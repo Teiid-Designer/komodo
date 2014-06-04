@@ -1,0 +1,16 @@
+target
+.settings
+bin
+tmp
+
+# OS X (Mac)
+.DS_Store
+
+# Eclipse
+.metadata
+
+*.vdb
+plugins/*/launch
+
+plugins/*/lib/*.jar
+plugins/*/libsrc/*.jar
