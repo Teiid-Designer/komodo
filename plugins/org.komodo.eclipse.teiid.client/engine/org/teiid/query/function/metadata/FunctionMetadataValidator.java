@@ -26,9 +26,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.FunctionMethod.PushDown;
@@ -59,7 +59,7 @@ public class FunctionMetadataValidator {
 	 * @param methods Collection of {@link FunctionMethod} objects
 	 * @param report Report to store validation errors
 	 */
-	public static final void validateFunctionMethods(ITeiidServerVersion teiidVersion, Collection<FunctionMethod> methods, ValidatorReport report) {
+	public static final void validateFunctionMethods(ITeiidVersion teiidVersion, Collection<FunctionMethod> methods, ValidatorReport report) {
 	    if(methods != null) {
 	    	for (FunctionMethod method : methods) {
 	    		validateFunctionMethod(teiidVersion, method, report);
@@ -81,7 +81,7 @@ public class FunctionMetadataValidator {
      * @param method The method to validate
      * @param report The report to update during validation
      */
-    public static final void validateFunctionMethod(ITeiidServerVersion teiidVersion, FunctionMethod method, ValidatorReport report) {
+    public static final void validateFunctionMethod(ITeiidVersion teiidVersion, FunctionMethod method, ValidatorReport report) {
         if(method == null) {
             updateReport(report, method, Messages.getString(Messages.ERR.ERR_015_001_0052, "FunctionMethod")); //$NON-NLS-1$ //$NON-NLS-2$
             return;  // can't validate
@@ -129,7 +129,7 @@ public class FunctionMetadataValidator {
      * @param param The parameter to validate
      * @throws Exception Thrown if function parameter is not valid in some way
      */
-    public static final void validateFunctionParameter(ITeiidServerVersion teiidVersion, FunctionParameter param) throws Exception {
+    public static final void validateFunctionParameter(ITeiidVersion teiidVersion, FunctionParameter param) throws Exception {
         if(param == null) {
              throw new Exception(Messages.gs(Messages.TEIID.TEIID30427));
         }
@@ -152,7 +152,7 @@ public class FunctionMetadataValidator {
      * @param name Name to validate
      * @throws Exception Thrown if function or parameter name is not valid in some way
      */
-    public static final void validateName(ITeiidServerVersion teiidVersion, String name) throws Exception {
+    public static final void validateName(ITeiidVersion teiidVersion, String name) throws Exception {
         validateIsNotNull(name, "Name"); //$NON-NLS-1$
         validateLength(name, MAX_LENGTH, "Name"); //$NON-NLS-1$
         if (teiidVersion.isLessThan(Version.TEIID_8_0.get()))
@@ -168,7 +168,7 @@ public class FunctionMetadataValidator {
      * @param type Type to validate
      * @throws Exception Thrown if parameter type is not valid in some way
      */
-    public static final void validateType(ITeiidServerVersion teiidVersion, String type) throws Exception {
+    public static final void validateType(ITeiidVersion teiidVersion, String type) throws Exception {
         validateIsNotNull(type, "Type"); //$NON-NLS-1$
 
         if(DataTypeManagerService.getInstance(teiidVersion).getDataTypeClass(type) == null) {

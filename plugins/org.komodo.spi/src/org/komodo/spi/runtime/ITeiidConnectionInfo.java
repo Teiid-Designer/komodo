@@ -18,11 +18,11 @@ import org.komodo.spi.state.IState;
 public interface ITeiidConnectionInfo {
 
     /**
-     * Protocol address prefix for secure server connections
+     * Protocol address prefix for secure teiid instance connections
      */
     public static final String MMS = "mms://"; //$NON-NLS-1$
     /**
-     * Protocol address prefix for server connections
+     * Protocol address prefix for teiid instance connections
      */
     public static final String MM = "mm://"; //$NON-NLS-1$
 

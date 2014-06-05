@@ -25,15 +25,15 @@ import org.komodo.eclipse.spi.registry.AbstractExtensionRegistry;
 import org.komodo.spi.query.IQueryService;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.IExecutionAdminFactory;
-import org.komodo.spi.runtime.ITeiidServer;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion;
+import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 
 /**
  * @since 1.0
  */
-public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidServerVersion, IExecutionAdminFactory> {
+public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersion, IExecutionAdminFactory> {
     
     private static final String EXT_POINT_ID = "org.teiid.designer.spi.teiidRuntimeClient"; //$NON-NLS-1$
 
@@ -76,102 +76,102 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidServer
             String minor = version.getAttribute(MINOR_ATTRIBUTE_ID);
             String micro = version.getAttribute(MICRO_ATTRIBUTE_ID);
 
-            ITeiidServerVersion serverVersion = new TeiidServerVersion(major, minor, micro);
-            register(serverVersion, adminFactory);
+            ITeiidVersion teiidVersion = new TeiidVersion(major, minor, micro);
+            register(teiidVersion, adminFactory);
         }
     }
 
     /**
-     * Get an {@link IExecutionAdminFactory} applicable for the given server version
+     * Get an {@link IExecutionAdminFactory} applicable for the given teiid instance version
      *
-     * @param teiidServerVersion
+     * @param teiidVersion
      *
      * @return instance of {@link IExecutionAdminFactory}
      * @throws Exception
      */
-    public IExecutionAdminFactory getExecutionAdminFactory(ITeiidServerVersion teiidServerVersion) throws Exception {
-        IExecutionAdminFactory factory = search(teiidServerVersion);
+    public IExecutionAdminFactory getExecutionAdminFactory(ITeiidVersion teiidVersion) throws Exception {
+        IExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
-            throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidServerVersion));
+            throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));
 
         return factory;
     }
 
     /**
-     * Get an {@link IExecutionAdmin} applicable for the given server
+     * Get an {@link IExecutionAdmin} applicable for the given teiid instance
      * 
-     * @param teiidServer
+     * @param teiidInstance
      * 
      * @return instance of {@link IExecutionAdmin}
      * @throws Exception 
      */
-    public IExecutionAdmin getExecutionAdmin(ITeiidServer teiidServer) throws Exception {
-        IExecutionAdminFactory factory = getExecutionAdminFactory(teiidServer.getServerVersion());
-        return factory.createExecutionAdmin(teiidServer);
+    public IExecutionAdmin getExecutionAdmin(ITeiidInstance teiidInstance) throws Exception {
+        IExecutionAdminFactory factory = getExecutionAdminFactory(teiidInstance.getVersion());
+        return factory.createExecutionAdmin(teiidInstance);
     }
 
     /**
      * Get the teiid data type manager service
      * 
-     * @param teiidServerVersion
+     * @param teiidVersion
      * 
      * @return instance of {@link IDataTypeManagerService}
      * @throws Exception 
      */
-    public IDataTypeManagerService getDataTypeManagerService(ITeiidServerVersion teiidServerVersion) throws Exception {
-        IExecutionAdminFactory factory = search(teiidServerVersion);
+    public IDataTypeManagerService getDataTypeManagerService(ITeiidVersion teiidVersion) throws Exception {
+        IExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
-            throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidServerVersion));
+            throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));
         
-        return factory.getDataTypeManagerService(teiidServerVersion);
+        return factory.getDataTypeManagerService(teiidVersion);
     }
 
     /**
-     * Get the Teiid Driver for the given server version
+     * Get the Teiid Driver for the given teiid instance version
      *
-     * @param teiidServerVersion
+     * @param teiidVersion
      *
      * @return the Teiid Driver
      * @throws Exception
      */
-    public Driver getTeiidDriver(ITeiidServerVersion teiidServerVersion) throws Exception {
-        IExecutionAdminFactory factory = search(teiidServerVersion);
+    public Driver getTeiidDriver(ITeiidVersion teiidVersion) throws Exception {
+        IExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
-            throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidServerVersion));
+            throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));
 
-        return factory.getTeiidDriver(teiidServerVersion);
+        return factory.getTeiidDriver(teiidVersion);
     }
 
     /**
      * Get the teiid sql syntax service
      * 
-     * @param teiidServerVersion
+     * @param teiidVersion
      * 
      * @return instance of {@link IQueryService}
      * @throws Exception 
      */
-    public IQueryService getQueryService(ITeiidServerVersion teiidServerVersion) throws Exception {
-        IExecutionAdminFactory factory = search(teiidServerVersion);
+    public IQueryService getQueryService(ITeiidVersion teiidVersion) throws Exception {
+        IExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
-            throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidServerVersion));
+            throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));
         
-        return factory.getQueryService(teiidServerVersion);
+        return factory.getQueryService(teiidVersion);
     }
     
     /**
-     * @param serverVersion
+     * @param teiidVersion
      * @return
      */
-    private IExecutionAdminFactory search(ITeiidServerVersion serverVersion) {
+    private IExecutionAdminFactory search(ITeiidVersion teiidVersion) {
         
-        IExecutionAdminFactory factory = getRegistered(serverVersion);
+        IExecutionAdminFactory factory = getRegistered(teiidVersion);
         if (factory != null)
             return factory;
         
-        for (Map.Entry<ITeiidServerVersion, IExecutionAdminFactory> entry : getRegisteredEntries()) {
-            ITeiidServerVersion entryVersion = entry.getKey();
+        for (Map.Entry<ITeiidVersion, IExecutionAdminFactory> entry : getRegisteredEntries()) {
+            ITeiidVersion entryVersion = entry.getKey();
             
-            if (serverVersion.compareTo(entryVersion))
+            if (teiidVersion.compareTo(entryVersion))
                 return entry.getValue();
         }
         
@@ -179,57 +179,57 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidServer
     }
     
     /**
-     * Retrieve all registered server versions
+     * Retrieve all registered teiid versions
      * 
      * @return unmodifiable collection
      */
-    public Collection<ITeiidServerVersion> getRegisteredServerVersions() {
+    public Collection<ITeiidVersion> getRegisteredTeiidVersions() {
         return getRegisteredKeys();
     }
 
     /**
      * Get the ultimate default teiid instance version. This is the provided
      * as the default teiid instance version IF the user has not configured
-     * a server connection nor set the default teiid instance preference.
+     * a teiid instance connection nor set the default teiid instance preference.
      *
-     * This attempts to derive the latest version of server from
+     * This attempts to derive the latest version of teiid instance from
      * the installed client runtimes but if none, returns the
      * hardcoded default value.
      *
-     * @return {@link ITeiidServerVersion} default version
+     * @return {@link ITeiidVersion} default version
      */
-    public static ITeiidServerVersion deriveUltimateDefaultServerVersion() {
-        ITeiidServerVersion lastTestedDefault = TeiidServerVersion.DEFAULT_TEIID_SERVER;
+    public static ITeiidVersion deriveUltimateDefaultTeiidVersion() {
+        ITeiidVersion lastTestedDefault = TeiidVersion.DEFAULT_TEIID_VERSION;
 
-        Collection<ITeiidServerVersion> serverVersions = null;
+        Collection<ITeiidVersion> teiidVersions = null;
         try {
-            serverVersions = getInstance().getRegisteredServerVersions();
+            teiidVersions = getInstance().getRegisteredTeiidVersions();
         } catch (Exception ex) {
             KEclipseSPIPlugin.log(ex);
             return lastTestedDefault;
         }
 
-        if (serverVersions == null || serverVersions.isEmpty())
+        if (teiidVersions == null || teiidVersions.isEmpty())
             return lastTestedDefault;
 
-        if (serverVersions.size() == 1)
-            return serverVersions.iterator().next();
+        if (teiidVersions.size() == 1)
+            return teiidVersions.iterator().next();
 
-        // Find the latest server version by sorting the registered client runtime versions
-        List<String> items = new ArrayList<String>(serverVersions.size());
-        for (ITeiidServerVersion serverVersion : serverVersions) {
+        // Find the latest version by sorting the registered client runtime versions
+        List<String> items = new ArrayList<String>(teiidVersions.size());
+        for (ITeiidVersion teiidVersion : teiidVersions) {
             /*
              * Do not offer unreleased and untested versions by default.
              * Does not stop the user choosing such versions but avoids
              * displaying them up-front.
              */
-            if (serverVersion.isGreaterThan(lastTestedDefault))
+            if (teiidVersion.isGreaterThan(lastTestedDefault))
                 continue;
 
-            items.add(serverVersion.toString());
+            items.add(teiidVersion.toString());
         }
         Collections.sort(items, Collections.reverseOrder());
 
-        return new TeiidServerVersion(items.get(0));
+        return new TeiidVersion(items.get(0));
     }
 }

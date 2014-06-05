@@ -24,8 +24,8 @@ package org.teiid.net.socket;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 public enum AuthenticationType {
     @Since(Version.TEIID_8_7)
@@ -36,7 +36,7 @@ public enum AuthenticationType {
     @Removed(Version.TEIID_8_7)
     CLEARTEXT;
 
-    private static boolean lessThan87(ITeiidServerVersion teiidVersion) {
+    private static boolean lessThan87(ITeiidVersion teiidVersion) {
         return teiidVersion.isLessThan(Version.TEIID_8_7.get());
     }
 
@@ -46,7 +46,7 @@ public enum AuthenticationType {
      *
      * @return enum value
      */
-    public static AuthenticationType value(ITeiidServerVersion teiidVersion, byte readByte) {
+    public static AuthenticationType value(ITeiidVersion teiidVersion, byte readByte) {
         switch (readByte) {
             case 0:
                 if (lessThan87(teiidVersion))
@@ -64,7 +64,7 @@ public enum AuthenticationType {
      * @param teiidVersion
      * @return Same as ordinal but handle deprecated inclusion of CLEARTEXT
      */
-    public int index(ITeiidServerVersion teiidVersion) {
+    public int index(ITeiidVersion teiidVersion) {
         if (lessThan87(teiidVersion) && this == CLEARTEXT)
             return 0;
 

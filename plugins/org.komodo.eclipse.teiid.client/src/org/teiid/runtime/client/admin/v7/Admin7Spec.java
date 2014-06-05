@@ -14,8 +14,8 @@ import java.io.InputStream;
 
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.ITeiidAdminInfo;
-import org.komodo.spi.runtime.ITeiidServer;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminException;
 import org.teiid.adminapi.VDB;
@@ -39,13 +39,13 @@ public class Admin7Spec extends AdminSpec {
     /**
      * @param teiidVersion
      */
-    public Admin7Spec(ITeiidServerVersion teiidVersion) {
+    public Admin7Spec(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
     @Override
-    public Admin createAdmin(ITeiidServer teiidServer) throws AdminException {
-        ITeiidAdminInfo teiidAdminInfo = teiidServer.getTeiidAdminInfo();
+    public Admin createAdmin(ITeiidInstance teiidInstance) throws AdminException {
+        ITeiidAdminInfo teiidAdminInfo = teiidInstance.getTeiidAdminInfo();
         char[] passwordArray = null;
         if (teiidAdminInfo.getPassword() != null) {
             passwordArray = teiidAdminInfo.getPassword().toCharArray();

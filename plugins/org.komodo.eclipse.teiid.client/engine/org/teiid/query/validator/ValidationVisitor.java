@@ -51,9 +51,9 @@ import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
 import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.api.exception.query.QueryValidatorException;
 import org.teiid.core.types.ArrayImpl;
@@ -204,7 +204,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 	/**
      * @param teiidVersion
      */
-    public ValidationVisitor(ITeiidServerVersion teiidVersion) {
+    public ValidationVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
         dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
     }

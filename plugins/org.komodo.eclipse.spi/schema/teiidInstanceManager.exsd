@@ -20,7 +20,7 @@ Implements ITeiidInstanceManager
       </annotation>
       <complexType>
          <sequence>
-            <element ref="serverManager"/>
+            <element ref="instanceManager"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -49,7 +49,7 @@ Implements ITeiidInstanceManager
       </complexType>
    </element>
 
-   <element name="serverManager">
+   <element name="instanceManager">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -57,7 +57,7 @@ Implements ITeiidInstanceManager
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.teiid.designer.runtime.spi.ITeiidServerManager"/>
+                  <meta.attribute kind="java" basedOn=":org.komodo.spi.runtime.ITeiidInstanceManager"/>
                </appinfo>
             </annotation>
          </attribute>

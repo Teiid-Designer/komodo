@@ -15,8 +15,8 @@ import org.komodo.spi.Messages.SPI;
 
 
 /**
- * The <code>ExecutionConfigurationEvent</code> class is the event that is broadcast from the {@link TeiidServerManager server manager}
- * when a server or connector is added, removed, or changed, or when a server is refreshed.
+ * The <code>ExecutionConfigurationEvent</code> class is the event that is broadcast from the {@link TeiidInstanceManager instance manager}
+ * when a teiid instance or connector is added, removed, or changed, or when a teiid instance is refreshed.
  *
  * @since 1.0
  */
@@ -26,8 +26,8 @@ public final class ExecutionConfigurationEvent {
         return new ExecutionConfigurationEvent(EventType.ADD, TargetType.DATA_SOURCE, dataSource);
     }
 
-    public static ExecutionConfigurationEvent createAddServerEvent( ITeiidServer teiidServer ) {
-        return new ExecutionConfigurationEvent(EventType.ADD, TargetType.TINSTANCE, teiidServer);
+    public static ExecutionConfigurationEvent createAddTeiidEvent( ITeiidInstance teiidInstance ) {
+        return new ExecutionConfigurationEvent(EventType.ADD, TargetType.TINSTANCE, teiidInstance);
     }
 
     public static ExecutionConfigurationEvent createDeployVDBEvent( String vdbName ) {
@@ -38,21 +38,21 @@ public final class ExecutionConfigurationEvent {
         return new ExecutionConfigurationEvent(EventType.REMOVE, TargetType.DATA_SOURCE, dataSource);
     }
 
-    public static ExecutionConfigurationEvent createRemoveServerEvent( ITeiidServer teiidServer ) {
-        return new ExecutionConfigurationEvent(EventType.REMOVE, TargetType.TINSTANCE, teiidServer);
+    public static ExecutionConfigurationEvent createRemoveTeiidEvent( ITeiidInstance teiidInstance ) {
+        return new ExecutionConfigurationEvent(EventType.REMOVE, TargetType.TINSTANCE, teiidInstance);
     }
 
-    public static ExecutionConfigurationEvent createServerRefreshEvent( ITeiidServer teiidServer ) {
-        return new ExecutionConfigurationEvent(EventType.REFRESH, TargetType.TINSTANCE, teiidServer);
+    public static ExecutionConfigurationEvent createTeiidRefreshEvent( ITeiidInstance teiidInstance ) {
+        return new ExecutionConfigurationEvent(EventType.REFRESH, TargetType.TINSTANCE, teiidInstance);
     }
 
-    public static ExecutionConfigurationEvent createServerConnectedEvent( ITeiidServer teiidServer ) {
-        return new ExecutionConfigurationEvent(EventType.CONNECTED, TargetType.TINSTANCE, teiidServer);
+    public static ExecutionConfigurationEvent createTeiidConnectedEvent( ITeiidInstance teiidInstance ) {
+        return new ExecutionConfigurationEvent(EventType.CONNECTED, TargetType.TINSTANCE, teiidInstance);
     }
 
-    public static ExecutionConfigurationEvent createSetDefaultServerEvent( ITeiidServer oldDefaultServer,
-                                                                           ITeiidServer newDefaultServer ) {
-        return new ExecutionConfigurationEvent(EventType.DEFAULT, TargetType.TINSTANCE, oldDefaultServer, newDefaultServer);
+    public static ExecutionConfigurationEvent createSetDefaultTeiidEvent( ITeiidInstance oldDefaultInstance,
+                                                                           ITeiidInstance newDefaultInstance ) {
+        return new ExecutionConfigurationEvent(EventType.DEFAULT, TargetType.TINSTANCE, oldDefaultInstance, newDefaultInstance);
     }
 
     public static ExecutionConfigurationEvent createUnDeployVDBEvent( String vdbName ) {
@@ -63,9 +63,9 @@ public final class ExecutionConfigurationEvent {
         return new ExecutionConfigurationEvent(EventType.UPDATE, TargetType.DATA_SOURCE, dataSource);
     }
 
-    public static ExecutionConfigurationEvent createUpdateServerEvent( ITeiidServer teiidServer,
-                                                                       ITeiidServer updatedServer ) {
-        return new ExecutionConfigurationEvent(EventType.UPDATE, TargetType.TINSTANCE, teiidServer, updatedServer);
+    public static ExecutionConfigurationEvent createUpdateTeiidEvent( ITeiidInstance teiidInstance,
+                                                                       ITeiidInstance updatedInstance ) {
+        return new ExecutionConfigurationEvent(EventType.UPDATE, TargetType.TINSTANCE, teiidInstance, updatedInstance);
     }
 
     private final EventType eventType;
@@ -108,7 +108,7 @@ public final class ExecutionConfigurationEvent {
 
     /**
      * @return the connector involved in the event
-     * @throws IllegalStateException if method is called for a server event
+     * @throws IllegalStateException if method is called for a teiid instance event
      */
     public ITeiidDataSource getDataSource() {
         if (this.targetType != TargetType.DATA_SOURCE) {
@@ -130,17 +130,17 @@ public final class ExecutionConfigurationEvent {
     /**
      * When changing the default teiid instance, this returns the old default teiid instance.
      * 
-     * @return the server involved in the event (may be <code>null</code>)
+     * @return the teiid instance involved in the event (may be <code>null</code>)
      * @throws IllegalStateException if method is called for a connector event
      */
-    public ITeiidServer getServer() {
+    public ITeiidInstance getTeiidInstance() {
         if (this.targetType != TargetType.TINSTANCE) {
-            throw new IllegalStateException(Messages.getString(Messages.SPI.invalidTargetTypeForGetServerMethod,
+            throw new IllegalStateException(Messages.getString(Messages.SPI.invalidTargetTypeForGetTeiidMethod,
                                                            this.targetType,
                                                            TargetType.TINSTANCE));
         }
 
-        return (ITeiidServer)this.target;
+        return (ITeiidInstance)this.target;
     }
 
     /**
@@ -152,7 +152,7 @@ public final class ExecutionConfigurationEvent {
 
     /**
      * @return the connector involved in the event
-     * @throws IllegalStateException if method is called for a server event
+     * @throws IllegalStateException if method is called for a teiid instance event
      */
     public ITeiidTranslator getTranslator() {
         if (this.targetType != TargetType.TRANSLATOR) {
@@ -167,17 +167,17 @@ public final class ExecutionConfigurationEvent {
     /**
      * When changing the default teiid instance, this returns the new default teiid instance.
      * 
-     * @return the updated server involved in the event (may be <code>null</code>)
+     * @return the updated teiid instance involved in the event (may be <code>null</code>)
      * @throws IllegalStateException if method is called for a connector event
      */
-    public ITeiidServer getUpdatedInstance() {
+    public ITeiidInstance getUpdatedInstance() {
         if (this.targetType != TargetType.TINSTANCE) {
-            throw new IllegalStateException(Messages.getString(Messages.SPI.invalidTargetTypeForGetUpdatedServerMethod,
+            throw new IllegalStateException(Messages.getString(Messages.SPI.invalidTargetTypeForGetUpdatedTeiidMethod,
                                                            this.targetType,
                                                            TargetType.TINSTANCE));
         }
 
-        return (ITeiidServer)this.updatedTarget;
+        return (ITeiidInstance)this.updatedTarget;
     }
 
     public enum EventType {

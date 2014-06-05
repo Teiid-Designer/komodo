@@ -10,25 +10,25 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 
 /**
  *
  */
-public interface ITeiidServerVersionListener {
+public interface ITeiidInstanceVersionListener {
 
     /**
-     * Server has been changed
+     * Instance has been changed
      *
-     * @param server
+     * @param instance
      */
-    void serverChanged(ITeiidServer server);
+    void instanceChanged(ITeiidInstance instance);
 
     /**
      * Version of Teiid Instance has been changed
      * 
      * @param version
      */
-    void versionChanged(ITeiidServerVersion version);
+    void versionChanged(ITeiidVersion version);
     
 }

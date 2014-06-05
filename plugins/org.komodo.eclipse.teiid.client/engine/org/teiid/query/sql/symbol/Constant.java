@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.komodo.spi.query.sql.symbol.IConstant;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.core.types.ClobType;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
@@ -32,7 +32,7 @@ public class Constant extends SimpleNode implements Expression, IConstant<Langua
 
     private boolean multiValued;
 
-    private static Map<ITeiidServerVersion, Constant> nullCache = new HashMap<ITeiidServerVersion, Constant>();
+    private static Map<ITeiidVersion, Constant> nullCache = new HashMap<ITeiidVersion, Constant>();
     
     /**
      * @param teiidParser

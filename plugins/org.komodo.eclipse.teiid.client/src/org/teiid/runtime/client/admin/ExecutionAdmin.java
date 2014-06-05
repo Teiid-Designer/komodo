@@ -46,16 +46,16 @@ import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.ITeiidConnectionInfo;
 import org.komodo.spi.runtime.ITeiidDataSource;
+import org.komodo.spi.runtime.ITeiidInstance;
 import org.komodo.spi.runtime.ITeiidJdbcInfo;
 import org.komodo.spi.runtime.ITeiidParent;
-import org.komodo.spi.runtime.ITeiidServer;
 import org.komodo.spi.runtime.ITeiidTranslator;
+import org.komodo.spi.runtime.ITeiidTranslator.TranslatorPropertyType;
 import org.komodo.spi.runtime.ITeiidVdb;
 import org.komodo.spi.runtime.TeiidExecutionException;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
-import org.komodo.spi.runtime.ITeiidTranslator.TranslatorPropertyType;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.state.IState;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.PropertyDefinition;
@@ -85,7 +85,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
     protected Map<String, ITeiidDataSource> dataSourceByNameMap;
     protected Set<String> dataSourceTypeNames;
     private final EventManager eventManager;
-    private final ITeiidServer teiidServer;
+    private final ITeiidInstance teiidInstance;
     private final AdminSpec adminSpec;
     private Map<String, ITeiidVdb> teiidVdbs;
     private final ModelConnectionMatcher connectionMatcher;
@@ -96,17 +96,17 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * Constructor used for testing purposes only. 
      * 
      * @param admin the associated Teiid Admin API (never <code>null</code>)
-     * @param teiidServer the server this admin belongs to (never <code>null</code>)
-     * @throws Exception if there is a problem connecting the server
+     * @param teiidInstance the teiid instancenstance this admin belongs to (never <code>null</code>)
+     * @throws Exception if there is a problem connecting the teiid instancenstance
      */
-    ExecutionAdmin(Admin admin, ITeiidServer teiidServer) throws Exception {
+    ExecutionAdmin(Admin admin, ITeiidInstance teiidInstance) throws Exception {
         ArgCheck.isNotNull(admin, "admin"); //$NON-NLS-1$
-        ArgCheck.isNotNull(teiidServer, "server"); //$NON-NLS-1$
+        ArgCheck.isNotNull(teiidInstance, "server"); //$NON-NLS-1$
         
         this.admin = admin;
-        this.teiidServer = teiidServer;
-        this.adminSpec = AdminSpec.getInstance(teiidServer.getServerVersion());
-        this.eventManager = teiidServer.getEventManager();
+        this.teiidInstance = teiidInstance;
+        this.adminSpec = AdminSpec.getInstance(teiidInstance.getVersion());
+        this.eventManager = teiidInstance.getEventManager();
         this.connectionMatcher = new ModelConnectionMatcher();
         
         init();
@@ -115,32 +115,32 @@ public class ExecutionAdmin implements IExecutionAdmin {
     /**
      * Default Constructor 
      * 
-     * @param teiidServer the server this admin belongs to (never <code>null</code>)
+     * @param teiidInstance the teiid instance this admin belongs to (never <code>null</code>)
      * 
-     * @throws Exception if there is a problem connecting the server
+     * @throws Exception if there is a problem connecting the teiid instance
      */
-    public ExecutionAdmin(ITeiidServer teiidServer) throws Exception {
-        ArgCheck.isNotNull(teiidServer, "server"); //$NON-NLS-1$
+    public ExecutionAdmin(ITeiidInstance teiidInstance) throws Exception {
+        ArgCheck.isNotNull(teiidInstance, "server"); //$NON-NLS-1$
 
-        this.adminSpec = AdminSpec.getInstance(teiidServer.getServerVersion());
+        this.adminSpec = AdminSpec.getInstance(teiidInstance.getVersion());
 
-        this.admin = adminSpec.createAdmin(teiidServer);
+        this.admin = adminSpec.createAdmin(teiidInstance);
         ArgCheck.isNotNull(admin, "admin"); //$NON-NLS-1$
 
-        this.teiidServer = teiidServer;
-        this.eventManager = teiidServer.getEventManager();
+        this.teiidInstance = teiidInstance;
+        this.eventManager = teiidInstance.getEventManager();
         this.connectionMatcher = new ModelConnectionMatcher();
 
         init();
     }
 
     private boolean isLessThanTeiidEight() {
-        ITeiidServerVersion minVersion = teiidServer.getServerVersion().getMinimumVersion();
+        ITeiidVersion minVersion = teiidInstance.getVersion().getMinimumVersion();
         return minVersion.isLessThan(Version.TEIID_8_0.get());
     }
     
     private boolean isLessThanTeiidEightSeven() {
-        ITeiidServerVersion minVersion = teiidServer.getServerVersion().getMinimumVersion();
+        ITeiidVersion minVersion = teiidInstance.getVersion().getMinimumVersion();
         return minVersion.isLessThan(Version.TEIID_8_7.get());
     }
 
@@ -327,7 +327,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
                 		Messages.getString(Messages.ExecutionAdmin.jdbcSourceForClassNameNotFound, connProfileDriverClass, getServer()));
             } else {
                 throw new TeiidExecutionException(
-                		ITeiidDataSource.ERROR_CODES.DATA_SOURCE_TYPE_DOES_NOT_EXIST_ON_SERVER,
+                		ITeiidDataSource.ERROR_CODES.DATA_SOURCE_TYPE_DOES_NOT_EXIST_ON_TEIID,
                 		Messages.getString(Messages.ExecutionAdmin.dataSourceTypeDoesNotExist, typeName, getServer()));
             }
         }
@@ -471,10 +471,10 @@ public class ExecutionAdmin implements IExecutionAdmin {
     }
 
     /**
-     * @return the server who owns this admin object (never <code>null</code>)
+     * @return the teiid instance who owns this admin object (never <code>null</code>)
      */
-    public ITeiidServer getServer() {
-        return this.teiidServer;
+    public ITeiidInstance getServer() {
+        return this.teiidInstance;
     }
 
     @Override
@@ -613,7 +613,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
             } else if (oldValue.equals(value)) return;
 
             if (notify) {
-                // TODO: Will we ever update Translator properties in TEIID Server?
+                // TODO: Will we ever update Translator properties in TEIID teiid instance?
                 // this.eventManager.notifyListeners(ExecutionConfigurationEvent.createUpdateConnectorEvent(translator));
             }
         } else {
@@ -666,7 +666,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
         refreshVDBs();
 
         // notify listeners
-        this.eventManager.notifyListeners(ExecutionConfigurationEvent.createServerRefreshEvent(this.teiidServer));
+        this.eventManager.notifyListeners(ExecutionConfigurationEvent.createTeiidRefreshEvent(this.teiidInstance));
     }
 
     protected void refreshDataSourceNames() throws Exception {
@@ -675,7 +675,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
     }
 
     /**
-     * Refreshes the local collection of Translators on the referenced Teiid server.
+     * Refreshes the local collection of Translators on the referenced Teiid teiid instance.
      * 
      * @param translators
      * @throws Exception
@@ -683,20 +683,20 @@ public class ExecutionAdmin implements IExecutionAdmin {
     protected void refreshTranslators( Collection<? extends Translator> translators ) throws Exception {
         for (Translator translator : translators) {
             if (translator.getName() != null) {
-                if( teiidServer.getServerVersion().isLessThan(Version.TEIID_8_6.get())) {
+                if( teiidInstance.getVersion().isLessThan(Version.TEIID_8_6.get())) {
                 	Collection<? extends PropertyDefinition> propDefs = this.admin.getTemplatePropertyDefinitions(translator.getName());
-                	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, teiidServer));
-                } else if( teiidServer.getServerVersion().isLessThan(Version.TEIID_8_7.get())) {
+                	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, teiidInstance));
+                } else if( teiidInstance.getVersion().isLessThan(Version.TEIID_8_7.get())) {
                 	Collection<? extends PropertyDefinition> propDefs = this.admin.getTranslatorPropertyDefinitions(translator.getName());
-                	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, teiidServer));
-                } else { // TEIID SERVER VERSION 8.7 AND HIGHER
+                	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, teiidInstance));
+                } else { // TEIID teiid instance VERSION 8.7 AND HIGHER
                 	Collection<? extends PropertyDefinition> propDefs  = 
                 			this.admin.getTranslatorPropertyDefinitions(translator.getName(), Admin.TranlatorPropertyType.OVERRIDE);
                 	Collection<? extends PropertyDefinition> importPropDefs  = 
                 			this.admin.getTranslatorPropertyDefinitions(translator.getName(), Admin.TranlatorPropertyType.IMPORT);
                 	Collection<? extends PropertyDefinition> extPropDefs  = 
                 			this.admin.getTranslatorPropertyDefinitions(translator.getName(), Admin.TranlatorPropertyType.EXTENSION_METADATA);
-                	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, importPropDefs, extPropDefs, teiidServer));
+                	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, importPropDefs, extPropDefs, teiidInstance));
                 }
             }
         }
@@ -708,7 +708,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
         teiidVdbs = new HashMap<String, ITeiidVdb>();
 
         for (VDB vdb : vdbs) {
-            teiidVdbs.put(vdb.getName(), new TeiidVdb(vdb, teiidServer));
+            teiidVdbs.put(vdb.getName(), new TeiidVdb(vdb, teiidInstance));
         }
     }
     
@@ -843,7 +843,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
     
     @Override
     public IState ping(PingType pingType) {
-        String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, teiidServer.getTeiidAdminInfo().getUsername());
+        String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, teiidInstance.getTeiidAdminInfo().getUsername());
         try {
             if (this.admin == null)
                 throw new Exception(msg);
@@ -868,8 +868,8 @@ public class ExecutionAdmin implements IExecutionAdmin {
     }
     
     private IState pingJdbc() {
-        String host = teiidServer.getHost();
-        ITeiidJdbcInfo teiidJdbcInfo = teiidServer.getTeiidJdbcInfo();
+        String host = teiidInstance.getHost();
+        ITeiidJdbcInfo teiidJdbcInfo = teiidInstance.getTeiidJdbcInfo();
         
         String protocol = ITeiidConnectionInfo.MM;
         if (teiidJdbcInfo.isSecure())
@@ -885,11 +885,11 @@ public class ExecutionAdmin implements IExecutionAdmin {
             try{
                 String urlAndCredentials = url + ";user=" + teiidJdbcInfo.getUsername() + ";password=" + teiidJdbcInfo.getPassword() + ';';  //$NON-NLS-1$ //$NON-NLS-2$              
                 TeiidDriver teiidDriver = TeiidDriver.getInstance();
-                teiidDriver.setTeiidVersion(teiidServer.getServerVersion());
+                teiidDriver.setTeiidVersion(teiidInstance.getVersion());
                 teiidJdbcConnection = teiidDriver.connect(urlAndCredentials, null);
                //pass
             } catch(SQLException ex){
-                String msg = Messages.getString(Messages.ExecutionAdmin.serverDeployUndeployProblemPingingTeiidJdbc, url);
+                String msg = Messages.getString(Messages.ExecutionAdmin.instanceDeployUndeployProblemPingingTeiidJdbc, url);
                 IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, msg, ex);
                 return new State(status);
             } finally {
@@ -900,7 +900,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
                 }
             }
         } catch (Exception ex) {
-            String msg = Messages.getString(Messages.ExecutionAdmin.serverDeployUndeployProblemPingingTeiidJdbc, url);
+            String msg = Messages.getString(Messages.ExecutionAdmin.instanceDeployUndeployProblemPingingTeiidJdbc, url);
             IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, msg, ex);
             return new State(status);
         }
@@ -928,7 +928,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
     @Removed(Version.TEIID_8_0)
     public void mergeVdbs( String sourceVdbName, int sourceVdbVersion, 
                                             String targetVdbName, int targetVdbVersion ) throws Exception {
-        if (!AnnotationUtils.isApplicable(getClass().getMethod("mergeVdbs"), getServer().getServerVersion()))  //$NON-NLS-1$
+        if (!AnnotationUtils.isApplicable(getClass().getMethod("mergeVdbs"), getServer().getVersion()))  //$NON-NLS-1$
             throw new UnsupportedOperationException(Messages.getString(Messages.ExecutionAdmin.mergeVdbUnsupported));
 
         admin.mergeVDBs(sourceVdbName, sourceVdbVersion, targetVdbName, targetVdbVersion);        

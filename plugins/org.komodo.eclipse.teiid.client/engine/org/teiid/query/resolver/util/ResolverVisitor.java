@@ -37,8 +37,8 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.query.sql.IResolverVisitor;
 import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.UnresolvedSymbolDescription;
@@ -118,7 +118,7 @@ public class ResolverVisitor extends LanguageVisitor
      * External groups are ordered from inner to outer most
      * @param teiidVersion
      */
-    public ResolverVisitor(ITeiidServerVersion teiidVersion) {
+    public ResolverVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -130,7 +130,7 @@ public class ResolverVisitor extends LanguageVisitor
      * @param groups
      * @param externalContext
      */
-    public ResolverVisitor(ITeiidServerVersion teiidVersion, IQueryMetadataInterface metadata, Collection<GroupSymbol> internalGroups, GroupContext externalContext) {
+    public ResolverVisitor(ITeiidVersion teiidVersion, IQueryMetadataInterface metadata, Collection<GroupSymbol> internalGroups, GroupContext externalContext) {
         this(teiidVersion);
 		this.groups = internalGroups;
         this.externalContext = externalContext;

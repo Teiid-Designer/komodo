@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.komodo.spi.query.sql.IPredicateCollectorVisitor;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.BetweenCriteria;
 import org.teiid.query.sql.lang.CompareCriteria;
@@ -64,7 +64,7 @@ public class PredicateCollectorVisitor extends LanguageVisitor
      * {@link java.util.ArrayList}.
      * @param teiidVersion
      */
-    public PredicateCollectorVisitor(ITeiidServerVersion teiidVersion) {
+    public PredicateCollectorVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
         this.predicates = new ArrayList<Criteria>();
     }

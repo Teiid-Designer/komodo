@@ -12,15 +12,15 @@ package org.komodo.spi.runtime;
 
 import java.util.Collection;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 
 /**
  *
  */
-public interface ITeiidServerManager extends EventManager {
+public interface ITeiidInstanceManager extends EventManager {
 
     /**
-     * State of the server manager
+     * State of the teiid instance manager
      */
     public enum RuntimeState {
         /**
@@ -34,7 +34,7 @@ public interface ITeiidServerManager extends EventManager {
         STARTED,
 
         /**
-         * State when the instance is restoring server configurations
+         * State when the instance is restoring teiid instance configurations
          */
         RESTORING,
 
@@ -52,42 +52,42 @@ public interface ITeiidServerManager extends EventManager {
     /**
      * Default teiid instance version property id
      */
-    String DEFAULT_TEIID_SERVER_VERSION_ID = "defaultTeiidServerVersion"; //$NON-NLS-1$
+    String DEFAULT_TEIID_INSTANCE_VERSION_ID = "defaultTeiidInstanceVersion"; //$NON-NLS-1$
 
     /**
      * Extension Point Element ID
      */
-    String TEIID_SERVER_MANAGER_ELEMENT_ID = "serverManager"; //$NON-NLS-1$
+    String TEIID_INSTANCE_MANAGER_ELEMENT_ID = "instanceManager"; //$NON-NLS-1$
 
     /**
-     * Registers the specified <code>PersistedServer</code>.
+     * Registers the specified <code>PersistedInstance</code>.
      * 
-     * @param teiidServer the server being added (never <code>null</code>)
+     * @param teiidInstance the teiid instance being added (never <code>null</code>)
      * @return a true if the instance was added to the registry
      */
-    boolean addServer(ITeiidServer teiidServer);
+    boolean addInstance(ITeiidInstance teiidInstance);
 
     /**
-     * @return defaultServer
+     * @return defaultInstance
      */
-    ITeiidServer getDefaultServer();
+    ITeiidInstance getDefaultInstance();
 
     /**
-     * @param id the id of the server being requested (never <code>null</code> )
-     * @return the requested server or <code>null</code> if not found in the registry
+     * @param id the id of the teiid instance being requested (never <code>null</code> )
+     * @return the requested teiid instance or <code>null</code> if not found in the registry
      */
-    ITeiidServer getServer(String id);
+    ITeiidInstance getInstance(String id);
 
     /**
-     * @param parentServer the parent server of the requested Teiid Instance
-     * @return the requested server or <code>null</code> if not found in the registry
+     * @param teiidParent the parent of the requested Teiid Instance
+     * @return the requested teiid parent or <code>null</code> if not found in the registry
      */
-    ITeiidServer getServer(ITeiidParent parentServer);
+    ITeiidInstance getInstance(ITeiidParent teiidParent);
 
     /**
-     * @return an unmodifiable collection of registered servers (never <code>null</code>)
+     * @return an unmodifiable collection of registered instances (never <code>null</code>)
      */
-    Collection<ITeiidServer> getServers();
+    Collection<ITeiidInstance> getInstances();
 
     /**
      * @return the state
@@ -104,33 +104,33 @@ public interface ITeiidServerManager extends EventManager {
      *
      * @return Teiid Instance version
      */
-    ITeiidServerVersion getDefaultServerVersion();
+    ITeiidVersion getDefaultVersion();
 
     /**
-     * Is this server the default
+     * Is this teiid instance the default
      * 
-     * @param teiidServer
+     * @param teiidInstance
      * 
-     * @return true if this server is the default, false otherwise.
+     * @return true if this teiid instance is the default, false otherwise.
      */
-    boolean isDefaultServer(ITeiidServer teiidServer);
+    boolean isDefaultInstance(ITeiidInstance teiidInstance);
 
     /**
-     * @param teiidServer the server being tested (never <code>null</code>)
-     * @return <code>true</code> if the server has been registered
+     * @param teiidInstance the teiid instance being tested (never <code>null</code>)
+     * @return <code>true</code> if the teiid instance has been registered
      */
-    boolean isRegistered(ITeiidServer teiidServer);
+    boolean isRegistered(ITeiidInstance teiidInstance);
 
     /**
-     * @param teiidServer the server being removed (never <code>null</code>)
+     * @param teiidInstance the instance being removed (never <code>null</code>)
      * @return a status indicating if the specified instance was removed from the registry (never <code>null</code>)
      */
-    boolean removeServer(ITeiidServer teiidServer);
+    boolean removeInstance(ITeiidInstance teiidInstance);
 
     /**
-     * @param teiidServer Sets defaultServer to the specified value. May be null.
+     * @param teiidInstance Sets default instance to the specified value. May be null.
      */
-    void setDefaultServer(ITeiidServer teiidServer);
+    void setDefaultInstance(ITeiidInstance teiidInstance);
 
     /**
      * Try and restore the manager's prior state
@@ -150,13 +150,13 @@ public interface ITeiidServerManager extends EventManager {
      * 
      * @param listener
      */
-    void addTeiidServerVersionListener(ITeiidServerVersionListener listener);
+    void addTeiidInstanceVersionListener(ITeiidInstanceVersionListener listener);
 
     /**
      * Remove a listener no longer interested in listening
-     * to changes is server version
+     * to changes in instance version
      * 
      * @param listener
      */
-    void removeTeiidServerVersionListener(ITeiidServerVersionListener listener);
+    void removeTeiidInstanceVersionListener(ITeiidInstanceVersionListener listener);
 }

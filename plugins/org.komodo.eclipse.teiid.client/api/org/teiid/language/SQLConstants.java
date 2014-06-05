@@ -17,8 +17,8 @@ import java.util.Set;
 
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  *
@@ -443,7 +443,7 @@ public abstract class SQLConstants {
         String IMPORT = "IMPORT"; //$NON-NLS-1$
     }
 
-    private static ITeiidServerVersion CACHED_TEIID_VERSION = null;
+    private static ITeiidVersion CACHED_TEIID_VERSION = null;
 
     /**
      * Set of CAPITALIZED reserved words for checking whether a string is a reserved word.
@@ -481,7 +481,7 @@ public abstract class SQLConstants {
     /**
      * @param teiidVersion
      */
-    private static void initialiseConstants(ITeiidServerVersion teiidVersion) {
+    private static void initialiseConstants(ITeiidVersion teiidVersion) {
         CACHED_TEIID_VERSION = teiidVersion;
         RESERVED_WORDS = extractFieldNames(SQLConstants.Reserved.class);
         NON_RESERVED_WORDS = extractFieldNames(SQLConstants.NonReserved.class);
@@ -490,7 +490,7 @@ public abstract class SQLConstants {
     /**
      * @return nonReservedWords
      */
-    public static Set<String> getNonReservedWords(ITeiidServerVersion teiidVersion) {
+    public static Set<String> getNonReservedWords(ITeiidVersion teiidVersion) {
         if (CACHED_TEIID_VERSION == null || ! CACHED_TEIID_VERSION.equals(teiidVersion) || NON_RESERVED_WORDS == null)
             initialiseConstants(teiidVersion);
 
@@ -500,7 +500,7 @@ public abstract class SQLConstants {
     /**
      * @return reservedWords
      */
-    public static Set<String> getReservedWords(ITeiidServerVersion teiidVersion) {
+    public static Set<String> getReservedWords(ITeiidVersion teiidVersion) {
         if (CACHED_TEIID_VERSION == null || ! CACHED_TEIID_VERSION.equals(teiidVersion) || RESERVED_WORDS == null)
             initialiseConstants(teiidVersion);
 
@@ -515,7 +515,7 @@ public abstract class SQLConstants {
      * @param str String to check
      * @return True if reserved word, false if not or null
      */
-    public static final boolean isReservedWord(ITeiidServerVersion teiidVersion, String str) {
+    public static final boolean isReservedWord(ITeiidVersion teiidVersion, String str) {
         if(str == null) { 
             return false;    
         }

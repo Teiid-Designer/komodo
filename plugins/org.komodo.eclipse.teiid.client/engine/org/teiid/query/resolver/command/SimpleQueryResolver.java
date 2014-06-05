@@ -39,7 +39,7 @@ import org.komodo.spi.query.metadata.IStoredProcedureInfo;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface.SupportConstants;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.IJoinType.Types;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.UnresolvedSymbolDescription;
 import org.teiid.core.types.DataTypeManagerService;

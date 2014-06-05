@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.core.util.ExternalizeUtil;
 
 /**
@@ -53,10 +53,10 @@ public final class ArrayImpl implements Comparable<ArrayImpl>, Externalizable, A
 	public final static class NullException extends RuntimeException {};
 	private final static NullException ex = new NullException();
 
-	private final ITeiidServerVersion teiidVersion;
+	private final ITeiidVersion teiidVersion;
     private DataTypeManagerService dataTypeManager;
 	
-	public ArrayImpl(ITeiidServerVersion teiidVersion, Object... values) {
+	public ArrayImpl(ITeiidVersion teiidVersion, Object... values) {
 		this.teiidVersion = teiidVersion;
         this.values = values;
 	}

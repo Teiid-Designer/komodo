@@ -18,7 +18,7 @@ import org.komodo.spi.Messages;
  * 
  * @since 8.0
  */
-public class TeiidServerVersion implements ITeiidServerVersion {
+public class TeiidVersion implements ITeiidVersion {
 
     /**
      * Version enumerator
@@ -70,24 +70,24 @@ public class TeiidServerVersion implements ITeiidServerVersion {
          */
         TEIID_8_7(VersionID.TEIID_8_7);
 
-        private final ITeiidServerVersion version;
+        private final ITeiidVersion version;
 
         Version(VersionID id) {
-            version = new TeiidServerVersion(id.toString());
+            version = new TeiidVersion(id.toString());
         }
 
         /**
          * @return version model
          */
-        public ITeiidServerVersion get() {
+        public ITeiidVersion get() {
             return version;
         }
     }
 
     /**
-     * The default preferred server
+     * The default preferred teiid instance
      */
-    public static final ITeiidServerVersion DEFAULT_TEIID_SERVER = Version.TEIID_8_6.get();
+    public static final ITeiidVersion DEFAULT_TEIID_VERSION = Version.TEIID_8_6.get();
 
     private String versionString = ZERO + DOT + ZERO + DOT + ZERO;
 
@@ -104,7 +104,7 @@ public class TeiidServerVersion implements ITeiidServerVersion {
      * @param minor the minor version
      * @param micro the micro version
      */
-    public TeiidServerVersion(String major, String minor, String micro) {
+    public TeiidVersion(String major, String minor, String micro) {
         if (major == null)
             throw new IllegalArgumentException(Messages.getString(Messages.SPI.valueCannotBeNull, "major")); //$NON-NLS-1$
         
@@ -125,7 +125,7 @@ public class TeiidServerVersion implements ITeiidServerVersion {
      * 
      * @param versionString the version string
      */
-    public TeiidServerVersion(String versionString) {
+    public TeiidVersion(String versionString) {
         this.versionString = versionString;
 
         String[] tokens = versionString.split("\\."); //$NON-NLS-1$
@@ -192,7 +192,7 @@ public class TeiidServerVersion implements ITeiidServerVersion {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        TeiidServerVersion other = (TeiidServerVersion)obj;
+        TeiidVersion other = (TeiidVersion)obj;
         if (this.majorVersion == null) {
             if (other.majorVersion != null) return false;
         } else if (!this.majorVersion.equals(other.majorVersion)) return false;
@@ -206,7 +206,7 @@ public class TeiidServerVersion implements ITeiidServerVersion {
     }
 
     @Override
-    public boolean compareTo(ITeiidServerVersion otherVersion) {
+    public boolean compareTo(ITeiidVersion otherVersion) {
         String entryMajor = otherVersion.getMajor();
 
         if (! getMajor().equals(entryMajor) && ! getMajor().equals(WILDCARD) && ! entryMajor.equals(WILDCARD))
@@ -230,12 +230,12 @@ public class TeiidServerVersion implements ITeiidServerVersion {
     }
     
     @Override
-    public boolean isSevenServer() {
-        return ITeiidServerVersion.SEVEN.equals(getMajor());
+    public boolean isSevenInstance() {
+        return ITeiidVersion.SEVEN.equals(getMajor());
     }
 
     @Override
-    public ITeiidServerVersion getMinimumVersion() {
+    public ITeiidVersion getMinimumVersion() {
         if (! this.hasWildCards())
             return this;
 
@@ -243,11 +243,11 @@ public class TeiidServerVersion implements ITeiidServerVersion {
         String minor = getMinor().equals(WILDCARD) ? ZERO : getMinor();
         String micro = getMicro().equals(WILDCARD) ? ZERO : getMicro();
 
-        return new TeiidServerVersion(major, minor, micro);
+        return new TeiidVersion(major, minor, micro);
     }
 
     @Override
-    public ITeiidServerVersion getMaximumVersion() {
+    public ITeiidVersion getMaximumVersion() {
         if (! this.hasWildCards())
             return this;
 
@@ -255,13 +255,13 @@ public class TeiidServerVersion implements ITeiidServerVersion {
         String minor = getMinor().equals(WILDCARD) ? NINE : getMinor();
         String micro = getMicro().equals(WILDCARD) ? NINE : getMicro();
 
-        return new TeiidServerVersion(major, minor, micro);
+        return new TeiidVersion(major, minor, micro);
     }
 
     @Override
-    public boolean isGreaterThan(ITeiidServerVersion otherVersion) {
-        ITeiidServerVersion myMaxVersion = getMaximumVersion();
-        ITeiidServerVersion otherMinVersion = otherVersion.getMinimumVersion();
+    public boolean isGreaterThan(ITeiidVersion otherVersion) {
+        ITeiidVersion myMaxVersion = getMaximumVersion();
+        ITeiidVersion otherMinVersion = otherVersion.getMinimumVersion();
 
         int majCompResult = myMaxVersion.getMajor().compareTo(otherMinVersion.getMajor());
         if (majCompResult > 0)
@@ -279,9 +279,9 @@ public class TeiidServerVersion implements ITeiidServerVersion {
     }
 
     @Override
-    public boolean isLessThan(ITeiidServerVersion otherVersion) {
-        ITeiidServerVersion myMaxVersion = getMaximumVersion();
-        ITeiidServerVersion otherMinVersion = otherVersion.getMinimumVersion();
+    public boolean isLessThan(ITeiidVersion otherVersion) {
+        ITeiidVersion myMaxVersion = getMaximumVersion();
+        ITeiidVersion otherMinVersion = otherVersion.getMinimumVersion();
 
         int majCompResult = myMaxVersion.getMajor().compareTo(otherMinVersion.getMajor());
         if (majCompResult < 0)
@@ -299,12 +299,12 @@ public class TeiidServerVersion implements ITeiidServerVersion {
     }
 
     @Override
-    public boolean isGreaterThanOrEqualTo(ITeiidServerVersion otherVersion) {
+    public boolean isGreaterThanOrEqualTo(ITeiidVersion otherVersion) {
         return this.compareTo(otherVersion) || this.isGreaterThan(otherVersion);
     }
 
     @Override
-    public boolean isLessThanOrEqualTo(ITeiidServerVersion otherVersion) {
+    public boolean isLessThanOrEqualTo(ITeiidVersion otherVersion) {
         return this.compareTo(otherVersion) || this.isLessThan(otherVersion);
     }
 }

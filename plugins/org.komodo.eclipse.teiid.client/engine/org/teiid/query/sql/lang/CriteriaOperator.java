@@ -16,8 +16,8 @@ import java.util.Collection;
 
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  *
@@ -136,7 +136,7 @@ public interface CriteriaOperator {
          *
          * @return the {@link Operator} for the given string representation
          */
-        public static Operator getOperator(ITeiidServerVersion version, String symbol) {
+        public static Operator getOperator(ITeiidVersion version, String symbol) {
             for (Operator operator : Operator.values()) {
 
                 boolean foundSymbol = false;

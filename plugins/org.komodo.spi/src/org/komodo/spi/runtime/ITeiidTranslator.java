@@ -29,23 +29,17 @@ public interface ITeiidTranslator {
     Collection<String> findInvalidProperties(TranslatorPropertyType propType);
 
     /**
-     * {@inheritDoc}
-     * 
-     * @see org.teiid.teiidServerapi.AdminObject#getName()
+     * @return name of this translator
      */
     String getName();
 
     /**
-     * {@inheritDoc}
-     * 
-     * @see org.teiid.teiidServerapi.AdminObject#getProperties()
+     * @return the properties of this translator
      */
     Properties getProperties();
 
     /**
-     * {@inheritDoc}
-     * 
-     * @see org.teiid.teiidServerapi.AdminObject#getPropertyValue(java.lang.String)
+     * @return the value of the given property
      */
     String getPropertyValue(String name, TranslatorPropertyType type);
 
@@ -55,9 +49,9 @@ public interface ITeiidTranslator {
     String getType();
 
     /**
-     * @return the execution teiidServer (never <code>null</code>)
+     * @return the execution teiidInstance (never <code>null</code>)
      */
-    ITeiidServer getTeiidServer();
+    ITeiidInstance getTeiidInstance();
 
     /**
      * @return the string version of the default value for each property (empty string if no default)

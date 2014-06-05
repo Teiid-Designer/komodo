@@ -33,8 +33,8 @@ import java.util.Set;
 
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.teiid.core.types.basic.AnyToObjectTransform;
 import org.teiid.core.types.basic.AnyToStringTransform;
@@ -126,7 +126,7 @@ public class DataTypeManagerService implements IDataTypeManagerService {
         @Since(Version.TEIID_8_0)
         VARBINARY ("varbinary", DataTypeName.VARBINARY, BinaryType.class); //$NON-NLS-1$
 
-        private static Map<ITeiidServerVersion, List<DefaultDataTypes>> valueCache = new HashMap<ITeiidServerVersion, List<DefaultDataTypes>>();
+        private static Map<ITeiidVersion, List<DefaultDataTypes>> valueCache = new HashMap<ITeiidVersion, List<DefaultDataTypes>>();
 
         private String id;
 
@@ -242,7 +242,7 @@ public class DataTypeManagerService implements IDataTypeManagerService {
          *
          * @return set of values for teiid version
          */
-        public static List<DefaultDataTypes> getValues(ITeiidServerVersion teiidVersion) {
+        public static List<DefaultDataTypes> getValues(ITeiidVersion teiidVersion) {
             List<DefaultDataTypes> appDataTypes = valueCache.get(teiidVersion);
 
             if (appDataTypes == null) {
@@ -267,7 +267,7 @@ public class DataTypeManagerService implements IDataTypeManagerService {
          * @param ordinal
          * @return enum value for ordinal
          */
-        public static DefaultDataTypes valueOf(ITeiidServerVersion teiidVersion, int ordinal) {
+        public static DefaultDataTypes valueOf(ITeiidVersion teiidVersion, int ordinal) {
             for (DefaultDataTypes dataType : DefaultDataTypes.values()) {
                 if (! AnnotationUtils.isApplicable(dataType, teiidVersion))
                     continue;
@@ -286,15 +286,15 @@ public class DataTypeManagerService implements IDataTypeManagerService {
      */
     private static Map<DefaultDataTypes, Map<DefaultDataTypes, Transform>> transforms = new HashMap<DefaultDataTypes, Map<DefaultDataTypes, Transform>>(128);
 
-    private static Map<ITeiidServerVersion, DataTypeManagerService> instances = new HashMap<ITeiidServerVersion, DataTypeManagerService>();
+    private static Map<ITeiidVersion, DataTypeManagerService> instances = new HashMap<ITeiidVersion, DataTypeManagerService>();
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
     /**
      * @param teiidVersion 
      * @return the singleton instance
      */
-    public static DataTypeManagerService getInstance(ITeiidServerVersion teiidVersion) {
+    public static DataTypeManagerService getInstance(ITeiidVersion teiidVersion) {
         DataTypeManagerService instance = instances.get(teiidVersion);
         if (instance == null) {
             instance = new DataTypeManagerService(teiidVersion);
@@ -315,7 +315,7 @@ public class DataTypeManagerService implements IDataTypeManagerService {
     /**
      * @param teiidVersion
      */
-    private DataTypeManagerService(ITeiidServerVersion teiidVersion) {
+    private DataTypeManagerService(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         loadBasicTransforms();
     }

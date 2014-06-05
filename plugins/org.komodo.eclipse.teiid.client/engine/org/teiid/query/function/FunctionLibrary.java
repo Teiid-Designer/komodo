@@ -33,8 +33,8 @@ import java.util.TreeSet;
 
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.core.CoreConstants;
 import org.teiid.core.types.DataTypeManagerService;
@@ -65,7 +65,7 @@ public class FunctionLibrary implements IFunctionLibrary {
     // Function tree for user-defined functions
     private FunctionTree[] userFunctions;
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
     private DataTypeManagerService dataTypeManager;
 
@@ -76,7 +76,7 @@ public class FunctionLibrary implements IFunctionLibrary {
 	 * @param systemFuncs 
 	 * @param userFuncs 
 	 */
-	public FunctionLibrary(ITeiidServerVersion teiidVersion, FunctionTree systemFuncs, FunctionTree... userFuncs) {
+	public FunctionLibrary(ITeiidVersion teiidVersion, FunctionTree systemFuncs, FunctionTree... userFuncs) {
         this.teiidVersion = teiidVersion;
         this.systemFunctions = systemFuncs;
        	this.userFunctions = userFuncs;
@@ -85,7 +85,7 @@ public class FunctionLibrary implements IFunctionLibrary {
 	/**
      * @return the teiidVersion
      */
-    public ITeiidServerVersion getTeiidVersion() {
+    public ITeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 

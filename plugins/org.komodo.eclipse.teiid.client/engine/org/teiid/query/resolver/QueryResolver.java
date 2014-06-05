@@ -34,8 +34,8 @@ import org.komodo.spi.query.IQueryResolver;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.query.metadata.IQueryNode;
 import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.QueryValidatorException;
 import org.teiid.core.types.DataTypeManagerService;
@@ -140,7 +140,7 @@ public class QueryResolver implements IQueryResolver<Command, GroupSymbol, Expre
     /**
      * @param teiidVersion
      */
-    public QueryResolver(ITeiidServerVersion teiidVersion) {
+    public QueryResolver(ITeiidVersion teiidVersion) {
         this(new QueryParser(teiidVersion));
     }
 
@@ -161,12 +161,12 @@ public class QueryResolver implements IQueryResolver<Command, GroupSymbol, Expre
     /**
      * @return parser teiid version
      */
-    public ITeiidServerVersion getTeiidVersion() {
+    public ITeiidVersion getTeiidVersion() {
         return getTeiidParser().getVersion();
     }
 
     protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
-        ITeiidServerVersion minVersion = getTeiidVersion().getMinimumVersion();
+        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
     }
 

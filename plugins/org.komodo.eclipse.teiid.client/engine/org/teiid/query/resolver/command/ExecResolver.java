@@ -33,7 +33,7 @@ import java.util.TreeMap;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.query.metadata.IStoredProcedureInfo;
 import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.query.mapping.relational.QueryNode;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;

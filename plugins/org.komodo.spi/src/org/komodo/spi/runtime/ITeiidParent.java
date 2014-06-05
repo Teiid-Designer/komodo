@@ -1,7 +1,7 @@
 package org.komodo.spi.runtime;
 
 /**
- * The parent server of a Teiid instance
+ * The parent teiid instance of a Teiid instance
  */
 public interface ITeiidParent {
 

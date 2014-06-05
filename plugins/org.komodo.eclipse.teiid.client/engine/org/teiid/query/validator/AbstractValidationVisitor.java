@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Stack;
 
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -54,7 +54,7 @@ public class AbstractValidationVisitor extends LanguageVisitor {
     /**
      * @param teiidVersion
      */
-    public AbstractValidationVisitor(ITeiidServerVersion teiidVersion) {
+    public AbstractValidationVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
         this.report = new ValidatorReport();
     }

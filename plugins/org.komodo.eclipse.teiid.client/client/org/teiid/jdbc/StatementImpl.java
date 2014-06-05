@@ -50,8 +50,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.client.DQP;
 import org.teiid.client.RequestMessage;
 import org.teiid.client.RequestMessage.ResultsMode;
@@ -200,22 +200,22 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
         setTimeoutFromProperties();
     }
 
-    protected ITeiidServerVersion getTeiidVersion() {
+    protected ITeiidVersion getTeiidVersion() {
         return driverConnection.getTeiidVersion();
     }
 
     protected boolean isLessThanTeiidEight() {
-        ITeiidServerVersion minVersion = getTeiidVersion().getMinimumVersion();
+        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.isLessThan(Version.TEIID_8_0.get());
     }
 
     protected boolean isGreaterThanTeiidSeven() {
-        ITeiidServerVersion minVersion = getTeiidVersion().getMinimumVersion();
+        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.isGreaterThan(Version.TEIID_7_7.get());
     }
 
     protected void checkSupportedVersion(Version teiidVersion) {
-        ITeiidServerVersion minVersion = getTeiidVersion().getMinimumVersion();
+        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         if (minVersion.isLessThan(teiidVersion.get())) { 
             TeiidRuntimePlugin.logError("StatementImpl.checkSupportedVersion", "Method being executed that is not supported in teiid version " + getTeiidVersion());  //$NON-NLS-1$//$NON-NLS-2$
             throw new UnsupportedOperationException();

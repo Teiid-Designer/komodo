@@ -30,7 +30,7 @@ import java.util.TimeZone;
 
 import javax.security.auth.Subject;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.core.util.LRUCache;
 import org.teiid.metadata.FunctionMethod.Determinism;
 
@@ -53,16 +53,16 @@ public class CommandContext implements Cloneable, org.teiid.CommandContext {
 
 	private Determinism[] determinismLevel = new Determinism[] {Determinism.DETERMINISTIC};
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
-    public CommandContext(ITeiidServerVersion teiidVersion) {
+    public CommandContext(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 
     /**
      * @return teiid version
      */
-    public ITeiidServerVersion getTeiidVersion() {
+    public ITeiidVersion getTeiidVersion() {
         return teiidVersion;
     }
 

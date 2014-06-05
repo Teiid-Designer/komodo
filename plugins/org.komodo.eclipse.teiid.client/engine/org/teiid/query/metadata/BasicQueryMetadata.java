@@ -32,7 +32,7 @@ import java.util.Set;
 import javax.script.ScriptEngine;
 
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.komodo.spi.xml.IMappingNode;
 import org.teiid.query.eval.TeiidScriptEngine;
@@ -47,19 +47,19 @@ import org.teiid.query.sql.symbol.Expression;
  */
 public class BasicQueryMetadata implements IQueryMetadataInterface {
 	
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
     /**
      * Constructor for AbstractQueryMetadata.
      * @param teiidVersion
      */
-    public BasicQueryMetadata(ITeiidServerVersion teiidVersion) {
+    public BasicQueryMetadata(ITeiidVersion teiidVersion) {
         super();
         this.teiidVersion = teiidVersion;
     }
 
     @Override
-    public ITeiidServerVersion getTeiidVersion() {
+    public ITeiidVersion getTeiidVersion() {
         return teiidVersion;
     }
 

@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.ICommandCollectorVisitor;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.ExistsCriteria;
@@ -56,7 +56,7 @@ public class CommandCollectorVisitor extends LanguageVisitor
     /**
      * @param teiidVersion
      */
-    public CommandCollectorVisitor(ITeiidServerVersion teiidVersion) {
+    public CommandCollectorVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

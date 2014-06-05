@@ -19,7 +19,7 @@ import org.komodo.spi.query.proc.wsdl.IWsdlConstants;
 import org.komodo.spi.query.proc.wsdl.IWsdlResponseInfo;
 import org.komodo.spi.query.proc.wsdl.IWsdlWrapperInfo;
 import org.komodo.spi.query.sql.ISQLConstants;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 
 /**
  *
@@ -35,7 +35,7 @@ public class WsdlResponseProcedureHelper extends AbstractWsdlHelper implements I
      * @param responseInfo
      * @param properties
      */
-    public WsdlResponseProcedureHelper(ITeiidServerVersion teiidVersion, IWsdlResponseInfo responseInfo, Properties properties) {
+    public WsdlResponseProcedureHelper(ITeiidVersion teiidVersion, IWsdlResponseInfo responseInfo, Properties properties) {
         super(teiidVersion);
         this.responseInfo = responseInfo;
         this.properties = properties;

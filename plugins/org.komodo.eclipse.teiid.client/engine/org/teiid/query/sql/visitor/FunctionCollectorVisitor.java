@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.komodo.spi.query.sql.IFunctionCollectorVisitor;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.metadata.FunctionMethod.Determinism;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -63,7 +63,7 @@ public class FunctionCollectorVisitor extends LanguageVisitor
      * @param teiidVersion
      * @param removeDuplicates 
      */
-    public FunctionCollectorVisitor(ITeiidServerVersion teiidVersion, boolean removeDuplicates) {
+    public FunctionCollectorVisitor(ITeiidVersion teiidVersion, boolean removeDuplicates) {
         this(teiidVersion, removeDuplicates ? new HashSet<Function>() : new ArrayList<Function>());
     }
     
@@ -75,7 +75,7 @@ public class FunctionCollectorVisitor extends LanguageVisitor
      * @param functions
      * @throws IllegalArgumentException If elements is null
      */
-	public FunctionCollectorVisitor(ITeiidServerVersion teiidVersion, Collection<Function> functions) {
+	public FunctionCollectorVisitor(ITeiidVersion teiidVersion, Collection<Function> functions) {
         this(teiidVersion, functions, null);
 	}
 
@@ -89,7 +89,7 @@ public class FunctionCollectorVisitor extends LanguageVisitor
      *
      * @throws IllegalArgumentException If elements is null
      */
-    public FunctionCollectorVisitor(ITeiidServerVersion teiidVersion, Collection<Function> functions, String functionName) {
+    public FunctionCollectorVisitor(ITeiidVersion teiidVersion, Collection<Function> functions, String functionName) {
         super(teiidVersion);
         if(functions == null) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0022));

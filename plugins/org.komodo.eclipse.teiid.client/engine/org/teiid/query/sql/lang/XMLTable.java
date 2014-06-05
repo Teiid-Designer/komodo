@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IXMLTable;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;

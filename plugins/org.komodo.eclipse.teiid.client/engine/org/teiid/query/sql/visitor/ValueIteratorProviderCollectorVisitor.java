@@ -29,7 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.IValueIteratorProviderCollectorVisitor;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.ExistsCriteria;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -60,7 +60,7 @@ public class ValueIteratorProviderCollectorVisitor extends LanguageVisitor
      * {@link java.util.ArrayList}.  
      * @param teiidVersion
      */
-    public ValueIteratorProviderCollectorVisitor(ITeiidServerVersion teiidVersion) {
+    public ValueIteratorProviderCollectorVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
         this.valueIteratorProviders = new ArrayList<SubqueryContainer>();
     }   
@@ -71,7 +71,7 @@ public class ValueIteratorProviderCollectorVisitor extends LanguageVisitor
      * @param teiidVersion
 	 * @param valueIteratorProviders Collection to accumulate found 
 	 */
-	ValueIteratorProviderCollectorVisitor(ITeiidServerVersion teiidVersion, List<SubqueryContainer> valueIteratorProviders) {
+	ValueIteratorProviderCollectorVisitor(ITeiidVersion teiidVersion, List<SubqueryContainer> valueIteratorProviders) {
 	    super(teiidVersion);
 		this.valueIteratorProviders = valueIteratorProviders;
 	}   

@@ -30,7 +30,7 @@ import java.util.TreeSet;
 
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.validator.IValidator.IValidatorFailure;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.ModelMetaData.Message.Severity;
@@ -78,7 +78,7 @@ import org.teiid.runtime.client.Messages;
 
 public class MetadataValidator {
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
     private final QueryParser queryParser;
 
@@ -89,13 +89,13 @@ public class MetadataValidator {
 		void execute(VDBMetaData vdb, MetadataStore vdbStore, ValidatorReport report, MetadataValidator metadataValidator);
 	}	
 
-	public MetadataValidator(ITeiidServerVersion teiidVersion, Map<String, Datatype> typeMap) {
+	public MetadataValidator(ITeiidVersion teiidVersion, Map<String, Datatype> typeMap) {
 		this.teiidVersion = teiidVersion;
         this.typeMap = typeMap;
 		this.queryParser = new QueryParser(teiidVersion);
 	}
 
-	public MetadataValidator(ITeiidServerVersion teiidVersion) {
+	public MetadataValidator(ITeiidVersion teiidVersion) {
         this(teiidVersion, SystemMetadata.getInstance(teiidVersion).getRuntimeTypeMap());
     }
 

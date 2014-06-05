@@ -13,8 +13,8 @@ package org.teiid.runtime.client.admin.v8;
 import java.io.InputStream;
 
 import org.komodo.spi.runtime.ITeiidAdminInfo;
-import org.komodo.spi.runtime.ITeiidServer;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminException;
 import org.teiid.adminapi.VDB;
@@ -36,20 +36,20 @@ public class Admin8Spec extends AdminSpec {
     /**
      * @param teiidVersion
      */
-    public Admin8Spec(ITeiidServerVersion teiidVersion) {
+    public Admin8Spec(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
     @Override
-    public Admin createAdmin(ITeiidServer teiidServer) throws AdminException {
-        ITeiidAdminInfo teiidAdminInfo = teiidServer.getTeiidAdminInfo();
+    public Admin createAdmin(ITeiidInstance teiidInstance) throws AdminException {
+        ITeiidAdminInfo teiidAdminInfo = teiidInstance.getTeiidAdminInfo();
         char[] passwordArray = null;
         if (teiidAdminInfo.getPassword() != null) {
             passwordArray = teiidAdminInfo.getPassword().toCharArray();
         }
 
-        Admin admin = Admin8Factory.getInstance().createAdmin(teiidServer.getServerVersion(),
-                                                              teiidServer.getHost(),
+        Admin admin = Admin8Factory.getInstance().createAdmin(teiidInstance.getVersion(),
+                                                              teiidInstance.getHost(),
                                                               teiidAdminInfo.getPortNumber(),
                                                               teiidAdminInfo.getUsername(),
                                                               passwordArray);

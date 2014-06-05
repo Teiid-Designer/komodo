@@ -35,12 +35,12 @@ public interface IExecutionAdmin {
      */
     enum PingType {
         /**
-         * Ping the admin port of the server
+         * Ping the admin port of the teiid instance
          */
         ADMIN, 
         
         /**
-         * Ping the JDBC port of the server
+         * Ping the JDBC port of the teiid instance
          */
         JDBC;
     }
@@ -68,12 +68,12 @@ public interface IExecutionAdmin {
      * Removes the data source from the Teiid Instance (if exists)
      * 
      * @param dsName the data source name
-     * @throws Exception if failure in deleting data source on server
+     * @throws Exception if failure in deleting data source on teiid instance
      */
      void deleteDataSource(String dsName) throws Exception;
 
     /**
-     * Returns a teiid data source object if it exists in this server
+     * Returns a teiid data source object if it exists in this teiid instance
      * 
      * @param name the data source name
      * @return the teiid data source object (can be <code>null</code>)
@@ -82,7 +82,7 @@ public interface IExecutionAdmin {
      ITeiidDataSource getDataSource(String name) throws Exception;
 
      /**
-      * Returns all teiid data source object if any on this server
+      * Returns all teiid data source object if any on this teiid instance
       * 
       * @return collection of {@link ITeiidDataSource}
       * 
@@ -102,7 +102,7 @@ public interface IExecutionAdmin {
      * Get the specified DataSource, or create one if it does not exist.  When the datasource is create thru the admin API,
      * it is given a JNDI name which is the same as the sourceName.  For example if dsName 'mySource' is supplied, then the 
      * JNDI name is set as 'java:/mySource' (java context is added).  When the sources created by any other user are retrieved 
-     * from the server, however, it is not guaranteed that the dsName and jndi name will match.
+     * from the teiid instance, however, it is not guaranteed that the dsName and jndi name will match.
      * @param displayName the data source display name
      * @param dsName the data source name
      * @param typeName the translator type name
@@ -131,7 +131,7 @@ public interface IExecutionAdmin {
      Collection<ITeiidTranslator> getTranslators() throws Exception;
 
     /**
-     * @return an unmodifiable collection of VDBs deployed on the server
+     * @return an unmodifiable collection of VDBs deployed on the teiid instance
      * @throws Exception 
      */
      Collection<ITeiidVdb> getVdbs() throws Exception;
@@ -145,7 +145,7 @@ public interface IExecutionAdmin {
      
      /**
       * @param name 
-      * @return whether server contains a vdb with the given name
+      * @return whether teiid instance contains a vdb with the given name
       * @throws Exception 
       */
      boolean hasVdb( String name ) throws Exception;

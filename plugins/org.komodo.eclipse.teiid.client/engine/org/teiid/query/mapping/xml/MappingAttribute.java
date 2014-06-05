@@ -24,7 +24,7 @@ package org.teiid.query.mapping.xml;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.xml.IMappingAttribute;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.symbol.ElementSymbol;

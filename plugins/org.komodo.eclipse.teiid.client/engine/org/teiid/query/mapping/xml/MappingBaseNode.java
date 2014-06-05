@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.xml.IMappingBaseNode;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.runtime.client.Messages;
@@ -94,7 +94,7 @@ public abstract class MappingBaseNode extends MappingNode implements IMappingBas
 			String mappingClass = recursiveElement.getMappingClass();
 
 			/* The upper case of the class is used in Teiid 7 mappings */
-			ITeiidServerVersion minVersion = getTeiidVersion().getMinimumVersion();
+			ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
 			if (minVersion.isLessThan(Version.TEIID_8_0.get()))
 				mappingClass = mappingClass.toUpperCase();
 

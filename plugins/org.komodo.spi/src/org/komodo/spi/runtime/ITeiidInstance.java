@@ -10,21 +10,21 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.state.IState;
 /**
  * @since 8.0
  *
  */
-public interface ITeiidServer extends IExecutionAdmin, HostProvider {
+public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
 
     /**
-     * @return the version information of this server
+     * @return the version information of this instance
      */
-    ITeiidServerVersion getServerVersion();
+    ITeiidVersion getVersion();
 
     /**
-     * Disconnect then connect to this server. This is preferable to 
+     * Disconnect then connect to this instance. This is preferable to 
      * calling {@link #disconnect()} and {@link #connect()} separately
      * since it only notifies at the end of the reconnection.
      */
@@ -48,7 +48,7 @@ public interface ITeiidServer extends IExecutionAdmin, HostProvider {
     String getDisplayName();
     
     /**
-     * @return object managing notifications for this server
+     * @return object managing notifications for this instance
      */
     EventManager getEventManager();
 
@@ -58,7 +58,7 @@ public interface ITeiidServer extends IExecutionAdmin, HostProvider {
     String getUrl();
 
     /**
-     * @return the unique identifier of this server
+     * @return the unique identifier of this instance
      */
     String getId();
 
@@ -68,27 +68,27 @@ public interface ITeiidServer extends IExecutionAdmin, HostProvider {
     ITeiidParent getParent();
 
     /**
-     * Get the parent server name
-     * @return the parent serverName
+     * Get the parent instance name
+     * @return the parent instanceName
      */
     String getParentName();
 
     /**
-     * @return <code>true</code> if a connection to this server exists and is working
+     * @return <code>true</code> if a connection to this instance exists and is working
      */
     boolean isConnected();
 
     /**
-     * Return whether parent server is connected.
+     * Return whether parent instance is connected.
      * 
      * @return true is started, otherwise false
      */
     boolean isParentConnected();
 
     /**
-     * Attempts to establish communication with the server.
+     * Attempts to establish communication with the instance.
      * 
-     * @return a status if the server connection can be established (never <code>null</code>)
+     * @return a status if the instance connection can be established (never <code>null</code>)
      */
     IState ping();
     
@@ -103,7 +103,7 @@ public interface ITeiidServer extends IExecutionAdmin, HostProvider {
     String getCustomLabel();
     
     /**
-     * @return the connection error message if the connection to the server failed
+     * @return the connection error message if the connection to the instance failed
      */
     String getConnectionError();
     
@@ -113,11 +113,11 @@ public interface ITeiidServer extends IExecutionAdmin, HostProvider {
     void setCustomLabel(String customLabel);
 
     /**
-     * Attempts to establish communication with the specified server for testing purposes only.
+     * Attempts to establish communication with the specified instance for testing purposes only.
      * 
      * This results in the connection being closed.
      * 
-     * @return a status if the server connection can be established (never <code>null</code>)
+     * @return a status if the instance connection can be established (never <code>null</code>)
      */
     IState testPing();
 
@@ -148,10 +148,10 @@ public interface ITeiidServer extends IExecutionAdmin, HostProvider {
     IState createVdbDataSource(String vdbName, String displayName, String jndiName);
 
     /**
-     * Update this server with the properties of the given server
+     * Update this instance with the properties of the given instance
      * 
-     * @param otherServer
+     * @param otherInstance
      */
-    void update(ITeiidServer otherServer);
+    void update(ITeiidInstance otherInstance);
 
 }

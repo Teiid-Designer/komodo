@@ -30,9 +30,9 @@ import java.util.Collection;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
@@ -62,7 +62,7 @@ public class SystemSource extends UDFSource implements FunctionCategoryConstants
     private static final String XML_FUNCTION_CLASS = XMLSystemFunctions.class.getName(); 
     private static final String SECURITY_FUNCTION_CLASS = SecuritySystemFunctions.class.getName();
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
     private final DataTypeManagerService dataTypeManager;
     
     /**
@@ -72,7 +72,7 @@ public class SystemSource extends UDFSource implements FunctionCategoryConstants
      * @param allowEnvFunction
      * @param classLoader 
      */
-    public SystemSource(ITeiidServerVersion teiidVersion, boolean allowEnvFunction, ClassLoader classLoader) {
+    public SystemSource(ITeiidVersion teiidVersion, boolean allowEnvFunction, ClassLoader classLoader) {
     	super(new ArrayList<FunctionMethod>(), classLoader);
         this.teiidVersion = teiidVersion;
         this.dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);

@@ -50,7 +50,7 @@ import java.util.regex.Matcher;
 
 import javax.sql.rowset.serial.SerialArray;
 
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.client.RequestMessage;
 import org.teiid.client.RequestMessage.ResultsMode;
 import org.teiid.client.RequestMessage.StatementType;

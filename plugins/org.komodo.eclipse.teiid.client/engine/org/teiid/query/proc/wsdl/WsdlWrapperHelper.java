@@ -20,7 +20,7 @@ import org.komodo.spi.query.proc.wsdl.IWsdlRequestInfo;
 import org.komodo.spi.query.proc.wsdl.IWsdlResponseInfo;
 import org.komodo.spi.query.proc.wsdl.IWsdlWrapperInfo;
 import org.komodo.spi.query.sql.ISQLConstants;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 
 /**
  *
@@ -35,7 +35,7 @@ public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConsta
      * @param teiidVersion 
      * @param wrapperInfo
      */
-    public WsdlWrapperHelper(ITeiidServerVersion teiidVersion, IWsdlWrapperInfo wrapperInfo) {
+    public WsdlWrapperHelper(ITeiidVersion teiidVersion, IWsdlWrapperInfo wrapperInfo) {
         super(teiidVersion);
         this.wrapperInfo = wrapperInfo;
         this.requestInfo = wrapperInfo.getRequestInfo();

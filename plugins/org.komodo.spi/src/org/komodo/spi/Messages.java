@@ -30,10 +30,10 @@ public class Messages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum SPI {
     	valueCannotBeNull,
-        invalidTargetTypeForGetServerMethod,
+        invalidTargetTypeForGetTeiidMethod,
         invalidTargetTypeForGetDataSourceMethod,
         invalidTargetTypeForGetTranslatorMethod,
-        invalidTargetTypeForGetUpdatedServerMethod;
+        invalidTargetTypeForGetUpdatedTeiidMethod;
 
         @Override
         public String toString() {

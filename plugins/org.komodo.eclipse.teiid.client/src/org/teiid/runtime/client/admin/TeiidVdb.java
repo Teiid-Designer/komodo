@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.komodo.spi.runtime.ITeiidServer;
+import org.komodo.spi.runtime.ITeiidInstance;
 import org.komodo.spi.runtime.ITeiidVdb;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.VDB;
@@ -20,17 +20,17 @@ public class TeiidVdb implements ITeiidVdb, Comparable<TeiidVdb> {
     
     private final VDB vdb;
 
-    private final ITeiidServer teiidServer;
+    private final ITeiidInstance teiidInstance;
 
     private final boolean isPreview;
 
     public TeiidVdb( VDB vdb,
-                     ITeiidServer teiidServer ) {
+                     ITeiidInstance teiidInstance ) {
         ArgCheck.isNotNull(vdb, "vdb"); //$NON-NLS-1$
-        ArgCheck.isNotNull(teiidServer, "teiidServer"); //$NON-NLS-1$
+        ArgCheck.isNotNull(teiidInstance, "teiidInstance"); //$NON-NLS-1$
 
         this.vdb = vdb;
-        this.teiidServer = teiidServer;
+        this.teiidInstance = teiidInstance;
         isPreview = Boolean.parseBoolean(vdb.getProperties().getProperty(PREVIEW));
     }
 

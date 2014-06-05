@@ -24,7 +24,7 @@ package org.teiid.query.sql.visitor;
 
 import java.util.TreeSet;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.metadata.FunctionMethod.Determinism;
 import org.teiid.metadata.FunctionMethod.PushDown;
@@ -58,7 +58,7 @@ public class EvaluatableVisitor extends LanguageVisitor {
 	/**
      * @param teiidVersion
      */
-    public EvaluatableVisitor(ITeiidServerVersion teiidVersion) {
+    public EvaluatableVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

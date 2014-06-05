@@ -23,8 +23,8 @@
 package org.teiid.metadata;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  * Represents a procedure parameter
@@ -48,7 +48,7 @@ public class ProcedureParameter extends BaseColumn {
 	/**
      * @param teiidVersion
      */
-    public ProcedureParameter(ITeiidServerVersion teiidVersion) {
+    public ProcedureParameter(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

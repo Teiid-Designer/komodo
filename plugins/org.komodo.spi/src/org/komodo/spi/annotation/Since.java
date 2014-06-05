@@ -14,18 +14,18 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  * Used for decorating classes, fields and methods defining the
- * minimum teiid server version
+ * minimum teiid teiid instance version
  */
 @Retention(value = RetentionPolicy.RUNTIME)
 @Inherited
 public @interface Since {
 
     /**
-     * The minimum version of the Teiid Server that the class,
+     * The minimum version of the Teiid Instance that the class,
      * field or method is applicable for, eg. 7.7.0, 8.2.0. The value
      * is one of the values of the enum {@link Version}.
      *

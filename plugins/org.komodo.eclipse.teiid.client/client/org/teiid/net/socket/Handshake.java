@@ -29,9 +29,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.core.util.ApplicationInfo;
 import org.teiid.core.util.StringUtil;
 
@@ -55,14 +55,14 @@ public class Handshake implements Externalizable {
     	this.version = version;
     }
 
-    private ITeiidServerVersion getTeiidVersion() {
-        ITeiidServerVersion version = new TeiidServerVersion(getVersion());
+    private ITeiidVersion getTeiidVersion() {
+        ITeiidVersion version = new TeiidVersion(getVersion());
         return version;
     }
 
     private AuthenticationType getAuthenticationType() {
         if (authType == null) {
-            ITeiidServerVersion version = getTeiidVersion();
+            ITeiidVersion version = getTeiidVersion();
             if (version.isGreaterThanOrEqualTo(Version.TEIID_8_7.get()))
                 authType = AuthenticationType.USERPASSWORD;
 

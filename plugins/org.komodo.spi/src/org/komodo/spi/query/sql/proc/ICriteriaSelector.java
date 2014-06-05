@@ -13,7 +13,7 @@ package org.komodo.spi.query.sql.proc;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.ILanguageVisitor;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  *

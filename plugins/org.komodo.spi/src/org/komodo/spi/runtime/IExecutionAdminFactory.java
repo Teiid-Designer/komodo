@@ -13,7 +13,7 @@ package org.komodo.spi.runtime;
 import java.sql.Driver;
 
 import org.komodo.spi.query.IQueryService;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 
 /**
@@ -22,15 +22,15 @@ import org.komodo.spi.type.IDataTypeManagerService;
 public interface IExecutionAdminFactory {
 
     /**
-     * Create an {@link IExecutionAdmin} with the given {@link ITeiidServer}
+     * Create an {@link IExecutionAdmin} with the given {@link ITeiidInstance}
      * 
-     * @param teiidServer
+     * @param teiidInstance
      * 
      * @return instance of {@link IExecutionAdmin}
      * 
      * @throws Exception 
      */
-    IExecutionAdmin createExecutionAdmin(ITeiidServer teiidServer) throws Exception;
+    IExecutionAdmin createExecutionAdmin(ITeiidInstance teiidInstance) throws Exception;
 
     /**
      * Get the teiid data type manager service
@@ -38,7 +38,7 @@ public interface IExecutionAdminFactory {
      *
      * @return instance of {@link IDataTypeManagerService}
      */
-    IDataTypeManagerService getDataTypeManagerService(ITeiidServerVersion teiidVersion);
+    IDataTypeManagerService getDataTypeManagerService(ITeiidVersion teiidVersion);
 
     /**
      * Get the {@link Driver} for the Teiid Instance
@@ -46,7 +46,7 @@ public interface IExecutionAdminFactory {
      *
      * @return the driver
      */
-    Driver getTeiidDriver(ITeiidServerVersion teiidVersion);
+    Driver getTeiidDriver(ITeiidVersion teiidVersion);
 
     /**
      * Get the query service
@@ -54,7 +54,7 @@ public interface IExecutionAdminFactory {
      * 
      * @return instance of {@link IQueryService}
      */
-    IQueryService getQueryService(ITeiidServerVersion teiidVersion);
+    IQueryService getQueryService(ITeiidVersion teiidVersion);
 
     /**
      * Get the location of this class' parent plugin

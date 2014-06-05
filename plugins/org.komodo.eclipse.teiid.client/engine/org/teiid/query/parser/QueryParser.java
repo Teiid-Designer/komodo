@@ -29,9 +29,9 @@ import java.util.HashSet;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.IQueryParser;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.MetadataFactory;
 import org.teiid.query.parser.v7.Teiid7Parser;
@@ -52,14 +52,14 @@ public class QueryParser implements IQueryParser {
 
 	private TeiidParser teiidParser;
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
     
 	/**
 	 * Construct a QueryParser - this may be reused.
 	 *
 	 * @param teiidVersion
 	 */
-	public QueryParser(ITeiidServerVersion teiidVersion) {
+	public QueryParser(ITeiidVersion teiidVersion) {
 	    this.teiidVersion = teiidVersion;
 	    this.teiidParser = createTeiidParser(new StringReader("")); //$NON-NLS-1$
 	}

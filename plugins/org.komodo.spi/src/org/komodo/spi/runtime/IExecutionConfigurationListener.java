@@ -12,7 +12,7 @@ package org.komodo.spi.runtime;
 
 
 /**
- * The <code>IExecutionConfigurationListener</code> interface defines the API for a server registry listener.
+ * The <code>IExecutionConfigurationListener</code> interface defines the API for a teiid instance registry listener.
  *
  * @since 8.0
  */

@@ -23,7 +23,7 @@ package org.teiid.query.function;
 
 import java.util.Collection;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.core.CoreConstants;
 import org.teiid.metadata.FunctionMethod;
 import org.teiid.query.function.metadata.FunctionMetadataValidator;
@@ -37,13 +37,13 @@ public class SystemFunctionManager {
 	private FunctionTree systemFunctionTree;
 	private boolean allowEnvFunction = true;
 	private final ClassLoader classLoader;
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
 	/**
 	 * @param teiidVersion
 	 * @param classLoader 
      */
-    public SystemFunctionManager(ITeiidServerVersion teiidVersion, ClassLoader classLoader) {
+    public SystemFunctionManager(ITeiidVersion teiidVersion, ClassLoader classLoader) {
         this.teiidVersion = teiidVersion;
         this.classLoader = classLoader;
     }
@@ -51,7 +51,7 @@ public class SystemFunctionManager {
     /**
      * @return the teiidVersion
      */
-    public ITeiidServerVersion getTeiidVersion() {
+    public ITeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 

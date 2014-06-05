@@ -17,8 +17,8 @@ import java.util.Map;
 import org.komodo.spi.query.IQueryService;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.IExecutionAdminFactory;
-import org.komodo.spi.runtime.ITeiidServer;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.jdbc.TeiidDriver;
@@ -30,17 +30,17 @@ import org.teiid.runtime.client.query.QueryService;
  */
 public class ExecutionAdminFactory implements IExecutionAdminFactory {
 
-    private final Map<ITeiidServerVersion, DataTypeManagerService> dataTypeManagerServiceCache = new HashMap<ITeiidServerVersion, DataTypeManagerService>();
+    private final Map<ITeiidVersion, DataTypeManagerService> dataTypeManagerServiceCache = new HashMap<ITeiidVersion, DataTypeManagerService>();
     
-    private final Map<ITeiidServerVersion, QueryService> queryServiceCache = new HashMap<ITeiidServerVersion, QueryService>();
+    private final Map<ITeiidVersion, QueryService> queryServiceCache = new HashMap<ITeiidVersion, QueryService>();
 
     @Override
-    public IExecutionAdmin createExecutionAdmin(ITeiidServer teiidServer) throws Exception {
-        return new ExecutionAdmin(teiidServer);
+    public IExecutionAdmin createExecutionAdmin(ITeiidInstance teiidInstance) throws Exception {
+        return new ExecutionAdmin(teiidInstance);
     }
     
     @Override
-    public IDataTypeManagerService getDataTypeManagerService(ITeiidServerVersion teiidVersion) {
+    public IDataTypeManagerService getDataTypeManagerService(ITeiidVersion teiidVersion) {
         DataTypeManagerService dataTypeManagerService = dataTypeManagerServiceCache.get(teiidVersion);
         if (dataTypeManagerService == null) {
             dataTypeManagerService = DataTypeManagerService.getInstance(teiidVersion);
@@ -51,14 +51,14 @@ public class ExecutionAdminFactory implements IExecutionAdminFactory {
     }
 
     @Override
-    public Driver getTeiidDriver(ITeiidServerVersion teiidVersion) {
+    public Driver getTeiidDriver(ITeiidVersion teiidVersion) {
         TeiidDriver instance = TeiidDriver.getInstance();
         instance.setTeiidVersion(teiidVersion);
         return instance;
     }
 
     @Override
-    public IQueryService getQueryService(ITeiidServerVersion teiidVersion) {
+    public IQueryService getQueryService(ITeiidVersion teiidVersion) {
         QueryService queryService = queryServiceCache.get(teiidVersion);
         if (queryService == null) {
             queryService = new QueryService(teiidVersion);

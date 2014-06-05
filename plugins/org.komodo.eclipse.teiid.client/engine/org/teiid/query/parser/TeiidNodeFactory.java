@@ -21,7 +21,7 @@ import java.util.Set;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.core.util.StringUtil;
 import org.teiid.query.parser.v7.Teiid7Parser;
 import org.teiid.query.parser.v8.Teiid8Parser;

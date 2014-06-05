@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.client.metadata.ParameterInfo;
 import org.teiid.client.plan.Annotation;
 import org.teiid.client.plan.PlanNode;
@@ -98,7 +98,7 @@ public class ResultsMessage implements Externalizable {
     private boolean delayDeserialization;
     byte[] resultBytes;
 
-    private transient ITeiidServerVersion teiidVersion;
+    private transient ITeiidVersion teiidVersion;
 
     public ResultsMessage(){
     }
@@ -430,7 +430,7 @@ public class ResultsMessage implements Externalizable {
 		this.delayDeserialization = delayDeserialization;
 	}
 
-	public ITeiidServerVersion getTeiidVersion() {
+	public ITeiidVersion getTeiidVersion() {
 	    if (teiidVersion == null)
 	        teiidVersion = TeiidDriver.getInstance().getTeiidVersion();
 
@@ -443,7 +443,7 @@ public class ResultsMessage implements Externalizable {
      *
      * @param teiidVersion
      */
-    public void setTeiidVersion(ITeiidServerVersion teiidVersion) {
+    public void setTeiidVersion(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 }

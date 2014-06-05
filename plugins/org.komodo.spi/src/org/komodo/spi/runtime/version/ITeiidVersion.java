@@ -13,7 +13,7 @@ package org.komodo.spi.runtime.version;
 /**
  * Parent marker interface for teiid instance version information
  */
-public interface ITeiidServerVersion {
+public interface ITeiidVersion {
     
     /**
      * dot
@@ -141,28 +141,28 @@ public interface ITeiidServerVersion {
      * 
      * @return true if the otherVersion is considered equivalent
      */
-    boolean compareTo(ITeiidServerVersion otherVersion);
+    boolean compareTo(ITeiidVersion otherVersion);
     
     /**
-     * Is this a 7 server?
+     * Is this a 7 teiid instance?
      * 
      * @return true is version is 7
      */
-    boolean isSevenServer();
+    boolean isSevenInstance();
 
     /**
      * @return the minimum version that this version could be,
      *                 eg. 8.x.x will be 8.0.0 while 8.1.x will be 8.1.0 and
      *                       8.2.1 will always be 8.2.1
      */
-    ITeiidServerVersion getMinimumVersion();
+    ITeiidVersion getMinimumVersion();
 
     /**
      * @return the maximum version that this version could be,
      *                 eg. 8.x.x will be 8.9.9 while 8.1.x will be 8.1.9 and
      *                       8.2.1 will always be 8.2.1
      */
-    ITeiidServerVersion getMaximumVersion();
+    ITeiidVersion getMaximumVersion();
 
     /**
      * Is this version greater than the given version
@@ -175,7 +175,7 @@ public interface ITeiidServerVersion {
      *
      * @return true if this version is greater. False otherwise.
      */
-    boolean isGreaterThan(ITeiidServerVersion otherVersion);
+    boolean isGreaterThan(ITeiidVersion otherVersion);
 
     /**
      * Is this version less than the given version
@@ -188,25 +188,25 @@ public interface ITeiidServerVersion {
      *
      * @return true if this version is less. False otherwise.
      */
-    boolean isLessThan(ITeiidServerVersion otherVersion);
+    boolean isLessThan(ITeiidVersion otherVersion);
 
     /**
-     * Convenience that delegates to {@link #compareTo(ITeiidServerVersion)}
-     * and {@link #isGreaterThan(ITeiidServerVersion)}.
+     * Convenience that delegates to {@link #compareTo(ITeiidVersion)}
+     * and {@link #isGreaterThan(ITeiidVersion)}.
      *
      * @param otherVersion
      *
      * @return this is greater than or equal to otherVersion
      */
-    boolean isGreaterThanOrEqualTo(ITeiidServerVersion otherVersion);
+    boolean isGreaterThanOrEqualTo(ITeiidVersion otherVersion);
 
     /**
-     * Convenience that delegates to {@link #compareTo(ITeiidServerVersion)}
-     * and {@link #isLessThan(ITeiidServerVersion)}.
+     * Convenience that delegates to {@link #compareTo(ITeiidVersion)}
+     * and {@link #isLessThan(ITeiidVersion)}.
      *
      * @param otherVersion
      *
      * @return this is less than or equal to otherVersion
      */
-    boolean isLessThanOrEqualTo(ITeiidServerVersion otherVersion);
+    boolean isLessThanOrEqualTo(ITeiidVersion otherVersion);
 }

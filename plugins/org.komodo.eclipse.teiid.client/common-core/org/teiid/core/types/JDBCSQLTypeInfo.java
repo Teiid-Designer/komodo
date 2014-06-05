@@ -32,7 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
 
 /**
@@ -203,7 +203,7 @@ public final class JDBCSQLTypeInfo {
     	return NAME_TO_TYPEINFO.keySet();
     }
 
-	public static Integer getMaxDisplaySize(ITeiidServerVersion teiidVersion, Class<?> dataTypeClass) {
+	public static Integer getMaxDisplaySize(ITeiidVersion teiidVersion, Class<?> dataTypeClass) {
 	    return getMaxDisplaySize(DataTypeManagerService.getInstance(teiidVersion).getDataTypeName(dataTypeClass));
 	}
 
@@ -215,7 +215,7 @@ public final class JDBCSQLTypeInfo {
 	    return ti.maxDisplaySize;
 	}
 
-	public static Integer getDefaultPrecision(ITeiidServerVersion teiidVersion, Class<?> dataTypeClass) {
+	public static Integer getDefaultPrecision(ITeiidVersion teiidVersion, Class<?> dataTypeClass) {
 	    return getDefaultPrecision(DataTypeManagerService.getInstance(teiidVersion).getDataTypeName(dataTypeClass));
 	}
 

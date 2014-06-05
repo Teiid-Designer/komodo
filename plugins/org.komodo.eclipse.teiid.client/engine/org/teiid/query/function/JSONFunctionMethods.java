@@ -30,8 +30,8 @@ import java.sql.SQLException;
 import java.util.Stack;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.common.buffer.FileStore;
 import org.teiid.common.buffer.FileStoreInputStreamFactory;
 import org.teiid.common.buffer.impl.MemoryStorageManager;
@@ -107,13 +107,13 @@ public class JSONFunctionMethods {
 	};
 	
 	public static class JSONBuilder {
-	    private final ITeiidServerVersion teiidVersion;
+	    private final ITeiidVersion teiidVersion;
 		private Writer writer;
 		private FileStoreInputStreamFactory fsisf;
 		private FileStore fs;
 		private Stack<Integer> position = new Stack<Integer>();
 
-		public JSONBuilder(ITeiidServerVersion teiidVersion) {
+		public JSONBuilder(ITeiidVersion teiidVersion) {
 		    this.teiidVersion = teiidVersion;
             MemoryStorageManager manager = new MemoryStorageManager();
 			fs = manager.createFileStore("xml"); //$NON-NLS-1$

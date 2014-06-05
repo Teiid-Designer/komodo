@@ -23,8 +23,8 @@
 package org.teiid.metadata;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 
 /**
@@ -72,7 +72,7 @@ public class Column extends BaseColumn implements Comparable<Column> {
     /**
      * @param teiidVersion
      */
-    public Column(ITeiidServerVersion teiidVersion) {
+    public Column(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

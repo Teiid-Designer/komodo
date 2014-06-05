@@ -28,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 @Removed(Version.TEIID_8_0)
 class ListOverMap<E> extends AbstractList<E> implements Serializable {

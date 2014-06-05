@@ -30,7 +30,7 @@ import java.util.Set;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.adminapi.VDB.ConnectionType;
 
 public interface Admin {

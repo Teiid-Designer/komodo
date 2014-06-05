@@ -35,8 +35,8 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeAliases;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.VDBMetaData;
@@ -55,13 +55,13 @@ import org.teiid.runtime.client.Messages;
 
 public class SystemMetadata {
 	
-	private static Map<ITeiidServerVersion, SystemMetadata> instances = new HashMap<ITeiidServerVersion, SystemMetadata>();
+	private static Map<ITeiidVersion, SystemMetadata> instances = new HashMap<ITeiidVersion, SystemMetadata>();
 	
 	/**
 	 * @param teiidVersion
 	 * @return get singleton instance keyed on given teiid version
 	 */
-	public static SystemMetadata getInstance(ITeiidServerVersion teiidVersion) {
+	public static SystemMetadata getInstance(ITeiidVersion teiidVersion) {
 		SystemMetadata instance = instances.get(teiidVersion);
 		if (instance == null) {
 		    instance = new SystemMetadata(teiidVersion);
@@ -71,7 +71,7 @@ public class SystemMetadata {
 		return instance;
 	}
 
-	private final ITeiidServerVersion teiidVersion;
+	private final ITeiidVersion teiidVersion;
 	private final DataTypeManagerService dataTypeManager;
 	private List<Datatype> dataTypes = new ArrayList<Datatype>();
 	private Map<String, Datatype> typeMap = new TreeMap<String, Datatype>(String.CASE_INSENSITIVE_ORDER);
@@ -80,7 +80,7 @@ public class SystemMetadata {
 	/**
 	 * @param teiidVersion
 	 */
-	public SystemMetadata(ITeiidServerVersion teiidVersion) {
+	public SystemMetadata(ITeiidVersion teiidVersion) {
 	    if (teiidVersion.isLessThan(Version.TEIID_8_0.get()))
 	        throw new UnsupportedOperationException(Messages.getString(Messages.Misc.TeiidVersionFailure, this.getClass().getSimpleName(), teiidVersion));
 

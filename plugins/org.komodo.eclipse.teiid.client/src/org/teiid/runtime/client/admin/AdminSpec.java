@@ -12,9 +12,9 @@ package org.teiid.runtime.client.admin;
 
 import java.io.InputStream;
 
-import org.komodo.spi.runtime.ITeiidServer;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminException;
 import org.teiid.adminapi.VDB;
@@ -26,16 +26,16 @@ import org.teiid.runtime.client.admin.v8.Admin8Spec;
  */
 public abstract class AdminSpec {
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
     /**
      * @param teiidVersion
      */
-    public AdminSpec(ITeiidServerVersion teiidVersion) {
+    public AdminSpec(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 
-    protected ITeiidServerVersion getTeiidVersion() {
+    protected ITeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 
@@ -49,7 +49,7 @@ public abstract class AdminSpec {
      * @param teiidVersion
      * @return admin spec for specific teiid version
      */
-    public static AdminSpec getInstance(ITeiidServerVersion teiidVersion) {
+    public static AdminSpec getInstance(ITeiidVersion teiidVersion) {
         if (teiidVersion.isLessThan(Version.TEIID_8_0.get()))
             return new Admin7Spec(teiidVersion);
         else
@@ -57,11 +57,11 @@ public abstract class AdminSpec {
     }
 
     /**
-     * @param teiidServer
+     * @param teiidInstance
      * @return new admin instance
      * @throws AdminException 
      */
-    public abstract Admin createAdmin(ITeiidServer teiidServer) throws AdminException;
+    public abstract Admin createAdmin(ITeiidInstance teiidInstance) throws AdminException;
 
     /**
      * @return test VDB configuration

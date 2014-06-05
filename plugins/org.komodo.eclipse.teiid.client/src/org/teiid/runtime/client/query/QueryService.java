@@ -37,7 +37,7 @@ import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 import org.komodo.spi.query.sql.symbol.ISymbol;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.udf.FunctionMethodDescriptor;
 import org.komodo.spi.udf.FunctionParameterDescriptor;
 import org.komodo.spi.udf.IFunctionLibrary;
@@ -83,7 +83,7 @@ import org.teiid.runtime.client.xml.MappingDocumentFactory;
  */
 public class QueryService implements IQueryService {
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
     private QueryParser queryParser;
 
@@ -94,7 +94,7 @@ public class QueryService implements IQueryService {
     /**
      * @param teiidVersion
      */
-    public QueryService(ITeiidServerVersion teiidVersion) {
+    public QueryService(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         systemFunctionManager = new SystemFunctionManager(teiidVersion, getClass().getClassLoader());
     }

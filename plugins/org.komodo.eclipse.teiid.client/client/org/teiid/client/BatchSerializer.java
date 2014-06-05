@@ -15,8 +15,8 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.client.batch.Batch0Serializer;
 import org.teiid.client.batch.Batch1Serializer;
 import org.teiid.client.batch.Batch2Serializer;
@@ -38,16 +38,16 @@ import org.teiid.core.types.DataTypeManagerService;
  */
 public abstract class BatchSerializer {
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
     /**
      * @param teiidVersion
      */
-    public BatchSerializer(ITeiidServerVersion teiidVersion) {
+    public BatchSerializer(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 
-    protected ITeiidServerVersion getTeiidVersion() {
+    protected ITeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 
@@ -59,7 +59,7 @@ public abstract class BatchSerializer {
      * @param teiidVersion
      * @return correct version of batch serializer according to teiid version
      */
-    public static BatchSerializer getInstance(ITeiidServerVersion teiidVersion) {
+    public static BatchSerializer getInstance(ITeiidVersion teiidVersion) {
         if (teiidVersion.isLessThan(Version.TEIID_8_0.get()))
             return new Batch0Serializer(teiidVersion);
         else if (teiidVersion.isLessThan(Version.TEIID_8_2.get()))

@@ -103,8 +103,8 @@ import org.komodo.spi.query.sql.symbol.IXMLNamespaces;
 import org.komodo.spi.query.sql.symbol.IXMLParse;
 import org.komodo.spi.query.sql.symbol.IXMLQuery;
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.AlterProcedure;
@@ -210,7 +210,7 @@ import org.teiid.query.sql.symbol.XMLSerialize;
 @SuppressWarnings( "javadoc" )
 public abstract class LanguageVisitor extends AbstractLanguageVisitor {
 
-    private final ITeiidServerVersion teiidVersion;
+    private final ITeiidVersion teiidVersion;
 
     /*
      * Required if nodes are to be created by the visitor
@@ -249,7 +249,7 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
      * @param teiidVersion used to check visitor methods are
      *                                      applicable
      */
-    public LanguageVisitor(ITeiidServerVersion teiidVersion) {
+    public LanguageVisitor(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         this.parser = new QueryParser(teiidVersion);
     }
@@ -257,17 +257,17 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
     /**
      * @return the teiidVersion
      */
-    public ITeiidServerVersion getTeiidVersion() {
+    public ITeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 
     protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
-        ITeiidServerVersion minVersion = getTeiidVersion().getMinimumVersion();
+        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
     }
 
     protected boolean isLessThanTeiidVersion(Version teiidVersion) {
-        ITeiidServerVersion maxVersion = getTeiidVersion().getMaximumVersion();
+        ITeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
         return maxVersion.isLessThan(teiidVersion.get());
     }
 

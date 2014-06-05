@@ -19,7 +19,7 @@ package org.komodo.spi.runtime;
 public interface EventManager {
 
     /**
-     * Listeners already registered will not be added again. The new listener will receive events for all existing servers.
+     * Listeners already registered will not be added again. The new listener will receive events for all existing teiid instances.
      * 
      * @param listener the listener being register to receive events (never <code>null</code>)
      * @return <code>true</code> if listener was added

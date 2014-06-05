@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IOption;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.language.SQLConstants.Reserved;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
@@ -37,7 +37,7 @@ public class Option extends SimpleNode implements IOption<LanguageVisitor> {
     public static class MakeDep {
         private Integer max;
         private boolean join;
-        private ITeiidServerVersion teiidVersion;
+        private ITeiidVersion teiidVersion;
         
         @Override
         public int hashCode() {
@@ -67,7 +67,7 @@ public class Option extends SimpleNode implements IOption<LanguageVisitor> {
             return true;
         }
 
-        public MakeDep(ITeiidServerVersion teiidVersion) {
+        public MakeDep(ITeiidVersion teiidVersion) {
             this.teiidVersion = teiidVersion;
         }
         

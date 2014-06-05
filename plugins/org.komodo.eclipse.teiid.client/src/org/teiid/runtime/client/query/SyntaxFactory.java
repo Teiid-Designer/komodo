@@ -62,8 +62,8 @@ import org.komodo.spi.query.sql.symbol.IMultipleElementSymbol;
 import org.komodo.spi.query.sql.symbol.IReference;
 import org.komodo.spi.query.sql.symbol.IScalarSubquery;
 import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.query.mapping.relational.QueryNode;
 import org.teiid.query.metadata.StoredProcedureInfo;
 import org.teiid.query.metadata.TempMetadataID;
@@ -150,8 +150,8 @@ public class SyntaxFactory implements IQueryFactory <Expression,
         this.teiidParser = teiidParser;
     }
 
-    private boolean isGreaterThanOrEqualTo(ITeiidServerVersion teiidVersion) {
-        ITeiidServerVersion minVersion = teiidParser.getVersion().getMinimumVersion();
+    private boolean isGreaterThanOrEqualTo(ITeiidVersion teiidVersion) {
+        ITeiidVersion minVersion = teiidParser.getVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion) || minVersion.isGreaterThan(teiidVersion);
     }
 

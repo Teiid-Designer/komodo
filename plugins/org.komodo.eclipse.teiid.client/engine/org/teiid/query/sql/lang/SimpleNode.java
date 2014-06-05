@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.visitor.SQLStringVisitor;
@@ -39,17 +39,17 @@ public class SimpleNode implements Node, LanguageObject {
     }
 
     @Override
-    public ITeiidServerVersion getTeiidVersion() {
+    public ITeiidVersion getTeiidVersion() {
         return parser.getVersion();
     }
 
     protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
-        ITeiidServerVersion minVersion = getTeiidVersion().getMinimumVersion();
+        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
     }
 
     protected boolean isLessThanTeiidVersion(Version teiidVersion) {
-        ITeiidServerVersion maxVersion = getTeiidVersion().getMaximumVersion();
+        ITeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
         return maxVersion.isLessThan(teiidVersion.get());
     }
 

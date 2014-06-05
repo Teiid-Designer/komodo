@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  *
@@ -103,7 +103,7 @@ public class AnnotationUtils {
      *
      * @return testVersion is greater than or equal to the currentVersion's minimum version
      */
-    private static boolean isGreaterOrEqualThan(ITeiidServerVersion testVersion, ITeiidServerVersion currentVersion) {
+    private static boolean isGreaterOrEqualThan(ITeiidVersion testVersion, ITeiidVersion currentVersion) {
         // Ensure we have no wildcards in the current version
         currentVersion = currentVersion.getMinimumVersion();
         if (currentVersion.equals(testVersion) || currentVersion.isGreaterThan(testVersion))
@@ -121,7 +121,7 @@ public class AnnotationUtils {
      * If removed contains wildcards then its a programming error.
      * <p>
      * The current version can contain wildcards as these are
-     * eliminated using {@link ITeiidServerVersion#getMinimumVersion()}
+     * eliminated using {@link ITeiidVersion#getMinimumVersion()}
      * <p>
      * If the removed annotation is null then a value of false is returned
      * since they is no annotation to test against and the most preferred
@@ -133,7 +133,7 @@ public class AnnotationUtils {
      *
      * @return currentVersion >= removed value
      */
-    public static boolean isGreaterThanOrEqualTo(Removed removed, ITeiidServerVersion currentVersion) {
+    public static boolean isGreaterThanOrEqualTo(Removed removed, ITeiidVersion currentVersion) {
         if (removed == null || currentVersion == null)
             return false;
 
@@ -149,7 +149,7 @@ public class AnnotationUtils {
      * If since contains wildcards then its a programming error.
      * <p>
      * The current version can contain wildcards as these are
-     * eliminated using {@link ITeiidServerVersion#getMinimumVersion()}
+     * eliminated using {@link ITeiidVersion#getMinimumVersion()}
      * <p>
      * If the since annotation is null then a value of true is returned
      * since they is no annotation to test against and the most preferred
@@ -161,7 +161,7 @@ public class AnnotationUtils {
      *
      * @return currentVersion >= since value
      */
-    public static boolean isGreaterThanOrEqualTo(Since since, ITeiidServerVersion currentVersion) {
+    public static boolean isGreaterThanOrEqualTo(Since since, ITeiidVersion currentVersion) {
         if (since == null || currentVersion == null)
             return true;
 
@@ -176,7 +176,7 @@ public class AnnotationUtils {
      * @param currentVersion
      * @return true if the given object is applicable for the given teiid version
      */
-    public static boolean isApplicable(Class<?> obj, ITeiidServerVersion currentVersion) {
+    public static boolean isApplicable(Class<?> obj, ITeiidVersion currentVersion) {
         if (hasAnnotation(obj, Removed.class)) {
             Removed removed = getAnnotation(obj, Removed.class);
             if (isGreaterThanOrEqualTo(removed, currentVersion)) {
@@ -202,7 +202,7 @@ public class AnnotationUtils {
      * @param currentVersion
      * @return true if the given object is applicable for the given teiid version
      */
-    public static boolean isApplicable(AccessibleObject obj, ITeiidServerVersion currentVersion) {
+    public static boolean isApplicable(AccessibleObject obj, ITeiidVersion currentVersion) {
         if (hasAnnotation(obj, Removed.class)) {
             Removed removed = getAnnotation(obj, Removed.class);
             if (isGreaterThanOrEqualTo(removed, currentVersion)) {
@@ -228,7 +228,7 @@ public class AnnotationUtils {
      * @param currentVersion
      * @return true if the given object is applicable for the given teiid version
      */
-    public static boolean isApplicable(Enum<?> obj, ITeiidServerVersion currentVersion) {
+    public static boolean isApplicable(Enum<?> obj, ITeiidVersion currentVersion) {
         try {
             if (hasAnnotation(obj, Removed.class)) {
                 Removed removed = getAnnotation(obj, Removed.class);
@@ -256,11 +256,11 @@ public class AnnotationUtils {
 
     private static class UpdateVersionPair implements Comparable<UpdateVersionPair>{
 
-        private final ITeiidServerVersion version;
+        private final ITeiidVersion version;
 
         private final String replacedValue;
 
-        public UpdateVersionPair(ITeiidServerVersion version, String replacedValue) {
+        public UpdateVersionPair(ITeiidVersion version, String replacedValue) {
             this.version = version;
             this.replacedValue = replacedValue;
         }
@@ -268,7 +268,7 @@ public class AnnotationUtils {
         /**
          * @return the version
          */
-        public ITeiidServerVersion getVersion() {
+        public ITeiidVersion getVersion() {
             return this.version;
         }
 
@@ -297,7 +297,7 @@ public class AnnotationUtils {
      *
      * @return old name from {@link Updated} name or given updated name depending on teiid version
      */
-    public static String getUpdatedName(Enum<?> enumValue, String updatedName, ITeiidServerVersion currentVersion) {
+    public static String getUpdatedName(Enum<?> enumValue, String updatedName, ITeiidVersion currentVersion) {
         if (! hasAnnotation(enumValue, Updated.class))
             return updatedName;
 

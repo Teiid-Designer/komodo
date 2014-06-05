@@ -23,7 +23,7 @@
 package org.teiid.query.function.metadata;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  * This interface defines the default set of function category constants.

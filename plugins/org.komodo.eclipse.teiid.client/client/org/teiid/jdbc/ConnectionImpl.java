@@ -50,9 +50,9 @@ import java.util.logging.Logger;
 
 import javax.transaction.xa.Xid;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.client.DQP;
 import org.teiid.client.RequestMessage;
 import org.teiid.client.plan.Annotation;
@@ -1067,14 +1067,14 @@ public class ConnectionImpl extends WrapperImpl implements TeiidConnection {
      * @return teiid version if defined by the connection properties or
      *                the default teiid version for this release.
      */
-    public ITeiidServerVersion getTeiidVersion() {
-        String teiidVersionString = connectionProps.getProperty(ITeiidServerVersion.TEIID_VERSION_PROPERTY);
+    public ITeiidVersion getTeiidVersion() {
+        String teiidVersionString = connectionProps.getProperty(ITeiidVersion.TEIID_VERSION_PROPERTY);
 
-        ITeiidServerVersion teiidVersion = null;
+        ITeiidVersion teiidVersion = null;
         if (teiidVersionString == null)
-            teiidVersion = TeiidServerVersion.DEFAULT_TEIID_SERVER;
+            teiidVersion = TeiidVersion.DEFAULT_TEIID_VERSION;
         else
-            teiidVersion = new TeiidServerVersion(teiidVersionString);
+            teiidVersion = new TeiidVersion(teiidVersionString);
 
         return teiidVersion;
     }
@@ -1084,7 +1084,7 @@ public class ConnectionImpl extends WrapperImpl implements TeiidConnection {
     }
 
     protected void checkSupportedVersion(Version teiidVersion) {
-        ITeiidServerVersion minVersion = getTeiidVersion().getMinimumVersion();
+        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         if (minVersion.isLessThan(teiidVersion.get())) { 
             TeiidRuntimePlugin.logError("StatementImpl.checkSupportedVersion", "Method being executed that is not supported in teiid version " + getTeiidVersion());  //$NON-NLS-1$//$NON-NLS-2$
             throw new UnsupportedOperationException();

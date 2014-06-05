@@ -64,8 +64,8 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminComponentException;
 import org.teiid.adminapi.AdminException;
@@ -125,7 +125,7 @@ public class Admin8Factory {
      * @return
      * @throws AdminException
      */
-    public Admin createAdmin(ITeiidServerVersion teiidVersion, String host, int port, String userName, char[] password) throws AdminException {
+    public Admin createAdmin(ITeiidVersion teiidVersion, String host, int port, String userName, char[] password) throws AdminException {
         if(host == null) {
             host = "localhost"; //$NON-NLS-1$
         }
@@ -206,7 +206,7 @@ public class Admin8Factory {
     public class AdminImpl implements Admin{
     	private static final String CLASS_NAME = "class-name";
 		private static final String JAVA_CONTEXT = "java:/";
-		private final ITeiidServerVersion teiidVersion;
+		private final ITeiidVersion teiidVersion;
 		private ModelControllerClient connection;
     	private boolean domainMode = false;
     	private String profileName = "ha";
@@ -215,7 +215,7 @@ public class Admin8Factory {
          * @param teiidVersion
          * @param connection
          */
-        public AdminImpl(ITeiidServerVersion teiidVersion, ModelControllerClient connection) {
+        public AdminImpl(ITeiidVersion teiidVersion, ModelControllerClient connection) {
             this.teiidVersion = teiidVersion;
             this.connection = connection;
             List<String> nodeTypes = Util.getNodeTypes(connection, new DefaultOperationRequestAddress());
@@ -227,11 +227,11 @@ public class Admin8Factory {
         /**
          * @return the teiidVersion
          */
-        public ITeiidServerVersion getTeiidVersion() {
+        public ITeiidVersion getTeiidVersion() {
             return this.teiidVersion;
         }
 
-        private void requires(String item, ITeiidServerVersion requiredVersion) throws AdminException {
+        private void requires(String item, ITeiidVersion requiredVersion) throws AdminException {
             if (getTeiidVersion().isLessThan(requiredVersion))
                 throw new AdminComponentException(Messages.getString(Messages.Misc.TeiidVersionFailure, item, getTeiidVersion()));
         }

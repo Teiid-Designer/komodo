@@ -41,8 +41,8 @@ import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface.SupportConstants;
 import org.komodo.spi.query.metadata.IStoredProcedureInfo;
 import org.komodo.spi.query.sql.lang.IJoinType.Types;
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion.Version;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.UnresolvedSymbolDescription;
 import org.teiid.core.types.DataTypeManagerService;
@@ -145,7 +145,7 @@ public class ResolverUtil {
      * @param typeNames an ordered array of unique type names.
      * @return a type name to which all the given types can be converted
      */
-    public static String getCommonType(ITeiidServerVersion teiidVersion, String[] typeNames) {
+    public static String getCommonType(ITeiidVersion teiidVersion, String[] typeNames) {
         if (typeNames == null || typeNames.length == 0) {
             return null;
         }
@@ -213,7 +213,7 @@ public class ResolverUtil {
      * @return true if there exists an implicit conversion from the
      * <code>fromType</code> to the <code>toType</code>.
      */
-    public static boolean canImplicitlyConvert(ITeiidServerVersion teiidVersion, String fromType, String toType) {
+    public static boolean canImplicitlyConvert(ITeiidVersion teiidVersion, String fromType, String toType) {
         if (fromType.equals(toType)) return true;
         return DataTypeManagerService.getInstance(teiidVersion).isImplicitConversion(fromType, toType);
     }

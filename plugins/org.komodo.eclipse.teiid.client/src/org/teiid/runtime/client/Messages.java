@@ -62,7 +62,7 @@ public class Messages {
         errorCreatingDataSource,
         invalidPropertyValue,
         cannotConnectToServer,
-        serverDeployUndeployProblemPingingTeiidJdbc,
+        instanceDeployUndeployProblemPingingTeiidJdbc,
         invalidPropertyEditorConstrainedValue,
         invalidPropertyEditorValue,
         invalidNullPropertyValue,

@@ -38,8 +38,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.komodo.spi.runtime.version.ITeiidServerVersion;
-import org.komodo.spi.runtime.version.TeiidServerVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 
 /**
@@ -72,7 +72,7 @@ public final class ApplicationInfo implements Serializable {
     
 	private Properties props = new Properties();
 
-	private ITeiidServerVersion teiidVersion = TeiidServerVersion.DEFAULT_TEIID_SERVER;
+	private ITeiidVersion teiidVersion = TeiidVersion.DEFAULT_TEIID_VERSION;
 
     private ApplicationInfo() {
         props.setProperty(COPYRIGHT, "Copyright (C) 2008-2009 Red Hat, Inc"); //$NON-NLS-1$
@@ -82,7 +82,7 @@ public final class ApplicationInfo implements Serializable {
     /**
      * @param teiidVersion
      */
-    public void setTeiidVersion(ITeiidServerVersion teiidVersion) {
+    public void setTeiidVersion(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 
