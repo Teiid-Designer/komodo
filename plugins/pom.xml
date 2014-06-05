@@ -1,0 +1,24 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jboss.tools</groupId>
+		<artifactId>komodo</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<groupId>org.jboss.tools.komodo</groupId>
+	<artifactId>plugins</artifactId>
+	<name>plugins</name>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<modules>
+
+    <module>org.komodo.spi</module>
+    <module>org.komodo.utils</module>
+
+    <module>org.komodo.eclipse.spi</module>
+    <module>org.komodo.eclipse.teiid.client</module>
+	</modules>
+</project>
+	

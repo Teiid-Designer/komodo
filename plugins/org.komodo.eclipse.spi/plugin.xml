@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="teiidRuntimeClient" name="Teiid Runtime Client" schema="schema/teiidRuntimeClient.exsd"/>
+   <extension-point id="teiidInstanceManager" name="Teiid Instance Manager" schema="schema/teiidInstanceManager.exsd"/>
+   <extension-point id="teiidPasswordProvider" name="Teiid Password Provider" schema="schema/teiidPasswordProvider.exsd"/>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.komodo.spi.runtime.spi.ITeiidParent"
+            class="org.komodo.eclipse.spi.adapter.TeiidParentAdapterFactory">
+         <adapter
+               type="org.eclipse.wst.server.core.IServer">
+         </adapter>
+      </factory>
+   </extension>
+
+</plugin>
