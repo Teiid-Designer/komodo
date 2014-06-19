@@ -14,3 +14,6 @@ plugins/*/launch
 
 plugins/*/lib/*.jar
 plugins/*/libsrc/*.jar
+
+tests/*/lib/*.jar
+tests/*/lib/jboss*
