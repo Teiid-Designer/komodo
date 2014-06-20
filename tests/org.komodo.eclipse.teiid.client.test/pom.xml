@@ -10,8 +10,8 @@
 
 	<groupId>org.jboss.tools.komodo.tests</groupId>
 	<artifactId>org.komodo.eclipse.teiid.client.test</artifactId>
-	<version>1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>eclipse-test-plugin</packaging>
 
 	<name>org.komodo.eclipse.teiid.client.test</name>
 	<url>http://maven.apache.org</url>
@@ -22,6 +22,9 @@
 		<jbossas-test-version>jboss-eap-6.1</jbossas-test-version>
 		<version.teiid>8.7.0.Final</version.teiid>
 		<version.arquillian>1.1.4.Final</version.arquillian>
+		<version.arquillian-container>7.2.0.Final</version.arquillian-container>
+		<version.arquillian-container-osgi>2.0.0.Final</version.arquillian-container-osgi>
+		<version.shrinkwrap>1.2.2</version.shrinkwrap>
 		<version.javaee>1.0.0.Final</version.javaee>
 		<version.arquillian-container>7.2.0.Final</version.arquillian-container>
 	</properties>
@@ -34,8 +37,165 @@
 				<version>2.6</version>
 				<executions>
 					<execution>
-						<id>unpack</id>
-						<phase>process-test-classes</phase>
+						<id>copy-dependencies</id>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<!-- Core -->
+								<artifactitem>
+									<groupId>org.jboss.arquillian.core</groupId>
+									<artifactId>arquillian-core-api</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.core</groupId>
+									<artifactId>arquillian-core-spi</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.core</groupId>
+									<artifactId>arquillian-core-impl-base</artifactId>
+								</artifactitem>
+
+								<!-- Config -->
+								<artifactitem>
+									<groupId>org.jboss.arquillian.config</groupId>
+									<artifactId>arquillian-config-api</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.config</groupId>
+									<artifactId>arquillian-config-spi</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.config</groupId>
+									<artifactId>arquillian-config-impl-base</artifactId>
+								</artifactitem>
+
+								<!-- Test -->
+								<artifactitem>
+									<groupId>org.jboss.arquillian.test</groupId>
+									<artifactId>arquillian-test-api</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.test</groupId>
+									<artifactId>arquillian-test-spi</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.test</groupId>
+									<artifactId>arquillian-test-impl-base</artifactId>
+								</artifactitem>
+
+								<!-- Container -->
+								<artifactitem>
+									<groupId>org.jboss.arquillian.container</groupId>
+									<artifactId>arquillian-container-spi</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.container</groupId>
+									<artifactId>arquillian-container-impl-base</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.container</groupId>
+									<artifactId>arquillian-container-osgi</artifactId>
+								</artifactitem>
+
+								<!-- Container Test -->
+								<artifactitem>
+									<groupId>org.jboss.arquillian.container</groupId>
+									<artifactId>arquillian-container-test-api</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.container</groupId>
+									<artifactId>arquillian-container-test-spi</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.arquillian.container</groupId>
+									<artifactId>arquillian-container-test-impl-base</artifactId>
+								</artifactitem>
+
+								<!-- junit -->
+								<artifactitem>
+									<groupId>org.jboss.arquillian.junit</groupId>
+									<artifactId>arquillian-junit-core</artifactId>
+								</artifactitem>
+								<artifactItem>
+									<groupId>org.jboss.arquillian.junit</groupId>
+									<artifactId>arquillian-junit-container</artifactId>
+								</artifactItem>
+
+								<!-- protocols -->
+								<artifactitem>
+									<groupId>org.jboss.arquillian.protocol</groupId>
+									<artifactId>arquillian-protocol-jmx</artifactId>
+								</artifactitem>
+
+								<!-- jboss -->
+								<artifactitem>
+									<groupId>org.jboss.as</groupId>
+									<artifactId>jboss-as-arquillian-container-managed</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.as</groupId>
+									<artifactId>jboss-as-arquillian-common</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.as</groupId>
+									<artifactId>jboss-as-arquillian-protocol-jmx</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.as</groupId>
+									<artifactId>jboss-as-arquillian-testenricher-msc</artifactId>
+								</artifactitem>
+
+								<!-- shrinkwrap -->
+								<artifactitem>
+									<groupId>org.jboss.shrinkwrap</groupId>
+									<artifactId>shrinkwrap-api</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.shrinkwrap</groupId>
+									<artifactId>shrinkwrap-spi</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.shrinkwrap</groupId>
+									<artifactId>shrinkwrap-impl-base</artifactId>
+								</artifactitem>
+
+								<!-- shrinkwrap descriptors -->
+								<artifactitem>
+									<groupId>org.jboss.shrinkwrap.descriptors</groupId>
+									<artifactId>shrinkwrap-descriptors-api-base</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.shrinkwrap.descriptors</groupId>
+									<artifactId>shrinkwrap-descriptors-api-jboss</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.shrinkwrap.descriptors</groupId>
+									<artifactId>shrinkwrap-descriptors-gen</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.shrinkwrap.descriptors</groupId>
+									<artifactId>shrinkwrap-descriptors-impl-base</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.shrinkwrap.descriptors</groupId>
+									<artifactId>shrinkwrap-descriptors-impl-jboss</artifactId>
+								</artifactitem>
+								<artifactitem>
+									<groupId>org.jboss.shrinkwrap.descriptors</groupId>
+									<artifactId>shrinkwrap-descriptors-spi</artifactId>
+								</artifactitem>
+							</artifactItems>
+
+							<skip>false</skip>
+							<stripVersion>true</stripVersion>
+							<outputDirectory>${project.basedir}/lib</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-for-teiid-testing</id>
+						<phase>process-sources</phase>
 						<goals>
 							<goal>unpack</goal>
 						</goals>
@@ -47,14 +207,14 @@
 									<version>${jbossas-version}</version>
 									<type>zip</type>
 									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}</outputDirectory>
+									<outputDirectory>${project.basedir}/lib/jbossas/</outputDirectory>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
 					<execution>
 						<id>unpack-teiid</id>
-						<phase>process-test-classes</phase>
+						<phase>process-sources</phase>
 						<goals>
 							<goal>unpack</goal>
 						</goals>
@@ -67,24 +227,13 @@
 									<classifier>jboss-dist</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/${jbossas-test-version}</outputDirectory>
+									<outputDirectory>${project.basedir}/lib/jbossas/${jbossas-test-version}</outputDirectory>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			<!--
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			-->
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-compiler-plugin</artifactId>
@@ -95,27 +244,6 @@
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>default-test</id>
-						<goals>
-							<goal>test</goal>
-						</goals>
-						<configuration>
-							<systemPropertyVariables>
-								<jbossHome>${project.build.directory}/${jbossas-test-version}</jbossHome>
-								<serverConfig>standalone-teiid.xml</serverConfig>
-							</systemPropertyVariables>
-							<includes>
-								<include>**/IntegrationTest*</include>
-							</includes>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -138,14 +266,14 @@
 											maven-dependency-plugin
 										</artifactId>
 										<versionRange>
-											[2.0,)
+											[2.6,)
 										</versionRange>
 										<goals>
-											<goal>unpack</goal>
+											<goal>copy</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<execute></execute>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -163,6 +291,10 @@
 		<dependency>
 			<groupId>org.jboss.arquillian.junit</groupId>
 			<artifactId>arquillian-junit-container</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.arquillian.container</groupId>
+			<artifactId>arquillian-container-osgi</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.spec</groupId>
@@ -206,6 +338,11 @@
 				<version>${version.arquillian}</version>
 				<scope>import</scope>
 				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.arquillian.container</groupId>
+				<artifactId>arquillian-container-osgi</artifactId>
+				<version>${version.arquillian-container-osgi}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
