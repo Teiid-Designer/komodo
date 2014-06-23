@@ -14,7 +14,7 @@
 	<modules>
 
     <module>org.komodo.eclipse.test.utils</module>
-    <module>org.komodo.eclipse.teiid.client.test</module>
+    <module>org.komodo.eclipse.teiid-8.7.client.test</module>
 
   </modules>
 </project>

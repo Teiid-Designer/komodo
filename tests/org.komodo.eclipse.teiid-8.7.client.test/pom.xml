@@ -9,11 +9,11 @@
 	</parent>
 
 	<groupId>org.jboss.tools.komodo.tests</groupId>
-	<artifactId>org.komodo.eclipse.teiid.client.test</artifactId>
+	<artifactId>org.komodo.eclipse.teiid-8.7.client.test</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
 
-	<name>org.komodo.eclipse.teiid.client.test</name>
+	<name>org.komodo.eclipse.teiid-8.7.client.test</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
