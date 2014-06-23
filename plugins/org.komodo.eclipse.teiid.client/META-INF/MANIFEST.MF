@@ -41,4 +41,7 @@ Bundle-ClassPath: lib/connector-api.jar,
  .
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.teiid.runtime.client.TeiidRuntimePlugin
+Export-Package: org.teiid.adminapi;x-friends:="org.komodo.eclipse.teiid.client.test",
+ org.teiid.jdbc;x-friends:="org.komodo.eclipse.teiid.client.test",
+ org.teiid.runtime.client.admin;x-friends:="org.komodo.eclipse.teiid.client.test"
 

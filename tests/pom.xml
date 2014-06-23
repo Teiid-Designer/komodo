@@ -13,6 +13,7 @@
 	<packaging>pom</packaging>
 	<modules>
 
+    <module>org.komodo.arquillian.lib</module>
     <module>org.komodo.eclipse.test.utils</module>
     <module>org.komodo.eclipse.teiid.client.test</module>
 
