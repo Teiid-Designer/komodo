@@ -6,6 +6,7 @@
 	<container qualifier="jbossas-managed" default="true">
 		<configuration>
 			<property name="jbossHome">lib/jbossas/jboss-eap-6.1</property>
+			<property name="serverConfig">standalone-teiid.xml</property>
 		</configuration>
 	</container>
 </arquillian>

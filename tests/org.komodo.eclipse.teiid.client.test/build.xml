@@ -97,7 +97,8 @@
 			 args="-pl target-platform,
 			           plugins/org.komodo.spi,
 			           plugins/org.komodo.eclipse.spi,
-                       plugins/org.komodo.eclipse.teiid.client
+                       plugins/org.komodo.eclipse.teiid.client,
+                       tests/org.komodo.eclipse.test.utils
 			       install"/>
 	</target>
 
