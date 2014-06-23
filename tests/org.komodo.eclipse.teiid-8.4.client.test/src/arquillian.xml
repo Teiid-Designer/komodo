@@ -1,0 +1,12 @@
+<arquillian xmlns="http://jboss.org/schema/arquillian"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://jboss.org/schema/arquillian
+        http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
+	<container qualifier="jbossas-managed" default="true">
+		<configuration>
+			<property name="jbossHome">lib/jbossas/jboss-eap-6.1</property>
+			<property name="serverConfig">standalone-teiid.xml</property>
+		</configuration>
+	</container>
+</arquillian>
