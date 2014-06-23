@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/jbossas/jboss-eap-6.1/modules/system/layers/base/org/jboss/common-core/main/jboss-common-core-2.2.17.GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jbossas/jboss-eap-6.1/modules/system/layers/base/org/jboss/logging/main/jboss-logging-3.1.2.GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jbossas/jboss-eap-6.1/modules/system/layers/base/org/jboss/as/controller-client/main/jboss-as-controller-client-7.2.0.Alpha1-redhat-4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/arquillian-config-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/arquillian-config-impl-base.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/arquillian-config-spi.jar"/>

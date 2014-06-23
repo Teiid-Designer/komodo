@@ -10,9 +10,12 @@ Fragment-Host: org.komodo.eclipse.teiid.client
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit;bundle-version="4.11.0",
- org.jboss.tools.locus.mockito;bundle-version="1.9.5"
+ org.jboss.tools.locus.mockito;bundle-version="1.9.5",
+ org.komodo.eclipse.test.utils;bundle-version="1.0.0"
 Bundle-ClassPath: .,
  lib/jbossas/jboss-eap-6.1/modules/system/layers/base/org/jboss/common-core/main/jboss-common-core-2.2.17.GA.jar,
+ lib/jbossas/jboss-eap-6.1/modules/system/layers/base/org/jboss/as/controller-client/main/jboss-as-controller-client-7.2.0.Alpha1-redhat-4.jar,
+ lib/jbossas/jboss-eap-6.1/modules/system/layers/base/org/jboss/logging/main/jboss-logging-3.1.2.GA.jar,
  lib/arquillian-config-api.jar,
  lib/arquillian-config-impl-base.jar,
  lib/arquillian-config-spi.jar,

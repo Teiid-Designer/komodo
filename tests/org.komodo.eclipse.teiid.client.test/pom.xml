@@ -14,7 +14,6 @@
 	<packaging>eclipse-test-plugin</packaging>
 
 	<name>org.komodo.eclipse.teiid.client.test</name>
-	<url>http://maven.apache.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
