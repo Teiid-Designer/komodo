@@ -26,6 +26,11 @@ public class TeiidVersion implements ITeiidVersion {
     public static enum Version {
 
         /**
+         * The default preferred teiid instance
+         */
+        DEFAULT_TEIID_VERSION(VersionID.TEIID_8_6),
+
+        /**
          * Teiid 7.7
          */
         TEIID_7_7(VersionID.TEIID_7_7),
@@ -83,11 +88,6 @@ public class TeiidVersion implements ITeiidVersion {
             return version;
         }
     }
-
-    /**
-     * The default preferred teiid instance
-     */
-    public static final ITeiidVersion DEFAULT_TEIID_VERSION = Version.TEIID_8_6.get();
 
     private String versionString = ZERO + DOT + ZERO + DOT + ZERO;
 

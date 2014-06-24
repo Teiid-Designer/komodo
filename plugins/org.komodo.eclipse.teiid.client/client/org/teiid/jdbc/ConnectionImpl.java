@@ -1072,7 +1072,7 @@ public class ConnectionImpl extends WrapperImpl implements TeiidConnection {
 
         ITeiidVersion teiidVersion = null;
         if (teiidVersionString == null)
-            teiidVersion = TeiidVersion.DEFAULT_TEIID_VERSION;
+            teiidVersion = Version.DEFAULT_TEIID_VERSION.get();
         else
             teiidVersion = new TeiidVersion(teiidVersionString);
 

@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.core.util.ApplicationInfo;
 import org.teiid.core.util.PropertiesUtils;
 import org.teiid.jdbc.JDBCURL.ConnectionType;
@@ -74,7 +75,7 @@ public class TeiidDriver implements Driver {
     
     private ConnectionProfile socketProfile = new SocketProfile();
 
-    private ITeiidVersion teiidVersion = TeiidVersion.DEFAULT_TEIID_VERSION;
+    private ITeiidVersion teiidVersion = Version.DEFAULT_TEIID_VERSION.get();
 
     public static TeiidDriver getInstance() {
         return INSTANCE;

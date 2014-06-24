@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.osgi.util.NLS;
 import org.komodo.eclipse.spi.KEclipseSPIPlugin;
@@ -28,6 +27,7 @@ import org.komodo.spi.runtime.IExecutionAdminFactory;
 import org.komodo.spi.runtime.ITeiidInstance;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
 
 /**
@@ -199,7 +199,7 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
      * @return {@link ITeiidVersion} default version
      */
     public static ITeiidVersion deriveUltimateDefaultTeiidVersion() {
-        ITeiidVersion lastTestedDefault = TeiidVersion.DEFAULT_TEIID_VERSION;
+        ITeiidVersion lastTestedDefault = Version.DEFAULT_TEIID_VERSION.get();
 
         Collection<ITeiidVersion> teiidVersions = null;
         try {

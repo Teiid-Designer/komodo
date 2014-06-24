@@ -40,6 +40,7 @@ import java.util.StringTokenizer;
 
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 
 /**
@@ -72,7 +73,7 @@ public final class ApplicationInfo implements Serializable {
     
 	private Properties props = new Properties();
 
-	private ITeiidVersion teiidVersion = TeiidVersion.DEFAULT_TEIID_VERSION;
+	private ITeiidVersion teiidVersion = Version.DEFAULT_TEIID_VERSION.get();
 
     private ApplicationInfo() {
         props.setProperty(COPYRIGHT, "Copyright (C) 2008-2009 Red Hat, Inc"); //$NON-NLS-1$
