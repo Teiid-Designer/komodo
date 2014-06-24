@@ -9,7 +9,6 @@ tmp
 # Eclipse
 .metadata
 
-*.vdb
 plugins/*/launch
 
 plugins/*/lib/*.jar
@@ -17,3 +16,6 @@ plugins/*/libsrc/*.jar
 
 tests/*/lib/*.jar
 tests/*/lib/jboss*
+
+integration-tests/*/lib/*.jar
+integration-tests/*/lib/jboss*
