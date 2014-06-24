@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.eclipse.teiid.client;
+package org.komodo.eclipse.teiid84.client;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -46,7 +46,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.komodo.eclipse.teiid.client.util.AdminUtil;
+import org.komodo.eclipse.teiid84.client.util.AdminUtil;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.test.utils.SmartTestKomodoSuite;

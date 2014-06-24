@@ -5,7 +5,6 @@ Bundle-SymbolicName: org.komodo.eclipse.teiid-8.7.client.test;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
-Export-Package: org.komodo.eclipse.teiid.client
 Fragment-Host: org.komodo.eclipse.teiid.client
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
