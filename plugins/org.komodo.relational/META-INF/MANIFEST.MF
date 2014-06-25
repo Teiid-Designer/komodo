@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.komodo.relational;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: %pluginProvider
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Localization: plugin
+Export-Package: org.komodo.relational,
+ org.komodo.relational.compare,
+ org.komodo.relational.constants,
+ org.komodo.relational.core,
+ org.komodo.relational.extension,
+ org.komodo.relational.model
+Require-Bundle: org.komodo.core;bundle-version="1.0.0"
+Bundle-ActivationPolicy: lazy
