@@ -5,7 +5,7 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.core;
+package org.komodo.utils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -23,14 +23,12 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
-import org.komodo.core.Messages.CORE;
-
 /**
  * This is a common place to put String utility methods.
  *
  * @since 8.0
  */
-public final class CoreStringUtil {
+public final class StringUtil {
 
     public interface Constants {
         char CARRIAGE_RETURN_CHAR = '\r';
@@ -357,7 +355,7 @@ public final class CoreStringUtil {
         if (strLength > maxCharPerLine) {
             StringBuffer sb = new StringBuffer(str.length() + (strLength / maxCharPerLine) + 1);
             strLength = 0;
-            List tokens = CoreStringUtil.split(str, Constants.SPACE);
+            List tokens = StringUtil.split(str, Constants.SPACE);
             Iterator itr = tokens.iterator();
             while (itr.hasNext()) {
                 String token = (String)itr.next();
@@ -542,7 +540,7 @@ public final class CoreStringUtil {
                         // ... and this is not the 'M' of 'MetaMatrix' ...
                         if (currentChar != 'M'
                             || i < 4
-                            || (!newName.substring(i - 4).startsWith(Messages.getString(CORE.StringUtil_Displayable)))) {
+                            || (!newName.substring(i - 4).startsWith(Messages.getString(Messages.StringUtil.displayable)))) {
                             newName.insert(i, ' ');
                             ++i; // skip, since we just move the character back one position
                         }
@@ -801,7 +799,7 @@ public final class CoreStringUtil {
      */
     public static boolean isDigits( String str ) {
         for (int i = 0; i < str.length(); i++) {
-            if (!CoreStringUtil.isDigit(str.charAt(i))) {
+            if (!StringUtil.isDigit(str.charAt(i))) {
                 return false;
             }
         }
@@ -818,7 +816,7 @@ public final class CoreStringUtil {
      * 
      * @since 4.0
      */
-    private CoreStringUtil() {
+    private StringUtil() {
     }
 
     /*

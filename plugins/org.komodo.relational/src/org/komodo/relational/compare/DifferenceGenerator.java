@@ -11,11 +11,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import org.komodo.core.CoreStringUtil;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.utils.StringUtil;
 
 /**
  * DifferenceGenerator - generates a difference report, with the differences between two RelationalModels
@@ -108,7 +107,7 @@ public class DifferenceGenerator implements RelationalConstants {
 		}
 		
         // string properties
-        if (!CoreStringUtil.valuesAreEqual(ref1.getName(), ref2.getName()) ) {
+        if (!StringUtil.valuesAreEqual(ref1.getName(), ref2.getName()) ) {
             return false;
         }
         
@@ -135,7 +134,7 @@ public class DifferenceGenerator implements RelationalConstants {
         if(ref1Parent.getType()==TYPES.MODEL) {
         	return true;
         // Non-model, names must match
-        } else if (!CoreStringUtil.valuesAreEqual(ref1Parent.getName(), ref1Parent.getName()) ) {
+        } else if (!StringUtil.valuesAreEqual(ref1Parent.getName(), ref1Parent.getName()) ) {
             return false;
         }
         

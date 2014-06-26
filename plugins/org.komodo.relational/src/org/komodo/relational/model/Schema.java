@@ -10,9 +10,8 @@ package org.komodo.relational.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.komodo.core.HashCodeUtil;
 import org.komodo.relational.core.RelationalStringNameValidator;
+import org.komodo.utils.HashCodeUtil;
 
 
 

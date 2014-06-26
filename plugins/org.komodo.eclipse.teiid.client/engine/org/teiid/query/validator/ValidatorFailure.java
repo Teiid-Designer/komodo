@@ -24,7 +24,7 @@ package org.teiid.query.validator;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
+import org.komodo.spi.outcome.IOutcome;
 import org.komodo.spi.validator.IValidator.IValidatorFailure;
 import org.teiid.query.report.ReportItem;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -35,8 +35,8 @@ public class ValidatorFailure extends ReportItem implements IValidatorFailure {
 
     // Don't want to pass this around, so make it transient
     private transient Collection<LanguageObject> invalidObjects;  
-    private VFStatus status = VFStatus.ERROR;
-        
+    private IOutcome.Level status = IOutcome.Level.ERROR;
+
     public ValidatorFailure(String description) { 
         super(VALIDATOR_FAILURE);
         setMessage(description);
@@ -55,12 +55,12 @@ public class ValidatorFailure extends ReportItem implements IValidatorFailure {
         this.invalidObjects = new ArrayList<LanguageObject>(objects);
     }
     
-    public void setStatus(VFStatus status) {
+    public void setStatus(IOutcome.Level status) {
 		this.status = status;
 	}
 
     @Override
-    public VFStatus getStatus() {
+    public IOutcome.Level getOutcome() {
         return status;
 	}
     

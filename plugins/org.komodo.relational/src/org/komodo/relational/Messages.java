@@ -13,8 +13,7 @@ package org.komodo.relational;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
-import org.komodo.relational.constants.StringConstants;
+import org.komodo.spi.constants.StringConstants;
 
 /**
  *

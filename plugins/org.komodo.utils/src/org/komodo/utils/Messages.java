@@ -57,6 +57,37 @@ public class Messages implements StringConstants {
         }
     }
 
+    @SuppressWarnings( "javadoc" )
+    public enum StringNameValidator {
+        minLengthFailure,
+        nameLengthLongerThanAllowed,
+        firstCharMustBeAlphabetic,
+        onlyAlphaOrDigit,
+        orOtherValidChars,
+        nameNotNull,
+        nameSameAsOtherObjects,
+        sameNameCaseSensitive,
+        minLengthNotExceedMaxLength,
+        unableMakeNameUnique,
+        charNotValidChar,
+        unquotedNameWithDelimiter;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum StringUtil {
+        displayable;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

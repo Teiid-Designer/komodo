@@ -11,13 +11,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-
-import org.komodo.core.HashCodeUtil;
-import org.komodo.core.IStatus;
-import org.komodo.core.Status;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
 import org.komodo.relational.core.RelationalStringNameValidator;
+import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.utils.HashCodeUtil;
 
 
 
@@ -119,20 +118,20 @@ public class UniqueConstraint extends RelationalObject {
     }
     
 	@Override
-	public IStatus validate() {
+	public IOutcome validate() {
 		// Walk through the properties for the table and set the status
-		this.currentStatus = super.validate();
+		this.currentOutcome = super.validate();
 		
-		if( !this.getStatus().isOK() ) {
-			return this.currentStatus;
+		if( !this.getOutcome().isOK() ) {
+			return this.currentOutcome;
 		}
 		
 		if( this.getColumns().isEmpty() ) {
-			this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, 
+			this.currentOutcome = OutcomeFactory.getInstance().createError(
 					Messages.getString(RELATIONAL.validate_error_ucNoColumnsDefined, getName()) );
-			return this.currentStatus;
+			return this.currentOutcome;
 		}
-		return this.currentStatus;
+		return this.currentOutcome;
 	}
 	
     /**

@@ -9,8 +9,7 @@ package org.komodo.relational.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
-import org.komodo.core.CoreArgCheck;
+import org.komodo.utils.ArgCheck;
 
 /**
  * 
@@ -102,7 +101,7 @@ public class Model extends RelationalObject {
      * @return 'true' if model contains child with matching name
      */
     public boolean hasChild(String name) {
-        CoreArgCheck.isNotNull(name, "name"); //$NON-NLS-1$
+        ArgCheck.isNotNull(name, "name"); //$NON-NLS-1$
         for( RelationalObject child : this.children ) {
             if( name.equalsIgnoreCase( child.getName())) {
                 return true;
@@ -118,7 +117,7 @@ public class Model extends RelationalObject {
      * @return the child, null if no matching child
      */
     public RelationalObject getChildWithName(String name) {
-        CoreArgCheck.isNotNull(name, "name"); //$NON-NLS-1$
+        ArgCheck.isNotNull(name, "name"); //$NON-NLS-1$
         for( RelationalObject child : this.children ) {
             if( name.equalsIgnoreCase( child.getName())) {
                 return child;

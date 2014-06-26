@@ -8,11 +8,10 @@
 package org.komodo.relational.model;
 
 import java.util.Properties;
-
-import org.komodo.core.CoreStringUtil;
-import org.komodo.core.HashCodeUtil;
-import org.komodo.core.IStatus;
 import org.komodo.relational.core.RelationalStringNameValidator;
+import org.komodo.spi.outcome.IOutcome;
+import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.StringUtil;
 
 
 
@@ -477,7 +476,7 @@ public class Column extends RelationalObject {
     }
     
 	@Override
-	public IStatus validate() {
+	public IOutcome validate() {
 		// Walk through the properties for the table and set the status
 		return super.validate();
 	}
@@ -583,16 +582,16 @@ public class Column extends RelationalObject {
         final Column other = (Column)object;
 
         // string properties
-        if (!CoreStringUtil.valuesAreEqualIgnoreCase(getCharacterSetName(), other.getCharacterSetName()) ||
-        		!CoreStringUtil.valuesAreEqualIgnoreCase(getCollationName(), other.getCollationName()) ||
-        		!CoreStringUtil.valuesAreEqualIgnoreCase(getDatatype(), other.getDatatype()) ||
-        		!CoreStringUtil.valuesAreEqualIgnoreCase(getDefaultValue(), other.getDefaultValue()) ||
-        		!CoreStringUtil.valuesAreEqualIgnoreCase(getFormat(), other.getFormat()) ||
-        		!CoreStringUtil.valuesAreEqualIgnoreCase(getMaximumValue(), other.getMaximumValue()) ||
-        		!CoreStringUtil.valuesAreEqualIgnoreCase(getMinimumValue(), other.getMinimumValue()) ||
-        		!CoreStringUtil.valuesAreEqualIgnoreCase(getNativeType(), other.getNativeType()) ||
-        		!CoreStringUtil.valuesAreEqualIgnoreCase(getNullable(), other.getNullable()) ||
-        		!CoreStringUtil.valuesAreEqualIgnoreCase(getSearchability(), other.getSearchability())  ) {
+        if (!StringUtil.valuesAreEqualIgnoreCase(getCharacterSetName(), other.getCharacterSetName()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getCollationName(), other.getCollationName()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getDatatype(), other.getDatatype()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getDefaultValue(), other.getDefaultValue()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getFormat(), other.getFormat()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getMaximumValue(), other.getMaximumValue()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getMinimumValue(), other.getMinimumValue()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getNativeType(), other.getNativeType()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getNullable(), other.getNullable()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getSearchability(), other.getSearchability())  ) {
         	return false;
         }
         
@@ -626,34 +625,34 @@ public class Column extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!CoreStringUtil.isEmpty(getCharacterSetName())) {
+        if (!StringUtil.isEmpty(getCharacterSetName())) {
             result = HashCodeUtil.hashCode(result, getCharacterSetName());
         }
-        if (!CoreStringUtil.isEmpty(getCollationName())) {
+        if (!StringUtil.isEmpty(getCollationName())) {
             result = HashCodeUtil.hashCode(result, getCollationName());
         }
-        if (!CoreStringUtil.isEmpty(getDatatype())) {
+        if (!StringUtil.isEmpty(getDatatype())) {
             result = HashCodeUtil.hashCode(result, getDatatype());
         }
-        if (!CoreStringUtil.isEmpty(getDefaultValue())) {
+        if (!StringUtil.isEmpty(getDefaultValue())) {
             result = HashCodeUtil.hashCode(result, getDefaultValue());
         }
-        if (!CoreStringUtil.isEmpty(getFormat())) {
+        if (!StringUtil.isEmpty(getFormat())) {
             result = HashCodeUtil.hashCode(result, getFormat());
         }
-        if (!CoreStringUtil.isEmpty(getMaximumValue())) {
+        if (!StringUtil.isEmpty(getMaximumValue())) {
             result = HashCodeUtil.hashCode(result, getMaximumValue());
         }
-        if (!CoreStringUtil.isEmpty(getMinimumValue())) {
+        if (!StringUtil.isEmpty(getMinimumValue())) {
             result = HashCodeUtil.hashCode(result, getMinimumValue());
         }
-        if (!CoreStringUtil.isEmpty(getNativeType())) {
+        if (!StringUtil.isEmpty(getNativeType())) {
             result = HashCodeUtil.hashCode(result, getNativeType());
         }
-        if (!CoreStringUtil.isEmpty(getNullable())) {
+        if (!StringUtil.isEmpty(getNullable())) {
             result = HashCodeUtil.hashCode(result, getNullable());
         }
-        if (!CoreStringUtil.isEmpty(getSearchability())) {
+        if (!StringUtil.isEmpty(getSearchability())) {
             result = HashCodeUtil.hashCode(result, getSearchability());
         }
         

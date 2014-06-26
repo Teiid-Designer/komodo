@@ -24,8 +24,7 @@ package org.teiid.query.validator;
 
 import java.util.Collection;
 import java.util.Iterator;
-
-import org.komodo.spi.validator.IValidator.IValidatorFailure;
+import org.komodo.spi.outcome.IOutcome;
 import org.komodo.spi.validator.IValidator.IValidatorReport;
 import org.teiid.query.report.ActivityReport;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -78,13 +77,14 @@ public class ValidatorReport extends ActivityReport<ValidatorFailure> implements
         return super.getItems();
     }
 
+    @Override
     public String toString() {
         return this.getFailureMessage();
     }
     
     public void handleValidationWarning(String message) {
     	ValidatorFailure vf = new ValidatorFailure(message);
-    	vf.setStatus(IValidatorFailure.VFStatus.WARNING);
+    	vf.setStatus(IOutcome.Level.WARNING);
         this.addItem(vf);
     }
     

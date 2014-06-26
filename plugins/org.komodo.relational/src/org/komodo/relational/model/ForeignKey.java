@@ -10,14 +10,13 @@ package org.komodo.relational.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
-
-import org.komodo.core.CoreStringUtil;
-import org.komodo.core.HashCodeUtil;
-import org.komodo.core.IStatus;
-import org.komodo.core.Status;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
 import org.komodo.relational.core.RelationalStringNameValidator;
+import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.StringUtil;
 
 
 
@@ -280,32 +279,32 @@ public class ForeignKey extends RelationalObject {
 	}
     
 	@Override
-	public IStatus validate() {
+	public IOutcome validate() {
 		// Walk through the properties for the table and set the status
-		this.currentStatus = super.validate();
+		this.currentOutcome = super.validate();
 		
-		if( !this.currentStatus.isOK() ) {
-			return this.currentStatus;
+		if( !this.currentOutcome.isOK() ) {
+			return this.currentOutcome;
 		}
 		
 		if( this.getColumns().isEmpty() ) {
-			this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, 
+			this.currentOutcome = OutcomeFactory.getInstance().createError(
 					Messages.getString(RELATIONAL.validate_error_fkNoColumnsDefined, getName()) );
-			return this.currentStatus;
+			return this.currentOutcome;
 		}
 				
 		if( this.getUniqueKeyName() == null || this.getUniqueKeyName().length() == 0 ) {
-			this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, 
+			this.currentOutcome = OutcomeFactory.getInstance().createError(
 					Messages.getString(RELATIONAL.validate_error_fKUniqueKeyNameIsUndefined, getName()) );
-			return this.currentStatus;
+			return this.currentOutcome;
 		}
 		
 		if( this.getUniqueKeyTableName() == null || this.getUniqueKeyTableName().length() == 0 ) {
-			this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, 
+			this.currentOutcome = OutcomeFactory.getInstance().createError(
 					Messages.getString(RELATIONAL.validate_error_fKReferencedUniqueKeyTableIsUndefined) );
-			return this.currentStatus;
+			return this.currentOutcome;
 		}
-		return this.currentStatus;
+		return this.currentOutcome;
 	}
 	
 	/* (non-Javadoc)
@@ -344,10 +343,10 @@ public class ForeignKey extends RelationalObject {
         final ForeignKey other = (ForeignKey)object;
 
         // string properties
-        if (!CoreStringUtil.valuesAreEqual(getForeignKeyMultiplicity(), other.getForeignKeyMultiplicity()) ||
-        		!CoreStringUtil.valuesAreEqual(getPrimaryKeyMultiplicity(), other.getPrimaryKeyMultiplicity()) ||
-        		!CoreStringUtil.valuesAreEqual(getUniqueKeyName(), other.getUniqueKeyName()) || 
-        		!CoreStringUtil.valuesAreEqual(getUniqueKeyTableName(), other.getUniqueKeyTableName()) ) {
+        if (!StringUtil.valuesAreEqual(getForeignKeyMultiplicity(), other.getForeignKeyMultiplicity()) ||
+        		!StringUtil.valuesAreEqual(getPrimaryKeyMultiplicity(), other.getPrimaryKeyMultiplicity()) ||
+        		!StringUtil.valuesAreEqual(getUniqueKeyName(), other.getUniqueKeyName()) || 
+        		!StringUtil.valuesAreEqual(getUniqueKeyTableName(), other.getUniqueKeyTableName()) ) {
             return false;
         }
         
@@ -376,16 +375,16 @@ public class ForeignKey extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!CoreStringUtil.isEmpty(getForeignKeyMultiplicity())) {
+        if (!StringUtil.isEmpty(getForeignKeyMultiplicity())) {
             result = HashCodeUtil.hashCode(result, getForeignKeyMultiplicity());
         }
-        if (!CoreStringUtil.isEmpty(getPrimaryKeyMultiplicity())) {
+        if (!StringUtil.isEmpty(getPrimaryKeyMultiplicity())) {
             result = HashCodeUtil.hashCode(result, getPrimaryKeyMultiplicity());
         }
-        if (!CoreStringUtil.isEmpty(getUniqueKeyName())) {
+        if (!StringUtil.isEmpty(getUniqueKeyName())) {
             result = HashCodeUtil.hashCode(result, getUniqueKeyName());
         }
-        if (!CoreStringUtil.isEmpty(getUniqueKeyTableName())) {
+        if (!StringUtil.isEmpty(getUniqueKeyTableName())) {
             result = HashCodeUtil.hashCode(result, getUniqueKeyTableName());
         }
         

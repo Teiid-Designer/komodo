@@ -12,5 +12,6 @@ Export-Package: org.komodo.relational,
  org.komodo.relational.core,
  org.komodo.relational.extension,
  org.komodo.relational.model
-Require-Bundle: org.komodo.core;bundle-version="1.0.0"
+Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
+ org.komodo.utils
 Bundle-ActivationPolicy: lazy

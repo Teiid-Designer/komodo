@@ -13,6 +13,7 @@ package org.komodo.core;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import org.komodo.spi.constants.StringConstants;
 
 /**
  *
@@ -25,45 +26,16 @@ public class Messages implements StringConstants {
 
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
-    @SuppressWarnings( "javadoc" )
-    public enum CORE {
-    	StringUtil_Displayable,
-    	Assertion_isEqual,
-    	Assertion_isNotEqual,
-    	CoreArgCheck_isNonNegativeInt,
-		CoreArgCheck_isNonPositiveInt,
-		CoreArgCheck_isNegativeInt,
-		CoreArgCheck_isPositiveInt,
-		CoreArgCheck_isStringNonZeroLength,
-		CoreArgCheck_isNonNull,
-		CoreArgCheck_isNull,
-		CoreArgCheck_isInstanceOf,
-		CoreArgCheck_isCollectionNotEmpty,
-		CoreArgCheck_isPropertiesNotEmpty,
-		CoreArgCheck_isMapNotEmpty,
-		CoreArgCheck_isArrayNotEmpty,
-		CoreArgCheck_isNotSame,
-		CoreArgCheck_contains,
-		CoreArgCheck_containsKey,
-		StringNameValidator_MinLengthFailure,
-		StringNameValidator_The_name_length__is_longer_than_allowed,
-		StringNameValidator_The_first_character_of_the_name__must_be_an_alphabetic_character,
-		StringNameValidator_The_character_at_position_is_not_allowed,
-		StringNameValidator_or_other_valid_characters,
-		StringNameValidator_The_name_may_not_be_null,
-		StringNameValidator_The_name_is_the_same_as_other_objects_under_the_same_parent,
-		StringNameValidator_sameNameCaseSensitive,
-		StringNameValidator_The_minimum_length_may_not_exceed_the_maximum_length,
-		StringNameValidator_Unable_to_make_the_name_unique_within_the_limits_of_the_maximum_length,
-		StringNameValidator_The_character_is_not_a_valid_character,
-        StringNameValidator_unquotedNameWithDelimiter;
+//    @SuppressWarnings( "javadoc" )
+//    public enum <INSERT NAME HERE> {
+//
+//        @Override
+//        public String toString() {
+//            return getEnumName(this) + DOT + name();
+//        }
+//    }
 
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
+    @SuppressWarnings( "unused" )
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

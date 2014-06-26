@@ -11,14 +11,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-
-import org.komodo.core.CoreStringUtil;
-import org.komodo.core.HashCodeUtil;
-import org.komodo.core.IStatus;
-import org.komodo.core.Status;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
 import org.komodo.relational.core.RelationalStringNameValidator;
+import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.IOutcome.Level;
+import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.StringUtil;
 
 /**
  * 
@@ -236,21 +236,19 @@ public class Index extends RelationalObject {
     }
     
 	@Override
-	public IStatus validate() {
+	public IOutcome validate() {
 		// Walk through the properties for the table and set the status
 		super.validate();
 		
-		if( getStatus().getSeverity() == IStatus.ERROR ) {
-			return this.currentStatus;
+		if( getOutcome().getLevel() == Level.ERROR ) {
+			return this.currentOutcome;
 		}
-		
-		
-		
+
 		// Check Column Status values
 		for( Column col : getColumns() ) {
-			if( col.getStatus().getSeverity() == IStatus.ERROR ) {
-				this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, col.getStatus().getMessage() );
-				return this.currentStatus;
+			if( col.getOutcome().getLevel() == Level.ERROR ) {
+				this.currentOutcome = OutcomeFactory.getInstance().createError(col.getOutcome().getMessage() );
+				return this.currentOutcome;
 			}
 		}
 		
@@ -259,21 +257,21 @@ public class Index extends RelationalObject {
 			for( Column innerColumn : getColumns() ) {
 				if( outerColumn != innerColumn ) {
 					if( outerColumn.getName().equalsIgnoreCase(innerColumn.getName())) {
-						this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, 
+						this.currentOutcome = OutcomeFactory.getInstance().createError(
 								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesReferencedInIndex, getName()) ); 
-						return this.currentStatus;
+						return this.currentOutcome;
 					}
 				}
 			}
 		}
 		
 		if( this.getColumns().isEmpty() ) {
-			this.currentStatus = new Status(IStatus.WARNING, PLUGIN_ID, 
+			this.currentOutcome = OutcomeFactory.getInstance().createError(
 					Messages.getString(RELATIONAL.validate_warning_noColumnReferencesDefined, getName()) );
-			return this.currentStatus;
+			return this.currentOutcome;
 		}
 		
-		return this.currentStatus;
+		return this.currentOutcome;
 		
 	}
 	
@@ -315,7 +313,7 @@ public class Index extends RelationalObject {
 
         
         // string properties
-        if (!CoreStringUtil.valuesAreEqual(getFilterCondition(), other.getFilterCondition()) ) {
+        if (!StringUtil.valuesAreEqual(getFilterCondition(), other.getFilterCondition()) ) {
             return false;
         }
         
@@ -357,7 +355,7 @@ public class Index extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!CoreStringUtil.isEmpty(getFilterCondition())) {
+        if (!StringUtil.isEmpty(getFilterCondition())) {
             result = HashCodeUtil.hashCode(result, getFilterCondition());
         }
         

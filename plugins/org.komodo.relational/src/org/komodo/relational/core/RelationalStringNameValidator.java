@@ -1,8 +1,8 @@
 package org.komodo.relational.core;
 
-import org.komodo.core.StringNameValidator;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
+import org.komodo.utils.StringNameValidator;
 
 
 /**

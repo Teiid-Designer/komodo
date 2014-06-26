@@ -5,12 +5,10 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.core;
+package org.komodo.utils;
 
 import java.util.Arrays;
 import java.util.TreeMap;
-
-import org.komodo.core.Messages.CORE;
 
 
 /**
@@ -27,8 +25,6 @@ public class StringNameValidator {
     public static final int DEFAULT_MAXIMUM_LENGTH = 255;
     public static final int DEFAULT_MINIMUM_LENGTH = 1;
     public static final boolean DEFAULT_CASE_SENSITIVE_NAME_COMPARISON = false;
-    private static final Integer INTEGER_ONE = new Integer(1);
-
     private final int maximumLength;
     private final int minimumLength;
     private final boolean caseSensitive;
@@ -51,7 +47,7 @@ public class StringNameValidator {
         this.caseSensitive = caseSensitive;
         this.replacementCharacter = replacementCharacter;
         if (this.minimumLength > this.maximumLength) {
-            final String msg = Messages.getString(CORE.StringNameValidator_The_minimum_length_may_not_exceed_the_maximum_length); 
+            final String msg = Messages.getString(Messages.StringNameValidator.minLengthNotExceedMaxLength); 
             throw new IllegalArgumentException(msg);
         }
         if (validNonLetterOrDigitChars == null) {
@@ -188,16 +184,16 @@ public class StringNameValidator {
      * @return a message stating what is wrong with the name, or null if the name is considered valid
      */
     public String checkNameLength( final String name ) {
-        CoreArgCheck.isNotNull(name);
+        ArgCheck.isNotNull(name);
         final int strLength = name.length();
         if (strLength < getMinimumLength()) {
             final Object[] params = new Object[] {new Integer(getMinimumLength())};
-            final String msg = Messages.getString(CORE.StringNameValidator_MinLengthFailure, params);
+            final String msg = Messages.getString(Messages.StringNameValidator.minLengthFailure, params);
             return msg;
             // check the entity name length agaist a desired value
         } else if (strLength > getMaximumLength()) {
             final Object[] params = new Object[] {new Integer(strLength), new Integer(getMaximumLength())};
-            final String msg = Messages.getString(CORE.StringNameValidator_The_name_length__is_longer_than_allowed, params);
+            final String msg = Messages.getString(Messages.StringNameValidator.nameLengthLongerThanAllowed, params);
             return msg;
         }
 
@@ -214,7 +210,7 @@ public class StringNameValidator {
      * @return a message stating what is wrong with the name, or null if the name is considered valid
      */
     public String checkNameCharacters( final String name ) {
-        CoreArgCheck.isNotNull(name);
+        ArgCheck.isNotNull(name);
 
         // Go through the string and ensure that each character is valid ...
         
@@ -229,7 +225,7 @@ public class StringNameValidator {
         String msg = null;
         boolean isDoubleQuoted = false;
         
-        if( !CoreStringUtil.isDoubleQuoted(name) ) {
+        if( !StringUtil.isDoubleQuoted(name) ) {
         	msg = isValidInitialChar(c);
         } else if( length > 1 ) {
         	isDoubleQuoted = true;
@@ -262,7 +258,7 @@ public class StringNameValidator {
 		if ( !Character.isLetter(c)) {
 			if (!Character.isDigit(c) && !isValidNonLetterOrDigit(c) ) {
 			    final Object[] params = new Object[] {new Character(c), new Integer(index+1), getValidNonLetterOrDigitMessageSuffix()};
-			    return Messages.getString(CORE.StringNameValidator_The_character_at_position_is_not_allowed, params);
+			    return Messages.getString(Messages.StringNameValidator.onlyAlphaOrDigit, params);
 			} 
 		} 
 		return null;
@@ -270,11 +266,11 @@ public class StringNameValidator {
 	
 	protected String isValidCharInDoubleQuotes(char c, int index) {
 		if ( !Character.isLetter(c)) {
-			if (c != CoreStringUtil.Constants.DOT_CHAR && 
+			if (c != StringUtil.Constants.DOT_CHAR && 
 				!Character.isDigit(c) && 
 				!isValidNonLetterOrDigit(c) ) {
 			    final Object[] params = new Object[] {new Character(c), new Integer(index+1), getValidNonLetterOrDigitMessageSuffix()};
-			    return Messages.getString(CORE.StringNameValidator_The_character_at_position_is_not_allowed, params);
+			    return Messages.getString(Messages.StringNameValidator.onlyAlphaOrDigit, params);
 			} 
 		} 
 		return null;
@@ -283,7 +279,7 @@ public class StringNameValidator {
     protected String isValidInitialChar(char c) {
     	if (!Character.isLetter(c)) {
             final Object[] params = new Object[] {new Character(c)};
-            final String msg = Messages.getString(CORE.StringNameValidator_The_first_character_of_the_name__must_be_an_alphabetic_character, params); 
+            final String msg = Messages.getString(Messages.StringNameValidator.firstCharMustBeAlphabetic, params); 
             return msg;
         }
         return null;
@@ -301,7 +297,7 @@ public class StringNameValidator {
     }
     
     public String getValidNonLetterOrDigitMessageSuffix() {
-    	return Messages.getString(CORE.StringNameValidator_or_other_valid_characters);
+    	return Messages.getString(Messages.StringNameValidator.orOtherValidChars);
     }
 
     /**
@@ -340,7 +336,7 @@ public class StringNameValidator {
     public String checkValidName( final String name ) {
         // The name may not be null
         if (name == null) {
-            final String msg = Messages.getString(CORE.StringNameValidator_The_name_may_not_be_null);
+            final String msg = Messages.getString(Messages.StringNameValidator.nameNotNull);
             return msg;
         }
 
@@ -393,7 +389,7 @@ public class StringNameValidator {
      */
     public String createValidName( final String name,
                                    final boolean performValidityCheck ) {
-        CoreArgCheck.isNotNull(name);
+        ArgCheck.isNotNull(name);
 
         // Otherwise, the name is presumed to be invalid ...
         StringBuffer newName = new StringBuffer(name.length());
@@ -506,7 +502,7 @@ public class StringNameValidator {
      * @return the new name, or null if the name was already unique (i.e., would be unchanged by this method)
      */
     public String createUniqueName(final String name) {
-        CoreArgCheck.isNotNull(name);
+        ArgCheck.isNotNull(name);
 
         // Compute the counter at which we have to start taking away characters ...
         final int roomForCounterChars = Math.max(0, this.getMaximumLength() - name.length());
@@ -548,7 +544,7 @@ public class StringNameValidator {
                     changed = true;
                 } else {
                     final Object[] params = new Object[] {name};
-                    final String msg = Messages.getString(CORE.StringNameValidator_Unable_to_make_the_name_unique_within_the_limits_of_the_maximum_length, params); //$NON-NLS-1$
+                    final String msg = Messages.getString(Messages.StringNameValidator.unableMakeNameUnique, params);
                     throw new KomodoCoreRuntimeException(msg);
                 }
             } else {

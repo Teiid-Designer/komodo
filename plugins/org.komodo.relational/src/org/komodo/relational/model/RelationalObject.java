@@ -11,19 +11,18 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
-
-import org.komodo.core.CoreArgCheck;
-import org.komodo.core.CoreStringUtil;
-import org.komodo.core.HashCodeUtil;
-import org.komodo.core.IStatus;
-import org.komodo.core.ModelType;
-import org.komodo.core.Status;
-import org.komodo.core.StringNameValidator;
-import org.komodo.core.StringUtilities;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.extension.RelationalModelExtensionConstants;
+import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.utils.ArgCheck;
+import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.ModelType;
+import org.komodo.utils.StringNameValidator;
+import org.komodo.utils.StringUtil;
+import org.komodo.utils.StringUtilities;
 
 
 /**
@@ -55,7 +54,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     
     private int processType;
     
-    protected IStatus currentStatus;
+    protected IOutcome currentOutcome;
     
     private boolean isChecked = true;
     
@@ -71,7 +70,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     public RelationalObject() {
         super();
         this.processType = CREATE_ANYWAY;
-        this.currentStatus = Status.OK_STATUS; 
+        this.currentOutcome = OutcomeFactory.getInstance().createOK();
         this.isChecked = true;
     }
     
@@ -305,8 +304,8 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     /**
      * @return the current status
      */
-    public IStatus getStatus() {
-    	return this.currentStatus;
+    public IOutcome getOutcome() {
+    	return this.currentOutcome;
     }
 
     /**
@@ -321,7 +320,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
      * 
      */
     public void setNameValidator(StringNameValidator nameValidator) {
-    	CoreArgCheck.isNotNull(nameValidator, "nameValidator"); //$NON-NLS-1$
+    	ArgCheck.isNotNull(nameValidator, "nameValidator"); //$NON-NLS-1$
     	this.nameValidator = nameValidator;
     }
     
@@ -348,20 +347,20 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     /**
      * @return the validation status
      */
-    public IStatus validate() {
+    public IOutcome validate() {
 		if( this.getName() == null || this.getName().length() == 0 ) {
-			this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, 
+		    this.currentOutcome = OutcomeFactory.getInstance().createError(
 					  Messages.getString(RELATIONAL.validate_error_nameCannotBeNullOrEmpty, getDisplayName()) );
-			return this.currentStatus;
+			return this.currentOutcome;
 		}
 		// Validate non-null string
 		String errorMessage = getNameValidator().checkValidName(this.getName());
 		if( errorMessage != null && !errorMessage.isEmpty() ) {
-			this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, errorMessage);
-			return this.currentStatus;
+			this.currentOutcome = OutcomeFactory.getInstance().createError(errorMessage);
+			return this.currentOutcome;
 		}
-		this.currentStatus = Status.OK_STATUS;
-		return this.currentStatus;
+		this.currentOutcome = OutcomeFactory.getInstance().createOK();
+		return this.currentOutcome;
     }
     
 	/* (non-Javadoc)
@@ -391,9 +390,9 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
         final RelationalObject other = (RelationalObject)object;
 
         // string properties
-        if (!CoreStringUtil.valuesAreEqual(getName(), other.getName())
-                || !CoreStringUtil.valuesAreEqual(getNameInSource(), other.getNameInSource())
-                || !CoreStringUtil.valuesAreEqual(getDescription(), other.getDescription())) {
+        if (!StringUtil.valuesAreEqual(getName(), other.getName())
+                || !StringUtil.valuesAreEqual(getNameInSource(), other.getNameInSource())
+                || !StringUtil.valuesAreEqual(getDescription(), other.getDescription())) {
             return false;
         }
         
@@ -427,11 +426,11 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
         result = HashCodeUtil.hashCode(result, getProcessType());
         
         // string properties
-        if (!CoreStringUtil.isEmpty(getName())) {
+        if (!StringUtil.isEmpty(getName())) {
             result = HashCodeUtil.hashCode(result, getName());
         }
         
-        if (!CoreStringUtil.isEmpty(getNameInSource())) {
+        if (!StringUtil.isEmpty(getNameInSource())) {
             result = HashCodeUtil.hashCode(result, getNameInSource());
         }
 
