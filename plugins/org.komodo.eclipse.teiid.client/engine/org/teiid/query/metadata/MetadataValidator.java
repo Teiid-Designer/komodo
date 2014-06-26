@@ -27,11 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
+import org.komodo.spi.outcome.IOutcome;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.validator.IValidator.IValidatorFailure;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.ModelMetaData.Message.Severity;
 import org.teiid.adminapi.impl.VDBMetaData;
@@ -342,7 +341,7 @@ public class MetadataValidator {
     		}
 			if(resolverReport != null && resolverReport.hasItems()) {
 				for (ValidatorFailure v:resolverReport.getItems()) {
-					log(report, model, v.getStatus() == IValidatorFailure.VFStatus.ERROR?Severity.ERROR:Severity.WARNING, v.getMessage());
+					log(report, model, v.getOutcome() == IOutcome.Level.ERROR?Severity.ERROR:Severity.WARNING, v.getMessage());
 				}
 			}
 		} catch (Exception e) {

@@ -14,7 +14,7 @@ package org.komodo.spi.runtime;
 /**
  * The <code>IExecutionConfigurationListener</code> interface defines the API for a teiid instance registry listener.
  *
- * @since 8.0
+ *
  */
 public interface IExecutionConfigurationListener {
 

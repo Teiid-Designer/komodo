@@ -6,7 +6,7 @@ import org.komodo.spi.runtime.ITeiidDataSource;
 import org.teiid.core.util.ArgCheck;
 
 /**
- * @since 8.0
+ *
  */
 public class TeiidDataSource implements Comparable<TeiidDataSource>, ITeiidDataSource {
 

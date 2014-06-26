@@ -738,7 +738,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
     /** 
      * @see org.teiid.query.metadata.QueryMetadataInterface#hasMaterialization(java.lang.Object)
-     * @since 4.2
+     *
      */
     public boolean hasMaterialization(final Object groupID) throws Exception,
                                                       TeiidClientException {
@@ -748,7 +748,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
     /** 
      * @see org.teiid.query.metadata.QueryMetadataInterface#getMaterialization(java.lang.Object)
-     * @since 4.2
+     *
      */
     public Object getMaterialization(final Object groupID) throws Exception,
                                                     TeiidClientException {
@@ -761,7 +761,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
     /** 
      * @see org.teiid.query.metadata.QueryMetadataInterface#getMaterializationStage(java.lang.Object)
-     * @since 4.2
+     *
      */
     public Object getMaterializationStage(final Object groupID) throws Exception,
                                                          TeiidClientException {
@@ -1005,7 +1005,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
     /** 
      * @see org.teiid.query.metadata.BasicQueryMetadata#getBinaryVDBResource(java.lang.String)
-     * @since 4.3
+     *
      */
     public byte[] getBinaryVDBResource(String resourcePath) throws Exception {
     	final VDBResources.Resource f = getFile(resourcePath);
@@ -1052,7 +1052,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
     /** 
      * @see org.teiid.query.metadata.BasicQueryMetadata#getCharacterVDBResource(java.lang.String)
-     * @since 4.3
+     *
      */
     public String getCharacterVDBResource(String resourcePath) throws Exception {
     	try {
@@ -1072,7 +1072,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
     /** 
      * @see org.teiid.query.metadata.BasicQueryMetadata#getVDBResourcePaths()
-     * @since 4.3
+     *
      */
     public String[] getVDBResourcePaths() throws Exception {
     	LinkedList<String> paths = new LinkedList<String>();

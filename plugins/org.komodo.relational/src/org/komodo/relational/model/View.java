@@ -13,7 +13,7 @@ package org.komodo.relational.model;
 /**
  * 
  *
- * @since 8.0
+ *
  */
 public class View extends Table {
 

@@ -16,7 +16,6 @@ Export-Package: org.komodo.eclipse.spi,
  org.komodo.eclipse.spi.datatools.connectivity,
  org.komodo.eclipse.spi.registry,
  org.komodo.eclipse.spi.runtime.connection.spi,
- org.komodo.eclipse.spi.runtime.registry,
- org.komodo.eclipse.spi.state
+ org.komodo.eclipse.spi.runtime.registry
 Bundle-Activator: org.komodo.eclipse.spi.KEclipseSPIPlugin
 Bundle-ActivationPolicy: lazy

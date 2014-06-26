@@ -11,22 +11,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-
-import org.komodo.core.CoreStringUtil;
-import org.komodo.core.HashCodeUtil;
-import org.komodo.core.IStatus;
-import org.komodo.core.Status;
-import org.komodo.core.StringUtilities;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
 import org.komodo.relational.core.RelationalStringNameValidator;
+import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.IOutcome.Level;
+import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.StringUtil;
+import org.komodo.utils.StringUtilities;
 
 
 
 /**
  * 
  *
- * @since 8.0
+ *
  */
 public class Procedure extends RelationalObject {
 
@@ -627,24 +627,24 @@ public class Procedure extends RelationalObject {
 	} 
     
 	@Override
-	public IStatus validate() {
+	public IOutcome validate() {
 		// Walk through the properties for the table and set the status
-		this.currentStatus = super.validate();
+		this.currentOutcome = super.validate();
 		
 		// Validate Children
 		for( Parameter param : getParameters() ) {
 			param.validate();
 		}
 		
-		if( getStatus().getSeverity() == IStatus.ERROR ) {
-			return this.currentStatus;
+		if( getOutcome().getLevel() == Level.ERROR ) {
+			return this.currentOutcome;
 		}
 		
 		// Check Column Status values
 		for( Parameter param : getParameters() ) {
-			if( param.getStatus().getSeverity() == IStatus.ERROR ) {
-				this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, param.getStatus().getMessage() );
-				return this.currentStatus;
+			if( param.getOutcome().getLevel() == Level.ERROR ) {
+				this.currentOutcome = OutcomeFactory.getInstance().createError(param.getOutcome().getMessage() );
+				return this.currentOutcome;
 			}
 		}
 		
@@ -653,18 +653,18 @@ public class Procedure extends RelationalObject {
 			for( Parameter innerParam : getParameters() ) {
 				if( outerParam != innerParam ) {
 					if( outerParam.getName().equalsIgnoreCase(innerParam.getName())) {
-						this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, 
+						this.currentOutcome = OutcomeFactory.getInstance().createError(
 								Messages.getString(RELATIONAL.validate_error_duplicateParameterNamesInProcedure, getName()) ); 
-						return this.currentStatus;
+						return this.currentOutcome;
 					}
 				}
 			}
 		}
 		
 		if( this.getParameters().isEmpty() ) {
-			this.currentStatus = new Status(IStatus.WARNING, PLUGIN_ID, 
+			this.currentOutcome = OutcomeFactory.getInstance().createWarning( 
 					Messages.getString(RELATIONAL.validate_warning_noParametersDefined) ); 
-			return this.currentStatus;
+			return this.currentOutcome;
 		}
 		
 		// Check for more than one RETURN parameter if Function
@@ -673,9 +673,9 @@ public class Procedure extends RelationalObject {
 			for( Parameter param : getParameters() ) {
 				if( param.getDirection().equalsIgnoreCase(DIRECTION.RETURN)) {
 					if( foundResultParam ) {
-						this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID,
+						this.currentOutcome = OutcomeFactory.getInstance().createError(
 								Messages.getString(RELATIONAL.validate_error_tooManyResultParametersInFunction) ); 
-						return this.currentStatus;
+						return this.currentOutcome;
 					} else {
 						foundResultParam = true;
 					}
@@ -684,42 +684,42 @@ public class Procedure extends RelationalObject {
 			
 			if( this.isSourceFunction() ) {
 				if( getResultSet() != null ) {
-					this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID,
+					this.currentOutcome = OutcomeFactory.getInstance().createError(
 							Messages.getString(RELATIONAL.validate_noResultSetAllowedInFunction) ); 
-					return this.currentStatus;
+					return this.currentOutcome;
 				}
 			} else {
 				// Check for null category, class or method name
 				if( this.functionCategory == null || this.functionCategory.trim().length() == 0 ) {
-					this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID,
+					this.currentOutcome = OutcomeFactory.getInstance().createError(
 							Messages.getString(RELATIONAL.validate_categoryUndefinedForUDF) ); 
-					return this.currentStatus;
+					return this.currentOutcome;
 				}
 				if( this.javaClass == null || this.javaClass.trim().length() == 0 ) {
-					this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID,
+					this.currentOutcome = OutcomeFactory.getInstance().createError(
 							Messages.getString(RELATIONAL.validate_javaClassUndefinedForUDF) ); 
-					return this.currentStatus;
+					return this.currentOutcome;
 				}
 				if( this.javaMethod == null || this.javaMethod.trim().length() == 0 ) {
-					this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID,
+					this.currentOutcome = OutcomeFactory.getInstance().createError(
 							Messages.getString(RELATIONAL.validate_javaMethodUndefinedForUDF) ); 
-					return this.currentStatus;
+					return this.currentOutcome;
 				}
 			}
 		} else {
 			if( getResultSet() != null ) {
-				if( getResultSet().getStatus().getSeverity() == IStatus.ERROR ) {
-					this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, getResultSet().getStatus().getMessage() );
-					return this.currentStatus;
+				if( getResultSet().getOutcome().getLevel() == Level.ERROR ) {
+					this.currentOutcome = OutcomeFactory.getInstance().createError(getResultSet().getOutcome().getMessage() );
+					return this.currentOutcome;
 				}
 				
-				if( getResultSet().getStatus().getSeverity() == IStatus.WARNING ) {
-					this.currentStatus = new Status(IStatus.WARNING, PLUGIN_ID, getResultSet().getStatus().getMessage() );
-					return this.currentStatus;
+				if( getResultSet().getOutcome().getLevel() == Level.WARNING ) {
+					this.currentOutcome = OutcomeFactory.getInstance().createError(getResultSet().getOutcome().getMessage() );
+					return this.currentOutcome;
 				}
 			}
 		}
-		return this.currentStatus;
+		return this.currentOutcome;
 	}
 	
     /**
@@ -741,12 +741,12 @@ public class Procedure extends RelationalObject {
         final Procedure other = (Procedure)object;
 
         // string properties
-        if (!CoreStringUtil.valuesAreEqual(getNativeQuery(), other.getNativeQuery()) ||
-        		!CoreStringUtil.valuesAreEqual(getFunctionCategory(), other.getFunctionCategory()) ||
-        		!CoreStringUtil.valuesAreEqual(getJavaClassName(), other.getJavaClassName()) || 
-        		!CoreStringUtil.valuesAreEqual(getJavaMethodName(), other.getJavaMethodName()) ||
-        		!CoreStringUtil.valuesAreEqual(getUdfJarPath(), other.getUdfJarPath()) ||
-        		!CoreStringUtil.valuesAreEqual(getUpdateCount(), other.getUpdateCount()) ) {
+        if (!StringUtil.valuesAreEqual(getNativeQuery(), other.getNativeQuery()) ||
+        		!StringUtil.valuesAreEqual(getFunctionCategory(), other.getFunctionCategory()) ||
+        		!StringUtil.valuesAreEqual(getJavaClassName(), other.getJavaClassName()) || 
+        		!StringUtil.valuesAreEqual(getJavaMethodName(), other.getJavaMethodName()) ||
+        		!StringUtil.valuesAreEqual(getUdfJarPath(), other.getUdfJarPath()) ||
+        		!StringUtil.valuesAreEqual(getUpdateCount(), other.getUpdateCount()) ) {
             return false;
         }
         
@@ -797,22 +797,22 @@ public class Procedure extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!CoreStringUtil.isEmpty(getNativeQuery())) {
+        if (!StringUtil.isEmpty(getNativeQuery())) {
             result = HashCodeUtil.hashCode(result, getNativeQuery());
         }
-        if (!CoreStringUtil.isEmpty(getFunctionCategory())) {
+        if (!StringUtil.isEmpty(getFunctionCategory())) {
             result = HashCodeUtil.hashCode(result, getFunctionCategory());
         }
-        if (!CoreStringUtil.isEmpty(getJavaClassName())) {
+        if (!StringUtil.isEmpty(getJavaClassName())) {
             result = HashCodeUtil.hashCode(result, getJavaClassName());
         }
-        if (!CoreStringUtil.isEmpty(getJavaMethodName())) {
+        if (!StringUtil.isEmpty(getJavaMethodName())) {
             result = HashCodeUtil.hashCode(result, getJavaMethodName());
         }
-        if (!CoreStringUtil.isEmpty(getUdfJarPath())) {
+        if (!StringUtil.isEmpty(getUdfJarPath())) {
             result = HashCodeUtil.hashCode(result, getUdfJarPath());
         }
-        if (!CoreStringUtil.isEmpty(getUpdateCount())) {
+        if (!StringUtil.isEmpty(getUpdateCount())) {
             result = HashCodeUtil.hashCode(result, getUpdateCount());
         }
 

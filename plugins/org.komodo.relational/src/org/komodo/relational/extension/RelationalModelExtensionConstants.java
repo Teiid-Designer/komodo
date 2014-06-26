@@ -9,7 +9,7 @@ package org.komodo.relational.extension;
 
 
 /**
- * @since 8.0
+ *
  */
 public interface RelationalModelExtensionConstants {
 

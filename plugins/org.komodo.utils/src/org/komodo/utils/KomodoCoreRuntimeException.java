@@ -5,12 +5,12 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.core;
+package org.komodo.utils;
 
 
 /**
  *
- * @since 8.0
+ *
  */
 public class KomodoCoreRuntimeException extends RuntimeException {
 	

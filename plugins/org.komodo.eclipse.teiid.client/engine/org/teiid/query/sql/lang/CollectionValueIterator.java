@@ -47,7 +47,7 @@ public class CollectionValueIterator implements ValueIterator, ICollectionValueI
     
     /** 
      * @see org.teiid.query.sql.util.ValueIterator#hasNext()
-     * @since 4.3
+     *
      */
     @Override
     public boolean hasNext() throws Exception {
@@ -59,7 +59,7 @@ public class CollectionValueIterator implements ValueIterator, ICollectionValueI
 
     /** 
      * @see org.teiid.query.sql.util.ValueIterator#next()
-     * @since 4.3
+     *
      */
     @Override
     public Object next() throws Exception {
@@ -71,7 +71,7 @@ public class CollectionValueIterator implements ValueIterator, ICollectionValueI
 
     /** 
      * @see org.teiid.query.sql.util.ValueIterator#reset()
-     * @since 4.3
+     *
      */
     @Override
     public void reset() {

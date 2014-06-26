@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * This class represents the model hierarchy as defined by a give WSDL
  *
- * @since 8.0
+ *
  */
 public interface IModel {
 

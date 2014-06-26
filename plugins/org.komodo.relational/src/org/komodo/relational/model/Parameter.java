@@ -8,21 +8,21 @@
 package org.komodo.relational.model;
 
 import java.util.Properties;
-
-import org.komodo.core.CoreStringUtil;
-import org.komodo.core.HashCodeUtil;
-import org.komodo.core.IStatus;
-import org.komodo.core.Status;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
 import org.komodo.relational.core.RelationalStringNameValidator;
+import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.IOutcome.Level;
+import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.StringUtil;
 
 
 
 /**
  * 
  *
- * @since 8.0
+ *
  */
 public class Parameter extends RelationalObject {
     @SuppressWarnings("javadoc")
@@ -211,12 +211,12 @@ public class Parameter extends RelationalObject {
     }
     
 	@Override
-	public IStatus validate() {
+	public IOutcome validate() {
 		// Walk through the properties for the parameter and set the status
 		super.validate();
 		
-		if( getStatus().getSeverity() == IStatus.ERROR ) {
-			return this.currentStatus;
+		if( getOutcome().getLevel() == Level.ERROR ) {
+			return this.currentOutcome;
 		}
 		
 		// Parameter directions check
@@ -224,12 +224,12 @@ public class Parameter extends RelationalObject {
 		if(parentProcedure!=null && parentProcedure.isFunction()) {
 			if( ! getDirection().equalsIgnoreCase(DIRECTION.IN) &&
 					! getDirection().equalsIgnoreCase(DIRECTION.RETURN)	) {
-				this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, 
+				this.currentOutcome = OutcomeFactory.getInstance().createError(
 						Messages.getString(RELATIONAL.validate_error_invalidParameterDirectionInFunction) ); 
-				return this.currentStatus;
+				return this.currentOutcome;
 			}
 		}
-		return this.currentStatus;
+		return this.currentOutcome;
 	}
     
     /**
@@ -292,11 +292,11 @@ public class Parameter extends RelationalObject {
         final Parameter other = (Parameter)object;
 
         // string properties
-        if (!CoreStringUtil.valuesAreEqual(getDatatype(), other.getDatatype()) ||
-        		!CoreStringUtil.valuesAreEqual(getDefaultValue(), other.getDefaultValue()) ||
-        		!CoreStringUtil.valuesAreEqual(getDirection(), other.getDirection()) ||
-        		!CoreStringUtil.valuesAreEqual(getNativeType(), other.getNativeType()) ||
-        		!CoreStringUtil.valuesAreEqual(getNullable(), other.getNullable()) ) {
+        if (!StringUtil.valuesAreEqual(getDatatype(), other.getDatatype()) ||
+        		!StringUtil.valuesAreEqual(getDefaultValue(), other.getDefaultValue()) ||
+        		!StringUtil.valuesAreEqual(getDirection(), other.getDirection()) ||
+        		!StringUtil.valuesAreEqual(getNativeType(), other.getNativeType()) ||
+        		!StringUtil.valuesAreEqual(getNullable(), other.getNullable()) ) {
         	return false;
         }
         
@@ -320,19 +320,19 @@ public class Parameter extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!CoreStringUtil.isEmpty(getDatatype())) {
+        if (!StringUtil.isEmpty(getDatatype())) {
             result = HashCodeUtil.hashCode(result, getDatatype());
         }
-        if (!CoreStringUtil.isEmpty(getDefaultValue())) {
+        if (!StringUtil.isEmpty(getDefaultValue())) {
             result = HashCodeUtil.hashCode(result, getDefaultValue());
         }
-        if (!CoreStringUtil.isEmpty(getDirection())) {
+        if (!StringUtil.isEmpty(getDirection())) {
             result = HashCodeUtil.hashCode(result, getDirection());
         }
-        if (!CoreStringUtil.isEmpty(getNativeType())) {
+        if (!StringUtil.isEmpty(getNativeType())) {
             result = HashCodeUtil.hashCode(result, getNativeType());
         }
-        if (!CoreStringUtil.isEmpty(getNullable())) {
+        if (!StringUtil.isEmpty(getNullable())) {
             result = HashCodeUtil.hashCode(result, getNullable());
         }
 

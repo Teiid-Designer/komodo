@@ -58,7 +58,7 @@ public class SubqueryFromClause extends FromClause
      * WARNING: this will modify the hashCode and equals semantics and will cause this object
      * to be lost if currently in a HashMap or HashSet.
      * @param name New name
-     * @since 4.3
+     *
      */
     @Override
     public void setName(String name) {

@@ -14,7 +14,7 @@ package org.komodo.spi.constants;
 /**
  * 
  *
- * @since 1.0
+ *
  */
 public interface StringConstants {
 

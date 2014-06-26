@@ -10,10 +10,10 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
-import org.komodo.spi.state.IState;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
- * @since 8.0
+ *
  */
 public interface ITeiidConnectionInfo {
 
@@ -105,6 +105,6 @@ public interface ITeiidConnectionInfo {
     /**
      * @return a status indicating if the connection info is in a validate state (never <code>null</code>)
      */
-    IState validate();
+    IOutcome validate();
 
 }

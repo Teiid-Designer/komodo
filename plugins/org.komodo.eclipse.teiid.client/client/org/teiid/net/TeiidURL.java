@@ -37,7 +37,7 @@ import org.teiid.runtime.client.Messages;
 /**
  * Class defines the URL in the Teiid.
  * 
- * @since 4.2
+ *
  */
 public class TeiidURL {
 
@@ -77,7 +77,7 @@ public class TeiidURL {
 		String CLIENT_MAC = "clientMAC"; //$NON-NLS-1$
 		/**
 		 * If true, will automatically select a new server instance after a communication exception.
-		 * @since 5.6
+		 *
 		 */
 		String AUTO_FAILOVER = "autoFailover";  //$NON-NLS-1$
 		/**
@@ -158,7 +158,7 @@ public class TeiidURL {
      * Create an MMURL from the server URL.  For use by the server-side.
      * @param serverURL   Expected format: mm[s]://server1:port1[,server2:port2]
      * @throws MalformedURLException 
-     * @since 4.2
+     *
      */
     public TeiidURL(String serverURL) throws MalformedURLException {
         if (serverURL == null) {
@@ -191,7 +191,7 @@ public class TeiidURL {
      * Validates that a server URL is in the correct format.
      * @param serverURL  Expected format: mm[s]://server1:port1[,server2:port2]
      * @return true if valid server url
-     * @since 4.2
+     *
      */
     public static boolean isValidServerURL(String serverURL) {
         boolean valid = true;
@@ -215,7 +215,7 @@ public class TeiidURL {
      * Get a list of hosts
      *  
      * @return string of host separated by commas
-     * @since 4.2
+     *
      */
     public String getHosts() {
         StringBuffer hostList = new StringBuffer("");  //$NON-NLS-1$
@@ -236,7 +236,7 @@ public class TeiidURL {
      * Get a list of ports  
      * 
      * @return string of ports seperated by commas
-     * @since 4.2
+     *
      */
     public String getPorts() {
         StringBuffer portList = new StringBuffer("");  //$NON-NLS-1$
@@ -256,7 +256,7 @@ public class TeiidURL {
     /**
      * @param url
      * @throws MalformedURLException 
-     * @since 4.2
+     *
      */
     private void parseServerURL(String serverURL, String exceptionMessage) throws MalformedURLException {
         StringTokenizer st = new StringTokenizer(serverURL, COMMA_DELIMITER); 
@@ -329,7 +329,7 @@ public class TeiidURL {
      * Get the Application Server URL
      * 
      * @return String for connection to the Server
-     * @since 4.2
+     *
      */
     public String getAppServerURL() {
         if (appServerURL == null) {
@@ -364,7 +364,7 @@ public class TeiidURL {
 
     /**
      * @see java.lang.Object#toString()
-     * @since 4.2
+     *
      */
     @Override
     public String toString() {
@@ -373,7 +373,7 @@ public class TeiidURL {
 
     /** 
      * @see java.lang.Object#equals(java.lang.Object)
-     * @since 4.2
+     *
      */
     @Override
     public boolean equals(Object obj) {
@@ -389,7 +389,7 @@ public class TeiidURL {
     
     /** 
      * @see java.lang.Object#hashCode()
-     * @since 4.2
+     *
      */
     @Override
     public int hashCode() {

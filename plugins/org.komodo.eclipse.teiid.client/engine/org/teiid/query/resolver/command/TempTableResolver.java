@@ -47,7 +47,7 @@ import org.teiid.runtime.client.Messages;
 
 
 /** 
- * @since 5.5
+ *
  */
 public class TempTableResolver extends CommandResolver {
 

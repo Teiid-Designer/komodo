@@ -384,7 +384,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
 
     /** 
      * @see IQueryMetadataInterface#hasMaterialization(java.lang.Object)
-     * @since 4.2
+     *
      */
     @Override
     public boolean hasMaterialization(Object groupID)
@@ -404,7 +404,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     
     /** 
      * @see IQueryMetadataInterface#getMaterialization(java.lang.Object)
-     * @since 4.2
+     *
      */
     @Override
     public Object getMaterialization(Object groupID) 
@@ -427,7 +427,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     
     /** 
      * @see IQueryMetadataInterface#getMaterializationStage(java.lang.Object)
-     * @since 4.2
+     *
      */
     @Override
     public Object getMaterializationStage(Object groupID) 
@@ -762,7 +762,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
 
     /**
      * Get the native type name for the element.
-     * @since 4.2
+     *
      */
     @Override
     public String getNativeType(Object elementID) throws Exception {

@@ -13,7 +13,6 @@ package org.komodo.spi;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 import org.komodo.spi.constants.StringConstants;
 
 /**
@@ -41,6 +40,16 @@ public class Messages implements StringConstants {
         }
     }
 
+    @SuppressWarnings( "javadoc" )
+    public enum OutcomeFactory {
+        OK;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+   
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

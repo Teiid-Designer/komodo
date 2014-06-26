@@ -35,7 +35,7 @@ import java.util.Properties;
  * This interface need not be used directly by clients except when coding to constants.
  * </p>
  *
- * @since 4.3
+ *
  */
 public interface AdminObject extends Serializable {
 
@@ -81,7 +81,7 @@ public interface AdminObject extends Serializable {
      * Get the name for this AdminObject, usually the last component of the identifier.
      *
      * @return String Name
-     * @since 4.3
+     *
      */
     String getName();
 
@@ -89,7 +89,7 @@ public interface AdminObject extends Serializable {
      * Get the Configuration Properties that defines this process
      *
      * @return Properties
-     * @since 4.3
+     *
      */
     Properties getProperties();
 
@@ -100,7 +100,7 @@ public interface AdminObject extends Serializable {
      * @param name
      *            the property key.
      * @return the value in this Admin Object with the specified key value.
-     * @since 4.3
+     *
      */
 
     String getPropertyValue(String name);

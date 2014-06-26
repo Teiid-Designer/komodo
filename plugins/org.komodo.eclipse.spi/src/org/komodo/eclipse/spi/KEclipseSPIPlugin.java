@@ -20,7 +20,7 @@ import org.eclipse.datatools.connectivity.services.PluginResourceLocator;
 import org.osgi.framework.BundleContext;
 
 /**
- * @since 1.0
+ *
  */
 public class KEclipseSPIPlugin extends Plugin {
 

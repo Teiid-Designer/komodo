@@ -242,7 +242,7 @@ public class TempMetadataID implements Serializable, IMetadataID<TempMetadataID>
     /**
      * Whether it is a temporary table  
      * @return
-     * @since 5.5
+     *
      */
     public boolean isTempTable() {
         return this.metadataType == Type.TEMP;
@@ -285,7 +285,7 @@ public class TempMetadataID implements Serializable, IMetadataID<TempMetadataID>
     
     /** 
      * @return Returns the originalMetadataID.
-     * @since 4.3
+     *
      */
     public Object getOriginalMetadataID() {
         return this.originalMetadataID;

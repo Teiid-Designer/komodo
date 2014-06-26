@@ -410,7 +410,7 @@ public class ArgCheck {
      * Check that the array is not empty
      * @param array Array 
      * @throws IllegalArgumentException If array is null or empty
-     * @since 3.1
+     *
      */
     public static final void isNotEmpty(Object[] array) {
         isNotEmpty(array,null);
@@ -421,7 +421,7 @@ public class ArgCheck {
      * @param array Array 
      * @param message Exception message if check fails
      * @throws IllegalArgumentException If array is null or empty
-     * @since 3.1
+     *
      */
     public static final void isNotEmpty(Object[] array, String message) {
         isNotNull(array);
@@ -437,7 +437,7 @@ public class ArgCheck {
      * Check that the string is not empty
      * @param string String 
      * @throws IllegalArgumentException If string is null or empty
-     * @since 3.1
+     *
      */
     public static final void isNotEmpty(String string) {
         isNotZeroLength(string,null);
@@ -448,7 +448,7 @@ public class ArgCheck {
      * @param string String 
      * @param message Exception message if check fails
      * @throws IllegalArgumentException If string is null or empty
-     * @since 3.1
+     *
      */
     public static final void isNotEmpty(String string, String message) {
         isNotZeroLength(string,message);
@@ -465,7 +465,7 @@ public class ArgCheck {
      *                      thrown;if null and <code>secondObject</code> is not null, <code>secondObject.toString()</code> will
      *                      be used.
      * @throws IllegalArgumentException If the specified objects are the same.
-     * @since 3.1
+     *
      */
     public static void isNotSame(final Object firstObject, String firstName, final Object secondObject, String secondName) {
         if (firstObject == secondObject) {

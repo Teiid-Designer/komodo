@@ -39,7 +39,7 @@ public final class AdminProcessingException extends AdminException {
 	/**
      * No-arg ctor.
      *
-     * @since 4.3
+     *
      */
     public AdminProcessingException() {
         super();
@@ -48,7 +48,7 @@ public final class AdminProcessingException extends AdminException {
     /**
      * Construct with a message.
      * @param msg the error message.
-     * @since 4.3
+     *
      */
     public AdminProcessingException(String msg) {
         super(msg);

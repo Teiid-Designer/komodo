@@ -109,7 +109,7 @@ public class PropertyDefinitionMetadata extends AdminObjectImpl implements Prope
 
     /** 
      * @see org.teiid.adminapi.PropertyDefinition#isExpert()
-     * @since 4.3
+     *
      */
     public boolean isAdvanced() {
         return advanced;

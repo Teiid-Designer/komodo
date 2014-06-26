@@ -13,7 +13,7 @@ package org.komodo.spi.query.proc.wsdl.model;
 /**
  * This class is an abstract representation of the elements that appear in a WSDL
  *
- * @since 8.0
+ *
  */
 public interface IWsdlElement {
 

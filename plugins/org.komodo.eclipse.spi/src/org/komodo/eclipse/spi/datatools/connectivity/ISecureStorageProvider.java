@@ -16,7 +16,7 @@ package org.komodo.eclipse.spi.datatools.connectivity;
  * Interface that should be implemented by classes providing
  * implementations of secure storage.
  * 
- * @since 1.0
+ *
  */
 public interface ISecureStorageProvider {
     

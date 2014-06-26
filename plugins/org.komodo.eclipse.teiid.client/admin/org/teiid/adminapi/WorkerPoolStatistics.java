@@ -51,7 +51,7 @@ public interface WorkerPoolStatistics extends AdminObject, DomainAware{
 	
 	/** 
      * @return Returns the number of requests queued.
-     * @since 4.3
+     *
      */
     public int getQueued();
     

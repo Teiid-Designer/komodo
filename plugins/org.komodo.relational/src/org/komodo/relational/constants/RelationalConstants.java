@@ -10,7 +10,7 @@ package org.komodo.relational.constants;
 /**
  * 
  *
- * @since 8.0
+ *
  */
 @SuppressWarnings("javadoc")
 public interface RelationalConstants {

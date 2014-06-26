@@ -13,7 +13,7 @@ package org.komodo.spi.query.proc.wsdl.model;
 /**
  * This class represents a Binding as defined in a WSDL
  *
- * @since 8.0
+ *
  */
 public interface IBinding extends IWsdlElement {
 

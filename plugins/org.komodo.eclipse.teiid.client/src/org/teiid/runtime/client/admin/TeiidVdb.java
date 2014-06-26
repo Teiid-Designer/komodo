@@ -12,7 +12,7 @@ import org.teiid.adminapi.VDB;
 import org.teiid.core.util.ArgCheck;
 
 /**
- * @since 8.0
+ *
  */
 public class TeiidVdb implements ITeiidVdb, Comparable<TeiidVdb> {
     

@@ -28,7 +28,7 @@ import java.util.List;
 
 
 /** 
- * @since 4.3
+ *
  */
 public class BatchResults {
 	

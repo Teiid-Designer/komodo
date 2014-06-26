@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Implementation independent version of the Teiid class PropertyDefinition
  * 
- * @since 8.0
+ *
  */
 public class TeiidPropertyDefinition {
 

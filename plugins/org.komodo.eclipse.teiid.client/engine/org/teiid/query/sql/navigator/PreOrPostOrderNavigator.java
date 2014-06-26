@@ -122,7 +122,7 @@ import org.teiid.query.sql.symbol.XMLQuery;
 import org.teiid.query.sql.symbol.XMLSerialize;
 
 /** 
- * @since 4.2
+ *
  */
 public class PreOrPostOrderNavigator extends AbstractNavigator {
 

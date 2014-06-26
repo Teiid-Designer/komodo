@@ -68,26 +68,26 @@ public interface ExecutionProperties {
 
     /** 
      * Whether to use result set cache if it is available 
-     * @since 4.2 
+     * 
      */
     public static final String RESULT_SET_CACHE_MODE = "resultSetCacheMode"; //$NON-NLS-1$
     
     /**
      * Default fetch size to use on Statements if the fetch size is not explicitly set.
      * The default is 500.  
-     * @since 4.2
+     *
      */
     public static final String PROP_FETCH_SIZE = "fetchSize";   //$NON-NLS-1$ 
     
     /**
      * If true, will ignore autocommit for local transactions.
-     * @since 5.5.2
+     *.2
      */
     public static final String DISABLE_LOCAL_TRANSACTIONS = "disableLocalTxn";  //$NON-NLS-1$
     
     /**
 	 * Overrides the handling of double quoted identifiers to allow them to be strings.
-	 * @since 4.3 
+	 * 
      */
     public static final String ANSI_QUOTED_IDENTIFIERS = "ansiQuotedIdentifiers"; //$NON-NLS-1$   
     
@@ -113,7 +113,7 @@ public interface ExecutionProperties {
 	 * backwards compatibility when JDBC3 and older support is still required.
 	 * 
 	 * Default is <code>true</code>
-	 * @since 7.4.1
+	 *.1
 	 */
     
     public static final String JDBC4COLUMNNAMEANDLABELSEMANTICS = "useJDBC4ColumnNameAndLabelSemantics"; //$NON-NLS-1$

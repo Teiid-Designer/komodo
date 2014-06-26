@@ -17,11 +17,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
-import org.komodo.spi.state.IState;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
- * @since 8.0
+ *
  */
 public interface IExecutionAdmin {
 
@@ -119,7 +118,7 @@ public interface IExecutionAdmin {
      * @param name the translator name (never <code>null</code> or empty)
      * @return a TeiidTranslator
      * @throws Exception 
-     * @since 7.0
+     *
      */
      ITeiidTranslator getTranslator(String name) throws Exception;
 
@@ -200,12 +199,12 @@ public interface IExecutionAdmin {
     /**
      * Ping the admin client to determine whether if is still connected
      * @param pingType 
-     * 
-     * @return {@link IStatus} describing state of ping
+     *
+     * @return {@link IOutcome} describing state of ping
      * 
      * @throws Exception 
      */
-     IState ping(PingType pingType) throws Exception;
+     IOutcome ping(PingType pingType) throws Exception;
      
      /**
       * Get the location of the the admin driver class. Implementations have historically

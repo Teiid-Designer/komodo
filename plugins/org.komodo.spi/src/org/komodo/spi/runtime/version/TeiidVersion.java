@@ -16,7 +16,7 @@ import org.komodo.spi.Messages;
 /**
  * Teiid Instance version class 
  * 
- * @since 8.0
+ *
  */
 public class TeiidVersion implements ITeiidVersion {
 

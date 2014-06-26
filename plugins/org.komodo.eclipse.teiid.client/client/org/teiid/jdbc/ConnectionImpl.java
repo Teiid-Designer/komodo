@@ -418,7 +418,7 @@ public class ConnectionImpl extends WrapperImpl implements TeiidConnection {
     /** 
      * @param resultSetType
      * @throws TeiidClientException
-     * @since 4.3
+     *
      */
     private void validateResultSetType(int resultSetType) throws SQLException {
         if (resultSetType == ResultSet.TYPE_SCROLL_SENSITIVE ) {
@@ -430,7 +430,7 @@ public class ConnectionImpl extends WrapperImpl implements TeiidConnection {
     /** 
      * @param resultSetConcurrency
      * @throws TeiidClientException
-     * @since 4.3
+     *
      */
     private void validateResultSetConcurrency(int resultSetConcurrency) throws SQLException {
         if (resultSetConcurrency == ResultSet.CONCUR_UPDATABLE) {
@@ -599,7 +599,7 @@ public class ConnectionImpl extends WrapperImpl implements TeiidConnection {
     /** 
      * @param sql
      * @throws TeiidClientException
-     * @since 4.3
+     *
      */
     private void validateSQL(String sql) throws SQLException {
         if (sql == null) {

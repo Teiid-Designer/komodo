@@ -89,7 +89,7 @@ public final class BlobType extends Streamable<Blob> implements Blob, Comparable
 
     /** 
      * @see java.sql.Blob#setBytes(long, byte[], int, int)
-     * @since 4.3
+     *
      */
     public int setBytes(long pos,
                         byte[] bytes,

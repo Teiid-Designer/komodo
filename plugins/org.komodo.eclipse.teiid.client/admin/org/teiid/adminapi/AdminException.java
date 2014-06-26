@@ -48,7 +48,7 @@ public abstract class AdminException extends TeiidClientException {
     /**
      * No-arg ctor.
      *
-     * @since 4.3
+     *
      */
     AdminException() {
         super();
@@ -57,7 +57,7 @@ public abstract class AdminException extends TeiidClientException {
     /**
      * Construct with a message.
      * @param msg the error message.
-     * @since 4.3
+     *
      */
     AdminException(String msg) {
         super(msg);
@@ -76,7 +76,7 @@ public abstract class AdminException extends TeiidClientException {
      * mutliple component failures.
      * @return <code>true</code> iff this exception contains multiple
      * component failure exceptions.
-     * @since 4.3
+     *
      */
     public boolean hasMultiple() {
         return (children != null && children.size() > 0);
@@ -88,7 +88,7 @@ public abstract class AdminException extends TeiidClientException {
      *
      * <p>The list will have members when {@link #hasMultiple()} returns <code>true</code>.</p>
      * @return The non-null list of failures.
-     * @since 4.3
+     *
      */
     public List<AdminException> getChildren() {
     	if (children == null) {
@@ -102,7 +102,7 @@ public abstract class AdminException extends TeiidClientException {
      * if and action resulted in multiple failures.
      *
      * @param child a specific failure
-     * @since 4.3
+     *
      */
     public void addChild(AdminException child) {
         if ( children == null ) {

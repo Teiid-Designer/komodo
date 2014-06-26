@@ -38,9 +38,10 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.ide.eclipse.as.core.server.v7.management.AS7ManagementDetails;
 import org.jboss.ide.eclipse.as.management.core.JBoss7ManagerUtil;
 import org.jboss.ide.eclipse.as.management.core.ModelDescriptionConstants;
-import org.komodo.eclipse.spi.state.State;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Removed;
+import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.IExecutionAdmin;
@@ -56,7 +57,6 @@ import org.komodo.spi.runtime.TeiidExecutionException;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.komodo.spi.state.IState;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.PropertyDefinition;
 import org.teiid.adminapi.Translator;
@@ -71,7 +71,7 @@ import org.teiid.runtime.client.TeiidRuntimePlugin;
 /**
  *
  *
- * @since 8.0
+ *
  */
 public class ExecutionAdmin implements IExecutionAdmin {
 
@@ -722,7 +722,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @param changedProperties a collection of properties that have changed (never <code>null</code> or empty)
      * @param type the translator property type
      * @throws Exception if there is a problem changing the properties
-     * @since 7.0
+     *
      */
     public void setProperties( ITeiidTranslator translator,
                                Properties changedProperties,
@@ -749,7 +749,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @param value the new value
      * @param type the translator property type
      * @throws Exception if there is a problem setting the property
-     * @since 7.0
+     *
      */
     public void setPropertyValue( ITeiidTranslator translator,
                                   String propName,
@@ -842,7 +842,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
     }
     
     @Override
-    public IState ping(PingType pingType) {
+    public IOutcome ping(PingType pingType) {
         String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, teiidInstance.getTeiidAdminInfo().getUsername());
         try {
             if (this.admin == null)
@@ -857,17 +857,16 @@ public class ExecutionAdmin implements IExecutionAdmin {
             }
         }
         catch (Exception ex) {
-        	IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, msg, ex);
-            return new State(status);
+            return OutcomeFactory.getInstance().createError(msg, ex);
         }
     }
     
-    private IState pingAdmin() throws Exception {
+    private IOutcome pingAdmin() throws Exception {
         admin.getSessions();
-        return State.OK;
+        return OutcomeFactory.getInstance().createOK();
     }
     
-    private IState pingJdbc() {
+    private IOutcome pingJdbc() {
         String host = teiidInstance.getHost();
         ITeiidJdbcInfo teiidJdbcInfo = teiidInstance.getTeiidJdbcInfo();
         
@@ -890,8 +889,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
                //pass
             } catch(SQLException ex){
                 String msg = Messages.getString(Messages.ExecutionAdmin.instanceDeployUndeployProblemPingingTeiidJdbc, url);
-                IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, msg, ex);
-                return new State(status);
+                return OutcomeFactory.getInstance().createError(msg, ex);
             } finally {
                 adminSpec.undeploy(admin, PING_VDB, 1);
                 
@@ -902,10 +900,10 @@ public class ExecutionAdmin implements IExecutionAdmin {
         } catch (Exception ex) {
             String msg = Messages.getString(Messages.ExecutionAdmin.instanceDeployUndeployProblemPingingTeiidJdbc, url);
             IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, msg, ex);
-            return new State(status);
+            return OutcomeFactory.getInstance().createError(msg, ex);
         }
         
-        return State.OK;
+        return OutcomeFactory.getInstance().createOK();
     }
     
     @Override

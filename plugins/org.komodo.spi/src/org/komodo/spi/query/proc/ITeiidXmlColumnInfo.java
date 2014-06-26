@@ -10,7 +10,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.proc;
 
-import org.komodo.spi.state.IState;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  *
@@ -84,8 +84,8 @@ public interface ITeiidXmlColumnInfo {
 
     /**
      * 
-     * @return status the <code>IStatus</code> representing the validity of the data in this info object
+     * @return outcome the <code>IOutcome</code> representing the validity of the data in this info object
      */
-    IState getStatus();
+    IOutcome getOutcome();
 
 }

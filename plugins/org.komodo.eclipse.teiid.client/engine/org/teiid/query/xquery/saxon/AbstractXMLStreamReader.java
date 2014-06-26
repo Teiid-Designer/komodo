@@ -25,7 +25,7 @@ import javax.xml.stream.XMLStreamReader;
  * Abstract base class for <code>XMLStreamReader</code>s.
  *
  * @author Arjen Poutsma
- * @since 3.0
+ *
  */
 abstract class AbstractXMLStreamReader implements XMLStreamReader {
 

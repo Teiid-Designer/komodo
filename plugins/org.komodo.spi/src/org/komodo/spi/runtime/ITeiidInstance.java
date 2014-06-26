@@ -10,10 +10,10 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
+import org.komodo.spi.outcome.IOutcome;
 import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.state.IState;
 /**
- * @since 8.0
+ *
  *
  */
 public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
@@ -90,7 +90,7 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
      * 
      * @return a status if the instance connection can be established (never <code>null</code>)
      */
-    IState ping();
+    IOutcome ping();
     
     /**
      * Notify clients of a refresh
@@ -119,7 +119,7 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
      * 
      * @return a status if the instance connection can be established (never <code>null</code>)
      */
-    IState testPing();
+    IOutcome testPing();
 
     /**
      * Test the jdbc connection
@@ -131,7 +131,7 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
      * 
      * @return status as to the ping's success
      */
-    IState testJDBCPing(String host,
+    IOutcome testJDBCPing(String host,
                                          String port,
                                          String username,
                                          String password);
@@ -145,7 +145,7 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
      * 
      * @return IState as to whether it succeeded
      */
-    IState createVdbDataSource(String vdbName, String displayName, String jndiName);
+    IOutcome createVdbDataSource(String vdbName, String displayName, String jndiName);
 
     /**
      * Update this instance with the properties of the given instance

@@ -12,21 +12,21 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-
-import org.komodo.core.CoreStringUtil;
-import org.komodo.core.HashCodeUtil;
-import org.komodo.core.IStatus;
-import org.komodo.core.Status;
-import org.komodo.core.StringUtilities;
+import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
 import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.relational.Messages;
+import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.IOutcome.Level;
+import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.StringUtil;
+import org.komodo.utils.StringUtilities;
 
 
 /**
  * 
  *
- * @since 8.0
+ *
  */
 public class Table extends RelationalObject {
     @SuppressWarnings("javadoc")
@@ -544,42 +544,42 @@ public class Table extends RelationalObject {
 	}
 	
 	@Override
-	public IStatus validate() {
+	public IOutcome validate() {
 		// Walk through the properties for the table and set the status
-		this.currentStatus = super.validate();
+		this.currentOutcome = super.validate();
 		
-		if( this.currentStatus.getSeverity() == IStatus.ERROR ) {
-			return this.currentStatus;
+		if( this.currentOutcome.getLevel() == Level.ERROR ) {
+			return this.currentOutcome;
 		}
 		
 		if( this.isMaterialized() && this.materializedTable == null ) {
-			this.currentStatus = new Status(IStatus.WARNING, PLUGIN_ID, 
+			this.currentOutcome = OutcomeFactory.getInstance().createWarning(
 					Messages.getString(RELATIONAL.validate_error_materializedTableHasNoTableDefined) );
-			return this.currentStatus;
+			return this.currentOutcome;
 		}
 		
-		if( this.getPrimaryKey() != null && !this.getPrimaryKey().getStatus().isOK()) {
-			this.currentStatus = this.getPrimaryKey().getStatus();
-			return this.currentStatus;
+		if( this.getPrimaryKey() != null && !this.getPrimaryKey().getOutcome().isOK()) {
+			this.currentOutcome = this.getPrimaryKey().getOutcome();
+			return this.currentOutcome;
 		}
 		
-		if( this.getUniqueContraint() != null && !this.getUniqueContraint().getStatus().isOK()) {
-			this.currentStatus = this.getUniqueContraint().getStatus();
-			return this.currentStatus;
+		if( this.getUniqueContraint() != null && !this.getUniqueContraint().getOutcome().isOK()) {
+			this.currentOutcome = this.getUniqueContraint().getOutcome();
+			return this.currentOutcome;
 		}
 		
 		for( ForeignKey fk : this.getForeignKeys() ) {
-			if( !fk.getStatus().isOK()) {
-				this.currentStatus = fk.getStatus();
-				return this.currentStatus;
+			if( !fk.getOutcome().isOK()) {
+				this.currentOutcome = fk.getOutcome();
+				return this.currentOutcome;
 			}
 		}
 		
 		// Check Column Status values
 		for( Column col : getColumns() ) {
-			if( col.getStatus().getSeverity() == IStatus.ERROR ) {
-				this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, col.getStatus().getMessage() );
-				return this.currentStatus;
+			if( col.getOutcome().getLevel() == Level.ERROR ) {
+				this.currentOutcome = OutcomeFactory.getInstance().createError(col.getOutcome().getMessage() );
+				return this.currentOutcome;
 			}
 		}
 		
@@ -588,9 +588,9 @@ public class Table extends RelationalObject {
 			for( Column innerColumn : getColumns() ) {
 				if( outerColumn != innerColumn ) {
 					if( outerColumn.getName().equalsIgnoreCase(innerColumn.getName())) {
-						this.currentStatus = new Status(IStatus.ERROR, PLUGIN_ID, 
+						this.currentOutcome = OutcomeFactory.getInstance().createError(
 								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesInTable, getName()) );
-						return this.currentStatus;
+						return this.currentOutcome;
 					}
 				}
 			}
@@ -598,17 +598,17 @@ public class Table extends RelationalObject {
 		
 		if( this.getColumns().isEmpty() ) {
 			if( this.getParent() != null && this.getParent() instanceof Procedure ) {
-				this.currentStatus = new Status(IStatus.WARNING, PLUGIN_ID, 
+				this.currentOutcome = OutcomeFactory.getInstance().createWarning(
 						Messages.getString(RELATIONAL.validate_warning_noColumnsDefinedForResultSet) ); 
-				return this.currentStatus;
+				return this.currentOutcome;
 			} else {
-				this.currentStatus = new Status(IStatus.WARNING, PLUGIN_ID, 
+				this.currentOutcome = OutcomeFactory.getInstance().createWarning(
 						Messages.getString(RELATIONAL.validate_warning_noColumnsDefined) ); 
-				return this.currentStatus;
+				return this.currentOutcome;
 			}
 		}
 		
-		return this.currentStatus;
+		return this.currentOutcome;
 		
 	}
 	
@@ -631,7 +631,7 @@ public class Table extends RelationalObject {
         final Table other = (Table)object;
 
         // string properties
-        if (!CoreStringUtil.valuesAreEqual(getNativeQuery(), other.getNativeQuery())) {
+        if (!StringUtil.valuesAreEqual(getNativeQuery(), other.getNativeQuery())) {
             return false;
         }
         
@@ -733,7 +733,7 @@ public class Table extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!CoreStringUtil.isEmpty(getNativeQuery())) {
+        if (!StringUtil.isEmpty(getNativeQuery())) {
             result = HashCodeUtil.hashCode(result, getNativeQuery());
         }
         

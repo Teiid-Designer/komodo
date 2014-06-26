@@ -14,7 +14,7 @@ import org.komodo.spi.runtime.ITeiidParent;
 /**
  * Adapter factory that can adapt an {@link ITeiidParent} to an {@link IServer}
  * 
- * @since 8.0
+ *
  */
 public class TeiidParentAdapterFactory implements IAdapterFactory {
 

@@ -142,7 +142,7 @@ public final class ApplicationInfo implements Serializable {
      * to a file at VM startup time for debugging purposes and ensuring
      * patches are applied.
      * @return classpath info string
-     * @since 4.2
+     *
      */
     public String getClasspathInfo() {
         String classPath = getClassPath(); 

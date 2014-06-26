@@ -11,7 +11,7 @@
 package org.komodo.spi.validator;
 
 import java.util.Collection;
-
+import org.komodo.spi.outcome.IOutcome;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.query.sql.ILanguageVisitor;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
@@ -41,15 +41,10 @@ public interface IValidator<L extends ILanguageObject<? extends ILanguageVisitor
 
     public interface IValidatorFailure {
 
-        enum VFStatus {
-            ERROR,
-            WARNING
-        }
-
         /**
          * @return
          */
-        VFStatus getStatus();
+        IOutcome.Level getOutcome();
         
     }
     

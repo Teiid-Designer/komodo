@@ -5,7 +5,7 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.core;
+package org.komodo.utils;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -29,7 +29,7 @@ import java.util.RandomAccess;
  * }
  * </PRE>
  *
- * @since 8.0
+ *
  */
 public final class HashCodeUtil {
 

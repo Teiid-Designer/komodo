@@ -31,7 +31,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 /** 
  * Represents a metadata model in the Teiid system.
  * 
- * @since 4.3
+ *
  */
 public interface Model extends AdminObject {
 	

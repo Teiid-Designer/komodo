@@ -56,7 +56,7 @@ import org.teiid.runtime.client.Messages;
 
 
 /** 
- * @since 4.2
+ *
  * 
  * <ul>
  * <li>version 0: starts with 7.1 and uses simple serialization too broadly
@@ -367,7 +367,7 @@ public class Batch2Serializer extends BatchSerializer {
      * @param col
      * @param batch
      * @throws IOException
-     * @since 4.2
+     *
      */
     static void writeIsNullData(ObjectOutput out, int col, List<? extends List<?>> batch) throws IOException {
         int numBytes = batch.size() / 8, row = 0, currentByte = 0;
@@ -404,7 +404,7 @@ public class Batch2Serializer extends BatchSerializer {
      * @param in
      * @param isNullBytes
      * @throws IOException
-     * @since 4.2
+     *
      */
     static void readIsNullData(ObjectInput in, byte[] isNullBytes) throws IOException {
         for (int i = 0; i < isNullBytes.length; i++) {
@@ -417,7 +417,7 @@ public class Batch2Serializer extends BatchSerializer {
      * @param isNull
      * @param row
      * @return
-     * @since 4.2
+     *
      */
     static final boolean isNullObject(byte[] isNull, int row) {
         //              byte number           mask     bits to shift mask
@@ -430,7 +430,7 @@ public class Batch2Serializer extends BatchSerializer {
     
     /**
      * An abstract serializer for native types
-     * @since 4.2
+     *
      */
     private class ColumnSerializer {
         public void writeColumn(ObjectOutput out, int col, List<? extends List<?>> batch) throws IOException {
