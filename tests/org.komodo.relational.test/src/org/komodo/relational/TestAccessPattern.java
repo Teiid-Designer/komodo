@@ -15,10 +15,13 @@
  */
 package org.komodo.relational;
 
-import org.komodo.core.IStatus;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  * Test Class to test Table
@@ -83,9 +86,9 @@ public class TestAccessPattern {
     public void testValidate1() {
     	AccessPattern ap = RelationalUtil.createAccessPattern(AP_NAME);
     	
-    	IStatus status = ap.validate();
+    	IOutcome outcome = ap.validate();
     	
-    	assertEquals(IStatus.OK, status.getSeverity());
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
     }
         
 }

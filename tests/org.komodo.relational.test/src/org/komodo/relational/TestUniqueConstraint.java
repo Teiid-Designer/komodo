@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 package org.komodo.relational;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import org.komodo.core.IStatus;
+import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.UniqueConstraint;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  * Test Class to test Table
@@ -83,10 +86,10 @@ public class TestUniqueConstraint {
     public void testValidate1() {
     	UniqueConstraint uc = RelationalUtil.createUniqueConstraint(UC_NAME);
     	
-    	IStatus status = uc.validate();
+    	IOutcome outcome = uc.validate();
     	
-    	assertEquals(IStatus.ERROR, status.getSeverity());
-    	if(!status.getMessage().startsWith("No columns defined for unique constraint")) { //$NON-NLS-1$
+    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
+    	if(!outcome.getMessage().startsWith("No columns defined for unique constraint")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}
     }

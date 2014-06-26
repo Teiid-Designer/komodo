@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 package org.komodo.relational;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Properties;
 
-import org.komodo.core.IStatus;
+import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  * Test Class to test Parameter
@@ -83,7 +86,7 @@ public class TestParameter {
     	assertEquals(null,defaultValue);
     	assertEquals(null,nativeType);
         assertEquals(null,nullable);
-    	assertEquals(DIRECTION.IN,direction);
+    	assertEquals(RelationalConstants.DIRECTION.IN,direction);
         assertEquals(0,length);
     	assertEquals(0,precision);
     	assertEquals(0,radix);
@@ -112,8 +115,8 @@ public class TestParameter {
 
     	props.put(Parameter.KEY_DATATYPE, "string"); //$NON-NLS-1$
     	props.put(Parameter.KEY_NATIVE_TYPE, "numeric"); //$NON-NLS-1$
-    	props.put(Parameter.KEY_NULLABLE, NULLABLE.NO_NULLS); 
-    	props.put(Parameter.KEY_DIRECTION, DIRECTION.IN_OUT);
+    	props.put(Parameter.KEY_NULLABLE, RelationalConstants.NULLABLE.NO_NULLS); 
+    	props.put(Parameter.KEY_DIRECTION, RelationalConstants.DIRECTION.IN_OUT);
     	props.put(Parameter.KEY_DEFAULT_VALUE, "xxx"); //$NON-NLS-1$
     	props.put(Parameter.KEY_LENGTH, "99"); //$NON-NLS-1$
     	props.put(Parameter.KEY_PRECISION, "3"); //$NON-NLS-1$
@@ -132,8 +135,8 @@ public class TestParameter {
     	assertEquals(0, param.getExtensionProperties().size());
     	assertEquals(99, param.getLength());
     	assertEquals("numeric", param.getNativeType()); //$NON-NLS-1$
-    	assertEquals(DIRECTION.IN_OUT, param.getDirection());
-    	assertEquals(NULLABLE.NO_NULLS, param.getNullable());
+    	assertEquals(RelationalConstants.DIRECTION.IN_OUT, param.getDirection());
+    	assertEquals(RelationalConstants.NULLABLE.NO_NULLS, param.getNullable());
     	assertEquals(3, param.getPrecision());
     	assertEquals(4, param.getRadix());
     	assertEquals(0, param.getProcessType());
@@ -164,9 +167,9 @@ public class TestParameter {
     public void testValidate1() {
     	Parameter param = RelationalUtil.createParameter(PARAM_NAME);
     	
-    	IStatus status = param.validate();
+    	IOutcome outcome = param.validate();
     	
-    	assertEquals(IStatus.OK, status.getSeverity());
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
     }
         
     /**
@@ -176,11 +179,11 @@ public class TestParameter {
     public void testValidate2() {
     	Parameter param = RelationalUtil.createParameter("Crap ?"); //$NON-NLS-1$
     	
-    	IStatus status = param.validate();
+    	IOutcome outcome = param.validate();
     	
-    	assertEquals(IStatus.ERROR, status.getSeverity());
+    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
     	
-    	if(!status.getMessage().startsWith("The name is invalid.")) { //$NON-NLS-1$
+    	if(!outcome.getMessage().startsWith("The name is invalid.")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}
     }
@@ -192,9 +195,9 @@ public class TestParameter {
     public void testValidate3() {
     	Parameter param = RelationalUtil.createParameter("Crap?"); //$NON-NLS-1$
     	
-    	IStatus status = param.validate();
+    	IOutcome outcome = param.validate();
     	
-    	assertEquals(IStatus.OK, status.getSeverity());
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
     }
     
     /**
@@ -204,11 +207,11 @@ public class TestParameter {
     public void testValidate4() {
     	Parameter param = RelationalUtil.createParameter("?Crap"); //$NON-NLS-1$
     	
-    	IStatus status = param.validate();
+    	IOutcome outcome = param.validate();
     	
-    	assertEquals(IStatus.ERROR, status.getSeverity());
+    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
     	
-    	if(!status.getMessage().startsWith("The first character of the name")) { //$NON-NLS-1$
+    	if(!outcome.getMessage().startsWith("The first character of the name")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}
     }

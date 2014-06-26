@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 package org.komodo.relational;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import java.util.Properties;
 
-import org.komodo.core.IStatus;
+import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.extension.RelationalModelExtensionConstants.PropertyKeysNoPrefix;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  * Test Class to test Procedure
@@ -419,10 +424,10 @@ public class TestProcedure {
     public void testValidate1() {
     	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
     	
-    	IStatus status = proc.validate();
+    	IOutcome outcome = proc.validate();
     	
-    	assertEquals(IStatus.WARNING, status.getSeverity());
-    	assertEquals("No parameters defined for procedure", status.getMessage()); //$NON-NLS-1$
+    	assertEquals(IOutcome.Level.WARNING, outcome.getLevel());
+    	assertEquals("No parameters defined for procedure", outcome.getMessage()); //$NON-NLS-1$
     }
 
     /**
@@ -433,9 +438,9 @@ public class TestProcedure {
     	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
     	proc.createParameter();
     	
-    	IStatus status = proc.validate();
+    	IOutcome outcome = proc.validate();
     	
-    	assertEquals(IStatus.OK, status.getSeverity());
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
     }
 
     /**
@@ -446,11 +451,11 @@ public class TestProcedure {
     	Procedure proc = RelationalUtil.createProcedure("Crap ?"); //$NON-NLS-1$
     	proc.createParameter();
     	
-    	IStatus status = proc.validate();
+    	IOutcome outcome = proc.validate();
     	
-    	assertEquals(IStatus.ERROR, status.getSeverity());
+    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
     	
-    	if(!status.getMessage().startsWith("The character ' ' (at position 5) is not allowed")) { //$NON-NLS-1$
+    	if(!outcome.getMessage().startsWith("The character ' ' (at position 5) is not allowed")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}
     }

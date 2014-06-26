@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 package org.komodo.relational;
+import static org.junit.Assert.assertEquals;
 
-import org.komodo.core.IStatus;
+import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  * Test Class to test Table
@@ -83,9 +85,9 @@ public class TestModel {
     public void testValidate1() {
     	Model model = RelationalUtil.createModel(MODEL_NAME);
     	
-    	IStatus status = model.validate();
+    	IOutcome outcome = model.validate();
     	
-    	assertEquals(IStatus.OK, status.getSeverity());
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
     }
         
 }
