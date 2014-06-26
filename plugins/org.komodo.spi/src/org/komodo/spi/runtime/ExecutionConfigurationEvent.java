@@ -18,7 +18,7 @@ import org.komodo.spi.Messages.SPI;
  * The <code>ExecutionConfigurationEvent</code> class is the event that is broadcast from the {@link TeiidInstanceManager instance manager}
  * when a teiid instance or connector is added, removed, or changed, or when a teiid instance is refreshed.
  *
- * @since 1.0
+ *
  */
 public final class ExecutionConfigurationEvent {
 

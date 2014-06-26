@@ -12,7 +12,7 @@ import java.util.Properties;
 
 /**
  * 
- * @since 8.0
+ *
  */
 public class ProcedureResultSet extends Table {
 

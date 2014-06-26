@@ -14,7 +14,7 @@ import org.komodo.utils.ArgCheck;
 /**
  * 
  *
- * @since 8.0
+ *
  */
 public class Model extends RelationalObject {
 	private Collection<RelationalObject> allRefs = new ArrayList<RelationalObject>();

@@ -42,7 +42,7 @@ public final class AdminComponentException extends AdminException {
     /**
      * Construct with a message.
      * @param msg the error message.
-     * @since 4.3
+     *
      */
     public AdminComponentException(String msg) {
         super(msg);

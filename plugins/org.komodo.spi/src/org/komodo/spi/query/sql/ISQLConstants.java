@@ -13,7 +13,7 @@ package org.komodo.spi.query.sql;
 /**
  * SqlConstants
  *
- * @since 8.0
+ *
  */
 public interface ISQLConstants {
 

@@ -196,7 +196,7 @@ public abstract class BaseColumn extends AbstractMetadataRecord {
 
     /**
      * @param nativeType The nativeType to set.
-     * @since 4.2
+     *
      */
 	@Since(Version.TEIID_8_7)
     public void setNativeType(String nativeType) {

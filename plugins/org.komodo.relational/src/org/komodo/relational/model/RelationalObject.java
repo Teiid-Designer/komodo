@@ -28,7 +28,7 @@ import org.komodo.utils.StringUtilities;
 /**
  * 
  *
- * @since 8.0
+ *
  */
 public abstract class RelationalObject implements RelationalConstants, RelationalModelExtensionConstants.PropertyKeysNoPrefix {
     @SuppressWarnings("javadoc")

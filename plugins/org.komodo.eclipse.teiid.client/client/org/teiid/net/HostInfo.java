@@ -34,7 +34,7 @@ import org.teiid.core.util.ArgCheck;
  * Similar to an {@link InetSocketAddress} except that it can be constructed
  * fully resolved, with an {@link InetAddress} and a hostname.
  * 
- * @since 4.2
+ *
  */
 public class HostInfo {
     // Host Name and Port Number

@@ -18,7 +18,7 @@ import org.komodo.utils.HashCodeUtil;
 /**
  * Relational Schema
  *
- * @since 8.0
+ *
  */
 public class Schema extends RelationalObject {
 

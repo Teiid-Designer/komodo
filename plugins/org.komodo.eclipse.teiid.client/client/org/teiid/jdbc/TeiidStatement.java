@@ -97,7 +97,7 @@ public interface TeiidStatement extends java.sql.Statement {
      *   
      * @param payload The payload that is to accompany requests executed
      * from this statement.
-     * @since 4.2
+     *
      */
     void setPayload(Serializable payload);
     

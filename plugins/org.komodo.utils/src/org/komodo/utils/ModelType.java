@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 
  *
- * @since 8.0
+ *
  */
 public final class ModelType implements Serializable {
 

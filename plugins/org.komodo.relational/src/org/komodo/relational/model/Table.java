@@ -26,7 +26,7 @@ import org.komodo.utils.StringUtilities;
 /**
  * 
  *
- * @since 8.0
+ *
  */
 public class Table extends RelationalObject {
     @SuppressWarnings("javadoc")

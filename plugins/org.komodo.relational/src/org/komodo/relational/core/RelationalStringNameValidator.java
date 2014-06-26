@@ -10,7 +10,7 @@ import org.komodo.utils.StringNameValidator;
  * 
  *
  *
- * @since 8.0
+ *
  */
 public class RelationalStringNameValidator extends StringNameValidator {
 	

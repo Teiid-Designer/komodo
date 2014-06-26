@@ -218,7 +218,7 @@ public class Base64
      * @param destination the array to hold the conversion
      * @param destOffset the index where output will be put
      * @return the <var>destination</var> array
-     * @since 1.3
+     *
      */
     private static byte[] encode3to4( 
      byte[] source, int srcOffset, int numSigBytes,
@@ -276,7 +276,7 @@ public class Base64
      * Does not GZip-compress data.
      *
      * @param source The data to convert
-     * @since 1.4
+     *
      */
     public static String encodeBytes( byte[] source )
     {
@@ -349,7 +349,7 @@ public class Base64
      * @param destination the array to hold the conversion
 	 * @param options alphabet type is pulled from this (standard, url-safe, ordered)
      * @return the number of decoded bytes converted
-     * @since 1.3
+     *
      */
     private static int decode4to3( byte[] source, int srcOffset, byte[] destination, int destOffset )
     {
@@ -411,7 +411,7 @@ public class Base64
      *
      * @param s the string to decode
      * @return the decoded data
-     * @since 1.4
+     *
      */
     public static byte[] decode( CharSequence s )
 	{

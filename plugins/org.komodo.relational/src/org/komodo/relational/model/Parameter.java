@@ -22,7 +22,7 @@ import org.komodo.utils.StringUtil;
 /**
  * 
  *
- * @since 8.0
+ *
  */
 public class Parameter extends RelationalObject {
     @SuppressWarnings("javadoc")

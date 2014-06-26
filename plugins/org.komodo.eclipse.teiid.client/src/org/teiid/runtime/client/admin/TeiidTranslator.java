@@ -28,7 +28,7 @@ import org.teiid.runtime.client.Messages;
 
 /**
  *
- * @since 8.0
+ *
  */
 public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTranslator {
 
@@ -280,7 +280,7 @@ public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTrans
      * @param name the property name
      * @param value the proposed new value
      * @return null if the property exists and the proposed value is valid or an error message
-     * @since 7.0
+     *
      */
     @Override
     public String isValidPropertyValue( String name,
@@ -371,7 +371,7 @@ public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTrans
      * @param name the property name (never <code>null</code>)
      * @param value the new property value
      * @throws Exception if there is a problem changing the property
-     * @since 5.0
+     *
      */
     @Override
     public void setPropertyValue( String name,
@@ -384,7 +384,7 @@ public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTrans
     /**
      * @param changedProperties the list of properties that are being changed (never <code>null</code> or empty)
      * @throws Exception if there is a problem changing the properties
-     * @since 7.0
+     *
      */
     @Override
     public void setProperties( Properties changedProperties ) throws Exception {

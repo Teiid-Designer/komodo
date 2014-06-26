@@ -13,7 +13,7 @@ package org.komodo.spi.query.proc.wsdl.model;
 /**
  * This class represents a port as defined in a WSDL
  *
- * @since 8.0
+ *
  */
 public interface IPort extends IWsdlElement {
 	

@@ -492,7 +492,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     
     /** 
      * @see LanguageVisitor#visit(org.teiid.query.sql.proc.AssignmentStatement)
-     * @since 5.0
+     *
      */
     @Override
     public void visit(AssignmentStatement obj) {
@@ -501,7 +501,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     
     /** 
      * @see LanguageVisitor#visit(org.teiid.query.sql.lang.Insert)
-     * @since 5.0
+     *
      */
     @Override
     public void visit(Insert obj) {

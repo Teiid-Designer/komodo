@@ -71,7 +71,7 @@ import org.teiid.runtime.client.TeiidRuntimePlugin;
 /**
  *
  *
- * @since 8.0
+ *
  */
 public class ExecutionAdmin implements IExecutionAdmin {
 
@@ -722,7 +722,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @param changedProperties a collection of properties that have changed (never <code>null</code> or empty)
      * @param type the translator property type
      * @throws Exception if there is a problem changing the properties
-     * @since 7.0
+     *
      */
     public void setProperties( ITeiidTranslator translator,
                                Properties changedProperties,
@@ -749,7 +749,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @param value the new value
      * @param type the translator property type
      * @throws Exception if there is a problem setting the property
-     * @since 7.0
+     *
      */
     public void setPropertyValue( ITeiidTranslator translator,
                                   String propName,

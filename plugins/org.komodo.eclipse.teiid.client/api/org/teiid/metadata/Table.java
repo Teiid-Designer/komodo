@@ -208,7 +208,7 @@ public class Table extends ColumnSet<Schema> implements Modifiable, DataModifiab
 
     /**
      * @param isMaterialized The isMaterialized to set.
-     * @since 4.2
+     *
      */
     public void setMaterialized(boolean isMaterialized) {
         this.isMaterialized = isMaterialized;

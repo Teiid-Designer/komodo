@@ -19,7 +19,7 @@ import org.komodo.utils.HashCodeUtil;
 /**
  * RelationalAccessPattern
  *
- * @since 8.0
+ *
  */
 public class AccessPattern extends RelationalObject {
     private List<Column> columns;

@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 /**
  * This is a common place to put String utility methods.
  *
- * @since 8.0
+ *
  */
 public final class StringUtil {
 
@@ -79,7 +79,7 @@ public final class StringUtil {
     public static final Comparator CASE_SENSITIVE_ORDER = new Comparator() {
         /**
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         * @since 4.2
+         *
          */
         @Override
         public int compare( Object o1,
@@ -561,14 +561,14 @@ public final class StringUtil {
     }
 
     /**
-     * @since 3.0
+     *
      */
     public static String computeDisplayableFormOfConstant( final String text ) {
         return computeDisplayableFormOfConstant(text, Constants.EMPTY_STRING);
     }
 
     /**
-     * @since 3.0
+     *
      */
     public static String computeDisplayableFormOfConstant( final String text,
                                                            final String defaultValue ) {
@@ -631,7 +631,7 @@ public final class StringUtil {
      * Returns whether the specified text represents a boolean value, i.e., whether it equals "true" or "false"
      * (case-insensitive).
      * 
-     * @since 4.0
+     *
      */
     public static boolean isBoolean( final String text ) {
         return (Boolean.TRUE.toString().equalsIgnoreCase(text) || Boolean.FALSE.toString().equalsIgnoreCase(text));
@@ -644,7 +644,7 @@ public final class StringUtil {
      * 
      * @param text The text to check; may be null;
      * @return True if the specified text is either empty or null.
-     * @since 4.0
+     *
      */
     public static boolean isEmpty( final String text ) {
         return (text == null || text.length() == 0);
@@ -814,7 +814,7 @@ public final class StringUtil {
      * Prevents instantiation.
      * </p>
      * 
-     * @since 4.0
+     *
      */
     private StringUtil() {
     }
@@ -851,7 +851,7 @@ public final class StringUtil {
      * 
      * @param raw
      * @return
-     * @since 5.0
+     *
      */
     public static String collapseWhitespace( String raw ) {
         StringBuffer rv = new StringBuffer(raw.length());
@@ -876,7 +876,7 @@ public final class StringUtil {
      * @param input Input text
      * @param desiredLength Desired length
      * @return
-     * @since 5.0
+     *
      */
     public static String toFixedLength( String input,
                                         int desiredLength ) {
@@ -980,7 +980,7 @@ public final class StringUtil {
      * 
      * @param str
      * @return The string with the first letter being changed to uppercase
-     * @since 5.5
+     *
      */
     public static String firstLetterUppercase( String str ) {
         if (str == null || str.length() == 0) {

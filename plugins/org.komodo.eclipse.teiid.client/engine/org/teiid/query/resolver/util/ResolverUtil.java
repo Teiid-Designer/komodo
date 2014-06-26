@@ -507,7 +507,7 @@ public class ResolverUtil {
      * default value is defined
      * @throws Exception for error retrieving metadata
      * @throws Exception
-     * @since 4.3
+     *
      */
 	public static Expression getDefault(ElementSymbol symbol, IQueryMetadataInterface metadata) throws Exception {
         //Check if there is a default value, if so use it
@@ -539,7 +539,7 @@ public class ResolverUtil {
      * @return Constant with proper type and default value Object of proper Class.  Will
      * be null Constant if defaultValue is null.
      * @throws Exception if TransformationException is encountered
-     * @since 4.3
+     *
      */
     private static Constant getProperlyTypedConstant(Object defaultValue, Class<?> parameterType, TeiidParser teiidParser)
         throws QueryResolverException{
@@ -696,7 +696,7 @@ public class ResolverUtil {
      * the internal NullType.  Added for defect 15437.
      * 
      * @param select The select clause
-     * @since 4.2
+     *
      */
     public static void resolveNullLiterals(List symbols) {
         for (int i = 0; i < symbols.size(); i++) {

@@ -11,7 +11,7 @@
 package org.komodo.spi.query.proc.wsdl.model;
 
 /**
- * @since 8.0
+ *
  */
 public interface IPart extends IWsdlElement {
 	

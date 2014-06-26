@@ -29,7 +29,7 @@ import java.util.RandomAccess;
  * }
  * </PRE>
  *
- * @since 8.0
+ *
  */
 public final class HashCodeUtil {
 

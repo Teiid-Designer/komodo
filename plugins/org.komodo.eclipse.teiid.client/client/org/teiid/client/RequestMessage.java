@@ -297,7 +297,7 @@ public class RequestMessage implements Externalizable {
 
     /** 
      * @return Returns the rowLimit.
-     * @since 4.3
+     *
      */
     public int getRowLimit() {
         return this.rowLimit;
@@ -306,7 +306,7 @@ public class RequestMessage implements Externalizable {
     
     /** 
      * @param rowLimit The rowLimit to set.
-     * @since 4.3
+     *
      */
     public void setRowLimit(int rowLimit) {
         this.rowLimit = rowLimit;

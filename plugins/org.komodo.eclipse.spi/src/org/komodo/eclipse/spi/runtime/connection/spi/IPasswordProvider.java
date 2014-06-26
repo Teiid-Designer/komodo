@@ -16,7 +16,7 @@ import org.komodo.eclipse.spi.KEclipseSPIPlugin;
  * Simple interface provides DQP preview manager ability to ask for user password
  * during Preview action setup.
  *
- * @since 1.0
+ *
  */
 public interface IPasswordProvider {
 

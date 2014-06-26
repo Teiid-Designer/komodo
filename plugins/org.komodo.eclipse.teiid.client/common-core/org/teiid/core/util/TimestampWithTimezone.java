@@ -137,7 +137,7 @@ public class TimestampWithTimezone {
      * Creates normalized SQL Time Object
      * 
      * @return Time
-     * @since 4.3
+     *
      */
     public static Time createTime(java.util.Date date) {
         if (date instanceof Time) {
@@ -152,7 +152,7 @@ public class TimestampWithTimezone {
      * Creates normalized SQL Date Object
      *  
      * @return Date
-     * @since 4.3
+     *
      */ 
     public static Date createDate(java.util.Date date) {
         if (date instanceof Date) {

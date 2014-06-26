@@ -205,7 +205,7 @@ public class NodeWrapper implements NodeInfo, VirtualNode, SiblingCountingNode {
 	 * @return the typed value. If requireSingleton is set to true, the result
 	 *         will always be an AtomicValue. In other cases it may be a Value
 	 *         representing a sequence whose items are atomic values.
-	 * @since 8.5
+	 *
 	 */
 
 	public Value atomize() {
@@ -256,7 +256,7 @@ public class NodeWrapper implements NodeInfo, VirtualNode, SiblingCountingNode {
      * @param other the node to be compared with this node
      * @return true if this NodeInfo object and the supplied NodeInfo object represent
      *         the same node in the tree.
-     * @since 8.7 Previously, the effect of the equals() method was not defined. Callers
+     * Previously, the effect of the equals() method was not defined. Callers
      *        should therefore be aware that third party implementations of the NodeInfo interface may
      *        not implement the correct semantics. It is safer to use isSameNodeInfo() for this reason.
      *        The equals() method has been defined because it is useful in contexts such as a Java Set or HashMap.
@@ -273,7 +273,7 @@ public class NodeWrapper implements NodeInfo, VirtualNode, SiblingCountingNode {
      /**
       * The hashCode() method obeys the contract for hashCode(): that is, if two objects are equal
       * (represent the same node) then they must have the same hashCode()
-      * @since 8.7 Previously, the effect of the equals() and hashCode() methods was not defined. Callers
+      * Previously, the effect of the equals() and hashCode() methods was not defined. Callers
       * should therefore be aware that third party implementations of the NodeInfo interface may
       * not implement the correct semantics.
       */

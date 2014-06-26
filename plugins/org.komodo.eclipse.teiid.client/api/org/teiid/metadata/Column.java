@@ -272,7 +272,7 @@ public class Column extends BaseColumn implements Comparable<Column> {
 
     /**
      * @param distinctValues The distinctValues to set.
-     * @since 4.3
+     *
      */
     public void setDistinctValues(int distinctValues) {
         this.distinctValues = Table.asInt(distinctValues);
@@ -285,7 +285,7 @@ public class Column extends BaseColumn implements Comparable<Column> {
 
     /**
      * @param nullValues The nullValues to set.
-     * @since 4.3
+     *
      */
     public void setNullValues(int nullValues) {
         this.nullValues = Table.asInt(nullValues);
@@ -298,7 +298,7 @@ public class Column extends BaseColumn implements Comparable<Column> {
 
     /**
      * @param nativeType The nativeType to set.
-     * @since 4.2
+     *
      */
     public void setNativeType(String nativeType) {
         this.nativeType = nativeType;

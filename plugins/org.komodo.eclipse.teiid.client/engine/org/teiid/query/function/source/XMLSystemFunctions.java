@@ -112,7 +112,7 @@ import org.teiid.util.StAXSQLXML.StAXSourceProvider;
 /** 
  * This class contains scalar system functions supporting for XML manipulation.
  * 
- * @since 4.2
+ *
  */
 public class XMLSystemFunctions {
 	

@@ -20,7 +20,7 @@ import java.util.Set;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
- * @since 8.0
+ *
  */
 public interface IExecutionAdmin {
 
@@ -118,7 +118,7 @@ public interface IExecutionAdmin {
      * @param name the translator name (never <code>null</code> or empty)
      * @return a TeiidTranslator
      * @throws Exception 
-     * @since 7.0
+     *
      */
      ITeiidTranslator getTranslator(String name) throws Exception;
 

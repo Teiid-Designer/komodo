@@ -19,7 +19,7 @@ import org.komodo.spi.constants.StringConstants;
 /**
  * This class contains static utilities that return strings that are the result of manipulating other strings or objects.
  * 
- * @since 8.0
+ *
  */
 public class StringUtilities implements StringConstants {
 
@@ -30,7 +30,7 @@ public class StringUtilities implements StringConstants {
      * @param prefix The path prefix
      * @param suffix The path suffix
      * @return The concatenated path prefix and suffix
-     * @since 3.1
+     *
      */
     public static String buildPath( final String prefix,
                                     final String suffix ) {
@@ -47,7 +47,7 @@ public class StringUtilities implements StringConstants {
      * @param endLength
      * @param middleString
      * @return
-     * @since 5.0
+     *
      */
     public static String condenseToLength( final String originalString,
                                            final int maxLength,

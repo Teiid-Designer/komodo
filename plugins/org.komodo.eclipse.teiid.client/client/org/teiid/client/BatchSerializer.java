@@ -24,7 +24,7 @@ import org.teiid.client.batch.Batch3Serializer;
 import org.teiid.core.types.DataTypeManagerService;
 
 /**
- * @since 4.2
+ *
  *
  * <ul>
  * <li>version 0: starts with 7.1 and uses simple serialization too broadly

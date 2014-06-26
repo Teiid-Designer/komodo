@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 /**
- * @since 8.0
+ *
  *
  */
 public interface ITeiidTranslator {
@@ -62,7 +62,7 @@ public interface ITeiidTranslator {
      * @param name the property name
      * @param value the proposed new value
      * @return null if the property exists and the proposed value is valid or an error message
-     * @since 7.0
+     *
      */
     String isValidPropertyValue(String name, String value, TranslatorPropertyType type);
 
@@ -72,14 +72,14 @@ public interface ITeiidTranslator {
      * @param name the property name (never <code>null</code>)
      * @param value the new property value
      * @throws Exception if there is a problem changing the property
-     * @since 5.0
+     *
      */
     void setPropertyValue(String name, String value, TranslatorPropertyType type) throws Exception;
 
     /**
      * @param changedProperties the list of properties that are being changed (never <code>null</code> or empty)
      * @throws Exception if there is a problem changing the properties
-     * @since 7.0
+     *
      */
     void setProperties(Properties changedProperties) throws Exception;
 
@@ -91,19 +91,19 @@ public interface ITeiidTranslator {
     
     /**
      * @return an immutable collection of property definitions (never <code>null</code>);
-     * @since 7.0
+     *
      */
     Collection<TeiidPropertyDefinition> getPropertyDefinitions();
     
     /**
      * @return an immutable collection of import property definitions (never <code>null</code>);
-     * @since 7.0
+     *
      */
     Collection<TeiidPropertyDefinition> getImportPropertyDefinitions();
     
     /**
      * @return an immutable collection of import property definitions (never <code>null</code>);
-     * @since 7.0
+     *
      */
     Collection<TeiidPropertyDefinition> getExtensionPropertyDefinitions();
 }

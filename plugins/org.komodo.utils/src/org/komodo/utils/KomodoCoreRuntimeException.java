@@ -10,7 +10,7 @@ package org.komodo.utils;
 
 /**
  *
- * @since 8.0
+ *
  */
 public class KomodoCoreRuntimeException extends RuntimeException {
 	

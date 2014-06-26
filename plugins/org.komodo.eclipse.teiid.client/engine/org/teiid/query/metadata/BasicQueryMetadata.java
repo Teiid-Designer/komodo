@@ -162,7 +162,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     
     /** 
      * @see IQueryMetadataInterface#getDistinctValues(java.lang.Object)
-     * @since 4.3
+     *
      */
     @Override
     public float getDistinctValues(Object elementID) throws Exception {
@@ -170,7 +170,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
     /** 
      * @see IQueryMetadataInterface#getNullValues(java.lang.Object)
-     * @since 4.3
+     *
      */
     @Override
     public float getNullValues(Object elementID) throws Exception {
@@ -214,7 +214,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
 
     /** 
      * @see IQueryMetadataInterface#hasMaterialization(java.lang.Object)
-     * @since 4.2
+     *
      */
     @Override
     public boolean hasMaterialization(Object groupID) 
@@ -224,7 +224,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     
     /** 
      * @see IQueryMetadataInterface#getMaterialization(java.lang.Object)
-     * @since 4.2
+     *
      */
     @Override
     public Object getMaterialization(Object groupID) 
@@ -234,7 +234,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     
     /** 
      * @see IQueryMetadataInterface#getMaterializationStage(java.lang.Object)
-     * @since 4.2
+     *
      */
     @Override
     public Object getMaterializationStage(Object groupID) 
@@ -492,7 +492,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     
     /** 
      * @see IQueryMetadataInterface#getModeledType(java.lang.Object)
-     * @since 5.0
+     *
      */
     @Override
     public String getModeledType(Object elementID) throws Exception {
@@ -501,7 +501,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     
     /** 
      * @see IQueryMetadataInterface#getModeledBaseType(java.lang.Object)
-     * @since 5.0
+     *
      */
     @Override
     public String getModeledBaseType(Object elementID) throws Exception {
@@ -510,7 +510,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
 
     /** 
      * @see IQueryMetadataInterface#getModeledPrimitiveType(java.lang.Object)
-     * @since 5.0
+     *
      */
     @Override
     public String getModeledPrimitiveType(Object elementID) throws Exception {

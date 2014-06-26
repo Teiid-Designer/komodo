@@ -13,7 +13,7 @@ package org.komodo.spi.runtime;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
- * @since 8.0
+ *
  */
 public interface ITeiidConnectionInfo {
 

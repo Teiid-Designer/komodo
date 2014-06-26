@@ -731,7 +731,7 @@ public class ResolverVisitor extends LanguageVisitor
 	 * @param types
 	 * @return
 	 * @throws Exception 
-	 * @since 4.3
+	 *
 	 */
 	private List<FunctionDescriptor> findWithImplicitConversions(FunctionLibrary library, Function function, Expression[] args, Class<?>[] types, boolean hasArgWithoutType) throws Exception {
 	    

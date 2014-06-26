@@ -24,7 +24,7 @@ package org.teiid.core;
 
 
 /**
- * @since 4.0
+ *
  */
 public interface CoreConstants {
 

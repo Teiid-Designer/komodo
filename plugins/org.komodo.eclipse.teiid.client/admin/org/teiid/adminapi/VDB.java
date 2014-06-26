@@ -40,7 +40,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
  * For example: <CODE>"Accounts<{@link #DELIMITER_CHAR}>1"</CODE>, <CODE>"UnifiedSales<{@link #DELIMITER_CHAR}>4</CODE>" etc. 
  * </p>
  * 
- * @since 4.3
+ *
  */
 public interface VDB extends AdminObject, DomainAware {
 

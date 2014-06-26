@@ -14,7 +14,7 @@ import java.util.TreeMap;
 /**
  * StringNameValidator
  *
- * @since 8.0
+ *
  */
 public class StringNameValidator {
 

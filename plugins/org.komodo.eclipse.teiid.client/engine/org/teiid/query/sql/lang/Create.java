@@ -40,7 +40,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
 
 
 /** 
- * @since 5.5
+ *
  */
 public class Create extends Command
     implements TargetedCommand, ICreate<Expression, LanguageVisitor> {
@@ -101,7 +101,7 @@ public class Create extends Command
     
     /** 
      * @see org.teiid.query.sql.lang.Command#getType()
-     * @since 5.5
+     *
      */
     public int getType() {
         return Command.TYPE_CREATE;
@@ -109,7 +109,7 @@ public class Create extends Command
 
     /** 
      * @see org.teiid.query.sql.lang.Command#getProjectedSymbols()
-     * @since 5.5
+     *
      */
     public List getProjectedSymbols() {
         return getUpdateCommandSymbol();
@@ -117,7 +117,7 @@ public class Create extends Command
 
     /** 
      * @see org.teiid.query.sql.lang.Command#areResultsCachable()
-     * @since 5.5
+     *
      */
     public boolean areResultsCachable() {
         return false;

@@ -563,7 +563,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     /**
      * Validate that the command assigns a value to the ROWS_UPDATED variable 
      * @param obj
-     * @since 4.2
+     *
      */
     @Removed(Version.TEIID_8_0)
     protected void validateContainsRowsUpdatedVariable(CreateUpdateProcedureCommand obj) {
@@ -1117,7 +1117,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     /**
      * Validates SELECT INTO queries.
      * @param query
-     * @since 4.2
+     *
      */
     protected void validateSelectInto(Query query) {
         List<Expression> symbols = query.getSelect().getProjectedSymbols();
@@ -1176,7 +1176,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     
     /** 
      * @see LanguageVisitor#visit(org.teiid.query.sql.lang.BetweenCriteria)
-     * @since 4.3
+     *
      */
     @Override
     public void visit(BetweenCriteria obj) {
@@ -1188,7 +1188,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
     /** 
      * @see LanguageVisitor#visit(org.teiid.query.sql.lang.IsNullCriteria)
-     * @since 4.3
+     *
      */
     @Override
     public void visit(IsNullCriteria obj) {
@@ -1197,7 +1197,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
     /** 
      * @see LanguageVisitor#visit(org.teiid.query.sql.lang.MatchCriteria)
-     * @since 4.3
+     *
      */
     @Override
     public void visit(MatchCriteria obj) {
@@ -1206,7 +1206,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
     /** 
      * @see LanguageVisitor#visit(org.teiid.query.sql.lang.NotCriteria)
-     * @since 4.3
+     *
      */
     @Override
     public void visit(NotCriteria obj) {
@@ -1215,7 +1215,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
     /** 
      * @see LanguageVisitor#visit(org.teiid.query.sql.lang.SetCriteria)
-     * @since 4.3
+     *
      */
     @Override
     public void visit(SetCriteria obj) {
@@ -1227,7 +1227,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
     /** 
      * @see LanguageVisitor#visit(org.teiid.query.sql.lang.SubqueryCompareCriteria)
-     * @since 4.3
+     *
      */
     @Override
     public void visit(SubqueryCompareCriteria obj) {

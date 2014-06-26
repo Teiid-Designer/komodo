@@ -18,7 +18,7 @@ import org.komodo.utils.StringUtil;
 /**
  * RelationalColumn
  *
- * @since 8.0
+ *
  */
 public class Column extends RelationalObject {
     @SuppressWarnings("javadoc")

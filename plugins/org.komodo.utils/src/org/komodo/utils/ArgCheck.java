@@ -15,7 +15,7 @@ import java.util.Properties;
  * are done, such as checking that an Object is non-null, checking the range of a value, etc. All of these methods throw
  * {@link IllegalArgumentException}.
  *
- * @since 8.0
+ *
  */
 public class ArgCheck {
 
@@ -219,7 +219,7 @@ public class ArgCheck {
      * 
      * @param string String
      * @throws IllegalArgumentException If string is null or empty
-     * @since 3.1
+     *
      */
     public static final void isNotEmpty(String string) {
         isNotZeroLength(string, null);
@@ -231,7 +231,7 @@ public class ArgCheck {
      * @param string String
      * @param message Exception message if check fails
      * @throws IllegalArgumentException If string is null or empty
-     * @since 3.1
+     *
      */
     public static final void isNotEmpty(String string, String message) {
         isNotZeroLength(string, message);

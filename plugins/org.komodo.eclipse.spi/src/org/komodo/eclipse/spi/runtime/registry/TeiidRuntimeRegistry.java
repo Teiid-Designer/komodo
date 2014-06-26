@@ -31,7 +31,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
 
 /**
- * @since 1.0
+ *
  */
 public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersion, IExecutionAdminFactory> {
     

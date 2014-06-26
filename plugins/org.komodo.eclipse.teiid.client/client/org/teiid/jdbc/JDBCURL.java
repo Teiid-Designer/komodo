@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 import org.teiid.net.TeiidURL;
 
 /** 
- * @since 4.3
+ *
  */
 public class JDBCURL {
     private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
