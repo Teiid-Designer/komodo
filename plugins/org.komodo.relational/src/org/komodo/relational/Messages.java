@@ -113,8 +113,8 @@ public class Messages implements StringConstants {
     /**
      * Get message string with parameters
      *
-     * @param key
-     * @param parameters
+     * @param key the enum key
+     * @param parameters params
      *
      * @return i18n string
      */

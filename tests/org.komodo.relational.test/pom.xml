@@ -9,7 +9,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<groupId>org.jboss.tools</groupId>
 	<artifactId>org.komodo.relational.test</artifactId> 
 	<version>1.0.0-SNAPSHOT</version>
-	<packaging>eclipse-test-plugin</packaging>
     <build>
         <plugins>
             <plugin>
@@ -25,4 +24,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             </plugin>
         </plugins>
     </build>
+    <packaging>eclipse-plugin</packaging>
 </project>
+

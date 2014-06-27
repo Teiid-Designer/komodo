@@ -16,11 +16,14 @@
 package org.komodo.relational;
 
 import java.util.Properties;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import org.komodo.core.IStatus;
+import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  * Test Class to test Column
@@ -110,8 +113,8 @@ public class TestColumn {
         assertEquals(0,octetLength);
         assertEquals(0,length);
         
-        assertEquals(NULLABLE.NULLABLE,nullable);
-        assertEquals(SEARCHABILITY.SEARCHABLE,searchability);
+        assertEquals(RelationalConstants.NULLABLE.NULLABLE,nullable);
+        assertEquals(RelationalConstants.SEARCHABILITY.SEARCHABLE,searchability);
     	assertEquals(true,isCaseSensitive);
     	assertEquals(true,isSigned);
     	assertEquals(true,isSelectable);
@@ -143,7 +146,7 @@ public class TestColumn {
     	props.put(Column.KEY_NULL_VALUE_COUNT, "6"); //$NON-NLS-1$
     	props.put(Column.KEY_DATATYPE, "string"); //$NON-NLS-1$
     	props.put(Column.KEY_NATIVE_TYPE, "numeric"); //$NON-NLS-1$
-    	props.put(Column.KEY_NULLABLE, NULLABLE.NO_NULLS); 
+    	props.put(Column.KEY_NULLABLE, RelationalConstants.NULLABLE.NO_NULLS); 
     	props.put(Column.KEY_AUTO_INCREMENTED, "true"); //$NON-NLS-1$
     	props.put(Column.KEY_CASE_SENSITIVE, "false"); //$NON-NLS-1$
     	props.put(Column.KEY_CHARACTER_SET_NAME, "charSet"); //$NON-NLS-1$
@@ -160,7 +163,7 @@ public class TestColumn {
     	props.put(Column.KEY_SCALE, "5"); //$NON-NLS-1$
     	props.put(Column.KEY_RADIX, "4"); //$NON-NLS-1$
     	props.put(Column.KEY_SIGNED, "false"); //$NON-NLS-1$
-    	props.put(Column.KEY_SEARCHABILITY, SEARCHABILITY.LIKE_ONLY);
+    	props.put(Column.KEY_SEARCHABILITY, RelationalConstants.SEARCHABILITY.LIKE_ONLY);
     	props.put(Column.KEY_SELECTABLE, "false"); //$NON-NLS-1$
     	props.put(Column.KEY_UPDATEABLE, "false"); //$NON-NLS-1$
     	
@@ -183,13 +186,13 @@ public class TestColumn {
     	assertEquals("maxVal", column.getMaximumValue()); //$NON-NLS-1$
     	assertEquals("minVal", column.getMinimumValue()); //$NON-NLS-1$
     	assertEquals("numeric", column.getNativeType()); //$NON-NLS-1$
-    	assertEquals(NULLABLE.NO_NULLS, column.getNullable());
+    	assertEquals(RelationalConstants.NULLABLE.NO_NULLS, column.getNullable());
     	assertEquals(6, column.getNullValueCount());
     	assertEquals(3, column.getPrecision());
     	assertEquals(4, column.getRadix());
     	assertEquals(0, column.getProcessType());
     	assertEquals(5, column.getScale());
-    	assertEquals(SEARCHABILITY.LIKE_ONLY,column.getSearchability());
+    	assertEquals(RelationalConstants.SEARCHABILITY.LIKE_ONLY,column.getSearchability());
     	assertEquals(true, column.isAutoIncremented());
     	assertEquals(false, column.isCaseSensitive());
     	assertEquals(true, column.isCurrency());
@@ -224,9 +227,9 @@ public class TestColumn {
     public void testValidate1() {
     	Column column = RelationalUtil.createColumn(COLUMN_NAME);
     	
-    	IStatus status = column.validate();
+    	IOutcome outcome = column.validate();
     	
-    	assertEquals(IStatus.OK, status.getSeverity());
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
     }
         
     /**
@@ -236,11 +239,11 @@ public class TestColumn {
     public void testValidate2() {
     	Column column = RelationalUtil.createColumn("Crap ?"); //$NON-NLS-1$
     	
-    	IStatus status = column.validate();
+    	IOutcome outcome = column.validate();
     	
-    	assertEquals(IStatus.ERROR, status.getSeverity());
+    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
     	
-    	if(!status.getMessage().startsWith("The name is invalid.")) { //$NON-NLS-1$
+    	if(!outcome.getMessage().startsWith("The name is invalid.")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}
     }
@@ -252,9 +255,9 @@ public class TestColumn {
     public void testValidate3() {
     	Column column = RelationalUtil.createColumn("Crap?"); //$NON-NLS-1$
     	
-    	IStatus status = column.validate();
+    	IOutcome outcome = column.validate();
     	
-    	assertEquals(IStatus.OK, status.getSeverity());
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
     }
     
     /**
@@ -264,11 +267,11 @@ public class TestColumn {
     public void testValidate4() {
     	Column column = RelationalUtil.createColumn("?Crap"); //$NON-NLS-1$
     	
-    	IStatus status = column.validate();
+    	IOutcome outcome = column.validate();
     	
-    	assertEquals(IStatus.ERROR, status.getSeverity());
+    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
     	
-    	if(!status.getMessage().startsWith("The first character of the name")) { //$NON-NLS-1$
+    	if(!outcome.getMessage().startsWith("The first character of the name")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}
     }

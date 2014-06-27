@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 package org.komodo.relational;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import java.util.Properties;
 
-import org.komodo.core.IStatus;
+import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.relational.model.Table;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  * Test Class to test Table
@@ -339,10 +344,10 @@ public class TestTable {
     public void testValidate1() {
     	Table table = RelationalUtil.createTable(TABLE_NAME);
     	
-    	IStatus status = table.validate();
+    	IOutcome outcome = table.validate();
     	
-    	assertEquals(IStatus.WARNING, status.getSeverity());
-    	assertEquals("No columns defined for table", status.getMessage()); //$NON-NLS-1$
+    	assertEquals(IOutcome.Level.WARNING, outcome.getLevel());
+    	assertEquals("No columns defined for table", outcome.getMessage()); //$NON-NLS-1$
     }
 
     /**
@@ -353,9 +358,9 @@ public class TestTable {
     	Table table = RelationalUtil.createTable(TABLE_NAME);
     	table.createColumn();
     	
-    	IStatus status = table.validate();
+    	IOutcome outcome = table.validate();
     	
-    	assertEquals(IStatus.OK, status.getSeverity());
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
     }
 
     /**
@@ -366,11 +371,11 @@ public class TestTable {
     	Table table = RelationalUtil.createTable("Crap ?"); //$NON-NLS-1$
     	table.createColumn();
     	
-    	IStatus status = table.validate();
+    	IOutcome outcome = table.validate();
     	
-    	assertEquals(IStatus.ERROR, status.getSeverity());
+    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
     	
-    	if(!status.getMessage().startsWith("The name is invalid.")) { //$NON-NLS-1$
+    	if(!outcome.getMessage().startsWith("The name is invalid.")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}
     }

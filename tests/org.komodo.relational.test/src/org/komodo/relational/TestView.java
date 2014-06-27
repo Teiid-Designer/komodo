@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 package org.komodo.relational;
+import static org.junit.Assert.assertEquals;
 
-import org.komodo.core.IStatus;
+import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.View;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  * Test Class to test Table
@@ -83,10 +85,10 @@ public class TestView {
     public void testValidate1() {
     	View view = RelationalUtil.createView(VIEW_NAME);
     	
-    	IStatus status = view.validate();
+    	IOutcome outcome = view.validate();
     	
-    	assertEquals(IStatus.WARNING, status.getSeverity());
-    	assertEquals("No columns defined for table", status.getMessage()); //$NON-NLS-1$
+    	assertEquals(IOutcome.Level.WARNING, outcome.getLevel());
+    	assertEquals("No columns defined for table", outcome.getMessage()); //$NON-NLS-1$
     }
         
 }

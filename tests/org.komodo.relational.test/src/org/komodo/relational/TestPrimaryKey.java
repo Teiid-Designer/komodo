@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 package org.komodo.relational;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import org.komodo.core.IStatus;
+import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.PrimaryKey;
+import org.komodo.spi.outcome.IOutcome;
 
 /**
  * Test Class to test Table
@@ -83,10 +86,10 @@ public class TestPrimaryKey {
     public void testValidate1() {
     	PrimaryKey pk = RelationalUtil.createPrimaryKey(PK_NAME);
     	
-    	IStatus status = pk.validate();
+    	IOutcome outcome = pk.validate();
     	
-    	assertEquals(IStatus.ERROR, status.getSeverity());
-    	if(!status.getMessage().startsWith("No columns defined for primary key")) { //$NON-NLS-1$
+    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
+    	if(!outcome.getMessage().startsWith("No columns defined for primary key")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}
     }
