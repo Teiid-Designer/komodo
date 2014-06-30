@@ -16,6 +16,7 @@
     <module>org.komodo.eclipse.test.utils</module>
     <module>org.komodo.eclipse.teiid.client.test</module>
     <module>org.komodo.relational.test</module>
+    <module>org.komodo.utils.test</module>
 
   </modules>
 </project>
