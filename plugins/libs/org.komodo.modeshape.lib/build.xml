@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!--
+==
+== Script to resolve the plugin's lib directory dependencies
+==
+== Note. This has to build the target platform of
+==       this plugin (even though we are not actually
+==       compiling it!)
+==
+-->
+
+<project name="generate-libs" default="generate">
+
+	<property name="GIT-HOME" location="../../.." />
+
+	<import file="${GIT-HOME}/scripts/build-common.xml" />
+
+	<!-- Comma-separated list of required libraries -->
+	<property name="libs" value="jcr.jar,
+								 modeshape-jcr.jar,
+								 modeshape-common.jar,
+		                         logback-core.jar,
+								 logback-classic.jar,
+								 slf4j-api.jar"/>
+
+	<!--
+	   Test whether all the required libraries are present
+	-->
+	<target name="check-libs" depends="init-ant-contrib">
+		<!-- correct any extra whitespace created from formatting -->
+		<removeWhitespace arg="${libs}"/>
+
+		<filelist id="my.libs" dir="lib" files="${rwsResult}" />
+		<restrict id="missing.libs">
+			<filelist refid="my.libs" />
+			<not>
+				<exists />
+			</not>
+		</restrict>
+
+		<property name="missing.libs" refid="missing.libs" />
+		<condition property="libs-present" value="true">
+			<length string="${missing.libs}" length="0" />
+		</condition>
+
+	</target>
+
+	<!--
+	   Check whether the libraries have already been downloaded.
+	   If not present then the 'should-generate' property be set to the 'true'
+	-->
+	<target name="check-work" depends="check-libs">
+		<condition property="should-generate" value="true">
+			<isfalse value="${libs-present}" />
+		</condition>
+	</target>
+
+	<target name="nothing-todo" unless="should-generate">
+		<echo message="Project source generation is up-to-date" />
+	</target>
+
+	<target name="clean-internal" if="should-generate">
+	</target>
+
+	<target name="clean">
+		<property name="should-generate" value="true"/>
+		<antcall target="clean-internal"/>
+	</target>
+
+	<target name="generate" depends="init-ant-contrib, check-work, nothing-todo, clean-internal" if="should-generate">
+		<echo message="Generating from maven ..." />
+		<mvn dir="." args="process-sources -P download-sources" />
+
+	</target>
+</project>

@@ -14,6 +14,8 @@
 	<packaging>pom</packaging>
 	<modules>
 
+    <module>libs</module>
+
     <module>org.komodo.spi</module>
     <module>org.komodo.relational</module>
     <module>org.komodo.utils</module>
