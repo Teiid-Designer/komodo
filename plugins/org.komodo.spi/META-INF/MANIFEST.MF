@@ -9,6 +9,7 @@ Bundle-Localization: plugin
 Export-Package: org.komodo.spi,
  org.komodo.spi.annotation,
  org.komodo.spi.constants,
+ org.komodo.spi.logging,
  org.komodo.spi.outcome,
  org.komodo.spi.query,
  org.komodo.spi.query.metadata,
