@@ -26,8 +26,7 @@ import java.lang.ref.ReferenceQueue;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
-import org.eclipse.core.runtime.IStatus;
-import org.teiid.runtime.client.TeiidRuntimePlugin;
+import org.komodo.utils.KLog;
 
 public class AutoCleanupUtil {
 	
@@ -81,7 +80,7 @@ public class AutoCleanupUtil {
 			try {
 				ref.cleanup();
 			} catch (Throwable e) {
-			    TeiidRuntimePlugin.log(IStatus.ERROR, e, "Error cleaning up."); //$NON-NLS-1$
+			    KLog.getLogger().error("Error cleaning up.", e); //$NON-NLS-1$
 			}
 			REFERENCES.remove(ref);
 		}

@@ -52,6 +52,7 @@ import java.util.regex.Pattern;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.utils.KLog;
 import org.teiid.client.DQP;
 import org.teiid.client.RequestMessage;
 import org.teiid.client.RequestMessage.ResultsMode;
@@ -70,7 +71,6 @@ import org.teiid.core.util.StringUtil;
 import org.teiid.jdbc.EnhancedTimer.Task;
 import org.teiid.net.TeiidURL;
 import org.teiid.runtime.client.Messages;
-import org.teiid.runtime.client.TeiidRuntimePlugin;
 
 
 public class StatementImpl extends WrapperImpl implements TeiidStatement {
@@ -217,7 +217,7 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
     protected void checkSupportedVersion(Version teiidVersion) {
         ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         if (minVersion.isLessThan(teiidVersion.get())) { 
-            TeiidRuntimePlugin.logError("StatementImpl.checkSupportedVersion", "Method being executed that is not supported in teiid version " + getTeiidVersion());  //$NON-NLS-1$//$NON-NLS-2$
+            KLog.getLogger().error("StatementImpl.checkSupportedVersion", "Method being executed that is not supported in teiid version " + getTeiidVersion());  //$NON-NLS-1$//$NON-NLS-2$
             throw new UnsupportedOperationException();
         }
     }

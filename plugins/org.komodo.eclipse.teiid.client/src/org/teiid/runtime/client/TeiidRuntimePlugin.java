@@ -22,11 +22,8 @@
 package org.teiid.runtime.client;
 
 import java.io.File;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.datatools.connectivity.services.PluginResourceLocator;
 import org.osgi.framework.BundleContext;
 import org.teiid.core.util.ArgCheck;
@@ -56,51 +53,10 @@ public class TeiidRuntimePlugin extends Plugin {
      */
     private static final String JAR = "jar"; //$NON-NLS-1$
 
-    /**
-     * Logger for logging warnings and errors. Initialised by the plugin starting
-     */
-    public static ILog LOGGER;
-
     @Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
-        TeiidRuntimePlugin.LOGGER = this.getLog();
         PLUGIN_ID = context.getBundle().getSymbolicName();
-    }
-
-    /**
-     * Logs the given message and {@link Throwable}with the supplied severity.
-     * 
-     * @param severity the severity, which corresponds to the {@link IStatus#getSeverity() IStatus severity}.
-     * @param message the message to be logged
-     * @param t the exception; may be null
-     */
-    public static void log( final int severity, final Throwable t, final String message ) {
-        ArgCheck.isNotNull(LOGGER);
-        LOGGER.log(new Status(severity, PLUGIN_ID, message, t));
-    }
-
-    /**
-     * Logs the given error message and {@link Throwable} with a prefix for some context.
-     *
-     * @param context
-     * @param e
-     * @param message
-     */
-    public static void logError(String context, Throwable e, Object message) {
-        String msg = context + " : " + message; //$NON-NLS-1$
-        log(IStatus.ERROR, e, msg);
-    }
-
-    /**
-     * Logs the given error message and {@link Throwable} with a prefix for some context.
-     *
-     * @param context
-     * @param message
-     */
-    public static void logError(String context, Object message) {
-        String msg = context + " : " + message; //$NON-NLS-1$
-        log(IStatus.ERROR, null, msg);
     }
 
     /**

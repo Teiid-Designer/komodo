@@ -53,6 +53,7 @@ import javax.transaction.xa.Xid;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.utils.KLog;
 import org.teiid.client.DQP;
 import org.teiid.client.RequestMessage;
 import org.teiid.client.plan.Annotation;
@@ -68,7 +69,6 @@ import org.teiid.net.TeiidURL;
 import org.teiid.net.socket.SocketServerConnection;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
-import org.teiid.runtime.client.TeiidRuntimePlugin;
 
 /**
  * Teiid's Connection implementation.
@@ -1086,7 +1086,7 @@ public class ConnectionImpl extends WrapperImpl implements TeiidConnection {
     protected void checkSupportedVersion(Version teiidVersion) {
         ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         if (minVersion.isLessThan(teiidVersion.get())) { 
-            TeiidRuntimePlugin.logError("StatementImpl.checkSupportedVersion", "Method being executed that is not supported in teiid version " + getTeiidVersion());  //$NON-NLS-1$//$NON-NLS-2$
+            KLog.getLogger().error("StatementImpl.checkSupportedVersion", "Method being executed that is not supported in teiid version " + getTeiidVersion());  //$NON-NLS-1$//$NON-NLS-2$
             throw new UnsupportedOperationException();
         }
     }
