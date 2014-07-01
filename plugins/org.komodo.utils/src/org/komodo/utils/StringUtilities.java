@@ -165,7 +165,7 @@ public class StringUtilities implements StringConstants {
                 line = reader.readLine();
             }
         } catch (final IOException e) {
-//            throw new TeiidDesignerRuntimeException(e);
+            throw new KomodoCoreRuntimeException(e);
         }
         return (String[])result.toArray(new String[result.size()]);
     }
