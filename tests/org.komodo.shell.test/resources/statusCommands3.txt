@@ -1,0 +1,5 @@
+#status at root.Project2.ViewModel1
+cd Project2
+cd ViewModel1
+status
+

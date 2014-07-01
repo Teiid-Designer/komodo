@@ -1,0 +1,17 @@
+#get status and list at root
+status
+list
+#cd into Project2
+cd Project2
+#get status and list at root.Project2
+status
+list
+#cd into ViewModel1
+cd ViewModel1
+#get status and list at root.Project2.ViewModel1
+status
+list
+#exit
+exit
+
+
