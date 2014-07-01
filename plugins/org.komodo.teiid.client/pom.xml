@@ -8,7 +8,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <groupId>org.jboss.tools.komodo.plugins</groupId>
-    <artifactId>org.komodo.eclipse.teiid.client</artifactId>
+    <artifactId>org.komodo.teiid.client</artifactId>
     <packaging>eclipse-plugin</packaging>
     <name>Komodo Teiid Client</name>
 	  <version>1.0.0-SNAPSHOT</version>
