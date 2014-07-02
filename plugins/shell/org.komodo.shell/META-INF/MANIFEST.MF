@@ -11,5 +11,5 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: org.komodo.shell-api;bundle-version="1.0.0",
  org.komodo.utils;bundle-version="1.0.0"
 Bundle-ClassPath: .,
- lib/aesh-0.33.13.jar
+ lib/aesh.jar
 
