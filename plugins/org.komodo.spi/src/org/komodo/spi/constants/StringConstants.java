@@ -125,5 +125,29 @@ public interface StringConstants {
      */
     String LOG = "log"; //$NON-NLS-1$
 
+	/**
+	 * Current Folder Symbol
+	 */
+	String CURRENT_FOLDER_SYMBOL = "."; //$NON-NLS-1$
 
+	/**
+	 * Parent Folder Symbol
+	 */
+	String PARENT_FOLDER_SYMBOL = ".."; //$NON-NLS-1$
+	
+	/**
+	 * Drive Separator
+	 */
+	String DRIVE_SEPARATOR = ":"; //$NON-NLS-1$
+	
+	/**
+	 * File Extension separator
+	 */
+	String FILE_EXTENSION_SEPARATOR = "."; //$NON-NLS-1$
+	
+	/**
+	 * File name wildcard
+	 */
+	String FILE_NAME_WILDCARD = "*"; //$NON-NLS-1$
 }
+

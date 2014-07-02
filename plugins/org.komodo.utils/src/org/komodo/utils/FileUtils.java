@@ -1,10 +1,25 @@
 /*
  * JBoss, Home of Professional Open Source.
- *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
- *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
+
 package org.komodo.utils;
 
 import java.io.BufferedInputStream;
@@ -22,23 +37,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 
+import org.komodo.spi.constants.StringConstants;
+
 /**
- * @since 8.0
+ * File Utilities
  */
-public class FileUtils {
-
-    public interface Constants {
-        char CURRENT_FOLDER_SYMBOL_CHAR = '.';
-        char DRIVE_SEPARATOR_CHAR = ':';
-        char FILE_EXTENSION_SEPARATOR_CHAR = '.';
-        char FILE_NAME_WILDCARD_CHAR = '*';
-
-        String CURRENT_FOLDER_SYMBOL = String.valueOf(CURRENT_FOLDER_SYMBOL_CHAR);
-        String DRIVE_SEPARATOR = String.valueOf(DRIVE_SEPARATOR_CHAR);
-        String FILE_EXTENSION_SEPARATOR = String.valueOf(FILE_EXTENSION_SEPARATOR_CHAR);
-        String FILE_NAME_WILDCARD = String.valueOf(FILE_NAME_WILDCARD_CHAR);
-        String PARENT_FOLDER_SYMBOL = ".."; //$NON-NLS-1$
-    }
+public class FileUtils implements StringConstants {
 
     public static final char SEPARATOR = '/';
 
@@ -104,18 +108,18 @@ public class FileUtils {
         if (name.endsWith(extension)) {
             return name;
         }
-        if (!force && name.indexOf(Constants.FILE_EXTENSION_SEPARATOR_CHAR) >= 0) {
+        if (!force && name.indexOf(FILE_EXTENSION_SEPARATOR) >= 0) {
             return name;
         }
         final int nameLen = name.length() - 1;
         final int extLen = extension.length();
-        final boolean nameEndsWithExtChr = (nameLen >= 0 && name.charAt(nameLen) == Constants.FILE_EXTENSION_SEPARATOR_CHAR);
-        final boolean extBeginsWithExtChr = (extLen > 0 && extension.charAt(0) == Constants.FILE_EXTENSION_SEPARATOR_CHAR);
+        final boolean nameEndsWithExtChr = (nameLen >= 0 && name.charAt(nameLen) == FILE_EXTENSION_SEPARATOR.charAt(0));
+        final boolean extBeginsWithExtChr = (extLen > 0 && extension.charAt(0) == FILE_EXTENSION_SEPARATOR.charAt(0));
         if (nameEndsWithExtChr && extBeginsWithExtChr) {
             return name.substring(0, nameLen) + extension;
         }
         if (!nameEndsWithExtChr && !extBeginsWithExtChr) {
-            return name + Constants.FILE_EXTENSION_SEPARATOR + extension;
+            return name + FILE_EXTENSION_SEPARATOR + extension;
         }
         return name + extension;
     }
@@ -158,7 +162,7 @@ public class FileUtils {
      */
     public static String getExtension(String theFileName) {
         String result = null;
-        final int index = theFileName.lastIndexOf(Constants.FILE_EXTENSION_SEPARATOR_CHAR);
+        final int index = theFileName.lastIndexOf(FILE_EXTENSION_SEPARATOR);
 
         // make sure extension char is found and is not the last char in the path
         if ((index != -1) && ((index + 1) != theFileName.length())) {
