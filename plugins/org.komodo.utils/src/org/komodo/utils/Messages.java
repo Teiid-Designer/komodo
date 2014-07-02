@@ -93,6 +93,26 @@ public class Messages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
+    public enum FileUtils {
+        The_name_of_the_file_may_not_be_null,
+        The_file_extension_may_not_be_null,
+        Unable_to_create_file_in,
+        Unable_to_write_file_in,
+        Unable_to_read_file_in,
+        Unable_to_rename_file_in,
+        Unable_to_delete_file_in,
+        File_already_exists, 
+        Unable_to_rename,
+        File_does_not_exist_1,
+        Not_a_directory;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
     public enum StringUtil {
         displayable;
 

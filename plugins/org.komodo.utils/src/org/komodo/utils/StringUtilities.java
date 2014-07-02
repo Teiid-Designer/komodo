@@ -154,20 +154,16 @@ public class StringUtilities implements StringConstants {
         return result.toString() + lastToken;
     }
 
-    public static String[] getLines( final String value ) {
-        final StringReader stringReader = new StringReader(value);
-        final BufferedReader reader = new BufferedReader(stringReader);
-        final ArrayList result = new ArrayList();
-        try {
-            String line = reader.readLine();
-            while (line != null) {
-                result.add(line);
-                line = reader.readLine();
-            }
-        } catch (final IOException e) {
-//            throw new TeiidDesignerRuntimeException(e);
-        }
-        return (String[])result.toArray(new String[result.size()]);
+    public static String[] getLines( final String value ) throws IOException {
+    	final StringReader stringReader = new StringReader(value);
+    	final BufferedReader reader = new BufferedReader(stringReader);
+    	final ArrayList result = new ArrayList();
+    	String line = reader.readLine();
+    	while (line != null) {
+    		result.add(line);
+    		line = reader.readLine();
+    	}
+    	return (String[])result.toArray(new String[result.size()]);
     }
 
     public static String getLineSeparator() {
