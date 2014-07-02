@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.komodo.utils.logger.modeshape;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: %pluginProvider
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Localization: plugin
+Export-Package: org.komodo.logging
+Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
+ org.komodo.modeshape.lib;bundle-version="1.0.0"
+Fragment-Host: org.komodo.utils;bundle-version="1.0.0.qualifier"

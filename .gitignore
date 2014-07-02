@@ -13,6 +13,8 @@ plugins/*/launch
 
 plugins/*/lib/*.jar
 plugins/*/libsrc/*.jar
+plugins/libs/*/lib/*.jar
+plugins/libs/*/libsrc/*.jar
 
 tests/*/lib/*.jar
 tests/*/lib/jboss*
