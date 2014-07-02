@@ -13,16 +13,14 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
-
-    <module>libs</module>
-
-    <module>org.komodo.spi</module>
-    <module>org.komodo.relational</module>
-    <module>org.komodo.utils</module>
-    <module>org.komodo.utils.logger.modeshape</module>
-
-    <module>org.komodo.eclipse.spi</module>
-    <module>org.komodo.eclipse.teiid.client</module>
+    		<module>libs</module>
+    		<module>org.komodo.utils.logger.modeshape</module>
+    		<module>org.komodo.spi</module>
+    		<module>org.komodo.utils</module>
+    		<module>org.komodo.relational</module>
+    		<module>shell</module>
+   	 	<module>org.komodo.eclipse.spi</module>
+    		<module>org.komodo.eclipse.teiid.client</module>
 	</modules>
 </project>
 	
