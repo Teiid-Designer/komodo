@@ -23,12 +23,13 @@ package org.teiid.runtime.client.driver.provider;
 
 import org.eclipse.datatools.connectivity.drivers.DefaultDriverValuesProvider;
 import org.eclipse.datatools.connectivity.drivers.IDriverValuesProvider;
-import org.teiid.runtime.client.TeiidRuntimePlugin;
 
 /**
  * Provides values for the default instance of the Teiid Connection Driver profile
  */
 public class TeiidDriverValuesProvider extends DefaultDriverValuesProvider {
+
+    private static final String TEIID_CLIENT_PLUGIN_ID = "org.teiid.runtime.client"; //$NON-NLS-1$
 
     @Override
     public String createDefaultValue(String key) {
@@ -36,7 +37,8 @@ public class TeiidDriverValuesProvider extends DefaultDriverValuesProvider {
             return Boolean.TRUE.toString();
 
         if (key.equals(IDriverValuesProvider.VALUE_JARLIST)) {
-            return TeiidRuntimePlugin.getPluginPath();
+            PluginFinder pluginFinder = new PluginFinder();
+            return pluginFinder.findPlugin(TEIID_CLIENT_PLUGIN_ID);
         }
 
         return super.createDefaultValue(key);
