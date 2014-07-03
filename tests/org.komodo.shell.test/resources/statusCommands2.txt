@@ -1,0 +1,5 @@
+#status at root.Project2
+cd Project2
+status
+
+
