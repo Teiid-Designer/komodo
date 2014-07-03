@@ -22,7 +22,8 @@
 package org.teiid.runtime.client.admin.v8;
 
 import java.io.InputStream;
-
+import java.util.Collection;
+import org.komodo.spi.runtime.IDataSourceDriver;
 import org.komodo.spi.runtime.ITeiidAdminInfo;
 import org.komodo.spi.runtime.ITeiidInstance;
 import org.komodo.spi.runtime.version.ITeiidVersion;
@@ -86,5 +87,10 @@ public class Admin8Spec extends AdminSpec {
     @Override
     public void undeploy(Admin admin, String vdbName, int version) throws AdminException {
         admin.undeploy(vdbName);
+    }
+
+    @Override
+    public Collection<IDataSourceDriver> getDataSourceDrivers(Admin admin) throws AdminException {
+        return admin.getDataSourceDrivers();
     }
 }

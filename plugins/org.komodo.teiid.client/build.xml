@@ -38,6 +38,7 @@
                                  jta.jar,
                                  netty.jar,
                                  nux.jar,
+                                 saxonhe.jar,
                                  xnio-api.jar,
                                  xnio-nio.jar,
                                  xom.jar"/>

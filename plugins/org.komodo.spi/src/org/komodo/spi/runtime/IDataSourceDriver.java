@@ -19,16 +19,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.eclipse.teiid84.client.test;
+package org.komodo.spi.runtime;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.komodo.eclipse.teiid84.client.IntegrationTestDataSources;
-import org.komodo.eclipse.teiid84.client.IntegrationTestDeployment;
+/**
+ *
+ */
+public interface IDataSourceDriver {
 
-@SuppressWarnings( "javadoc" )
-@RunWith( Suite.class )
-@Suite.SuiteClasses( { IntegrationTestDeployment.class, IntegrationTestDataSources.class } )
-public class AllTests {
-    // nothing to do
+    /**
+     * @return the name of this driver
+     */
+    String getName();
+
+    /**
+     * @return the class name of this driver
+     */
+    String getClassName();
 }

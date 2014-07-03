@@ -22,7 +22,6 @@
 package org.komodo.spi.runtime;
 
 import java.sql.Driver;
-
 import org.komodo.spi.query.IQueryService;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
@@ -66,11 +65,4 @@ public interface IExecutionAdminFactory {
      * @return instance of {@link IQueryService}
      */
     IQueryService getQueryService(ITeiidVersion teiidVersion);
-
-    /**
-     * Get the location of this class' parent plugin
-     *
-     * @return OS specific path to the plugin location
-     */
-    String getRuntimePluginPath();
 }

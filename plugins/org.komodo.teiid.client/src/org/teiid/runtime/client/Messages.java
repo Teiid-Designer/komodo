@@ -93,7 +93,8 @@ public class Messages {
         validity_errors_describe,
         data_permissions_describe,
         mapped_role_names_describe,
-        noParentServer;
+        noParentServer,
+        refreshVdbException;
 
         @Override
         public String toString() {

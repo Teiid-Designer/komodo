@@ -24,7 +24,6 @@ package org.teiid.runtime.client.admin;
 import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.komodo.spi.query.IQueryService;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.IExecutionAdminFactory;
@@ -33,7 +32,6 @@ import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.jdbc.TeiidDriver;
-import org.teiid.runtime.client.TeiidRuntimePlugin;
 import org.teiid.runtime.client.query.QueryService;
 
 /**
@@ -77,10 +75,5 @@ public class ExecutionAdminFactory implements IExecutionAdminFactory {
         }
 
         return queryService;
-    }
-
-    @Override
-    public String getRuntimePluginPath() {
-        return TeiidRuntimePlugin.getPluginPath();
     }
 }

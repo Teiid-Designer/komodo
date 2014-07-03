@@ -22,7 +22,8 @@
 package org.teiid.runtime.client.admin.v7;
 
 import java.io.InputStream;
-
+import java.util.Collection;
+import org.komodo.spi.runtime.IDataSourceDriver;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.ITeiidAdminInfo;
 import org.komodo.spi.runtime.ITeiidInstance;
@@ -92,5 +93,10 @@ public class Admin7Spec extends AdminSpec {
         }
 
         admin.deleteVDB(vdbName, version);
+    }
+
+    @Override
+    public Collection<IDataSourceDriver> getDataSourceDrivers(Admin admin) {
+        throw new UnsupportedOperationException();
     }
 }

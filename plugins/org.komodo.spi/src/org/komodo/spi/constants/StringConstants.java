@@ -111,19 +111,19 @@ public interface StringConstants {
 	String CLOSE_ANGLE_BRACKET = ">"; //$NON-NLS-1$
 
 	/**
-     * komodo
-     */
-    String KOMODO = "komodo"; //$NON-NLS-1$
+   * komodo
+   */
+  String KOMODO = "komodo"; //$NON-NLS-1$
 
-    /**
-     * .komodo
-     */
-    String DOT_KOMODO = ".komodo"; //$NON-NLS-1$
+  /**
+   * .komodo
+   */
+  String DOT_KOMODO = ".komodo"; //$NON-NLS-1$
 
-    /**
-     * log
-     */
-    String LOG = "log"; //$NON-NLS-1$
+  /**
+   * log
+   */
+  String LOG = "log"; //$NON-NLS-1$
 
 	/**
 	 * Current Folder Symbol
@@ -149,5 +149,20 @@ public interface StringConstants {
 	 * File name wildcard
 	 */
 	String FILE_NAME_WILDCARD = "*"; //$NON-NLS-1$
+
+  /**
+   * Target directory
+   */
+  String TARGET = "target"; //$NON-NLS-1$
+
+  /**
+   * sources jar component
+   */
+  String SOURCES = "sources"; //$NON-NLS-1$
+
+  /**
+   * JAR File Extension
+   */
+  String JAR = "jar"; //$NON-NLS-1$
 }
 

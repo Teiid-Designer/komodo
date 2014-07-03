@@ -27,9 +27,9 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Properties;
 import java.util.Set;
-
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
+import org.komodo.spi.runtime.IDataSourceDriver;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.adminapi.VDB.ConnectionType;
 
@@ -433,5 +433,17 @@ public interface Admin {
      * @throws AdminException
      */
     void restart();
+
+    /**
+     * Added to interface by komodo and not part of the original teiid client.
+     *
+     * Will query the host server and determine the drivers (jdbc or otherwise)
+     * that are currently installed and available to teiid.
+     *
+     * @return collection of the installed drivers available
+     * @throws AdminException
+     */
+    @Since(Version.TEIID_8_0)
+    Collection<IDataSourceDriver> getDataSourceDrivers() throws AdminException;
 
 }

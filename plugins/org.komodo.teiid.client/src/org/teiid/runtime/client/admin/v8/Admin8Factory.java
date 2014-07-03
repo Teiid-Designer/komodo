@@ -64,6 +64,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
+import org.komodo.spi.runtime.IDataSourceDriver;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.adminapi.Admin;
@@ -93,6 +94,7 @@ import org.teiid.adminapi.impl.VDBMetadataMapper.TransactionMetadataMapper;
 import org.teiid.adminapi.impl.VDBTranslatorMetaData;
 import org.teiid.core.util.ObjectConverterUtil;
 import org.teiid.runtime.client.Messages;
+import org.teiid.runtime.client.admin.DataSourceDriver;
 
 
 /**
@@ -1947,6 +1949,57 @@ public class Admin8Factory {
         @Removed(Version.TEIID_8_0)
         public void deleteVDB(String vdbName, int version) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Collection<IDataSourceDriver> getDataSourceDrivers() throws AdminException {
+            HashSet<IDataSourceDriver> dataSourceDrivers = new HashSet<IDataSourceDriver>();
+
+            if (!this.domainMode) {
+                //'installed-driver-list' not available in the domain mode.
+                final ModelNode request = buildRequest("datasources", "installed-drivers-list");
+                try {
+                    ModelNode outcome = this.connection.execute(request);
+                    if (Util.isSuccess(outcome)) {
+                        List<IDataSourceDriver> drivers = getList(outcome, new MetadataMapper<IDataSourceDriver>() {
+                            @Override
+                            public IDataSourceDriver unwrap(ModelNode node) {
+                                String driverName = null;
+                                String driverClassName = null;
+                                if (node.hasDefined("driver-name"))
+                                    driverName = node.get("driver-name").asString();
+
+                                if (node.hasDefined("driver-class-name"))
+                                    driverClassName = node.get("driver-class-name").asString();
+
+                                if (driverName == null || driverClassName == null)
+                                    return null;
+
+                                return new DataSourceDriver(driverName, driverClassName);
+                            }
+
+                            @Override
+                            public ModelNode describe(ModelNode node) {
+                                throw new UnsupportedOperationException();
+                            }
+                        });
+
+                        dataSourceDrivers.addAll(drivers);
+                    }
+                } catch (IOException e) {
+                    throw new AdminComponentException(e);
+                }
+            }
+            else {
+                // TODO: AS7 needs to provide better way to query the deployed JDBC drivers
+                List<String> deployments = getChildNodeNames(null, "deployment");
+                for (String deployment:deployments) {
+                    if (!deployment.contains("translator") && deployment.endsWith(".jar")) {
+                        dataSourceDrivers.add(new DataSourceDriver(deployment, deployment));
+                    }
+                }
+            }
+            return dataSourceDrivers;
         }
     }
 }

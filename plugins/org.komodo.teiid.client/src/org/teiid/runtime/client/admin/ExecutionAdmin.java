@@ -38,28 +38,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.wst.server.core.IServer;
-import org.jboss.dmr.ModelNode;
-import org.jboss.ide.eclipse.as.core.server.v7.management.AS7ManagementDetails;
-import org.jboss.ide.eclipse.as.management.core.JBoss7ManagerUtil;
-import org.jboss.ide.eclipse.as.management.core.ModelDescriptionConstants;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.outcome.IOutcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
+import org.komodo.spi.runtime.IDataSourceDriver;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.ITeiidConnectionInfo;
 import org.komodo.spi.runtime.ITeiidDataSource;
 import org.komodo.spi.runtime.ITeiidInstance;
 import org.komodo.spi.runtime.ITeiidJdbcInfo;
-import org.komodo.spi.runtime.ITeiidParent;
 import org.komodo.spi.runtime.ITeiidTranslator;
 import org.komodo.spi.runtime.ITeiidTranslator.TranslatorPropertyType;
 import org.komodo.spi.runtime.ITeiidVdb;
@@ -85,7 +75,6 @@ import org.teiid.runtime.client.Messages;
  */
 public class ExecutionAdmin implements IExecutionAdmin {
 
-    private static String PLUGIN_ID = "org.teiid.runtime.client";  //$NON-NLS-1$
     private static String DYNAMIC_VDB_SUFFIX = "-vdb.xml"; //$NON-NLS-1$
     private static int VDB_LOADING_TIMEOUT_SEC = 300;
 
@@ -220,27 +209,10 @@ public class ExecutionAdmin implements IExecutionAdmin {
         // TODO should get version from vdbFile
         VDB vdb = admin.getVDB(vdbName, vdbVersion);
 
-        // If the VDB is still loading, refresh again and potentially start refresh job
-        if(vdb.getStatus().equals(adminSpec.getLoadingVDBStatus()) && vdb.getValidityErrors().isEmpty()) {
-            // Give a 0.5 sec pause for the VDB to finish loading metadata.
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-            }   
-            // Refresh again to update vdb states
-            refreshVDBs();
-            vdb = admin.getVDB(vdbName, vdbVersion);
-            // Determine if still loading, if so start refresh job.  User will get dialog that the
-            // vdb is still loading - and try again in a few seconds
-            if(vdb.getStatus().equals(adminSpec.getLoadingVDBStatus()) && vdb.getValidityErrors().isEmpty()) {
-                final Job refreshVDBsJob = new RefreshVDBsJob(vdbName);
-                refreshVDBsJob.schedule();
-            }
-        }
-
-        this.eventManager.notifyListeners(ExecutionConfigurationEvent.createDeployVDBEvent(vdb.getName()));
+        Thread refreshThread = new RefreshThread(vdb);
+        refreshThread.start();
     }
-    
+
     @Override
     public String getSchema(String vdbName, int vdbVersion, String modelName) throws Exception {
         if (isLessThanTeiidEight()) {
@@ -376,30 +348,14 @@ public class ExecutionAdmin implements IExecutionAdmin {
         if (!getServer().isParentConnected())
             return null;
 
-        ModelNode request = new ModelNode();
-        request.get(ModelDescriptionConstants.OP).set("installed-drivers-list"); //$NON-NLS-1$
-
-        ModelNode address = new ModelNode();
-        address.add(ModelDescriptionConstants.SUBSYSTEM, "datasources"); //$NON-NLS-1$
-        request.get(ModelDescriptionConstants.OP_ADDR).set(address);
-
         try {
-            String requestString = request.toJSONString(true);
-            ITeiidParent teiidParent = getServer().getParent();
-            IServer parentServer = (IServer) Platform.getAdapterManager().getAdapter(teiidParent, IServer.class);
-            if (parentServer == null)
-            	throw new Exception(Messages.getString(Messages.ExecutionAdmin.noParentServer, getServer().getDisplayName()));
+            Collection<IDataSourceDriver> dataSourceDrivers = adminSpec.getDataSourceDrivers(admin);
+            for (IDataSourceDriver driver : dataSourceDrivers) {
+                String driverClassName = driver.getClassName();
+                String driverName = driver.getName();
 
-            AS7ManagementDetails as7ManagementDetails = new AS7ManagementDetails(parentServer);
-            String resultString = JBoss7ManagerUtil.getService(parentServer).execute(as7ManagementDetails, requestString);
-            ModelNode operationResult = ModelNode.fromJSONString(resultString);
-
-            List<ModelNode> driverList = operationResult.asList();
-            for (ModelNode driver : driverList) {
-                String driverClassName = driver.get("driver-class-name").asString(); //$NON-NLS-1$
-                String driverName = driver.get("driver-name").asString(); //$NON-NLS-1$
-
-                if (requestDriverClass.equalsIgnoreCase(driverClassName)) return driverName;
+                if (requestDriverClass.equalsIgnoreCase(driverClassName))
+                    return driverName;
             }
 
         } catch (Exception ex) {
@@ -941,52 +897,33 @@ public class ExecutionAdmin implements IExecutionAdmin {
         admin.mergeVDBs(sourceVdbName, sourceVdbVersion, targetVdbName, targetVdbVersion);        
     }
 
-    /**
-     * Executes VDB refresh when a VDB is loading - as a background job.
-     */
-    class RefreshVDBsJob extends Job {
+    private class RefreshThread extends Thread {
 
-        String vdbName;
-        
+        private VDB vdb;
+
+        private String vdbName;
+
+        private int vdbVersion;
+
         /**
-         * RefreshVDBsJob constructor
-         * @param vdbName the name of the VDB to monitor
+         * @param vdb
          */
-        public RefreshVDBsJob(String vdbName ) {
-            super("VDB Refresh"); //$NON-NLS-1$
-            this.vdbName = vdbName;
-            
-            setSystem(false);
-            setUser(true);
+        public RefreshThread(VDB vdb) {
+            this.vdb = vdb;
+            this.vdbName = vdb.getName();
+            this.vdbVersion = vdb.getVersion();
+
+            this.setDaemon(true);
+            this.setName("Refreshing vdb + " + vdb.getName()); //$NON-NLS-1$
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-         */
-        @Override
-        protected IStatus run( IProgressMonitor monitor ) {
-            monitor.beginTask("VDB Refresh", //$NON-NLS-1$
-                              IProgressMonitor.UNKNOWN);
-
-            try {
-                waitForVDBLoad(this.vdbName);
-            } catch (Exception ex) {
-            }
-
-            monitor.done();
-
-            return Status.OK_STATUS;
-        }
-        
-        /*
-         * Wait for the VDB to finish loading.  Will check status every 5 secs and return when the VDB is loaded.
-         * If not loaded within 30sec, it will timeout
-         * @param vdbName the name of the VDB
-         */
-        private void waitForVDBLoad(String vdbName) throws Exception {
-            long waitUntil = System.currentTimeMillis() + VDB_LOADING_TIMEOUT_SEC*1000;
+      /*
+      * Wait for the VDB to finish loading.  Will check status every 5 secs and return when the VDB is loaded.
+      * If not loaded within 30sec, it will timeout
+      * @param vdbName the name of the VDB
+      */
+        private void waitForVDBLoad() throws Exception {
+            long waitUntil = System.currentTimeMillis() + VDB_LOADING_TIMEOUT_SEC * 1000;
             boolean first = true;
             do {
                 // Pauses 5 sec
@@ -999,27 +936,60 @@ public class ExecutionAdmin implements IExecutionAdmin {
                 } else {
                     first = false;
                 }
-                
+
                 // Refreshes from adminApi
                 refreshVDBs();
-                
-                // Get the VDB
+
+                // Get the teiid vdb
                 ITeiidVdb vdb = getVdb(vdbName);
-                
                 // Stop waiting if any conditions have been met
-                if(vdb!=null) {
-                	boolean hasValidityErrors = !vdb.getValidityErrors().isEmpty();
-                	if(  !vdb.hasModels() || vdb.hasFailed()  || !vdb.isLoading() 
-                	   || vdb.isActive()  || vdb.wasRemoved() || hasValidityErrors ) {
-                		return;
-                	} 
-                } else {
+                if (vdb == null)
+                    return;
+
+                boolean hasValidityErrors = !vdb.getValidityErrors().isEmpty();
+                if (!vdb.hasModels() || vdb.hasFailed() || !vdb.isLoading() || vdb.isActive() || vdb.wasRemoved() || hasValidityErrors) {
                     return;
                 }
             } while (System.currentTimeMillis() < waitUntil);
-            
+
             refreshVDBs();
             return;
+        }
+
+        private boolean isVdbLoading() throws Exception {
+            // Get the refreshed vdb straight off the server
+            vdb = admin.getVDB(vdbName, vdbVersion);
+            if (vdb == null)
+                return false;
+
+            return adminSpec.getLoadingVDBStatus().equals(vdb.getStatus()) && vdb.getValidityErrors().isEmpty();
+        }
+
+        @Override
+        public void run() {
+            try {
+                // If the VDB is still loading, refresh again and potentially start refresh job
+                if(isVdbLoading()) {
+                    // Give a 0.5 sec pause for the VDB to finish loading metadata.
+                    Thread.sleep(500);
+                } 
+            }   catch (Exception e) {
+                KLog.getLogger().error(Messages.getString(Messages.ExecutionAdmin.refreshVdbException, vdbName), e);
+            }
+
+            try {
+                // Refresh again to update vdb states
+                refreshVDBs();
+
+                // Determine if still loading, if so wait for loading to be completed
+                if(isVdbLoading()) {
+                    waitForVDBLoad();
+                }
+            } catch (Exception ex) {
+                KLog.getLogger().error(Messages.getString(Messages.ExecutionAdmin.refreshVdbException, vdbName), ex);
+            }
+
+            eventManager.notifyListeners(ExecutionConfigurationEvent.createDeployVDBEvent(vdb.getName()));
         }
 
     }
