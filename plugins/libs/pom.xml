@@ -15,5 +15,6 @@
 	<modules>
 
     <module>org.komodo.modeshape.lib</module>
+    <module>org.komodo.shell.lib</module>
 	</modules>
 </project>
