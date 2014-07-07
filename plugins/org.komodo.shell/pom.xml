@@ -10,35 +10,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<artifactId>org.komodo.shell</artifactId> 
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
-    <properties>
-        <version.org.jboss.aesh>0.33.13</version.org.jboss.aesh>
-    </properties>
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-				    <groupId>org.jboss.aesh</groupId>
-				    <artifactId>aesh</artifactId>
-                                    <version>${version.org.jboss.aesh}</version>
-                                </artifactItem>
-                            </artifactItems>
-                            <skip>false</skip>
-                            <stripVersion>true</stripVersion>
-                            <outputDirectory>${project.basedir}/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-compiler-plugin</artifactId>
@@ -86,21 +60,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             </snapshots>
         </repository>
     </repositories>
-    <dependencies>
-        <dependency>
-            <groupId>org.jboss.aesh</groupId>
-            <artifactId>aesh</artifactId>
-        </dependency>
-    </dependencies>
-    <dependencyManagement> 
-        <dependencies>
-            <dependency>
-                <groupId>org.jboss.aesh</groupId>
-                <artifactId>aesh</artifactId>
-                <version>${version.org.jboss.aesh}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 </project>
 
 
