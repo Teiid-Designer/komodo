@@ -19,7 +19,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
 */
-package org.komodo.eclipse.teiid.client.test;
+package org.komodo.teiid.client.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
