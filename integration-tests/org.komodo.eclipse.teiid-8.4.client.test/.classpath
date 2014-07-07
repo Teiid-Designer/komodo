@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/jbossas/jboss-eap-6.1/jboss-modules.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jbossas/jboss-eap-6.1/modules/system/layers/base/org/jboss/as/cli/main/jboss-as-cli-7.2.0.Alpha1-redhat-4.jar"/>
@@ -49,11 +51,5 @@
 	<classpathentry exported="true" kind="lib" path="lib/shrinkwrap-descriptors-spi.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/shrinkwrap-impl-base.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/shrinkwrap-spi.jar"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
