@@ -21,64 +21,51 @@
  */
 package org.komodo.eclipse.teiid87.client;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.util.Collection;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 import org.jboss.arquillian.junit.Arquillian;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.komodo.eclipse.teiid87.client.util.AdminUtil;
-import org.komodo.spi.runtime.IDataSourceDriver;
+import org.komodo.spi.runtime.ITeiidParent;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.ITeiidVersion.VersionID;
 import org.komodo.test.utils.AbstractTeiidVersionTest;
-import org.komodo.test.utils.TeiidInstanceBuilder;
-import org.teiid.adminapi.Admin;
-import org.teiid.adminapi.AdminException;
-import org.teiid.runtime.client.admin.AdminSpec;
+import org.mockito.Mockito;
+import org.teiid.runtime.client.instance.TeiidInstance;
 
 /**
  *
  */
 @RunWith( Arquillian.class )
 @SuppressWarnings( {"javadoc", "nls"} )
-public class IntegrationTestDataSources extends AbstractTeiidVersionTest {
+public class IntegrationTestTeiidInstance extends AbstractTeiidVersionTest {
 
     private static final VersionID TEIID_VERSION_ID = ITeiidVersion.VersionID.TEIID_8_7;
 
-    private final AdminSpec adminSpec;
+    private ITeiidParent teiidParent;
 
-    private Admin admin;
+    private TeiidInstance teiidInstance;
 
-    public IntegrationTestDataSources() {
+    public IntegrationTestTeiidInstance() {
         super(TEIID_VERSION_ID);
-        adminSpec = AdminSpec.getInstance(getTeiidVersion());
     }
 
     @Before
     public void setup() throws Exception {
+        teiidParent = Mockito.mock(ITeiidParent.class);
 
-        TeiidInstanceBuilder teiidBuilder = createTeiidInstanceBuilder();
-        admin = adminSpec.createAdmin(teiidBuilder.getTeiidInstance());
-    }
+        when(teiidParent.getHost()).thenReturn("localhost");
+        when(teiidParent.getPort()).thenReturn(9999);
+        when(teiidParent.getUserName()).thenReturn("admin");
+        when(teiidParent.getPassword()).thenReturn("admin");
 
-    @After
-    public void teardown() throws AdminException {
-        AdminUtil.cleanUp(admin);
-        admin.close();
+        teiidInstance = new TeiidInstance(teiidParent);
     }
 
     @Test
-    public void testDataSourceDrivers() throws Exception {
-        Collection<IDataSourceDriver> dataSourceDrivers = admin.getDataSourceDrivers();
-        assertNotNull(dataSourceDrivers);
-        assertFalse(dataSourceDrivers.isEmpty());
-        for (IDataSourceDriver driver : dataSourceDrivers) {
-            assertTrue(driver.getName().contains("teiid") || driver.getName().equals("h2"));
-            assertTrue(driver.getClassName().contains("TeiidDriver") || driver.getClassName().contains("h2"));
-        }
+    public void testVersion() throws Exception {
+        ITeiidVersion version = teiidInstance.getVersion();
+        assertEquals(getTeiidVersion(), version);
     }
 }

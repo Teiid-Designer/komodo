@@ -31,8 +31,9 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
 
     /**
      * @return the version information of this instance
+     * @throws Exception 
      */
-    ITeiidVersion getVersion();
+    ITeiidVersion getVersion() throws Exception;
 
     /**
      * Disconnect then connect to this instance. This is preferable to 

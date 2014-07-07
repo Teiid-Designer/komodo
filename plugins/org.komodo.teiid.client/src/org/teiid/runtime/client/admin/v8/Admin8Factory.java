@@ -25,7 +25,6 @@ package org.teiid.runtime.client.admin.v8;
 import static org.jboss.as.controller.client.helpers.ClientConstants.DEPLOYMENT_REMOVE_OPERATION;
 import static org.jboss.as.controller.client.helpers.ClientConstants.DEPLOYMENT_UNDEPLOY_OPERATION;
 import static org.jboss.as.controller.client.helpers.ClientConstants.RESULT;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -46,7 +45,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
-
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -54,7 +52,6 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.sasl.RealmCallback;
 import javax.security.sasl.RealmChoiceCallback;
-
 import org.jboss.as.cli.Util;
 import org.jboss.as.cli.operation.OperationFormatException;
 import org.jboss.as.cli.operation.impl.DefaultOperationRequestAddress;
@@ -66,6 +63,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.IDataSourceDriver;
 import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminComponentException;
@@ -94,6 +92,7 @@ import org.teiid.adminapi.impl.VDBMetadataMapper.TransactionMetadataMapper;
 import org.teiid.adminapi.impl.VDBTranslatorMetaData;
 import org.teiid.core.util.ObjectConverterUtil;
 import org.teiid.runtime.client.Messages;
+import org.teiid.runtime.client.admin.AdminSpec;
 import org.teiid.runtime.client.admin.DataSourceDriver;
 
 
@@ -120,6 +119,7 @@ public class Admin8Factory {
 
     /**
      * Creates a ServerAdmin with the specified connection properties.
+     * @param teiidVersion,
      * @param userName
      * @param password
      * @param serverURL
@@ -148,7 +148,7 @@ public class Admin8Factory {
                         + host + ":" + port); //$NON-NLS-1$
                 return new AdminImpl(teiidVersion, newClient);
             }
-            LOGGER.info(Messages.gs(Messages.TEIID.TEIID70051, host, port)); //$NON-NLS-1$ //$NON-NLS-2$
+            LOGGER.info(Messages.gs(Messages.TEIID.TEIID70051, host, port)); 
         } catch (UnknownHostException e) {
         	 throw new AdminProcessingException(Messages.gs(Messages.TEIID.TEIID70000, host, e.getLocalizedMessage()));
         }
@@ -165,6 +165,7 @@ public class Admin8Factory {
         	this.password = password;
         }
 
+        @Override
         public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
             // Special case for anonymous authentication to avoid prompting user for their name.
             if (callbacks.length == 1 && callbacks[0] instanceof NameCallback) {
@@ -205,7 +206,7 @@ public class Admin8Factory {
 		}
 	}
 
-    public class AdminImpl implements Admin{
+    public class AdminImpl implements Admin {
     	private static final String CLASS_NAME = "class-name";
 		private static final String JAVA_CONTEXT = "java:/";
 		private final ITeiidVersion teiidVersion;
@@ -229,8 +230,8 @@ public class Admin8Factory {
         /**
          * @return the teiidVersion
          */
-        public ITeiidVersion getTeiidVersion() {
-            return this.teiidVersion;
+        public ITeiidVersion getTeiidVersion() throws AdminException {
+            return teiidVersion;
         }
 
         private void requires(String item, ITeiidVersion requiredVersion) throws AdminException {
@@ -2001,5 +2002,40 @@ public class Admin8Factory {
             }
             return dataSourceDrivers;
         }
+    }
+
+    /**
+     * Find the installed teiid version on the given host if Teiid is installed and this {@link AdminSpec}
+     * is applicable to the given host.
+     *
+     * @param host
+     * @param port
+     * @param userName
+     * @param password
+     *
+     * @return teiid version if the host was successfully contacted, otherwise null
+     * @throws Exception
+     */
+    public ITeiidVersion getTeiidVersion(String host, int port, String userName, String password) throws Exception {
+        CallbackHandler cbh = new AuthenticationCallbackHandler(userName, password.toCharArray());
+        ModelControllerClient client = ModelControllerClient.Factory.create(host, port, cbh);
+
+        DefaultOperationRequestBuilder builder = new DefaultOperationRequestBuilder();
+        final ModelNode request;
+
+        builder.addNode("subsystem", "teiid"); //$NON-NLS-1$
+        builder.setOperationName("read-attribute"); //$NON-NLS-1$
+        builder.addProperty("name", "runtime-version");  //$NON-NLS-1$
+
+        request = builder.buildRequest();
+        ModelNode outcome = client.execute(request);
+        if (! Util.isSuccess(outcome))
+            return null;     
+
+        if (!outcome.hasDefined("result"))
+            return null;
+
+        ITeiidVersion teiidVersion = new TeiidVersion(outcome.get("result").asString());
+        return teiidVersion;
     }
 }

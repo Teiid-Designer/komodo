@@ -25,10 +25,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.eclipse.teiid84.client.IntegrationTestDataSources;
 import org.komodo.eclipse.teiid84.client.IntegrationTestDeployment;
+import org.komodo.eclipse.teiid84.client.IntegrationTestTeiidInstance;
 
 @SuppressWarnings( "javadoc" )
 @RunWith( Suite.class )
-@Suite.SuiteClasses( { IntegrationTestDeployment.class, IntegrationTestDataSources.class } )
+@Suite.SuiteClasses( { IntegrationTestDeployment.class, IntegrationTestDataSources.class,
+                                         IntegrationTestTeiidInstance.class} )
 public class AllTests {
     // nothing to do
 }

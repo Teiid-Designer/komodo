@@ -23,7 +23,6 @@ package org.komodo.test.utils;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import org.komodo.spi.runtime.ITeiidAdminInfo;
 import org.komodo.spi.runtime.ITeiidInstance;
 import org.komodo.spi.runtime.ITeiidJdbcInfo;
@@ -36,7 +35,7 @@ public class TeiidInstanceBuilder {
 
 	private ITeiidInstance teiidInstance;
 
-	public TeiidInstanceBuilder(ITeiidVersion teiidVersion) {
+	public TeiidInstanceBuilder(ITeiidVersion teiidVersion) throws Exception {
 		teiidInstance = mock(ITeiidInstance.class);
 		when(teiidInstance.getVersion()).thenReturn(teiidVersion);
 
