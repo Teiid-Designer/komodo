@@ -15,8 +15,13 @@
  */
 package org.komodo.shell;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.komodo.shell.api.AbstractShellCommand;
-import org.komodo.shell.Messages;
+import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.WorkspaceStatus;
 
 /**
  * Abstract base class for all built-in shell commands.
@@ -28,6 +33,18 @@ import org.komodo.shell.Messages;
 public abstract class BuiltInShellCommand extends AbstractShellCommand {
 
     /**
+     * Constructor
+	 * @param commandName the command name
+	 * @param wsStatus workspace status
+	 */
+	public BuiltInShellCommand(String commandName, WorkspaceStatus wsStatus) {
+		super();
+		setName(commandName);
+		setWorkspaceStatus(wsStatus);
+		initValidWsContextTypes();
+	}
+
+	/**
      * @see org.komodo.shell.api.ShellCommand#printUsage()
      */
     @Override
@@ -41,6 +58,51 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     @Override
     public void printHelp() {
         print(Messages.getString(getClass().getSimpleName() + ".help")); //$NON-NLS-1$
+    }
+    
+    /**
+     * @see org.komodo.shell.api.ShellCommand#recordCommand(Arguments)
+     */
+    @Override
+    public void recordCommand(Arguments args) {
+    	StringBuffer buff = new StringBuffer(getName());
+    	for(int i=0; i<args.size(); i++) {
+    		buff.append(" "+args.get(i)); //$NON-NLS-1$
+    	}
+    	recordToFile(buff.toString());
+    }
+    
+    /**
+     * @see org.komodo.shell.api.ShellCommand#recordComment(String)
+     */
+    @Override
+    public void recordComment(String comment) {   
+    	recordToFile("# "+comment);  //$NON-NLS-1$
+    }
+    
+    /**
+     * Write the supplied line to the recording output file.
+     * @param line the line to output
+     */
+    private void recordToFile(String line) {
+    	File outputFile = getWorkspaceStatus().getRecordingOutputFile();
+    	if(outputFile!=null) {
+    		FileWriter recordingFileWriter = null;
+    		try {
+    			// Create file if it doesnt exist
+            	outputFile.createNewFile();
+				recordingFileWriter = new FileWriter(outputFile,true);
+				recordingFileWriter.write(line+"\n"); //$NON-NLS-1$ 
+				recordingFileWriter.flush();
+			} catch (IOException ex) {
+			}
+    	    finally {
+    	        try {
+    	        	recordingFileWriter.close();
+    	        } catch (final IOException ignored) {
+    	        }
+    	    }
+    	}
     }
 
 }

@@ -21,7 +21,9 @@
  ************************************************************************************/
 package org.komodo.shell;
 
+import java.io.File;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import org.komodo.shell.api.WorkspaceContext;
@@ -32,16 +34,19 @@ import org.komodo.shell.api.WorkspaceStatusEventHandler;
 /**
  * Test implementation of WorkspaceStatus
  */
-public class TestWorkspaceStatus implements WorkspaceStatus {
+public class WorkpaceStatusImpl implements WorkspaceStatus {
 
 	private WorkspaceContext rootContext;
 	private WorkspaceContext currentContext;
 	private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
+	private boolean recordingStatus=false;
+	private File recordingOutputFile;
+	private String teiidServerUrl;
 	
 	/**
 	 * Constructor
 	 */
-	public TestWorkspaceStatus() {
+	public WorkpaceStatusImpl() {
 		initSample();
 	}
 	
@@ -104,4 +109,67 @@ public class TestWorkspaceStatus implements WorkspaceStatus {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceStatus#setRecordingStatus(boolean)
+	 */
+	@Override
+	public void setRecordingStatus(boolean recordState) {
+		this.recordingStatus=recordState;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceStatus#getRecordingStatus()
+	 */
+	@Override
+	public boolean getRecordingStatus() {
+		return this.recordingStatus;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceStatus#getRecordingOutputFile()
+	 */
+	@Override
+	public File getRecordingOutputFile() {
+		return this.recordingOutputFile;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceStatus#setRecordingOutputFile(java.lang.String)
+	 */
+	@Override
+	public void setRecordingOutputFile(String recordingOutputFilePath) {
+		this.recordingOutputFile = new File(recordingOutputFilePath);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceStatus#getTeiidServerUrl()
+	 */
+	@Override
+	public String getTeiidServerUrl() {
+		return this.teiidServerUrl;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceStatus#setTeiidServerUrl(java.lang.String)
+	 */
+	@Override
+	public void setTeiidServerUrl(String teiidServerUrl) {
+		this.teiidServerUrl=teiidServerUrl;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceStatus#setProperties(java.util.Properties)
+	 */
+	@Override
+	public void setProperties(Properties props) {
+        for (final String name : props.stringPropertyNames()){
+        	if(name.equals(RECORDING_FILEPATH_KEY)) {
+        		setRecordingOutputFile(props.getProperty(name));
+        	} else if(name.equals(TEIID_SERVER_URL_KEY)) {
+        		setTeiidServerUrl(props.getProperty(name));
+        	}
+        }
+	}
+
+	
 }

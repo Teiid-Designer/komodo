@@ -21,11 +21,24 @@
  ************************************************************************************/
 package org.komodo.shell.api;
 
+import java.io.File;
+import java.util.Properties;
+
 /**
  * WorkspaceStatus interface.
  */
 public interface WorkspaceStatus {
 
+    @SuppressWarnings("javadoc")
+	public final String RECORDING_FILEPATH_KEY = "RECORDING_FILEPATH"; //$NON-NLS-1$
+    @SuppressWarnings("javadoc")
+	public final String TEIID_SERVER_URL_KEY = "TEIID_SERVER_URL"; //$NON-NLS-1$
+    
+	/**
+	 * Allows set workspace properties on startup
+	 * @param props the properties
+	 */
+	public void setProperties(Properties props);
 	
 	/**
 	 * Get the root context
@@ -44,6 +57,42 @@ public interface WorkspaceStatus {
 	 * @return the current workspace context
 	 */
 	public WorkspaceContext getCurrentContext();
+	
+	/**
+	 * Toggles the recording status 'on' or 'off'
+	 * @param recordState 'true' to enable recording, 'false' to disable
+	 */
+	public void setRecordingStatus(boolean recordState);
+	
+	/**
+	 * Get the recording status
+	 * @return 'true' if recording is enabled, 'false' if not.
+	 */
+	public boolean getRecordingStatus();
+
+	/**
+	 * Get the recording output file path
+	 * @return the output file
+	 */
+	public File getRecordingOutputFile();
+	
+	/**
+	 * Set the Teiid URL
+	 * @param recordingOutputFilePath the recording output file path
+	 */
+	public void setRecordingOutputFile(String recordingOutputFilePath);
+	
+	/**
+	 * Get the Teiid URL
+	 * @return the teiid server url
+	 */
+	public String getTeiidServerUrl();
+
+	/**
+	 * Set the Teiid URL
+	 * @param teiidServerUrl the Teiid url
+	 */
+	public void setTeiidServerUrl(String teiidServerUrl);
 	
 	/**
 	 * Add a WorkspaceContext Event Handler

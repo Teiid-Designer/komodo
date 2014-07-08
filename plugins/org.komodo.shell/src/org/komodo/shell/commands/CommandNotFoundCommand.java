@@ -18,6 +18,7 @@ package org.komodo.shell.commands;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.AbstractShellCommand;
+import org.komodo.shell.api.Arguments;
 
 /**
  * The command used when a command does not exist for a given command name.
@@ -31,8 +32,11 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
 
 	/**
 	 * Constructor.
+	 * @param name the command name
 	 */
-	public CommandNotFoundCommand() {
+	public CommandNotFoundCommand(String name) {
+		super();
+		setName(name);
 	}
 
 	/**
@@ -48,6 +52,20 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
 	@Override
 	public void printHelp() {
 	}
+	
+    /**
+     * @see org.komodo.shell.api.ShellCommand#recordCommand(Arguments)
+     */
+    @Override
+    public void recordCommand(Arguments args) {
+    }
+    
+    /**
+     * @see org.komodo.shell.api.ShellCommand#recordComment(String)
+     */
+    @Override
+    public void recordComment(String str) {
+    }
 
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#execute()

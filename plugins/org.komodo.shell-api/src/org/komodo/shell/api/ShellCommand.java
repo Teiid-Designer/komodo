@@ -30,6 +30,18 @@ import java.util.List;
 public interface ShellCommand {
 
 	/**
+	 * Get the name of the command.
+	 * @return the command name
+	 */
+	public String getName();
+	
+	/**
+	 * Set the name of the command.
+	 * @param name the command name
+	 */
+	public void setName(String name);
+	
+	/**
 	 * Sets the arguments that can be used by this command.
 	 * @param arguments the args
 	 */
@@ -75,6 +87,18 @@ public interface ShellCommand {
 	 * Prints the help text for this command.
 	 */
 	public void printHelp();
+	
+	/**
+	 * Record the command to the current record output
+	 * @param args the command args
+	 */
+	public void recordCommand(Arguments args);
+	
+	/**
+	 * Record the comment to the current record output
+	 * @param comment the comment
+	 */
+	public void recordComment(String comment);
 
 	/**
 	 * Prints the given message to the output stream.

@@ -36,8 +36,11 @@ public class ListCommand extends BuiltInShellCommand {
 
 	/**
 	 * Constructor.
+	 * @param name the command name
+	 * @param wsStatus the workspace status
 	 */
-	public ListCommand() {
+	public ListCommand(String name, WorkspaceStatus wsStatus) {
+		super(name,wsStatus);
 	}
 
 	/**
@@ -59,6 +62,9 @@ public class ListCommand extends BuiltInShellCommand {
 			WorkspaceContext.Type childType = childContext.getType();
 			print(childName+" ["+childType+"]"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		}
+		
+		if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
+
 		return true;
 	}
 

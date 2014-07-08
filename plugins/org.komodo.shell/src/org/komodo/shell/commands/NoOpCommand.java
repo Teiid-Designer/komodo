@@ -15,7 +15,8 @@
  */
 package org.komodo.shell.commands;
 
-import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.api.AbstractShellCommand;
+import org.komodo.shell.api.Arguments;
 
 /**
  * The command about nothing.  The Seinfeld command.
@@ -25,12 +26,14 @@ import org.komodo.shell.BuiltInShellCommand;
  * 
  * @author eric.wittmann@redhat.com
  */
-public class NoOpCommand extends BuiltInShellCommand {
+public class NoOpCommand extends AbstractShellCommand {
 
 	/**
 	 * Constructor.
+	 * @param name the command name
 	 */
-	public NoOpCommand() {
+	public NoOpCommand(String name) {
+		setName(name);
 	}
 
 	/**
@@ -53,6 +56,20 @@ public class NoOpCommand extends BuiltInShellCommand {
 	@Override
 	public boolean execute() {
         return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.ShellCommand#recordCommand(org.komodo.shell.api.Arguments)
+	 */
+	@Override
+	public void recordCommand(Arguments args) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.ShellCommand#recordComment(java.lang.String)
+	 */
+	@Override
+	public void recordComment(String comment) {
 	}
 
 }

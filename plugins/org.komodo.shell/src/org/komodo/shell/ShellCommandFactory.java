@@ -40,6 +40,8 @@ import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
 import org.komodo.shell.commands.core.CdCommand;
 import org.komodo.shell.commands.core.ListCommand;
+import org.komodo.shell.commands.core.PropertyCommand;
+import org.komodo.shell.commands.core.RecordCommand;
 import org.komodo.shell.commands.core.StatusCommand;
 import org.komodo.utils.FileUtils;
 
@@ -80,17 +82,20 @@ public class ShellCommandFactory {
 		List<WorkspaceContext.Type> allList = new ArrayList<WorkspaceContext.Type>(1);
 		allList.add(WorkspaceContext.Type.ALL);
 		
-		StatusCommand statusCommand = new StatusCommand();
-		statusCommand.initValidWsContextTypes();
-		commandMap.put("status", statusCommand); //$NON-NLS-1$ 
+		StatusCommand statusCommand = new StatusCommand("status",this.wsStatus); //$NON-NLS-1$
+		commandMap.put(statusCommand.getName(), statusCommand);  
 		
-		ListCommand listCommand = new ListCommand();
-		listCommand.initValidWsContextTypes();
-		commandMap.put("list", listCommand); //$NON-NLS-1$ 
+		ListCommand listCommand = new ListCommand("list",this.wsStatus); //$NON-NLS-1$
+		commandMap.put(listCommand.getName(), listCommand);  
 
-		CdCommand cdCommand = new CdCommand();
-		cdCommand.initValidWsContextTypes();
-		commandMap.put("cd", cdCommand); //$NON-NLS-1$ 
+		CdCommand cdCommand = new CdCommand("cd",this.wsStatus); //$NON-NLS-1$
+		commandMap.put(cdCommand.getName(), cdCommand); 
+
+		RecordCommand recordCommand = new RecordCommand("record",this.wsStatus); //$NON-NLS-1$
+		commandMap.put(recordCommand.getName(), recordCommand);
+		
+		PropertyCommand propertyCommand = new PropertyCommand("property",this.wsStatus); //$NON-NLS-1$
+		commandMap.put(propertyCommand.getName(), propertyCommand);
 
 		discoverContributedCommands();
 	}
@@ -139,6 +144,7 @@ public class ShellCommandFactory {
 						try {
 							command = commandClass.newInstance();
 	        				command.initValidWsContextTypes();
+	        				command.setWorkspaceStatus(this.wsStatus);
 	            			commandMap.put(entry.getKey(), command);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
@@ -159,15 +165,15 @@ public class ShellCommandFactory {
 	public ShellCommand getCommand(String commandName) throws Exception {
 		ShellCommand command = null;
 		if (commandName.equals(HELP_CMD_NAME)) {
-            command = new HelpCommand(getCommands());
+            command = new HelpCommand(HELP_CMD_NAME, this.wsStatus, getCommands());
 		} else if (commandName.equals(QUIT_CMD_NAME)) {
-			command = new ExitCommand();
+			command = new ExitCommand(EXIT_CMD_NAME,this.wsStatus);
 		} else if (commandName.equals(EXIT_CMD_NAME)) {
-			command = new ExitCommand();
+			command = new ExitCommand(EXIT_CMD_NAME,this.wsStatus);
 		} else {
 			command = commandMap.get(commandName);
 			if (command == null)
-				return new CommandNotFoundCommand();
+				return new CommandNotFoundCommand("NotFound"); //$NON-NLS-1$
 		}
 		return command;
 	}

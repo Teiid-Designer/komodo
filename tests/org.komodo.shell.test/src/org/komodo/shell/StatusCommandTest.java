@@ -42,12 +42,12 @@ public class StatusCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testStatus1() {
-    	WorkspaceStatus wsStatus = new TestWorkspaceStatus();
+    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
     	setup(STATUS_COMMANDS1,wsStatus);
     	
     	execute();
     	
-    	String expectedOutput = "Current Repo    : local Repository\nCurrent Server  : [none : not connected]\nCurrent Context : root\n"; //$NON-NLS-1$
+    	String expectedOutput = "Current Repo    : local Repository\nCurrent Server  : [Unknown : not connected]\nCurrent Context : root\n"; //$NON-NLS-1$
     	String writerOutput = getWriterOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("root", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
@@ -60,12 +60,12 @@ public class StatusCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testStatus2() {
-    	WorkspaceStatus wsStatus = new TestWorkspaceStatus();
+    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
     	setup(STATUS_COMMANDS2,wsStatus);
     	
     	execute();
     	
-    	String expectedOutput = "Current Repo    : local Repository\nCurrent Server  : [none : not connected]\nCurrent Context : root.Project2\n"; //$NON-NLS-1$
+    	String expectedOutput = "Current Repo    : local Repository\nCurrent Server  : [Unknown : not connected]\nCurrent Context : root.Project2\n"; //$NON-NLS-1$
     	String writerOutput = getWriterOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("root.Project2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
@@ -78,12 +78,12 @@ public class StatusCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testStatus3() {
-    	WorkspaceStatus wsStatus = new TestWorkspaceStatus();
+    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
     	setup(STATUS_COMMANDS3,wsStatus);
 
     	execute();
     	
-    	String expectedOutput = "Current Repo    : local Repository\nCurrent Server  : [none : not connected]\nCurrent Context : root.Project2.ViewModel1\n"; //$NON-NLS-1$
+    	String expectedOutput = "Current Repo    : local Repository\nCurrent Server  : [Unknown : not connected]\nCurrent Context : root.Project2.ViewModel1\n"; //$NON-NLS-1$
     	String writerOutput = getWriterOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("root.Project2.ViewModel1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
