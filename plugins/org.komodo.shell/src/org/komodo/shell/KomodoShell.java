@@ -21,14 +21,16 @@
  ************************************************************************************/
 package org.komodo.shell;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Properties;
 
+import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
 
 
 /**
@@ -43,6 +45,7 @@ import org.komodo.shell.Messages.SHELL;
 public class KomodoShell {
 
     private static final String LOCALE_PROPERTY = "komodo.shell.locale"; //$NON-NLS-1$
+    private static final String STARTUP_PROPERTIES_FILEPATH = "./komodoShell.properties"; //$NON-NLS-1$
 
 	/**
 	 * Main entry point.
@@ -83,7 +86,7 @@ public class KomodoShell {
 		}
 	}
 
-	private WorkspaceStatus wsStatus = new TestWorkspaceStatus();
+	private WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
 	private final ShellCommandFactory factory = new ShellCommandFactory(wsStatus);
 	private ShellCommandReader reader;
 
@@ -99,6 +102,17 @@ public class KomodoShell {
 	 * @throws Exception the exception
 	 */
 	public void run(String[] args) throws Exception {
+		File startupPropertiesFile = new File(STARTUP_PROPERTIES_FILEPATH);
+		if(startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead()) {
+			Properties props = new Properties();
+
+			try {
+				props.load(new FileInputStream(startupPropertiesFile));
+			} catch (Exception e) {
+			}
+			wsStatus.setProperties(props);
+		}
+		
         reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
         reader.open();
 		displayWelcomeMessage();
@@ -147,7 +161,7 @@ public class KomodoShell {
 		System.out.println(
 				"**********************************************************************\n" + //$NON-NLS-1$
 				"  Welcome to Komodo Shell\n" + //$NON-NLS-1$
-				"  Locale: " + Locale.getDefault().toString().trim() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
+//				"  Locale: " + Locale.getDefault().toString().trim() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
 				"**********************************************************************" //$NON-NLS-1$
 				);
 	}

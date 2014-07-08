@@ -41,7 +41,7 @@ public class ListCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testList1() {
-    	WorkspaceStatus wsStatus = new TestWorkspaceStatus();
+    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
     	setup(LIST_COMMAND1,wsStatus);
     	
     	execute();
@@ -59,7 +59,7 @@ public class ListCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testList2() {
-    	WorkspaceStatus wsStatus = new TestWorkspaceStatus();
+    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
     	setup(LIST_COMMAND2,wsStatus);
     	
     	execute();

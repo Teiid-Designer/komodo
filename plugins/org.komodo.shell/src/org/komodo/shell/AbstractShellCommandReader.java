@@ -97,7 +97,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
         line = filterLine(line, properties);
 		Arguments arguments = new Arguments(line);
 		if (arguments.isEmpty()) {
-			return new NoOpCommand();
+			return new NoOpCommand("NoOp"); //$NON-NLS-1$
 		}
 
 		// The first argument is the command name.
@@ -105,7 +105,6 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
 		// Create the command.
 		ShellCommand command = factory.getCommand(commandName);
-		command.setWorkspaceStatus(this.wsStatus);
 		command.setArguments(arguments);
 		command.setOutput(getCommandOutput());
 		return command;

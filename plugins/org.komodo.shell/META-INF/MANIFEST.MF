@@ -6,7 +6,10 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Localization: plugin
-Export-Package: org.komodo.shell
+Export-Package: org.komodo.shell,
+ org.komodo.shell.commands,
+ org.komodo.shell.commands.core,
+ org.komodo.shell.util
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.komodo.shell-api;bundle-version="1.0.0",
  org.komodo.utils;bundle-version="1.0.0",

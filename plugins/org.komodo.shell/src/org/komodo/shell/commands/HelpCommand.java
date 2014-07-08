@@ -43,10 +43,12 @@ public class HelpCommand extends BuiltInShellCommand {
 
 	/**
 	 * Constructor.
-	 *
+	 * @param name the command name
+	 * @param wsStatus the workspace status
 	 * @param commands the commands
 	 */
-	public HelpCommand(Map<String, ShellCommand> commands) {
+	public HelpCommand(String name, WorkspaceStatus wsStatus, Map<String, ShellCommand> commands) {
+		super(name,wsStatus);
 		this.commands = commands;
 	}
 

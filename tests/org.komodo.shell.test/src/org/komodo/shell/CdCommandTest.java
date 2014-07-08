@@ -41,7 +41,7 @@ public class CdCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testCd1() {
-    	WorkspaceStatus wsStatus = new TestWorkspaceStatus();
+    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
     	setup(CD_COMMAND1,wsStatus);
     	
     	execute();
@@ -57,7 +57,7 @@ public class CdCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testCd2() {
-    	WorkspaceStatus wsStatus = new TestWorkspaceStatus();
+    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
     	setup(CD_COMMAND2,wsStatus);
     	
     	execute();

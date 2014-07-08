@@ -35,8 +35,11 @@ public class StatusCommand extends BuiltInShellCommand {
 
 	/**
 	 * Constructor.
+	 * @param name the command name
+	 * @param wsStatus the workspace status
 	 */
-	public StatusCommand() {
+	public StatusCommand(String name, WorkspaceStatus wsStatus) {
+		super(name,wsStatus);
 	}
 
 	/**
@@ -46,19 +49,22 @@ public class StatusCommand extends BuiltInShellCommand {
 	public boolean execute() throws Exception {
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 
+		// Repo info
 		String currentRepo = "local Repository"; //$NON-NLS-1$
-		String currentServer = "[none : not connected]"; //$NON-NLS-1$
-		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		
-		// Current Repository
 		print(Messages.getString("StatusCommand.CurrentRepo", currentRepo)); //$NON-NLS-1$
 		
-		// Current Server
+		// Server info
+		String serverUrl = (wsStatus.getTeiidServerUrl() == null) ? "Unknown" : wsStatus.getTeiidServerUrl(); //$NON-NLS-1$
+		String currentServer = "[" + serverUrl + " : not connected]"; //$NON-NLS-1$ //$NON-NLS-2$
 		print(Messages.getString("StatusCommand.CurrentServer", currentServer)); //$NON-NLS-1$
-		
-		// Current Context path
-		print(Messages.getString("StatusCommand.CurrentContext", currentContext.getFullName())); //$NON-NLS-1$
 
+		// Current Context
+		WorkspaceContext currentContext = wsStatus.getCurrentContext();
+		print(Messages.getString("StatusCommand.CurrentContext", currentContext.getFullName())); //$NON-NLS-1$
+		
+		// Echo command if recording on
+		if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
+		
 		return true;
 	}
 

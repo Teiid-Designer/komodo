@@ -54,18 +54,17 @@ public class ShellCommandReaderFactory {
         if (args.length > 0) {
             Map<String, String> properties = new HashMap<String, String>();
             if (args[0].equals("-simple")) { //$NON-NLS-1$
-                properties = getProperties(1, args);
-                if (System.console() != null) {
-                    commandReader = new ConsoleShellCommandReader(factory, wsStatus, properties);
-                } else {
-                    commandReader = new StdInShellCommandReader(factory, wsStatus, properties);
-                }
-
+            	properties = getProperties(1, args);
+            	if (System.console() != null) {
+            		commandReader = new ConsoleShellCommandReader(factory, wsStatus, properties);
+            	} else {
+            		commandReader = new StdInShellCommandReader(factory, wsStatus, properties);
+            	}
+            // -f filePath means we are reading from a file
             } else if (args.length >= 2 && "-f".equals(args[0])) { //$NON-NLS-1$
-                String filePath = args[1];
-                properties = getProperties(2, args);
-                commandReader = new FileShellCommandReader(factory, wsStatus, filePath, properties);
-
+            	String filePath = args[1];
+            	properties = getProperties(2, args);
+            	commandReader = new FileShellCommandReader(factory, wsStatus, filePath, properties);
             }
         } else {
             if (System.console() != null) {

@@ -18,6 +18,7 @@ package org.komodo.shell.commands;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.WorkspaceStatus;
 
 /**
  * Implements the 'exit' command.
@@ -32,8 +33,11 @@ public class ExitCommand extends BuiltInShellCommand {
 	
 	/**
 	 * Constructor.
+	 * @param name the command name
+	 * @param wsStatus the workspace status
 	 */
-	public ExitCommand() {
+	public ExitCommand(String name, WorkspaceStatus wsStatus) {
+		super(name,wsStatus);
 	}
 
 	/**

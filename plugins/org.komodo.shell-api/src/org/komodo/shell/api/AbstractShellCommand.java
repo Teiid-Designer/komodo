@@ -34,13 +34,30 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	private Arguments arguments;
 	private Writer writer;
 	private List<WorkspaceContext.Type> validWsContextTypes;
+	private String name;
 
 	/**
 	 * Constructor.
 	 */
-	public AbstractShellCommand( ) {
+	public AbstractShellCommand() {
 	}
 
+	/**
+	 * @see org.komodo.shell.api.ShellCommand#getName()
+	 */
+	@Override
+	public String getName() {
+		return this.name;
+	}
+	
+	/**
+	 * @see org.komodo.shell.api.ShellCommand#setName(String)
+	 */
+	@Override
+	public void setName(String name) {
+		this.name=name;
+	}
+	
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#initValidWsContextTypes()
 	 */

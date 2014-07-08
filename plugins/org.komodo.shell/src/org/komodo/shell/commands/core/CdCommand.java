@@ -21,6 +21,9 @@
  ************************************************************************************/
 package org.komodo.shell.commands.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
@@ -28,16 +31,18 @@ import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * Displays a summary of the current status, including what repository the
- * user is currently connected to (if any).
+ * Cd command - allows changing the workspace context
  *
  */
 public class CdCommand extends BuiltInShellCommand {
 
 	/**
 	 * Constructor
+	 * @param name the command name
+	 * @param wsStatus the workspace status
 	 */
-	public CdCommand() {
+	public CdCommand(String name, WorkspaceStatus wsStatus) {
+		super(name,wsStatus);
 	}
 
 	/**
@@ -46,7 +51,7 @@ public class CdCommand extends BuiltInShellCommand {
 	@Override
 	public boolean execute() throws Exception {
 		String locationArg = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath)); 
-
+		
 		if (!this.validate(locationArg)) {
 			return false;
 		}
@@ -57,6 +62,7 @@ public class CdCommand extends BuiltInShellCommand {
 		String locArg = locationArg.trim();
 		if("..".equals(locArg)) { //$NON-NLS-1$
 			getWorkspaceStatus().setCurrentContext(currentContext.getParent());
+			if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
 			return true;
 		} 
 		
@@ -72,6 +78,7 @@ public class CdCommand extends BuiltInShellCommand {
 		}
 		if(foundMatch) {
 			getWorkspaceStatus().setCurrentContext(newContext);
+			if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
 			return true;
 		}
 		
@@ -123,19 +130,40 @@ public class CdCommand extends BuiltInShellCommand {
 		return true;
 	}
 
-//	/**
-//	 * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
-//	 */
-//	@Override
-//	public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
-//		int toReturn = FeedTabCompleter.tabCompletion(getArguments(), getContext(), lastArgument, candidates);
-//		if (getArguments().size() == 1) {
-//			if (lastArgument == null)
-//				lastArgument = ""; //$NON-NLS-1$
-//			FileNameCompleter delegate = new FileNameCompleter();
-//			return delegate.complete(lastArgument, lastArgument.length(), candidates);
-//		}
-//		return toReturn;
-//	}
+	/**
+	 * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+	 */
+	@Override
+	public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
+		if (getArguments().isEmpty()) {
+			WorkspaceStatus wsStatus = getWorkspaceStatus();
+			
+			List<WorkspaceContext> children = wsStatus.getCurrentContext().getChildren();
+			List<String> childNames = new ArrayList<String>(children.size());
+			for(WorkspaceContext wsContext : children) {
+				childNames.add(wsContext.getName());
+			}
+			
+			if(lastArgument == null) {
+				for(String name : childNames) {
+					candidates.add(name+" "); //$NON-NLS-1$
+				}
+				return 0;
+			} else {
+				boolean found = false;
+				for(String name : childNames) {
+					if(name.startsWith(lastArgument)) {
+						candidates.add(name+" "); //$NON-NLS-1$
+						found = true;
+						break;
+					}
+				}
+				if(found) return 0;
+				return -1;
+			}
 
+		}
+		return -1;
+	}
+	
 }
