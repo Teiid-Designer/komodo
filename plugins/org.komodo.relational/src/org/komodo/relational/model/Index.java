@@ -25,12 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.RELATIONAL;
-import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.outcome.IOutcome.Level;
-import org.komodo.spi.outcome.OutcomeFactory;
+
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
 
@@ -74,7 +69,6 @@ public class Index extends RelationalObject {
     public Index() {
         super();
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -83,7 +77,6 @@ public class Index extends RelationalObject {
     public Index( String name ) {
         super(name);
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -249,46 +242,6 @@ public class Index extends RelationalObject {
         handleInfoChanged();
     }
     
-	@Override
-	public IOutcome validate() {
-		// Walk through the properties for the table and set the status
-		super.validate();
-		
-		if( getOutcome().getLevel() == Level.ERROR ) {
-			return this.currentOutcome;
-		}
-
-		// Check Column Status values
-		for( Column col : getColumns() ) {
-			if( col.getOutcome().getLevel() == Level.ERROR ) {
-				this.currentOutcome = OutcomeFactory.getInstance().createError(col.getOutcome().getMessage() );
-				return this.currentOutcome;
-			}
-		}
-		
-		// Check Column Status values
-		for( Column outerColumn : getColumns() ) {
-			for( Column innerColumn : getColumns() ) {
-				if( outerColumn != innerColumn ) {
-					if( outerColumn.getName().equalsIgnoreCase(innerColumn.getName())) {
-						this.currentOutcome = OutcomeFactory.getInstance().createError(
-								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesReferencedInIndex, getName()) ); 
-						return this.currentOutcome;
-					}
-				}
-			}
-		}
-		
-		if( this.getColumns().isEmpty() ) {
-			this.currentOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_warning_noColumnReferencesDefined, getName()) );
-			return this.currentOutcome;
-		}
-		
-		return this.currentOutcome;
-		
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

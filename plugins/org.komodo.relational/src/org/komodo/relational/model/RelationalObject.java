@@ -25,16 +25,16 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.RELATIONAL;
+
 import org.komodo.relational.constants.RelationalConstants;
+import org.komodo.relational.core.RelationalObjectValidator;
+import org.komodo.relational.core.RelationalValidator;
 import org.komodo.relational.extension.RelationalModelExtensionConstants;
 import org.komodo.spi.outcome.IOutcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.ModelType;
-import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtil;
 import org.komodo.utils.StringUtilities;
 
@@ -76,7 +76,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     
     private Properties extensionProperties = new Properties();
     
-    private StringNameValidator nameValidator = new StringNameValidator();
+    private RelationalValidator validator = new RelationalObjectValidator();
 
     /**
      * RelationalReference constructor
@@ -323,19 +323,20 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     }
 
     /**
+     * Get the validator
      * @return the string name validator
      */
-    public StringNameValidator getNameValidator() {
-    	return this.nameValidator;
+    public RelationalValidator getValidator() {
+    	return this.validator;
     }
 
     /**
-     * @param nameValidator the name validator
+     * @param validator the relational validator
      * 
      */
-    public void setNameValidator(StringNameValidator nameValidator) {
-    	ArgCheck.isNotNull(nameValidator, "nameValidator"); //$NON-NLS-1$
-    	this.nameValidator = nameValidator;
+    public void setValidator(RelationalValidator validator) {
+    	ArgCheck.isNotNull(validator, "validator"); //$NON-NLS-1$
+    	this.validator = validator;
     }
     
     protected void handleInfoChanged() {
@@ -343,38 +344,10 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     }
     
     /**
-     * Check name validity
-     * @return 'true' if value, 'false' if not.
-     */
-    public final boolean nameIsValid() {
-		if( this.getName() == null || this.getName().length() == 0 ) {
-			return false;
-		}
-		// Validate non-null string
-		String errorMessage = getNameValidator().checkValidName(this.getName());
-		if( errorMessage != null && !errorMessage.isEmpty() ) {
-			return false;
-		}
-		return true;
-    }
-    
-    /**
      * @return the validation status
      */
     public IOutcome validate() {
-		if( this.getName() == null || this.getName().length() == 0 ) {
-		    this.currentOutcome = OutcomeFactory.getInstance().createError(
-					  Messages.getString(RELATIONAL.validate_error_nameCannotBeNullOrEmpty, getDisplayName()) );
-			return this.currentOutcome;
-		}
-		// Validate non-null string
-		String errorMessage = getNameValidator().checkValidName(this.getName());
-		if( errorMessage != null && !errorMessage.isEmpty() ) {
-			this.currentOutcome = OutcomeFactory.getInstance().createError(errorMessage);
-			return this.currentOutcome;
-		}
-		this.currentOutcome = OutcomeFactory.getInstance().createOK();
-		return this.currentOutcome;
+    	return getValidator().validate(this);
     }
     
 	/* (non-Javadoc)

@@ -26,12 +26,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.RELATIONAL;
+
 import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.outcome.IOutcome.Level;
-import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
 import org.komodo.utils.StringUtilities;
@@ -107,7 +103,7 @@ public class Table extends RelationalObject {
         this.foreignKeys = new ArrayList<ForeignKey>();
         this.indexes = new ArrayList<Index>();
         this.uniqueConstraints = new ArrayList<UniqueConstraint>();
-        setNameValidator(new RelationalStringNameValidator(true));
+        getValidator().setNameValidator(new RelationalStringNameValidator(true));
     }
     
     /**
@@ -555,75 +551,6 @@ public class Table extends RelationalObject {
 			getExtensionProperties().put(NATIVE_QUERY, this.nativeQuery );
 		} else getExtensionProperties().remove(NATIVE_QUERY);
 			
-	}
-	
-	@Override
-	public IOutcome validate() {
-		// Walk through the properties for the table and set the status
-		this.currentOutcome = super.validate();
-		
-		if( this.currentOutcome.getLevel() == Level.ERROR ) {
-			return this.currentOutcome;
-		}
-		
-		if( this.isMaterialized() && this.materializedTable == null ) {
-			this.currentOutcome = OutcomeFactory.getInstance().createWarning(
-					Messages.getString(RELATIONAL.validate_error_materializedTableHasNoTableDefined) );
-			return this.currentOutcome;
-		}
-		
-		if( this.getPrimaryKey() != null && !this.getPrimaryKey().getOutcome().isOK()) {
-			this.currentOutcome = this.getPrimaryKey().getOutcome();
-			return this.currentOutcome;
-		}
-		
-		if( this.getUniqueContraint() != null && !this.getUniqueContraint().getOutcome().isOK()) {
-			this.currentOutcome = this.getUniqueContraint().getOutcome();
-			return this.currentOutcome;
-		}
-		
-		for( ForeignKey fk : this.getForeignKeys() ) {
-			if( !fk.getOutcome().isOK()) {
-				this.currentOutcome = fk.getOutcome();
-				return this.currentOutcome;
-			}
-		}
-		
-		// Check Column Status values
-		for( Column col : getColumns() ) {
-			if( col.getOutcome().getLevel() == Level.ERROR ) {
-				this.currentOutcome = OutcomeFactory.getInstance().createError(col.getOutcome().getMessage() );
-				return this.currentOutcome;
-			}
-		}
-		
-		// Check Column Status values
-		for( Column outerColumn : getColumns() ) {
-			for( Column innerColumn : getColumns() ) {
-				if( outerColumn != innerColumn ) {
-					if( outerColumn.getName().equalsIgnoreCase(innerColumn.getName())) {
-						this.currentOutcome = OutcomeFactory.getInstance().createError(
-								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesInTable, getName()) );
-						return this.currentOutcome;
-					}
-				}
-			}
-		}
-		
-		if( this.getColumns().isEmpty() ) {
-			if( this.getParent() != null && this.getParent() instanceof Procedure ) {
-				this.currentOutcome = OutcomeFactory.getInstance().createWarning(
-						Messages.getString(RELATIONAL.validate_warning_noColumnsDefinedForResultSet) ); 
-				return this.currentOutcome;
-			} else {
-				this.currentOutcome = OutcomeFactory.getInstance().createWarning(
-						Messages.getString(RELATIONAL.validate_warning_noColumnsDefined) ); 
-				return this.currentOutcome;
-			}
-		}
-		
-		return this.currentOutcome;
-		
 	}
 	
     /**

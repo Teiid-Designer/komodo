@@ -22,12 +22,7 @@
 package org.komodo.relational.model;
 
 import java.util.Properties;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.RELATIONAL;
-import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.outcome.IOutcome.Level;
-import org.komodo.spi.outcome.OutcomeFactory;
+
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
 
@@ -95,7 +90,6 @@ public class Parameter extends RelationalObject {
      */
     public Parameter() {
         super();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -104,7 +98,6 @@ public class Parameter extends RelationalObject {
      */
     public Parameter( String name ) {
         super(name);
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -223,28 +216,6 @@ public class Parameter extends RelationalObject {
     public void setScale( int scale ) {
         this.scale = scale;
     }
-    
-	@Override
-	public IOutcome validate() {
-		// Walk through the properties for the parameter and set the status
-		super.validate();
-		
-		if( getOutcome().getLevel() == Level.ERROR ) {
-			return this.currentOutcome;
-		}
-		
-		// Parameter directions check
-		Procedure parentProcedure = (Procedure)getParent();
-		if(parentProcedure!=null && parentProcedure.isFunction()) {
-			if( ! getDirection().equalsIgnoreCase(DIRECTION.IN) &&
-					! getDirection().equalsIgnoreCase(DIRECTION.RETURN)	) {
-				this.currentOutcome = OutcomeFactory.getInstance().createError(
-						Messages.getString(RELATIONAL.validate_error_invalidParameterDirectionInFunction) ); 
-				return this.currentOutcome;
-			}
-		}
-		return this.currentOutcome;
-	}
     
     /**
      * Set properties
