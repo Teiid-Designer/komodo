@@ -25,12 +25,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.RELATIONAL;
+
 import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.outcome.IOutcome.Level;
-import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
 import org.komodo.utils.StringUtilities;
@@ -83,7 +79,7 @@ public class Procedure extends RelationalObject {
     public Procedure() {
         super();
         this.parameters = new ArrayList<Parameter>();
-        setNameValidator(new RelationalStringNameValidator(true, true));
+        getValidator().setNameValidator(new RelationalStringNameValidator(true, true));
     }
     
     /**
@@ -93,7 +89,7 @@ public class Procedure extends RelationalObject {
     public Procedure( String name ) {
         super(name);
         this.parameters = new ArrayList<Parameter>();
-        setNameValidator(new RelationalStringNameValidator(true, true));
+        getValidator().setNameValidator(new RelationalStringNameValidator(true, true));
     }
 
     /**
@@ -639,103 +635,7 @@ public class Procedure extends RelationalObject {
 			getExtensionProperties().remove(ALLOWS_DISTINCT);
 		}
 	} 
-    
-	@Override
-	public IOutcome validate() {
-		// Walk through the properties for the table and set the status
-		this.currentOutcome = super.validate();
-		
-		// Validate Children
-		for( Parameter param : getParameters() ) {
-			param.validate();
-		}
-		
-		if( getOutcome().getLevel() == Level.ERROR ) {
-			return this.currentOutcome;
-		}
-		
-		// Check Column Status values
-		for( Parameter param : getParameters() ) {
-			if( param.getOutcome().getLevel() == Level.ERROR ) {
-				this.currentOutcome = OutcomeFactory.getInstance().createError(param.getOutcome().getMessage() );
-				return this.currentOutcome;
-			}
-		}
-		
-		// Check Column Status values
-		for( Parameter outerParam : getParameters() ) {
-			for( Parameter innerParam : getParameters() ) {
-				if( outerParam != innerParam ) {
-					if( outerParam.getName().equalsIgnoreCase(innerParam.getName())) {
-						this.currentOutcome = OutcomeFactory.getInstance().createError(
-								Messages.getString(RELATIONAL.validate_error_duplicateParameterNamesInProcedure, getName()) ); 
-						return this.currentOutcome;
-					}
-				}
-			}
-		}
-		
-		if( this.getParameters().isEmpty() ) {
-			this.currentOutcome = OutcomeFactory.getInstance().createWarning( 
-					Messages.getString(RELATIONAL.validate_warning_noParametersDefined) ); 
-			return this.currentOutcome;
-		}
-		
-		// Check for more than one RETURN parameter if Function
-		if( this.isFunction() ) {
-			boolean foundResultParam = false;
-			for( Parameter param : getParameters() ) {
-				if( param.getDirection().equalsIgnoreCase(DIRECTION.RETURN)) {
-					if( foundResultParam ) {
-						this.currentOutcome = OutcomeFactory.getInstance().createError(
-								Messages.getString(RELATIONAL.validate_error_tooManyResultParametersInFunction) ); 
-						return this.currentOutcome;
-					} else {
-						foundResultParam = true;
-					}
-				}
-			}
-			
-			if( this.isSourceFunction() ) {
-				if( getResultSet() != null ) {
-					this.currentOutcome = OutcomeFactory.getInstance().createError(
-							Messages.getString(RELATIONAL.validate_noResultSetAllowedInFunction) ); 
-					return this.currentOutcome;
-				}
-			} else {
-				// Check for null category, class or method name
-				if( this.functionCategory == null || this.functionCategory.trim().length() == 0 ) {
-					this.currentOutcome = OutcomeFactory.getInstance().createError(
-							Messages.getString(RELATIONAL.validate_categoryUndefinedForUDF) ); 
-					return this.currentOutcome;
-				}
-				if( this.javaClass == null || this.javaClass.trim().length() == 0 ) {
-					this.currentOutcome = OutcomeFactory.getInstance().createError(
-							Messages.getString(RELATIONAL.validate_javaClassUndefinedForUDF) ); 
-					return this.currentOutcome;
-				}
-				if( this.javaMethod == null || this.javaMethod.trim().length() == 0 ) {
-					this.currentOutcome = OutcomeFactory.getInstance().createError(
-							Messages.getString(RELATIONAL.validate_javaMethodUndefinedForUDF) ); 
-					return this.currentOutcome;
-				}
-			}
-		} else {
-			if( getResultSet() != null ) {
-				if( getResultSet().getOutcome().getLevel() == Level.ERROR ) {
-					this.currentOutcome = OutcomeFactory.getInstance().createError(getResultSet().getOutcome().getMessage() );
-					return this.currentOutcome;
-				}
-				
-				if( getResultSet().getOutcome().getLevel() == Level.WARNING ) {
-					this.currentOutcome = OutcomeFactory.getInstance().createError(getResultSet().getOutcome().getMessage() );
-					return this.currentOutcome;
-				}
-			}
-		}
-		return this.currentOutcome;
-	}
-	
+    	
     /**
      * {@inheritDoc}
      * 

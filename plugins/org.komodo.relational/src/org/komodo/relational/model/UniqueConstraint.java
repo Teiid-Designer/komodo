@@ -25,11 +25,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.RELATIONAL;
+
 import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.utils.HashCodeUtil;
 
 
@@ -48,7 +45,7 @@ public class UniqueConstraint extends RelationalObject {
     public UniqueConstraint() {
         super();
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(true, true));
+        getValidator().setNameValidator(new RelationalStringNameValidator(true, true));
     }
     
     /**
@@ -58,7 +55,7 @@ public class UniqueConstraint extends RelationalObject {
     public UniqueConstraint( String name ) {
         super(name);
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(true, true));
+        getValidator().setNameValidator(new RelationalStringNameValidator(true, true));
     }
  
     /**
@@ -131,23 +128,6 @@ public class UniqueConstraint extends RelationalObject {
     	return null;
     }
     
-	@Override
-	public IOutcome validate() {
-		// Walk through the properties for the table and set the status
-		this.currentOutcome = super.validate();
-		
-		if( !this.getOutcome().isOK() ) {
-			return this.currentOutcome;
-		}
-		
-		if( this.getColumns().isEmpty() ) {
-			this.currentOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_ucNoColumnsDefined, getName()) );
-			return this.currentOutcome;
-		}
-		return this.currentOutcome;
-	}
-	
     /**
      * {@inheritDoc}
      * 

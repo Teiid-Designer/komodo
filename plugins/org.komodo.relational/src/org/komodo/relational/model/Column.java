@@ -22,8 +22,7 @@
 package org.komodo.relational.model;
 
 import java.util.Properties;
-import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.spi.outcome.IOutcome;
+
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
 
@@ -168,7 +167,6 @@ public class Column extends RelationalObject {
      */
     public Column() {
         super();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -177,7 +175,6 @@ public class Column extends RelationalObject {
      */
     public Column( String name ) {
         super(name);
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -488,12 +485,6 @@ public class Column extends RelationalObject {
     public void setUpdateable( boolean updateable ) {
         this.updateable = updateable;
     }
-    
-	@Override
-	public IOutcome validate() {
-		// Walk through the properties for the table and set the status
-		return super.validate();
-	}
     
     /**
      * Set properties

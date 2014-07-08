@@ -24,7 +24,7 @@ package org.komodo.relational.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.komodo.relational.core.RelationalStringNameValidator;
+
 import org.komodo.utils.HashCodeUtil;
 
 
@@ -48,7 +48,6 @@ public class Schema extends RelationalObject {
         this.indexes = new ArrayList<Index>();
         this.procedures = new ArrayList<Procedure>();
         this.tables = new ArrayList<Table>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -60,7 +59,6 @@ public class Schema extends RelationalObject {
         this.indexes = new ArrayList<Index>();
         this.procedures = new ArrayList<Procedure>();
         this.tables = new ArrayList<Table>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**

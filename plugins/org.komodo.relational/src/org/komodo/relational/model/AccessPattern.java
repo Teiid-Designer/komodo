@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.relational.core.RelationalStringNameValidator;
+
 import org.komodo.utils.HashCodeUtil;
 
 
@@ -44,7 +44,6 @@ public class AccessPattern extends RelationalObject {
     public AccessPattern() {
         super();
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -54,7 +53,6 @@ public class AccessPattern extends RelationalObject {
     public AccessPattern( String name ) {
         super(name);
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
 
     /**

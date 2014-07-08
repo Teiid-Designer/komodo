@@ -24,11 +24,7 @@ package org.komodo.relational.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.RELATIONAL;
-import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.outcome.OutcomeFactory;
+
 import org.komodo.utils.HashCodeUtil;
 
 
@@ -48,7 +44,6 @@ public class PrimaryKey extends RelationalObject {
     public PrimaryKey( ) {
         super();
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -58,7 +53,6 @@ public class PrimaryKey extends RelationalObject {
     public PrimaryKey( String name ) {
         super(name);
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -131,23 +125,6 @@ public class PrimaryKey extends RelationalObject {
         handleInfoChanged();
     }
     
-	@Override
-	public IOutcome validate() {
-		// Walk through the properties for the table and set the status
-		this.currentOutcome = super.validate();
-		
-		if( !this.getOutcome().isOK() ) {
-			return this.currentOutcome;
-		}
-		
-		if( this.getColumns().isEmpty() ) {
-			this.currentOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_pkNoColumnsDefined, getName()) );
-			return this.currentOutcome;
-		}
-		return this.currentOutcome;
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

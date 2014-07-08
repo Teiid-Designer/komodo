@@ -24,11 +24,7 @@ package org.komodo.relational.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.RELATIONAL;
-import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.outcome.OutcomeFactory;
+
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
 
@@ -74,7 +70,6 @@ public class ForeignKey extends RelationalObject {
     public ForeignKey() {
         super();
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -84,7 +79,6 @@ public class ForeignKey extends RelationalObject {
     public ForeignKey( String name ) {
         super(name);
         this.columns = new ArrayList<Column>();
-        setNameValidator(new RelationalStringNameValidator(false));
     }
     
     /**
@@ -292,35 +286,6 @@ public class ForeignKey extends RelationalObject {
 			
 	}
     
-	@Override
-	public IOutcome validate() {
-		// Walk through the properties for the table and set the status
-		this.currentOutcome = super.validate();
-		
-		if( !this.currentOutcome.isOK() ) {
-			return this.currentOutcome;
-		}
-		
-		if( this.getColumns().isEmpty() ) {
-			this.currentOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_fkNoColumnsDefined, getName()) );
-			return this.currentOutcome;
-		}
-				
-		if( this.getUniqueKeyName() == null || this.getUniqueKeyName().length() == 0 ) {
-			this.currentOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_fKUniqueKeyNameIsUndefined, getName()) );
-			return this.currentOutcome;
-		}
-		
-		if( this.getUniqueKeyTableName() == null || this.getUniqueKeyTableName().length() == 0 ) {
-			this.currentOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_fKReferencedUniqueKeyTableIsUndefined) );
-			return this.currentOutcome;
-		}
-		return this.currentOutcome;
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
