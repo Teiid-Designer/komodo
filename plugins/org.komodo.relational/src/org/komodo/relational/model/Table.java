@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.komodo.relational.core.RelationalStringNameValidator;
@@ -207,6 +208,115 @@ public class Table extends RelationalObject {
     }
 
     /**
+     * Add a child to this model
+     * @param child the child
+     * @return 'true' if child was added
+     */
+    @Override
+	public boolean addChild(RelationalObject child) {
+    	int objectType = child.getType();
+    	boolean success = false;
+    	
+		switch(objectType) {
+		case TYPES.COLUMN:
+			success = addColumn((Column)child);
+			break;
+		case TYPES.UC:
+			success = addUniqueConstraint((UniqueConstraint)child);
+			break;
+		case TYPES.AP:
+			success = addAccessPattern((AccessPattern)child);
+			break;
+		case TYPES.PK:
+			success = setPrimaryKey((PrimaryKey)child);
+			break;
+		case TYPES.FK:
+			success = addForeignKey((ForeignKey)child);
+			break;
+		case TYPES.INDEX:
+			success = addIndex((Index)child);
+		}
+        
+        return success;
+    }
+    
+    /**
+     * Remove specified child from the model
+     * @param child the child to remove
+     * @return 'true' if child was removed
+     */
+    @Override
+	public boolean removeChild(RelationalObject child) {
+    	int objectType = child.getType();
+    	boolean success = false;
+    	
+		switch(objectType) {
+		case TYPES.COLUMN:
+			success = removeColumn((Column)child);
+			break;
+		case TYPES.UC:
+			success = removeUniqueConstraint((UniqueConstraint)child);
+			break;
+		case TYPES.AP:
+			success = removeAccessPattern((AccessPattern)child);
+			break;
+		case TYPES.PK:
+			success = setPrimaryKey(null);
+			break;
+		case TYPES.FK:
+			success = removeForeignKey((ForeignKey)child);
+			break;
+		case TYPES.INDEX:
+			success = removeIndex((Index)child);
+		}
+        
+        return success;
+    }
+    
+    /**
+     * Get the children for this Table
+     * @return children
+     */
+    @Override
+	public Collection<RelationalObject> getChildren() {
+    	Collection<RelationalObject> children = new ArrayList<RelationalObject>();
+    	
+    	if(getColumns()!=null && !getColumns().isEmpty()) {
+    		children.addAll(getColumns());
+    	}
+    	if(getPrimaryKey()!=null) {
+    		children.add(getPrimaryKey());
+    	}
+    	if(getForeignKeys()!=null && !getForeignKeys().isEmpty()) {
+    		children.addAll(getForeignKeys());
+    	}
+    	if(getIndexes()!=null && !getIndexes().isEmpty()) {
+    		children.addAll(getIndexes());
+    	}
+    	if(getUniqueConstraints()!=null && !getUniqueConstraints().isEmpty()) {
+    		children.addAll(getUniqueConstraints());
+    	}
+    	
+        return children;
+    }
+    
+    /**
+     * Get the properties for this object
+     * @return the properties
+     */
+    @Override
+	public Map<String,String> getProperties() {
+    	Map<String,String> props = super.getProperties();
+    	
+    	props.put(KEY_CARDINALITY, String.valueOf(getCardinality()));
+    	props.put(KEY_MATERIALIZED, String.valueOf(isMaterialized()));
+    	props.put(KEY_SUPPORTS_UPDATE, String.valueOf(getSupportsUpdate()));
+    	props.put(KEY_SYSTEM, String.valueOf(isSystem()));
+    	
+    	return props;
+    }
+    
+    /**
      * @return columns
      */
     public List<Column> getColumns() {
@@ -216,25 +326,31 @@ public class Table extends RelationalObject {
     /**
      * Add a column to the table
      * @param column the column to add
+     * @return 'true' if the add was successful
      */
-    public void addColumn(Column column) {
-    	if( this.columns.add(column) ) {
-    		column.setParent(this);
+    public boolean addColumn(Column column) {
+    	boolean wasAdded = false;
+    	if(!this.columns.contains(column)) {
+        	wasAdded = this.columns.add(column);
+    	}
+    	if( wasAdded ) {
+    		if(column.getParent()!=this) column.setParent(this);
     		handleInfoChanged();
     	} 
+    	return wasAdded;
     }
     
     /**
      * Remove a column from the table
      * @param column the column to remove
-     * @return 'true' if the move was successful
+     * @return 'true' if the remove was successful
      */
     public boolean removeColumn(Column column) {
-    	if( this.columns.remove(column) ) {
+    	boolean wasRemoved = this.columns.remove(column);
+    	if( wasRemoved ) {
     		handleInfoChanged();
-    		return true;
     	}
-    	return false;
+    	return wasRemoved;
     }
 
     /**
@@ -247,15 +363,17 @@ public class Table extends RelationalObject {
     /**
      * Set the tables PK
      * @param pk the pk
+     * @return 'true' if successfully set
      */
-    public void setPrimaryKey(PrimaryKey pk) {
+    public boolean setPrimaryKey(PrimaryKey pk) {
+    	boolean wasSet = false;
     	if( this.primaryKey != pk ) {
-	    	if( pk != null ) {
-	    		pk.setParent(this);
-	    	}
 	        this.primaryKey = pk;
+	    	pk.setParent(this);
+	        wasSet = true;
 	        handleInfoChanged();
     	}
+    	return wasSet;
     }
     
     /**
@@ -268,15 +386,19 @@ public class Table extends RelationalObject {
     /**
      * Set the unique constraint
      * @param uc the uc
+     * @return 'true' if the UC was set
      */
-    public void setUniqueConstraint(UniqueConstraint uc) {
+    public boolean setUniqueConstraint(UniqueConstraint uc) {
+    	boolean wasSet = false;
     	if( this.uniqueConstraint != uc ) {
 	    	if( uc != null ) {
 	    		uc.setParent(this);
 	    	}
 	        this.uniqueConstraint = uc;
+	        wasSet = true;
 	        handleInfoChanged();
     	}
+    	return wasSet;
     }
     
     /**
@@ -289,12 +411,18 @@ public class Table extends RelationalObject {
     /**
      * Add a unique constraint
      * @param constraint the constraint
+     * @return 'true' if successfully added
      */
-    public void addUniqueConstraint(UniqueConstraint constraint) {
-    	if( this.uniqueConstraints.add(constraint) ) {
-    		constraint.setParent(this);
-    		handleInfoChanged();
+    public boolean addUniqueConstraint(UniqueConstraint constraint) {
+    	boolean wasAdded = false;
+    	if(!this.uniqueConstraints.contains(constraint)) {
+        	wasAdded = this.uniqueConstraints.add(constraint);
     	}
+    	if( wasAdded ) {
+    		if(constraint.getParent()!=this) constraint.setParent(this);
+    		handleInfoChanged();
+    	} 
+    	return wasAdded;
     }
     
     /**
@@ -303,11 +431,11 @@ public class Table extends RelationalObject {
      * @return 'true' if removed, 'false' if not
      */
     public boolean removeUniqueConstraint(UniqueConstraint constraint) {
-    	if( this.uniqueConstraints.remove(constraint) ) {
+    	boolean wasRemoved = this.uniqueConstraints.remove(constraint);
+    	if( wasRemoved ) {
     		handleInfoChanged();
-    		return true;
     	}
-    	return false;
+    	return wasRemoved;
     }
 
     /**
@@ -320,12 +448,18 @@ public class Table extends RelationalObject {
     /**
      * Add an AccessPattern to the table
      * @param ap the AccessPattern
+     * @return 'true' if the ap was added
      */
-    public void addAccessPattern(AccessPattern ap) {
-    	if( this.accessPatterns.add(ap) ) {
-    		ap.setParent(this);
-    		handleInfoChanged();
+    public boolean addAccessPattern(AccessPattern ap) {
+    	boolean wasAdded = false;
+    	if(!this.accessPatterns.contains(ap)) {
+        	wasAdded = this.accessPatterns.add(ap);
     	}
+    	if( wasAdded ) {
+    		if(ap.getParent()!=this) ap.setParent(this);
+    		handleInfoChanged();
+    	} 
+    	return wasAdded;
     }
     
     /**
@@ -334,11 +468,11 @@ public class Table extends RelationalObject {
      * @return 'true' if removed, 'false' if not
      */
     public boolean removeAccessPattern(AccessPattern ap) {
-    	if( this.accessPatterns.remove(ap) ) {
+    	boolean wasRemoved = this.accessPatterns.remove(ap);
+    	if( wasRemoved ) {
     		handleInfoChanged();
-    		return true;
     	}
-    	return false;
+    	return wasRemoved;
     }
 
     /**
@@ -351,12 +485,18 @@ public class Table extends RelationalObject {
     /**
      * Add FK to the table
      * @param fk the fk
+     * @return 'true' if the FK was added
      */
-    public void addForeignKey(ForeignKey fk) {
-    	if( this.foreignKeys.add(fk) ) {
-    		fk.setParent(this);
-    		handleInfoChanged();
+    public boolean addForeignKey(ForeignKey fk) {
+    	boolean wasAdded = false;
+    	if(!this.foreignKeys.contains(fk)) {
+        	wasAdded = this.foreignKeys.add(fk);
     	}
+    	if( wasAdded ) {
+    		if(fk.getParent()!=this) fk.setParent(this);
+    		handleInfoChanged();
+    	} 
+    	return wasAdded;
     }
     
     /**
@@ -365,11 +505,11 @@ public class Table extends RelationalObject {
      * @return 'true' if removed, 'false' if not.
      */
     public boolean removeForeignKey(ForeignKey fk) {
-    	if( this.foreignKeys.remove(fk) ) {
+    	boolean wasRemoved = this.foreignKeys.remove(fk);
+    	if( wasRemoved ) {
     		handleInfoChanged();
-    		return true;
     	}
-    	return false;
+    	return wasRemoved;
     }
     
     /**
@@ -381,13 +521,19 @@ public class Table extends RelationalObject {
 
     /**
      * @param index the index
+     * @return 'true' if successfully added
      */
-    public void addIndex(Index index) {
-    	if( this.indexes.add(index) ) {
-    		// NOTE: indexes are children of a schema so set parent to table's parent
-    		index.setParent(this.getParent());
-    		handleInfoChanged();
+    public boolean addIndex(Index index) {
+    	boolean wasAdded = false;
+    	if(!this.indexes.contains(index)) {
+        	wasAdded = this.indexes.add(index);
     	}
+    	if( wasAdded ) {
+    		// NOTE: indexes are children of a schema so set parent to table's parent
+    		if(index.getParent()!=this) index.setParent(this);
+    		handleInfoChanged();
+    	} 
+    	return wasAdded;
     }
     
     /**
@@ -395,11 +541,11 @@ public class Table extends RelationalObject {
      * @return if index was removed
      */
     public boolean removeIndex(Index index) {
-    	if( this.indexes.remove(index) ) {
+    	boolean wasRemoved = this.indexes.remove(index);
+    	if( wasRemoved ) {
     		handleInfoChanged();
-    		return true;
     	}
-    	return false;
+    	return wasRemoved;
     }
     
     /**

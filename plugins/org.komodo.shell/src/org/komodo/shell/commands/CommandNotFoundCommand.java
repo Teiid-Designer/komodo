@@ -15,6 +15,7 @@
  */
 package org.komodo.shell.commands;
 
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.AbstractShellCommand;
@@ -40,17 +41,17 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
 	}
 
 	/**
-	 * @see org.komodo.shell.api.ShellCommand#printUsage()
+	 * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
 	 */
 	@Override
-	public void printUsage() {
+	public void printUsage(int indent) {
 	}
 
 	/**
-	 * @see org.komodo.shell.api.ShellCommand#printHelp()
+	 * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
 	 */
 	@Override
-	public void printHelp() {
+	public void printHelp(int indent) {
 	}
 	
     /**
@@ -72,7 +73,7 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
 	 */
 	@Override
 	public boolean execute() {
-		print(Messages.getString(SHELL.COMMAND_NOT_FOUND));
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.COMMAND_NOT_FOUND));
         return true;
 	}
 

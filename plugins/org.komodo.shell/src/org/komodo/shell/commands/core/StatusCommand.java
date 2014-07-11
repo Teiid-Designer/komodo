@@ -22,6 +22,7 @@
 package org.komodo.shell.commands.core;
 
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -51,16 +52,16 @@ public class StatusCommand extends BuiltInShellCommand {
 
 		// Repo info
 		String currentRepo = "local Repository"; //$NON-NLS-1$
-		print(Messages.getString("StatusCommand.CurrentRepo", currentRepo)); //$NON-NLS-1$
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("StatusCommand.CurrentRepo", currentRepo)); //$NON-NLS-1$
 		
 		// Server info
 		String serverUrl = (wsStatus.getTeiidServerUrl() == null) ? "Unknown" : wsStatus.getTeiidServerUrl(); //$NON-NLS-1$
 		String currentServer = "[" + serverUrl + " : not connected]"; //$NON-NLS-1$ //$NON-NLS-2$
-		print(Messages.getString("StatusCommand.CurrentServer", currentServer)); //$NON-NLS-1$
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("StatusCommand.CurrentServer", currentServer)); //$NON-NLS-1$
 
 		// Current Context
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		print(Messages.getString("StatusCommand.CurrentContext", currentContext.getFullName())); //$NON-NLS-1$
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("StatusCommand.CurrentContext", currentContext.getFullName())); //$NON-NLS-1$
 		
 		// Echo command if recording on
 		if(wsStatus.getRecordingStatus()) recordCommand(getArguments());

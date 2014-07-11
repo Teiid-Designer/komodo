@@ -24,6 +24,7 @@ package org.komodo.relational.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.komodo.utils.HashCodeUtil;
@@ -211,6 +212,22 @@ public class Index extends RelationalObject {
 		this.relationalTable = relationalTable;
 	}
 
+    /**
+     * Get the properties for this object
+     * @return the properties
+     */
+    @Override
+	public Map<String,String> getProperties() {
+    	Map<String,String> props = super.getProperties();
+    	
+    	props.put(KEY_NULLABLE, String.valueOf(isNullable()));
+    	props.put(KEY_UNIQUE, String.valueOf(isUnique()));
+    	props.put(KEY_AUTO_UPDATE, String.valueOf(isAutoUpdate()));
+    	props.put(KEY_FILTER_CONDITION, getFilterCondition());
+    	
+    	return props;
+    }
+    
     /**
      * Set properties
      * @param props the properties

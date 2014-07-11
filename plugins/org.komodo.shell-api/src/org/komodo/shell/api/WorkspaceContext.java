@@ -21,13 +21,15 @@
  ************************************************************************************/
 package org.komodo.shell.api;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.komodo.relational.model.RelationalObject;
 
 /**
- * The WorkspaceContext
+ * The interface WorkspaceContext
  */
-public class WorkspaceContext {
+public interface WorkspaceContext {
 	
 	/**
 	 * The context type
@@ -40,110 +42,137 @@ public class WorkspaceContext {
 		@SuppressWarnings("javadoc")
 		PROJECT,
 		@SuppressWarnings("javadoc")
-		SOURCE_MODEL,
+		TABLE,
 		@SuppressWarnings("javadoc")
-		VIEW_MODEL
-	}
-	
-	private String name;
-	private Type type;
-	private WorkspaceContext parent = null;
-	private List<WorkspaceContext> children = new ArrayList<WorkspaceContext>();
-	
-	/**
-	 * Constructor
-	 * @param parent the parent context
-	 * @param name the context name
-	 * @param type the context type
-	 */
-	public WorkspaceContext(WorkspaceContext parent, String name, Type type) {
-		super();
-		this.parent = parent;
-		this.name = name;
-		this.type = type;
+		COLUMN,
+		@SuppressWarnings("javadoc")
+		PROCEDURE,
+		@SuppressWarnings("javadoc")
+		PARAMETER,
+		@SuppressWarnings("javadoc")
+		RESULT_SET,
+		@SuppressWarnings("javadoc")
+		SCHEMA,
+		@SuppressWarnings("javadoc")
+		VIEW,
+		@SuppressWarnings("javadoc")
+		UNIQUE_CONSTRAINT,
+		@SuppressWarnings("javadoc")
+		ACCESS_PATTERN,
+		@SuppressWarnings("javadoc")
+		PRIMARY_KEY,
+		@SuppressWarnings("javadoc")
+		FOREIGN_KEY,
+		@SuppressWarnings("javadoc")
+		INDEX,
+		@SuppressWarnings("javadoc")
+		MODEL
 	}
 	
 	/**
 	 * Get the name
 	 * @return the context name
 	 */
-	public String getName() {
-		return name;
-	}
+	public String getName();
 
 	/**
 	 * Set the name
 	 * @param name the context name
 	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+	public void setName(String name);
 
 	/**
 	 * Get the type
 	 * @return the type
 	 */
-	public Type getType() {
-		return type;
-	}
+	public Type getType();
 
 	/**
 	 * Set the type
 	 * @param type the type
 	 */
-	public void setType(Type type) {
-		this.type = type;
-	}
+	public void setType(Type type);
 
+	/**
+	 * Get the workspace status
+	 * @return the workspace status
+	 */
+	public WorkspaceStatus getWorkspaceStatus();
+	
 	/**
 	 * Get the parent context
 	 * @return the parent
 	 */
-	public WorkspaceContext getParent() {
-		return this.parent;
-	}
+	public WorkspaceContext getParent();
 	
 	/**
 	 * Get all children
 	 * @return the list of children
 	 */
-	public List<WorkspaceContext> getChildren() {
-		return children;
-	}
+	public List<WorkspaceContext> getChildren();
 
 	/**
-	 * Set the children for this context
-	 * @param children the children
+	 * Get the child context of the given name and type
+	 * @param name the name
+	 * @param type the type
+	 * @return the child
 	 */
-	public void setChildren(List<WorkspaceContext> children) {
-		this.children = children;
-	}
-	
-	/**
-	 * Add a child to this context
-	 * @param child the child
-	 */
-	public void addChild(WorkspaceContext child) {
-		this.children.add(child);
-	}
+	public WorkspaceContext getChild(String name, Type type);
 	
 	/**
 	 * Get the full name path for this context.  e.g. root.parentContext.thisContext
 	 * @return the full name
 	 */
-	public String getFullName() {
-		List<WorkspaceContext> parentContexts = new ArrayList<WorkspaceContext>();
-		WorkspaceContext parentContext = this.parent;
-		while(parentContext!=null) {
-			parentContexts.add(0,parentContext);
-			parentContext = parentContext.getParent();
-		}
-		StringBuffer sb = new StringBuffer();
-		for(WorkspaceContext theContext : parentContexts) {
-			sb.append(theContext.getName()+"."); //$NON-NLS-1$
-		}
-		sb.append(getName());
-		return sb.toString();
-	}
+	public String getFullName();
+	
+	/**
+	 * Determine if the context is within relational model
+	 * @return 'true' if relational
+	 */
+	public boolean isRelational();
+	
+	/**
+	 * Get the relational obj type which corresponds to the context type
+	 * @param ctxType the context type
+	 * @return the relational object type
+	 */
+	public int getRelationalObjTypeForWsContextType(WorkspaceContext.Type ctxType);
+	
+	/**
+	 * Get the context type type which corresponds to the relational object type
+	 * @param relObjType the relational object type
+	 * @return the context type
+	 */
+	public WorkspaceContext.Type getWsContextTypeForRelationalObjType(int relObjType);
+	
+	/**
+	 * Get relational object at this context
+	 * @return the relationalObject, null if not applicable
+	 */
+	public RelationalObject getRelationalObj();
 
+	/**
+	 * Get relational models at project context
+	 * @return the relationalObject list
+	 */
+	public List<RelationalObject> getModels();
+	
+	/**
+	 * Get the property name value map at this context
+	 * @return the map of property name-value
+	 */
+	public Map<String,String> getPropertyNameValueMap();
+
+	/**
+	 * Get the valid objects that can be created at this context
+	 * @return the list of valid types
+	 */
+	public List<String> getValidTypesForCreate();
+
+	/**
+	 * Add a child context
+	 * @param child the child
+	 */
+	public void addChild(Object child);
+	
 }

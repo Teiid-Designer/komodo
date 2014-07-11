@@ -36,7 +36,7 @@ import org.komodo.shell.api.WorkspaceStatusEventHandler;
  */
 public class WorkpaceStatusImpl implements WorkspaceStatus {
 
-	private WorkspaceContext rootContext;
+	private WorkspaceContextImpl rootContext;
 	private WorkspaceContext currentContext;
 	private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
 	private boolean recordingStatus=false;
@@ -47,24 +47,12 @@ public class WorkpaceStatusImpl implements WorkspaceStatus {
 	 * Constructor
 	 */
 	public WorkpaceStatusImpl() {
-		initSample();
+		init();
 	}
 	
-	private void initSample() {
-		rootContext = new WorkspaceContext(null,"root",WorkspaceContext.Type.ROOT); //$NON-NLS-1$
-		
-		WorkspaceContext projContext1 = new WorkspaceContext(rootContext,"Project1",WorkspaceContext.Type.PROJECT); //$NON-NLS-1$
-		projContext1.addChild(new WorkspaceContext(projContext1,"SrcModel1",WorkspaceContext.Type.SOURCE_MODEL)); //$NON-NLS-1$
-		projContext1.addChild(new WorkspaceContext(projContext1,"SrcModel2",WorkspaceContext.Type.SOURCE_MODEL)); //$NON-NLS-1$
-		projContext1.addChild(new WorkspaceContext(projContext1,"ViewModel1",WorkspaceContext.Type.VIEW_MODEL)); //$NON-NLS-1$
-
-		WorkspaceContext projContext2 = new WorkspaceContext(rootContext,"Project2",WorkspaceContext.Type.PROJECT); //$NON-NLS-1$
-		projContext2.addChild(new WorkspaceContext(projContext2,"SrcModel1",WorkspaceContext.Type.SOURCE_MODEL)); //$NON-NLS-1$
-		projContext2.addChild(new WorkspaceContext(projContext2,"ViewModel1",WorkspaceContext.Type.VIEW_MODEL)); //$NON-NLS-1$
-		
-		rootContext.addChild(projContext1);
-		rootContext.addChild(projContext2);
-		
+	private void init() {
+		rootContext = new WorkspaceContextImpl(this,null,"root",WorkspaceContext.Type.ROOT); //$NON-NLS-1$
+				
 		currentContext = rootContext;
 	}
 	
@@ -170,6 +158,5 @@ public class WorkpaceStatusImpl implements WorkspaceStatus {
         	}
         }
 	}
-
 	
 }

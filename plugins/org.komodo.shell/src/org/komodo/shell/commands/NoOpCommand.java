@@ -37,17 +37,17 @@ public class NoOpCommand extends AbstractShellCommand {
 	}
 
 	/**
-	 * @see org.komodo.shell.api.ShellCommand#printUsage()
+	 * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
 	 */
 	@Override
-	public void printUsage() {
+	public void printUsage(int indent) {
 	}
 
 	/**
-	 * @see org.komodo.shell.api.ShellCommand#printHelp()
+	 * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
 	 */
 	@Override
-	public void printHelp() {
+	public void printHelp(int indent) {
 	}
 
 	/**

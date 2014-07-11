@@ -40,7 +40,8 @@ public class Messages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum SHELLAPI {
-    	invalid_final_arg;
+    	invalid_final_arg,
+    	negative_indent_supplied;
 
         @Override
         public String toString() {

@@ -26,4 +26,7 @@ public interface CompletionConstants {
 
     @SuppressWarnings("javadoc")
 	public static final int NO_APPEND_SEPARATOR = 100;
+    
+    @SuppressWarnings("javadoc")
+    public static final int MESSAGE_INDENT = 5;
 }

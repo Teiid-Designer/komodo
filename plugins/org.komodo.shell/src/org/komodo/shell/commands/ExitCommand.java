@@ -16,6 +16,7 @@
 package org.komodo.shell.commands;
 
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -41,18 +42,18 @@ public class ExitCommand extends BuiltInShellCommand {
 	}
 
 	/**
-	 * @see org.komodo.shell.api.ShellCommand#printUsage()
+	 * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
 	 */
 	@Override
-	public void printUsage() {
-		print("exit"); //$NON-NLS-1$
+	public void printUsage(int indent) {
+		print(indent,"exit"); //$NON-NLS-1$
 	}
 
 	/**
-	 * @see org.komodo.shell.api.ShellCommand#printHelp()
+	 * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
 	 */
 	@Override
-	public void printHelp() {
+	public void printHelp(int indent) {
 	}
 
 	/**
@@ -60,7 +61,7 @@ public class ExitCommand extends BuiltInShellCommand {
 	 */
 	@Override
 	public boolean execute() throws Exception {
-		print(Messages.getString(SHELL.GOOD_BYE)); 
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.GOOD_BYE)); 
 		System.exit(0);
         return true;
 	}

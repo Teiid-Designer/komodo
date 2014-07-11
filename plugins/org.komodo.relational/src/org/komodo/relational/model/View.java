@@ -60,7 +60,7 @@ public class View extends Table {
      * @see org.komodo.relational.model.Table#addForeignKey(org.komodo.relational.model.ForeignKey)
      */
     @Override
-    public void addForeignKey( ForeignKey fk ) {
+    public boolean addForeignKey( ForeignKey fk ) {
         throw new UnsupportedOperationException("addForeignKey() not supported for Relational Views"); //$NON-NLS-1$
     }
     /**
@@ -69,7 +69,7 @@ public class View extends Table {
      * @see org.komodo.relational.model.Table#setPrimaryKey(org.komodo.relational.model.PrimaryKey)
      */
     @Override
-    public void setPrimaryKey( PrimaryKey pk ) {
+    public boolean setPrimaryKey( PrimaryKey pk ) {
         throw new UnsupportedOperationException("addPrimaryKey() not supported for Relational Views"); //$NON-NLS-1$
     }
     /**
@@ -78,7 +78,7 @@ public class View extends Table {
      * @see org.komodo.relational.model.Table#setUniqueConstraint(org.komodo.relational.model.UniqueConstraint)
      */
     @Override
-    public void setUniqueConstraint( UniqueConstraint uc ) {
+    public boolean setUniqueConstraint( UniqueConstraint uc ) {
         throw new UnsupportedOperationException("addUniqueConstraint() not supported for Relational Views"); //$NON-NLS-1$
     }
     

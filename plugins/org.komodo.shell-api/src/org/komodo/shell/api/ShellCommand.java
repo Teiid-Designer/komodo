@@ -80,13 +80,15 @@ public interface ShellCommand {
 
 	/**
 	 * Prints the usage help for this command.
+	 * @param indent number of spaces to indent
 	 */
-	public void printUsage();
+	public void printUsage(int indent);
 
 	/**
 	 * Prints the help text for this command.
+	 * @param indent number of spaces to indent
 	 */
-	public void printHelp();
+	public void printHelp(int indent);
 	
 	/**
 	 * Record the command to the current record output
@@ -102,10 +104,11 @@ public interface ShellCommand {
 
 	/**
 	 * Prints the given message to the output stream.
+	 * @param indent the number of chars to indent the message
 	 * @param formattedMessage the message
 	 * @param params the params
 	 */
-	public void print(String formattedMessage, Object ... params);
+	public void print(int indent,String formattedMessage, Object ... params);
 
 	/**
 	 * Handle tab completion for the command.  This is optional, but provides a mechanism by
