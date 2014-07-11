@@ -31,6 +31,7 @@ import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
 
 
 /**
@@ -46,6 +47,7 @@ public class KomodoShell {
 
     private static final String LOCALE_PROPERTY = "komodo.shell.locale"; //$NON-NLS-1$
     private static final String STARTUP_PROPERTIES_FILEPATH = "./komodoShell.properties"; //$NON-NLS-1$
+    private String msgIndentStr = StringConstants.EMPTY_STRING;
 
 	/**
 	 * Main entry point.
@@ -94,6 +96,11 @@ public class KomodoShell {
 	 * Constructor.
 	 */
 	public KomodoShell() {
+		StringBuffer sb = new StringBuffer();
+		for(int i=0; i<CompletionConstants.MESSAGE_INDENT; i++) {
+			sb.append(StringConstants.SPACE);
+		}
+		msgIndentStr = sb.toString();
 	}
 
 	/**
@@ -130,10 +137,10 @@ public class KomodoShell {
 					}
 				}
 			} catch (InvalidCommandArgumentException e) {
-				System.out.println(Messages.getString(SHELL.INVALID_ARG, e.getMessage())); 
+				System.out.println(msgIndentStr+Messages.getString(SHELL.INVALID_ARG, e.getMessage())); 
 				if (command != null) {
-    				System.out.println(Messages.getString(SHELL.USAGE)); 
-    				command.printUsage();
+    				System.out.println(msgIndentStr+Messages.getString(SHELL.USAGE)); 
+    				command.printUsage(CompletionConstants.MESSAGE_INDENT);
 				}
 				if (reader.isBatch())
 				    System.exit(1);
@@ -149,9 +156,9 @@ public class KomodoShell {
 	 * Shuts down the shell.
 	 */
 	public void shutdown() {
-		System.out.print(Messages.getString(SHELL.SHUTTING_DOWN));
+		System.out.print(msgIndentStr+Messages.getString(SHELL.SHUTTING_DOWN));
 		try { this.reader.close(); } catch (IOException e) { }
-		System.out.println(Messages.getString(SHELL.DONE));
+		System.out.println(msgIndentStr+Messages.getString(SHELL.DONE));
 	}
 
 	/**

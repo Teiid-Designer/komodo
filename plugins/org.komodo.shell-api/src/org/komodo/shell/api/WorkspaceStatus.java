@@ -57,7 +57,7 @@ public interface WorkspaceStatus {
 	 * @return the current workspace context
 	 */
 	public WorkspaceContext getCurrentContext();
-	
+
 	/**
 	 * Toggles the recording status 'on' or 'off'
 	 * @param recordState 'true' to enable recording, 'false' to disable

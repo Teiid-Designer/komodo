@@ -23,6 +23,7 @@ package org.komodo.relational.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 
 import org.komodo.utils.HashCodeUtil;
@@ -241,6 +242,22 @@ public class ForeignKey extends RelationalObject {
         	this.allowJoin = allowJoin;
         	handleInfoChanged();
         }
+    }
+
+    /**
+     * Get the properties for this object
+     * @return the properties
+     */
+    @Override
+	public Map<String,String> getProperties() {
+    	Map<String,String> props = super.getProperties();
+    	
+    	props.put(KEY_FOREIGN_KEY_MULTIPLICITY, getForeignKeyMultiplicity());
+    	props.put(KEY_PRIMARY_KEY_MULTIPLICITY, getPrimaryKeyMultiplicity());
+    	props.put(KEY_UNIQUE_KEY_NAME, getUniqueKeyName());
+    	props.put(KEY_UNIQUE_KEY_TABLE_NAME, getUniqueKeyTableName());
+    	
+    	return props;
     }
 
     /**

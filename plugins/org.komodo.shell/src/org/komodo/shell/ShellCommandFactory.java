@@ -39,6 +39,7 @@ import org.komodo.shell.commands.CommandNotFoundCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
 import org.komodo.shell.commands.core.CdCommand;
+import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.PropertyCommand;
 import org.komodo.shell.commands.core.RecordCommand;
@@ -96,6 +97,9 @@ public class ShellCommandFactory {
 		
 		PropertyCommand propertyCommand = new PropertyCommand("property",this.wsStatus); //$NON-NLS-1$
 		commandMap.put(propertyCommand.getName(), propertyCommand);
+
+		CreateCommand createCommand = new CreateCommand("create",this.wsStatus); //$NON-NLS-1$
+		commandMap.put(createCommand.getName(), createCommand);
 
 		discoverContributedCommands();
 	}

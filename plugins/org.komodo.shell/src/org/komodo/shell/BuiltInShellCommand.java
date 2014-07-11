@@ -45,19 +45,19 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	}
 
 	/**
-     * @see org.komodo.shell.api.ShellCommand#printUsage()
+     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
      */
     @Override
-    public void printUsage() {
-        print(Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
+    public void printUsage(int indent) {
+        print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
     }
 
     /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp()
+     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */
     @Override
-    public void printHelp() {
-        print(Messages.getString(getClass().getSimpleName() + ".help")); //$NON-NLS-1$
+    public void printHelp(int indent) {
+        print(indent,Messages.getString(getClass().getSimpleName() + ".help")); //$NON-NLS-1$
     }
     
     /**

@@ -69,7 +69,7 @@ else
     echo "logging.configuration already set in JAVA_OPTS"
 fi
 
-CLASSPATH=./target/*:../libs/org.komodo.shell.lib/lib/*:../org.komodo.shell-api/target/*:../org.komodo.spi/target/*:../org.komodo.utils/target/*
+CLASSPATH=./target/*:../libs/org.komodo.shell.lib/lib/*:../org.komodo.shell-api/target/*:../org.komodo.spi/target/*:../org.komodo.utils/target/*:../org.komodo.relational/target/*
 
 eval \"$JAVA\" $JAVA_OPTS -cp \"${CLASSPATH}\" org.komodo.shell.KomodoShell "$CLI_OPTS"
 

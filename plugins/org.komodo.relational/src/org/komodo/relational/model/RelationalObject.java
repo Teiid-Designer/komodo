@@ -21,8 +21,13 @@
  */
 package org.komodo.relational.model;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -133,6 +138,20 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     	
         handleInfoChanged();
     }
+    
+    /**
+     * Get the properties for this object
+     * @return the properties
+     */
+    public Map<String,String> getProperties() {
+    	Map<String,String> props = new HashMap<String,String>();
+    	
+    	props.put(KEY_NAME, getName());
+    	props.put(KEY_NAME_IN_SOURCE, getNameInSource());
+    	props.put(KEY_DESCRIPTION, getDescription());
+    	
+    	return props;
+    }
 	
 	/**
 	 * @param obj the relational reference
@@ -146,12 +165,84 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     public RelationalObject getParent() {
         return parent;
     }
+    
+	/**
+	 * Add the supplied object as a child
+     * @param relObj the object to add
+     * @return 'true' if add was a success, 'false' if not
+     */
+    public boolean addChild(RelationalObject relObj) {
+    	return false;
+    }
+    
+	/**
+	 * Remove the supplied object from child list
+     * @param relObj the object to remove
+     * @return 'true' if remove was a success, 'false' if not
+     */
+    public boolean removeChild(RelationalObject relObj) {
+    	return false;
+    }
+    
+	/**
+     * @return parent
+     */
+    public Collection<RelationalObject> getChildren() {
+        return Collections.emptyList();
+    }
+    
+	/**
+	 * Get the valid child types for this object
+     * @return parent
+     */
+    public Collection<Integer> getValidChildTypes() {
+        return Collections.emptyList();
+    }
+    
+	/**
+	 * Get the child of specified type at the specified path
+	 * @param pathToChild the relative path to the child
+	 * @param objType the type of relational object
+     * @return the object - null if not found
+     */
+    public RelationalObject getChildAtPath(List<String> pathToChild, int objType) {
+    	RelationalObject resultObj = null;
+    	RelationalObject currentChild = this;
+    	
+    	for(int i=0; i<pathToChild.size(); i++) {
+    		String currentElem = pathToChild.get(i);
+        	Collection<RelationalObject> children = currentChild.getChildren();
+        	// Look for matching child at this level
+        	boolean foundChild = false;
+        	for(RelationalObject child : children) {
+        		if(currentElem.equalsIgnoreCase(child.getName())) {
+        			currentChild=child;
+        			if(i==pathToChild.size()-1) {
+        				if(currentChild.getType()==objType) {
+        					resultObj = currentChild;
+        					foundChild=true;
+        					break;
+        				}
+        			}
+        			foundChild=true;
+        			break;
+        		}
+        	}
+    		if(!foundChild) break;
+     	}
+
+    	return resultObj;
+    }
 
     /**
      * @param parent Sets parent to the specified value.
      */
     public void setParent( RelationalObject parent ) {
-        this.parent = parent;
+    	if(this.parent!=null && !this.parent.equals(parent)) {
+    		this.parent.removeChild(this);
+    	}
+    	this.parent = parent;
+    	this.parent.addChild(this);
         handleInfoChanged();
     }
     /**

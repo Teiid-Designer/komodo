@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.model;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.komodo.utils.HashCodeUtil;
@@ -215,6 +216,27 @@ public class Parameter extends RelationalObject {
      */
     public void setScale( int scale ) {
         this.scale = scale;
+    }
+    
+    /**
+     * Get the properties for this object
+     * @return the properties
+     */
+    @Override
+	public Map<String,String> getProperties() {
+    	Map<String,String> props = super.getProperties();
+    	
+    	props.put(KEY_LENGTH, String.valueOf(getLength()));
+    	props.put(KEY_DATATYPE, getDatatype());
+    	props.put(KEY_DEFAULT_VALUE, getDefaultValue());
+    	props.put(KEY_DIRECTION, getDirection());
+    	props.put(KEY_NATIVE_TYPE, getNativeType());
+    	props.put(KEY_NULLABLE, getNullable());
+    	props.put(KEY_PRECISION, String.valueOf(getPrecision()));
+    	props.put(KEY_SCALE, String.valueOf(getScale()));
+    	props.put(KEY_RADIX, String.valueOf(getRadix()));
+    	
+    	return props;
     }
     
     /**

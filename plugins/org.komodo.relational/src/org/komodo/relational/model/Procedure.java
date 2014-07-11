@@ -24,6 +24,7 @@ package org.komodo.relational.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.komodo.relational.core.RelationalStringNameValidator;
@@ -100,6 +101,66 @@ public class Procedure extends RelationalObject {
         return TYPES.PROCEDURE;
     }
 
+    /**
+     * Add a child to this procedure
+     * @param child the child
+     * @return 'true' if child was added
+     */
+    @Override
+	public boolean addChild(RelationalObject child) {
+    	int objectType = child.getType();
+    	boolean success = false;
+    	
+		switch(objectType) {
+		case TYPES.PARAMETER:
+			success = addParameter((Parameter)child);
+			break;
+		case TYPES.RESULT_SET:
+			success = setResultSet((ProcedureResultSet)child);
+		}
+        
+        return success;
+    }
+    
+    /**
+     * Remove specified child from the procedure
+     * @param child the child to remove
+     * @return 'true' if child was removed
+     */
+    @Override
+	public boolean removeChild(RelationalObject child) {
+    	int objectType = child.getType();
+    	boolean success = false;
+    	
+		switch(objectType) {
+		case TYPES.PARAMETER:
+			success = removeParameter((Parameter)child);
+			break;
+		case TYPES.RESULT_SET:
+			success = setResultSet(null);
+		}
+        
+        return success;
+    }
+    
+    /**
+     * Get the children for this Procedure
+     * @return children
+     */
+    @Override
+	public Collection<RelationalObject> getChildren() {
+    	Collection<RelationalObject> children = new ArrayList<RelationalObject>();
+    	
+    	if(getParameters()!=null && !getParameters().isEmpty()) {
+    		children.addAll(getParameters());
+    	}
+    	if(getResultSet()!=null) {
+    		children.add(getResultSet());
+    	}
+    	
+        return children;
+    }
+    
     /**
      * @return updateCount
      */
@@ -400,18 +461,25 @@ public class Procedure extends RelationalObject {
     public ProcedureResultSet getResultSet() {
         return resultSet;
     }
+    
     /**
+     * Set the result set
      * @param resultSet Sets resultSet to the specified value.
+     * @return 'true' if successfully set
      */
-    public void setResultSet( ProcedureResultSet resultSet ) {
-    	if( this.resultSet != null ) {
-    		this.resultSet.setParent(null);
+    public boolean setResultSet(ProcedureResultSet resultSet) {
+    	boolean wasSet = false;
+    	if( this.resultSet != resultSet ) {
+	    	if( resultSet != null ) {
+	    		resultSet.setParent(this);
+	    	}
+	        this.resultSet = resultSet;
+	        wasSet = true;
+	        handleInfoChanged();
     	}
-        this.resultSet = resultSet;
-        if( this.resultSet != null) {
-        	this.resultSet.setParent(this);
-        }
+    	return wasSet;
     }
+    
     /**
      * @return parameters
      */
@@ -420,25 +488,33 @@ public class Procedure extends RelationalObject {
     }
     
     /**
+     * Add the parameter
      * @param parameter the new parameter
+     * @return 'true' if successfully added
      */
-    public void addParameter(Parameter parameter) {
-        if( this.parameters.add(parameter) ) {
-        	parameter.setParent(this);
+    public boolean addParameter(Parameter parameter) {
+    	boolean wasAdded = false;
+    	if(!this.parameters.contains(parameter)) {
+        	wasAdded = this.parameters.add(parameter);
+    	}
+    	if( wasAdded ) {
+    		if(parameter.getParent()!=this) parameter.setParent(this);
     		handleInfoChanged();
-        }
+    	} 
+    	return wasAdded;
     }
     
     /**
+     * Remove the parameter
      * @param parameter the parameter to remove
      * @return if parameter was removed or not
      */
     public boolean removeParameter(Parameter parameter) {
-    	if( this.parameters.remove(parameter) ) {
+    	boolean wasRemoved = this.parameters.remove(parameter);
+    	if( wasRemoved ) {
     		handleInfoChanged();
-    		return true;
     	}
-    	return false;
+    	return wasRemoved;
     }
     
     /**
@@ -541,6 +617,20 @@ public class Procedure extends RelationalObject {
 			this.parameters = newParameters;
 		}
 	}
+    
+    /**
+     * Get the properties for this object
+     * @return the properties
+     */
+    @Override
+	public Map<String,String> getProperties() {
+    	Map<String,String> props = super.getProperties();
+    	
+    	props.put(KEY_FUNCTION, String.valueOf(isFunction()));
+    	props.put(KEY_UPDATE_COUNT, getUpdateCount());
+    	
+    	return props;
+    }
     
     /**
      * @param props the properties

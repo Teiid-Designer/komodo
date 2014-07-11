@@ -23,6 +23,7 @@ package org.komodo.relational.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -32,7 +33,14 @@ import org.komodo.utils.ArgCheck;
  */
 public class Model extends RelationalObject {
 	private Collection<RelationalObject> allRefs = new ArrayList<RelationalObject>();
-    private Collection<RelationalObject> children;
+    private Collection<RelationalObject> children = new ArrayList<RelationalObject>();
+    
+    /**
+     * RelationalModel constructor
+     */
+    public Model( ) {
+        super();
+    }
     
     /**
      * RelationalModel constructor
@@ -40,7 +48,6 @@ public class Model extends RelationalObject {
      */
     public Model( String name ) {
         super(name);
-        this.children = new ArrayList<RelationalObject>();
     }
        
     /**
@@ -69,7 +76,8 @@ public class Model extends RelationalObject {
      * Get the top level children for this model
      * @return model children
      */
-    public Collection<RelationalObject> getChildren() {
+    @Override
+	public Collection<RelationalObject> getChildren() {
         return this.children;
     }
     
@@ -78,17 +86,15 @@ public class Model extends RelationalObject {
      * @param child the child
      * @return 'true' if child was added
      */
-    public boolean addChild(RelationalObject child) {
-        if( this.children == null ) {
-            this.children = new ArrayList<RelationalObject>();
+    @Override
+	public boolean addChild(RelationalObject child) {
+    	boolean wasAdded = false;
+    	if(!this.children.contains(child)) {
+        	wasAdded = this.children.add(child);
+    	}
+        if( wasAdded ) {
+    		if(child.getParent()!=this) child.setParent(this);
         }
-
-        boolean wasAdded = false;
-        if( !this.children.contains(child) ) {
-        	child.setParent(this);
-            wasAdded = this.children.add(child);
-        }
-        
         return wasAdded;
     }
     
@@ -97,16 +103,11 @@ public class Model extends RelationalObject {
      * @param child the child to remove
      * @return 'true' if child was removed
      */
-    public boolean removeChild(RelationalObject child) {
-        if( this.children == null ) {
-            return false;
-        }
+    @Override
+	public boolean removeChild(RelationalObject child) {
+        boolean wasRemoved = this.children.remove(child);
         
-        if( this.children.contains(child) ) {
-            return this.children.remove(child);
-        }
-        
-        return false;
+        return wasRemoved;
     }
     
     /**

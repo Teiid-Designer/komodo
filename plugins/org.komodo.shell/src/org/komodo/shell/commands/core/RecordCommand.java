@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -34,6 +35,9 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 public class RecordCommand extends BuiltInShellCommand {
 
+	private static final String ON = "ON"; //$NON-NLS-1$
+	private static final String OFF = "OFF"; //$NON-NLS-1$
+	
 	/**
 	 * Constructor
 	 * @param name the command name
@@ -62,10 +66,10 @@ public class RecordCommand extends BuiltInShellCommand {
 		}
 		
 		Date d = new Date();
-		String rState = wsStatus.getRecordingStatus() ? "ON" : "OFF"; //$NON-NLS-1$ //$NON-NLS-2$
+		String rState = wsStatus.getRecordingStatus() ? ON : OFF; 
 		String stateChangedMsg = Messages.getString("RecordCommand.setRecordingStateMsg",rState,d.toString()); //$NON-NLS-1$
 		
-        print(stateChangedMsg);  
+        print(CompletionConstants.MESSAGE_INDENT,stateChangedMsg);  
 
         recordComment("====== "+stateChangedMsg+" ======"); //$NON-NLS-1$ //$NON-NLS-2$
         
@@ -82,12 +86,12 @@ public class RecordCommand extends BuiltInShellCommand {
 	protected boolean validate(String... args) {
 		String onOffArg = args[0].trim();
 		if(onOffArg.length()==0) {
-            print(Messages.getString("RecordCommand.onOffArg_empty")); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RecordCommand.onOffArg_empty")); //$NON-NLS-1$
 			return false;
 		}
 		
 		if(!onOffArg.equalsIgnoreCase("on") && !onOffArg.equalsIgnoreCase("off")) { //$NON-NLS-1$ //$NON-NLS-2$
-            print(Messages.getString("RecordCommand.onOffArg_invalid")); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RecordCommand.onOffArg_invalid")); //$NON-NLS-1$
 			return false;
 		}
 		return true;

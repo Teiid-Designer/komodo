@@ -24,6 +24,8 @@ package org.komodo.shell.commands.core;
 import java.util.List;
 
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -54,13 +56,17 @@ public class ListCommand extends BuiltInShellCommand {
 		
 		List<WorkspaceContext> children = currentContext.getChildren();
 		if(children.isEmpty()) { 
-			print("No items to show."); //$NON-NLS-1$
+			String cType = getWorkspaceStatus().getCurrentContext().getType().toString();
+			String name = getWorkspaceStatus().getCurrentContext().getName();
+			
+			String noChildrenMsg = Messages.getString("ListCommand.noChildrenMsg",cType,name); //$NON-NLS-1$
+			print(CompletionConstants.MESSAGE_INDENT,noChildrenMsg); 
 		}
 		
 		for(WorkspaceContext childContext : children) {
 			String childName = childContext.getName();
 			WorkspaceContext.Type childType = childContext.getType();
-			print(childName+" ["+childType+"]"); //$NON-NLS-1$ //$NON-NLS-2$ 
+			print(CompletionConstants.MESSAGE_INDENT,childName+" ["+childType+"]"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		}
 		
 		if(wsStatus.getRecordingStatus()) recordCommand(getArguments());

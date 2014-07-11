@@ -53,6 +53,11 @@ public interface StringConstants {
      * The String "\n"
      */
     String NEW_LINE = "\n"; //$NON-NLS-1$
+
+    /**
+     * The String "\t"
+     */
+    String TAB = "\n"; //$NON-NLS-1$
     
     /**
      * A Comma.
@@ -63,6 +68,11 @@ public interface StringConstants {
      * A Dot.
      */
     String DOT = "."; //$NON-NLS-1$
+
+    /**
+     * Two Dots
+     */
+    String DOT_DOT = ".."; //$NON-NLS-1$
 
     /**
      * class extension

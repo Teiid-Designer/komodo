@@ -22,11 +22,13 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
 
 /**
  * Implements the 'help' command.
@@ -39,6 +41,8 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 public class HelpCommand extends BuiltInShellCommand {
 
+	private static final int CMDS_PER_LINE = 4;
+	
 	private final Map<String, ShellCommand> commands;
 
 	/**
@@ -55,19 +59,19 @@ public class HelpCommand extends BuiltInShellCommand {
 	/**
 	 * Prints the usage.
 	 *
-	 * @see org.komodo.shell.api.ShellCommand#printUsage()
+	 * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
 	 */
 	@Override
-	public void printUsage() {
+	public void printUsage(int indent) {
 	}
 
 	/**
 	 * Prints the help.
 	 *
-	 * @see org.komodo.shell.api.ShellCommand#printHelp()
+	 * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
 	 */
 	@Override
-	public void printHelp() {
+	public void printHelp(int indent) {
 	}
 
 	/**
@@ -92,12 +96,17 @@ public class HelpCommand extends BuiltInShellCommand {
 	 * Prints the generic help - all commands for this workspace context
 	 */
 	private void printHelpAll() {
-		print(Messages.getString(SHELL.Help_COMMAND_LIST_MSG)); 
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_COMMAND_LIST_MSG)); 
 		
 		// Determine the current Workspace Context type
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
 		WorkspaceContext.Type currentContextType = currentContext.getType();
+
+		StringBuffer indentBuffer = new StringBuffer();
+		for(int i=0; i<CompletionConstants.MESSAGE_INDENT; i++) {
+			indentBuffer.append(StringConstants.SPACE);
+		}
 		
 		int colCount = 0;
 		StringBuilder builder = new StringBuilder();
@@ -105,22 +114,21 @@ public class HelpCommand extends BuiltInShellCommand {
 			String cmdName = entry.getKey();
 			ShellCommand command = entry.getValue();
 			if(command.isValidForWsContext(currentContextType)) {
-				
-				builder.append(String.format("%1$-18s", cmdName)); //$NON-NLS-1$
+				builder.append(String.format("%-18s", cmdName)); //$NON-NLS-1$
 				colCount++;
 
-				if (colCount == 3) {
-					builder.append("\n  "); //$NON-NLS-1$
+				if (colCount == CMDS_PER_LINE) {
+					builder.append("\n"+indentBuffer.toString()); //$NON-NLS-1$
 					colCount = 0;
 				}
 			}
 		}
-		print(builder.toString());
-		if(colCount!=0) print("\n"); //$NON-NLS-1$
-		print(Messages.getString(SHELL.Help_GET_HELP_1)); 
-		print(""); //$NON-NLS-1$
-		print(Messages.getString(SHELL.Help_GET_HELP_2)); 
-		print(""); //$NON-NLS-1$
+		print(CompletionConstants.MESSAGE_INDENT,builder.toString());
+		if(colCount!=0) print(CompletionConstants.MESSAGE_INDENT,"\n"); //$NON-NLS-1$
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_1)); 
+		print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_2)); 
+		print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
 	}
 
 	/**
@@ -132,13 +140,11 @@ public class HelpCommand extends BuiltInShellCommand {
 	private void printHelpForCommand(String cmdName) throws Exception {
 		ShellCommand command = this.commands.get(cmdName);
 		if (command == null) {
-			print(Messages.getString(SHELL.Help_INVALID_COMMAND)); 
+			print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_INVALID_COMMAND)); 
 		} else {
-			print(Messages.getString(SHELL.Help_USAGE)); 
-			command.printUsage();
-			print(""); //$NON-NLS-1$
-			command.printHelp();
-			print(""); //$NON-NLS-1$
+			command.printUsage(0);
+			command.printHelp(0);
+			print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
 		}
 	}
 

@@ -25,17 +25,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
 
 /**
  * Cd command - allows changing the workspace context
  *
  */
 public class CdCommand extends BuiltInShellCommand {
-
+	
 	/**
 	 * Constructor
 	 * @param name the command name
@@ -102,7 +104,7 @@ public class CdCommand extends BuiltInShellCommand {
 	private boolean validateLocationArg(String location) {
 		String locArg = location.trim();
 		if(locArg.length()==0) {
-            print(Messages.getString("CdCommand.locationArg_empty")); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CdCommand.locationArg_empty")); //$NON-NLS-1$
 			return false;
 		}
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
@@ -110,7 +112,7 @@ public class CdCommand extends BuiltInShellCommand {
 		// See if command to go up
 		if("..".equals(locArg)) {  //$NON-NLS-1$
 			if(currentContext.getParent()==null) {
-	            print(Messages.getString("CdCommand.locationArg_cantCdUp")); //$NON-NLS-1$
+	            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CdCommand.locationArg_cantCdUp")); //$NON-NLS-1$
 				return false;
 			} 
 			return true;
@@ -124,7 +126,7 @@ public class CdCommand extends BuiltInShellCommand {
 			}
 		}
 		if(!foundMatch) {
-            print(Messages.getString("CdCommand.locationArg_noChildWithThisName")); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CdCommand.locationArg_noChildWithThisName")); //$NON-NLS-1$
 			return false;
 		}
 		return true;
@@ -135,33 +137,26 @@ public class CdCommand extends BuiltInShellCommand {
 	 */
 	@Override
 	public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
+
 		if (getArguments().isEmpty()) {
-			WorkspaceStatus wsStatus = getWorkspaceStatus();
-			
-			List<WorkspaceContext> children = wsStatus.getCurrentContext().getChildren();
+			List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
 			List<String> childNames = new ArrayList<String>(children.size());
+			if(getWorkspaceStatus().getCurrentContext().getType()!=WorkspaceContext.Type.ROOT) {
+				childNames.add(StringConstants.DOT_DOT);
+			}
 			for(WorkspaceContext wsContext : children) {
 				childNames.add(wsContext.getName());
 			}
-			
-			if(lastArgument == null) {
-				for(String name : childNames) {
-					candidates.add(name+" "); //$NON-NLS-1$
-				}
-				return 0;
+			if(lastArgument==null) {
+				candidates.addAll(childNames);
 			} else {
-				boolean found = false;
-				for(String name : childNames) {
-					if(name.startsWith(lastArgument)) {
-						candidates.add(name+" "); //$NON-NLS-1$
-						found = true;
-						break;
+				for (String child : childNames) {
+					if (child.toUpperCase().startsWith(lastArgument.toUpperCase())) {
+						candidates.add(child);
 					}
 				}
-				if(found) return 0;
-				return -1;
 			}
-
+			return 0;
 		}
 		return -1;
 	}

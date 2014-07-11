@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.model;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.komodo.utils.HashCodeUtil;
@@ -484,6 +485,41 @@ public class Column extends RelationalObject {
      */
     public void setUpdateable( boolean updateable ) {
         this.updateable = updateable;
+    }
+    
+    /**
+     * Get the properties for this object
+     * @return the properties
+     */
+    @Override
+	public Map<String,String> getProperties() {
+    	Map<String,String> props = super.getProperties();
+    	
+    	props.put(KEY_AUTO_INCREMENTED, String.valueOf(isAutoIncremented()));
+    	props.put(KEY_LENGTH, String.valueOf(getLength()));
+    	props.put(KEY_CASE_SENSITIVE, String.valueOf(isCaseSensitive()));
+    	props.put(KEY_CHARACTER_SET_NAME, getCharacterSetName());
+    	props.put(KEY_CHARACTER_OCTET_LENGTH, String.valueOf(getCharacterOctetLength()));
+    	props.put(KEY_COLLATION_NAME, getCollationName());
+    	props.put(KEY_CURRENCY, String.valueOf(isCurrency()));
+    	props.put(KEY_DATATYPE, getDatatype());
+    	props.put(KEY_DEFAULT_VALUE, getDefaultValue());
+    	props.put(KEY_DISTINCT_VALUE_COUNT, String.valueOf(getDistinctValueCount()));
+    	props.put(KEY_FORMAT, getFormat());
+    	props.put(KEY_LENGTH_FIXED, String.valueOf(isLengthFixed()));
+    	props.put(KEY_MAXIMUM_VALUE, getMaximumValue());
+    	props.put(KEY_MINIMUM_VALUE, getMinimumValue());
+    	props.put(KEY_NATIVE_TYPE, getNativeType());
+    	props.put(KEY_NULLABLE, getNullable());
+    	props.put(KEY_NULL_VALUE_COUNT, String.valueOf(getPrecision()));
+    	props.put(KEY_SCALE, String.valueOf(getScale()));
+    	props.put(KEY_RADIX, String.valueOf(getRadix()));
+    	props.put(KEY_SEARCHABILITY, getSearchability());
+    	props.put(KEY_SELECTABLE, String.valueOf(isSelectable()));
+    	props.put(KEY_SIGNED, String.valueOf(isSigned()));
+    	props.put(KEY_UPDATEABLE, String.valueOf(isUpdateable()));
+    	
+    	return props;
     }
     
     /**

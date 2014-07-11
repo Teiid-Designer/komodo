@@ -20,6 +20,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.komodo.shell.api.Messages.SHELLAPI;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.utils.ArgCheck;
+
 /**
  * Base class for shell commands.
  * 
@@ -33,7 +37,7 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	private WorkspaceStatus wsStatus;
 	private Arguments arguments;
 	private Writer writer;
-	private List<WorkspaceContext.Type> validWsContextTypes;
+	protected List<WorkspaceContext.Type> validWsContextTypes;
 	private String name;
 
 	/**
@@ -157,16 +161,21 @@ public abstract class AbstractShellCommand implements ShellCommand {
 		}
 		return getArguments().get(argIndex);
 	}
-
+	
 	/**
-	 * @see org.komodo.shell.api.ShellCommand#print(java.lang.String, java.lang.Object[])
+	 * @see org.komodo.shell.api.ShellCommand#print(int,java.lang.String, java.lang.Object[])
 	 */
 	@Override
-	public void print(String formattedMessage, Object... params) {
+	public void print(int indent,String formattedMessage, Object... params) {
+		ArgCheck.isNonNegative(indent, Messages.getString(SHELLAPI.negative_indent_supplied)); 
+		StringBuffer sb = new StringBuffer();
+		for(int i=0; i<indent; i++) {
+			sb.append(StringConstants.SPACE);
+		}
 		String msg = String.format(formattedMessage, params);
 		if (writer != null) {
 			try {
-				writer.write(msg);
+				writer.write(sb.toString()+msg);
 				writer.write('\n');
 				writer.flush();
 			} catch (IOException e) {
