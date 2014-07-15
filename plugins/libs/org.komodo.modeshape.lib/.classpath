@@ -7,6 +7,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jcr.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/logback-core.jar" sourcepath="libsrc/logback-core-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-common.jar" sourcepath="libsrc/modeshape-common-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/modeshape-sequencer-ddl.jar" sourcepath="libsrc/modeshape-sequencer-ddl-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-jcr.jar" sourcepath="libsrc/modeshape-jcr-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api.jar" sourcepath="libsrc/slf4j-api-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>

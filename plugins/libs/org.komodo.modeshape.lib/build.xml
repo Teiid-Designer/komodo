@@ -20,6 +20,7 @@
 	<property name="libs" value="jcr.jar,
 								 modeshape-jcr.jar,
 								 modeshape-common.jar,
+								 modeshape-sequencer-ddl.jar,
 		                         logback-core.jar,
 								 logback-classic.jar,
 								 slf4j-api.jar"/>

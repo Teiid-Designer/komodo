@@ -13,7 +13,7 @@
     <packaging>eclipse-plugin</packaging>
 
     <properties>
-        <modeshape.version>4.0.0.Alpha3</modeshape.version>
+        <modeshape.version>3.8.0.Final</modeshape.version>
         <version.slf4j.api>1.6.1</version.slf4j.api>
         <version.logback>0.9.29</version.logback>
     </properties>
@@ -51,6 +51,11 @@
                                         <artifactItem>
                                             <groupId>org.modeshape</groupId>
                                             <artifactId>modeshape-common</artifactId>
+                                            <classifier>sources</classifier>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.modeshape</groupId>
+                                            <artifactId>modeshape-sequencer-ddl</artifactId>
                                             <classifier>sources</classifier>
                                         </artifactItem>
                                         <artifactItem>
@@ -105,6 +110,10 @@
                                 <artifactItem>
                                     <groupId>org.modeshape</groupId>
                                     <artifactId>modeshape-common</artifactId>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.modeshape</groupId>
+                                    <artifactId>modeshape-sequencer-ddl</artifactId>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>ch.qos.logback</groupId>
@@ -262,6 +271,10 @@
         <dependency>
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.modeshape</groupId>
+            <artifactId>modeshape-sequencer-ddl</artifactId>
         </dependency>
         <!-- Our code implements a custom logger using LogBack (which implements 
             the SLF4J API) and implements ModeShape's logging factory -->
