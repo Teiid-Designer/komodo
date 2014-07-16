@@ -24,6 +24,10 @@ package org.komodo.relational.model;
 import java.util.Map;
 import java.util.Properties;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.RELATIONAL;
+import org.komodo.relational.core.DataType;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
 
@@ -111,21 +115,11 @@ public class Column extends RelationalObject {
     @SuppressWarnings("javadoc")
     public static final String DEFAULT_FORMAT = null;
     @SuppressWarnings("javadoc")
-    public static final int DEFAULT_LENGTH = 0;
-    @SuppressWarnings("javadoc")
     public static final boolean DEFAULT_LENGTH_FIXED = false;
     @SuppressWarnings("javadoc")
     public static final String DEFAULT_MAXIMUM_VALUE = null;
     @SuppressWarnings("javadoc")
     public static final String DEFAULT_MINIMUM_VALUE = null;
-    @SuppressWarnings("javadoc")
-    public static final int DEFAULT_PRECISION = 0;
-    @SuppressWarnings("javadoc")
-    public static final int DEFAULT_NUMERIC_PRECISION = 1;
-    @SuppressWarnings("javadoc")
-    public static final int DEFAULT_RADIX = 0;
-    @SuppressWarnings("javadoc")
-    public static final int DEFAULT_SCALE = 0;
     @SuppressWarnings("javadoc")
     public static final boolean DEFAULT_SIGNED = true;
     @SuppressWarnings("javadoc")
@@ -140,7 +134,6 @@ public class Column extends RelationalObject {
     
     private int distinctValueCount = DEFAULT_DISTINCT_VALUE_COUNT;
     private int nullValueCount = DEFAULT_NULL_VALUE_COUNT;
-    private String  datatype;
     private String  nativeType;
     private String  nullable = DEFAULT_NULLABLE;
     private boolean autoIncremented;
@@ -150,18 +143,16 @@ public class Column extends RelationalObject {
     private boolean currency;
     private String  defaultValue;
     private String  format;
-    private int length;
     private boolean lengthFixed;
     private String  maximumValue;
     private String  minimumValue;
-    private int precision;
-    private int scale;
-    private int radix;
     private int characterOctetLength;
 	private boolean signed = DEFAULT_SIGNED;
     private String  searchability = DEFAULT_SEARCHABILITY;
     private boolean selectable = DEFAULT_SELECTABLE;
     private boolean updateable = DEFAULT_UPDATEABLE;
+    
+    private DataType dataType = new DataType();
     
     /**
      * RelationalColumn constructor
@@ -210,27 +201,36 @@ public class Column extends RelationalObject {
     public void setNullValueCount( int nullValueCount ) {
         this.nullValueCount = nullValueCount;
     }
+    
     /**
      * @return datatype
      */
-    public String getDatatype() {
-        return datatype;
+    public String getDatatypeName() {
+        return this.dataType.getName();
     }
+    
     /**
-     * @param datatype Sets datatype to the specified value.
+     * @param typeName Sets datatype to the specified value.
      */
-    public void setDatatype( String datatype ) {
-        this.datatype = datatype;
-        if( this.precision == DEFAULT_PRECISION &&
-        	(this.datatype.equalsIgnoreCase("INTEGER") || //$NON-NLS-1$
-        	this.datatype.equalsIgnoreCase("DECIMAL") || //$NON-NLS-1$
-        	this.datatype.equalsIgnoreCase("LONG") || //$NON-NLS-1$
-        	this.datatype.equalsIgnoreCase("SHORT") || //$NON-NLS-1$
-        	this.datatype.equalsIgnoreCase("BIGDECIMAL") || //$NON-NLS-1$
-        	this.datatype.equalsIgnoreCase("BIGINTEGER")) ) { //$NON-NLS-1$
-        	setPrecision(DEFAULT_NUMERIC_PRECISION);
-        }
+    public void setDatatypeName( String typeName ) {
+    	this.dataType.setName(typeName);
     }
+    
+    /**
+     * @param datatype the datatype
+     */
+    public void setDatatype( DataType datatype ) {
+    	ArgCheck.isNotNull(datatype);
+    	this.dataType = datatype;
+    }
+    
+    /**
+     * @return the datatype
+     */
+    public DataType getDatatype( ) {
+    	return this.dataType;
+    }
+    
     /**
      * @return nativeType
      */
@@ -253,7 +253,16 @@ public class Column extends RelationalObject {
      * @param nullable Sets nullable to the specified value.
      */
     public void setNullable( String nullable ) {
-        this.nullable = nullable;
+    	ArgCheck.isNotEmpty(nullable);
+    	String[] allowedValues = NULLABLE.AS_ARRAY;
+    	boolean matchFound = false;
+    	for(int i=0; i<allowedValues.length; i++) {
+    		if(allowedValues[i].equalsIgnoreCase(nullable)) {
+    			this.nullable = allowedValues[i];
+    			matchFound = true;
+    		}
+    	}
+    	if(!matchFound) throw new IllegalArgumentException(Messages.getString(RELATIONAL.columnError_Nullable_NotAllowable,nullable));
     }
     /**
      * @return autoIncremented
@@ -342,14 +351,14 @@ public class Column extends RelationalObject {
     /**
      * @return length
      */
-    public int getLength() {
-        return length;
+    public long getLength() {
+        return this.dataType.getLength();
     }
     /**
      * @param length Sets length to the specified value.
      */
-    public void setLength( int length ) {
-        this.length = length;
+    public void setLength( long length ) {
+        this.dataType.setLength(length);
     }
     /**
      * @return lengthFixed
@@ -391,37 +400,37 @@ public class Column extends RelationalObject {
      * @return precision
      */
     public int getPrecision() {
-        return precision;
+        return this.dataType.getPrecision();
     }
     /**
      * @param precision Sets precision to the specified value.
      */
     public void setPrecision( int precision ) {
-        this.precision = precision;
+        this.dataType.setPrecision(precision);
     }
     /**
      * @return scale
      */
     public int getScale() {
-        return scale;
+        return this.dataType.getScale();
     }
     /**
      * @param scale Sets scale to the specified value.
      */
     public void setScale( int scale ) {
-        this.scale = scale;
+        this.dataType.setScale(scale);
     }
     /**
      * @return radix
      */
     public int getRadix() {
-        return radix;
+        return this.dataType.getRadix();
     }
     /**
      * @param radix Sets radix to the specified value.
      */
     public void setRadix( int radix ) {
-        this.radix = radix;
+        this.dataType.setRadix(radix);
     }
     
     /**
@@ -456,12 +465,23 @@ public class Column extends RelationalObject {
     public String getSearchability() {
         return searchability;
     }
+    
     /**
      * @param searchability Sets searchability to the specified value.
      */
     public void setSearchability( String searchability ) {
-        this.searchability = searchability;
+    	ArgCheck.isNotEmpty(searchability);
+    	String[] allowedValues = SEARCHABILITY.AS_ARRAY;
+    	boolean matchFound = false;
+    	for(int i=0; i<allowedValues.length; i++) {
+    		if(allowedValues[i].equalsIgnoreCase(searchability)) {
+    			this.searchability = allowedValues[i];
+    			matchFound = true;
+    		}
+    	}
+    	if(!matchFound) throw new IllegalArgumentException(Messages.getString(RELATIONAL.columnError_Searchability_NotAllowable,searchability));
     }
+
     /**
      * @return selectable
      */
@@ -502,7 +522,7 @@ public class Column extends RelationalObject {
     	props.put(KEY_CHARACTER_OCTET_LENGTH, String.valueOf(getCharacterOctetLength()));
     	props.put(KEY_COLLATION_NAME, getCollationName());
     	props.put(KEY_CURRENCY, String.valueOf(isCurrency()));
-    	props.put(KEY_DATATYPE, getDatatype());
+    	props.put(KEY_DATATYPE, getDatatypeName());
     	props.put(KEY_DEFAULT_VALUE, getDefaultValue());
     	props.put(KEY_DISTINCT_VALUE_COUNT, String.valueOf(getDistinctValueCount()));
     	props.put(KEY_FORMAT, getFormat());
@@ -554,7 +574,7 @@ public class Column extends RelationalObject {
             } else if(keyStr.equalsIgnoreCase(KEY_CURRENCY) ) {
                 setCurrency(Boolean.parseBoolean(value));
             } else if(keyStr.equalsIgnoreCase(KEY_DATATYPE) ) {
-                setDatatype(value);
+                setDatatypeName(value);
             } else if(keyStr.equalsIgnoreCase(KEY_DEFAULT_VALUE) ) {
                 setDefaultValue(value);
             } else if(keyStr.equalsIgnoreCase(KEY_DISTINCT_VALUE_COUNT) ) {
@@ -625,7 +645,7 @@ public class Column extends RelationalObject {
         // string properties
         if (!StringUtil.valuesAreEqualIgnoreCase(getCharacterSetName(), other.getCharacterSetName()) ||
         		!StringUtil.valuesAreEqualIgnoreCase(getCollationName(), other.getCollationName()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getDatatype(), other.getDatatype()) ||
+        		!StringUtil.valuesAreEqualIgnoreCase(getDatatypeName(), other.getDatatypeName()) ||
         		!StringUtil.valuesAreEqualIgnoreCase(getDefaultValue(), other.getDefaultValue()) ||
         		!StringUtil.valuesAreEqualIgnoreCase(getFormat(), other.getFormat()) ||
         		!StringUtil.valuesAreEqualIgnoreCase(getMaximumValue(), other.getMaximumValue()) ||
@@ -672,8 +692,8 @@ public class Column extends RelationalObject {
         if (!StringUtil.isEmpty(getCollationName())) {
             result = HashCodeUtil.hashCode(result, getCollationName());
         }
-        if (!StringUtil.isEmpty(getDatatype())) {
-            result = HashCodeUtil.hashCode(result, getDatatype());
+        if (!StringUtil.isEmpty(getDatatypeName())) {
+            result = HashCodeUtil.hashCode(result, getDatatypeName());
         }
         if (!StringUtil.isEmpty(getDefaultValue())) {
             result = HashCodeUtil.hashCode(result, getDefaultValue());

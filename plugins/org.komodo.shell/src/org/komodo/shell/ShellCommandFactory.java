@@ -40,6 +40,7 @@ import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
 import org.komodo.shell.commands.core.CdCommand;
 import org.komodo.shell.commands.core.CreateCommand;
+import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.PropertyCommand;
 import org.komodo.shell.commands.core.RecordCommand;
@@ -100,6 +101,9 @@ public class ShellCommandFactory {
 
 		CreateCommand createCommand = new CreateCommand("create",this.wsStatus); //$NON-NLS-1$
 		commandMap.put(createCommand.getName(), createCommand);
+
+		ImportCommand importCommand = new ImportCommand("import",this.wsStatus); //$NON-NLS-1$
+		commandMap.put(importCommand.getName(), importCommand);
 
 		discoverContributedCommands();
 	}

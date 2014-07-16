@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
@@ -42,7 +43,7 @@ public class TestModel {
      */
     @Test
     public void testCreate() {
-    	Model model = RelationalUtil.createModel(MODEL_NAME);
+    	Model model = RelationalObjectFactory.INSTANCE.createModel(MODEL_NAME);
     	String tName = model.getName();
     	int type = model.getType();
     	
@@ -55,9 +56,9 @@ public class TestModel {
      */
     @Test
     public void testAddChild() {
-    	Model model = RelationalUtil.createModel(MODEL_NAME);
+    	Model model = RelationalObjectFactory.INSTANCE.createModel(MODEL_NAME);
 
-    	model.addChild(RelationalUtil.createColumn("column1")); //$NON-NLS-1$
+    	model.addChild(RelationalObjectFactory.INSTANCE.createColumn("column1")); //$NON-NLS-1$
     	
     	assertEquals(1, model.getChildren().size());
     }
@@ -67,9 +68,9 @@ public class TestModel {
      */
     @Test
     public void testAddRemoveColumns() {
-    	Model model = RelationalUtil.createModel(MODEL_NAME);
+    	Model model = RelationalObjectFactory.INSTANCE.createModel(MODEL_NAME);
 
-    	Column col1 = RelationalUtil.createColumn("col1"); //$NON-NLS-1$
+    	Column col1 = RelationalObjectFactory.INSTANCE.createColumn("col1"); //$NON-NLS-1$
     	
     	model.addChild(col1);
     	
@@ -83,7 +84,7 @@ public class TestModel {
      */
     @Test
     public void testValidate1() {
-    	Model model = RelationalUtil.createModel(MODEL_NAME);
+    	Model model = RelationalObjectFactory.INSTANCE.createModel(MODEL_NAME);
     	
     	IOutcome outcome = model.validate();
     	

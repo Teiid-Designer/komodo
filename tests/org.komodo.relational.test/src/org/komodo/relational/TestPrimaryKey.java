@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.PrimaryKey;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
@@ -43,7 +44,7 @@ public class TestPrimaryKey {
      */
     @Test
     public void testCreate() {
-    	PrimaryKey pk = RelationalUtil.createPrimaryKey(PK_NAME);
+    	PrimaryKey pk = RelationalObjectFactory.INSTANCE.createPrimaryKey(PK_NAME);
     	String tName = pk.getName();
     	int type = pk.getType();
     	
@@ -56,9 +57,9 @@ public class TestPrimaryKey {
      */
     @Test
     public void testAddColumns() {
-    	PrimaryKey pk = RelationalUtil.createPrimaryKey(PK_NAME);
+    	PrimaryKey pk = RelationalObjectFactory.INSTANCE.createPrimaryKey(PK_NAME);
 
-    	pk.addColumn(RelationalUtil.createColumn("column1")); //$NON-NLS-1$
+    	pk.addColumn(RelationalObjectFactory.INSTANCE.createColumn("column1")); //$NON-NLS-1$
     	
     	assertEquals(1, pk.getColumns().size());
     }
@@ -68,9 +69,9 @@ public class TestPrimaryKey {
      */
     @Test
     public void testAddRemoveColumns() {
-    	PrimaryKey pk = RelationalUtil.createPrimaryKey(PK_NAME);
+    	PrimaryKey pk = RelationalObjectFactory.INSTANCE.createPrimaryKey(PK_NAME);
 
-    	Column col1 = RelationalUtil.createColumn("col1"); //$NON-NLS-1$
+    	Column col1 = RelationalObjectFactory.INSTANCE.createColumn("col1"); //$NON-NLS-1$
     	
     	pk.addColumn(col1);
     	
@@ -84,7 +85,7 @@ public class TestPrimaryKey {
      */
     @Test
     public void testValidate1() {
-    	PrimaryKey pk = RelationalUtil.createPrimaryKey(PK_NAME);
+    	PrimaryKey pk = RelationalObjectFactory.INSTANCE.createPrimaryKey(PK_NAME);
     	
     	IOutcome outcome = pk.validate();
     	

@@ -15,14 +15,17 @@
  */
 package org.komodo.relational;
 
-import java.util.Properties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.Properties;
+
 import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
+import org.komodo.relational.core.DataType;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
@@ -45,7 +48,7 @@ public class TestColumn {
      */
     @Test
     public void testCreate() {
-    	Column col = RelationalUtil.createColumn(COLUMN_NAME);
+    	Column col = RelationalObjectFactory.INSTANCE.createColumn(COLUMN_NAME);
     	String cName = col.getName();
     	int type = col.getType();
     	
@@ -58,7 +61,7 @@ public class TestColumn {
      */
     @Test
     public void testDefaultProperties() {
-    	Column column = RelationalUtil.createColumn(COLUMN_NAME);
+    	Column column = RelationalObjectFactory.INSTANCE.createColumn(COLUMN_NAME);
     	
     	String name = column.getName();
     	assertEquals(COLUMN_NAME, name);
@@ -66,14 +69,14 @@ public class TestColumn {
     	int octetLength = column.getCharacterOctetLength();
     	String charSetName = column.getCharacterSetName();
     	String collationName = column.getCollationName();
-    	String dataType = column.getDatatype();
+    	String dataTypeName = column.getDatatypeName();
     	String defaultValue = column.getDefaultValue();
     	String description = column.getDescription();
     	String displayName = column.getDisplayName();
     	int distinctValueCount = column.getDistinctValueCount();
     	Properties extProps = column.getExtensionProperties();
     	String format = column.getFormat();
-    	int length = column.getLength();
+    	long length = column.getLength();
     	String maxValue = column.getMaximumValue();
     	String minValue = column.getMinimumValue();
     	String nativeType = column.getNativeType();
@@ -94,7 +97,7 @@ public class TestColumn {
 
     	assertEquals(null,charSetName);
     	assertEquals(null,collationName);
-    	assertEquals(null,dataType);
+    	assertEquals(DataType.DEFAULT_NAME,dataTypeName);
     	assertEquals(null,defaultValue);
     	assertEquals(null,format);
     	assertEquals(null,maxValue);
@@ -131,7 +134,7 @@ public class TestColumn {
      */
     @Test
     public void testSetProperties() {
-    	Column column = RelationalUtil.createColumn(COLUMN_NAME);
+    	Column column = RelationalObjectFactory.INSTANCE.createColumn(COLUMN_NAME);
 
     	String testName = "TestName"; //$NON-NLS-1$
     	String testNIS = "TestNIS"; //$NON-NLS-1$
@@ -177,7 +180,7 @@ public class TestColumn {
     	assertEquals(10,column.getCharacterOctetLength());
     	assertEquals("charSet", column.getCharacterSetName()); //$NON-NLS-1$
     	assertEquals("collation", column.getCollationName()); //$NON-NLS-1$
-    	assertEquals("string", column.getDatatype()); //$NON-NLS-1$
+    	assertEquals("string", column.getDatatypeName()); //$NON-NLS-1$
     	assertEquals("xxx", column.getDefaultValue()); //$NON-NLS-1$
     	assertEquals(5, column.getDistinctValueCount());
     	assertEquals(0, column.getExtensionProperties().size());
@@ -207,16 +210,16 @@ public class TestColumn {
      */
     @Test
     public void testDatatype() {
-    	Column column = RelationalUtil.createColumn(COLUMN_NAME);
+    	Column column = RelationalObjectFactory.INSTANCE.createColumn(COLUMN_NAME);
     	
-    	column.setDatatype("STRING"); //$NON-NLS-1$
+    	column.setDatatypeName("STRING"); //$NON-NLS-1$
     	
-    	assertEquals("STRING", column.getDatatype()); //$NON-NLS-1$
+    	assertEquals("STRING", column.getDatatypeName()); //$NON-NLS-1$
     	assertEquals(0, column.getPrecision());
 
-    	column.setDatatype("INTEGER"); //$NON-NLS-1$
+    	column.setDatatypeName("INTEGER"); //$NON-NLS-1$
     	
-    	assertEquals("INTEGER", column.getDatatype()); //$NON-NLS-1$
+    	assertEquals("INTEGER", column.getDatatypeName()); //$NON-NLS-1$
     	assertEquals(1, column.getPrecision());
     }
 
@@ -225,7 +228,7 @@ public class TestColumn {
      */
     @Test
     public void testValidate1() {
-    	Column column = RelationalUtil.createColumn(COLUMN_NAME);
+    	Column column = RelationalObjectFactory.INSTANCE.createColumn(COLUMN_NAME);
     	
     	IOutcome outcome = column.validate();
     	
@@ -237,7 +240,7 @@ public class TestColumn {
      */
     @Test
     public void testValidate2() {
-    	Column column = RelationalUtil.createColumn("Crap ?"); //$NON-NLS-1$
+    	Column column = RelationalObjectFactory.INSTANCE.createColumn("Crap ?"); //$NON-NLS-1$
     	
     	IOutcome outcome = column.validate();
     	
@@ -253,7 +256,7 @@ public class TestColumn {
      */
     @Test
     public void testValidate3() {
-    	Column column = RelationalUtil.createColumn("Crap?"); //$NON-NLS-1$
+    	Column column = RelationalObjectFactory.INSTANCE.createColumn("Crap?"); //$NON-NLS-1$
     	
     	IOutcome outcome = column.validate();
     	
@@ -265,7 +268,7 @@ public class TestColumn {
      */
     @Test
     public void testValidate4() {
-    	Column column = RelationalUtil.createColumn("?Crap"); //$NON-NLS-1$
+    	Column column = RelationalObjectFactory.INSTANCE.createColumn("?Crap"); //$NON-NLS-1$
     	
     	IOutcome outcome = column.validate();
     	

@@ -78,7 +78,8 @@ public class StdInShellCommandReader extends AbstractShellCommandReader {
 	@Override
 	protected String readLine() throws IOException {
 		if (!stdinReader.ready()) {
-			System.out.print("komodo> "); //$NON-NLS-1$
+			String prompt = "["+getWorkspaceStatus().getCurrentContext().getName()+"] > "; //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.print(prompt); 
 		}
 		return stdinReader.readLine();
 	}

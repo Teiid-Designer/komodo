@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
@@ -44,7 +45,7 @@ public class TestForeignKey {
      */
     @Test
     public void testCreate() {
-    	ForeignKey fk = RelationalUtil.createForeignKey(FK_NAME);
+    	ForeignKey fk = RelationalObjectFactory.INSTANCE.createForeignKey(FK_NAME);
     	String fkName = fk.getName();
     	int type = fk.getType();
     	
@@ -57,9 +58,9 @@ public class TestForeignKey {
      */
     @Test
     public void testAddColumns() {
-    	ForeignKey fk = RelationalUtil.createForeignKey(FK_NAME);
+    	ForeignKey fk = RelationalObjectFactory.INSTANCE.createForeignKey(FK_NAME);
 
-    	fk.addColumn(RelationalUtil.createColumn("column1")); //$NON-NLS-1$
+    	fk.addColumn(RelationalObjectFactory.INSTANCE.createColumn("column1")); //$NON-NLS-1$
     	
     	assertEquals(1, fk.getColumns().size());
     }
@@ -69,9 +70,9 @@ public class TestForeignKey {
      */
     @Test
     public void testAddRemoveColumns() {
-    	ForeignKey fk = RelationalUtil.createForeignKey(FK_NAME);
+    	ForeignKey fk = RelationalObjectFactory.INSTANCE.createForeignKey(FK_NAME);
 
-    	Column col1 = RelationalUtil.createColumn("col1"); //$NON-NLS-1$
+    	Column col1 = RelationalObjectFactory.INSTANCE.createColumn("col1"); //$NON-NLS-1$
     	
     	fk.addColumn(col1);
     	
@@ -85,7 +86,7 @@ public class TestForeignKey {
      */
     @Test
     public void testValidate1() {
-    	ForeignKey fk = RelationalUtil.createForeignKey(FK_NAME);
+    	ForeignKey fk = RelationalObjectFactory.INSTANCE.createForeignKey(FK_NAME);
     	
     	IOutcome outcome = fk.validate();
     	

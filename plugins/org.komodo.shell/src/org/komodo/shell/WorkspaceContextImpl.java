@@ -22,6 +22,7 @@
 package org.komodo.shell;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -131,7 +132,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 	}
 	
 	/**
-	 * Get the full name path for this context.  e.g. root.parentContext.thisContext
+	 * Get the full name path for this context.  e.g. home.parentContext.thisContext
 	 * @return the full name
 	 */
 	@Override
@@ -175,7 +176,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 			isRelational=true;
 			break;
 		case ALL:
-		case ROOT:
+		case HOME:
 		case PROJECT:
 		default:
 			break;
@@ -232,7 +233,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 	@Override
 	public Map<String,String> getPropertyNameValueMap() {
 		Map<String,String> propNameValues = new HashMap<String,String>();
-		if(getType().equals(WorkspaceContext.Type.ROOT)) {
+		if(getType().equals(WorkspaceContext.Type.HOME)) {
 			propNameValues.put(WorkspaceStatus.RECORDING_FILEPATH_KEY,getWorkspaceStatus().getRecordingOutputFile().toString());
 			propNameValues.put(WorkspaceStatus.TEIID_SERVER_URL_KEY,getWorkspaceStatus().getTeiidServerUrl());
 		} else if(isRelational()) {
@@ -251,7 +252,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 	@Override
 	public List<String> getValidTypesForCreate() {
 		List<String> types = new ArrayList<String>();
-		if(getType().equals(WorkspaceContext.Type.ROOT)) {
+		if(getType().equals(WorkspaceContext.Type.HOME)) {
 			types.add(WorkspaceContext.Type.PROJECT.toString());
 		} else if(getType().equals(WorkspaceContext.Type.PROJECT)) {
 			types.add(WorkspaceContext.Type.MODEL.toString());
@@ -280,18 +281,18 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 			String projName = getProjectName(fullName);
 			String modelName = getModelName(fullName);
 			
-			WorkspaceContext rootContext = this;
+			WorkspaceContext homeContext = this;
 			WorkspaceContext parentContext = getParent();
 			while(parentContext!=null) {
-				rootContext = parentContext;
-				parentContext = rootContext.getParent();
+				homeContext = parentContext;
+				parentContext = homeContext.getParent();
 			}
-			WorkspaceContext projContext = rootContext.getChild(projName, WorkspaceContext.Type.PROJECT);
+			WorkspaceContext projContext = homeContext.getChild(projName, WorkspaceContext.Type.PROJECT);
 			RelationalObject modelObj = getModelObject(projContext,modelName);
 			if(projContext!=null) {
 				List<String> objPathElems = getModelObjPath(fullName);
 				if(!objPathElems.isEmpty()) {
-					int relObjType = rootContext.getRelationalObjTypeForWsContextType(currentCtxType);
+					int relObjType = homeContext.getRelationalObjTypeForWsContextType(currentCtxType);
 					relObj = modelObj.getChildAtPath(objPathElems,relObjType);
 				} else {
 					relObj = modelObj;
@@ -369,11 +370,19 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 		if(child instanceof WorkspaceContext) {
 			this.children.add((WorkspaceContext)child);
 		} else if(child instanceof RelationalObject) {
-			this.children.add(createWorkspaceContext((RelationalObject)child));
+			WorkspaceContext wCtx = createWorkspaceContext((RelationalObject)child);
+			this.children.add(wCtx);
 			// Maintain Model list if this is a project
 			if(this.getType()==WorkspaceContext.Type.PROJECT && ((RelationalObject)child).getType()==TYPES.MODEL) {
 				this.models.add((RelationalObject)child);
 			}
+			addChildren(wCtx,((RelationalObject)child).getChildren());
+		}
+	}
+	
+	private void addChildren(WorkspaceContext wCtx, Collection<RelationalObject> children) {
+		for(RelationalObject rObj : children) {
+			wCtx.addChild(rObj); 
 		}
 	}
 
@@ -386,6 +395,17 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 			return this.models;
 		}
 		return Collections.emptyList();
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getClass().getName());
+		sb.append(" : name = ").append(getFullName()); //$NON-NLS-1$
+		return sb.toString();
 	}
 
 }

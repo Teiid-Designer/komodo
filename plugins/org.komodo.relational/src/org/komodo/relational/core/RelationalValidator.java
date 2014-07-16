@@ -29,4 +29,10 @@ public interface RelationalValidator {
      */
     public void setNameValidator(StringNameValidator nameValidator);
 
+    /**
+     * Set the DataType validator
+     * @param datatypeValidator the DataType validator
+     */
+    public void setDataTypeValidator(DataTypeValidator datatypeValidator);
+    
 }

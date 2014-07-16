@@ -78,8 +78,8 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	 * Creates the ANSI compatible prompt.
 	 */
 	private String defaultAnsiPrompt() {
-		String prompt = this.wsStatus.getCurrentContext().getName()+" >"; //$NON-NLS-1$
-		return ANSI_BOLD_RED+prompt+ANSI_RESET; 
+		String prompt = "["+this.wsStatus.getCurrentContext().getName()+"] >"; //$NON-NLS-1$ //$NON-NLS-2$
+		return ANSI_BOLD_RED+prompt+ANSI_RESET;  
 	}
 
 	/**

@@ -36,7 +36,7 @@ import org.komodo.shell.api.WorkspaceStatusEventHandler;
  */
 public class WorkpaceStatusImpl implements WorkspaceStatus {
 
-	private WorkspaceContextImpl rootContext;
+	private WorkspaceContextImpl homeContext;
 	private WorkspaceContext currentContext;
 	private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
 	private boolean recordingStatus=false;
@@ -51,14 +51,14 @@ public class WorkpaceStatusImpl implements WorkspaceStatus {
 	}
 	
 	private void init() {
-		rootContext = new WorkspaceContextImpl(this,null,"root",WorkspaceContext.Type.ROOT); //$NON-NLS-1$
+		homeContext = new WorkspaceContextImpl(this,null,"home",WorkspaceContext.Type.HOME); //$NON-NLS-1$
 				
-		currentContext = rootContext;
+		currentContext = homeContext;
 	}
 	
 	@Override
 	public WorkspaceContext getRootContext() {
-		return rootContext;
+		return homeContext;
 	}
 	
 	@Override

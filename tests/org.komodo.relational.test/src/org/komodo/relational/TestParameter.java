@@ -21,8 +21,10 @@ import java.util.Properties;
 
 import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
+import org.komodo.relational.core.DataType;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
@@ -45,7 +47,7 @@ public class TestParameter {
      */
     @Test
     public void testCreate() {
-    	Parameter param = RelationalUtil.createParameter(PARAM_NAME);
+    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter(PARAM_NAME);
     	String cName = param.getName();
     	int type = param.getType();
     	
@@ -58,7 +60,7 @@ public class TestParameter {
      */
     @Test
     public void testDefaultProperties() {
-    	Parameter param = RelationalUtil.createParameter(PARAM_NAME);
+    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter(PARAM_NAME);
     	
     	String name = param.getName();
     	String description = param.getDescription();
@@ -70,9 +72,9 @@ public class TestParameter {
     	assertEquals(null,nis);
     	
     	
-    	String dataType = param.getDatatype();
+    	String dataType = param.getDatatypeName();
     	String defaultValue = param.getDefaultValue();
-    	int length = param.getLength();
+    	long length = param.getLength();
     	String nativeType = param.getNativeType();
     	String nullable = param.getNullable();
     	int precision = param.getPrecision();
@@ -82,7 +84,7 @@ public class TestParameter {
     	String direction = param.getDirection();
     	Properties extProps = param.getExtensionProperties();
     	
-    	assertEquals(null,dataType);
+    	assertEquals(DataType.DEFAULT_NAME,dataType);
     	assertEquals(null,defaultValue);
     	assertEquals(null,nativeType);
         assertEquals(null,nullable);
@@ -102,7 +104,7 @@ public class TestParameter {
      */
     @Test
     public void testSetProperties() {
-    	Parameter param = RelationalUtil.createParameter(PARAM_NAME);
+    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter(PARAM_NAME);
 
     	String testName = "TestName"; //$NON-NLS-1$
     	String testNIS = "TestNIS"; //$NON-NLS-1$
@@ -130,7 +132,7 @@ public class TestParameter {
     	assertEquals(testDesc, param.getDescription());
     	assertEquals("Parameter", param.getDisplayName()); //$NON-NLS-1$
 
-    	assertEquals("string", param.getDatatype()); //$NON-NLS-1$
+    	assertEquals("string", param.getDatatypeName()); //$NON-NLS-1$
     	assertEquals("xxx", param.getDefaultValue()); //$NON-NLS-1$
     	assertEquals(0, param.getExtensionProperties().size());
     	assertEquals(99, param.getLength());
@@ -148,16 +150,16 @@ public class TestParameter {
      */
     @Test
     public void testDatatype() {
-    	Parameter param = RelationalUtil.createParameter(PARAM_NAME);
+    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter(PARAM_NAME);
     	
-    	param.setDatatype("STRING"); //$NON-NLS-1$
+    	param.setDatatypeName("STRING"); //$NON-NLS-1$
     	
-    	assertEquals("STRING", param.getDatatype()); //$NON-NLS-1$
+    	assertEquals("STRING", param.getDatatypeName()); //$NON-NLS-1$
     	assertEquals(0, param.getPrecision());
 
-    	param.setDatatype("INTEGER"); //$NON-NLS-1$
+    	param.setDatatypeName("INTEGER"); //$NON-NLS-1$
     	
-    	assertEquals("INTEGER", param.getDatatype()); //$NON-NLS-1$
+    	assertEquals("INTEGER", param.getDatatypeName()); //$NON-NLS-1$
     }
 
     /**
@@ -165,7 +167,7 @@ public class TestParameter {
      */
     @Test
     public void testValidate1() {
-    	Parameter param = RelationalUtil.createParameter(PARAM_NAME);
+    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter(PARAM_NAME);
     	
     	IOutcome outcome = param.validate();
     	
@@ -177,7 +179,7 @@ public class TestParameter {
      */
     @Test
     public void testValidate2() {
-    	Parameter param = RelationalUtil.createParameter("Crap ?"); //$NON-NLS-1$
+    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("Crap ?"); //$NON-NLS-1$
     	
     	IOutcome outcome = param.validate();
     	
@@ -193,7 +195,7 @@ public class TestParameter {
      */
     @Test
     public void testValidate3() {
-    	Parameter param = RelationalUtil.createParameter("Crap?"); //$NON-NLS-1$
+    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("Crap?"); //$NON-NLS-1$
     	
     	IOutcome outcome = param.validate();
     	
@@ -205,7 +207,7 @@ public class TestParameter {
      */
     @Test
     public void testValidate4() {
-    	Parameter param = RelationalUtil.createParameter("?Crap"); //$NON-NLS-1$
+    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("?Crap"); //$NON-NLS-1$
     	
     	IOutcome outcome = param.validate();
     	

@@ -15,8 +15,8 @@
  */
 package org.komodo.relational;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Properties;
@@ -27,6 +27,7 @@ import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.relational.model.Table;
 import org.komodo.spi.outcome.IOutcome;
 
@@ -50,7 +51,7 @@ public class TestTable {
      */
     @Test
     public void testCreate() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	String tName = table.getName();
     	int type = table.getType();
     	
@@ -63,9 +64,9 @@ public class TestTable {
      */
     @Test
     public void testAddColumns() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
 
-    	table.addColumn(RelationalUtil.createColumn("column1")); //$NON-NLS-1$
+    	table.addColumn(RelationalObjectFactory.INSTANCE.createColumn("column1")); //$NON-NLS-1$
     	
     	assertEquals(1, table.getColumns().size());
     }
@@ -75,9 +76,9 @@ public class TestTable {
      */
     @Test
     public void testAddRemoveColumns() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
 
-    	Column col1 = RelationalUtil.createColumn("col1"); //$NON-NLS-1$
+    	Column col1 = RelationalObjectFactory.INSTANCE.createColumn("col1"); //$NON-NLS-1$
     	
     	table.addColumn(col1);
     	
@@ -91,9 +92,9 @@ public class TestTable {
      */
     @Test
     public void testSetGetPK() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
 
-    	PrimaryKey pk = RelationalUtil.createPrimaryKey("pk1"); //$NON-NLS-1$
+    	PrimaryKey pk = RelationalObjectFactory.INSTANCE.createPrimaryKey("pk1"); //$NON-NLS-1$
     	table.setPrimaryKey(pk);
     	
     	assertEquals(pk, table.getPrimaryKey());
@@ -104,9 +105,9 @@ public class TestTable {
      */
     @Test
     public void testAddFK() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
 
-    	ForeignKey fk = RelationalUtil.createForeignKey("fk1"); //$NON-NLS-1$
+    	ForeignKey fk = RelationalObjectFactory.INSTANCE.createForeignKey("fk1"); //$NON-NLS-1$
     	table.addForeignKey(fk);
     	
     	assertEquals(1, table.getForeignKeys().size());
@@ -117,9 +118,9 @@ public class TestTable {
      */
     @Test
     public void testAddRemoveFK() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
 
-    	ForeignKey fk = RelationalUtil.createForeignKey("fk1"); //$NON-NLS-1$
+    	ForeignKey fk = RelationalObjectFactory.INSTANCE.createForeignKey("fk1"); //$NON-NLS-1$
     	table.addForeignKey(fk);
     	
     	table.removeForeignKey(fk);
@@ -132,7 +133,7 @@ public class TestTable {
      */
     @Test
     public void testDefaultProperties() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	
     	String name = table.getName();
     	assertEquals(TABLE_NAME, name);
@@ -175,7 +176,7 @@ public class TestTable {
      */
     @Test
     public void testCreateSingleColumn() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	
     	table.createColumn();
     	
@@ -184,7 +185,7 @@ public class TestTable {
     	
     	Column col = table.getColumns().get(0);
     	String colName = col.getName();
-    	String dType = col.getDatatype();
+    	String dType = col.getDatatypeName();
     	
     	// Default name and type
     	assertEquals("newColumn_1",colName); //$NON-NLS-1$
@@ -202,7 +203,7 @@ public class TestTable {
      */
     @Test
     public void testCreateMultiColumns() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	
     	table.createColumn();
     	table.createColumn();
@@ -224,9 +225,9 @@ public class TestTable {
     	assertEquals("newColumn_3",col3Name); //$NON-NLS-1$
     	
     	// Check expected types
-    	String dType1 = col1.getDatatype();
-    	String dType2 = col2.getDatatype();
-    	String dType3 = col3.getDatatype();
+    	String dType1 = col1.getDatatypeName();
+    	String dType2 = col2.getDatatypeName();
+    	String dType3 = col3.getDatatypeName();
     	assertEquals("string",dType1); //$NON-NLS-1$
     	assertEquals("string",dType2); //$NON-NLS-1$
     	assertEquals("string",dType3); //$NON-NLS-1$
@@ -253,7 +254,7 @@ public class TestTable {
      */
     @Test
     public void testMoveColumn() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	
     	table.createColumn();
     	table.createColumn();
@@ -309,7 +310,7 @@ public class TestTable {
      */
     @Test
     public void testSetProperties() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
 
     	String testName = "TestName"; //$NON-NLS-1$
     	String testNIS = "TestNIS"; //$NON-NLS-1$
@@ -342,7 +343,7 @@ public class TestTable {
      */
     @Test
     public void testValidate1() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	
     	IOutcome outcome = table.validate();
     	
@@ -355,7 +356,7 @@ public class TestTable {
      */
     @Test
     public void testValidate2() {
-    	Table table = RelationalUtil.createTable(TABLE_NAME);
+    	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	table.createColumn();
     	
     	IOutcome outcome = table.validate();
@@ -368,7 +369,7 @@ public class TestTable {
      */
     @Test
     public void testValidate3() {
-    	Table table = RelationalUtil.createTable("Crap ?"); //$NON-NLS-1$
+    	Table table = RelationalObjectFactory.INSTANCE.createTable("Crap ?"); //$NON-NLS-1$
     	table.createColumn();
     	
     	IOutcome outcome = table.validate();

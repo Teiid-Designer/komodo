@@ -8,6 +8,7 @@
 package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -63,7 +64,9 @@ public class PropertyCommand extends BuiltInShellCommand {
 				String propListHeader = Messages.getString("PropertyCommand.PropertyListHeader",cType,name); //$NON-NLS-1$
 				print(CompletionConstants.MESSAGE_INDENT,propListHeader); 
 				print(CompletionConstants.MESSAGE_INDENT,String.format("%-25s%-25s","---------------","---------------")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				for(String pName : currentProps.keySet()) {
+				List<String> sortedPropNames = new ArrayList<String>(currentProps.keySet());
+				Collections.sort(sortedPropNames);
+				for(String pName : sortedPropNames) {
 					if(propNameArg.equalsIgnoreCase(ALL) || propNameArg.equalsIgnoreCase(pName)) {
 						print(CompletionConstants.MESSAGE_INDENT,String.format("%-25s%-25s",pName,currentProps.get(pName))); //$NON-NLS-1$
 					}
@@ -99,7 +102,7 @@ public class PropertyCommand extends BuiltInShellCommand {
 	private void setProperty(String propName, String propValue) {
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		if(currentContext.getType().equals(WorkspaceContext.Type.ROOT)) {
+		if(currentContext.getType().equals(WorkspaceContext.Type.HOME)) {
 			if(propName.equals(WorkspaceStatus.RECORDING_FILEPATH_KEY)) {
 				wsStatus.setRecordingOutputFile(propValue);
 			} else if(propName.equals(WorkspaceStatus.TEIID_SERVER_URL_KEY)) {

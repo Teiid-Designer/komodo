@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.komodo.relational.core.DataType;
 import org.komodo.relational.core.RelationalStringNameValidator;
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
@@ -541,8 +542,8 @@ public class Procedure extends RelationalObject {
      */
     public Parameter createParameter(String name, String datatype, int length) {
     	Parameter newParameter = new Parameter(name);
-    	newParameter.setDatatype(datatype);
-    	newParameter.setLength(length);
+    	DataType dType = new DataType(datatype,length);
+    	newParameter.setDatatype(dType);
     	addParameter(newParameter);
     	return newParameter;
     }

@@ -38,7 +38,7 @@ public interface WorkspaceContext {
 		@SuppressWarnings("javadoc")
 		ALL,
 		@SuppressWarnings("javadoc")
-		ROOT,
+		HOME,
 		@SuppressWarnings("javadoc")
 		PROJECT,
 		@SuppressWarnings("javadoc")

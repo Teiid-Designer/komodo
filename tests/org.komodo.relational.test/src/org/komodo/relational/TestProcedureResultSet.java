@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
@@ -42,7 +43,7 @@ public class TestProcedureResultSet {
      */
     @Test
     public void testCreate() {
-    	ProcedureResultSet rs = RelationalUtil.createProcedureResultSet(RESULT_SET_NAME);
+    	ProcedureResultSet rs = RelationalObjectFactory.INSTANCE.createProcedureResultSet(RESULT_SET_NAME);
     	String tName = rs.getName();
     	int type = rs.getType();
     	
@@ -55,9 +56,9 @@ public class TestProcedureResultSet {
      */
     @Test
     public void testAddColumns() {
-    	ProcedureResultSet rs = RelationalUtil.createProcedureResultSet(RESULT_SET_NAME);
+    	ProcedureResultSet rs = RelationalObjectFactory.INSTANCE.createProcedureResultSet(RESULT_SET_NAME);
     	
-    	rs.addColumn(RelationalUtil.createColumn("column1")); //$NON-NLS-1$
+    	rs.addColumn(RelationalObjectFactory.INSTANCE.createColumn("column1")); //$NON-NLS-1$
     	
     	assertEquals(1, rs.getColumns().size());
     }
@@ -67,9 +68,9 @@ public class TestProcedureResultSet {
      */
     @Test
     public void testAddRemoveColumns() {
-    	ProcedureResultSet rs = RelationalUtil.createProcedureResultSet(RESULT_SET_NAME);
+    	ProcedureResultSet rs = RelationalObjectFactory.INSTANCE.createProcedureResultSet(RESULT_SET_NAME);
 
-    	Column col1 = RelationalUtil.createColumn("col1"); //$NON-NLS-1$
+    	Column col1 = RelationalObjectFactory.INSTANCE.createColumn("col1"); //$NON-NLS-1$
     	
     	rs.addColumn(col1);
     	
@@ -83,7 +84,7 @@ public class TestProcedureResultSet {
      */
     @Test
     public void testValidate1() {
-    	ProcedureResultSet rs = RelationalUtil.createProcedureResultSet(RESULT_SET_NAME);
+    	ProcedureResultSet rs = RelationalObjectFactory.INSTANCE.createProcedureResultSet(RESULT_SET_NAME);
     	
     	IOutcome outcome = rs.validate();
     	

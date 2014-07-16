@@ -78,7 +78,8 @@ public class ConsoleShellCommandReader extends AbstractShellCommandReader {
 	 */
 	@Override
 	protected String readLine() throws IOException {
-		return console.readLine("komodo> "); //$NON-NLS-1$
+		String prompt = "["+getWorkspaceStatus().getCurrentContext().getName()+"] > "; //$NON-NLS-1$ //$NON-NLS-2$
+		return console.readLine(prompt);
 	}
 
 	/**

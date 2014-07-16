@@ -32,7 +32,7 @@ import org.komodo.utils.ArgCheck;
  *
  */
 public class Model extends RelationalObject {
-	private Collection<RelationalObject> allRefs = new ArrayList<RelationalObject>();
+	private Collection<RelationalObject> allObjects = new ArrayList<RelationalObject>();
     private Collection<RelationalObject> children = new ArrayList<RelationalObject>();
     
     /**
@@ -59,17 +59,17 @@ public class Model extends RelationalObject {
     }
 
     /**
-     * Get all reference objects for this model
-     * @return all reference objects
+     * Get all objects for this model
+     * @return all objects
      */
-    public Collection<RelationalObject> getAllReferences() {
-    	this.allRefs.clear();
+    public Collection<RelationalObject> getAllObjects() {
+    	this.allObjects.clear();
     	if(this.children!=null) {
         	for(RelationalObject ref:this.children) {
-        		addRecursive(ref,this.allRefs);
+        		addRecursive(ref,this.allObjects);
         	}
     	}
-    	return this.allRefs;
+    	return this.allObjects;
     }
     
     /**

@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
 import org.komodo.spi.constants.StringConstants;
 
 /**
- *
+ * Messages for the org.komodo.relationa plugin
  */
 public class Messages implements StringConstants {
 
@@ -59,6 +59,10 @@ public class Messages implements StringConstants {
     	relationalRefFactory_errorSettingDescription,
     	relationalRefFactory_errorGettingEmfExtProps,
     	validationOkCreateObject,
+    	columnError_Searchability_NotAllowable,
+    	columnError_Nullable_NotAllowable,
+    	parameterError_Direction_NotAllowable,
+    	dataTypeError_NameNotValid,
     	validate_error_nameCannotBeNullOrEmpty,
     	validate_error_pkNoColumnsDefined,
     	validate_error_fkNoColumnsDefined,
