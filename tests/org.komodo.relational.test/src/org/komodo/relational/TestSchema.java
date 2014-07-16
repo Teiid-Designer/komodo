@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.Table;
 import org.komodo.spi.outcome.IOutcome;
@@ -42,7 +43,7 @@ public class TestSchema {
      */
     @Test
     public void testCreate() {
-    	Schema schema = RelationalUtil.createSchema(SCHEMA_NAME);
+    	Schema schema = RelationalObjectFactory.INSTANCE.createSchema(SCHEMA_NAME);
     	String tName = schema.getName();
     	int type = schema.getType();
     	
@@ -55,9 +56,9 @@ public class TestSchema {
      */
     @Test
     public void testAddColumns() {
-    	Schema schema = RelationalUtil.createSchema(SCHEMA_NAME);
+    	Schema schema = RelationalObjectFactory.INSTANCE.createSchema(SCHEMA_NAME);
 
-    	schema.addTable(RelationalUtil.createTable("table1")); //$NON-NLS-1$
+    	schema.addTable(RelationalObjectFactory.INSTANCE.createTable("table1")); //$NON-NLS-1$
     	
     	assertEquals(1, schema.getTables().size());
     }
@@ -67,9 +68,9 @@ public class TestSchema {
      */
     @Test
     public void testAddRemoveColumns() {
-    	Schema schema = RelationalUtil.createSchema(SCHEMA_NAME);
+    	Schema schema = RelationalObjectFactory.INSTANCE.createSchema(SCHEMA_NAME);
 
-    	Table table1 = RelationalUtil.createTable("table1"); //$NON-NLS-1$
+    	Table table1 = RelationalObjectFactory.INSTANCE.createTable("table1"); //$NON-NLS-1$
     	
     	schema.addTable(table1);
     	
@@ -83,7 +84,7 @@ public class TestSchema {
      */
     @Test
     public void testValidate1() {
-    	Schema schema = RelationalUtil.createSchema(SCHEMA_NAME);
+    	Schema schema = RelationalObjectFactory.INSTANCE.createSchema(SCHEMA_NAME);
     	
     	IOutcome outcome = schema.validate();
     	

@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
@@ -43,7 +44,7 @@ public class TestAccessPattern {
      */
     @Test
     public void testCreate() {
-    	AccessPattern ap = RelationalUtil.createAccessPattern(AP_NAME);
+    	AccessPattern ap = RelationalObjectFactory.INSTANCE.createAccessPattern(AP_NAME);
     	String tName = ap.getName();
     	int type = ap.getType();
     	
@@ -56,9 +57,9 @@ public class TestAccessPattern {
      */
     @Test
     public void testAddColumns() {
-    	AccessPattern ap = RelationalUtil.createAccessPattern(AP_NAME);
+    	AccessPattern ap = RelationalObjectFactory.INSTANCE.createAccessPattern(AP_NAME);
     	
-    	ap.addColumn(RelationalUtil.createColumn("column1")); //$NON-NLS-1$
+    	ap.addColumn(RelationalObjectFactory.INSTANCE.createColumn("column1")); //$NON-NLS-1$
     	
     	assertEquals(1, ap.getColumns().size());
     }
@@ -68,9 +69,9 @@ public class TestAccessPattern {
      */
     @Test
     public void testAddRemoveColumns() {
-    	AccessPattern ap = RelationalUtil.createAccessPattern(AP_NAME);
+    	AccessPattern ap = RelationalObjectFactory.INSTANCE.createAccessPattern(AP_NAME);
 
-    	Column col1 = RelationalUtil.createColumn("col1"); //$NON-NLS-1$
+    	Column col1 = RelationalObjectFactory.INSTANCE.createColumn("col1"); //$NON-NLS-1$
     	
     	ap.addColumn(col1);
     	
@@ -84,7 +85,7 @@ public class TestAccessPattern {
      */
     @Test
     public void testValidate1() {
-    	AccessPattern ap = RelationalUtil.createAccessPattern(AP_NAME);
+    	AccessPattern ap = RelationalObjectFactory.INSTANCE.createAccessPattern(AP_NAME);
     	
     	IOutcome outcome = ap.validate();
     	

@@ -141,7 +141,7 @@ public class CdCommand extends BuiltInShellCommand {
 		if (getArguments().isEmpty()) {
 			List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
 			List<String> childNames = new ArrayList<String>(children.size());
-			if(getWorkspaceStatus().getCurrentContext().getType()!=WorkspaceContext.Type.ROOT) {
+			if(getWorkspaceStatus().getCurrentContext().getType()!=WorkspaceContext.Type.HOME) {
 				childNames.add(StringConstants.DOT_DOT);
 			}
 			for(WorkspaceContext wsContext : children) {
@@ -150,9 +150,9 @@ public class CdCommand extends BuiltInShellCommand {
 			if(lastArgument==null) {
 				candidates.addAll(childNames);
 			} else {
-				for (String child : childNames) {
-					if (child.toUpperCase().startsWith(lastArgument.toUpperCase())) {
-						candidates.add(child);
+				for (String name : childNames) {
+					if (name.toUpperCase().startsWith(lastArgument.toUpperCase())) {
+						candidates.add(name);
 					}
 				}
 			}

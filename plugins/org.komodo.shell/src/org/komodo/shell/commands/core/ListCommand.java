@@ -60,6 +60,9 @@ public class ListCommand extends BuiltInShellCommand {
 			String name = getWorkspaceStatus().getCurrentContext().getName();
 			
 			String noChildrenMsg = Messages.getString("ListCommand.noChildrenMsg",cType,name); //$NON-NLS-1$
+			if(getWorkspaceStatus().getCurrentContext().getType()==WorkspaceContext.Type.HOME) {
+				noChildrenMsg = Messages.getString("ListCommand.noProjectsMsg"); //$NON-NLS-1$
+			}
 			print(CompletionConstants.MESSAGE_INDENT,noChildrenMsg); 
 		}
 		

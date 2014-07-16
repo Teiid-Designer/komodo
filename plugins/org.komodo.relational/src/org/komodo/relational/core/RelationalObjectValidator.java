@@ -39,6 +39,7 @@ import org.komodo.utils.StringNameValidator;
 public class RelationalObjectValidator implements RelationalValidator {
 
 	StringNameValidator nameValidator = new RelationalStringNameValidator(false);
+	DataTypeValidator dataTypeValidator = new DefaultDataTypeValidator();
 	
 	/* (non-Javadoc)
 	 * @see org.komodo.relational.core.RelationalValidator#setNameValidator(org.komodo.utils.StringNameValidator)
@@ -52,6 +53,14 @@ public class RelationalObjectValidator implements RelationalValidator {
 		return this.nameValidator;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.komodo.relational.core.RelationalValidator#setDataTypeValidator(org.komodo.relational.core.DataTypeValidator)
+	 */
+	@Override
+	public void setDataTypeValidator(DataTypeValidator datatypeValidator) {
+		this.dataTypeValidator=datatypeValidator;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.komodo.relational.core.RelationalValidator#validate(org.komodo.relational.model.RelationalObject)
 	 */
@@ -181,7 +190,11 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @return the validation status
      */
 	private IOutcome validateColumn(Column relationalColumn) {
-		return OutcomeFactory.getInstance().createOK();
+		IOutcome theOutcome = null;
+		
+		theOutcome = this.dataTypeValidator.validate(relationalColumn.getDatatype());
+		
+		return theOutcome;
 	}
 	
     /**
@@ -304,8 +317,8 @@ public class RelationalObjectValidator implements RelationalValidator {
 				return theOutcome;
 			}
 		}
-    	
-		return OutcomeFactory.getInstance().createOK();
+		
+		return this.dataTypeValidator.validate(relationalParmeter.getDatatype());
 	}
 	
     /**

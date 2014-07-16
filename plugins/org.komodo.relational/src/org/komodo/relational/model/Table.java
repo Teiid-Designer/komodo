@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.komodo.relational.core.DataType;
 import org.komodo.relational.core.RelationalStringNameValidator;
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
@@ -606,8 +607,8 @@ public class Table extends RelationalObject {
      */
     public Column createColumn(String name, String datatype, int length) {
     	Column newColumn = new Column(name);
-    	newColumn.setDatatype(datatype);
-    	newColumn.setLength(length);
+    	DataType dType = new DataType(datatype,length);
+    	newColumn.setDatatype(dType);
     	addColumn(newColumn);
     	return newColumn;
     }

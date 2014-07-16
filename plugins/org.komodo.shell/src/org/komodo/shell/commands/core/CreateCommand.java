@@ -45,7 +45,7 @@ public class CreateCommand extends BuiltInShellCommand {
 	public void initValidWsContextTypes() {
 		// Cannot do a create at certain Relational contexts
 		List<WorkspaceContext.Type> validTypes = new ArrayList<WorkspaceContext.Type>(1);
-		validTypes.add(WorkspaceContext.Type.ROOT);
+		validTypes.add(WorkspaceContext.Type.HOME);
 		validTypes.add(WorkspaceContext.Type.PROJECT);
 		validTypes.add(WorkspaceContext.Type.MODEL);
 		validTypes.add(WorkspaceContext.Type.TABLE);

@@ -20,6 +20,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.outcome.IOutcome;
 
@@ -43,7 +44,7 @@ public class TestUniqueConstraint {
      */
     @Test
     public void testCreate() {
-    	UniqueConstraint uc = RelationalUtil.createUniqueConstraint(UC_NAME);
+    	UniqueConstraint uc = RelationalObjectFactory.INSTANCE.createUniqueConstraint(UC_NAME);
     	String tName = uc.getName();
     	int type = uc.getType();
     	
@@ -56,9 +57,9 @@ public class TestUniqueConstraint {
      */
     @Test
     public void testAddColumns() {
-    	UniqueConstraint uc = RelationalUtil.createUniqueConstraint(UC_NAME);
+    	UniqueConstraint uc = RelationalObjectFactory.INSTANCE.createUniqueConstraint(UC_NAME);
     	
-    	uc.addColumn(RelationalUtil.createColumn("column1")); //$NON-NLS-1$
+    	uc.addColumn(RelationalObjectFactory.INSTANCE.createColumn("column1")); //$NON-NLS-1$
     	
     	assertEquals(1, uc.getColumns().size());
     }
@@ -68,9 +69,9 @@ public class TestUniqueConstraint {
      */
     @Test
     public void testAddRemoveColumns() {
-    	UniqueConstraint uc = RelationalUtil.createUniqueConstraint(UC_NAME);
+    	UniqueConstraint uc = RelationalObjectFactory.INSTANCE.createUniqueConstraint(UC_NAME);
 
-    	Column col1 = RelationalUtil.createColumn("col1"); //$NON-NLS-1$
+    	Column col1 = RelationalObjectFactory.INSTANCE.createColumn("col1"); //$NON-NLS-1$
     	
     	uc.addColumn(col1);
     	
@@ -84,7 +85,7 @@ public class TestUniqueConstraint {
      */
     @Test
     public void testValidate1() {
-    	UniqueConstraint uc = RelationalUtil.createUniqueConstraint(UC_NAME);
+    	UniqueConstraint uc = RelationalObjectFactory.INSTANCE.createUniqueConstraint(UC_NAME);
     	
     	IOutcome outcome = uc.validate();
     	

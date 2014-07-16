@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.relational.model.View;
 import org.komodo.spi.outcome.IOutcome;
 
@@ -42,7 +43,7 @@ public class TestView {
      */
     @Test
     public void testCreate() {
-    	View view = RelationalUtil.createView(VIEW_NAME);
+    	View view = RelationalObjectFactory.INSTANCE.createView(VIEW_NAME);
     	String tName = view.getName();
     	int type = view.getType();
     	
@@ -55,9 +56,9 @@ public class TestView {
      */
     @Test
     public void testAddColumns() {
-    	View view = RelationalUtil.createView(VIEW_NAME);
+    	View view = RelationalObjectFactory.INSTANCE.createView(VIEW_NAME);
 
-    	view.addColumn(RelationalUtil.createColumn("column1")); //$NON-NLS-1$
+    	view.addColumn(RelationalObjectFactory.INSTANCE.createColumn("column1")); //$NON-NLS-1$
     	
     	assertEquals(1, view.getColumns().size());
     }
@@ -67,9 +68,9 @@ public class TestView {
      */
     @Test
     public void testAddRemoveColumns() {
-    	View view = RelationalUtil.createView(VIEW_NAME);
+    	View view = RelationalObjectFactory.INSTANCE.createView(VIEW_NAME);
 
-    	Column col1 = RelationalUtil.createColumn("col1"); //$NON-NLS-1$
+    	Column col1 = RelationalObjectFactory.INSTANCE.createColumn("col1"); //$NON-NLS-1$
     	
     	view.addColumn(col1);
     	
@@ -83,7 +84,7 @@ public class TestView {
      */
     @Test
     public void testValidate1() {
-    	View view = RelationalUtil.createView(VIEW_NAME);
+    	View view = RelationalObjectFactory.INSTANCE.createView(VIEW_NAME);
     	
     	IOutcome outcome = view.validate();
     	

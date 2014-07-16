@@ -15,8 +15,8 @@
  */
 package org.komodo.relational;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Properties;
@@ -28,6 +28,7 @@ import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.spi.outcome.IOutcome;
 
 /**
@@ -50,7 +51,7 @@ public class TestProcedure {
      */
     @Test
     public void testCreate() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	String pName = proc.getName();
     	int type = proc.getType();
     	
@@ -63,9 +64,9 @@ public class TestProcedure {
      */
     @Test
     public void testAddParameters() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
 
-    	Parameter param1 = RelationalUtil.createParameter("param1"); //$NON-NLS-1$
+    	Parameter param1 = RelationalObjectFactory.INSTANCE.createParameter("param1"); //$NON-NLS-1$
     	proc.addParameter(param1); 
     	
     	assertEquals(1, proc.getParameters().size());
@@ -76,9 +77,9 @@ public class TestProcedure {
      */
     @Test
     public void testAddRemoveParameters() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
 
-    	Parameter param1 = RelationalUtil.createParameter("param1"); //$NON-NLS-1$
+    	Parameter param1 = RelationalObjectFactory.INSTANCE.createParameter("param1"); //$NON-NLS-1$
     	
     	proc.addParameter(param1);
     	
@@ -92,7 +93,7 @@ public class TestProcedure {
      */
     @Test
     public void testDefaultProperties() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	
     	String name = proc.getName();
     	assertEquals(PROC_NAME, name);
@@ -131,7 +132,7 @@ public class TestProcedure {
      */
     @Test
     public void testCreateSingleParameter() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	
     	proc.createParameter();
     	
@@ -140,7 +141,7 @@ public class TestProcedure {
     	
     	Parameter param = proc.getParameters().get(0);
     	String name = param.getName();
-    	String dType = param.getDatatype();
+    	String dType = param.getDatatypeName();
     	
     	// Default name and type
     	assertEquals("newParameter_1",name); //$NON-NLS-1$
@@ -158,7 +159,7 @@ public class TestProcedure {
      */
     @Test
     public void testCreateMultiParameters() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	
     	proc.createParameter();
     	proc.createParameter();
@@ -180,9 +181,9 @@ public class TestProcedure {
     	assertEquals("newParameter_3",p3Name); //$NON-NLS-1$
     	
     	// Check expected types
-    	String dType1 = param1.getDatatype();
-    	String dType2 = param2.getDatatype();
-    	String dType3 = param3.getDatatype();
+    	String dType1 = param1.getDatatypeName();
+    	String dType2 = param2.getDatatypeName();
+    	String dType3 = param3.getDatatypeName();
     	assertEquals("string",dType1); //$NON-NLS-1$
     	assertEquals("string",dType2); //$NON-NLS-1$
     	assertEquals("string",dType3); //$NON-NLS-1$
@@ -209,7 +210,7 @@ public class TestProcedure {
      */
     @Test
     public void testMoveParameter() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	
     	proc.createParameter();
     	proc.createParameter();
@@ -265,7 +266,7 @@ public class TestProcedure {
      */
     @Test
     public void testSetProperties() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
 
     	String testName = "TestName"; //$NON-NLS-1$
     	String testNIS = "TestNIS"; //$NON-NLS-1$
@@ -305,7 +306,7 @@ public class TestProcedure {
      */
     @Test
     public void testCreateFunction() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
 
     	String testName = "Function"; //$NON-NLS-1$
     	String testNIS = "FunctionNIS"; //$NON-NLS-1$
@@ -365,7 +366,7 @@ public class TestProcedure {
      */
     @Test
     public void testCreateAggregateFunction() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
 
     	String testName = "Function"; //$NON-NLS-1$
     	String testNIS = "FunctionNIS"; //$NON-NLS-1$
@@ -422,7 +423,7 @@ public class TestProcedure {
      */
     @Test
     public void testValidate1() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	
     	IOutcome outcome = proc.validate();
     	
@@ -435,7 +436,7 @@ public class TestProcedure {
      */
     @Test
     public void testValidate2() {
-    	Procedure proc = RelationalUtil.createProcedure(PROC_NAME);
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	proc.createParameter();
     	
     	IOutcome outcome = proc.validate();
@@ -448,7 +449,7 @@ public class TestProcedure {
      */
     @Test
     public void testValidate3() {
-    	Procedure proc = RelationalUtil.createProcedure("Crap ?"); //$NON-NLS-1$
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure("Crap ?"); //$NON-NLS-1$
     	proc.createParameter();
     	
     	IOutcome outcome = proc.validate();

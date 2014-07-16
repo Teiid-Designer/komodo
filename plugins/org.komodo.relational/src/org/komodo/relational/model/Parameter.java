@@ -24,6 +24,10 @@ package org.komodo.relational.model;
 import java.util.Map;
 import java.util.Properties;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.RELATIONAL;
+import org.komodo.relational.core.DataType;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.HashCodeUtil;
 import org.komodo.utils.StringUtil;
 
@@ -55,8 +59,6 @@ public class Parameter extends RelationalObject {
     public static final String KEY_SCALE = "SCALE"; //$NON-NLS-1$
     
     @SuppressWarnings("javadoc")
-    public static final String DEFAULT_DATATYPE = null;
-    @SuppressWarnings("javadoc")
     public static final String DEFAULT_NATIVE_TYPE = null;
     @SuppressWarnings("javadoc")
     public static final String DEFAULT_NULLABLE = NULLABLE.NULLABLE;
@@ -64,28 +66,17 @@ public class Parameter extends RelationalObject {
     public static final String DEFAULT_DIRECTION = DIRECTION.IN;
     @SuppressWarnings("javadoc")
     public static final String DEFAULT_DEFAULT_VALUE = null;
-    @SuppressWarnings("javadoc")
-    public static final int DEFAULT_LENGTH = 0;
-    @SuppressWarnings("javadoc")
-    public static final int DEFAULT_PRECISION = 0;
-    @SuppressWarnings("javadoc")
-    public static final int DEFAULT_RADIX = 0;
-    @SuppressWarnings("javadoc")
-    public static final int DEFAULT_SCALE = 10;
     
     @SuppressWarnings("javadoc")
     public static final int DEFAULT_STRING_LENGTH = 4000;
     
-    private String  datatype;
     private String  nativeType;
     private String  nullable;
     private String  direction = DEFAULT_DIRECTION;
     private String  defaultValue;
-    private int length;
-    private int precision;
-    private int radix;
-    private int scale;
     
+    private DataType dataType = new DataType();
+
     /**
      * RelationalParameter constructor
      */
@@ -112,15 +103,32 @@ public class Parameter extends RelationalObject {
     /**
      * @return datatype
      */
-    public String getDatatype() {
-        return datatype;
+    public String getDatatypeName() {
+        return this.dataType.getName();
     }
+    
     /**
-     * @param datatype Sets datatype to the specified value.
+     * @param typeName Sets datatype to the specified value.
      */
-    public void setDatatype( String datatype ) {
-        this.datatype = datatype;
+    public void setDatatypeName( String typeName ) {
+    	this.dataType.setName(typeName);
     }
+    
+    /**
+     * @param datatype the datatype
+     */
+    public void setDatatype( DataType datatype ) {
+    	ArgCheck.isNotNull(datatype);
+    	this.dataType = datatype;
+    }
+    
+    /**
+     * @return the datatype
+     */
+    public DataType getDatatype( ) {
+    	return this.dataType;
+    }
+    
     /**
      * @return nativeType
      */
@@ -143,7 +151,16 @@ public class Parameter extends RelationalObject {
      * @param nullable Sets nullable to the specified value.
      */
     public void setNullable( String nullable ) {
-        this.nullable = nullable;
+    	ArgCheck.isNotEmpty(nullable);
+    	String[] allowedValues = NULLABLE.AS_ARRAY;
+    	boolean matchFound = false;
+    	for(int i=0; i<allowedValues.length; i++) {
+    		if(allowedValues[i].equalsIgnoreCase(nullable)) {
+    			this.nullable = allowedValues[i];
+    			matchFound = true;
+    		}
+    	}
+    	if(!matchFound) throw new IllegalArgumentException(Messages.getString(RELATIONAL.columnError_Nullable_NotAllowable,nullable));
     }
     /**
      * @return direction
@@ -155,7 +172,16 @@ public class Parameter extends RelationalObject {
      * @param direction Sets direction to the specified value.
      */
     public void setDirection( String direction ) {
-        this.direction = direction;
+    	ArgCheck.isNotEmpty(direction);
+    	String[] allowedValues = DIRECTION.AS_ARRAY;
+    	boolean matchFound = false;
+    	for(int i=0; i<allowedValues.length; i++) {
+    		if(allowedValues[i].equalsIgnoreCase(direction)) {
+    			this.direction = allowedValues[i];
+    			matchFound = true;
+    		}
+    	}
+    	if(!matchFound) throw new IllegalArgumentException(Messages.getString(RELATIONAL.parameterError_Direction_NotAllowable,direction));
     }
     /**
      * @return defaultValue
@@ -172,50 +198,50 @@ public class Parameter extends RelationalObject {
     /**
      * @return length
      */
-    public int getLength() {
-        return length;
+    public long getLength() {
+        return this.dataType.getLength();
     }
     /**
      * @param length Sets length to the specified value.
      */
-    public void setLength( int length ) {
-        this.length = length;
+    public void setLength( long length ) {
+        this.dataType.setLength(length);
     }
     /**
      * @return precision
      */
     public int getPrecision() {
-        return precision;
+        return this.dataType.getPrecision();
     }
     /**
      * @param precision Sets precision to the specified value.
      */
     public void setPrecision( int precision ) {
-        this.precision = precision;
-    }
-    /**
-     * @return radix
-     */
-    public int getRadix() {
-        return radix;
-    }
-    /**
-     * @param radix Sets radix to the specified value.
-     */
-    public void setRadix( int radix ) {
-        this.radix = radix;
+        this.dataType.setPrecision(precision);
     }
     /**
      * @return scale
      */
     public int getScale() {
-        return scale;
+        return this.dataType.getScale();
     }
     /**
      * @param scale Sets scale to the specified value.
      */
     public void setScale( int scale ) {
-        this.scale = scale;
+        this.dataType.setScale(scale);
+    }
+    /**
+     * @return radix
+     */
+    public int getRadix() {
+        return this.dataType.getRadix();
+    }
+    /**
+     * @param radix Sets radix to the specified value.
+     */
+    public void setRadix( int radix ) {
+        this.dataType.setRadix(radix);
     }
     
     /**
@@ -227,7 +253,7 @@ public class Parameter extends RelationalObject {
     	Map<String,String> props = super.getProperties();
     	
     	props.put(KEY_LENGTH, String.valueOf(getLength()));
-    	props.put(KEY_DATATYPE, getDatatype());
+    	props.put(KEY_DATATYPE, getDatatypeName());
     	props.put(KEY_DEFAULT_VALUE, getDefaultValue());
     	props.put(KEY_DIRECTION, getDirection());
     	props.put(KEY_NATIVE_TYPE, getNativeType());
@@ -259,7 +285,7 @@ public class Parameter extends RelationalObject {
             if(keyStr.equalsIgnoreCase(KEY_LENGTH) ) {
                 setLength(Integer.parseInt(value));
             } else if(keyStr.equalsIgnoreCase(KEY_DATATYPE) ) {
-                setDatatype(value);
+                setDatatypeName(value);
             } else if(keyStr.equalsIgnoreCase(KEY_DEFAULT_VALUE) ) {
                 setDefaultValue(value);
             } else if(keyStr.equalsIgnoreCase(KEY_DIRECTION) ) {
@@ -299,7 +325,7 @@ public class Parameter extends RelationalObject {
         final Parameter other = (Parameter)object;
 
         // string properties
-        if (!StringUtil.valuesAreEqual(getDatatype(), other.getDatatype()) ||
+        if (!StringUtil.valuesAreEqual(getDatatypeName(), other.getDatatypeName()) ||
         		!StringUtil.valuesAreEqual(getDefaultValue(), other.getDefaultValue()) ||
         		!StringUtil.valuesAreEqual(getDirection(), other.getDirection()) ||
         		!StringUtil.valuesAreEqual(getNativeType(), other.getNativeType()) ||
@@ -327,7 +353,7 @@ public class Parameter extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!StringUtil.isEmpty(getDatatype())) {
+        if (!StringUtil.isEmpty(getDatatypeName())) {
             result = HashCodeUtil.hashCode(result, getDatatype());
         }
         if (!StringUtil.isEmpty(getDefaultValue())) {
