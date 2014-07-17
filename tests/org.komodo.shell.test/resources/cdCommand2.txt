@@ -1,4 +1,6 @@
-#cd into root.Project2.ViewModel1
+#create a Project and model, then cd into the model
+create project Project2
 cd Project2
-cd ViewModel1
+create model MyModel
+cd MyModel
 

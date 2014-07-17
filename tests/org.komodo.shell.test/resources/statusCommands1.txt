@@ -1,4 +1,4 @@
-#status at the root
+#status at home context
 status
 
 

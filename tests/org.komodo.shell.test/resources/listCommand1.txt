@@ -1,3 +1,6 @@
+#create two projects, then list
+create project Project1
+create project Project2
 #List at the root
 list
 

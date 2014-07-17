@@ -41,10 +41,10 @@ public interface WorkspaceStatus {
 	public void setProperties(Properties props);
 	
 	/**
-	 * Get the root context
-	 * @return the root context
+	 * Get the home context
+	 * @return the home context
 	 */
-	public WorkspaceContext getRootContext();
+	public WorkspaceContext getHomeContext();
 	
 	/**
 	 * Set the current workspace context
