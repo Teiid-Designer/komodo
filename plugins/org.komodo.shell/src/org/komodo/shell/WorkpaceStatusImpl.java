@@ -57,11 +57,6 @@ public class WorkpaceStatusImpl implements WorkspaceStatus {
 	}
 	
 	@Override
-	public WorkspaceContext getRootContext() {
-		return homeContext;
-	}
-	
-	@Override
 	public void setCurrentContext(WorkspaceContext context) {
 		currentContext = context;
 		fireContextChangeEvent();
@@ -71,6 +66,14 @@ public class WorkpaceStatusImpl implements WorkspaceStatus {
 	public WorkspaceContext getCurrentContext() {
 		return currentContext;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceStatus#getHomeContext()
+	 */
+	@Override
+	public WorkspaceContext getHomeContext() {
+		return homeContext;
+	}	
 	
 	/**
 	 * @see org.komodo.shell.api.WorkspaceStatus#addHandler(org.komodo.shell.api.WorkspaceStatusEventHandler)

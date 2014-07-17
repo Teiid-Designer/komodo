@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.commands.core.ListCommand;
 
 /**
  * Test Class to test ListCommand
@@ -28,6 +29,7 @@ public class ListCommandTest extends AbstractCommandTest {
 
 	private static final String LIST_COMMAND1 = "listCommand1.txt"; //$NON-NLS-1$
 	private static final String LIST_COMMAND2 = "listCommand2.txt"; //$NON-NLS-1$
+	private static final String INDENT = getIndentStr();
 	
 	/**
 	 * Test for ListCommand
@@ -42,14 +44,15 @@ public class ListCommandTest extends AbstractCommandTest {
     @Test
     public void testList1() {
     	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
-    	setup(LIST_COMMAND1,wsStatus);
+    	setup(LIST_COMMAND1, ListCommand.class, wsStatus);
     	
     	execute();
     	
-    	String expectedOutput = "Project1 [PROJECT]\nProject2 [PROJECT]\n"; //$NON-NLS-1$
-    	String writerOutput = getWriterOutput();
+    	String expectedOutput = INDENT+"Project1 [PROJECT]\n"+ //$NON-NLS-1$
+    	                        INDENT+"Project2 [PROJECT]\n"; //$NON-NLS-1$
+    	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("root", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("home", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	teardown();
     }
@@ -60,14 +63,16 @@ public class ListCommandTest extends AbstractCommandTest {
     @Test
     public void testList2() {
     	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
-    	setup(LIST_COMMAND2,wsStatus);
+    	setup(LIST_COMMAND2, ListCommand.class, wsStatus);
     	
     	execute();
     	
-    	String expectedOutput = "SrcModel1 [SOURCE_MODEL]\nSrcModel2 [SOURCE_MODEL]\nViewModel1 [VIEW_MODEL]\n"; //$NON-NLS-1$
-    	String writerOutput = getWriterOutput();
+    	String expectedOutput = INDENT+"Model1 [MODEL]\n"+ //$NON-NLS-1$
+    			                INDENT+"Model2 [MODEL]\n"+ //$NON-NLS-1$ 
+    			                INDENT+"Model3 [MODEL]\n"; //$NON-NLS-1$ 
+    	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("root.Project1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("home.Project1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	teardown();
     }

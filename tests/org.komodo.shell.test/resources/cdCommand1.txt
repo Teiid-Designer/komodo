@@ -1,4 +1,5 @@
-#cd into root.Project2
+#create a project, then cd into it
+create project Project2
 cd Project2
 
 

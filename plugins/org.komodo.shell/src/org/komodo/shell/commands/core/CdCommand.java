@@ -63,7 +63,13 @@ public class CdCommand extends BuiltInShellCommand {
 		
 		String locArg = locationArg.trim();
 		if("..".equals(locArg)) { //$NON-NLS-1$
-			getWorkspaceStatus().setCurrentContext(currentContext.getParent());
+			wsStatus.setCurrentContext(currentContext.getParent());
+			if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
+			return true;
+		} 
+		
+		if(WorkspaceContext.Type.HOME.toString().equals(locArg)) { 
+			wsStatus.setCurrentContext(wsStatus.getHomeContext());
 			if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
 			return true;
 		} 
@@ -117,6 +123,10 @@ public class CdCommand extends BuiltInShellCommand {
 			} 
 			return true;
 		}
+		// cd HOME
+		if(WorkspaceContext.Type.HOME.toString().equalsIgnoreCase(locArg)) { 
+			return true;
+		}
 		// See if matching child
 		boolean foundMatch = false;
 		for(WorkspaceContext childContext : currentContext.getChildren()) {
@@ -143,6 +153,7 @@ public class CdCommand extends BuiltInShellCommand {
 			List<String> childNames = new ArrayList<String>(children.size());
 			if(getWorkspaceStatus().getCurrentContext().getType()!=WorkspaceContext.Type.HOME) {
 				childNames.add(StringConstants.DOT_DOT);
+				childNames.add(WorkspaceContext.Type.HOME.toString());
 			}
 			for(WorkspaceContext wsContext : children) {
 				childNames.add(wsContext.getName());

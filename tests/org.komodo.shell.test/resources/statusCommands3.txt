@@ -1,5 +1,11 @@
-#status at root.Project2.ViewModel1
-cd Project2
-cd ViewModel1
+# create one projects - and three models within it.
+# cd into Project1.Model2 - then get status
+create project Project1
+cd Project1
+create model Model1
+create model Model2
+create model Model3
+cd Model2
+#Status of Model2
 status
 

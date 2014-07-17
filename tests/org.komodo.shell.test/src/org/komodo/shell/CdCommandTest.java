@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.commands.core.CdCommand;
 
 /**
  * Test Class to test CdCommand
@@ -42,12 +43,12 @@ public class CdCommandTest extends AbstractCommandTest {
     @Test
     public void testCd1() {
     	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
-    	setup(CD_COMMAND1,wsStatus);
+    	setup(CD_COMMAND1, CdCommand.class, wsStatus);
     	
     	execute();
     	
     	// Check WorkspaceContext
-    	assertEquals("root.Project2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("home.Project2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	teardown();
     }
@@ -58,12 +59,12 @@ public class CdCommandTest extends AbstractCommandTest {
     @Test
     public void testCd2() {
     	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
-    	setup(CD_COMMAND2,wsStatus);
+    	setup(CD_COMMAND2, CdCommand.class, wsStatus);
     	
     	execute();
     	
     	// Check WorkspaceContext
-    	assertEquals("root.Project2.ViewModel1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("home.Project2.MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	teardown();
     }

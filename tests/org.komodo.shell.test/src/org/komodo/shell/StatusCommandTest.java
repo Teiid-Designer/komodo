@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.commands.core.StatusCommand;
 
 /**
  * Test Class to test StatusCommand
@@ -29,6 +30,7 @@ public class StatusCommandTest extends AbstractCommandTest {
 	private static final String STATUS_COMMANDS1 = "statusCommands1.txt"; //$NON-NLS-1$
 	private static final String STATUS_COMMANDS2 = "statusCommands2.txt"; //$NON-NLS-1$
 	private static final String STATUS_COMMANDS3 = "statusCommands3.txt"; //$NON-NLS-1$
+	private static final String INDENT = getIndentStr();
 	
 	/**
 	 * Test for StatusCommand
@@ -43,14 +45,16 @@ public class StatusCommandTest extends AbstractCommandTest {
     @Test
     public void testStatus1() {
     	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
-    	setup(STATUS_COMMANDS1,wsStatus);
+    	setup(STATUS_COMMANDS1, StatusCommand.class, wsStatus);
     	
     	execute();
     	
-    	String expectedOutput = "Current Repo    : local Repository\nCurrent Server  : [Unknown : not connected]\nCurrent Context : root\n"; //$NON-NLS-1$
-    	String writerOutput = getWriterOutput();
+    	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
+                                INDENT+"Current Server  : [Unknown : not connected]\n"+ //$NON-NLS-1$
+                                INDENT+"Current Context : [home]\n"; //$NON-NLS-1$
+    	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("root", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("home", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	teardown();
     }
@@ -61,14 +65,16 @@ public class StatusCommandTest extends AbstractCommandTest {
     @Test
     public void testStatus2() {
     	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
-    	setup(STATUS_COMMANDS2,wsStatus);
+    	setup(STATUS_COMMANDS2, StatusCommand.class, wsStatus);
     	
     	execute();
     	
-    	String expectedOutput = "Current Repo    : local Repository\nCurrent Server  : [Unknown : not connected]\nCurrent Context : root.Project2\n"; //$NON-NLS-1$
-    	String writerOutput = getWriterOutput();
+    	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
+    	                        INDENT+"Current Server  : [Unknown : not connected]\n"+ //$NON-NLS-1$
+    	                        INDENT+"Current Context : [home.Project2]\n"; //$NON-NLS-1$
+    	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("root.Project2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("home.Project2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	teardown();
     }
@@ -79,14 +85,16 @@ public class StatusCommandTest extends AbstractCommandTest {
     @Test
     public void testStatus3() {
     	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
-    	setup(STATUS_COMMANDS3,wsStatus);
+    	setup(STATUS_COMMANDS3, StatusCommand.class, wsStatus);
 
     	execute();
     	
-    	String expectedOutput = "Current Repo    : local Repository\nCurrent Server  : [Unknown : not connected]\nCurrent Context : root.Project2.ViewModel1\n"; //$NON-NLS-1$
-    	String writerOutput = getWriterOutput();
+    	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
+                                INDENT+"Current Server  : [Unknown : not connected]\n"+ //$NON-NLS-1$
+                                INDENT+"Current Context : [home.Project1.Model2]\n"; //$NON-NLS-1$
+    	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("root.Project2.ViewModel1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("home.Project1.Model2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
    	
     	teardown();
     }
