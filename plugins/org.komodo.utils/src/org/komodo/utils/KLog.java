@@ -22,6 +22,7 @@
 package org.komodo.utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.logging.FileHandler;
@@ -39,19 +40,44 @@ public class KLog implements KLogger {
 
         private final Logger logger;
 
+        private String logPath = System.getProperty("user.home") + //$NON-NLS-1$
+                                                        File.separator + DOT_KOMODO + File.separator + KOMODO + DOT + LOG;
+
+        private FileHandler logPathHandler;
+
         public BasicLogger() {
             this.logger = Logger.getLogger(KLogger.class.getName());
-            StringBuilder logDir = new StringBuilder(System.getProperty("user.home")); //$NON-NLS-1$
-            logDir.append(File.separator + DOT_KOMODO);
-            logDir.append(File.separator + KOMODO + DOT + LOG);
+
             try {
-                this.logger.addHandler(new FileHandler(logDir.toString()));
+                initHandler();
             } catch (Exception ex) {
                 // If this goes wrong then something really has gone wrong!!
                 throw new RuntimeException(ex);
             }
         }
-        
+
+        private void initHandler() throws IOException {
+            logPathHandler = new FileHandler(logPath);
+            this.logger.addHandler(logPathHandler);
+        }
+
+        @Override
+        public void dispose() {
+            // Nothing to do
+        }
+
+        @Override
+        public String getLogPath() {
+            return logPath;
+        }
+
+        @Override
+        public void setLogPath(String logPath) throws Exception {
+            this.logPath = logPath;
+            this.logger.removeHandler(logPathHandler);
+            initHandler();
+        }
+
         @Override
         public void info(String message, Object... args) {
             logger.log(Level.INFO, message, args);
@@ -129,6 +155,21 @@ public class KLog implements KLogger {
             // Fallback to basic java.util.logger implementation
             this.kLogger = new BasicLogger();
         }
+    }
+
+    @Override
+    public void dispose() {
+        kLogger.dispose();
+    }
+
+    @Override
+    public String getLogPath() throws Exception {
+        return kLogger.getLogPath();
+    }
+
+    @Override
+    public void setLogPath(String logPath) throws Exception {
+        kLogger.setLogPath(logPath);
     }
 
     /* (non-Javadoc)

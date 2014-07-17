@@ -21,13 +21,16 @@
  */
 package org.komodo.utils.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.komodo.utils.KLog;
 
@@ -37,102 +40,112 @@ import org.komodo.utils.KLog;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestKLog {
 
-    public class TestOutputStream extends OutputStream {
+    private KLog logger;
 
-        private final String testMessage;
-
-        private Exception testException;
-
-        private StringBuilder receivedMessage = new StringBuilder();
-
-        public TestOutputStream(String msg) {
-            this.testMessage = msg;
-        }
-
-        /**
-         * @param msg
-         * @param testException
-         */
-        public TestOutputStream(String msg, Exception testException) {
-            this(msg);
-            this.testException = testException;
-        }
-
-        @Override
-        public void write(int b) {
-            receivedMessage.append(String.valueOf((char)b));
-        }
-
-        public void testMessageEquivalence() {
-            assertTrue(receivedMessage.toString().contains(testMessage));
-            if (testException != null)
-                assertTrue(receivedMessage.toString().contains(testException.getLocalizedMessage()));
-        }
+    @Before
+    public void setup() {
+        logger = KLog.getLogger();
     }
 
-    private static PrintStream originalOut;
-
-    private static PrintStream originalErr;
-
-    @BeforeClass
-    public static void setupClass() {
-        originalOut = System.out;
-        originalErr = System.err;
-    }
-
-    @AfterClass
-    public static void cleanupClass() {
-        System.setOut(originalOut);
-        System.setErr(originalErr);
+    @After
+    public void cleanup() {
+        logger.dispose();
     }
 
     @Test
     public void testLogInit() {
         try {
-            KLog logger = KLog.getLogger();
+            logger = KLog.getLogger();
             assertNotNull(logger);
         } catch (Throwable throwable) {
-            throwable.printStackTrace();
             fail("Should not throw an exception " + throwable.getLocalizedMessage());
         }
     }
 
-//    @Test
-//    public void testLogInfo() throws Exception {
-//        KLog logger = KLog.getLogger();
-//        assertNotNull(logger);
-//        String msg = "This is a test";
-//
-//        TestOutputStream testOut = new TestOutputStream(msg);
-//        System.setOut(new PrintStream(testOut));
-//        logger.info(msg);
-//        testOut.testMessageEquivalence();
-//    }
-//
-//    @Test
-//    public void testLogWarning() throws Exception {
-//        KLog logger = KLog.getLogger();
-//        assertNotNull(logger);
-//        String msg = "This is a {0} test";
-//        String param1 = "warning";
-//
-//        TestOutputStream testOut = new TestOutputStream(msg.replace("{0}", param1));
-//        System.setOut(new PrintStream(testOut));
-//        logger.warn(msg, param1);
-//        testOut.testMessageEquivalence();
-//    }
-//
-//    @Test
-//    public void testLogError() throws Exception {
-//        KLog logger = KLog.getLogger();
-//        assertNotNull(logger);
-//        String msg = "This is a exception test";
-//        Exception testException = new Exception("This is a test exception");
-//
-//        TestOutputStream testOut = new TestOutputStream(msg, testException);
-//        System.setOut(new PrintStream(testOut));
-//        logger.error(msg, testException);
-//        testOut.testMessageEquivalence();
-//    }
+    private File configureLogPath(KLog logger) throws IOException, Exception {
+        File newLogFile = File.createTempFile("TestKLog", ".log");
+        newLogFile.deleteOnExit();
+
+        logger.setLogPath(newLogFile.getAbsolutePath());
+        assertEquals(newLogFile.getAbsolutePath(), logger.getLogPath());
+        return newLogFile;
+    }
+
+    private String retrieveLogContents(File newLogFile) throws Exception {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(newLogFile));
+            StringBuilder builder = new StringBuilder();
+            String line;
+            while((line = reader.readLine()) != null) {
+                builder.append(line);
+                builder.append("\n");
+            }
+
+            return builder.toString();
+        } finally {
+            if (reader != null)
+                reader.close();
+        }
+    }
+
+    @Test
+    public void testSetLogPath() throws Exception {
+        assertNotNull(logger);
+
+        File newLogFile = configureLogPath(logger);
+
+        String logMsg = "Test Log Message";
+        logger.info(logMsg);
+
+        String fileMsg = retrieveLogContents(newLogFile);
+        assertTrue(fileMsg.contains(logMsg));
+    }
+
+    @Test
+    public void testLogInfo() throws Exception {
+        assertNotNull(logger);
+
+        File newLogFile = configureLogPath(logger);
+
+        String msg = "This is a test";
+        logger.info(msg);
+
+        String fileMsg = retrieveLogContents(newLogFile);
+        assertTrue(fileMsg.contains("<level>INFO</level>"));
+        assertTrue(fileMsg.contains(msg));
+    }
+
+    @Test
+    public void testLogWarning() throws Exception {
+        assertNotNull(logger);
+
+        File newLogFile = configureLogPath(logger);
+
+        String msg = "This is a {0} test";
+        String param1 = "warning";
+
+        logger.warn(msg, param1);
+
+        String fileMsg = retrieveLogContents(newLogFile);
+        assertTrue(fileMsg.contains("<level>WARNING</level>"));
+        assertTrue(fileMsg.contains(msg.replace("{0}", param1)));
+    }
+
+    @Test
+    public void testLogError() throws Exception {
+        assertNotNull(logger);
+
+        File newLogFile = configureLogPath(logger);
+
+        String msg = "This is a exception test";
+        Exception testException = new Exception("This is a test exception");
+        logger.error(msg, testException);
+
+        String fileMsg = retrieveLogContents(newLogFile);
+        assertTrue(fileMsg.contains("<level>SEVERE</level>"));
+        assertTrue(fileMsg.contains(msg));
+        assertTrue(fileMsg.contains(testException.getMessage()));
+    }
 
 }

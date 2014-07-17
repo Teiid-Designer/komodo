@@ -27,6 +27,25 @@ package org.komodo.spi.logging;
 public interface KLogger {
 
     /**
+     * Dispose of this logger, releasing any resources
+     */
+    void dispose();
+
+    /**
+     * @return path where logging is taking place
+     * @throws Exception
+     */
+    String getLogPath() throws Exception;
+
+    /**
+     * Set the path where the logger will log to
+     *
+     * @param logPath
+     * @throws Exception
+     */
+    void setLogPath(String logPath) throws Exception;
+
+    /**
      * @param message
      * @param args
      */

@@ -22,6 +22,7 @@
 package org.komodo.logging;
 
 
+import org.komodo.modeshape.lib.LogConfigurator;
 import org.komodo.spi.logging.KLogger;
 import org.modeshape.common.i18n.TextI18n;
 import org.modeshape.common.logging.Logger;
@@ -31,7 +32,34 @@ import org.modeshape.common.logging.Logger;
  */
 public class ModeshapeKLogger implements KLogger {
 
-    private static final Logger logger = Logger.getLogger(KLogger.class);
+    private Logger logger;
+
+    @Override
+    public void dispose() {
+        try {
+            LogConfigurator.getInstance().dispose();
+        } catch (Exception ex) {
+            error("", ex); //$NON-NLS-1$
+        }
+        logger = null;
+    }
+
+    @Override
+    public String getLogPath() throws Exception {
+        return LogConfigurator.getInstance().getLogPath();
+    }
+
+    @Override
+    public void setLogPath(String logPath) throws Exception {
+        LogConfigurator.getInstance().setLogPath(logPath);
+    }
+
+    private Logger getLogger() {
+        if (logger == null)
+            logger = Logger.getLogger(KLogger.class);
+
+        return logger;
+    }
 
     /**
      * @param message
@@ -45,56 +73,56 @@ public class ModeshapeKLogger implements KLogger {
     @Override
     public void info(String message, Object... args) {
         TextI18n ti18n = getI18n(message);
-        logger.info(ti18n, args);
+        getLogger().info(ti18n, args);
     }
 
     @Override
     public void info(String message, Throwable throwable, Object... args) {
         TextI18n ti18n = getI18n(message);
-        logger.info(throwable, ti18n, args);
+        getLogger().info(throwable, ti18n, args);
     }
 
     @Override
     public void warn(String message, Object... args) {
         TextI18n ti18n = getI18n(message);
-        logger.warn(ti18n, args);
+        getLogger().warn(ti18n, args);
     }
 
     @Override
     public void warn(String message, Throwable throwable, Object... args) {
         TextI18n ti18n = getI18n(message);
-        logger.warn(throwable, ti18n, args);
+        getLogger().warn(throwable, ti18n, args);
     }
 
     @Override
     public void error(String message, Object... args) {
         TextI18n ti18n = getI18n(message);
-        logger.error(ti18n, args);
+        getLogger().error(ti18n, args);
     }
 
     @Override
     public void error(String message, Throwable throwable, Object... args) {
         TextI18n ti18n = getI18n(message);
-        logger.error(throwable, ti18n, args);
+        getLogger().error(throwable, ti18n, args);
     }
 
     @Override
     public void debug(String message, Object... args) {
-        logger.debug(message, args);
+        getLogger().debug(message, args);
     }
 
     @Override
     public void debug(String message, Throwable throwable, Object... args) {
-        logger.debug(throwable, message, args);
+        getLogger().debug(throwable, message, args);
     }
 
     @Override
     public void trace(String message, Object... args) {
-        logger.trace(message, args);
+        getLogger().trace(message, args);
     }
 
     @Override
     public void trace(String message, Throwable throwable, Object... args) {
-        logger.trace(throwable, message, args);
+        getLogger().trace(throwable, message, args);
     }
 }
