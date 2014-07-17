@@ -83,7 +83,7 @@ public class TestProcedureResultSet {
      * Test validation.  expected result - warning : no columns defined
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultResultSet() {
     	ProcedureResultSet rs = RelationalObjectFactory.INSTANCE.createProcedureResultSet(RESULT_SET_NAME);
     	
     	IOutcome outcome = rs.validate();

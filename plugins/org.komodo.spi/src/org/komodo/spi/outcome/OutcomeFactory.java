@@ -21,6 +21,10 @@
  */
 package org.komodo.spi.outcome;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.komodo.spi.Messages;
 import org.komodo.spi.outcome.IOutcome.Level;
 
@@ -31,6 +35,8 @@ public class OutcomeFactory {
 
     private static class Outcome implements IOutcome {
 
+    	private List<IOutcome> children;
+    	
         private String message;
 
         private Exception exception;
@@ -89,8 +95,96 @@ public class OutcomeFactory {
         public boolean isOK() {
             return Level.OK == level;
         }
-    }
 
+		/* (non-Javadoc)
+		 * @see org.komodo.spi.outcome.IOutcome#getOutcomes()
+		 */
+		@Override
+		public List<IOutcome> getOutcomes() {
+			return this.children == null ? Collections.EMPTY_LIST : this.children;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.komodo.spi.outcome.IOutcome#addOutcome(org.komodo.spi.outcome.IOutcome)
+		 */
+		@Override
+		public void addOutcome(IOutcome outcome) {
+			if(this.children==null) this.children=new ArrayList<IOutcome>();
+			if(outcome.isMultiOutcome()) {
+				addOutcomes(outcome.getOutcomes());
+			} else {
+				this.children.add(outcome);
+				if(this.children.size()==1) {
+					this.setMessage(outcome.getMessage());
+				}
+			}
+    		// Set level to highest of the children
+    		Level addedLevel = outcome.getLevel();
+    		if(isGreaterThanCurrent(addedLevel)) {
+    			setLevel(addedLevel);
+    		}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.komodo.spi.outcome.IOutcome#addOutcomes(java.util.List)
+		 */
+		@Override
+		public void addOutcomes(List<IOutcome> outcomes) {
+    		for(IOutcome outcome : outcomes) {
+    			addOutcome(outcome);
+    		}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.komodo.spi.outcome.IOutcome#isMultiOutcome()
+		 */
+		@Override
+		public boolean isMultiOutcome() {
+			return (this.children!=null && !this.children.isEmpty()) ? true : false;
+		}
+        
+    	private boolean isGreaterThanCurrent(Level level) {
+    		Level currentLevel = getLevel();
+    		boolean isGreater = false;
+    		switch (level) {
+    		case OK:
+    			isGreater=false;
+    			break;
+    		case INFO:
+    			if(currentLevel==Level.OK) isGreater=true;
+    			break;
+    		case WARNING:
+    			if(currentLevel==Level.OK || currentLevel==Level.INFO) isGreater=true;
+    			break;
+    		case ERROR:
+    			if(currentLevel==Level.OK || currentLevel==Level.INFO || currentLevel==Level.ERROR) isGreater=true;
+    			break;
+    		default:
+    		}
+    		return isGreater;
+    	}
+    	
+    	/* (non-Javadoc)
+    	 * @see java.lang.Object#toString()
+    	 */
+    	@Override
+    	public String toString() {
+    		StringBuilder sb = new StringBuilder();
+    		sb.append(this.getClass().getName());
+    		if(!isMultiOutcome()) {
+        		sb.append("\n\t").append("isMulti = ").append(isMultiOutcome()); //$NON-NLS-1$ //$NON-NLS-2$
+    			sb.append("\n\t").append("Level   = ").append(getLevel()); //$NON-NLS-1$  //$NON-NLS-2$
+    			sb.append("\n\t").append("Msg     = ").append(getMessage()); //$NON-NLS-1$  //$NON-NLS-2$
+    		} else {
+        		sb.append("\n\t").append("isMulti = ").append(isMultiOutcome()); //$NON-NLS-1$ //$NON-NLS-2$
+        		sb.append(" (").append(getOutcomes().size()).append(" outcomes)"); //$NON-NLS-1$ //$NON-NLS-2$
+    			sb.append("\n\t").append("Max Level = ").append(getLevel()); //$NON-NLS-1$  //$NON-NLS-2$
+    			sb.append("\n\t").append("Msg = ").append(getMessage()); //$NON-NLS-1$  //$NON-NLS-2$
+    		}
+    		return sb.toString();
+    	}
+    }
+    
     private static OutcomeFactory instance;
 
     public static OutcomeFactory getInstance() {
@@ -100,12 +194,30 @@ public class OutcomeFactory {
         return instance;
     }
 
+    public IOutcome createMultiOutcome(String message, List<IOutcome> outcomes) {
+    	Outcome multiOutcome = new Outcome();
+    	multiOutcome.setMessage(message);
+    	multiOutcome.setLevel(Level.OK);
+    	multiOutcome.addOutcomes(outcomes);
+    	return multiOutcome;
+    }
+    
     /**
      * @return default ok outcome
      */
     public IOutcome createOK() {
         Outcome outcome = new Outcome();
         outcome.setMessage(Messages.getString(Messages.OutcomeFactory.OK));
+        outcome.setLevel(Level.OK);
+        return outcome;
+    }
+    
+    /**
+     * @return default ok outcome
+     */
+    public IOutcome createOK(String msg) {
+        Outcome outcome = new Outcome();
+        outcome.setMessage(msg);
         outcome.setLevel(Level.OK);
         return outcome;
     }

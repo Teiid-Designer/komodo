@@ -83,7 +83,7 @@ public class TestModel {
      * Test validation.  expected result - warning : no columns defined
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultModel() {
     	Model model = RelationalObjectFactory.INSTANCE.createModel(MODEL_NAME);
     	
     	IOutcome outcome = model.validate();

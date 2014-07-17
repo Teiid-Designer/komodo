@@ -227,7 +227,7 @@ public class TestColumn {
      * Test validation.  expected result - OK
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultCol() {
     	Column column = RelationalObjectFactory.INSTANCE.createColumn(COLUMN_NAME);
     	
     	IOutcome outcome = column.validate();
@@ -236,11 +236,23 @@ public class TestColumn {
     }
         
     /**
+     * Test validation.  expected result - OK - special char is allowed
+     */
+    @Test
+    public void testValidateColWithGoodName() {
+    	Column column = RelationalObjectFactory.INSTANCE.createColumn("Crap?"); //$NON-NLS-1$
+    	
+    	IOutcome outcome = column.validate();
+    	
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    }
+    
+    /**
      * Test validation.  expected result - ERROR - no spaces in unquoted name
      */
     @Test
-    public void testValidate2() {
-    	Column column = RelationalObjectFactory.INSTANCE.createColumn("Crap ?"); //$NON-NLS-1$
+    public void testValidateColWithBadName() {
+	Column column = RelationalObjectFactory.INSTANCE.createColumn("Crap ?"); //$NON-NLS-1$
     	
     	IOutcome outcome = column.validate();
     	
@@ -252,23 +264,11 @@ public class TestColumn {
     }
 
     /**
-     * Test validation.  expected result - OK - special char is allowed
-     */
-    @Test
-    public void testValidate3() {
-    	Column column = RelationalObjectFactory.INSTANCE.createColumn("Crap?"); //$NON-NLS-1$
-    	
-    	IOutcome outcome = column.validate();
-    	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
-    }
-    
-    /**
      * Test validation.  expected result - ERROR - invalid name, first char must be alpha
      */
     @Test
-    public void testValidate4() {
-    	Column column = RelationalObjectFactory.INSTANCE.createColumn("?Crap"); //$NON-NLS-1$
+    public void testValidateColWithBadName2() {
+	Column column = RelationalObjectFactory.INSTANCE.createColumn("?Crap"); //$NON-NLS-1$
     	
     	IOutcome outcome = column.validate();
     	

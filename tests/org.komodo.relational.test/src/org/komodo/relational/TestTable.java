@@ -342,7 +342,7 @@ public class TestTable {
      * Test validation.  expected result - warning : no columns defined
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultCreate() {
     	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	
     	IOutcome outcome = table.validate();
@@ -355,7 +355,7 @@ public class TestTable {
      * Test validation.  expected result - ok
      */
     @Test
-    public void testValidate2() {
+    public void testValidateTableWithOneColumn() {
     	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	table.createColumn();
     	
@@ -368,7 +368,7 @@ public class TestTable {
      * Test validation.  expected result - error : invalid name
      */
     @Test
-    public void testValidate3() {
+    public void testValidateTableWithBadName() {
     	Table table = RelationalObjectFactory.INSTANCE.createTable("Crap ?"); //$NON-NLS-1$
     	table.createColumn();
     	

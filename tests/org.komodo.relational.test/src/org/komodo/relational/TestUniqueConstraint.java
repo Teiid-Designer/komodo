@@ -84,7 +84,7 @@ public class TestUniqueConstraint {
      * Test validation.  expected result - warning : no columns defined
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultUC() {
     	UniqueConstraint uc = RelationalObjectFactory.INSTANCE.createUniqueConstraint(UC_NAME);
     	
     	IOutcome outcome = uc.validate();

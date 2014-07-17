@@ -33,8 +33,8 @@ import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.utils.StringNameValidator;
 
 /**
- * RelationalObjectValidator.  This validation returns the first ERROR that is found for the RelationalObject.  If no
- * errors are found, the first warning is returned.
+ * RelationalObjectValidator.  This validation returns ALL errors and warnings that is found for the RelationalObject and its
+ * children.  
  */
 public class RelationalObjectValidator implements RelationalValidator {
 
@@ -66,21 +66,21 @@ public class RelationalObjectValidator implements RelationalValidator {
 	 */
     @Override
 	public IOutcome validate(RelationalObject relationalObj) {
-    	IOutcome theOutcome = null;
+		IOutcome multiOutcome = OutcomeFactory.getInstance().createOK("Object Validation Successful"); //$NON-NLS-1$
     	
     	// --------------------------------------------------
     	// Name Validation - done for all Relational Objects
     	// --------------------------------------------------
 		if( relationalObj.getName() == null || relationalObj.getName().length() == 0 ) {
-		    theOutcome = OutcomeFactory.getInstance().createError(
-					  Messages.getString(RELATIONAL.validate_error_nameCannotBeNullOrEmpty, relationalObj.getDisplayName()) );
-			return theOutcome;
+		    multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+					  Messages.getString(RELATIONAL.validate_error_nameCannotBeNullOrEmpty, relationalObj.getDisplayName()) ));
 		}
-		// Validate non-null string
-		String errorMessage = getNameValidator().checkValidName(relationalObj.getName());
-		if( errorMessage != null && !errorMessage.isEmpty() ) {
-			theOutcome = OutcomeFactory.getInstance().createError(errorMessage);
-			return theOutcome;
+		if(multiOutcome.isOK()) {
+			// Validate non-null string
+			String errorMessage = getNameValidator().checkValidName(relationalObj.getName());
+			if( errorMessage != null && !errorMessage.isEmpty() ) {
+				multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(errorMessage));
+			}
 		}
 		
     	// --------------------------------------------------
@@ -89,34 +89,34 @@ public class RelationalObjectValidator implements RelationalValidator {
 		int objType = relationalObj.getType();
 		switch(objType) {
 		case TYPES.TABLE: 
-			return validateTable((Table)relationalObj);
+			return validateTable((Table)relationalObj,multiOutcome);
 		case TYPES.COLUMN:
-			return validateColumn((Column)relationalObj);
+			return validateColumn((Column)relationalObj,multiOutcome);
 		case TYPES.PROCEDURE:
-			return validateProcedure((Procedure)relationalObj);
+			return validateProcedure((Procedure)relationalObj,multiOutcome);
 		case TYPES.PARAMETER:
-			return validateParameter((Parameter)relationalObj);
+			return validateParameter((Parameter)relationalObj,multiOutcome);
 		case TYPES.RESULT_SET:
-			return validateProcedureResultSet((ProcedureResultSet)relationalObj);
+			return validateProcedureResultSet((ProcedureResultSet)relationalObj,multiOutcome);
 		case TYPES.SCHEMA:
-			return validateSchema((Schema)relationalObj);
+			return validateSchema((Schema)relationalObj,multiOutcome);
 		case TYPES.VIEW:
-			return validateView((View)relationalObj);
+			return validateView((View)relationalObj,multiOutcome);
 		case TYPES.UC:
-			return validateUniqueConstraint((UniqueConstraint)relationalObj);
+			return validateUniqueConstraint((UniqueConstraint)relationalObj,multiOutcome);
 		case TYPES.AP:
-			return validateAccessPattern((AccessPattern)relationalObj);
+			return validateAccessPattern((AccessPattern)relationalObj,multiOutcome);
 		case TYPES.PK:
-			return validatePrimaryKey((PrimaryKey)relationalObj);
+			return validatePrimaryKey((PrimaryKey)relationalObj,multiOutcome);
 		case TYPES.FK:
-			return validateForeignKey((ForeignKey)relationalObj);
+			return validateForeignKey((ForeignKey)relationalObj,multiOutcome);
 		case TYPES.INDEX:
-			return validateIndex((Index)relationalObj);
+			return validateIndex((Index)relationalObj,multiOutcome);
 		case TYPES.MODEL:
-			return validateModel((Model)relationalObj);
+			return validateModel((Model)relationalObj,multiOutcome);
 		}
 		
-		return OutcomeFactory.getInstance().createOK();
+		return multiOutcome;
     }
     
     /**
@@ -124,35 +124,38 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalTable the table
      * @return the validation status
      */
-	private IOutcome validateTable(Table relationalTable) {
-    	IOutcome theOutcome = null;
-    	
+	private IOutcome validateTable(Table relationalTable, IOutcome multiOutcome) {
 		if( relationalTable.isMaterialized() && relationalTable.getMaterializedTable() == null ) {
-			theOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_materializedTableHasNoTableDefined) );
-			return theOutcome;
+			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+					Messages.getString(RELATIONAL.validate_error_materializedTableHasNoTableDefined) ));
 		}
 		
 		if( relationalTable.getPrimaryKey() != null) {
-			theOutcome = validate(relationalTable.getPrimaryKey());
-			if(theOutcome.getLevel() == Level.ERROR) return theOutcome;
+			IOutcome outcome = validate(relationalTable.getPrimaryKey());
+			if(!outcome.isOK()) {
+				multiOutcome.addOutcome(outcome);
+			}
 		}
 		
 		if( relationalTable.getUniqueContraint() != null ) {
-			theOutcome = validate(relationalTable.getUniqueContraint());
-			if(theOutcome.getLevel() == Level.ERROR) return theOutcome;
+			IOutcome outcome = validate(relationalTable.getUniqueContraint());
+			if(!outcome.isOK()) {
+				multiOutcome.addOutcome(outcome);
+			}
 		}
 		
 		for( ForeignKey fk : relationalTable.getForeignKeys() ) {
-			theOutcome = validate(fk);
-			if(theOutcome.getLevel() == Level.ERROR) return theOutcome;
+			IOutcome outcome = validate(fk);
+			if(!outcome.isOK()) {
+				multiOutcome.addOutcome(outcome);
+			}
 		}
 		
 		// Check Column Status values
 		for( Column col : relationalTable.getColumns() ) {
-			theOutcome = validate(col);
-			if( theOutcome.getLevel() == Level.ERROR ) {
-				return theOutcome;
+			IOutcome outcome = validate(col);
+			if(!outcome.isOK()) {
+				multiOutcome.addOutcome(outcome);
 			}
 		}
 		
@@ -161,9 +164,9 @@ public class RelationalObjectValidator implements RelationalValidator {
 			for( Column innerColumn : relationalTable.getColumns() ) {
 				if( outerColumn != innerColumn ) {
 					if( outerColumn.getName().equalsIgnoreCase(innerColumn.getName())) {
-						theOutcome = OutcomeFactory.getInstance().createError(
-								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesInTable, relationalTable.getName()) );
-						return theOutcome;
+						multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesInTable, relationalTable.getName()) ));
+						break;
 					}
 				}
 			}
@@ -171,17 +174,15 @@ public class RelationalObjectValidator implements RelationalValidator {
 		
 		if( relationalTable.getColumns().isEmpty() ) {
 			if( relationalTable.getParent() != null && relationalTable.getParent() instanceof Procedure ) {
-				theOutcome = OutcomeFactory.getInstance().createWarning(
-						Messages.getString(RELATIONAL.validate_warning_noColumnsDefinedForResultSet) ); 
-				return theOutcome;
+				multiOutcome.addOutcome(OutcomeFactory.getInstance().createWarning(
+						Messages.getString(RELATIONAL.validate_warning_noColumnsDefinedForResultSet) )); 
 			} else {
-				theOutcome = OutcomeFactory.getInstance().createWarning(
-						Messages.getString(RELATIONAL.validate_warning_noColumnsDefined) ); 
-				return theOutcome;
+				multiOutcome.addOutcome(OutcomeFactory.getInstance().createWarning(
+						Messages.getString(RELATIONAL.validate_warning_noColumnsDefined) )); 
 			}
 		}
 		
-		return OutcomeFactory.getInstance().createOK();
+		return multiOutcome;
 	}
 	
     /**
@@ -189,12 +190,12 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalColumn the column
      * @return the validation status
      */
-	private IOutcome validateColumn(Column relationalColumn) {
-		IOutcome theOutcome = null;
-		
-		theOutcome = this.dataTypeValidator.validate(relationalColumn.getDatatype());
-		
-		return theOutcome;
+	private IOutcome validateColumn(Column relationalColumn, IOutcome multiOutcome) {
+		IOutcome outcome = this.dataTypeValidator.validate(relationalColumn.getDatatype());
+		if(!outcome.isOK()) {
+			multiOutcome.addOutcome(outcome);
+		}
+		return multiOutcome;
 	}
 	
     /**
@@ -202,8 +203,8 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalAP the access pattern
      * @return the validation status
      */
-	private IOutcome validateAccessPattern(AccessPattern relationalAP) {
-		return OutcomeFactory.getInstance().createOK();
+	private IOutcome validateAccessPattern(AccessPattern relationalAP, IOutcome multiOutcome) {
+		return multiOutcome;
 	}
 	
     /**
@@ -211,28 +212,24 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalFK the foreign key
      * @return the validation status
      */
-	private IOutcome validateForeignKey(ForeignKey relationalFK) {
-    	IOutcome theOutcome = null;
+	private IOutcome validateForeignKey(ForeignKey relationalFK, IOutcome multiOutcome) {
 		
 		if( relationalFK.getColumns().isEmpty() ) {
-			theOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_fkNoColumnsDefined, relationalFK.getName()) );
-			return theOutcome;
+			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+					Messages.getString(RELATIONAL.validate_error_fkNoColumnsDefined, relationalFK.getName()) ));
 		}
 				
 		if( relationalFK.getUniqueKeyName() == null || relationalFK.getUniqueKeyName().length() == 0 ) {
-			theOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_fKUniqueKeyNameIsUndefined, relationalFK.getName()) );
-			return theOutcome;
+			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+					Messages.getString(RELATIONAL.validate_error_fKUniqueKeyNameIsUndefined, relationalFK.getName()) ));
 		}
 		
 		if( relationalFK.getUniqueKeyTableName() == null || relationalFK.getUniqueKeyTableName().length() == 0 ) {
-			theOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_fKReferencedUniqueKeyTableIsUndefined) );
-			return theOutcome;
+			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+					Messages.getString(RELATIONAL.validate_error_fKReferencedUniqueKeyTableIsUndefined) ));
 		}
     	
-		return OutcomeFactory.getInstance().createOK();
+		return multiOutcome;
 	}
 	
     /**
@@ -240,16 +237,14 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalPK the Primary Key
      * @return the validation status
      */
-	private IOutcome validatePrimaryKey(PrimaryKey relationalPK) {
-    	IOutcome theOutcome = null;
+	private IOutcome validatePrimaryKey(PrimaryKey relationalPK, IOutcome multiOutcome) {
     	
 		if( relationalPK.getColumns().isEmpty() ) {
-			theOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_pkNoColumnsDefined, relationalPK.getName()) );
-			return theOutcome;
+			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+					Messages.getString(RELATIONAL.validate_error_pkNoColumnsDefined, relationalPK.getName()) ));
 		}
 
-		return OutcomeFactory.getInstance().createOK();
+		return multiOutcome;
 	}
 	
     /**
@@ -257,14 +252,13 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalIndex the Index
      * @return the validation status
      */
-	private IOutcome validateIndex(Index relationalIndex) {
-    	IOutcome theOutcome = null;
+	private IOutcome validateIndex(Index relationalIndex, IOutcome multiOutcome) {
     	
 		// Check Column Status values
 		for( Column col : relationalIndex.getColumns() ) {
-			if( col.getOutcome().getLevel() == Level.ERROR ) {
-				theOutcome = OutcomeFactory.getInstance().createError(col.getOutcome().getMessage() );
-				return theOutcome;
+			IOutcome outcome = validate(col);
+			if(!outcome.isOK()) {
+				multiOutcome.addOutcome(outcome);
 			}
 		}
 		
@@ -273,21 +267,20 @@ public class RelationalObjectValidator implements RelationalValidator {
 			for( Column innerColumn : relationalIndex.getColumns() ) {
 				if( outerColumn != innerColumn ) {
 					if( outerColumn.getName().equalsIgnoreCase(innerColumn.getName())) {
-						theOutcome = OutcomeFactory.getInstance().createError(
-								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesReferencedInIndex, relationalIndex.getName()) ); 
-						return theOutcome;
+						multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesReferencedInIndex, relationalIndex.getName()) )); 
+						break;
 					}
 				}
 			}
 		}
 		
 		if( relationalIndex.getColumns().isEmpty() ) {
-			theOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_warning_noColumnReferencesDefined, relationalIndex.getName()) );
-			return theOutcome;
+			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+					Messages.getString(RELATIONAL.validate_warning_noColumnReferencesDefined, relationalIndex.getName()) ));
 		}
     	
-		return OutcomeFactory.getInstance().createOK();
+		return multiOutcome;
 	}
 	
     /**
@@ -295,8 +288,8 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalModel the model
      * @return the validation status
      */
-	private IOutcome validateModel(Model relationalModel) {
-		return OutcomeFactory.getInstance().createOK();
+	private IOutcome validateModel(Model relationalModel, IOutcome multiOutcome) {
+		return multiOutcome;
 	}
 	
     /**
@@ -304,21 +297,23 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalParmeter the Parameter
      * @return the validation status
      */
-	private IOutcome validateParameter(Parameter relationalParmeter) {
-    	IOutcome theOutcome = null;
+	private IOutcome validateParameter(Parameter relationalParmeter, IOutcome multiOutcome) {
     	
 		// Parameter directions check
 		Procedure parentProcedure = (Procedure)relationalParmeter.getParent();
 		if(parentProcedure!=null && parentProcedure.isFunction()) {
 			if( ! relationalParmeter.getDirection().equalsIgnoreCase(DIRECTION.IN) &&
 					! relationalParmeter.getDirection().equalsIgnoreCase(DIRECTION.RETURN)	) {
-				theOutcome = OutcomeFactory.getInstance().createError(
-						Messages.getString(RELATIONAL.validate_error_invalidParameterDirectionInFunction) ); 
-				return theOutcome;
+				multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+						Messages.getString(RELATIONAL.validate_error_invalidParameterDirectionInFunction) )); 
 			}
 		}
 		
-		return this.dataTypeValidator.validate(relationalParmeter.getDatatype());
+		IOutcome outcome = this.dataTypeValidator.validate(relationalParmeter.getDatatype());
+		if(!outcome.isOK()) {
+			multiOutcome.addOutcome(outcome);
+		}
+		return multiOutcome;
 	}
 	
     /**
@@ -326,16 +321,17 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalProcedure the Procedure
      * @return the validation status
      */
-	private IOutcome validateProcedure(Procedure relationalProcedure) {
-    	IOutcome theOutcome = null;
+	private IOutcome validateProcedure(Procedure relationalProcedure, IOutcome multiOutcome) {
     	
     	List<Parameter> params = relationalProcedure.getParameters();
     	
     	if(!params.isEmpty()) {
     		// Validate Parameters
     		for( Parameter param : params ) {
-    			theOutcome = validate(param);
-    			if(theOutcome.getLevel() == Level.ERROR) return theOutcome;
+    			IOutcome outcome = validate(param);
+    			if(!outcome.isOK()) {
+    				multiOutcome.addOutcome(outcome);
+    			}
     		}
 
     		// Check Parameter Status values
@@ -343,9 +339,9 @@ public class RelationalObjectValidator implements RelationalValidator {
     			for( Parameter innerParam : params ) {
     				if( outerParam != innerParam ) {
     					if( outerParam.getName().equalsIgnoreCase(innerParam.getName())) {
-    						theOutcome = OutcomeFactory.getInstance().createError(
-    								Messages.getString(RELATIONAL.validate_error_duplicateParameterNamesInProcedure, relationalProcedure.getName()) ); 
-    						return theOutcome;
+    						multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+    								Messages.getString(RELATIONAL.validate_error_duplicateParameterNamesInProcedure, relationalProcedure.getName()) ));
+    						break;
     					}
     				}
     			}
@@ -358,9 +354,9 @@ public class RelationalObjectValidator implements RelationalValidator {
 			for( Parameter param : params ) {
 				if( param.getDirection().equalsIgnoreCase(DIRECTION.RETURN)) {
 					if( foundResultParam ) {
-						theOutcome = OutcomeFactory.getInstance().createError(
-								Messages.getString(RELATIONAL.validate_error_tooManyResultParametersInFunction) ); 
-						return theOutcome;
+						multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+								Messages.getString(RELATIONAL.validate_error_tooManyResultParametersInFunction) )); 
+						break;
 					} else {
 						foundResultParam = true;
 					}
@@ -369,49 +365,42 @@ public class RelationalObjectValidator implements RelationalValidator {
 			
 			if( relationalProcedure.isSourceFunction() ) {
 				if( relationalProcedure.getResultSet() != null ) {
-					theOutcome = OutcomeFactory.getInstance().createError(
-							Messages.getString(RELATIONAL.validate_noResultSetAllowedInFunction) ); 
-					return theOutcome;
+					multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+							Messages.getString(RELATIONAL.validate_noResultSetAllowedInFunction) )); 
 				}
 			} else {
 				// Check for null category, class or method name
 				if( relationalProcedure.getFunctionCategory() == null || relationalProcedure.getFunctionCategory().trim().length() == 0 ) {
-					theOutcome = OutcomeFactory.getInstance().createError(
-							Messages.getString(RELATIONAL.validate_categoryUndefinedForUDF) ); 
-					return theOutcome;
+					multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+							Messages.getString(RELATIONAL.validate_categoryUndefinedForUDF) )); 
 				}
 				if( relationalProcedure.getJavaClassName() == null || relationalProcedure.getJavaClassName().trim().length() == 0 ) {
-					theOutcome = OutcomeFactory.getInstance().createError(
-							Messages.getString(RELATIONAL.validate_javaClassUndefinedForUDF) ); 
-					return theOutcome;
+					multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+							Messages.getString(RELATIONAL.validate_javaClassUndefinedForUDF) )); 
 				}
 				if( relationalProcedure.getJavaMethodName() == null || relationalProcedure.getJavaMethodName().trim().length() == 0 ) {
-					theOutcome = OutcomeFactory.getInstance().createError(
-							Messages.getString(RELATIONAL.validate_javaMethodUndefinedForUDF) ); 
-					return theOutcome;
+					multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+							Messages.getString(RELATIONAL.validate_javaMethodUndefinedForUDF) )); 
 				}
 			}
 		} else {
 			if( relationalProcedure.getResultSet() != null ) {
 				if( relationalProcedure.getResultSet().getOutcome().getLevel() == Level.ERROR ) {
-					theOutcome = OutcomeFactory.getInstance().createError(relationalProcedure.getResultSet().getOutcome().getMessage() );
-					return theOutcome;
+					multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(relationalProcedure.getResultSet().getOutcome().getMessage() ));
 				}
 				
 				if( relationalProcedure.getResultSet().getOutcome().getLevel() == Level.WARNING ) {
-					theOutcome = OutcomeFactory.getInstance().createError(relationalProcedure.getResultSet().getOutcome().getMessage() );
-					return theOutcome;
+					multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(relationalProcedure.getResultSet().getOutcome().getMessage() ));
 				}
 			}
 		}
 		
 		if( params.isEmpty() ) {
-			theOutcome = OutcomeFactory.getInstance().createWarning( 
-					Messages.getString(RELATIONAL.validate_warning_noParametersDefined) ); 
-			return theOutcome;
+			multiOutcome.addOutcome(OutcomeFactory.getInstance().createWarning( 
+					Messages.getString(RELATIONAL.validate_warning_noParametersDefined) )); 
 		}
 		
-		return OutcomeFactory.getInstance().createOK();
+		return multiOutcome;
 	}
 	
     /**
@@ -419,14 +408,13 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalProcedureResultSet the ProcedureResultSet
      * @return the validation status
      */
-	private IOutcome validateProcedureResultSet(ProcedureResultSet relationalProcedureResultSet) {
-    	IOutcome theOutcome = null;
+	private IOutcome validateProcedureResultSet(ProcedureResultSet relationalProcedureResultSet, IOutcome multiOutcome) {
     	
 		// Check Column Status values
 		for( Column col : relationalProcedureResultSet.getColumns() ) {
-			theOutcome = validate(col);
-			if( theOutcome.getLevel() == Level.ERROR ) {
-				return theOutcome;
+			IOutcome outcome = validate(col);
+			if(!outcome.isOK()) {
+				multiOutcome.addOutcome(outcome);
 			}
 		}
 		
@@ -435,9 +423,9 @@ public class RelationalObjectValidator implements RelationalValidator {
 			for( Column innerColumn : relationalProcedureResultSet.getColumns() ) {
 				if( outerColumn != innerColumn ) {
 					if( outerColumn.getName().equalsIgnoreCase(innerColumn.getName())) {
-						theOutcome = OutcomeFactory.getInstance().createError(
-								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesInTable, relationalProcedureResultSet.getName()) );
-						return theOutcome;
+						multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesInTable, relationalProcedureResultSet.getName()) ));
+						break;
 					}
 				}
 			}
@@ -445,17 +433,15 @@ public class RelationalObjectValidator implements RelationalValidator {
 		
 		if( relationalProcedureResultSet.getColumns().isEmpty() ) {
 			if( relationalProcedureResultSet.getParent() != null && relationalProcedureResultSet.getParent() instanceof Procedure ) {
-				theOutcome = OutcomeFactory.getInstance().createWarning(
-						Messages.getString(RELATIONAL.validate_warning_noColumnsDefinedForResultSet) ); 
-				return theOutcome;
+				multiOutcome.addOutcome(OutcomeFactory.getInstance().createWarning(
+						Messages.getString(RELATIONAL.validate_warning_noColumnsDefinedForResultSet) )); 
 			} else {
-				theOutcome = OutcomeFactory.getInstance().createWarning(
-						Messages.getString(RELATIONAL.validate_warning_noColumnsDefined) ); 
-				return theOutcome;
+				multiOutcome.addOutcome(OutcomeFactory.getInstance().createWarning(
+						Messages.getString(RELATIONAL.validate_warning_noColumnsDefined) )); 
 			}
 		}
 		
-		return OutcomeFactory.getInstance().createOK();
+		return multiOutcome;
 	}
 	
     /**
@@ -463,8 +449,8 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalSchema the Schema
      * @return the validation status
      */
-	private IOutcome validateSchema(Schema relationalSchema) {
-		return OutcomeFactory.getInstance().createOK();
+	private IOutcome validateSchema(Schema relationalSchema, IOutcome multiOutcome) {
+		return multiOutcome;
 	}
 	
     /**
@@ -472,14 +458,13 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalView the View
      * @return the validation status
      */
-	private IOutcome validateView(View relationalView) {
-    	IOutcome theOutcome = null;
+	private IOutcome validateView(View relationalView, IOutcome multiOutcome) {
     	
 		// Check Column Status values
 		for( Column col : relationalView.getColumns() ) {
-			theOutcome = validate(col);
-			if( theOutcome.getLevel() == Level.ERROR ) {
-				return theOutcome;
+			IOutcome outcome = validate(col);
+			if(!outcome.isOK()) {
+				multiOutcome.addOutcome(outcome);
 			}
 		}
 		
@@ -488,9 +473,9 @@ public class RelationalObjectValidator implements RelationalValidator {
 			for( Column innerColumn : relationalView.getColumns() ) {
 				if( outerColumn != innerColumn ) {
 					if( outerColumn.getName().equalsIgnoreCase(innerColumn.getName())) {
-						theOutcome = OutcomeFactory.getInstance().createError(
-								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesInTable, relationalView.getName()) );
-						return theOutcome;
+						multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+								Messages.getString(RELATIONAL.validate_error_duplicateColumnNamesInTable, relationalView.getName()) ));
+						break;
 					}
 				}
 			}
@@ -498,17 +483,15 @@ public class RelationalObjectValidator implements RelationalValidator {
 		
 		if( relationalView.getColumns().isEmpty() ) {
 			if( relationalView.getParent() != null && relationalView.getParent() instanceof Procedure ) {
-				theOutcome = OutcomeFactory.getInstance().createWarning(
-						Messages.getString(RELATIONAL.validate_warning_noColumnsDefinedForResultSet) ); 
-				return theOutcome;
+				multiOutcome.addOutcome(OutcomeFactory.getInstance().createWarning(
+						Messages.getString(RELATIONAL.validate_warning_noColumnsDefinedForResultSet) )); 
 			} else {
-				theOutcome = OutcomeFactory.getInstance().createWarning(
-						Messages.getString(RELATIONAL.validate_warning_noColumnsDefined) ); 
-				return theOutcome;
+				multiOutcome.addOutcome(OutcomeFactory.getInstance().createWarning(
+						Messages.getString(RELATIONAL.validate_warning_noColumnsDefined) )); 
 			}
 		}
 		
-		return OutcomeFactory.getInstance().createOK();
+		return multiOutcome;
 	}
 	
     /**
@@ -516,16 +499,14 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalUC the UniqueConstraint
      * @return the validation status
      */
-	private IOutcome validateUniqueConstraint(UniqueConstraint relationalUC) {
-    	IOutcome theOutcome = null;
+	private IOutcome validateUniqueConstraint(UniqueConstraint relationalUC, IOutcome multiOutcome) {
     	
 		if( relationalUC.getColumns().isEmpty() ) {
-			theOutcome = OutcomeFactory.getInstance().createError(
-					Messages.getString(RELATIONAL.validate_error_ucNoColumnsDefined, relationalUC.getName()) );
-			return theOutcome;
+			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
+					Messages.getString(RELATIONAL.validate_error_ucNoColumnsDefined, relationalUC.getName()) ));
 		}
 		
-		return OutcomeFactory.getInstance().createOK();
+		return multiOutcome;
 	}
 
 }

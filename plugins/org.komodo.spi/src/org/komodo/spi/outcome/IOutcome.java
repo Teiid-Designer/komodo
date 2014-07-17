@@ -1,5 +1,7 @@
 package org.komodo.spi.outcome;
 
+import java.util.List;
+
 
 /**
  * The return state of a process or function
@@ -10,6 +12,12 @@ public interface IOutcome {
         OK, INFO, WARNING, ERROR;
     }
 
+    List<IOutcome> getOutcomes();
+    
+    void addOutcome(IOutcome outcome);
+    
+    void addOutcomes(List<IOutcome> outcomes);
+    
     /**
      * @return
      */
@@ -29,5 +37,7 @@ public interface IOutcome {
      * @return
      */
     boolean isOK();
+    
+    boolean isMultiOutcome();
 
 }

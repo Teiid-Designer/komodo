@@ -85,7 +85,7 @@ public class TestForeignKey {
      * Test validation.  expected result - warning : no columns defined
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultFK() {
     	ForeignKey fk = RelationalObjectFactory.INSTANCE.createForeignKey(FK_NAME);
     	
     	IOutcome outcome = fk.validate();
