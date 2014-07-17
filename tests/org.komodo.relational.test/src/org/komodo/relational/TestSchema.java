@@ -83,7 +83,7 @@ public class TestSchema {
      * Test validation.  expected result - warning : no columns defined
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultSchema() {
     	Schema schema = RelationalObjectFactory.INSTANCE.createSchema(SCHEMA_NAME);
     	
     	IOutcome outcome = schema.validate();

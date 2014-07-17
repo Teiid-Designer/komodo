@@ -84,7 +84,7 @@ public class TestAccessPattern {
      * Test validation.  expected result - OK
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultAP() {
     	AccessPattern ap = RelationalObjectFactory.INSTANCE.createAccessPattern(AP_NAME);
     	
     	IOutcome outcome = ap.validate();

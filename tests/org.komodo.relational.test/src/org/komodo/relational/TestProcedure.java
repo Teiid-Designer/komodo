@@ -422,7 +422,7 @@ public class TestProcedure {
      * Test validation.  expected result - warning : no columns defined
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultProc() {
     	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	
     	IOutcome outcome = proc.validate();
@@ -432,23 +432,10 @@ public class TestProcedure {
     }
 
     /**
-     * Test validation.  expected result - ok
-     */
-    @Test
-    public void testValidate2() {
-    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
-    	proc.createParameter();
-    	
-    	IOutcome outcome = proc.validate();
-    	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
-    }
-
-    /**
      * Test validation.  expected result - error : invalid name
      */
     @Test
-    public void testValidate3() {
+    public void testValidateProcWithBadName() {
     	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure("Crap ?"); //$NON-NLS-1$
     	proc.createParameter();
     	
@@ -461,4 +448,17 @@ public class TestProcedure {
     	}
     }
         
+    /**
+     * Test validation.  expected result - ok
+     */
+    @Test
+    public void testValidateProcWithOneParam() {
+    	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
+    	proc.createParameter();
+    	
+    	IOutcome outcome = proc.validate();
+    	
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    }
+
 }

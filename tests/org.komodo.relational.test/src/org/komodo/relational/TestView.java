@@ -83,7 +83,7 @@ public class TestView {
      * Test validation.  expected result - warning : no columns defined
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultView() {
     	View view = RelationalObjectFactory.INSTANCE.createView(VIEW_NAME);
     	
     	IOutcome outcome = view.validate();

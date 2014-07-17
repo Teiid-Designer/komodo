@@ -166,7 +166,7 @@ public class TestParameter {
      * Test validation.  expected result - OK
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultParam() {
     	Parameter param = RelationalObjectFactory.INSTANCE.createParameter(PARAM_NAME);
     	
     	IOutcome outcome = param.validate();
@@ -175,10 +175,22 @@ public class TestParameter {
     }
         
     /**
+     * Test validation.  expected result - OK - special char is allowed
+     */
+    @Test
+    public void testValidateParamWithGoodName() {
+    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("Crap?"); //$NON-NLS-1$
+    	
+    	IOutcome outcome = param.validate();
+    	
+    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    }
+    
+    /**
      * Test validation.  expected result - ERROR - no spaces in unquoted name
      */
     @Test
-    public void testValidate2() {
+    public void testValidateParamWithBadName1() {
     	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("Crap ?"); //$NON-NLS-1$
     	
     	IOutcome outcome = param.validate();
@@ -191,22 +203,10 @@ public class TestParameter {
     }
 
     /**
-     * Test validation.  expected result - OK - special char is allowed
-     */
-    @Test
-    public void testValidate3() {
-    	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("Crap?"); //$NON-NLS-1$
-    	
-    	IOutcome outcome = param.validate();
-    	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
-    }
-    
-    /**
      * Test validation.  expected result - ERROR - invalid name, first char must be alpha
      */
     @Test
-    public void testValidate4() {
+    public void testParamWithBadName2() {
     	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("?Crap"); //$NON-NLS-1$
     	
     	IOutcome outcome = param.validate();

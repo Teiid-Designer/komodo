@@ -84,7 +84,7 @@ public class TestPrimaryKey {
      * Test validation.  expected result - warning : no columns defined
      */
     @Test
-    public void testValidate1() {
+    public void testValidateDefaultPK() {
     	PrimaryKey pk = RelationalObjectFactory.INSTANCE.createPrimaryKey(PK_NAME);
     	
     	IOutcome outcome = pk.validate();
