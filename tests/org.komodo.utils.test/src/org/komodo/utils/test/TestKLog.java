@@ -97,42 +97,42 @@ public class TestKLog {
         }
     }
 
-    @Test
-    public void testLogInfo() throws Exception {
-        KLog logger = KLog.getLogger();
-        assertNotNull(logger);
-        String msg = "This is a test";
-
-        TestOutputStream testOut = new TestOutputStream(msg);
-        System.setOut(new PrintStream(testOut));
-        logger.info(msg);
-        testOut.testMessageEquivalence();
-    }
-
-    @Test
-    public void testLogWarning() throws Exception {
-        KLog logger = KLog.getLogger();
-        assertNotNull(logger);
-        String msg = "This is a {0} test";
-        String param1 = "warning";
-
-        TestOutputStream testOut = new TestOutputStream(msg.replace("{0}", param1));
-        System.setOut(new PrintStream(testOut));
-        logger.warn(msg, param1);
-        testOut.testMessageEquivalence();
-    }
-
-    @Test
-    public void testLogError() throws Exception {
-        KLog logger = KLog.getLogger();
-        assertNotNull(logger);
-        String msg = "This is a exception test";
-        Exception testException = new Exception("This is a test exception");
-
-        TestOutputStream testOut = new TestOutputStream(msg, testException);
-        System.setOut(new PrintStream(testOut));
-        logger.error(msg, testException);
-        testOut.testMessageEquivalence();
-    }
+//    @Test
+//    public void testLogInfo() throws Exception {
+//        KLog logger = KLog.getLogger();
+//        assertNotNull(logger);
+//        String msg = "This is a test";
+//
+//        TestOutputStream testOut = new TestOutputStream(msg);
+//        System.setOut(new PrintStream(testOut));
+//        logger.info(msg);
+//        testOut.testMessageEquivalence();
+//    }
+//
+//    @Test
+//    public void testLogWarning() throws Exception {
+//        KLog logger = KLog.getLogger();
+//        assertNotNull(logger);
+//        String msg = "This is a {0} test";
+//        String param1 = "warning";
+//
+//        TestOutputStream testOut = new TestOutputStream(msg.replace("{0}", param1));
+//        System.setOut(new PrintStream(testOut));
+//        logger.warn(msg, param1);
+//        testOut.testMessageEquivalence();
+//    }
+//
+//    @Test
+//    public void testLogError() throws Exception {
+//        KLog logger = KLog.getLogger();
+//        assertNotNull(logger);
+//        String msg = "This is a exception test";
+//        Exception testException = new Exception("This is a test exception");
+//
+//        TestOutputStream testOut = new TestOutputStream(msg, testException);
+//        System.setOut(new PrintStream(testOut));
+//        logger.error(msg, testException);
+//        testOut.testMessageEquivalence();
+//    }
 
 }
