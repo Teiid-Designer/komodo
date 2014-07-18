@@ -27,6 +27,8 @@
 		<module>site</module>
     -->
 
+		<module>build</module>
+
 	</modules>
 
 	<build>
@@ -53,4 +55,3 @@
 	</build>
 
 </project>
-
