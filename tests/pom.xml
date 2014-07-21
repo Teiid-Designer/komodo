@@ -15,7 +15,6 @@
 
     <module>org.komodo.eclipse.test.utils</module>
     <module>org.komodo.teiid.client.test</module>
-    <module>org.komodo.relational.test</module>
     <module>org.komodo.utils.test</module>
     <module>org.komodo.relational.test</module>
     <module>org.komodo.ddl.importer.test</module>
