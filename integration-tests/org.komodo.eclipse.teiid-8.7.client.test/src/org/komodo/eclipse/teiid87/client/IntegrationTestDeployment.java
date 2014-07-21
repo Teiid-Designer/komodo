@@ -27,7 +27,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.sql.Connection;
@@ -40,7 +39,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.After;
 import org.junit.Before;
@@ -48,7 +46,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.komodo.eclipse.teiid87.client.util.AdminUtil;
 import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.ITeiidVersion.VersionID;
+import org.komodo.test.utils.AbstractTeiidVersionTest;
 import org.komodo.test.utils.SmartTestKomodoSuite;
 import org.komodo.test.utils.TeiidInstanceBuilder;
 import org.teiid.adminapi.Admin;
@@ -64,24 +63,24 @@ import org.teiid.jdbc.TeiidDriver;
 import org.teiid.runtime.client.admin.AdminSpec;
 
 @RunWith(Arquillian.class)
-@SuppressWarnings("nls")
-public class IntegrationTestDeployment {
+@SuppressWarnings({"javadoc", "nls"})
+public class IntegrationTestDeployment extends AbstractTeiidVersionTest {
 
-	private ITeiidVersion teiidVersion = new TeiidVersion(ITeiidVersion.VersionID.TEIID_8_7.toString());
+    private static final VersionID TEIID_VERSION_ID = ITeiidVersion.VersionID.TEIID_8_7;
 
-	private AdminSpec adminSpec = AdminSpec.getInstance(teiidVersion);
+    private final AdminSpec adminSpec;
 
-	private Admin admin;
+    private Admin admin;
+
+    public IntegrationTestDeployment() {
+        super(TEIID_VERSION_ID);
+        adminSpec = AdminSpec.getInstance(getTeiidVersion());
+    }
 
 	@Before
 	public void setup() throws Exception {
 
-		TeiidInstanceBuilder teiidBuilder = new TeiidInstanceBuilder(teiidVersion);
-		teiidBuilder.setHost("localhost");
-		teiidBuilder.setPort(9999);
-		teiidBuilder.setUserName("admin");
-		teiidBuilder.setPassword("admin");
-
+	    TeiidInstanceBuilder teiidBuilder = createTeiidInstanceBuilder();
 		admin = adminSpec.createAdmin(teiidBuilder.getTeiidInstance());
 	}
 

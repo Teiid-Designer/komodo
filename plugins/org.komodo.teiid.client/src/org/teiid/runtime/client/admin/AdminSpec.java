@@ -30,7 +30,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminException;
 import org.teiid.adminapi.VDB;
-import org.teiid.runtime.client.admin.v7.Admin7Spec;
+import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.admin.v8.Admin8Spec;
 
 /**
@@ -63,7 +63,7 @@ public abstract class AdminSpec {
      */
     public static AdminSpec getInstance(ITeiidVersion teiidVersion) {
         if (teiidVersion.isLessThan(Version.TEIID_8_0.get()))
-            return new Admin7Spec(teiidVersion);
+            throw new UnsupportedOperationException(Messages.getString(Messages.Misc.TeiidVersionNotSupported, teiidVersion));
         else
             return new Admin8Spec(teiidVersion);
     }

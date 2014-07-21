@@ -76,24 +76,24 @@ public interface ITeiidInstanceManager extends EventManager {
      * @param teiidInstance the teiid instance being added (never <code>null</code>)
      * @return a true if the instance was added to the registry
      */
-    boolean addInstance(ITeiidInstance teiidInstance);
+    boolean addTeiidInstance(ITeiidInstance teiidInstance);
 
     /**
      * @return defaultInstance
      */
-    ITeiidInstance getDefaultInstance();
+    ITeiidInstance getDefaultTeiidInstance();
 
     /**
      * @param id the id of the teiid instance being requested (never <code>null</code> )
      * @return the requested teiid instance or <code>null</code> if not found in the registry
      */
-    ITeiidInstance getInstance(String id);
+    ITeiidInstance getTeiidInstance(String id);
 
     /**
      * @param teiidParent the parent of the requested Teiid Instance
      * @return the requested teiid parent or <code>null</code> if not found in the registry
      */
-    ITeiidInstance getInstance(ITeiidParent teiidParent);
+    ITeiidInstance getTeiidInstance(ITeiidParent teiidParent);
 
     /**
      * @return an unmodifiable collection of registered instances (never <code>null</code>)
@@ -136,7 +136,7 @@ public interface ITeiidInstanceManager extends EventManager {
      * @param teiidInstance the instance being removed (never <code>null</code>)
      * @return a status indicating if the specified instance was removed from the registry (never <code>null</code>)
      */
-    boolean removeInstance(ITeiidInstance teiidInstance);
+    boolean removeTeiidInstance(ITeiidInstance teiidInstance);
 
     /**
      * @param teiidInstance Sets default instance to the specified value. May be null.

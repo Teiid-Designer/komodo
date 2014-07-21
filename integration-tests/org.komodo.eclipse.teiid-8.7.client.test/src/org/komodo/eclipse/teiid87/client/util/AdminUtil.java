@@ -22,13 +22,12 @@
 package org.komodo.eclipse.teiid87.client.util;
 
 import java.util.Properties;
-
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminException;
 import org.teiid.adminapi.VDB;
 import org.teiid.adminapi.VDB.Status;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({"javadoc", "nls"})
 public class AdminUtil {
 
 	public static void cleanUp(Admin admin) throws AdminException {

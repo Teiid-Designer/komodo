@@ -38,8 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.komodo.spi.annotation.AnnotationUtils;
-import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.outcome.IOutcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
@@ -119,7 +117,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @throws Exception if there is a problem connecting the teiid instance
      */
     public ExecutionAdmin(ITeiidInstance teiidInstance) throws Exception {
-        ArgCheck.isNotNull(teiidInstance, "server"); //$NON-NLS-1$
+        ArgCheck.isNotNull(teiidInstance, "Teiid Instance"); //$NON-NLS-1$
 
         this.adminSpec = AdminSpec.getInstance(teiidInstance.getVersion());
 
@@ -132,13 +130,8 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
         init();
     }
-
-    private boolean isLessThanTeiidEight() {
-        ITeiidVersion minVersion = teiidInstance.getVersion().getMinimumVersion();
-        return minVersion.isLessThan(Version.TEIID_8_0.get());
-    }
     
-    private boolean isLessThanTeiidEightSeven() {
+    private boolean isLessThanTeiidEightSeven() throws Exception {
         ITeiidVersion minVersion = teiidInstance.getVersion().getMinimumVersion();
         return minVersion.isLessThan(Version.TEIID_8_7.get());
     }
@@ -215,11 +208,6 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
     @Override
     public String getSchema(String vdbName, int vdbVersion, String modelName) throws Exception {
-        if (isLessThanTeiidEight()) {
-            // Limited schema support in 77x, just return empty string here
-            return ""; //$NON-NLS-1$
-        }
-
         return admin.getSchema(vdbName, vdbVersion, modelName, null, null);
     }
         
@@ -492,11 +480,6 @@ public class ExecutionAdmin implements IExecutionAdmin {
      */
     @Override
     public Properties getDataSourceProperties(String name) throws Exception {
-        if (isLessThanTeiidEight()) {
-            // Teiid 7.7.x does not support
-            return null;
-        }
-
         return this.admin.getDataSource(name);
     }
 
@@ -615,14 +598,11 @@ public class ExecutionAdmin implements IExecutionAdmin {
         this.dataSourceByNameMap.clear();
         Collection<ITeiidDataSource> tdsList = connectionMatcher.findTeiidDataSources(this.dataSourceNames);
         for (ITeiidDataSource ds : tdsList) {
-            if (!isLessThanTeiidEight()) {
-                /* Not done in Teiid 7.7 */
-                // Get Properties for the source
-                Properties dsProps = this.admin.getDataSource(ds.getName());
-                // Transfer properties to the ITeiidDataSource
-                ds.getProperties().clear();
-                ds.getProperties().putAll(dsProps);
-            }
+            // Get Properties for the source
+            Properties dsProps = this.admin.getDataSource(ds.getName());
+            // Transfer properties to the ITeiidDataSource
+            ds.getProperties().clear();
+            ds.getProperties().putAll(dsProps);
 
         	// put ds into map
             this.dataSourceByNameMap.put(ds.getName(), ds);
@@ -884,17 +864,6 @@ public class ExecutionAdmin implements IExecutionAdmin {
             return (Driver) driver;
         
         throw new Exception(Messages.getString(Messages.ExecutionAdmin.cannotLoadDriverClass, driverClass));
-    }
-
-    @Override
-    @Deprecated
-    @Removed(Version.TEIID_8_0)
-    public void mergeVdbs( String sourceVdbName, int sourceVdbVersion, 
-                                            String targetVdbName, int targetVdbVersion ) throws Exception {
-        if (!AnnotationUtils.isApplicable(getClass().getMethod("mergeVdbs"), getServer().getVersion()))  //$NON-NLS-1$
-            throw new UnsupportedOperationException(Messages.getString(Messages.ExecutionAdmin.mergeVdbUnsupported));
-
-        admin.mergeVDBs(sourceVdbName, sourceVdbVersion, targetVdbName, targetVdbVersion);        
     }
 
     private class RefreshThread extends Thread {

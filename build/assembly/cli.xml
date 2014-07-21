@@ -1,0 +1,60 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+  <id>komodo-console</id>
+
+  <formats>
+    <format>dir</format>
+    <format>zip</format>
+  </formats>
+
+  <includeBaseDirectory>false</includeBaseDirectory>
+
+  <fileSets>
+    <fileSet>
+      <directory>target/kits/console</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+         <include>**/*.sh</include>
+      </includes>
+      <fileMode>755</fileMode>
+    </fileSet>
+  </fileSets>
+
+  <moduleSets>
+    <moduleSet>
+      <includeSubModules>true</includeSubModules>
+      <useAllReactorProjects>true</useAllReactorProjects>
+
+      <excludes>
+        <exclude>:*eclipse*</exclude>
+      </excludes>
+
+      <includes>
+        <include>org.jboss.tools.komodo.plugins:*</include>
+        <include>org.jboss.tools.komodo.plugins.libs:*</include>
+      </includes>
+
+      <binaries>
+        <outputDirectory>komodo</outputDirectory>
+        <unpack>false</unpack>
+
+        <dependencySets>
+          <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <scope>runtime</scope>
+            <useProjectArtifact>false</useProjectArtifact>
+
+            <excludes>
+              <exclude>org.jboss.tools.komodo.plugins:*</exclude>
+              <exclude>org.jboss.tools.komodo.plugins.lib:*</exclude>
+            </excludes>
+
+          </dependencySet>
+        </dependencySets>
+      </binaries>
+
+    </moduleSet>
+  </moduleSets>
+
+</assembly>

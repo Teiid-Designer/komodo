@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ TestKLog.class, })
+
 public class AllTests {
     // nothing to do
 }

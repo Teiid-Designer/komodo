@@ -62,6 +62,17 @@ public class Messages {
     }
 
     @SuppressWarnings( "javadoc" )
+    public enum TeiidInstance {
+        versionFailure,
+        parentNotStartedMessage;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
     public enum ExecutionAdmin {
         mergeVdbUnsupported,
         dynamicVdbInvalidName,
@@ -443,6 +454,7 @@ public class Messages {
     @SuppressWarnings( "javadoc" )
     public enum Misc {
         ReflectionHelper_errorConstructing,
+        TeiidVersionNotSupported,
         TeiidVersionFailure,
         Evaluator_noValue,
         ExceptionHolder_convertedException;
