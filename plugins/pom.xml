@@ -26,6 +26,7 @@
     <module>org.komodo.teiid.client</module>
 
     <module>org.komodo.eclipse.spi</module>
+    <module>org.komodo.eclipse.shell</module>
 	</modules>
 </project>
 	

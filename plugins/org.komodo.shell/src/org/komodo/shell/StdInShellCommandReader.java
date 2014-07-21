@@ -19,7 +19,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
-
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -65,7 +64,7 @@ public class StdInShellCommandReader extends AbstractShellCommandReader {
 	 */
 	@Override
 	public void open() throws IOException {
-		stdinReader = new BufferedReader(new InputStreamReader(System.in));
+		stdinReader = new BufferedReader(new InputStreamReader(getInputStream()));
 	}
 
 	/**
@@ -79,7 +78,7 @@ public class StdInShellCommandReader extends AbstractShellCommandReader {
 	protected String readLine() throws IOException {
 		if (!stdinReader.ready()) {
 			String prompt = "["+getWorkspaceStatus().getCurrentContext().getName()+"] > "; //$NON-NLS-1$ //$NON-NLS-2$
-			System.out.print(prompt); 
+			getOutputStream().print(prompt);
 		}
 		return stdinReader.readLine();
 	}
@@ -105,7 +104,7 @@ public class StdInShellCommandReader extends AbstractShellCommandReader {
 	public String promptForInput(String prompt) {
 		try {
 			if (!stdinReader.ready()) {
-				System.out.print(prompt);
+				getOutputStream().print(prompt);
 			}
 			return stdinReader.readLine();
 		} catch (IOException e) {

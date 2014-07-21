@@ -16,7 +16,6 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.core.StatusCommand;
@@ -44,7 +43,7 @@ public class StatusCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testStatus1() {
-    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
+    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
     	setup(STATUS_COMMANDS1, StatusCommand.class, wsStatus);
     	
     	execute();
@@ -64,7 +63,7 @@ public class StatusCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testStatus2() {
-    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
+    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
     	setup(STATUS_COMMANDS2, StatusCommand.class, wsStatus);
     	
     	execute();
@@ -84,7 +83,7 @@ public class StatusCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testStatus3() {
-    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
+    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
     	setup(STATUS_COMMANDS3, StatusCommand.class, wsStatus);
 
     	execute();

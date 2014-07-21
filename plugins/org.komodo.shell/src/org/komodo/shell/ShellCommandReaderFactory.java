@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -45,11 +44,12 @@ public class ShellCommandReaderFactory {
      * @param args the args
      * @param factory the factory
      * @param wsStatus the workspace status
+     * @param inStream stream from which commands will be read
      * @return the shell command reader
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static ShellCommandReader createCommandReader(String[] args, ShellCommandFactory factory,
-            WorkspaceStatus wsStatus) throws IOException {
+            WorkspaceStatus wsStatus) throws Exception {
         ShellCommandReader commandReader = null;
         if (args.length > 0) {
             Map<String, String> properties = new HashMap<String, String>();
@@ -83,7 +83,7 @@ public class ShellCommandReaderFactory {
      * @param args the args
      * @return the properties
      */
-    private static Map<String, String> getProperties(int index, String[] args) {
+    private static Map<String, String> getProperties(int index, String[] args) throws Exception {
         Map<String, String> properties = new HashMap<String, String>();
         boolean propertyFileArg = false;
         for (int i = index; i < args.length; i++) {
@@ -95,7 +95,7 @@ public class ShellCommandReaderFactory {
                         String value = argument.substring(argument.indexOf("=") + 1); //$NON-NLS-1$
                         properties.put(key, value);
                     } else {
-                        System.out.println("Error Argument: " + argument + " index: " + i + " "  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+                        throw new Exception("Error Argument: " + argument + " index: " + i + " "  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
                                 + Messages.getString(SHELL.InvalidArgMsg_property_not_correct_format));
 
                     }
@@ -108,7 +108,7 @@ public class ShellCommandReaderFactory {
                 try {
                     properties.putAll(getPropertiesFromFile(argument, index));
                 } catch (ShellArgumentException sae) {
-                    System.out.println("Error Argument: " + argument + " index: " + i + " " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    throw new Exception("Error Argument: " + argument + " index: " + i + " " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                             + sae.getMessage());
                 }
 

@@ -22,6 +22,8 @@
 package org.komodo.shell.api;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Properties;
 
 /**
@@ -33,13 +35,14 @@ public interface WorkspaceStatus {
 	public final String RECORDING_FILEPATH_KEY = "RECORDING_FILEPATH"; //$NON-NLS-1$
     @SuppressWarnings("javadoc")
 	public final String TEIID_SERVER_URL_KEY = "TEIID_SERVER_URL"; //$NON-NLS-1$
+
     
 	/**
 	 * Allows set workspace properties on startup
 	 * @param props the properties
 	 */
 	public void setProperties(Properties props);
-	
+
 	/**
 	 * Get the home context
 	 * @return the home context
@@ -105,6 +108,15 @@ public interface WorkspaceStatus {
 	 * @param handler the workspace context eventHandler
 	 */
 	public void removeHandler(WorkspaceStatusEventHandler handler);
-	
+
+    /**
+     * @return the input stream
+     */
+    public InputStream getInputStream();
+
+    /**
+     * @return the output stream
+     */
+    public PrintStream getOutputStream();
 
 }
