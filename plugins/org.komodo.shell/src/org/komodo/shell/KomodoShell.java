@@ -24,9 +24,10 @@ package org.komodo.shell;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Locale;
 import java.util.Properties;
-
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
@@ -72,7 +73,7 @@ public class KomodoShell {
 	        }
 	    }
 
-		final KomodoShell shell = new KomodoShell();
+		final KomodoShell shell = new KomodoShell(System.in, System.out);
 		Thread shutdownHook = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -88,14 +89,19 @@ public class KomodoShell {
 		}
 	}
 
-	private WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
-	private final ShellCommandFactory factory = new ShellCommandFactory(wsStatus);
-	private ShellCommandReader reader;
+    private final WorkspaceStatus wsStatus;
+    private final ShellCommandFactory factory;
+    private ShellCommandReader reader;
+    private boolean shutdown = false;
 
 	/**
 	 * Constructor.
+	 * @param inStream
+	 * @param outStream
 	 */
-	public KomodoShell() {
+	public KomodoShell(InputStream inStream, PrintStream outStream) {
+	    wsStatus = new WorkspaceStatusImpl(inStream, outStream);
+	    factory = new ShellCommandFactory(wsStatus);
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; i<CompletionConstants.MESSAGE_INDENT; i++) {
 			sb.append(StringConstants.SPACE);
@@ -124,30 +130,32 @@ public class KomodoShell {
         reader.open();
 		displayWelcomeMessage();
 		boolean done = false;
-		while (!done) {
+		while (!done && !shutdown) {
 			ShellCommand command = null;
 			try {
-	            command = reader.read();
+			    if (shutdown)
+			        break;
+
+			    command = reader.read();
 				if (command == null) {
 					done = true;
 				} else {
 					boolean success = command.execute();
 					if (!success && reader.isBatch()) {
-					    System.exit(1);
+					    shutdown();
 					}
 				}
 			} catch (InvalidCommandArgumentException e) {
-				System.out.println(msgIndentStr+Messages.getString(SHELL.INVALID_ARG, e.getMessage())); 
+			    wsStatus.getOutputStream().println(msgIndentStr+Messages.getString(SHELL.INVALID_ARG, e.getMessage())); 
 				if (command != null) {
-    				System.out.println(msgIndentStr+Messages.getString(SHELL.USAGE)); 
+				    wsStatus.getOutputStream().println(msgIndentStr+Messages.getString(SHELL.USAGE)); 
     				command.printUsage(CompletionConstants.MESSAGE_INDENT);
 				}
 				if (reader.isBatch())
-				    System.exit(1);
+				    shutdown();
 			} catch (Exception e) {
-				e.printStackTrace(System.err);
 				if (reader.isBatch())
-				    System.exit(1);
+				    shutdown();
 			}
 		}
 	}
@@ -156,16 +164,20 @@ public class KomodoShell {
 	 * Shuts down the shell.
 	 */
 	public void shutdown() {
-		System.out.print(msgIndentStr+Messages.getString(SHELL.SHUTTING_DOWN));
-		try { this.reader.close(); } catch (IOException e) { }
-		System.out.println(msgIndentStr+Messages.getString(SHELL.DONE));
+        wsStatus.getOutputStream().print(msgIndentStr + Messages.getString(SHELL.SHUTTING_DOWN));
+        try {
+            shutdown  = true;
+            this.reader.close();
+        } catch (IOException e) {
+        }
+        wsStatus.getOutputStream().println(msgIndentStr+Messages.getString(SHELL.DONE));
 	}
 
 	/**
 	 * Displays a welcome message to the user.
 	 */
 	private void displayWelcomeMessage() {
-		System.out.println(
+	    wsStatus.getOutputStream().println(
 				"**********************************************************************\n" + //$NON-NLS-1$
 				"  Welcome to Komodo Shell\n" + //$NON-NLS-1$
 //				"  Locale: " + Locale.getDefault().toString().trim() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$

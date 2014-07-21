@@ -22,12 +22,13 @@
 package org.komodo.shell;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.Writer;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -45,6 +46,8 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
 	private final WorkspaceStatus wsStatus;
 	private final ShellCommandFactory factory;
+	private final InputStream inStream;
+	private final PrintStream outStream;
     private Map<String, String> properties;
 
     /**
@@ -56,6 +59,8 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
     public AbstractShellCommandReader(ShellCommandFactory factory, WorkspaceStatus wsStatus) {
     	this.factory = factory;
     	this.wsStatus = wsStatus;
+        this.inStream = wsStatus.getInputStream();
+        this.outStream = wsStatus.getOutputStream();
     }
 
     /**
@@ -70,6 +75,8 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
         this.factory = factory;
         this.wsStatus = wsStatus;
         this.properties = properties;
+        this.inStream = wsStatus.getInputStream();
+        this.outStream = wsStatus.getOutputStream();
     }
 
 	/**
@@ -140,7 +147,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
      * @return the command output
      */
 	protected Writer getCommandOutput() {
-		return new OutputStreamWriter(System.out);
+		return new OutputStreamWriter(outStream);
 	}
 
 	/**
@@ -179,6 +186,20 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
      */
 	public WorkspaceStatus getWorkspaceStatus() {
 		return wsStatus;
+	}
+
+	/**
+	 * @return input stream for receiving commands inputted into the console
+	 */
+	public InputStream getInputStream() {
+	    return inStream;
+	}
+
+	/**
+	 * @return output stream for printing messages to the console
+	 */
+	public PrintStream getOutputStream() {
+	    return outStream;
 	}
 
 	/**

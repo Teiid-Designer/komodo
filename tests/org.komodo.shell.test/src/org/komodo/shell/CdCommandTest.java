@@ -16,7 +16,6 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.core.CdCommand;
@@ -42,7 +41,7 @@ public class CdCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testCd1() {
-    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
+    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
     	setup(CD_COMMAND1, CdCommand.class, wsStatus);
     	
     	execute();
@@ -58,7 +57,7 @@ public class CdCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testCd2() {
-    	WorkspaceStatus wsStatus = new WorkpaceStatusImpl();
+    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
     	setup(CD_COMMAND2, CdCommand.class, wsStatus);
     	
     	execute();

@@ -3,7 +3,6 @@ package org.komodo.shell;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-
 import org.junit.Assert;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
@@ -44,7 +43,7 @@ public abstract class AbstractCommandTest {
 	        // Writer to store the output
 	        writer = new StringWriter();
 	        commandWriter = new StringWriter();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Assert.fail("Failed - setup error: "+e.getMessage()); //$NON-NLS-1$
 		}
 	}
