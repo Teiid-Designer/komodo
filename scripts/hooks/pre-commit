@@ -61,7 +61,7 @@ do
     exit 1
   fi
 
-  systemPrint=`grep System\.out "$file"`
+  systemPrint=`grep System\.out\.print "$file"`
   if [ -n "$systemPrint" ]; then
     echo "Error: $file contains System,out.print statements"
     exit 1
