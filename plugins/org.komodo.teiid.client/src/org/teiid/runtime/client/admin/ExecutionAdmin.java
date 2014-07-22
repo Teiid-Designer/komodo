@@ -81,7 +81,6 @@ public class ExecutionAdmin implements IExecutionAdmin {
     protected Collection<String> dataSourceNames;
     protected Map<String, ITeiidDataSource> dataSourceByNameMap;
     protected Set<String> dataSourceTypeNames;
-    private final EventManager eventManager;
     private final ITeiidInstance teiidInstance;
     private final AdminSpec adminSpec;
     private Map<String, ITeiidVdb> teiidVdbs;
@@ -103,7 +102,6 @@ public class ExecutionAdmin implements IExecutionAdmin {
         this.admin = admin;
         this.teiidInstance = teiidInstance;
         this.adminSpec = AdminSpec.getInstance(teiidInstance.getVersion());
-        this.eventManager = teiidInstance.getEventManager();
         this.connectionMatcher = new ModelConnectionMatcher();
         
         init();
@@ -125,7 +123,6 @@ public class ExecutionAdmin implements IExecutionAdmin {
         ArgCheck.isNotNull(admin, "admin"); //$NON-NLS-1$
 
         this.teiidInstance = teiidInstance;
-        this.eventManager = teiidInstance.getEventManager();
         this.connectionMatcher = new ModelConnectionMatcher();
 
         init();
@@ -158,7 +155,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
                 if (tds != null) {
                     this.dataSourceByNameMap.remove(dsName);
-                    this.eventManager.notifyListeners(ExecutionConfigurationEvent.createRemoveDataSourceEvent(tds));
+                    this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createRemoveDataSourceEvent(tds));
 
                 }
             }
@@ -241,7 +238,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @return the event manager (never <code>null</code>)
      */
     public EventManager getEventManager() {
-        return this.eventManager;
+        return this.teiidInstance.getEventManager();
     }
 
     @Override
@@ -312,7 +309,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
             ITeiidDataSource tds = new TeiidDataSource(nullStr, dsName, typeName, properties);
 
             this.dataSourceByNameMap.put(dsName, tds);
-            this.eventManager.notifyListeners(ExecutionConfigurationEvent.createAddDataSourceEvent(tds));
+            this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createAddDataSourceEvent(tds));
 
             return tds;
         }
@@ -612,7 +609,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
         refreshVDBs();
 
         // notify listeners
-        this.eventManager.notifyListeners(ExecutionConfigurationEvent.createTeiidRefreshEvent(this.teiidInstance));
+        this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createTeiidRefreshEvent(this.teiidInstance));
     }
 
     protected void refreshDataSourceNames() throws Exception {
@@ -633,7 +630,8 @@ public class ExecutionAdmin implements IExecutionAdmin {
                 	Collection<? extends PropertyDefinition> propDefs = this.admin.getTemplatePropertyDefinitions(translator.getName());
                 	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, teiidInstance));
                 } else if( teiidInstance.getVersion().isLessThan(Version.TEIID_8_7.get())) {
-                	Collection<? extends PropertyDefinition> propDefs = this.admin.getTranslatorPropertyDefinitions(translator.getName());
+                    @SuppressWarnings( "deprecation" )
+                    Collection<? extends PropertyDefinition> propDefs = this.admin.getTranslatorPropertyDefinitions(translator.getName());
                 	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, teiidInstance));
                 } else { // TEIID teiid instance VERSION 8.7 AND HIGHER
                 	Collection<? extends PropertyDefinition> propDefs  = 
@@ -720,7 +718,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
         if (vdb == null) {
 
         } else {
-            this.eventManager.notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
+            this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
         }
     }
     
@@ -737,7 +735,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
         if (vdb == null) {
 
         } else {
-            this.eventManager.notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
+            this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
         }
     }
 
@@ -756,7 +754,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
         if (vdb == null) {
 
         } else {
-            this.eventManager.notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
+            this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
         }
     }
     
@@ -788,13 +786,13 @@ public class ExecutionAdmin implements IExecutionAdmin {
     }
     
     @Override
-    public IOutcome ping(PingType pingType) {
+    public IOutcome ping(ConnectivityType connectivityType) {
         String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, teiidInstance.getTeiidAdminInfo().getUsername());
         try {
             if (this.admin == null)
                 throw new Exception(msg);
             
-            switch(pingType) {
+            switch(connectivityType) {
                 case JDBC:
                     return pingJdbc();
                 case ADMIN:
@@ -958,7 +956,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
                 KLog.getLogger().error(Messages.getString(Messages.ExecutionAdmin.refreshVdbException, vdbName), ex);
             }
 
-            eventManager.notifyListeners(ExecutionConfigurationEvent.createDeployVDBEvent(vdb.getName()));
+            getEventManager().notifyListeners(ExecutionConfigurationEvent.createDeployVDBEvent(vdb.getName()));
         }
 
     }

@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Properties;
+import org.komodo.spi.runtime.ITeiidInstance;
 
 /**
  * WorkspaceStatus interface.
@@ -33,8 +34,6 @@ public interface WorkspaceStatus {
 
     @SuppressWarnings("javadoc")
 	public final String RECORDING_FILEPATH_KEY = "RECORDING_FILEPATH"; //$NON-NLS-1$
-    @SuppressWarnings("javadoc")
-	public final String TEIID_SERVER_URL_KEY = "TEIID_SERVER_URL"; //$NON-NLS-1$
 
     
 	/**
@@ -84,19 +83,17 @@ public interface WorkspaceStatus {
 	 * @param recordingOutputFilePath the recording output file path
 	 */
 	public void setRecordingOutputFile(String recordingOutputFilePath);
-	
-	/**
-	 * Get the Teiid URL
-	 * @return the teiid server url
-	 */
-	public String getTeiidServerUrl();
 
-	/**
-	 * Set the Teiid URL
-	 * @param teiidServerUrl the Teiid url
-	 */
-	public void setTeiidServerUrl(String teiidServerUrl);
-	
+    /**
+     * @return the parent of the teiid instance
+     */
+    IShellTeiidParent getTeiidParent();
+
+    /**
+     * @return current teiid instance
+     */
+    ITeiidInstance getTeiidInstance();
+
 	/**
 	 * Add a WorkspaceContext Event Handler
 	 * @param handler the workspace context eventHandler

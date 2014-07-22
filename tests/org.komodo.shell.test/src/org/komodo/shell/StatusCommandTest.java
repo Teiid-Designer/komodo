@@ -49,8 +49,10 @@ public class StatusCommandTest extends AbstractCommandTest {
     	execute();
     	
     	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
-                                INDENT+"Current Server  : [Unknown : not connected]\n"+ //$NON-NLS-1$
+                                INDENT+"Current Teiid Instance  : [mm://localhost:9999 : Not Connected]\n"+ //$NON-NLS-1$
+                                INDENT+"Current Teiid Instance Jdbc  : [jdbc:teiid:<vdbname>@mm://localhost:31000 : Not Connected]\n"+ //$NON-NLS-1$
                                 INDENT+"Current Context : [home]\n"; //$NON-NLS-1$
+
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("home", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
@@ -69,7 +71,8 @@ public class StatusCommandTest extends AbstractCommandTest {
     	execute();
     	
     	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
-    	                        INDENT+"Current Server  : [Unknown : not connected]\n"+ //$NON-NLS-1$
+                                INDENT+"Current Teiid Instance  : [mm://localhost:9999 : Not Connected]\n"+ //$NON-NLS-1$
+                                INDENT+"Current Teiid Instance Jdbc  : [jdbc:teiid:<vdbname>@mm://localhost:31000 : Not Connected]\n"+ //$NON-NLS-1$
     	                        INDENT+"Current Context : [home.Project2]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
@@ -88,9 +91,10 @@ public class StatusCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
-                                INDENT+"Current Server  : [Unknown : not connected]\n"+ //$NON-NLS-1$
-                                INDENT+"Current Context : [home.Project1.Model2]\n"; //$NON-NLS-1$
+        String expectedOutput = INDENT + "Current Repo    : local Repository\n" + //$NON-NLS-1$
+                                                        INDENT + "Current Teiid Instance  : [mm://localhost:9999 : Not Connected]\n" + //$NON-NLS-1$
+                                                        INDENT + "Current Teiid Instance Jdbc  : [jdbc:teiid:<vdbname>@mm://localhost:31000 : Not Connected]\n" + //$NON-NLS-1$
+                                                        INDENT + "Current Context : [home.Project1.Model2]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("home.Project1.Model2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$

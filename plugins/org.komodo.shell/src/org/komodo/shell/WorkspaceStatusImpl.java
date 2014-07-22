@@ -30,6 +30,9 @@ import java.util.Set;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
+import org.komodo.spi.runtime.ITeiidInstance;
+import org.teiid.runtime.client.instance.TeiidInstance;
+import org.teiid.runtime.client.instance.TeiidJdbcInfo;
 
 /**
  * Test implementation of WorkspaceStatus
@@ -41,9 +44,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
     private boolean recordingStatus = false;
     private File recordingOutputFile;
-    private String teiidServerUrl;
     private final InputStream inStream;
     private final PrintStream outStream;
+    private ShellTeiidParent shellTeiidParent;
 
     /**
      * Constructor
@@ -70,6 +73,14 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     @Override
     public PrintStream getOutputStream() {
         return outStream;
+    }
+
+    @Override
+    public ShellTeiidParent getTeiidParent() {
+        if (shellTeiidParent == null)
+            shellTeiidParent = new ShellTeiidParent();
+
+        return shellTeiidParent;
     }
 
     @Override
@@ -149,19 +160,18 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#getTeiidServerUrl()
-     */
-    @Override
-    public String getTeiidServerUrl() {
-        return this.teiidServerUrl;
-    }
-
-    /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceStatus#setTeiidServerUrl(java.lang.String)
      */
     @Override
-    public void setTeiidServerUrl(String teiidServerUrl) {
-        this.teiidServerUrl = teiidServerUrl;
+    public ITeiidInstance getTeiidInstance() {
+        ITeiidInstance teiidInstance = getTeiidParent().getTeiidInstance();
+        if (teiidInstance == null) {
+            TeiidJdbcInfo jdbcInfo = new TeiidJdbcInfo();
+            jdbcInfo.setHostProvider(getTeiidParent());
+            teiidInstance = new TeiidInstance(getTeiidParent(), jdbcInfo);
+        }
+
+        return teiidInstance;
     }
 
     /* (non-Javadoc)
@@ -172,8 +182,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         for (final String name : props.stringPropertyNames()) {
             if (name.equals(RECORDING_FILEPATH_KEY)) {
                 setRecordingOutputFile(props.getProperty(name));
-            } else if (name.equals(TEIID_SERVER_URL_KEY)) {
-                setTeiidServerUrl(props.getProperty(name));
             }
         }
     }

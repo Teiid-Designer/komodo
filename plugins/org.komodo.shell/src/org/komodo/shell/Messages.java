@@ -24,7 +24,6 @@ package org.komodo.shell;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 import org.komodo.spi.constants.StringConstants;
 
 /**
@@ -74,6 +73,20 @@ public class Messages implements StringConstants {
     	public String toString() {
     		return getEnumName(this) + DOT + name();
     	}
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum StatusCommand {
+        Separator,
+        Connected,
+        NotConnected,
+        PingOk,
+        PingFail;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
     }
 
     private static String getEnumName(Enum<?> enumValue) {
@@ -163,5 +176,4 @@ public class Messages implements StringConstants {
 
         return MessageFormat.format(text, parameters);
     }
-    
 }

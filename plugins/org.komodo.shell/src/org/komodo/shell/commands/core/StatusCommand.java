@@ -26,13 +26,16 @@ import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.runtime.IExecutionAdmin.ConnectivityType;
+import org.komodo.spi.runtime.ITeiidInstance;
 
 /**
  * Displays a summary of the current status, including what repository the
  * user is currently connected to (if any).
  *
  */
-public class StatusCommand extends BuiltInShellCommand {
+public class StatusCommand extends BuiltInShellCommand implements StringConstants {
 
 	/**
 	 * Constructor.
@@ -54,10 +57,26 @@ public class StatusCommand extends BuiltInShellCommand {
 		String currentRepo = "local Repository"; //$NON-NLS-1$
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("StatusCommand.CurrentRepo", currentRepo)); //$NON-NLS-1$
 		
-		// Server info
-		String serverUrl = (wsStatus.getTeiidServerUrl() == null) ? "Unknown" : wsStatus.getTeiidServerUrl(); //$NON-NLS-1$
-		String currentServer = "[" + serverUrl + " : not connected]"; //$NON-NLS-1$ //$NON-NLS-2$
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("StatusCommand.CurrentServer", currentServer)); //$NON-NLS-1$
+        // Teiid Instance info
+        ITeiidInstance teiidInstance = wsStatus.getTeiidInstance();
+        String teiidUrl = teiidInstance.getUrl();
+        String teiidConnected = teiidInstance.isConnected() ?
+            Messages.getString(Messages.StatusCommand.Connected) :
+                Messages.getString(Messages.StatusCommand.NotConnected);
+
+        String teiidJdbcUrl = teiidInstance.getTeiidJdbcInfo().getUrl();
+        /* Only test jdbc connection if teiid instance has been connected to */
+        String teiidJdbcConnected = teiidConnected;
+        if (teiidInstance.isConnected()) {
+            teiidJdbcConnected = teiidInstance.ping(ConnectivityType.JDBC).isOK() ?
+                Messages.getString(Messages.StatusCommand.PingOk) :
+                    Messages.getString(Messages.StatusCommand.PingFail);
+        }
+
+        String currentTeiidInst = OPEN_SQUARE_BRACKET + teiidUrl + " : " + teiidConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
+        String currentTeiidJdbc = OPEN_SQUARE_BRACKET + teiidJdbcUrl + " : " + teiidJdbcConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
+        print(CompletionConstants.MESSAGE_INDENT, Messages.getString("StatusCommand.CurrentTeiid", currentTeiidInst)); //$NON-NLS-1$
+        print(CompletionConstants.MESSAGE_INDENT, Messages.getString("StatusCommand.CurrentTeiidJdbc", currentTeiidJdbc)); //$NON-NLS-1$
 
 		// Current Context
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();

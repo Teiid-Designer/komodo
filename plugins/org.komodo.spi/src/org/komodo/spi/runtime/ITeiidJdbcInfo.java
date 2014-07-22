@@ -29,7 +29,7 @@ public interface ITeiidJdbcInfo extends ITeiidConnectionInfo {
     /**
      * The default Teiid JDBC port number. Value is {@value} .
      */
-    public static final String DEFAULT_PORT = "31000"; //$NON-NLS-1$
+    public static final int DEFAULT_PORT = 31000;
     /**
      * The default Teiid Admin secure protocol flag. Value is {@value} .
      */

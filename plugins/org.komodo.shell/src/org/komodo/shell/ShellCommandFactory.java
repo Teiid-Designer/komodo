@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.TreeMap;
-
 import javax.xml.namespace.QName;
-
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceContext;
@@ -39,6 +37,7 @@ import org.komodo.shell.commands.CommandNotFoundCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
 import org.komodo.shell.commands.core.CdCommand;
+import org.komodo.shell.commands.core.ConnectCommand;
 import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
@@ -46,6 +45,7 @@ import org.komodo.shell.commands.core.PropertyCommand;
 import org.komodo.shell.commands.core.RecordCommand;
 import org.komodo.shell.commands.core.StatusCommand;
 import org.komodo.utils.FileUtils;
+import org.komodo.utils.KLog;
 
 /**
  * Factory used to create shell commands.
@@ -105,6 +105,9 @@ public class ShellCommandFactory {
 		ImportCommand importCommand = new ImportCommand("import",this.wsStatus); //$NON-NLS-1$
 		commandMap.put(importCommand.getName(), importCommand);
 
+		ConnectCommand connCommand = new ConnectCommand(this.wsStatus);
+        commandMap.put(connCommand.getName(), connCommand);
+
 		discoverContributedCommands();
 	}
 
@@ -135,7 +138,7 @@ public class ShellCommandFactory {
                 ClassLoader extraCommandsCL = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
                 commandClassloaders.add(extraCommandsCL);
             } catch (IOException e) {
-                e.printStackTrace();
+                KLog.getLogger().error(e.getLocalizedMessage(), e);
             }
         }
 
@@ -155,8 +158,7 @@ public class ShellCommandFactory {
 	        				command.setWorkspaceStatus(this.wsStatus);
 	            			commandMap.put(entry.getKey(), command);
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						    KLog.getLogger().error(e.getLocalizedMessage(), e);
 						}
         			}
                 }

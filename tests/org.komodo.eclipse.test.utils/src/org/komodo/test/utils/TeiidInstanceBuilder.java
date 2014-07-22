@@ -66,7 +66,7 @@ public class TeiidInstanceBuilder {
 	}
 
 	public void setPort(int port) {
-		when(teiidInstance.getTeiidAdminInfo().getPortNumber()).thenReturn(port);
+		when(teiidInstance.getTeiidAdminInfo().getPort()).thenReturn(port);
 	}
 
 }

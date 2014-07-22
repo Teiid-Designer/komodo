@@ -27,6 +27,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.komodo.spi.runtime.ITeiidJdbcInfo;
 import org.komodo.spi.runtime.ITeiidParent;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.ITeiidVersion.VersionID;
@@ -47,6 +48,8 @@ public class IntegrationTestTeiidInstance extends AbstractTeiidVersionTest {
 
     private TeiidInstance teiidInstance;
 
+    private ITeiidJdbcInfo teiidJdbcInfo;
+
     public IntegrationTestTeiidInstance() {
         super(TEIID_VERSION_ID);
     }
@@ -60,7 +63,13 @@ public class IntegrationTestTeiidInstance extends AbstractTeiidVersionTest {
         when(teiidParent.getUserName()).thenReturn("admin");
         when(teiidParent.getPassword()).thenReturn("admin");
 
-        teiidInstance = new TeiidInstance(teiidParent);
+        teiidJdbcInfo = Mockito.mock(ITeiidJdbcInfo.class);
+        when(teiidJdbcInfo.getHostProvider()).thenReturn(teiidParent);
+        when(teiidParent.getPort()).thenReturn(ITeiidJdbcInfo.DEFAULT_PORT);
+        when(teiidParent.getUserName()).thenReturn(ITeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
+        when(teiidParent.getPassword()).thenReturn(ITeiidJdbcInfo.DEFAULT_JDBC_PASSWORD);
+
+        teiidInstance = new TeiidInstance(teiidParent, teiidJdbcInfo);
     }
 
     @Test

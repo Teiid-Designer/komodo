@@ -21,7 +21,8 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.runtime.IExecutionAdmin.ConnectivityType;
+
 
 /**
  *
@@ -43,20 +44,14 @@ public interface ITeiidConnectionInfo {
     String getPassword();
 
     /**
-     * @return the port (can be <code>null</code> or empty)
-     */
-    String getPort();
-
-    /**
      * @return the port number
      */
-
-    int getPortNumber();
+    int getPort();
 
     /**
      * @return the connection type (never <code>null</code>)
      */
-    String getType();
+    ConnectivityType getType();
     
     /**
      * @return the host provider (never <code>null</code>)
@@ -79,13 +74,6 @@ public interface ITeiidConnectionInfo {
     boolean isSecure();
 
     /**
-     * The port, password, user name, persisting password, secure protocol, and host provider are set.
-     * 
-     * @param info the connection properties whose values are being used to update state
-     */
-    void setAll(ITeiidConnectionInfo info);
-
-    /**
      * @param hostProvider the new value for host provider (never <code>null</code>)
      * @throws IllegalArgumentException if hostProvider is <code>null</code>
      */
@@ -100,7 +88,7 @@ public interface ITeiidConnectionInfo {
      * @param port the new value for port (never empty or <code>null</code>)
      * @see #validate()
      */
-    void setPort(String port);
+    void setPort(int port);
 
     /**
      * @param secure the new value for if a secure connection protocol should be used
@@ -112,10 +100,5 @@ public interface ITeiidConnectionInfo {
      * @see #validate()
      */
     void setUsername(String username);
-
-    /**
-     * @return a status indicating if the connection info is in a validate state (never <code>null</code>)
-     */
-    IOutcome validate();
 
 }

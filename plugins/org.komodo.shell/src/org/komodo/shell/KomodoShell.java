@@ -84,8 +84,7 @@ public class KomodoShell {
 		try {
 			shell.run(args);
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			System.out.println(Messages.getString(SHELL.EXITING));
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -154,6 +153,8 @@ public class KomodoShell {
 				if (reader.isBatch())
 				    shutdown();
 			} catch (Exception e) {
+			    String msg = "Exception Occurred: " + (e.getLocalizedMessage() == null ? e.getClass().getSimpleName() : e.getLocalizedMessage()); //$NON-NLS-1$
+			    wsStatus.getOutputStream().println(msgIndentStr + msg);
 				if (reader.isBatch())
 				    shutdown();
 			}

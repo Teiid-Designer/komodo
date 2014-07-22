@@ -28,9 +28,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
+import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.ITeiidAdminInfo;
 import org.komodo.spi.runtime.ITeiidDataSource;
@@ -49,34 +52,125 @@ import org.teiid.runtime.client.admin.ExecutionAdmin;
 /**
  *
  */
-public class TeiidInstance implements ITeiidInstance {
+public class TeiidInstance implements ITeiidInstance, StringConstants {
 
     private final ITeiidParent parent;
 
-    private final EventManager eventManager;
+    private final ITeiidAdminInfo adminInfo;
 
-    private final TeiidVersionProbe probe;
+    private final ITeiidJdbcInfo jdbcInfo;
+
+    private TeiidVersionProbe probe;
     
     private ITeiidVersion version;
 
     private IExecutionAdmin admin;
+
+    private class TeiidAdminInfo implements ITeiidAdminInfo {
+
+        @Override
+        public HostProvider getHostProvider() {
+            return parent;
+        }
+
+        @Override
+        public String getUsername() {
+            return parent.getUserName();
+        }
+
+        @Override
+        public String getPassword() {
+            return parent.getPassword();
+        }
+
+        @Override
+        public int getPort() {
+            return parent.getPort();
+        }
+
+        @Override
+        public boolean isSecure() {
+            return parent.isSecure();
+        }
+
+        @Override
+        public ConnectivityType getType() {
+            return ConnectivityType.ADMIN;
+        }
+
+        /**
+         * mm<s>://host:port
+         */
+        @Override
+        public String getUrl() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(isSecure() ? MMS : MM);
+            sb.append(getHostProvider().getHost());
+            sb.append(':');
+            sb.append(getPort());
+
+            return sb.toString();
+        }
+
+        @Override
+        public void setHostProvider(HostProvider hostProvider) {
+            // Not required since all data depends on parent
+        }
+
+        @Override
+        public void setPassword(String password) {
+            // Not required since all data depends on parent
+        }
+
+        @Override
+        public void setPort(int port) {
+            // Not required since all data depends on parent
+        }
+
+        @Override
+        public void setSecure(boolean secure) {
+            // Not required since all data depends on parent
+        }
+
+        @Override
+        public void setUsername(String username) {
+            // Not required since all data depends on parent
+        }
+    }
 
     /**
      * Construct instance
      *
      * @param parent
      */
-    public TeiidInstance(ITeiidParent parent) {
+    public TeiidInstance(ITeiidParent parent, ITeiidJdbcInfo jdbcInfo) {
         ArgCheck.isNotNull(parent);
         this.parent = parent;
-        this.parent.setTeiidInstance(this);
-        this.eventManager = parent.getEventManager();
-        probe = new TeiidVersionProbe(parent);
+        parent.setTeiidInstance(this);
+        this.adminInfo = new TeiidAdminInfo();
+        this.jdbcInfo = jdbcInfo;
+    }
+
+    private TeiidVersionProbe getProbe() {
+        if (probe == null)
+            probe = new TeiidVersionProbe(parent);
+
+        return probe;
     }
 
     @Override
     public ITeiidParent getParent() {
         return parent;
+    }
+
+    @Override
+    public ITeiidAdminInfo getTeiidAdminInfo() {
+        return adminInfo;
+    }
+
+    @Override
+    public ITeiidJdbcInfo getTeiidJdbcInfo() {
+        return jdbcInfo;
     }
 
     @Override
@@ -88,7 +182,7 @@ public class TeiidInstance implements ITeiidInstance {
     public ITeiidVersion getVersion() throws Exception {
         if (version == null) {
             try {
-                this.version = probe.getVersion();
+                this.version = getProbe().getVersion();
             } catch (Exception ex) {
                 // Ensure this instance has a version if host is not available
                 this.version = TeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
@@ -102,12 +196,38 @@ public class TeiidInstance implements ITeiidInstance {
 
     @Override
     public boolean isParentConnected() {
-        return probe.isParentConnected();
+        return getProbe().isParentConnected();
+    }
+
+    /**
+     * @return <code>true</code> if a connection to this server exists and is working
+     */
+    @Override
+    public boolean isConnected() {
+        if (! isParentConnected() || this.admin == null) {
+            return false;
+        }
+        return ping(ConnectivityType.ADMIN).isOK();
     }
 
     @Override
     public EventManager getEventManager() {
-        return eventManager;
+        return parent.getEventManager();
+    }
+
+    @Override
+    public String getHost() {
+        return parent.getHost();
+    }
+
+    @Override
+    public String getId() {
+        return getUrl() + HYPHEN + getParent().getId();
+    }
+
+    @Override
+    public String getUrl() {
+        return getTeiidAdminInfo().getUrl();
     }
 
     @Override
@@ -173,211 +293,195 @@ public class TeiidInstance implements ITeiidInstance {
     }
 
     @Override
+    public IOutcome ping(ConnectivityType connectivityType) {
+        try {
+            boolean testCausesConnect = false;
+
+            if (admin == null) {
+                connect();
+                testCausesConnect = true;
+            }
+
+            IOutcome outcome = admin.ping(connectivityType);
+
+            // Only disconnect if this test ping caused
+            // the connect
+            if (testCausesConnect) {
+                disconnect();
+            }
+
+            return outcome;
+
+        } catch (Exception ex) {
+            String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, getUrl());
+            return OutcomeFactory.getInstance().createError(msg, ex);
+        }
+    }
+
+    @Override
     public boolean dataSourceExists(String name) throws Exception {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteDataSource(String dsName) throws Exception {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public ITeiidDataSource getDataSource(String name) throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Collection<ITeiidDataSource> getDataSources() throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Set<String> getDataSourceTypeNames() throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public ITeiidDataSource getOrCreateDataSource(String displayName, String dsName, String typeName, Properties properties)
         throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public ITeiidTranslator getTranslator(String name) throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Collection<ITeiidTranslator> getTranslators() throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Collection<ITeiidVdb> getVdbs() throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public ITeiidVdb getVdb(String name) throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean hasVdb(String name) throws Exception {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean isVdbActive(String vdbName) throws Exception {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean isVdbLoading(String vdbName) throws Exception {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean hasVdbFailed(String vdbName) throws Exception {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean wasVdbRemoved(String vdbName) throws Exception {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<String> retrieveVdbValidityErrors(String vdbName) throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void undeployVdb(String vdbName) throws Exception {
-    }
-
-    @Override
-    public IOutcome ping(PingType pingType) throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getAdminDriverPath() throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Driver getTeiidDriver(String driverClass) throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deployDynamicVdb(String deploymentName, InputStream inStream) throws Exception {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void undeployDynamicVdb(String vdbName) throws Exception {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deployDriver(File driverFile) throws Exception {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getSchema(String vdbName, int vdbVersion, String modelName) throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Properties getDataSourceProperties(String name) throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Set<String> getDataSourceTemplateNames() throws Exception {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Collection<TeiidPropertyDefinition> getTemplatePropertyDefns(String templateName) throws Exception {
-        return null;
-    }
-
-    @Override
-    public String getHost() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void reconnect() {
-    }
-
-    @Override
-    public ITeiidAdminInfo getTeiidAdminInfo() {
-        return null;
-    }
-
-    @Override
-    public ITeiidJdbcInfo getTeiidJdbcInfo() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getDisplayName() {
-        return null;
-    }
-
-    @Override
-    public String getUrl() {
-        return null;
-    }
-
-    @Override
-    public String getId() {
-        return null;
-    }
-
-    @Override
-    public boolean isConnected() {
-        return false;
-    }
-
-    @Override
-    public IOutcome ping() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getCustomLabel() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getConnectionError() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setCustomLabel(String customLabel) {
-    }
-
-    @Override
-    public IOutcome testPing() {
-        return null;
-    }
-
-    @Override
-    public IOutcome testJDBCPing(String host, String port, String username, String password) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public IOutcome createVdbDataSource(String vdbName, String displayName, String jndiName) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void update(ITeiidInstance otherInstance) {
+        throw new UnsupportedOperationException();
     }
 
 }

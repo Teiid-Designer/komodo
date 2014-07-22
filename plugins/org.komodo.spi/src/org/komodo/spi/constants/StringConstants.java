@@ -65,6 +65,11 @@ public interface StringConstants {
     String COMMA = ","; //$NON-NLS-1$
 
     /**
+     * A Hyphen.
+     */
+    String HYPHEN = "-"; //$NON-NLS-1$
+
+    /**
      * A Dot.
      */
     String DOT = "."; //$NON-NLS-1$
@@ -119,6 +124,16 @@ public interface StringConstants {
 	 * Close Angle Bracket
 	 */
 	String CLOSE_ANGLE_BRACKET = ">"; //$NON-NLS-1$
+
+    /**
+     * Open Square Bracket
+     */
+    String OPEN_SQUARE_BRACKET = "["; //$NON-NLS-1$
+
+    /**
+     * Close Square Bracket
+     */
+    String CLOSE_SQUARE_BRACKET = "]"; //$NON-NLS-1$
 
 	/**
    * komodo
