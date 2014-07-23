@@ -70,7 +70,7 @@ public class Admin8Spec extends AdminSpec {
 
         Admin admin = Admin8Factory.getInstance().createAdmin(teiidVersion,
                                                               teiidInstance.getHost(),
-                                                              teiidAdminInfo.getPortNumber(),
+                                                              teiidAdminInfo.getPort(),
                                                               teiidAdminInfo.getUsername(),
                                                               passwordArray);
 

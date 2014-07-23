@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
@@ -105,8 +104,6 @@ public class PropertyCommand extends BuiltInShellCommand {
 		if(currentContext.getType().equals(WorkspaceContext.Type.HOME)) {
 			if(propName.equals(WorkspaceStatus.RECORDING_FILEPATH_KEY)) {
 				wsStatus.setRecordingOutputFile(propValue);
-			} else if(propName.equals(WorkspaceStatus.TEIID_SERVER_URL_KEY)) {
-				wsStatus.setTeiidServerUrl(propValue);
 			}
 		} else if(currentContext.isRelational()) {
 			Properties newProps = new Properties();

@@ -26,11 +26,15 @@ import java.io.InputStream;
 import java.sql.Driver;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
+import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.ITeiidAdminInfo;
 import org.komodo.spi.runtime.ITeiidDataSource;
@@ -43,40 +47,140 @@ import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.KLog;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.admin.ExecutionAdmin;
 
 /**
  *
  */
-public class TeiidInstance implements ITeiidInstance {
+public class TeiidInstance implements ITeiidInstance, StringConstants {
 
-    private final ITeiidParent parent;
+    private ITeiidParent parent;
 
-    private final EventManager eventManager;
+    private ITeiidAdminInfo adminInfo;
 
-    private final TeiidVersionProbe probe;
-    
+    private ITeiidJdbcInfo jdbcInfo;
+
+    private TeiidVersionProbe probe;
+
     private ITeiidVersion version;
 
     private IExecutionAdmin admin;
+
+    private String customLabel;
+
+    private String connectionError;
+
+    private class TeiidAdminInfo implements ITeiidAdminInfo {
+
+        @Override
+        public HostProvider getHostProvider() {
+            return parent;
+        }
+
+        @Override
+        public String getUsername() {
+            return parent.getUserName();
+        }
+
+        @Override
+        public String getPassword() {
+            return parent.getPassword();
+        }
+
+        @Override
+        public int getPort() {
+            return parent.getPort();
+        }
+
+        @Override
+        public boolean isSecure() {
+            return parent.isSecure();
+        }
+
+        @Override
+        public ConnectivityType getType() {
+            return ConnectivityType.ADMIN;
+        }
+
+        /**
+         * mm<s>://host:port
+         */
+        @Override
+        public String getUrl() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(isSecure() ? MMS : MM);
+            sb.append(getHostProvider().getHost());
+            sb.append(':');
+            sb.append(getPort());
+
+            return sb.toString();
+        }
+
+        @Override
+        public void setHostProvider(HostProvider hostProvider) {
+            // Not required since all data depends on parent
+        }
+
+        @Override
+        public void setPassword(String password) {
+            // Not required since all data depends on parent
+        }
+
+        @Override
+        public void setPort(int port) {
+            // Not required since all data depends on parent
+        }
+
+        @Override
+        public void setSecure(boolean secure) {
+            // Not required since all data depends on parent
+        }
+
+        @Override
+        public void setUsername(String username) {
+            // Not required since all data depends on parent
+        }
+    }
 
     /**
      * Construct instance
      *
      * @param parent
      */
-    public TeiidInstance(ITeiidParent parent) {
+    public TeiidInstance(ITeiidParent parent, ITeiidJdbcInfo jdbcInfo) {
+        initParent(parent);
+        this.jdbcInfo = jdbcInfo;
+    }
+
+    private void initParent(ITeiidParent parent) {
         ArgCheck.isNotNull(parent);
         this.parent = parent;
-        this.parent.setTeiidInstance(this);
-        this.eventManager = parent.getEventManager();
-        probe = new TeiidVersionProbe(parent);
+        parent.setTeiidInstance(this);
+        this.adminInfo = new TeiidAdminInfo();
+    }
+
+    private TeiidVersionProbe getProbe() {
+        if (probe == null)
+            probe = new TeiidVersionProbe(parent);
+
+        return probe;
     }
 
     @Override
     public ITeiidParent getParent() {
         return parent;
+    }
+
+    @Override
+    public ITeiidAdminInfo getTeiidAdminInfo() {
+        return adminInfo;
+    }
+
+    @Override
+    public ITeiidJdbcInfo getTeiidJdbcInfo() {
+        return jdbcInfo;
     }
 
     @Override
@@ -88,7 +192,7 @@ public class TeiidInstance implements ITeiidInstance {
     public ITeiidVersion getVersion() throws Exception {
         if (version == null) {
             try {
-                this.version = probe.getVersion();
+                this.version = getProbe().getVersion();
             } catch (Exception ex) {
                 // Ensure this instance has a version if host is not available
                 this.version = TeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
@@ -102,12 +206,38 @@ public class TeiidInstance implements ITeiidInstance {
 
     @Override
     public boolean isParentConnected() {
-        return probe.isParentConnected();
+        return getProbe().isParentConnected();
+    }
+
+    /**
+     * @return <code>true</code> if a connection to this server exists and is working
+     */
+    @Override
+    public boolean isConnected() {
+        if (!isParentConnected() || this.admin == null) {
+            return false;
+        }
+        return ping(ConnectivityType.ADMIN).isOK();
     }
 
     @Override
     public EventManager getEventManager() {
-        return eventManager;
+        return parent.getEventManager();
+    }
+
+    @Override
+    public String getHost() {
+        return parent.getHost();
+    }
+
+    @Override
+    public String getId() {
+        return getUrl() + HYPHEN + getParent().getId();
+    }
+
+    @Override
+    public String getUrl() {
+        return getTeiidAdminInfo().getUrl();
     }
 
     @Override
@@ -117,7 +247,7 @@ public class TeiidInstance implements ITeiidInstance {
 
     @Override
     public void connect() throws Exception {
-        if (! isParentConnected()) {
+        if (!isParentConnected()) {
             throw new Exception(Messages.getString(Messages.TeiidInstance.parentNotStartedMessage, getHost()));
         }
 
@@ -168,216 +298,306 @@ public class TeiidInstance implements ITeiidInstance {
             this.admin.disconnect();
             this.admin = null;
         }
-        
+
         notifyRefresh();
     }
 
     @Override
+    public void reconnect() {
+        try {
+            // Call disconnect() first to clear out Server & admin caches
+            getEventManager().permitListeners(false);
+            try {
+                disconnect();
+            } catch (Exception ex) {
+                throw ex;
+            } finally {
+                getEventManager().permitListeners(true);
+            }
+
+            if (isParentConnected()) {
+                // Refresh is implied in the getting of the admin object since it will
+                // automatically load and refresh.
+                connect();
+            } else {
+                throw new Exception(Messages.getString(Messages.TeiidInstance.parentNotStartedMessage));
+            }
+
+            setConnectionError(null);
+        } catch (Exception e) {
+            KLog.getLogger().error(EMPTY_STRING, e);
+            String msg = Messages.getString(Messages.TeiidInstance.reconnectErrorMsg, this) + "\n" + e.getLocalizedMessage(); //$NON-NLS-1$
+            setConnectionError(msg);
+        }
+    }
+
+    @Override
+    public IOutcome ping(ConnectivityType connectivityType) {
+        try {
+            boolean testCausesConnect = false;
+
+            if (admin == null) {
+                connect();
+                testCausesConnect = true;
+            }
+
+            IOutcome outcome = admin.ping(connectivityType);
+
+            // Only disconnect if this test ping caused
+            // the connect
+            if (testCausesConnect) {
+                disconnect();
+            }
+
+            return outcome;
+
+        } catch (Exception ex) {
+            String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, getUrl());
+            return OutcomeFactory.getInstance().createError(msg, ex);
+        }
+    }
+
+    @Override
     public boolean dataSourceExists(String name) throws Exception {
-        return false;
+        connect();
+        return admin.dataSourceExists(name);
     }
 
     @Override
     public void deleteDataSource(String dsName) throws Exception {
+        connect();
+        admin.deleteDataSource(dsName);
     }
 
     @Override
     public ITeiidDataSource getDataSource(String name) throws Exception {
-        return null;
+        connect();
+        return admin.getDataSource(name);
     }
 
     @Override
     public Collection<ITeiidDataSource> getDataSources() throws Exception {
-        return null;
+        connect();
+        return admin.getDataSources();
     }
 
     @Override
     public Set<String> getDataSourceTypeNames() throws Exception {
-        return null;
+        connect();
+        return admin.getDataSourceTypeNames();
     }
 
     @Override
-    public ITeiidDataSource getOrCreateDataSource(String displayName, String dsName, String typeName, Properties properties)
-        throws Exception {
-        return null;
+    public ITeiidDataSource getOrCreateDataSource(String displayName, String dsName, String typeName, Properties properties) throws Exception {
+        connect();
+        ArgCheck.isNotNull(displayName, "displayName"); //$NON-NLS-1$
+        ArgCheck.isNotNull(dsName, "dsName"); //$NON-NLS-1$
+        ArgCheck.isNotNull(typeName, "typeName"); //$NON-NLS-1$
+        ArgCheck.isNotNull(properties, "properties"); //$NON-NLS-1$
+
+        for (Entry<Object, Object> entry : properties.entrySet()) {
+            Object value = entry.getValue();
+            String errorMsg = "No value for the connection property '" + entry.getKey() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+            ArgCheck.isNotNull(value, errorMsg);
+            ArgCheck.isNotEmpty(value.toString(), errorMsg);
+        }
+
+        return admin.getOrCreateDataSource(displayName, dsName, typeName, properties);
     }
 
-    @Override
-    public ITeiidTranslator getTranslator(String name) throws Exception {
-        return null;
-    }
-
-    @Override
-    public Collection<ITeiidTranslator> getTranslators() throws Exception {
-        return null;
-    }
-
-    @Override
-    public Collection<ITeiidVdb> getVdbs() throws Exception {
-        return null;
-    }
-
-    @Override
-    public ITeiidVdb getVdb(String name) throws Exception {
-        return null;
-    }
-
-    @Override
-    public boolean hasVdb(String name) throws Exception {
-        return false;
-    }
-
-    @Override
-    public boolean isVdbActive(String vdbName) throws Exception {
-        return false;
-    }
-
-    @Override
-    public boolean isVdbLoading(String vdbName) throws Exception {
-        return false;
-    }
-
-    @Override
-    public boolean hasVdbFailed(String vdbName) throws Exception {
-        return false;
-    }
-
-    @Override
-    public boolean wasVdbRemoved(String vdbName) throws Exception {
-        return false;
-    }
-
-    @Override
-    public List<String> retrieveVdbValidityErrors(String vdbName) throws Exception {
-        return null;
-    }
-
-    @Override
-    public void undeployVdb(String vdbName) throws Exception {
-    }
-
-    @Override
-    public IOutcome ping(PingType pingType) throws Exception {
-        return null;
-    }
-
-    @Override
-    public String getAdminDriverPath() throws Exception {
-        return null;
-    }
-
-    @Override
-    public Driver getTeiidDriver(String driverClass) throws Exception {
-        return null;
-    }
-
-    @Override
-    public void deployDynamicVdb(String deploymentName, InputStream inStream) throws Exception {
-    }
-
-    @Override
-    public void undeployDynamicVdb(String vdbName) throws Exception {
-    }
-
-    @Override
-    public void deployDriver(File driverFile) throws Exception {
-    }
-
-    @Override
-    public String getSchema(String vdbName, int vdbVersion, String modelName) throws Exception {
-        return null;
-    }
-
-    @Override
-    public Properties getDataSourceProperties(String name) throws Exception {
-        return null;
-    }
-
-    @Override
-    public Set<String> getDataSourceTemplateNames() throws Exception {
-        return null;
-    }
-
-    @Override
-    public Collection<TeiidPropertyDefinition> getTemplatePropertyDefns(String templateName) throws Exception {
-        return null;
-    }
-
-    @Override
-    public String getHost() {
-        return null;
-    }
-
-    @Override
-    public void reconnect() {
-    }
-
-    @Override
-    public ITeiidAdminInfo getTeiidAdminInfo() {
-        return null;
-    }
-
-    @Override
-    public ITeiidJdbcInfo getTeiidJdbcInfo() {
-        return null;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return null;
-    }
-
-    @Override
-    public String getUrl() {
-        return null;
-    }
-
-    @Override
-    public String getId() {
-        return null;
-    }
-
-    @Override
-    public boolean isConnected() {
-        return false;
-    }
-
-    @Override
-    public IOutcome ping() {
-        return null;
-    }
-
-    @Override
-    public String getCustomLabel() {
-        return null;
-    }
-
-    @Override
-    public String getConnectionError() {
-        return null;
-    }
-
-    @Override
-    public void setCustomLabel(String customLabel) {
-    }
-
-    @Override
-    public IOutcome testPing() {
-        return null;
-    }
-
-    @Override
-    public IOutcome testJDBCPing(String host, String port, String username, String password) {
-        return null;
+    private String getVdbDataSourceConnectionUrl(String vdbName) {
+        String host = this.adminInfo.getHostProvider().getHost();
+        int port = this.adminInfo.getPort();
+        return "jdbc:teiid:" + vdbName + "@mm://" + host + ':' + port; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
     public IOutcome createVdbDataSource(String vdbName, String displayName, String jndiName) {
-        return null;
+        Properties props = new Properties();
+        String username = this.jdbcInfo.getUsername();
+        String password = this.jdbcInfo.getPassword();
+        if (username != null) {
+            props.put("user-name", username); //$NON-NLS-1$
+        }
+        if (password != null) {
+            props.put("password", password); //$NON-NLS-1$
+        }
+
+        props.put("driver-class", "org.teiid.jdbc.TeiidDriver"); //$NON-NLS-1$ //$NON-NLS-2$
+        props.put("connection-url", getVdbDataSourceConnectionUrl(vdbName)); //$NON-NLS-1$
+
+        try {
+            connect();
+            admin.getOrCreateDataSource(displayName, jndiName, "connector-jdbc", props); //$NON-NLS-1$
+        } catch (Exception ex) {
+            String msg = "Error creating data source for VDB " + vdbName; //$NON-NLS-1$
+            return OutcomeFactory.getInstance().createError(msg, ex);
+        }
+
+        return OutcomeFactory.getInstance().createOK();
+    }
+
+    @Override
+    public ITeiidTranslator getTranslator(String name) throws Exception {
+        connect();
+        return admin.getTranslator(name);
+    }
+
+    @Override
+    public Collection<ITeiidTranslator> getTranslators() throws Exception {
+        connect();
+        return admin.getTranslators();
+    }
+
+    @Override
+    public Collection<ITeiidVdb> getVdbs() throws Exception {
+        connect();
+        return admin.getVdbs();
+    }
+
+    @Override
+    public ITeiidVdb getVdb(String name) throws Exception {
+        connect();
+        return admin.getVdb(name);
+    }
+
+    @Override
+    public boolean hasVdb(String name) throws Exception {
+        connect();
+        return admin.hasVdb(name);
+    }
+
+    @Override
+    public boolean isVdbActive(String vdbName) throws Exception {
+        connect();
+        return admin.isVdbActive(vdbName);
+    }
+
+    @Override
+    public boolean isVdbLoading(String vdbName) throws Exception {
+        connect();
+        return admin.isVdbLoading(vdbName);
+    }
+
+    @Override
+    public boolean hasVdbFailed(String vdbName) throws Exception {
+        connect();
+        return admin.hasVdbFailed(vdbName);
+    }
+
+    @Override
+    public boolean wasVdbRemoved(String vdbName) throws Exception {
+        connect();
+        return admin.wasVdbRemoved(vdbName);
+    }
+
+    @Override
+    public List<String> retrieveVdbValidityErrors(String vdbName) throws Exception {
+        connect();
+        return admin.retrieveVdbValidityErrors(vdbName);
+    }
+
+    @Override
+    public void undeployVdb(String vdbName) throws Exception {
+        connect();
+        admin.undeployVdb(vdbName);
+    }
+
+    @Override
+    public String getAdminDriverPath() throws Exception {
+        connect();
+        return admin.getAdminDriverPath();
+    }
+
+    @Override
+    public Driver getTeiidDriver(String driverClass) throws Exception {
+        connect();
+        return admin.getTeiidDriver(driverClass);
+    }
+
+    @Override
+    public void deployDynamicVdb(String deploymentName, InputStream inStream) throws Exception {
+        connect();
+        admin.deployDynamicVdb(deploymentName, inStream);
+    }
+
+    @Override
+    public void undeployDynamicVdb(String vdbName) throws Exception {
+        connect();
+        admin.undeployDynamicVdb(vdbName);
+    }
+
+    @Override
+    public void deployDriver(File driverFile) throws Exception {
+        connect();
+        admin.deployDriver(driverFile);
+    }
+
+    @Override
+    public String getSchema(String vdbName, int vdbVersion, String modelName) throws Exception {
+        connect();
+        return admin.getSchema(vdbName, vdbVersion, modelName);
+    }
+
+    @Override
+    public Properties getDataSourceProperties(String name) throws Exception {
+        connect();
+        return admin.getDataSourceProperties(name);
+    }
+
+    @Override
+    public Set<String> getDataSourceTemplateNames() throws Exception {
+        connect();
+        return admin.getDataSourceTemplateNames();
+    }
+
+    @Override
+    public Collection<TeiidPropertyDefinition> getTemplatePropertyDefns(String templateName) throws Exception {
+        connect();
+        return admin.getTemplatePropertyDefns(templateName);
+    }
+
+    @Override
+    public String getCustomLabel() {
+        return this.customLabel;
+    }
+
+    @Override
+    public void setCustomLabel(String customLabel) {
+        this.customLabel = customLabel;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return getCustomLabel() != null ? getCustomLabel() : getUrl();
+    }
+
+    @Override
+    public String getConnectionError() {
+        return this.connectionError;
+    }
+
+    private void setConnectionError(String connectionError) {
+        this.connectionError = connectionError;
     }
 
     @Override
     public void update(ITeiidInstance otherInstance) {
+        ArgCheck.isNotNull(otherInstance);
+
+        disconnect();
+        connectionError = null;
+        probe = null;
+        version = null;
+        setCustomLabel(otherInstance.getCustomLabel());
+        initParent(otherInstance.getParent());
+
+        ITeiidJdbcInfo otherJdbcInfo = otherInstance.getTeiidJdbcInfo();
+        jdbcInfo.setHostProvider(otherJdbcInfo.getHostProvider());
+        jdbcInfo.setPassword(otherJdbcInfo.getPassword());
+        jdbcInfo.setUsername(otherJdbcInfo.getUsername());
+        jdbcInfo.setPort(otherJdbcInfo.getPort());
+        jdbcInfo.setSecure(otherJdbcInfo.isSecure());
     }
 
 }

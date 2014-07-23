@@ -96,13 +96,6 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
      * @return true is started, otherwise false
      */
     boolean isParentConnected();
-
-    /**
-     * Attempts to establish communication with the instance.
-     * 
-     * @return a status if the instance connection can be established (never <code>null</code>)
-     */
-    IOutcome ping();
     
     /**
      * Notify clients of a refresh
@@ -123,30 +116,6 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
      * @param customLabel the new custom label or <code>null</code> or empty if the custom label is not being used
      */
     void setCustomLabel(String customLabel);
-
-    /**
-     * Attempts to establish communication with the specified instance for testing purposes only.
-     * 
-     * This results in the connection being closed.
-     * 
-     * @return a status if the instance connection can be established (never <code>null</code>)
-     */
-    IOutcome testPing();
-
-    /**
-     * Test the jdbc connection
-     * 
-     * @param host
-     * @param port
-     * @param username
-     * @param password
-     * 
-     * @return status as to the ping's success
-     */
-    IOutcome testJDBCPing(String host,
-                                         String port,
-                                         String username,
-                                         String password);
     
     /**
      * Construct a vdb data source

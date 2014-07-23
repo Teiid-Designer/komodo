@@ -33,11 +33,7 @@ public interface ITeiidAdminInfo extends ITeiidConnectionInfo {
     /**
      * The default Teiid Admin port number. Value is {@value} .
      */
-    public static final String DEFAULT_PORT = "9999"; //$NON-NLS-1$
-    /**
-     * The default Teiid Admin port number on teiid 7.7 teiid instances.
-     */
-    public static final String DEFAULT_LEGACY_PORT = "31443"; //$NON-NLS-1$
+    public static final int DEFAULT_PORT = 9999;
     
     /**
      * The default Teiid Admin secure protocol flag. Value is {@value} .

@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
 import org.komodo.relational.constants.RelationalConstants.TYPES;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.shell.api.WorkspaceContext;
@@ -235,7 +234,6 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 		Map<String,String> propNameValues = new HashMap<String,String>();
 		if(getType().equals(WorkspaceContext.Type.HOME)) {
 			propNameValues.put(WorkspaceStatus.RECORDING_FILEPATH_KEY,getWorkspaceStatus().getRecordingOutputFile().toString());
-			propNameValues.put(WorkspaceStatus.TEIID_SERVER_URL_KEY,getWorkspaceStatus().getTeiidServerUrl());
 		} else if(isRelational()) {
 			RelationalObject relObj = getRelationalObj();
 			Map<String,String> props = relObj.getProperties();

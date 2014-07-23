@@ -41,16 +41,16 @@ public interface IExecutionAdmin {
     String PING_VDB = "ping-vdb.xml"; //$NON-NLS-1$
 
     /**
-     * Type of ping to be performed
+     * Type of connectivity
      */
-    enum PingType {
+    enum ConnectivityType {
         /**
-         * Ping the admin port of the teiid instance
+         * Admin connection of the teiid instance
          */
         ADMIN, 
         
         /**
-         * Ping the JDBC port of the teiid instance
+         * JDBC connection of the teiid instance
          */
         JDBC;
     }
@@ -209,13 +209,13 @@ public interface IExecutionAdmin {
      
     /**
      * Ping the admin client to determine whether if is still connected
-     * @param pingType 
+     * @param connectivityType
      *
      * @return {@link IOutcome} describing state of ping
      * 
      * @throws Exception 
      */
-     IOutcome ping(PingType pingType) throws Exception;
+     IOutcome ping(ConnectivityType connectivityType) throws Exception;
      
      /**
       * Get the location of the the admin driver class. Implementations have historically
