@@ -64,7 +64,8 @@ public class Messages {
     @SuppressWarnings( "javadoc" )
     public enum TeiidInstance {
         versionFailure,
-        parentNotStartedMessage;
+        parentNotStartedMessage,
+        reconnectErrorMsg;
 
         @Override
         public String toString() {
