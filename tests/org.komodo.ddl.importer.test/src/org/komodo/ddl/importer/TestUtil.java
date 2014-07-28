@@ -23,43 +23,101 @@ package org.komodo.ddl.importer;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.komodo.relational.constants.RelationalConstants;
-import org.komodo.relational.model.Model;
 import org.komodo.relational.model.RelationalObject;
-import org.komodo.relational.model.Table;
 
 /**
  *
  */
 public class TestUtil {
 	
+	@SuppressWarnings("javadoc")
+	public static final Map<String,String> REL_OBJ_DEFAULTS = new HashMap<String,String>();
+	static {
+		REL_OBJ_DEFAULTS.put("NAME", null); //$NON-NLS-1$ 
+		REL_OBJ_DEFAULTS.put("NAMEINSOURCE", null); //$NON-NLS-1$ 
+		REL_OBJ_DEFAULTS.put("DESCRIPTION", null); //$NON-NLS-1$ 
+	}
+	@SuppressWarnings("javadoc")
+	public static final Map<String,String> TABLE_PROPERTY_DEFAULTS = new HashMap<String,String>();
+	static {
+		TABLE_PROPERTY_DEFAULTS.putAll(REL_OBJ_DEFAULTS);
+		TABLE_PROPERTY_DEFAULTS.put("SYSTEM", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		TABLE_PROPERTY_DEFAULTS.put("MATERIALIZED", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		TABLE_PROPERTY_DEFAULTS.put("CARDINALITY", "-1"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	@SuppressWarnings("javadoc")
+	public static final Map<String,String> PROCEDURE_PROPERTY_DEFAULTS = new HashMap<String,String>();
+	static {
+		PROCEDURE_PROPERTY_DEFAULTS.putAll(REL_OBJ_DEFAULTS);
+		PROCEDURE_PROPERTY_DEFAULTS.put("FUNCTION", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		PROCEDURE_PROPERTY_DEFAULTS.put("UPDATECOUNT", null); //$NON-NLS-1$ 
+	}
+	@SuppressWarnings("javadoc")
+	public static final Map<String,String> RESULTSET_PROPERTY_DEFAULTS = new HashMap<String,String>();
+	static {
+		PROCEDURE_PROPERTY_DEFAULTS.putAll(REL_OBJ_DEFAULTS);
+		PROCEDURE_PROPERTY_DEFAULTS.put("FUNCTION", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		PROCEDURE_PROPERTY_DEFAULTS.put("UPDATECOUNT", null); //$NON-NLS-1$ 
+	}
+	@SuppressWarnings("javadoc")
+	public static final Map<String,String> COLUMN_PROPERTY_DEFAULTS = new HashMap<String,String>();
+	static {
+		COLUMN_PROPERTY_DEFAULTS.putAll(REL_OBJ_DEFAULTS);
+		COLUMN_PROPERTY_DEFAULTS.put("SEARCHABILITY", "SEARCHABLE"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("SIGNED", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("CHARACTEROCTETLENGTH", "0"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("DEFAULTVALUE", null); //$NON-NLS-1$ 
+		COLUMN_PROPERTY_DEFAULTS.put("CHARACTERSETNAME", null); //$NON-NLS-1$ 
+		COLUMN_PROPERTY_DEFAULTS.put("MAXIMUMVALUE", null); //$NON-NLS-1$ 
+		COLUMN_PROPERTY_DEFAULTS.put("MINIMUMVALUE", null); //$NON-NLS-1$ 
+		COLUMN_PROPERTY_DEFAULTS.put("AUTOINCREMENTED", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("NATIVETYPE", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("LENGTH", "10"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("SCALE", "0"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("LENGTHFIXED", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("NULLABLE", "NO_NULLS"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("SELECTABLE", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("NULLVALUECOUNT", "0"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("DATATYPE", "string"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("CURRENCY", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("RADIX", "0"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("FORMAT", null); //$NON-NLS-1$ 
+		COLUMN_PROPERTY_DEFAULTS.put("COLLATIONNAME", null); //$NON-NLS-1$ 
+		COLUMN_PROPERTY_DEFAULTS.put("UPDATEABLE", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("CASESENSITIVE", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		COLUMN_PROPERTY_DEFAULTS.put("DISTINCTVALUECOUNT", "-1"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
     /**
-     * Determine if the model has tables matching the list of supplied names
-     * @param model the model
-     * @param tableNames the list of names
-     * @return 'true' if tables match, 'false' if not
+     * Determine if the parent has child objects of supplied type that match the list of supplied names
+     * @param parent the parent
+     * @param objectNames the list of names
+     * @param objType the type of object
+     * @return 'true' if objects match the supplied names, 'false' if not
      */
-    public static boolean hasTables(Model model, List<String> tableNames) {
-    	List<Table> tables = new ArrayList<Table>();
-    	Collection<RelationalObject> children = model.getChildren();
+    public static boolean childrenMatch(RelationalObject parent, List<String> objectNames, int objType) {
+    	List<RelationalObject> rObjs = new ArrayList<RelationalObject>();
+    	Collection<RelationalObject> children = parent.getChildren();
     	for(RelationalObject relObj : children) {
-    		if(relObj.getType()==RelationalConstants.TYPES.TABLE) {
-    			tables.add((Table)relObj);
+    		if(relObj.getType()==objType) {
+    			rObjs.add(relObj);
     		}
     	}
     	
     	// Must have equal numbers
-    	if(tableNames.size()!=tables.size()) {
+    	if(objectNames.size()!=rObjs.size()) {
     		return false;
     	}
     	
-    	for(Table table : tables) {
-    		String tableNm = table.getName();
+    	for(RelationalObject rObj : rObjs) {
+    		String objName = rObj.getName();
     		boolean found = false;
-    		for(String tableName : tableNames) {
-    			if(tableName.equalsIgnoreCase(tableNm)) {
+    		for(String roName : objectNames) {
+    			if(roName.equalsIgnoreCase(objName)) {
     				found = true;
     				break;
     			}
@@ -70,6 +128,32 @@ public class TestUtil {
     	}
     	
     	return true;
+    }
+    
+    /**
+     * Determine if the object properties match the expected properties
+     * @param relObj the relational object
+     * @param expectedProps the expected properties
+     * @return 'true' if properties match, 'false' if not
+     */
+    public static String compareProperties(RelationalObject relObj, Map<String,String> expectedProps) {
+    	String result = "OK";  //$NON-NLS-1$
+    	Map<String,String> actualProps = relObj.getProperties();
+    	for(String expectedName : expectedProps.keySet()) {
+    		if(!actualProps.keySet().contains(expectedName)) {
+    			result = "Object properties do not contain property '"+expectedName+"'";  //$NON-NLS-1$ //$NON-NLS-2$
+    			break;
+    		} 
+    		String expectedValue = expectedProps.get(expectedName);
+    		String actualValue = actualProps.get(expectedName);
+    		if(   (expectedValue==null && actualValue!=null)
+    	       || (actualValue==null && expectedValue!=null)
+     		   || (actualValue!=null && !actualValue.equals(expectedValue))) {
+    			result = "'"+expectedName+"' Actual value ["+actualValue+"] does not match Expected value ["+expectedValue+"]";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    			break;
+    		}
+    	}
+    	return result;
     }
 
 }

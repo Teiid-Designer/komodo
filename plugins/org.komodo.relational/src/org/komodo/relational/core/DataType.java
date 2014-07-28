@@ -195,7 +195,11 @@ public class DataType implements DataTypes {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder(100);
-        result.append("DataType()").append(" ").append(name); //$NON-NLS-1$ //$NON-NLS-2$
+        result.append("DataType()").append(" ").append(name) //$NON-NLS-1$ //$NON-NLS-2$
+        .append(", Length: "+getLength()) //$NON-NLS-1$
+        .append(", Precision: "+getPrecision()) //$NON-NLS-1$
+        .append(", Scale: "+getScale()) //$NON-NLS-1$
+        .append(", Radix: "+getRadix()); //$NON-NLS-1$
 
         return result.toString();
     }
