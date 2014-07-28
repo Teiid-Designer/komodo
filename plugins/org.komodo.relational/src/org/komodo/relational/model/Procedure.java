@@ -471,10 +471,12 @@ public class Procedure extends RelationalObject {
     public boolean setResultSet(ProcedureResultSet resultSet) {
     	boolean wasSet = false;
     	if( this.resultSet != resultSet ) {
-	    	if( resultSet != null ) {
-	    		resultSet.setParent(this);
-	    	}
-	        this.resultSet = resultSet;
+    		if(resultSet==null) {
+    			this.resultSet = resultSet;
+    		} else if ( !resultSet.equals(this.resultSet) ) {
+		        this.resultSet = resultSet;
+	    		this.resultSet.setParent(this);
+    		}
 	        wasSet = true;
 	        handleInfoChanged();
     	}
