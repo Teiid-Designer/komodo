@@ -55,6 +55,15 @@
 		<echo message="Project source generation is up-to-date" />
 	</target>
 
+	<target name="dependencies" depends="init-ant-contrib" if="should-generate">
+
+	    <!-- Executes maven from the root directory, installing
+	         the project dependencies.
+	    -->
+	    <mvn dir="${GIT-HOME}"
+	         args="-pl target-platform install"/>
+	</target>
+
 	<target name="clean-internal" if="should-generate">
 	</target>
 
@@ -63,7 +72,7 @@
 		<antcall target="clean-internal"/>
 	</target>
 
-	<target name="generate" depends="init-ant-contrib, check-work, nothing-todo, clean-internal" if="should-generate">
+	<target name="generate" depends="init-ant-contrib, check-work, nothing-todo, clean-internal, dependencies" if="should-generate">
 		<echo message="Generating from maven ..." />
 		<mvn dir="." args="process-sources -P download-sources" />
 
