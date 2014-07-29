@@ -50,6 +50,11 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.modeshape</groupId>
+                                            <artifactId>modeshape-jcr-api</artifactId>
+                                            <classifier>sources</classifier>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.modeshape</groupId>
                                             <artifactId>modeshape-common</artifactId>
                                             <classifier>sources</classifier>
                                         </artifactItem>
@@ -106,6 +111,10 @@
                                 <artifactItem>
                                     <groupId>org.modeshape</groupId>
                                     <artifactId>modeshape-jcr</artifactId>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.modeshape</groupId>
+                                    <artifactId>modeshape-jcr-api</artifactId>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.modeshape</groupId>
