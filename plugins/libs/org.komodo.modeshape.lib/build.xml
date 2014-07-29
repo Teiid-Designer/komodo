@@ -19,6 +19,7 @@
 	<!-- Comma-separated list of required libraries -->
 	<property name="libs" value="jcr.jar,
 								 modeshape-jcr.jar,
+		 						 modeshape-jcr-api.jar,
 								 modeshape-common.jar,
 								 modeshape-sequencer-ddl.jar,
 		                         logback-core.jar,
