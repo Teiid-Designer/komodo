@@ -1,7 +1,6 @@
 package org.komodo.spi.type;
 
 import java.util.Set;
-
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.annotation.Updated;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
@@ -217,5 +216,26 @@ public interface IDataTypeManagerService {
      * @return true if a transform is possible between the types
      */
     boolean isTransformable(String sourceTypeName, String targetTypeName);
-    
+
+    /**
+     * @param bytes
+     *
+     * @return Wrapped binary type of the given bytes
+     */
+    IBinaryType createBinaryType(byte[] bytes);
+
+    /**
+     * Transform the given value into the given data type
+     *
+     * @param value
+     * @param dataTypeName
+     * @return transformed value
+     * @throws Exception
+     */
+    <T> T transformValue(Object value, DataTypeName dataTypeName) throws Exception;
+
+    /**
+     * @return whether decimals are treated as doubles
+     */
+    boolean isDecimalAsDouble();
 }
