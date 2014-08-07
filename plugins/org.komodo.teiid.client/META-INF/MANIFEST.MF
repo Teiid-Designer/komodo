@@ -32,5 +32,6 @@ Bundle-ClassPath: lib/connector-api.jar,
  lib/xnio-nio.jar,
  lib/xom.jar,
  .
-Export-Package: org.teiid.runtime.client.instance
+Export-Package: org.teiid.runtime.client.admin.factory,
+ org.teiid.runtime.client.instance
 

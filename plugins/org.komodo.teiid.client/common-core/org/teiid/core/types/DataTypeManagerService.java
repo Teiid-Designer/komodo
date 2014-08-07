@@ -41,11 +41,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.type.IBinaryType;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.teiid.core.types.basic.AnyToObjectTransform;
 import org.teiid.core.types.basic.AnyToStringTransform;
@@ -957,6 +957,15 @@ public class DataTypeManagerService implements IDataTypeManagerService {
         return transformValue(value, value.getClass(), getDataType(targetClass));
     }
 
+    @Override
+    public <T> T transformValue(Object value, DataTypeName dataTypeName) throws Exception {
+        ArgCheck.isNotNull(dataTypeName);
+        Class<?> targetClass = getDefaultDataClass(dataTypeName);
+
+        return transformValue(value, value.getClass(), getDataType(targetClass));
+    }
+    
+    @Override
     public boolean isDecimalAsDouble() {
         return PropertiesUtils.getBooleanProperty(System.getProperties(), "org.teiid.decimalAsDouble", false); //$NON-NLS-1$
     }
@@ -1004,5 +1013,10 @@ public class DataTypeManagerService implements IDataTypeManagerService {
             return getDataTypeClass(getDataTypeName(c));
         }
         return value; // "object type"
+    }
+
+    @Override
+    public IBinaryType createBinaryType(byte[] bytes) {
+        return new BinaryType(bytes);
     }
 }

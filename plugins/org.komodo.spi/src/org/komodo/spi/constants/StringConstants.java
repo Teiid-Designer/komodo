@@ -65,6 +65,11 @@ public interface StringConstants {
     String COMMA = ","; //$NON-NLS-1$
 
     /**
+     * A Colon.
+     */
+    String COLON = ":"; //$NON-NLS-1$
+
+    /**
      * A Hyphen.
      */
     String HYPHEN = "-"; //$NON-NLS-1$
@@ -116,6 +121,16 @@ public interface StringConstants {
     String EQUALS = "="; //$NON-NLS-1$
 
     /**
+     * Open Bracket
+     */
+    String OPEN_BRACKET = "("; //$NON-NLS-1$
+
+    /**
+     * Close Bracket
+     */
+    String CLOSE_BRACKET = ")"; //$NON-NLS-1$
+
+    /**
      * Open Angle Bracket
      */
 	String OPEN_ANGLE_BRACKET = "<"; //$NON-NLS-1$
@@ -134,6 +149,16 @@ public interface StringConstants {
      * Close Square Bracket
      */
     String CLOSE_SQUARE_BRACKET = "]"; //$NON-NLS-1$
+
+    /**
+     * Open Brace
+     */
+    String OPEN_BRACE = "{"; //$NON-NLS-1$
+
+    /**
+     * Close Brace
+     */
+    String CLOSE_BRACE = "}"; //$NON-NLS-1$
 
 	/**
    * komodo
