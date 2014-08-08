@@ -21,12 +21,23 @@
  ************************************************************************************/
 package org.komodo.modeshape.teiid.sql.lang;
 
-public class SubqueryHint {
+import org.komodo.modeshape.teiid.parser.TeiidParser;
+
+public class SubqueryHint extends ASTNode {
+
     public static String MJ = "MJ"; //$NON-NLS-1$
 
     public static String NOUNNEST = "NO_UNNEST"; //$NON-NLS-1$
 
     public static String DJ = "DJ"; //$NON-NLS-1$
+
+    /**
+     * @param p
+     * @param id
+     */
+    public SubqueryHint(TeiidParser p, int id) {
+        super(p, id);
+    }
 
     public void setMergeJoin(boolean semiJoin) {
     }
@@ -65,7 +76,7 @@ public class SubqueryHint {
 
     @Override
     public SubqueryHint clone() {
-        SubqueryHint clone = new SubqueryHint();
+        SubqueryHint clone = new SubqueryHint(getTeiidParser(), getId());
         clone.setMergeJoin(this.isMergeJoin());
         clone.setNoUnnest(this.isNoUnnest());
         clone.setDepJoin(this.isDepJoin());

@@ -37,7 +37,7 @@ import org.komodo.spi.query.sql.lang.ISPParameter;
 * The connector will utilize this class to set the appropriate values at the
 * datasource layer.
 */
-public class SPParameter implements ISPParameter<ElementSymbol> {
+public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> {
 
     /** Constant identifying an IN parameter */
     public static final int IN = ParameterInfo.IN.index();
@@ -54,49 +54,17 @@ public class SPParameter implements ISPParameter<ElementSymbol> {
     /** Constant identifying a RESULT SET parameter */
     public static final int RESULT_SET = ParameterInfo.RESULT_SET.index();
 
-    private TeiidParser teiidParser;
-
     /**
-     * Constructor used when constructing a parameter during execution.  In this case we
-     * know what the parameter is being filled with but no metadata about the parameter.
-     *
-     * @param teiidParser
-     * @param index the positional index of this parameter
-     * @param expression
+     * @param p
+     * @param id
      */
-    public SPParameter(TeiidParser teiidParser, int index, Expression expression) {
-        this.teiidParser = teiidParser;
-        setIndex(index);
-        setExpression(expression);
-    }
-
-    /**
-     * Constructor used when constructing a parameter from metadata.
-     * In this case we specify the description of the parameter but
-     * no notion of what it is being filled with.
-     *
-     * @param teiidParser
-     * @param index Parameter index
-     * @param parameterType Type of parameter based on class constant - IN, OUT, etc
-     * @param name Full name of parameter (including proc name)
-     */
-    public SPParameter(TeiidParser teiidParser, int index, int parameterType, String name) {
-        this.teiidParser = teiidParser;
-        setIndex(index);
-        setParameterType(parameterType);
-        setName(name);
-    }
-
-    /**
-     * @return the teiidParser
-     */
-    public TeiidParser getTeiidParser() {
-        return this.teiidParser;
+    public SPParameter(TeiidParser p, int id) {
+        super(p, id);
     }
 
     @SuppressWarnings( "unused" )
     private ElementSymbol createElementSymbol(String name) {
-        ElementSymbol symbol = teiidParser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
+        ElementSymbol symbol = getTeiidParser().createASTNode(ASTNodes.ELEMENT_SYMBOL);
         symbol.setName(name);
         return symbol;
     }
@@ -138,7 +106,7 @@ public class SPParameter implements ISPParameter<ElementSymbol> {
      */
     @Override
     public int getParameterType() {
-        return this.getParameterType();
+        return 0;
     }
 
     /**
@@ -235,7 +203,7 @@ public class SPParameter implements ISPParameter<ElementSymbol> {
      */
     @Override
     public Object getMetadataID() {
-        return teiidParser;
+        return null;
     }
 
     /**
@@ -333,7 +301,8 @@ public class SPParameter implements ISPParameter<ElementSymbol> {
 
     @Override
     public SPParameter clone() {
-        SPParameter clone = new SPParameter(this.getTeiidParser(), getIndex(), getExpression());
+        SPParameter clone = new SPParameter(getTeiidParser(), getId());
+        clone.setIndex(getIndex());
         clone.setParameterType(getParameterType());
 
         if (getExpression() != null) {

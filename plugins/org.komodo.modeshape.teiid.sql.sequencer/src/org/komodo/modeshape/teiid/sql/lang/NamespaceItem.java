@@ -21,45 +21,45 @@
  ************************************************************************************/
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.parser.TeiidParser;
 
 /**
  *
  */
-public class NamespaceItem {
-    private String uri;
-    private String prefix;
+public class NamespaceItem extends ASTNode {
 
     /**
-     * @param uri
-     * @param prefix
+     * @param p
+     * @param id
      */
-    public NamespaceItem(String uri, String prefix) {
-    }
-
-    /**
-     * @param defaultNamepace
-     */
-    public NamespaceItem(String defaultNamepace) {
-    }
-
-    /**
-     * 
-     */
-    public NamespaceItem() {
+    public NamespaceItem(TeiidParser p, int id) {
+        super(p, id);
     }
 
     /**
      * @return uri
      */
     public String getUri() {
-        return uri;
+        return null;
+    }
+
+    /**
+     * @param uri the uri to set
+     */
+    public void setUri(String uri) {
     }
 
     /**
      * @return prefix
      */
     public String getPrefix() {
-        return prefix;
+        return null;
+    }
+
+    /**
+    * @param prefix the prefix to set
+    */
+    public void setPrefix(String prefix) {
     }
 
     @Override
@@ -73,22 +73,31 @@ public class NamespaceItem {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
         NamespaceItem other = (NamespaceItem)obj;
         if (this.getPrefix() == null) {
-            if (other.getPrefix() != null) return false;
-        } else if (!this.getPrefix().equals(other.getPrefix())) return false;
+            if (other.getPrefix() != null)
+                return false;
+        } else if (!this.getPrefix().equals(other.getPrefix()))
+            return false;
         if (this.getUri() == null) {
-            if (other.getUri() != null) return false;
-        } else if (!this.getUri().equals(other.getUri())) return false;
+            if (other.getUri() != null)
+                return false;
+        } else if (!this.getUri().equals(other.getUri()))
+            return false;
         return true;
     }
 
     @Override
     public NamespaceItem clone() {
-        NamespaceItem clone = new NamespaceItem(this.getUri(), this.getUri());
+        NamespaceItem clone = new NamespaceItem(this.getTeiidParser(), this.getId());
+        clone.setUri(getUri());
+        clone.setPrefix(getPrefix());
         return clone;
     }
 

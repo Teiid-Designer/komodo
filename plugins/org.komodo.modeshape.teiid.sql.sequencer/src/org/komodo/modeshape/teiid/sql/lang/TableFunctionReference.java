@@ -43,19 +43,6 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
     }
 
     /**
-     * @return correlated references
-     */
-    public SymbolMap getCorrelatedReferences() {
-        return null;
-    }
-
-    /**
-     * @param correlatedReferences
-     */
-    public void setCorrelatedReferences(SymbolMap correlatedReferences) {
-    }
-
-    /**
      * @param copy
      */
     public void copy(TableFunctionReference copy) {
@@ -119,7 +106,7 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((this.getCorrelatedReferences() == null) ? 0 : this.getCorrelatedReferences().hashCode());
+//        result = prime * result + ((this.getCorrelatedReferences() == null) ? 0 : this.getCorrelatedReferences().hashCode());
         result = prime * result + ((this.getGroupSymbol() == null) ? 0 : this.getGroupSymbol().hashCode());
         return result;
     }
@@ -133,11 +120,11 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
         if (getClass() != obj.getClass())
             return false;
         TableFunctionReference other = (TableFunctionReference)obj;
-        if (this.getCorrelatedReferences() == null) {
-            if (other.getCorrelatedReferences() != null)
-                return false;
-        } else if (!this.getCorrelatedReferences().equals(other.getCorrelatedReferences()))
-            return false;
+//        if (this.getCorrelatedReferences() == null) {
+//            if (other.getCorrelatedReferences() != null)
+//                return false;
+//        } else if (!this.getCorrelatedReferences().equals(other.getCorrelatedReferences()))
+//            return false;
         if (this.getGroupSymbol() == null) {
             if (other.getGroupSymbol() != null)
                 return false;

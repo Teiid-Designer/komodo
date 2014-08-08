@@ -66,6 +66,7 @@ public abstract class AbstractTeiidParser implements TeiidParser {
     /**
      * @param teiidVersion
      */
+    @Override
     public void setVersion(ITeiidVersion teiidVersion) {
         this.version = teiidVersion;
     }
@@ -111,7 +112,9 @@ public abstract class AbstractTeiidParser implements TeiidParser {
 	@Since(Version.TEIID_8_0)
 	protected void convertToParameters(List<Expression> values, StoredProcedure storedProcedure, int paramIndex) {
 		for (Expression value : values) {
-			SPParameter parameter = new SPParameter(this, paramIndex++, value);
+			SPParameter parameter = createASTNode(ASTNodes.SP_PARAMETER); 
+			parameter.setIndex(paramIndex++);
+			parameter.setExpression(value);
 			parameter.setParameterType(SPParameter.IN);
 			storedProcedure.setParameter(parameter);
 		}

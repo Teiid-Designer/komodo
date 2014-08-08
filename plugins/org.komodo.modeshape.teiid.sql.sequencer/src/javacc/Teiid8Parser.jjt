@@ -131,14 +131,14 @@ public class Teiid8Parser extends AbstractTeiidParser {
         return false;
     }
 
-    private SourceHint getSourceHint(Token t) {
+    private SourceHint getSourceHint(Token t) throws ParseException {
         String comment = getComment(t);
         Matcher matcher = SOURCE_HINT.matcher(comment);
         if (!matcher.find()) {
             return null;
         }
 
-        SourceHint sourceHint = new SourceHint();
+        SourceHint sourceHint = sourceHint();
         if (matcher.group(1) != null) {
             sourceHint.setUseAliases(true);
         }
@@ -158,7 +158,7 @@ public class Teiid8Parser extends AbstractTeiidParser {
         return sourceHint;
     }
 
-    private SourceHint getSourceHint(Teiid8Parser parser) {
+    private SourceHint getSourceHint(Teiid8Parser parser) throws ParseException {
        int index = 1;
        //scan for the first keyword
        Token t = null;
@@ -173,8 +173,8 @@ public class Teiid8Parser extends AbstractTeiidParser {
        return getSourceHint(t);
     }
 
-    private SubqueryHint getSubqueryHint(Token t) {
-        SubqueryHint hint = new SubqueryHint();
+    private SubqueryHint getSubqueryHint(Token t) throws ParseException {
+        SubqueryHint hint = subqueryHint();
         String[] parts = getComment(t).split("\\s"); //$NON-NLS-1$
         for (int i = 0; i < parts.length; i++) {
             if (parts[i].equalsIgnoreCase(SubqueryHint.MJ)) {
@@ -1381,7 +1381,10 @@ Statement assignStatement(ParseInfo info) :
     (value = assignStatementOperand(info) |
      (value = storedProcedure(info, 2) [(<WITH>|<WITHOUT> {returnable = false;}) <RETURN>]) {
 		StoredProcedure storedProcedure = (StoredProcedure)value;
-	    SPParameter parameter = new SPParameter(this, 1, SPParameter.RETURN_VALUE, "return"); //$NON-NLS-1$
+	    SPParameter parameter = spParameter();
+	    parameter.setIndex(1);
+	    parameter.setParameterType(SPParameter.RETURN_VALUE);
+	    parameter.setName("return"); //$NON-NLS-1$
 	    parameter.setExpression(elementID);
 		storedProcedure.setParameter(parameter);  
 		storedProcedure.setCalledWithReturn(true);
@@ -1645,7 +1648,10 @@ StoredProcedure callableStatement(ParseInfo info) :
 	<LBRACE>
 	[<QMARK> <EQ>
 	 {
-	   parameter = new SPParameter(this, parameterIndex++, SPParameter.RETURN_VALUE, "return"); //$NON-NLS-1$
+	   parameter = spParameter();
+	   parameter.setIndex(parameterIndex++);
+	   parameter.setParameterType(SPParameter.RETURN_VALUE);
+	   parameter.setName("return"); //$NON-NLS-1$
 	   storedProcedure.setParameter(parameter);
 	   storedProcedure.setCalledWithReturn(true);
 	 }
@@ -1752,7 +1758,9 @@ void executeNamedParams(ParseInfo info, StoredProcedure storedProcedure, int par
 	 <EQ> [<GT>]
 	 value = expression(info)
 		{
-			parameter = new SPParameter(this, parameterIndex++, value);
+			parameter = spParameter();
+			parameter.setIndex(parameterIndex++);
+			parameter.setExpression(value);
 			parameter.setName(name);
 			parameter.setParameterType(SPParameter.IN);
 			storedProcedure.setParameter(parameter);
@@ -1763,7 +1771,9 @@ void executeNamedParams(ParseInfo info, StoredProcedure storedProcedure, int par
 	 		<EQ> [<GT>]
 	 		value = expression(info)
 			{
-				parameter = new SPParameter(this, parameterIndex++, value);
+				parameter = spParameter();
+				parameter.setIndex(parameterIndex++);
+				parameter.setExpression(value);
 				parameter.setName(name);
 				parameter.setParameterType(SPParameter.IN);
 				storedProcedure.setParameter(parameter);
@@ -4842,7 +4852,7 @@ name=xml namespace element
 description=An xml namespace
 example={code:sql}NO DEFAULT{code}
 */
-NamespaceItem namespaceItem() :
+NamespaceItem namespaceItem() #NamespaceItem:
 {
 	String uri = null;
 	String prefix = null;
@@ -4851,17 +4861,20 @@ NamespaceItem namespaceItem() :
 	(
 		uri = stringVal() <AS> prefix = id(null)
 		{
-			return new NamespaceItem(uri, prefix);
+		  	jjtThis.setUri(uri);
+		  	jjtThis.setPrefix(prefix);
+			return jjtThis;
 		}
 	) | (
 		<NO> <DEFAULT_KEYWORD>
 		{
-			return new NamespaceItem();
+			return jjtThis;
 		}
 	) | (
 		<DEFAULT_KEYWORD> uri = stringVal()
 		{
-			return new NamespaceItem(uri);
+			jjtThis.setUri(uri);
+			return jjtThis;
 		}
 	)
 }
@@ -5300,6 +5313,42 @@ AlterView alterView() #AlterView :
 }
 
 Array array() #Array :
+{
+}
+{
+    {
+        return jjtThis;
+    }
+}
+
+SPParameter spParameter() #SPParameter :
+{
+}
+{
+    {
+        return jjtThis;
+    }
+}
+
+SourceHint sourceHint() #SourceHint :
+{
+}
+{
+    {
+        return jjtThis;
+    }
+}
+
+SpecificHint specificHint() #SpecificHint :
+{
+}
+{
+    {
+        return jjtThis;
+    }
+}
+
+SubqueryHint subqueryHint() #SubqueryHint :
 {
 }
 {
