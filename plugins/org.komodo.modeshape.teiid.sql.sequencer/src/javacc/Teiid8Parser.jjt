@@ -21,22 +21,23 @@
 */
 
 options {
-	STATIC = false;
-	ERROR_REPORTING = true;
-	JAVA_UNICODE_ESCAPE = true;
-	UNICODE_INPUT = false;
+	BUILD_NODE_FILES = false;
+	ERROR_REPORTING = true;	
 	IGNORE_CASE = true;
+	JAVA_UNICODE_ESCAPE = true;
     MULTI = true;
-    BUILD_NODE_FILES = true;
-    NODE_PREFIX = "MS";
+    NODE_CLASS = "ASTNode";
+    NODE_DEFAULT_VOID = true;
+    NODE_FACTORY = "TeiidNodeFactory";
+    NODE_PACKAGE = "org.komodo.modeshape.teiid.sql.lang";
+    NODE_PREFIX = "";
     NODE_SCOPE_HOOK = false;
     NODE_USES_PARSER = true;
-    NODE_PACKAGE = "org.komodo.modeshape.teiid.sql";
-    VISITOR = false;
     GRAMMAR_ENCODING="UTF-8";
     KEEP_LINE_COLUMN = true;
-    NODE_FACTORY = "TeiidNodeFactory";
-    NODE_DEFAULT_VOID = true;
+    STATIC = false;
+    UNICODE_INPUT = false;
+    VISITOR = false;
 }
 
 PARSER_BEGIN(Teiid8Parser)
@@ -70,33 +71,25 @@ import java.util.regex.Matcher;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.IBinaryType;
 import org.komodo.spi.query.sql.lang.IMatchCriteria.MatchMode;
 import org.komodo.spi.query.sql.lang.IJoinType;
 import org.komodo.spi.query.sql.lang.ISetQuery;
-import org.teiid.runtime.client.Messages;
-import org.teiid.language.SortSpecification.NullOrdering;
-import org.teiid.metadata.AbstractMetadataRecord;
-import org.teiid.metadata.BaseColumn;
-import org.teiid.metadata.BaseColumn.NullType;
-import org.teiid.metadata.Column;
-import org.teiid.metadata.KeyRecord;
-import org.teiid.metadata.MetadataFactory;
-import org.teiid.metadata.Procedure;
-import org.teiid.metadata.ProcedureParameter;
-import org.teiid.metadata.Table;
-import org.teiid.query.parser.AbstractTeiidParser;
-import org.teiid.query.parser.ParsedDataType;
-import org.teiid.query.parser.ParseInfo;
-import org.teiid.query.parser.TeiidNodeFactory;
-import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.sql.lang.*;
-import org.teiid.query.sql.lang.CriteriaOperator.Operator;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria.PredicateQuantifier;
-import org.teiid.query.sql.proc.*;
-import org.teiid.query.sql.symbol.*;
-import org.teiid.core.types.BinaryType;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.util.StringUtil;
+import org.komodo.modeshape.teiid.Messages;
+import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidParser;
+import org.komodo.modeshape.teiid.parser.ParsedDataType;
+import org.komodo.modeshape.teiid.parser.ParseInfo;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
+import org.komodo.modeshape.teiid.sql.lang.*;
+import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator.Operator;
+import org.komodo.modeshape.teiid.sql.lang.SubqueryCompareCriteria.PredicateQuantifier;
+import org.komodo.modeshape.teiid.sql.proc.*;
+import org.komodo.modeshape.teiid.sql.symbol.*;
+import org.komodo.utils.StringUtil;
 
 /** 
  * <p>The SQLParser is a JavaCC-generated parser that reads a SQL string and produces a 
@@ -189,7 +182,7 @@ public class Teiid8Parser extends AbstractTeiidParser {
             } else if (parts[i].equalsIgnoreCase(SubqueryHint.NOUNNEST)) {
                 hint.setNoUnnest(true);
             } else if (parts[i].equalsIgnoreCase(SubqueryHint.DJ)) {
-                hint.setDepJoin();
+                hint.setDepJoin(true);
             }
         }
         return hint;
@@ -852,7 +845,7 @@ Command createTrigger(ParseInfo info) :
 		AlterTrigger alterTrigger = alterTrigger();
 		alterTrigger.setTarget(groupSymbol(target));
 		alterTrigger.setDefinition(triggerAction);
-		alterTrigger.setEvent(Table.TriggerEvent.valueOf(event.image.toUpperCase()));
+		alterTrigger.setEvent(TriggerEvent.valueOf(event.image.toUpperCase()));
 		alterTrigger.setCreate(true);
 		return alterTrigger;
 	}
@@ -910,7 +903,7 @@ Command alter(ParseInfo info) :
 		    AlterTrigger alterTrigger = alterTrigger();
 			alterTrigger.setTarget(groupSymbol(target));
 			alterTrigger.setDefinition(triggerAction);
-			alterTrigger.setEvent(Table.TriggerEvent.valueOf(event.image.toUpperCase()));
+			alterTrigger.setEvent(TriggerEvent.valueOf(event.image.toUpperCase()));
 			if (enabled != null) {
 				alterTrigger.setEnabled(enabled);
 			}
@@ -985,10 +978,7 @@ Command userCommand(ParseInfo info) :
     { if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(this); } command = insert(info) |
     { if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(this); } command = update(info) |
     { if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(this); } command = delete(info) |
-    command = dropTable(info) |
-	LOOKAHEAD(2) command = createTempTable(info) |
-    LOOKAHEAD(2) command = createForeignTempTable(info) |
-	command = alter(info) |
+    command = alter(info) |
 	command = createTrigger(info) |
 	{
       requiresVersionAtLeast(Version.TEIID_8_4);
@@ -1004,114 +994,6 @@ Command userCommand(ParseInfo info) :
 	    setSourceHint(sourceHint, command);
 		return command;
 	}
-}
-
-/*
-name=drop table
-description=Creates a trigger action on the given target.
-example={code:sql}CREATE TRIGGER ON vw INSTEAD OF INSERT AS FOR EACH ROW BEGIN ATOMIC ... END{code}
-*/
-Drop dropTable(ParseInfo info) #Drop :
-{
-	String table = null;
-}
-{
-	<DROP> <TABLE> 
-	table = id(null)
-	{
-		jjtThis.setTable(groupSymbol(table));
-		return jjtThis;
-	}
-}
-
-/*
-name=create temporary table
-description=Creates a temporary table.
-example={code:sql}CREATE LOCAL TEMPORARY TABLE tmp (col integer){code}
-*/
-Command createTempTable(ParseInfo info) #Create :
-{
-    String table = null;
-    String pkId = null;
-    Column col = null;
-    List<ElementSymbol> pk = null;
-    boolean localToken = false;
-}
-{
-    <CREATE>
-    [<LOCAL>
-     {
-        localToken = true;
-     }
-    ]
-
-    <TEMPORARY>
-    {
-      if(! localToken)
-        // LOCAL is only optional for Teiid 8.5+        requiresVersionAtLeast(Version.TEIID_8_5);
-    }
-    <TABLE>
-    table = id(null)
-    <LPAREN>
-    {
-        jjtThis.setTable(groupSymbol(table));
-    }
-    col = tableElement(info)
-    {
-      jjtThis.getColumns().add(col);
-    }
-    (LOOKAHEAD(2) <COMMA>
-      col = tableElement(info)
-      {
-        jjtThis.getColumns().add(col);
-      }
-    )*  
-    [<COMMA> <PRIMARY> <KEY> 
-      pk = columnList(true, true)
-      {
-        jjtThis.getPrimaryKey().addAll(pk);
-      }   
-    ]
-    <RPAREN>
-    {
-        return jjtThis;
-    }
-}
-
-/*
-name=temporary table element
-description=Defines a temporary table column.
-example={code:sql}col string NOT NULL{code}
-*/
-Column tableElement(ParseInfo info) :
-{
-    String element = null;
-    ParsedDataType type = null;
-    boolean autoIncrement = false;
-    //TODO: once we support udts, then this will need to inherit the nullability from the type
-    boolean notNull = false;
-}
-{
-     element = id(Boolean.TRUE)
-     (
-      type = parseDataType()
-      |
-      <SERIAL>
-      {
-        type = new ParsedDataType("INTEGER");
-        autoIncrement = true;
-        notNull = true;
-      }
-     )
-     [<NOT> <NULL> { notNull = true; }]
-     {
-        Column c = new Column(getVersion());
-        c.setName(element);
-        c.setRuntimeType(type.getType());
-        c.setAutoIncremented(autoIncrement);
-        c.setNullType(notNull?NullType.No_Nulls:NullType.Nullable);
-        return c;
-     }
 }
 
 /*
@@ -1209,7 +1091,7 @@ Expression exception(ParseInfo info) :
 		ee.setMessage(err);
 		ee.setSqlState(sqlState);
 		ee.setErrorCode(errCode);
-		ee.setParent(parent);
+		ee.setParentExpression(parent);
 		return ee;
 	}	
 }
@@ -3919,7 +3801,7 @@ Expression intParam(ParseInfo info) :
 {
    val = intVal()
    {
-     return constant(val, DataTypeManagerService.DefaultDataTypes.INTEGER);
+     return constant(val, DataTypeName.INTEGER);
    }
    |
    ex = unsignedValueExpressionPrimary(info)
@@ -3974,7 +3856,7 @@ Expression fetchLimit(ParseInfo info) :
     <FETCH> (<FIRST> | <NEXT>) [limit = intParam(info)] (<ROW>|<ROWS>) <ONLY>
     {
       if (limit == null) {
-        return constant(1, DataTypeManagerService.DefaultDataTypes.INTEGER); 
+        return constant(1, DataTypeName.INTEGER); 
       }
       return limit;
     }
@@ -5093,30 +4975,34 @@ Constant nonNumericLiteral() :
 {
     Token t = null;
     String strVal = "";
-    DataTypeManagerService.DefaultDataTypes escapeType = null;
+    DataTypeName escapeType = null;
     Constant constant = null;
 }
 {
 	(	
 		strVal=stringVal()	{ 
-			constant = constant(strVal, DataTypeManagerService.DefaultDataTypes.STRING);
+			constant = constant(strVal, DataTypeName.STRING);
 		} |
-		t=<BINARYSTRINGVAL> { constant = constant(new BinaryType(javax.xml.bind.DatatypeConverter.parseHexBinary(t.image.substring(2, t.image.length() - 1))), DataTypeManagerService.DefaultDataTypes.VARBINARY); } |
-		t=<FALSE>    { constant = constant(Boolean.FALSE, DataTypeManagerService.DefaultDataTypes.BOOLEAN); } |
-		t=<TRUE>     { constant = constant(Boolean.TRUE, DataTypeManagerService.DefaultDataTypes.BOOLEAN); }  |
-        t=<UNKNOWN>  { constant = constant(null, DataTypeManagerService.DefaultDataTypes.BOOLEAN); }       |
+		t=<BINARYSTRINGVAL> {
+		    byte[] bytes = javax.xml.bind.DatatypeConverter.parseHexBinary(t.image.substring(2, t.image.length() - 1));
+		    IBinaryType binary = getDataTypeService().createBinaryType(bytes);
+		    constant = constant(binary, DataTypeName.VARBINARY);
+		  } |
+		t=<FALSE>    { constant = constant(Boolean.FALSE, DataTypeName.BOOLEAN); } |
+		t=<TRUE>     { constant = constant(Boolean.TRUE, DataTypeName.BOOLEAN); }  |
+        t=<UNKNOWN>  { constant = constant(null, DataTypeName.BOOLEAN); }       |
         t=<NULL>     { constant = constant(null); }          |
         
         ( <ESCAPEDTYPE> { 
             String image = getToken(0).image; 
         	if (StringUtil.endsWithIgnoreCase(image, "b")) {
-        		escapeType=DataTypeManagerService.DefaultDataTypes.BOOLEAN;
+        		escapeType=DataTypeName.BOOLEAN;
         	} else if (StringUtil.endsWithIgnoreCase(image, "ts")) {
-        		escapeType=DataTypeManagerService.DefaultDataTypes.TIMESTAMP;
+        		escapeType=DataTypeName.TIMESTAMP;
         	} else if (StringUtil.endsWithIgnoreCase(image, "d")) {
-        		escapeType=DataTypeManagerService.DefaultDataTypes.DATE;
+        		escapeType=DataTypeName.DATE;
         	} else {
-        		escapeType=DataTypeManagerService.DefaultDataTypes.TIME;
+        		escapeType=DataTypeName.TIME;
         	}
 		  } strVal=stringVal() { 
 	        	try {
@@ -5146,15 +5032,15 @@ Constant unsignedNumericLiteral(String strVal) :
 			try { 
 			    strVal = prependSign(strVal, t.image);
 				// First try as integer - this should nearly always work
-				return constant(Integer.valueOf(strVal), DataTypeManagerService.DefaultDataTypes.INTEGER); 				
+				return constant(Integer.valueOf(strVal), DataTypeName.INTEGER); 				
 			} catch(NumberFormatException e1) { 
 				try { 
 					// Second try as a long
-					return constant(Long.valueOf(strVal), DataTypeManagerService.DefaultDataTypes.LONG);
+					return constant(Long.valueOf(strVal), DataTypeName.LONG);
 				} catch(NumberFormatException e2) {
 					try {
 						// Third try as a biginteger
-						return constant(new BigInteger(strVal), DataTypeManagerService.DefaultDataTypes.BIG_INTEGER);
+						return constant(new BigInteger(strVal), DataTypeName.BIG_INTEGER);
 					} catch(NumberFormatException e3) {
 						Object[] params = new Object[] { strVal };
 						throw new ParseException(Messages.getString(Messages.TeiidParser.Integer_parse, params));
@@ -5164,7 +5050,7 @@ Constant unsignedNumericLiteral(String strVal) :
 		}	| t=<FLOATVAL>	{ 
 		    strVal = prependSign(strVal, t.image);
 			try { 
-				return constant(Double.valueOf(strVal), DataTypeManagerService.DefaultDataTypes.DOUBLE); 
+				return constant(Double.valueOf(strVal), DataTypeName.DOUBLE); 
 			} catch(NumberFormatException e) {
 				Object[] params = new Object[] { strVal };
 				throw new ParseException(Messages.getString(Messages.TeiidParser.Float_parse, params));
@@ -5173,400 +5059,15 @@ Constant unsignedNumericLiteral(String strVal) :
      		strVal = prependSign(strVal, t.image);
 			try { 
 			    if (getDataTypeService().isDecimalAsDouble()) {
-			    	return constant(Double.valueOf(strVal), DataTypeManagerService.DefaultDataTypes.DOUBLE);
+			    	return constant(Double.valueOf(strVal), DataTypeName.DOUBLE);
 				} else {
-			    	return constant(new java.math.BigDecimal(strVal), DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL); 
+			    	return constant(new java.math.BigDecimal(strVal), DataTypeName.BIG_DECIMAL); 
 				}
 			} catch(NumberFormatException e) {
 				Object[] params = new Object[] { t.image };
 				throw new ParseException(Messages.getString(Messages.TeiidParser.decimal_parse, params));
 			}
 		} )
-}
-
-/*
-unused=true
-*/
- void parseMetadata(MetadataFactory factory) :
-{
-}
-{
-    (ddlStmt(factory))*
-    <EOF>     
-}
-
-/*
-name=ddl statement
-description=A data definition statement.
-example={code:sql}CREATE FOREIGN TABLE X (Y STRING){code}
-index=true
-*/
-void ddlStmt(MetadataFactory factory) :
-{
-	Command command = null; 
-}
-{
-	(LOOKAHEAD(3) 	createTable(factory) | 
-	 LOOKAHEAD(4)	createDDLProcedure(factory, ParseInfo.DEFAULT_INSTANCE) |
-	 LOOKAHEAD(2)	createNameSpace(factory) |
-	 LOOKAHEAD(4)	alterStatement(factory) |
-	 LOOKAHEAD(4) 	command=createTrigger(ParseInfo.DEFAULT_INSTANCE)
-	 {
-	 	createDDLTrigger(factory, (AlterTrigger)command);
-	 }
-	)
-	[<SEMICOLON>]
-}
-
-/*
-name=option namespace
-description=A namespace used to shorten the full name of an option key.
-example={code:sql}SET NAMESPACE 'http://foo' AS foo{code}
-*/
-void createNameSpace(MetadataFactory factory) :
-{
-	String uri = null;
-	String prefix = null;
-}
-{ 
-	<SET> <NAMESPACE> uri = stringVal() <AS> prefix = id(Boolean.FALSE)
-	{
-		factory.addNamespace(prefix, uri);
-	}
-}
-
-/*
-name=create procedure
-description=Defines a procedure or function invocation.
-example={code:sql}CREATE FOREIGN PROCEDURE proc (param STRING) RETURNS STRING{code}
-*/
-CreateProcedureCommand createDDLProcedure(MetadataFactory factory, ParseInfo info) :
-{
-	boolean virtual = true;
-	boolean function = false;
-	Procedure proc = null;
-	String procName = null;
-    CreateProcedureCommand procCmd = createASTNode(ASTNodes.CREATE_PROCEDURE_COMMAND);
-    Statement stmt = null; 	
-    ParsedDataType returnDataType = null;
-    Token comment = null;    
-}
-{
-	<CREATE> [<VIRTUAL> | <FOREIGN> {virtual = false;}] (<PROCEDURE> | <FUNCTION> {function = true;})
-	//the below is optional beacuse to allow the designer based metadata
-	(	procName = id(null)
-		{
-			proc = factory.addProcedure(procName);
-		}
-	
-		<LPAREN>
-		[procedureParameter(factory, proc)
-		(<COMMA> procedureParameter(factory, proc))*]	
-		<RPAREN>
-		
-		[<RETURNS> (([<TABLE>] <LPAREN>
-	        procedureRsColumn(factory, proc)
-	        (<COMMA> procedureRsColumn(factory, proc))*
-	    <RPAREN>)
-	     |
-	     returnDataType = parseDataType())
-	    ]
-	    [ optionsClause(proc, factory)
-		   {
-		      setProcedureOptions(proc);
-		   }
-		]
-		[<AS> { comment = getToken(1).specialToken; } 
-		stmt = statement(info)])
-		{
-			proc.setVirtual(virtual);
-			proc.setFunction(function);
-			if (stmt != null){
-			    if (function || !virtual) {
-			         throw new ParseException(Messages.getString(Messages.TeiidParser.function_def, procName));
-			    }
-				proc.setQueryPlan((comment != null?comment.image+" ":"") + stmt.toString());
-			}
-			
-	        if (returnDataType != null){
-				addProcColumn(factory, proc, "return", returnDataType, false);
-	        }
-	        if (function) {
-	        	replaceProcedureWithFunction(factory, proc);
-	        }
-	        return procCmd; 		
-		}
-}
-
-/*
-name=procedure parameter
-description=A procedure or function parameter
-example={code:sql}OUT x INTEGER{code}
-*/
-void procedureParameter(MetadataFactory factory, Procedure proc) :
-{
-	String name = null;
-	ParsedDataType type = null;
-	ProcedureParameter.Type ppType = ProcedureParameter.Type.In;
-	ProcedureParameter param = null;
-	String defaultValue = null;
-	boolean notNull = false;
-	boolean vararg = false;
-}
-{
-	[LOOKAHEAD(1) ((<IN> {ppType = ProcedureParameter.Type.In ;})
-	 |(<OUT> {ppType = ProcedureParameter.Type.Out;})
-	 |(<INOUT> {ppType = ProcedureParameter.Type.InOut;})
-	 |(<VARIADIC> {ppType = ProcedureParameter.Type.In ; vararg = true;}))]
-	name = id(Boolean.TRUE)
-	type = parseDataType()
-	[<NOT> <NULL> {notNull = true;}]
-	[<RESULT>
-	  {
-	    if (ppType != ProcedureParameter.Type.Out) {
-	    	throw new ParseException(Messages.getString(Messages.TeiidParser.param_out, proc.getName(), name));
-	    }
-	    ppType = ProcedureParameter.Type.ReturnValue;
-	  }
-	]
-	{
-		param = factory.addProcedureParameter(name, type.getType(), ppType, proc);
-		setTypeInfo(type, param);
-		if (notNull) {
-			param.setNullType(Column.NullType.No_Nulls);
-		}
-		if (vararg) {
-			param.setVarArg(vararg);
-		}			
-	}
-	[<DEFAULT_KEYWORD> defaultValue = stringVal() {param.setDefaultValue(defaultValue);}]
-	[optionsClause(param, factory)
-	   {
-	      setColumnOptions(param);
-	   }
-	]	
-}
-
-/*
-name=procedure result column
-description=A procedure result column.
-example={code:sql}x INTEGER{code}
-*/
-void procedureRsColumn(MetadataFactory factory, Procedure proc) :
-{
-	String name = null;
-	ParsedDataType type = null;
-	boolean notNull = false;
-	BaseColumn column = null; 
-}
-{
-      name = id(Boolean.TRUE)
-	  type = parseDataType()
-	  {
-	  	column = addProcColumn(factory, proc, name, type, true);
-	  }
-	  [<NOT> <NULL> {column.setNullType(Column.NullType.No_Nulls);}]	  
-	  [optionsClause(column, factory)
-	   {
-	      setColumnOptions(column);
-	   }
-	  ]
-}
-
-/*
-name=create table
-description=Defines a table or view.
-example={code:sql}CREATE VIEW vw AS SELECT 1{code}
-*/
-void createTable(MetadataFactory factory) :
-{
-	boolean view = false;
-	boolean globalTemp = false;
-	String tableName = null;
-	Table table = null;
-	Token comment = null;
-	Command query = null;
-}
-{
-	<CREATE> (
-        (<FOREIGN> <TABLE>) | 
-        ([<VIRTUAL>] <VIEW> {view = true;}) |
-        (<GLOBAL> <TEMPORARY> <TABLE> { requiresVersionAtLeast(Version.TEIID_8_5); globalTemp = true; view = true;})
-    )
-
-	tableName = id(null)
-	{
-	    table = factory.addTable(tableName);
-	    table.setVirtual(view);
-	    if (globalTemp) {
-          table.setTableType(Table.Type.TemporaryTable);
-        }
-	}
-	(createTableBody(table, factory) | [optionsClause(table, factory)
-	   {
-	      setTableOptions(table);
-	   }
-	])
-	[<AS> { comment = getToken(1).specialToken; } query = queryExpression(ParseInfo.DEFAULT_INSTANCE)
-	  {
-		   if (!view || globalTemp) {
-     		   throw new ParseException(Messages.getString(Messages.TeiidParser.view_def, table.getName()));
-		   }
-		   table.setSelectTransformation((comment != null?comment.image+" ":"") + query.toString());	
-	  }
-	]
-}
-
-/*
-name=create foreign temp table
-description=Defines a foreign temp table
-example={code:sql}CREATE FOREIGN TEMPORARY TABLE t (x string) ON z{code}
-*/
-Create createForeignTempTable(ParseInfo info) :
-{
-	Table table = null;
-	String tableName = null;
-	String model = null;
-	MetadataFactory factory = getTempMetadataFactory();
-}
-{
-	<CREATE> [<LOCAL>] <FOREIGN> <TEMPORARY> <TABLE>
-	tableName = id(null)
-	{
-		table = new Table();
-		//need to set a dummy/stable uuid
-		table.setUUID("tid:0");
-		table.setTableType(Table.Type.TemporaryTable);
-		table.setName(tableName);
-	} 
-	createTableBody(table, factory)
-	<ON> model = id(null)
-	{
-		Create create = createASTNode(ASTNodes.CREATE);
-		create.setTableMetadata(table);
-		create.setOn(model);
-		return create;
-	}
-}
-
-/*
-name=create table body
-description=Defines a table.
-example={code:sql}(x string) OPTIONS (CARDINALITY 100){code}
-*/
-void createTableBody(Table table, MetadataFactory factory) :
-{
-	String name = null;
-	AbstractMetadataRecord constraint = null;
-}
-{
-	<LPAREN>
-    createColumn(factory, table)
-    (LOOKAHEAD(3) <COMMA>
-      createColumn(factory, table)
-    )*	
-    (<COMMA>{name=null;} [<CONSTRAINT> name = id(null)] (constraint = primaryKey(factory, table, name) | constraint = constraint(factory, table, name, ParseInfo.DEFAULT_INSTANCE) | constraint = foreignKey(factory, table, name))
-       [optionsClause(constraint, factory)
-	   {
-	      setCommonProperties(constraint, constraint.getProperties());
-	   }
-	]
-    )*
-    <RPAREN>    
-    [optionsClause(table, factory)
-	   {
-	      setTableOptions(table);
-	   }
-	]
-	{
-		if (table.getColumns() != null && !table.supportsUpdate()) {
-			for (Column c : table.getColumns()) {
-				c.setUpdatable(false);
-			}
-		}
-	}
-}
-
-/*
-name=foreign key
-description=Defines the foreign key referential constraint.
-example={code:sql}FOREIGN KEY (a, b) REFERENCES tbl (x, y){code}
-*/
-AbstractMetadataRecord foreignKey(MetadataFactory factory, Table table, String name) :
-{
-	List<String> columnNames = null;
-	String viewName = null;
-	Table reference = null;
-	KeyRecord pk = null;
-	Column column = null;
-	List<String> pkColumnNames = null;
-	KeyRecord key = null;
-}
-{
-	<FOREIGN> <KEY>
-	columnNames = columnList(true, false)
-    <REFERENCES>
-    viewName = id(null)
-    [pkColumnNames = columnList(true, false)]
-    {
-	    return factory.addForiegnKey(name != null?name:("FK"+table.getForeignKeys().size()), columnNames, pkColumnNames, viewName, table);   
-    }
-}
-
-/*
-name=primary key
-description=Defines the primary key.
-example={code:sql}PRIMARY KEY (a, b){code}
-*/
-AbstractMetadataRecord primaryKey(MetadataFactory factory, Table table, String name) :
-{
-	List<String> columnNames = null;
-	Column column = null;
-	KeyRecord key = null;
-}
-{
-	<PRIMARY> <KEY>
-	columnNames = columnList(true, false)
-    {
-	    if (table.getPrimaryKey() != null){
-	    	throw new ParseException(Messages.getString(Messages.TeiidParser.pk_exists, table.getName()));
-	 	}
- 		return factory.addPrimaryKey(name!=null?name:"PK", columnNames, table);
-    }
-}
-
-/*
-name=other constraints
-description=Defines ACCESSPATTERN and UNIQUE constraints and INDEXes. 
-example={code:sql}UNIQUE (a){code}
-*/
-AbstractMetadataRecord constraint(MetadataFactory factory, Table table, String name, ParseInfo info) :
-{
-	KeyRecord keyrecord = null;
-	Column column = null;
-	List<String> columnNames = null;
-	Token type = null;
-	KeyRecord key = null;
-	List<Expression> expressions = null;
-}
-{
-	(( type = <UNIQUE> | type = <ACCESSPATTERN>)
-	columnNames = columnList(true, false)	    
-	{
-		if (type.image.equalsIgnoreCase("UNIQUE")) { 
-    		return factory.addIndex(name != null?name:("UNIQUE"+table.getUniqueKeys().size()), false, columnNames, table);
-    	} else if (type.image.equalsIgnoreCase("ACCESSPATTERN")) { 
-    		return factory.addAccessPattern(name != null?name:("AP"+table.getAccessPatterns().size()), columnNames, table);
-    	}
-    }) | (
-    type = <INDEX>
-    <LPAREN>
- 	expressions = expressionList(info)
- 	<RPAREN>
- 	 {
- 		return addFBI(factory, expressions, table, name);
- 	 }
- 	)
 }
 
 /*
@@ -5602,220 +5103,6 @@ List columnList(boolean validate, boolean asElementSymbols) :
 	 {
 	 	return list;
 	 }
-}
-
-/*
-name=table element
-description=Defines a table column.
-example={code:sql}x INTEGER NOT NULL{code}
-*/
-void createColumn(MetadataFactory factory, Table table) :
-{
-	String element = null;
-	ParsedDataType type = null;
-	boolean autoIncrement = false;
-	boolean notNull = false;
-	String defalt = null;
-	Column column = null;
-	List<String> columnName = new ArrayList<String>();
-	boolean index = false;
-	boolean unique = false;
-	boolean pk = false;
-	Token word = null;
-}
-{
-	 element = id(Boolean.TRUE)
-	 (
-       <SERIAL>
-       {
-         requiresVersionAtLeast(Version.TEIID_8_5);
-         type = new ParsedDataType("INTEGER");
-         autoIncrement = true;
-         notNull = true;
-       }
-       |
-       (
-         type = parseDataType()
-         [<NOT> <NULL> { notNull = true; }]
-         [<AUTO_INCREMENT> {  autoIncrement = true; }]
-       )
-       {
-         column = factory.addColumn(element, type.getType(), table);
-         column.setUpdatable(true);
-         setTypeInfo(type, column);                
-         columnName.add(element);
-       }
-	 )
-
-	 ((<PRIMARY> <KEY> { pk = true; }) | ([<UNIQUE> { unique = true;  }] [<INDEX> { index = true; }]))
-	 [<DEFAULT_KEYWORD> defalt = stringVal() {column.setDefaultValue(defalt);}]
-	 [optionsClause(column, factory)
-	   {
-	      setColumnOptions(column);
-	   }
-	 ]
-	 {
-	    if (index){
-	 		factory.addIndex("INDEX"+table.getIndexes().size(), true, columnName, table);
-	 	} else if (unique){
-	 		factory.addIndex("UNIQUE"+table.getIndexes().size(), false, columnName, table);
-	 	} else if (pk) {
-	    	if (table.getPrimaryKey() != null) {
-	    		throw new ParseException(Messages.getString(Messages.TeiidParser.pk_exists, table.getName()));
-	    	}
-	 		factory.addPrimaryKey("PK", columnName, table);
-	 	}
-
-        if (notNull) {
-          column.setNullType(Column.NullType.No_Nulls);
-        }
-	    column.setAutoIncremented(autoIncrement);
-	 }
-}
-
-/*
-name=options clause
-description=A list of statement options.
-example={code:sql}OPTIONS ('x' 'y', 'a' 'b'){code}
-*/
-void optionsClause(AbstractMetadataRecord record, MetadataFactory factory) :
-{
-}
-{
-  <OPTIONS> <LPAREN>
-  optionPair(record, factory) (<COMMA> optionPair(record, factory))*	   
-  <RPAREN> 
-}
-
-/*
-name=option pair
-description=An option key/value pair.
-example={code:sql}'key' 'value'{code}
-*/
-void optionPair(AbstractMetadataRecord record, MetadataFactory factory) :
-{
-	Constant value = null;
-	String key = null;
-	Token t = null;
-	String strVal = null;
-}
-{
-	 key = id(null)
-	 (value = nonNumericLiteral()
-	 | [strVal = plusMinus()] value = unsignedNumericLiteral(strVal))
-	 { 
-	 	key = resolvePropertyKey(factory, key);
-	 	String val = null;
-	 	if (value.getValue() != null) {
-	 		val = value.getValue().toString();
-	 	}
-	 	record.setProperty(key, val); 
-	 } 
-}
-
-/*
-name=alter options
-description=alters options of tables/procedure
-example={code:sql}ALTER FOREIGN TABLE foo OPTIONS (ADD cardinality 100){code}
-*/
-void alterStatement(MetadataFactory factory) :
-{
-	boolean table = false;
-	boolean proc = false;
-	boolean func = false;
-	String objectName = null;
-	AbstractMetadataRecord record = null;
-}
-{ 
-	<ALTER> [<VIRTUAL> | <FOREIGN>] (<TABLE> {table = true;} | <VIEW> {table = true;} | <PROCEDURE> {proc=true;})
-	objectName = id(null)
-	{
-		if (table){
-			record = factory.getSchema().getTable(objectName);
-			if (record == null){
-				throw new ParseException(Messages.getString(Messages.TeiidParser.alter_table_doesnot_exist, objectName));
-			}
-		}
-		if (proc){
-			record = factory.getSchema().getProcedure(objectName);
-			if (record == null){
-				throw new ParseException(Messages.getString(Messages.TeiidParser.alter_procedure_doesnot_exist, objectName));
-			}
-		}		
-	}
-	
-	(alterOptionsList(record, factory) | 
-	 alterColumn(record, factory))
-}
-
-/*
-name=alter options list
-description=a list of alterations to options
-example={code:sql}OPTIONS (ADD updatable true){code}
-*/
-void alterOptionsList(AbstractMetadataRecord record, MetadataFactory factory) :
-{
-
-}
-{
-  <OPTIONS> <LPAREN>
-  (addSetOption(record, factory) |
-   dropOption(record))
-  (<COMMA> (addSetOption(record, factory) |
-   dropOption(record)))*
-  <RPAREN>
-  {
- 		setOptions(record);
-  }
-}
-
-/*
-name=drop option
-description=drop option
-example={code:sql}DROP updatable{code}
-*/
-void dropOption(AbstractMetadataRecord record) :
-{
-	String key = null;
-}
-{
-   <DROP> key = id(null) 
-   {
- 		removeOption(key, record);
-   }
-}
-
-/*
-name=add set option
-description=add or set an option pair
-example={code:sql}ADD updatable true{code}
-*/
-void addSetOption(AbstractMetadataRecord record, MetadataFactory factory) :
-{
-}
-{
-   (<ADD>|<SET>) optionPair(record, factory) 
-}
-
-/*
-name=alter column options
-description=alters a set of column options
-example={code:sql}ALTER COLUMN bar OPTIONS (ADD updatable true){code}
-*/
-void alterColumn(AbstractMetadataRecord parent, MetadataFactory factory) :
-{
-	boolean param = false;
-	String objectName = null;
-	AbstractMetadataRecord record = null;
-	String key = null;
-}
-{ 
-	<ALTER> [<COLUMN>|<PARAMETER>{param=true;}]
-	objectName = id(null)
-	{
-		record = getChild(objectName, parent, param);
-	}
-	alterOptionsList(record, factory)
 }
 
 AssignmentStatement assignmentStatement(ElementSymbol elementSymbol, LanguageObject value) #AssignmentStatement :
@@ -5878,9 +5165,8 @@ Constant constant(Object... args) #Constant :
         for (Object arg : args) {
             if (arg instanceof Class) {
                 jjtThis.setType((Class) arg);
-            } else if (arg instanceof DataTypeManagerService.DefaultDataTypes) {
-                DataTypeManagerService.DefaultDataTypes dataType = (DataTypeManagerService.DefaultDataTypes) arg;
-                jjtThis.setType(dataType.getTypeClass());
+            } else if (arg instanceof DataTypeName) {
+                jjtThis.setType(getDataTypeService().getDefaultDataClass((DataTypeName) arg));
             } else {
                 jjtThis.setValue(arg);
             }
