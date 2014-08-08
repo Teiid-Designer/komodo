@@ -1,0 +1,133 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
+
+package org.komodo.modeshape.teiid.sql.lang;
+
+import java.util.List;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
+import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
+import org.komodo.spi.query.sql.lang.IWithQueryCommand;
+
+public class WithQueryCommand extends ASTNode
+    implements SubqueryContainer<QueryCommand>, IWithQueryCommand<LanguageVisitor, QueryCommand> {
+
+    public WithQueryCommand(TeiidParser p, int id) {
+        super(p, id);
+    }
+
+    /**
+     * @return
+     */
+    public GroupSymbol getGroupSymbol() {
+        return null;
+    }
+
+    /**
+     * @param groupSymbol
+     */
+    public void setGroupSymbol(GroupSymbol groupSymbol) {
+    }
+
+    /**
+     * @return
+     */
+    public List<ElementSymbol> getColumns() {
+        return null;
+    }
+
+    /**
+     * @param columns
+     */
+    public void setColumns(List<ElementSymbol> columns) {
+    }
+
+    /**
+     * @return
+     */
+    public QueryCommand getQueryExpression() {
+        return null;
+    }
+
+    /**
+     * @param queryExpression
+     */
+    public void setQueryExpression(QueryCommand queryExpression) {
+    }
+    @Override
+    public QueryCommand getCommand() {
+        return null;
+    }
+
+    @Override
+    public void setCommand(QueryCommand command) {
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((this.getColumns() == null) ? 0 : this.getColumns().hashCode());
+        result = prime * result + ((this.getGroupSymbol() == null) ? 0 : this.getGroupSymbol().hashCode());
+        result = prime * result + ((this.getQueryExpression() == null) ? 0 : this.getQueryExpression().hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!super.equals(obj)) return false;
+        if (getClass() != obj.getClass()) return false;
+        WithQueryCommand other = (WithQueryCommand)obj;
+        if (this.getColumns() == null) {
+            if (other.getColumns() != null) return false;
+        } else if (!this.getColumns().equals(other.getColumns())) return false;
+        if (this.getGroupSymbol() == null) {
+            if (other.getGroupSymbol() != null) return false;
+        } else if (!this.getGroupSymbol().equals(other.getGroupSymbol())) return false;
+        if (this.getQueryExpression() == null) {
+            if (other.getQueryExpression() != null) return false;
+        } else if (!this.getQueryExpression().equals(other.getQueryExpression())) return false;
+        return true;
+    }
+
+    @Override
+    public void acceptVisitor(LanguageVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public WithQueryCommand clone() {
+        WithQueryCommand clone = new WithQueryCommand(this.getTeiidParser(), this.getId());
+
+        if(getColumns() != null)
+            clone.setColumns(cloneList(getColumns()));
+        if(getGroupSymbol() != null)
+            clone.setGroupSymbol(getGroupSymbol().clone());
+        if(getQueryExpression() != null)
+            clone.setQueryExpression(getQueryExpression().clone());
+
+        return clone;
+    }
+
+}

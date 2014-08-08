@@ -46,24 +46,29 @@
 					<includes>
 						<include>src/javacc/*Parser.jjt</include>
 					</includes>
-					<isStatic>false</isStatic>
+					<!-- 
+					        These options should be an identical superset of the options
+					        configured in the javacc/*.jjt files
+					-->
+					<buildNodeFiles>false</buildNodeFiles>
 					<errorReporting>true</errorReporting>
-					<javaUnicodeEscape>true</javaUnicodeEscape>
-					<unicodeInput>false</unicodeInput>
+					<grammarEncoding>UTF-8</grammarEncoding>
 					<ignoreCase>true</ignoreCase>
+					<interimDirectory>${project.basedir}/src</interimDirectory>
+					<isStatic>false</isStatic>
+					<javaUnicodeEscape>true</javaUnicodeEscape>
+					<keepLineColumn>true</keepLineColumn>
 					<multi>true</multi>
-					<buildNodeFiles>true</buildNodeFiles>
-					<nodePrefix>MS</nodePrefix>
+					<nodeClass>ASTNode</nodeClass>
+					<nodeDefaultVoid>true</nodeDefaultVoid>
 					<nodeFactory>TeiidNodeFactory</nodeFactory>
+					<nodePackage>org.komodo.modeshape.teiid.sql.lang</nodePackage>
+					<nodePrefix/>
 					<nodeScopeHook>false</nodeScopeHook>
 					<nodeUsesParser>true</nodeUsesParser>
-					<nodePackage>org.komodo.modeshape.teiid.sql</nodePackage>
-					<visitor>false</visitor>
-					<grammarEncoding>UTF-8</grammarEncoding>
-					<keepLineColumn>true</keepLineColumn>
-					<nodeDefaultVoid>true</nodeDefaultVoid>
-					<interimDirectory>${project.basedir}/src</interimDirectory>
 					<outputDirectory>${project.basedir}/src</outputDirectory>
+					<unicodeInput>false</unicodeInput>
+					<visitor>false</visitor>
 				</configuration>
 			</plugin>
 			<plugin>
