@@ -20,7 +20,7 @@
  * 02110-1301 USA.
  */
 
-package org.komodo.modeshape.teiid.sql.lang;
+package org.komodo.modeshape.teiid.sql.util;
 
 import java.util.ArrayList;
 import java.util.Collections;

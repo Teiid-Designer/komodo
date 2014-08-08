@@ -53,6 +53,7 @@ import org.komodo.modeshape.teiid.sql.lang.JoinType;
 import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
 import org.komodo.modeshape.teiid.sql.lang.Limit;
 import org.komodo.modeshape.teiid.sql.lang.MatchCriteria;
+import org.komodo.modeshape.teiid.sql.lang.NamespaceItem;
 import org.komodo.modeshape.teiid.sql.lang.NotCriteria;
 import org.komodo.modeshape.teiid.sql.lang.ObjectColumn;
 import org.komodo.modeshape.teiid.sql.lang.ObjectTable;
@@ -61,14 +62,18 @@ import org.komodo.modeshape.teiid.sql.lang.OrderBy;
 import org.komodo.modeshape.teiid.sql.lang.OrderByItem;
 import org.komodo.modeshape.teiid.sql.lang.ProjectedColumn;
 import org.komodo.modeshape.teiid.sql.lang.Query;
+import org.komodo.modeshape.teiid.sql.lang.SPParameter;
 import org.komodo.modeshape.teiid.sql.lang.Select;
 import org.komodo.modeshape.teiid.sql.lang.SetClause;
 import org.komodo.modeshape.teiid.sql.lang.SetClauseList;
 import org.komodo.modeshape.teiid.sql.lang.SetCriteria;
 import org.komodo.modeshape.teiid.sql.lang.SetQuery;
+import org.komodo.modeshape.teiid.sql.lang.SourceHint;
+import org.komodo.modeshape.teiid.sql.lang.SpecificHint;
 import org.komodo.modeshape.teiid.sql.lang.StoredProcedure;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryCompareCriteria;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryFromClause;
+import org.komodo.modeshape.teiid.sql.lang.SubqueryHint;
 import org.komodo.modeshape.teiid.sql.lang.SubquerySetCriteria;
 import org.komodo.modeshape.teiid.sql.lang.Teiid8ParserTreeConstants;
 import org.komodo.modeshape.teiid.sql.lang.TextColumn;
@@ -859,6 +864,12 @@ public class TeiidNodeFactory {
         XML_NAMESPACES("XMLNamespaces"), //$NON-NLS-1$
 
         /**
+         * NamespaceItem
+         * @generated
+         */
+        NAMESPACE_ITEM("NamespaceItem"), //$NON-NLS-1$
+
+        /**
          * AssignmentStatement
          * @generated
          */
@@ -952,7 +963,31 @@ public class TeiidNodeFactory {
          * Array
          * @generated
          */
-        ARRAY("Array"); //$NON-NLS-1$
+        ARRAY("Array"), //$NON-NLS-1$
+
+        /**
+         * SPParameter
+         * @generated
+         */
+        SP_PARAMETER("SPParameter"), //$NON-NLS-1$
+
+        /**
+         * SourceHint
+         * @generated
+         */
+        SOURCE_HINT("SourceHint"), //$NON-NLS-1$
+
+        /**
+         * SpecificHint
+         * @generated
+         */
+        SPECIFIC_HINT("SpecificHint"), //$NON-NLS-1$
+
+        /**
+         * SubqueryHint
+         * @generated
+         */
+        SUBQUERY_HINT("SubqueryHint"); //$NON-NLS-1$
 
         private String name;
 
@@ -1792,6 +1827,18 @@ public class TeiidNodeFactory {
      * @param nodeType
      * @return
      */
+    private NamespaceItem createNamespaceItem(TeiidParser teiidParser, int nodeType) {
+        return new NamespaceItem(teiidParser, nodeType);
+    }
+
+    /**
+     *
+     * @generated
+     *
+     * @param teiidParser
+     * @param nodeType
+     * @return
+     */
     private AssignmentStatement createAssignmentStatement(TeiidParser teiidParser, int nodeType) {
         return new AssignmentStatement(teiidParser, nodeType);
     }
@@ -1977,6 +2024,54 @@ public class TeiidNodeFactory {
     }
 
     /**
+     *
+     * @generated
+     *
+     * @param teiidParser
+     * @param nodeType
+     * @return
+     */
+    private SPParameter createSPParameter(TeiidParser teiidParser, int nodeType) {
+        return new SPParameter(teiidParser, nodeType);
+    }
+
+    /**
+     *
+     * @generated
+     *
+     * @param teiidParser
+     * @param nodeType
+     * @return
+     */
+    private SourceHint createSourceHint(TeiidParser teiidParser, int nodeType) {
+        return new SourceHint(teiidParser, nodeType);
+    }
+
+    /**
+     *
+     * @generated
+     *
+     * @param teiidParser
+     * @param nodeType
+     * @return
+     */
+    private SpecificHint createSpecificHint(TeiidParser teiidParser, int nodeType) {
+        return new SpecificHint(teiidParser, nodeType);
+    }
+
+    /**
+     *
+     * @generated
+     *
+     * @param teiidParser
+     * @param nodeType
+     * @return
+     */
+    private SubqueryHint createSubqueryHint(TeiidParser teiidParser, int nodeType) {
+        return new SubqueryHint(teiidParser, nodeType);
+    }
+
+    /**
      * Create a version 8 teiid parser node for the given node type.
      *
      * @generated
@@ -2123,6 +2218,8 @@ public class TeiidNodeFactory {
                 return (T) createXMLForest(teiidParser, nodeType);
             case Teiid8ParserTreeConstants.JJTXMLNAMESPACES:
                 return (T) createXMLNamespaces(teiidParser, nodeType);
+            case Teiid8ParserTreeConstants.JJTNAMESPACEITEM:
+                return (T) createNamespaceItem(teiidParser, nodeType);
             case Teiid8ParserTreeConstants.JJTASSIGNMENTSTATEMENT:
                 return (T) createAssignmentStatement(teiidParser, nodeType);
             case Teiid8ParserTreeConstants.JJTSCALARSUBQUERY:
@@ -2155,6 +2252,14 @@ public class TeiidNodeFactory {
                 return (T) createAlterView(teiidParser, nodeType);
             case Teiid8ParserTreeConstants.JJTARRAY:
                 return (T) createArray(teiidParser, nodeType);
+            case Teiid8ParserTreeConstants.JJTSPPARAMETER:
+                return (T) createSPParameter(teiidParser, nodeType);
+            case Teiid8ParserTreeConstants.JJTSOURCEHINT:
+                return (T) createSourceHint(teiidParser, nodeType);
+            case Teiid8ParserTreeConstants.JJTSPECIFICHINT:
+                return (T) createSpecificHint(teiidParser, nodeType);
+            case Teiid8ParserTreeConstants.JJTSUBQUERYHINT:
+                return (T) createSubqueryHint(teiidParser, nodeType);
             default:
                 throw new IllegalArgumentException(Messages.getString(Messages.TeiidParser.invalidNodeType, nodeType, teiidParser.getVersion()));
         }

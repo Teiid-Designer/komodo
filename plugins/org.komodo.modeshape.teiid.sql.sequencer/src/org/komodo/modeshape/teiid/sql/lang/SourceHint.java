@@ -23,52 +23,20 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Map;
+import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.lang.ISourceHint;
 
 /**
  *
  */
-public class SourceHint implements ISourceHint {
+public class SourceHint extends ASTNode implements ISourceHint {
 
     /**
-     *
+     * @param p
+     * @param id
      */
-    public static class SpecificHint {
-
-        /**
-         * @param hint
-         * @param useAliases
-         */
-        public SpecificHint(String hint, boolean useAliases) {
-            this.setHint(hint);
-            this.setUseAliases(useAliases);
-        }
-
-        /**
-         * @param hint
-         */
-        private void setHint(String hint) {
-        }
-
-        /**
-         * @return hint
-         */
-        public String getHint() {
-            return null;
-        }
-
-        /**
-         * @return use aliases
-         */
-        public boolean isUseAliases() {
-            return false;
-        }
-
-        /**
-         * @param useAliases
-         */
-        private void setUseAliases(boolean useAliases) {
-        }
+    public SourceHint(TeiidParser p, int id) {
+        super(p, id);
     }
 
     /**
