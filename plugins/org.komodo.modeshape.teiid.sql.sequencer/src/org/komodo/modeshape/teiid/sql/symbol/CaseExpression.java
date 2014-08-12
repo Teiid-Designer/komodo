@@ -73,13 +73,7 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
         return 0;
     }
 
-    /**
-     * Sets the WHEN and THEN parts of this CASE expression.
-     * Both lists should have the same number of Expressions.
-     * @param when a non-null List of at least one Expression
-     * @param then a non-null List of at least one Expression
-     */
-    public void setWhen(List<Expression> when, List<Expression> then) {
+    public void setWhen(List<Expression> when) {
     }
 
     public List<Expression> getThenExpressions() {
@@ -89,6 +83,9 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
     @Override
     public Expression getThenExpression(int index) {
         return null;
+    }
+
+    public void setThen(List<Expression> then) {
     }
 
     @Override
@@ -163,7 +160,9 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
         if (getExpression() != null)
             clone.setExpression(getExpression().clone());
         if (getWhenExpressions() != null)
-            clone.setWhen(cloneList(getWhenExpressions()), cloneList(getThenExpressions()));
+            clone.setWhen(cloneList(getWhenExpressions()));
+        if (getThenExpressions() != null)
+            clone.setThen(cloneList(getThenExpressions()));
         if (getElseExpression() != null)
             clone.setElseExpression(getElseExpression().clone());
         if (getType() != null)

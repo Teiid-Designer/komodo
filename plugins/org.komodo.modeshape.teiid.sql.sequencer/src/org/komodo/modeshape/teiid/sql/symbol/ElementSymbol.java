@@ -56,12 +56,12 @@ public class ElementSymbol extends Symbol implements Expression, IElementSymbol<
     }
 
     @Override
-    public org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode getDisplayMode() {
+    public ElementSymbol.DisplayMode getDisplayMode() {
         return null;
     }
 
     @Override
-    public void setDisplayMode(org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode outputName) {
+    public void setDisplayMode(ElementSymbol.DisplayMode outputName) {
     }
 
     @Override

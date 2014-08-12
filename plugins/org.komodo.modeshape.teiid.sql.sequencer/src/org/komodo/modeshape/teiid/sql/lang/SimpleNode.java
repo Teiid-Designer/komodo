@@ -26,26 +26,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
 
-public class SimpleNode implements Node, LanguageObject {
+public class SimpleNode implements Node {
 
     protected Node parent;
     protected Node[] children;
-    protected int id;
+    private int id;
     protected Object value;
-    protected TeiidParser parser;
+    private TeiidParser parser;
 
     public SimpleNode(TeiidParser p, int i) {
         id = i;
         parser = p;
     }
 
-    @Override
     public TeiidParser getTeiidParser() {
         return parser;
     }
@@ -54,22 +50,7 @@ public class SimpleNode implements Node, LanguageObject {
      * @return the id
      */
     public int getId() {
-        return this.getId();
-    }
-
-    @Override
-    public ITeiidVersion getTeiidVersion() {
-        return parser.getVersion();
-    }
-
-    public IDataTypeManagerService getDataTypeService() {
-        return parser.getDataTypeService();
-    }
-
-    /** Accept the visitor. **/
-    @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
-        visitor.visit(this);
+        return id;
     }
 
     @Override
@@ -122,7 +103,7 @@ public class SimpleNode implements Node, LanguageObject {
 
     @Override
     public SimpleNode clone() {
-        SimpleNode clone = new SimpleNode(this.getTeiidParser(), this.getId());
+        SimpleNode clone = new SimpleNode(getTeiidParser(), this.getId());
         return clone;
     }
 

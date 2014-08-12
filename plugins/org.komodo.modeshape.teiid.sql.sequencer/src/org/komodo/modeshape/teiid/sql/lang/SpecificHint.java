@@ -61,4 +61,11 @@ public class SpecificHint extends ASTNode {
      */
     public void setUseAliases(boolean useAliases) {
     }
+
+    public String getTranslatorName() {
+        return null;
+    }
+
+    public void setTranslatorName(String translatorName) {
+    }
 }

@@ -57,7 +57,7 @@ public interface StringConstants {
     /**
      * The String "\t"
      */
-    String TAB = "\n"; //$NON-NLS-1$
+    String TAB = "\t"; //$NON-NLS-1$
     
     /**
      * A Comma.
@@ -80,14 +80,24 @@ public interface StringConstants {
     String DOT = "."; //$NON-NLS-1$
 
     /**
+     * A Speech mark.
+     */
+    String SPEECH_MARK = "\""; //$NON-NLS-1$
+
+    /**
      * Two Dots
      */
     String DOT_DOT = ".."; //$NON-NLS-1$
 
     /**
-     * class extension
+     * class
      */
     String CLASS = "class"; //$NON-NLS-1$
+
+    /**
+     * interface
+     */
+    String INTERFACE = "interface"; //$NON-NLS-1$
 
     /**
      * xml extension
@@ -160,6 +170,16 @@ public interface StringConstants {
      */
     String CLOSE_BRACE = "}"; //$NON-NLS-1$
 
+    /**
+     * Minus Sign
+     */
+    String MINUS = "-"; //$NON-NLS-1$
+
+    /**
+     * Plus Sign
+     */
+    String PLUS = "+"; //$NON-NLS-1$
+
 	/**
    * komodo
    */
@@ -214,5 +234,10 @@ public interface StringConstants {
    * JAR File Extension
    */
   String JAR = "jar"; //$NON-NLS-1$
+
+  /**
+   * src directory
+   */
+  String SRC = "src"; //$NON-NLS-1$
 }
 

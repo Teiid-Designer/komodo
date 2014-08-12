@@ -28,7 +28,7 @@ import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IOrderByItem;
 
-public class OrderByItem extends ASTNode implements SortSpecification, IOrderByItem<Expression, LanguageVisitor> {
+public class OrderByItem extends ASTNode implements IOrderByItem<Expression, LanguageVisitor> {
 
     public OrderByItem(TeiidParser p, int id) {
         super(p, id);
@@ -57,14 +57,14 @@ public class OrderByItem extends ASTNode implements SortSpecification, IOrderByI
     /**
      * @return
      */
-    public NullOrdering getNullOrdering() {
+    public SortSpecification.NullOrdering getNullOrdering() {
         return null;
     }
 
     /**
      * @param nullOrdering
      */
-    public void setNullOrdering(NullOrdering nullOrdering) {
+    public void setNullOrdering(SortSpecification.NullOrdering nullOrdering) {
     }
 
     @Override

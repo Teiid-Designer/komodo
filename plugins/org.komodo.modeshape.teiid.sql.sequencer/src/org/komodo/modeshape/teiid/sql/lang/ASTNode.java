@@ -30,8 +30,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.type.IDataTypeManagerService;
 import org.modeshape.common.util.CheckArg;
 import org.modeshape.jcr.api.JcrConstants;
 
@@ -39,7 +42,7 @@ import org.modeshape.jcr.api.JcrConstants;
  * Utility object class designed to facilitate constructing an AST or Abstract Syntax Tree representing nodes and properties that
  * are compatible with ModeShape graph component structure.
  */
-public class ASTNode extends SimpleNode implements StringConstants, Iterable<ASTNode>, Cloneable {
+public class ASTNode extends SimpleNode implements LanguageObject, StringConstants, Iterable<ASTNode>, Cloneable {
 
     /**
      * 
@@ -69,6 +72,21 @@ public class ASTNode extends SimpleNode implements StringConstants, Iterable<AST
      */
     public ASTNode(TeiidParser parser, int nodeTypeIndex) {
         super(parser, nodeTypeIndex);
+    }
+
+    @Override
+    public ITeiidVersion getTeiidVersion() {
+        return getTeiidParser().getVersion();
+    }
+
+    public IDataTypeManagerService getDataTypeService() {
+        return getTeiidParser().getDataTypeService();
+    }
+
+    /** Accept the visitor. **/
+    @Override
+    public void acceptVisitor(LanguageVisitor visitor) {
+        visitor.visit(this);
     }
 
     /**
@@ -608,7 +626,7 @@ public class ASTNode extends SimpleNode implements StringConstants, Iterable<AST
     }
 
     protected ASTNode cloneWithoutNewParent() {
-        ASTNode result = new ASTNode(parser, id);
+        ASTNode result = new ASTNode(getTeiidParser(), getId());
         result.properties.putAll(this.properties);
         // Clone the children ...
         for (ASTNode child : children) {

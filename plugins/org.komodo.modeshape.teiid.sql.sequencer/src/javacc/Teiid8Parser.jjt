@@ -152,7 +152,10 @@ public class Teiid8Parser extends AbstractTeiidParser {
         matcher = SOURCE_HINT_ARG.matcher(comment);
         while (matcher.find(end)) {
             end = matcher.end();
-            sourceHint.setSourceHint(matcher.group(1), normalizeStringLiteral(matcher.group(3)), matcher.group(2) != null);
+            SpecificHint specificHint = specificHint();
+            specificHint.setTranslatorName(matcher.group(1));
+            specificHint.setHint(normalizeStringLiteral(matcher.group(3)));
+            specificHint.setUseAliases(matcher.group(2) != null);
         }
 
         return sourceHint;
@@ -4334,7 +4337,8 @@ CaseExpression caseExpression(ParseInfo info) #CaseExpression :
 	<END>
 	{
 	    jjtThis.setExpression(expression);
-	    jjtThis.setWhen(whenExpressions, thenExpressions);
+	    jjtThis.setWhen(whenExpressions);
+	    jjtThis.setThen(thenExpressions);
 		jjtThis.setElseExpression(elseExpression);
 		return jjtThis;
 	}
@@ -4368,7 +4372,8 @@ SearchedCaseExpression searchedCaseExpression(ParseInfo info) #SearchedCaseExpre
 	[<ELSE> elseExpression = expression(info)]
 	<END>
 	{
-	    jjtThis.setWhen(whenCriteriaList, thenExpressions);
+	    jjtThis.setWhen(whenCriteriaList);
+	    jjtThis.setThen(thenExpressions);
 		jjtThis.setElseExpression(elseExpression);
 		return jjtThis;
 	}

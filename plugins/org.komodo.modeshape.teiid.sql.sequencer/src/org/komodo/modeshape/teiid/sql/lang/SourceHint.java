@@ -57,16 +57,14 @@ public class SourceHint extends ASTNode implements ISourceHint {
      *
      * @return source hint with name
      */
-    public String getSourceHint(String sourceName) {
+    public SpecificHint getSourceHint(String sourceName) {
         return null;
     }
 
     /**
-     * @param translatorName
-     * @param hint
-     * @param useAliases
+     * @param specificHint
      */
-    public void setSourceHint(String translatorName, String hint, boolean useAliases) {
+    public void setSourceHint(SpecificHint specificHint) {
     }
 
     /**
