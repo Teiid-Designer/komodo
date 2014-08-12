@@ -26,7 +26,6 @@ import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.modeshape.teiid.sql.lang.OrderBy;
-import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
 
 public class AggregateSymbol extends Function implements IAggregateSymbol<LanguageVisitor> {
@@ -116,7 +115,8 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
     /**
      * @param args
      */
-    public void setArgs(IExpression[] args) {
+    @Override
+    public void setArgs(Expression[] args) {
     }
 
     @Override

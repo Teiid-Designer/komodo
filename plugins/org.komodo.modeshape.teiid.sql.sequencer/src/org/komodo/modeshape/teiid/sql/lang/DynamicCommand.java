@@ -52,7 +52,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
     /** 
      * @param columns The columns to set.
      */
-    public void setAsColumns(List columns) {
+    public void setAsColumns(List<ElementSymbol> columns) {
     }
     
     /** 

@@ -53,19 +53,16 @@ public class SearchedCaseExpression extends ASTNode implements Expression, ISear
         return null;
     }
 
-    /**
-     * @return
-     */
+    public void setWhen(List<Criteria> when) {
+    }
+
     public List<Expression> getThen() {
         return null;
     }
 
-    /**
-     * @param whenCriteriaList
-     * @param thenExpressions
-     */
-    public void setWhen(List<Criteria> whenCriteriaList, List<Expression> thenExpressions) {
+    public void setThen(List<Expression> then) {
     }
+
 
     /**
      * @return
@@ -133,7 +130,9 @@ public class SearchedCaseExpression extends ASTNode implements Expression, ISear
         SearchedCaseExpression clone = new SearchedCaseExpression(this.getTeiidParser(), this.getId());
 
         if (getWhen() != null)
-            clone.setWhen(cloneList(getWhen()), cloneList(getThen()));
+            clone.setWhen(cloneList(getWhen()));
+        if (getThen() != null)
+            clone.setThen(cloneList(getThen()));
         if (getElseExpression() != null)
             clone.setElseExpression(getElseExpression().clone());
         if (getType() != null)

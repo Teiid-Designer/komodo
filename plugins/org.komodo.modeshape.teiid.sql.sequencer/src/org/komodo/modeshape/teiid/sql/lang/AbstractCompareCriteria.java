@@ -28,7 +28,7 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 /**
  *
  */
-public abstract class AbstractCompareCriteria extends Criteria implements PredicateCriteria, CriteriaOperator {
+public abstract class AbstractCompareCriteria extends Criteria implements PredicateCriteria {
 
     /**
      * @param p
@@ -57,8 +57,8 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * Sets the operator.
      * @param operator
      */
-    public void setOperator( Operator operator ) {
-        if (operator.isLessThan(Operator.EQ) || operator.isGreaterThan(Operator.GE)) {
+    public void setOperator(CriteriaOperator.Operator operator ) {
+        if (operator.isLessThan(CriteriaOperator.Operator.EQ) || operator.isGreaterThan(CriteriaOperator.Operator.GE)) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0001, operator));
         }
     }
