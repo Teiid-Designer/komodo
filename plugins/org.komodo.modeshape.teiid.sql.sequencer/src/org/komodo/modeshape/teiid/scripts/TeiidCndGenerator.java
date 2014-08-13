@@ -24,12 +24,15 @@ package org.komodo.modeshape.teiid.scripts;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +46,7 @@ import org.komodo.modeshape.teiid.sql.proc.Block;
 import org.komodo.modeshape.teiid.sql.symbol.Symbol;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
+import org.modeshape.jcr.value.Reference;
 
 /**
  *
@@ -61,9 +65,6 @@ public class TeiidCndGenerator implements StringConstants {
         ccf.generate();
     }
 
-    /**
-     * @param pkg
-     */
     private static String convertPackageToDirPath(Package pkg) {
         return pkg.getName().replaceAll(DOUBLE_BACK_SLASH + DOT, File.separator);
     }
@@ -108,50 +109,63 @@ public class TeiidCndGenerator implements StringConstants {
     };
 
     private static final String TSQL_PREFIX = "tsql";
+    
+    private static final String TSQL_NAMESPACE = "http://www.teiid.org/sql/1.0";
 
-    private static final String TEIID_SQL_CND = "TeiidSQL.cnd";
+    private static final String TEIID_SQL_CND = "TeiidSql.cnd";
+
+    private static final String TEIID_SQL_LEXICON = "TeiidSqlLexicon";
 
     private static final String[] MODESHAPE_NAMESPACES = {
         "<jcr='http://www.jcp.org/jcr/1.0'>",
         "<nt='http://www.jcp.org/jcr/nt/1.0'>",
         "<mix='http://www.jcp.org/jcr/mix/1.0'>",
-        "<" + TSQL_PREFIX + "='http://www.teiid.org/sql/1.0'>"
+        "<" + TSQL_PREFIX + "='" + TSQL_NAMESPACE + "'>"
     };
 
-    /**
-     * Prefix for setter methods
-     */
     private static final String SET = "set";
 
-    private static final String STRING = "STRING";
-    private static final String BINARY = "BINARY";
-    private static final String LONG = "LONG";
-    private static final String DOUBLE = "DOUBLE";
-    private static final String DATE = "DATE";
-    private static final String BOOLEAN = "BOOLEAN";
-    private static final String NAME = "NAME";
-    private static final String PATH = "PATH";
-    private static final String REFERENCE = "REFERENCE";
-    private static final String WEAKREFERENCE = "WEAKREFERENCE";
-    private static final String URI = "URI";
-    private static final String DECIMAL = "DECIMAL";
-    
-    private static final String[] MODESHAPE_BASIC_TYPES = new String[] {
-        STRING, BINARY, LONG, DOUBLE,DATE, BOOLEAN, NAME,
-        PATH, REFERENCE, WEAKREFERENCE, URI, DECIMAL
-    };
+    private enum ModeshapeType {
+        STRING("STRING", String.class),
+        BINARY("BINARY", Object.class),
+        LONG("LONG", Long.class),
+        DOUBLE("DOUBLE", Double.class),
+        DATE("DATE", Date.class),
+        BOOLEAN("BOOLEAN", Boolean.class),
+        NAME("NAME", String.class),
+        PATH("PATH", String.class),
+        REFERENCE("REFERENCE", Reference.class),
+        WEAKREFERENCE("WEAKREFERENCE", WeakReference.class),
+        URI("URI", URI.class),
+        DECIMAL("DECIMAL", Float.class),
+        INT("LONG", Long.class),
+        INTEGER("LONG", Long.class),
+        CHARACTER("STRING", String.class),
+        CHAR("STRING", String.class);
 
-    private static final Map<String, String> PROPERTY_TYPE_MAP = new HashMap<String, String>();
+        private String name;
+        private Class<?> type;
 
-    static {
-        for (String basicPropType : MODESHAPE_BASIC_TYPES) {
-            PROPERTY_TYPE_MAP.put(basicPropType, basicPropType);
+        private ModeshapeType(String name, Class<?> type) {
+            this.name = name;
+            this.type = type;
         }
 
-        PROPERTY_TYPE_MAP.put("INT", LONG);
-        PROPERTY_TYPE_MAP.put("INTEGER", LONG);
-        PROPERTY_TYPE_MAP.put("CHARACTER", STRING);
-        PROPERTY_TYPE_MAP.put("CHAR", STRING);
+        public String getName() {
+            return this.name;
+        }
+
+        public Class<?> getTypeClass() {
+            return this.type;
+        }
+
+        public static ModeshapeType get(Class<?> klazz) {
+            for (ModeshapeType mst : ModeshapeType.values()) {
+                if (mst.name().equals(klazz.getSimpleName().toUpperCase()))
+                    return mst;
+            }
+            return null;
+        }
     }
 
     // Modeshape attributes for properties and children
@@ -179,9 +193,86 @@ public class TeiidCndGenerator implements StringConstants {
             return lowerCase;
         }
     }
-    private final File cndTargetFile;
+    
+    private abstract class Aspect {
+
+        private String name;
+        private boolean multiple;
+
+        public Aspect(String name, boolean multiple) {
+            this.name = name;
+            this.multiple = multiple;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public boolean isMultiple() {
+            return this.multiple;
+        }
+
+        public abstract String getTypeName();
+
+        public abstract Class<?> getTypeClass();        
+    }
+
+    private class ChildAspect extends Aspect {
+
+        private Class<?> klazz;
+
+        public ChildAspect(String name, Class<?> klazz, boolean multiple) {
+            super(name, multiple);
+            this.klazz = klazz;
+        }
+
+        @Override
+        public String getTypeName() {
+            return klazz.getSimpleName();
+        }
+
+        @Override
+        public Class<?> getTypeClass() {
+            return klazz;
+        }
+    }
+
+    private class PropertyAspect extends Aspect {
+
+        private List<String> constraints;
+        private ModeshapeType mType;
+
+        public PropertyAspect(String name, ModeshapeType mType, boolean multiple) {
+            super(name, multiple);
+            this.mType = mType;
+        }
+
+        @Override
+        public String getTypeName() {
+            return mType.getName();
+        }
+
+        @Override
+        public Class<?> getTypeClass() {
+            return mType.getTypeClass();
+        }
+
+        public List<String> getConstraints() {
+            return this.constraints;
+        }
+
+        public void setConstraints(List<String> constraints) {
+            this.constraints = new ArrayList<String>();
+            this.constraints.addAll(constraints);
+        }
+        
+    }
+
+    private final File targetDirectory;
 
     private final BufferedWriter cndWriter;
+
+    private final BufferedWriter lexiconWriter;
 
     /**
      * @param targetDirectory
@@ -191,35 +282,80 @@ public class TeiidCndGenerator implements StringConstants {
         ArgCheck.isTrue(targetDirectory.isDirectory(), "Parent directory not directory!");
         ArgCheck.isTrue(targetDirectory.canWrite(), "Parent directory not writeable!");
 
-        cndTargetFile = new File(targetDirectory, TEIID_SQL_CND);
+        this.targetDirectory = targetDirectory;
+        File cndTargetFile = new File(targetDirectory, TEIID_SQL_CND);
         if (cndTargetFile.exists())
             cndTargetFile.delete();
 
         cndWriter = new BufferedWriter(new FileWriter(cndTargetFile));
+
+        File lexiconTargetFile = new File(targetDirectory, TEIID_SQL_LEXICON + DOT + JAVA);
+        if (lexiconTargetFile.exists())
+            lexiconTargetFile.delete();
+
+        lexiconWriter = new BufferedWriter(new FileWriter(lexiconTargetFile));
     }
 
-    /**
-     * @param name
-     * @return
-     */
     private String toLowerCamelCase(String name) {
         return name.substring(0, 1).toLowerCase() + name.substring(1);
+    }
+
+    private String camelCaseToUnderscores(String name) {
+        StringBuffer buf = new StringBuffer();
+
+        for (int i = 0; i < name.length(); ++i) {
+            Character c = name.charAt(i);
+
+            if (i > 0 && Character.isUpperCase(c)) {
+                Character c1 = null;
+
+                if ((i + 1) < name.length()) {
+                    c1 = name.charAt(i + 1);
+                }
+
+                if (c1 != null && ! Character.isUpperCase(c1))
+                    buf.append(UNDERSCORE);
+            }
+
+            buf.append(Character.toUpperCase(c));
+        }
+
+        return buf.toString();
     }
 
     private String capitalize(String name) {
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 
-    private void write(String token) throws Exception {
+    private void cnd(String token) throws Exception {
         cndWriter.write(token);
     }
 
-    private void newLine() throws Exception {
-        write(NEW_LINE);
+    private void lex(String token) throws Exception {
+        lexiconWriter.write(token);
     }
 
-    private void writeLicense() throws Exception {
-        write(LICENSE);
+    private void lexPackage() throws Exception {
+        File genDir = new File(GENERATOR_HOME_SRC_DIR);
+        File cndDir = new File(genDir.getParentFile(), "cnd");
+        String lexPackage = cndDir.getAbsolutePath();
+        lexPackage = lexPackage.substring(lexPackage.indexOf(SRC_DIR) + SRC_DIR.length() + 1);
+        lexPackage = lexPackage.replaceAll(File.separator, DOT);
+
+        lex("package " + lexPackage + SEMI_COLON);
+        lex(NEW_LINE);
+        lex(NEW_LINE);
+
+        lex("import " + StringConstants.class.getCanonicalName() + SEMI_COLON);
+        lex(NEW_LINE);
+        lex(NEW_LINE);
+    }
+
+    private void lexClassDeclaration() throws Exception {
+        lex("@SuppressWarnings( { \"javadoc\", \"nls\" })" + NEW_LINE);
+        lex(PUBLIC + SPACE + INTERFACE + SPACE + TEIID_SQL_LEXICON + " extends StringConstants" + SPACE + OPEN_BRACE);
+        lex(NEW_LINE);
+        lex(NEW_LINE);
     }
 
     private void writeSection1Comment(String comment) throws Exception {
@@ -238,24 +374,43 @@ public class TeiidCndGenerator implements StringConstants {
         buf.append("//------------------------------------------------------------------------------");
         buf.append(NEW_LINE);
  
-        write(buf.toString());
+        cnd(buf.toString());
     }
 
     private void writeSection2Comment(String comment) throws Exception {
-        write("//==================================================");
-        newLine();
-        write("//  " + comment);
-        newLine();
-        write("//==================================================");
-        newLine();
+        StringBuffer buf = new StringBuffer();
+        buf.append("//==================================================");
+        buf.append(NEW_LINE);
+        buf.append("//  " + comment);
+        buf.append(NEW_LINE);
+        buf.append("//==================================================");
+        buf.append(NEW_LINE);
+
+        cnd(buf.toString());
     }
 
     private void writeNamespaces() throws Exception {
         writeSection1Comment("NAMESPACES");
         for (String nm : MODESHAPE_NAMESPACES) {
-            write(nm);
-            newLine();
+            cnd(nm);
+            cnd(NEW_LINE);
         }
+        cnd(NEW_LINE);
+
+        StringBuffer buf = new StringBuffer();
+        buf.append(TAB).append(INTERFACE).append(" Namespace ").append(OPEN_BRACE).append(NEW_LINE);
+
+        buf.append(TAB).append(TAB).append(PUBLIC).append(SPACE).append(STATIC).append(SPACE).append(FINAL)
+             .append(SPACE).append("String PREFIX = ").append(SPEECH_MARK).append(TSQL_PREFIX)
+             .append(SPEECH_MARK).append(SEMI_COLON).append(NEW_LINE);
+
+        buf.append(TAB).append(TAB).append(PUBLIC).append(SPACE).append(STATIC).append(SPACE).append(FINAL)
+             .append(SPACE).append("String URI = ").append(SPEECH_MARK).append(TSQL_NAMESPACE)
+             .append(SPEECH_MARK).append(SEMI_COLON).append(NEW_LINE);
+             
+        buf.append(TAB).append(CLOSE_BRACE).append(NEW_LINE).append(NEW_LINE);
+
+        lex(buf.toString());
     }
 
     private boolean isRootClass(Class<?> objClass) {
@@ -277,12 +432,13 @@ public class TeiidCndGenerator implements StringConstants {
         return objClass.isEnum();
     }
 
-    private void writeNodeName(Class<?> data) throws Exception {
-        write(TSQL_PREFIX);
-        write(COLON);
+    private String nodeName(Class<?> data) throws Exception {
+        StringBuffer buf = new StringBuffer();
         String name = data.getSimpleName();
         name = toLowerCamelCase(name);
-        write(name);
+
+        buf.append(TSQL_PREFIX).append(COLON).append(name);
+        return buf.toString();
     }
 
     private Iterator<CTree.Node> createParentIterator(CTree.Node node) {
@@ -298,28 +454,38 @@ public class TeiidCndGenerator implements StringConstants {
     }
 
     private void writeInheritsFrom() throws Exception {
-        write(TAB);
-        write(CLOSE_ANGLE_BRACKET);
-        write(TAB);
+        cnd(TAB);
+        cnd(CLOSE_ANGLE_BRACKET);
+        cnd(TAB);
+
+        lex(" extends ");
     }
 
     private void writeParentList(Iterator<? extends CTree.Node> parentIter) throws Exception {
         while(parentIter.hasNext()) {
             CTree.Node parentNode = parentIter.next();
-            writeNodeName(parentNode.klazz());
+            cnd(nodeName(parentNode.klazz()));
+            lex(parentNode.klazz().getSimpleName());
 
             if (parentIter.hasNext()) {
-                write(COMMA);
-                write(SPACE);
+                cnd(COMMA);
+                cnd(SPACE);
+                lex(COMMA);
+                lex(SPACE);
             }
         }
     }
 
     private void writeNodeDeclaration(CTree.Node node) throws Exception {
-        write(OPEN_SQUARE_BRACKET);
-        writeNodeName(node.klazz());
-        write(CLOSE_SQUARE_BRACKET);
+        cnd(OPEN_SQUARE_BRACKET);
+        cnd(nodeName(node.klazz()));
+        cnd(CLOSE_SQUARE_BRACKET);
 
+        lex(TAB + "/**" + NEW_LINE);
+        lex(TAB + " * " + nodeName(node.klazz()) + NEW_LINE);
+        lex(TAB + " */" + NEW_LINE);
+        lex(TAB + INTERFACE + SPACE + node.klazz().getSimpleName());
+        
         Iterator<CTree.Node> parentIter = createParentIterator(node);
         if (parentIter.hasNext()) {
             // Write out parent node types
@@ -331,12 +497,20 @@ public class TeiidCndGenerator implements StringConstants {
 
     private void writeMixinDeclaration() throws Exception {
         // All node types are mixin
-        write(SPACE + "mixin");
+        cnd(SPACE + "mixin");
     }
 
     private void writeAbstractDeclaration(Class<?> klazz) throws Exception {
-        if (Modifier.isAbstract(klazz.getModifiers()))
-            write(SPACE + "abstract");
+        boolean isAbstract = false;
+
+        if (Modifier.isAbstract(klazz.getModifiers())) {
+            cnd(SPACE + "abstract");
+            isAbstract = true;
+        }
+
+        lex(NEW_LINE);
+        lex(TAB + TAB + "boolean IS_ABSTRACT = " + Boolean.toString(isAbstract) + SEMI_COLON + NEW_LINE);
+        lex(NEW_LINE);
     }
 
     private boolean isSetter(Method method) {
@@ -371,10 +545,6 @@ public class TeiidCndGenerator implements StringConstants {
         if (constraints == null || constraints.isEmpty())
             return;
 
-        buf.append(SPACE);
-        buf.append(OPEN_ANGLE_BRACKET);
-        buf.append(SPACE);
-
         Iterator<String> iterator = constraints.iterator();
         while(iterator.hasNext()) {
             String constraint = iterator.next();
@@ -386,10 +556,6 @@ public class TeiidCndGenerator implements StringConstants {
                 buf.append(SPACE);
             }
         }
-    }
-
-    private boolean isBasicProperty(Class<?> aspectClass) {
-        return PROPERTY_TYPE_MAP.containsKey(aspectClass.getSimpleName().toUpperCase());
     }
 
     private Class<?> findGenericClass(Class<?> parameterClass, Method method) throws Exception {
@@ -427,84 +593,149 @@ public class TeiidCndGenerator implements StringConstants {
         }
     }
 
-    private String formProperty(String propName, String propertyType, boolean multiple, List<String> constraints) throws Exception {
-        StringBuffer buf = new StringBuffer();
-        buf.append(TAB);
-        buf.append(MINUS);
-        buf.append(SPACE);
-        buf.append(TSQL_PREFIX);
-        buf.append(COLON);
-        buf.append(propName);
-        buf.append(SPACE);
-        buf.append(OPEN_BRACKET);
-        buf.append(propertyType.toLowerCase());
-        buf.append(CLOSE_BRACKET);
+    private void writeProperty(PropertyAspect aspect) throws Exception {
+        String prefixName = TSQL_PREFIX + COLON + aspect.getName();
+        
+        StringBuffer cndBuf = new StringBuffer();
+        cndBuf.append(TAB);
+        cndBuf.append(MINUS);
+        cndBuf.append(SPACE);
+        cndBuf.append(prefixName);
+        cndBuf.append(SPACE);
+        cndBuf.append(OPEN_BRACKET);
+        cndBuf.append(aspect.getTypeName().toLowerCase());
+        cndBuf.append(CLOSE_BRACKET);
 
         List<Attributes> attributes = new ArrayList<Attributes>();
-        if (multiple)
+        if (aspect.isMultiple())
             attributes.add(Attributes.MULTIPLE);
             
-        appendAttributes(buf, attributes);
-        appendConstraints(buf, constraints);
+        appendAttributes(cndBuf, attributes);
 
-        buf.append(NEW_LINE);
-        return buf.toString();
+        if (aspect.getConstraints() != null && ! aspect.getConstraints().isEmpty()) {
+            cndBuf.append(SPACE);
+            cndBuf.append(OPEN_ANGLE_BRACKET);
+            cndBuf.append(SPACE);
+            appendConstraints(cndBuf, aspect.getConstraints());
+        }
+
+        cndBuf.append(NEW_LINE);
+        cnd(cndBuf.toString());
+
+        String varName = camelCaseToUnderscores(aspect.getName()).toUpperCase();
+        StringBuffer lexBuf = new StringBuffer();
+
+        lexBuf.append(TAB + TAB + "/**" + NEW_LINE)
+                 .append(TAB + TAB + " * " + varName + " Property" + NEW_LINE)
+                 .append(TAB + TAB + " */" + NEW_LINE);
+        
+        lexBuf.append(TAB).append(TAB)
+                 .append("String ").append(varName).append("_PROP_NAME")
+                 .append(" = Namespace.PREFIX ").append(PLUS).append(SPACE).append("COLON").append(SPACE)
+                 .append(PLUS).append(SPACE).append(SPEECH_MARK).append(aspect.getName()).append(SPEECH_MARK)
+                 .append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+                 
+        lexBuf.append(TAB).append(TAB)
+                  .append("Class<?> ").append(varName).append("_PROP_TYPE").append(" = ")
+                  .append(SPACE).append(aspect.getTypeClass().getSimpleName()).append(DOT).append(CLASS)
+                  .append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+
+        lexBuf.append(TAB).append(TAB)
+                  .append("boolean ").append(varName).append("_PROP_MULTIPLE").append(" = ")
+                  .append("true").append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+
+        if (aspect.getConstraints() != null && ! aspect.getConstraints().isEmpty()) {
+            lexBuf.append(TAB).append(TAB)
+                      .append("String[] ").append(varName).append("_PROP_CONSTRAINTS").append(" = ")
+                      .append(OPEN_BRACE).append(SPACE);
+
+            appendConstraints(lexBuf, aspect.getConstraints());
+                      
+            lexBuf.append(SPACE).append(CLOSE_BRACE).append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+        }
+
+        lex(lexBuf.toString());
     }
 
-    private String formChildNode(String childName, String childType, boolean multiple) throws Exception {
-        StringBuffer buf = new StringBuffer();
-        buf.append(TAB);
-        buf.append(PLUS);
-        buf.append(SPACE);
-        buf.append(TSQL_PREFIX);
-        buf.append(COLON);
-        buf.append(childName);
-        buf.append(SPACE);
-        buf.append(OPEN_BRACKET);
-        buf.append(TSQL_PREFIX);
-        buf.append(COLON);
-        buf.append(toLowerCamelCase(childType));
-        buf.append(CLOSE_BRACKET);
+    private void writeChildNode(ChildAspect aspect) throws Exception {
+        StringBuffer cndBuf = new StringBuffer();
+        cndBuf.append(TAB);
+        cndBuf.append(PLUS);
+        cndBuf.append(SPACE);
+        cndBuf.append(TSQL_PREFIX);
+        cndBuf.append(COLON);
+        cndBuf.append(aspect.getName());
+        cndBuf.append(SPACE);
+        cndBuf.append(OPEN_BRACKET);
+        cndBuf.append(TSQL_PREFIX);
+        cndBuf.append(COLON);
+        cndBuf.append(toLowerCamelCase(aspect.getTypeName()));
+        cndBuf.append(CLOSE_BRACKET);
 
         List<Attributes> attributes = new ArrayList<Attributes>();
-        if (multiple)
+        if (aspect.isMultiple())
             attributes.add(Attributes.SNS);
 
-        appendAttributes(buf, attributes);
+        appendAttributes(cndBuf, attributes);
 
-        buf.append(NEW_LINE);
-        return buf.toString();        
+        cndBuf.append(NEW_LINE);
+        cnd(cndBuf.toString());
+
+        String varName = camelCaseToUnderscores(aspect.getName()).toUpperCase();
+        StringBuffer lexBuf = new StringBuffer();
+
+        lexBuf.append(TAB + TAB + "/**" + NEW_LINE)
+                 .append(TAB + TAB + " * " + varName + " Reference" + NEW_LINE)
+                 .append(TAB + TAB + " */" + NEW_LINE);
+
+        lexBuf.append(TAB).append(TAB)
+                 .append("String ").append(varName).append("_REF_NAME")
+                 .append(" = Namespace.PREFIX ").append(PLUS).append(SPACE).append("COLON").append(SPACE)
+                 .append(PLUS).append(SPACE).append(SPEECH_MARK).append(aspect.getName()).append(SPEECH_MARK)
+                 .append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+        
+        lexBuf.append(TAB).append(TAB)
+                 .append("Class<?> ").append(varName).append("_REF_TYPE").append(" = ")
+                 .append(SPACE).append(aspect.getTypeClass().getSimpleName()).append(DOT).append(CLASS)
+                 .append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+
+        lexBuf.append(TAB).append(TAB)
+                 .append("boolean ").append(varName).append("_REF_MULTIPLE").append(" = ")
+                 .append("true").append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+        
+        lex(lexBuf.toString());
     }
 
-    private String formAspect(Class<?> parameterClass, Method method, Node classNode, boolean multiple) throws Exception {
+    private Aspect createAspect(Class<?> parameterClass, Method method, Node classNode, boolean multiple) throws Exception {
         String aspectName = getSetterName(method);
         String aspectType = parameterClass.getSimpleName();
+        ModeshapeType mType = ModeshapeType.get(parameterClass);
         boolean isRegistered = classNode.getTree().containsClass(parameterClass);
         boolean isSPIInterface = classNode.getTree().isSPIInterface(parameterClass);
 
         if (isSPIInterface)
             return null; // Not interested in these methods
 
-        if (isBasicProperty(parameterClass))
+        if (mType != null)
             // Basic property like STRING, or DOUBLE
-            return formProperty(aspectName, PROPERTY_TYPE_MAP.get(aspectType.toUpperCase()), multiple, null);
+            return new PropertyAspect(aspectName, mType, multiple);
         else if (isRegistered)
             // A LanguageObject child
-            return formChildNode(aspectName, aspectType, multiple);
+            return new ChildAspect(aspectName, parameterClass, multiple);
         else if (parameterClass == Class.class)
             // A Class property
-            return formProperty(aspectName + capitalize(CLASS), STRING, multiple, null);
+            return new PropertyAspect(aspectName + capitalize(CLASS), ModeshapeType.STRING, multiple);
         else if (parameterClass == Object.class) {
             // Need to handle these setObject methods but the actual values will need to be serialised or something tbd.
-            return formProperty(aspectName, BINARY, multiple, null);
+            return new PropertyAspect(aspectName, ModeshapeType.BINARY, multiple);
         }
         else if (parameterClass.isArray())
             // An Array
-            return formAspect(parameterClass.getComponentType(), method, classNode, true);
+            return createAspect(parameterClass.getComponentType(), method, classNode, true);
         else if (parameterClass == Collection.class || parameterClass == List.class) {
             // A Collection or List
             parameterClass = findGenericClass(parameterClass, method);
-            return formAspect(parameterClass, method, classNode, true);
+            return createAspect(parameterClass, method, classNode, true);
         } else if (parameterClass.isEnum()) {
             // An Enum
             List<String> constraints = new ArrayList<String>();
@@ -512,7 +743,9 @@ public class TeiidCndGenerator implements StringConstants {
             for (Object c : enumConstants) {
                 constraints.add(c.toString());
             }
-            return formProperty(aspectName, STRING, multiple, constraints);
+            PropertyAspect propAspect = new PropertyAspect(aspectName, ModeshapeType.STRING, multiple);
+            propAspect.setConstraints(constraints);
+            return propAspect;
         }
         else
             System.out.println("The class " + classNode.klazz().getSimpleName() + " has the setter method " + method.getName() + " with a parameter type '" + aspectType + "' is not supported");
@@ -520,8 +753,8 @@ public class TeiidCndGenerator implements StringConstants {
         return null;
     }
 
-    private String formAspect(Class<?> parameterClass, Method method, Node classNode) throws Exception {
-        return formAspect(parameterClass, method, classNode, false);
+    private Aspect createAspect(Class<?> parameterClass, Method method, Node classNode) throws Exception {
+        return createAspect(parameterClass, method, classNode, false);
     }
 
     /**
@@ -534,8 +767,8 @@ public class TeiidCndGenerator implements StringConstants {
      */
     private void writeAspects(Node node) throws Exception {
         Class<?> nodeClass = node.klazz();
-        StringBuffer propBuf = new StringBuffer();
-        StringBuffer childBuf = new StringBuffer();
+        List<PropertyAspect> propertyAspects = new ArrayList<PropertyAspect>();
+        List<ChildAspect> childAspects = new ArrayList<ChildAspect>();
 
         Map<String, Method> dedupedMethods = new HashMap<String, Method>();
         for (Method method : nodeClass.getDeclaredMethods()) {
@@ -565,18 +798,36 @@ public class TeiidCndGenerator implements StringConstants {
 
         for (Method method : dedupedMethods.values()) {
             Class<?>[] parameterTypes = method.getParameterTypes();
-            String aspect = formAspect(parameterTypes[0], method, node);
-            if (aspect == null)
-                continue;
+            Aspect aspect = createAspect(parameterTypes[0], method, node);
 
-            if (aspect.startsWith(TAB + MINUS))
-                propBuf.append(aspect);
-            else
-                childBuf.append(aspect);
+            if (aspect instanceof PropertyAspect)
+                propertyAspects.add((PropertyAspect) aspect);
+            else if (aspect instanceof ChildAspect)
+                childAspects.add((ChildAspect) aspect);
         }
 
-        write(propBuf.toString());
-        write(childBuf.toString());
+        for (PropertyAspect aspect : propertyAspects) {
+            writeProperty(aspect);
+        }
+
+        for (ChildAspect aspect : childAspects) {
+            writeChildNode(aspect);
+        }
+    }
+
+    private void lexId(Node node) throws Exception {
+        
+        String name = node.klazz().getSimpleName();
+        name = toLowerCamelCase(name);
+        
+        lex(NEW_LINE);
+        
+        StringBuffer buf = new StringBuffer();
+        buf.append(TAB).append(TAB)
+            .append("String ID = Namespace.PREFIX ").append(PLUS).append(SPACE).append("COLON ").append(PLUS).append(SPACE)
+            .append(SPEECH_MARK).append(name).append(SPEECH_MARK).append(SEMI_COLON);
+        lex(buf.toString());
+        lex(NEW_LINE);
     }
 
     private void writeInterfaceNode(CTree.INode iNode) throws Exception {
@@ -584,8 +835,12 @@ public class TeiidCndGenerator implements StringConstants {
 
         writeMixinDeclaration();
 
-        newLine();
-        newLine();
+        cnd(NEW_LINE + NEW_LINE);
+
+        lex(SPACE + OPEN_BRACE + NEW_LINE);
+        lexId(iNode);
+        lex(NEW_LINE);
+        lex(TAB + CLOSE_BRACE + NEW_LINE + NEW_LINE);
 
         // Write the children out
         for (CTree.INode child : iNode.getChildren()) {
@@ -631,7 +886,8 @@ public class TeiidCndGenerator implements StringConstants {
                 // No parents written as yet so write the inherits from declaration
                 writeInheritsFrom();
             } else {
-                write(COMMA + SPACE);
+                cnd(COMMA + SPACE);
+                lex(COMMA + SPACE);
             }
 
             writeParentList(classInterfaces.iterator());
@@ -639,14 +895,20 @@ public class TeiidCndGenerator implements StringConstants {
 
         writeMixinDeclaration();
 
+        // Open brace of the interface
+        lex(SPACE + OPEN_BRACE + NEW_LINE);
+
+        lexId(classNode);
+
         writeAbstractDeclaration(classNode.klazz());
 
-        newLine();
+        cnd(NEW_LINE);
 
         // Write properties and child fields of this node
         writeAspects(classNode);
 
-        newLine();
+        cnd(NEW_LINE);
+        lex(TAB + CLOSE_BRACE + NEW_LINE + NEW_LINE);
 
         // Write the children out
         for (CTree.CNode child : classNode.getChildren()) {
@@ -707,18 +969,26 @@ public class TeiidCndGenerator implements StringConstants {
      */
     public void generate() throws Exception {
         try {
-            writeLicense();
-            newLine();
+            cnd(LICENSE);
+            cnd(NEW_LINE);
+
+            lex(LICENSE);
+            lex(NEW_LINE);
+
+            lexPackage();
+            lexClassDeclaration();
 
             writeNamespaces();
-            newLine();
 
             writeSection1Comment("NODETYPES");
             writeClassTree();
-            newLine();
+            cnd(NEW_LINE);
+
+            lex(CLOSE_BRACE);
 
         } finally {
             cndWriter.close();
+            lexiconWriter.close();
         }
     }
 

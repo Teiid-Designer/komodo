@@ -1,0 +1,524 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
+
+//------------------------------------------------------------------------------
+// N A M E S P A C E S
+//------------------------------------------------------------------------------
+<jcr='http://www.jcp.org/jcr/1.0'>
+<nt='http://www.jcp.org/jcr/nt/1.0'>
+<mix='http://www.jcp.org/jcr/mix/1.0'>
+<tsql='http://www.teiid.org/sql/1.0'>
+
+//------------------------------------------------------------------------------
+// N O D E T Y P E S
+//------------------------------------------------------------------------------
+//==================================================
+//  Interfaces
+//==================================================
+[tsql:labeled] mixin
+
+[tsql:expressionStatement] mixin
+
+[tsql:languageObject] mixin
+
+[tsql:expression]	>	tsql:languageObject mixin
+
+[tsql:predicateCriteria]	>	tsql:expression mixin
+
+[tsql:subqueryContainer]	>	tsql:languageObject mixin
+
+[tsql:targetedCommand] mixin
+
+//==================================================
+//  Classes
+//==================================================
+[tsql:criteria]	>	tsql:expression mixin
+
+[tsql:notCriteria]	>	tsql:criteria mixin
+	+ tsql:criteria (tsql:criteria)
+
+[tsql:existsCriteria]	>	tsql:criteria, tsql:predicateCriteria, tsql:subqueryContainer mixin
+	- tsql:negated (boolean)
+	+ tsql:command (tsql:queryCommand)
+	+ tsql:subqueryHint (tsql:subqueryHint)
+
+[tsql:abstractSetCriteria]	>	tsql:criteria, tsql:predicateCriteria mixin abstract
+	- tsql:negated (boolean)
+	+ tsql:expression (tsql:expression)
+
+[tsql:subquerySetCriteria]	>	tsql:abstractSetCriteria, tsql:subqueryContainer mixin
+	+ tsql:command (tsql:queryCommand)
+	+ tsql:subqueryHint (tsql:subqueryHint)
+
+[tsql:setCriteria]	>	tsql:abstractSetCriteria mixin
+	+ tsql:values (tsql:expression) sns
+
+[tsql:isNullCriteria]	>	tsql:criteria, tsql:predicateCriteria mixin
+	- tsql:negated (boolean)
+	+ tsql:expression (tsql:expression)
+
+[tsql:betweenCriteria]	>	tsql:criteria, tsql:predicateCriteria mixin
+	- tsql:negated (boolean)
+	+ tsql:lowerExpression (tsql:expression)
+	+ tsql:expression (tsql:expression)
+	+ tsql:upperExpression (tsql:expression)
+
+[tsql:abstractCompareCriteria]	>	tsql:criteria, tsql:predicateCriteria mixin abstract
+	- tsql:operator (string) < "=", "<>", "<", ">", "<=", ">="
+	+ tsql:leftExpression (tsql:expression)
+
+[tsql:subqueryCompareCriteria]	>	tsql:abstractCompareCriteria, tsql:subqueryContainer mixin
+	- tsql:predicateQuantifier (string) < "SOME", "ANY", "ALL"
+	+ tsql:command (tsql:queryCommand)
+
+[tsql:compareCriteria]	>	tsql:abstractCompareCriteria mixin
+	- tsql:optional (boolean)
+	- tsql:operator (long)
+	+ tsql:rightExpression (tsql:expression)
+
+[tsql:matchCriteria]	>	tsql:criteria, tsql:predicateCriteria mixin
+	- tsql:negated (boolean)
+	- tsql:escapeChar (string)
+	+ tsql:leftExpression (tsql:expression)
+	+ tsql:rightExpression (tsql:expression)
+
+[tsql:compoundCriteria]	>	tsql:criteria mixin
+	- tsql:operator (long)
+	+ tsql:criteria (tsql:criteria) sns
+
+[tsql:expressionCriteria]	>	tsql:criteria mixin
+	+ tsql:expression (tsql:expression)
+
+[tsql:command]	>	tsql:languageObject mixin abstract
+	- tsql:isResolved (boolean)
+	+ tsql:sourceHint (tsql:sourceHint)
+	+ tsql:option (tsql:option)
+
+[tsql:queryCommand]	>	tsql:command mixin abstract
+	+ tsql:with (tsql:withQueryCommand) sns
+	+ tsql:orderBy (tsql:orderBy)
+	+ tsql:limit (tsql:limit)
+
+[tsql:setQuery]	>	tsql:queryCommand mixin
+	- tsql:all (boolean)
+	+ tsql:leftQuery (tsql:queryCommand)
+	+ tsql:rightQuery (tsql:queryCommand)
+
+[tsql:query]	>	tsql:queryCommand mixin
+	- tsql:rowConstructor (boolean)
+	+ tsql:into (tsql:into)
+	+ tsql:having (tsql:criteria)
+	+ tsql:groupBy (tsql:groupBy)
+	+ tsql:from (tsql:from)
+	+ tsql:criteria (tsql:criteria)
+	+ tsql:select (tsql:select)
+
+[tsql:procedureContainer]	>	tsql:command mixin abstract
+
+[tsql:delete]	>	tsql:procedureContainer, tsql:targetedCommand mixin
+	+ tsql:criteria (tsql:criteria)
+	+ tsql:group (tsql:groupSymbol)
+
+[tsql:insert]	>	tsql:procedureContainer, tsql:targetedCommand mixin
+	- tsql:merge (boolean)
+	+ tsql:queryExpression (tsql:queryCommand)
+	+ tsql:values (tsql:expression) sns
+	+ tsql:variables (tsql:elementSymbol) sns
+	+ tsql:group (tsql:groupSymbol)
+
+[tsql:update]	>	tsql:procedureContainer, tsql:targetedCommand mixin
+	+ tsql:changeList (tsql:setClauseList)
+	+ tsql:criteria (tsql:criteria)
+	+ tsql:group (tsql:groupSymbol)
+
+[tsql:storedProcedure]	>	tsql:procedureContainer, tsql:targetedCommand mixin
+	- tsql:displayNamedParameters (boolean)
+	- tsql:calledWithReturn (boolean)
+	- tsql:callableStatement (boolean)
+	- tsql:procedureName (string)
+	- tsql:procedureID (binary)
+	+ tsql:parameter (tsql:sPParameter)
+	+ tsql:group (tsql:groupSymbol)
+
+[tsql:alter]	>	tsql:command mixin abstract
+	+ tsql:definition (tsql:command)
+	+ tsql:target (tsql:groupSymbol)
+
+[tsql:alterTrigger]	>	tsql:alter mixin
+	- tsql:event (string) < "INSERT", "UPDATE", "DELETE"
+	- tsql:enabled (boolean)
+	- tsql:create (boolean)
+
+[tsql:alterView]	>	tsql:alter mixin
+
+[tsql:alterProcedure]	>	tsql:alter mixin
+
+[tsql:dynamicCommand]	>	tsql:command mixin
+	- tsql:asClauseSet (boolean)
+	- tsql:updatingModelCount (long)
+	+ tsql:asColumns (tsql:elementSymbol) sns
+	+ tsql:using (tsql:setClauseList)
+	+ tsql:sql (tsql:expression)
+	+ tsql:intoGroup (tsql:groupSymbol)
+
+[tsql:triggerAction]	>	tsql:command mixin
+	+ tsql:block (tsql:block)
+
+[tsql:createProcedureCommand]	>	tsql:command mixin
+	+ tsql:block (tsql:block)
+	+ tsql:virtualGroup (tsql:groupSymbol)
+
+[tsql:select]	>	tsql:languageObject mixin
+	- tsql:distinct (boolean)
+	+ tsql:symbols (tsql:expression) sns
+
+[tsql:withQueryCommand]	>	tsql:subqueryContainer mixin
+	+ tsql:columns (tsql:elementSymbol) sns
+	+ tsql:command (tsql:queryCommand)
+	+ tsql:queryExpression (tsql:queryCommand)
+	+ tsql:groupSymbol (tsql:groupSymbol)
+
+[tsql:limit]	>	tsql:languageObject mixin
+	- tsql:strict (boolean)
+	- tsql:implicit (boolean)
+	+ tsql:offset (tsql:expression)
+	+ tsql:rowLimit (tsql:expression)
+
+[tsql:fromClause]	>	tsql:languageObject mixin abstract
+	- tsql:preserve (boolean)
+	- tsql:makeDep (boolean)
+	- tsql:optional (boolean)
+	- tsql:max (boolean)
+	- tsql:join (boolean)
+	- tsql:makeNotDep (boolean)
+	- tsql:makeInd (boolean)
+	- tsql:noUnnest (boolean)
+
+[tsql:tableFunctionReference]	>	tsql:fromClause mixin abstract
+	- tsql:name (string)
+
+[tsql:arrayTable]	>	tsql:tableFunctionReference mixin
+	+ tsql:columns (tsql:projectedColumn) sns
+	+ tsql:arrayValue (tsql:expression)
+
+[tsql:textTable]	>	tsql:tableFunctionReference mixin
+	- tsql:header (long)
+	- tsql:usingRowDelimiter (boolean)
+	- tsql:quote (string)
+	- tsql:selector (string)
+	- tsql:escape (boolean)
+	- tsql:skip (long)
+	- tsql:fixedWidth (boolean)
+	- tsql:delimiter (string)
+	+ tsql:columns (tsql:textColumn) sns
+	+ tsql:file (tsql:expression)
+
+[tsql:xMLTable]	>	tsql:tableFunctionReference mixin
+	- tsql:usingDefaultColumn (boolean)
+	- tsql:xquery (string)
+	+ tsql:columns (tsql:xMLColumn) sns
+	+ tsql:passing (tsql:derivedColumn) sns
+	+ tsql:namespaces (tsql:xMLNamespaces)
+
+[tsql:objectTable]	>	tsql:tableFunctionReference mixin
+	- tsql:rowScript (string)
+	- tsql:scriptingLanguage (string)
+	+ tsql:columns (tsql:objectColumn) sns
+	+ tsql:passing (tsql:derivedColumn) sns
+
+[tsql:unaryFromClause]	>	tsql:fromClause mixin
+	+ tsql:expandedCommand (tsql:command)
+	+ tsql:group (tsql:groupSymbol)
+
+[tsql:joinPredicate]	>	tsql:fromClause mixin
+	+ tsql:leftClause (tsql:fromClause)
+	+ tsql:rightClause (tsql:fromClause)
+	+ tsql:joinCriteria (tsql:criteria) sns
+	+ tsql:joinType (tsql:joinType)
+
+[tsql:subqueryFromClause]	>	tsql:fromClause, tsql:subqueryContainer mixin
+	- tsql:table (boolean)
+	+ tsql:command (tsql:command)
+
+[tsql:orderByItem]	>	tsql:languageObject mixin
+	- tsql:nullOrdering (string) < "FIRST", "LAST"
+	- tsql:ascending (boolean)
+	+ tsql:symbol (tsql:expression)
+
+[tsql:specificHint]	>	tsql:languageObject mixin
+	- tsql:translatorName (string)
+	- tsql:useAliases (boolean)
+	- tsql:hint (string)
+
+[tsql:projectedColumn]	>	tsql:languageObject mixin
+	- tsql:type (string)
+
+[tsql:xMLColumn]	>	tsql:projectedColumn mixin
+	- tsql:ordinal (boolean)
+	- tsql:path (string)
+	+ tsql:defaultExpression (tsql:expression)
+
+[tsql:textColumn]	>	tsql:projectedColumn mixin
+	- tsql:selector (string)
+	- tsql:ordinal (boolean)
+	- tsql:position (long)
+	- tsql:noTrim (boolean)
+	- tsql:width (long)
+
+[tsql:objectColumn]	>	tsql:projectedColumn mixin
+	- tsql:path (string)
+	+ tsql:defaultExpression (tsql:expression)
+
+[tsql:setClauseList]	>	tsql:languageObject mixin
+
+[tsql:groupBy]	>	tsql:languageObject mixin
+	- tsql:rollup (boolean)
+	+ tsql:symbols (tsql:expression) sns
+
+[tsql:joinType]	>	tsql:languageObject mixin
+
+[tsql:sourceHint]	>	tsql:languageObject mixin
+	- tsql:generalHint (string)
+	- tsql:useAliases (boolean)
+	+ tsql:sourceHint (tsql:specificHint)
+
+[tsql:from]	>	tsql:languageObject mixin
+	+ tsql:clauses (tsql:fromClause) sns
+
+[tsql:into]	>	tsql:languageObject mixin
+	+ tsql:group (tsql:groupSymbol)
+
+[tsql:orderBy]	>	tsql:languageObject mixin
+
+[tsql:subqueryHint]	>	tsql:languageObject mixin
+	- tsql:mergeJoin (boolean)
+	- tsql:depJoin (boolean)
+	- tsql:noUnnest (boolean)
+
+[tsql:namespaceItem]	>	tsql:languageObject mixin
+	- tsql:prefix (string)
+	- tsql:uri (string)
+
+[tsql:setClause]	>	tsql:languageObject mixin
+	+ tsql:value (tsql:expression)
+	+ tsql:symbol (tsql:elementSymbol)
+
+[tsql:sPParameter]	>	tsql:languageObject mixin
+	- tsql:classTypeClass (string)
+	- tsql:metadataID (binary)
+	- tsql:usingDefault (boolean)
+	- tsql:varArg (boolean)
+	- tsql:name (string)
+	- tsql:index (long)
+	- tsql:parameterType (long)
+	+ tsql:expression (tsql:expression)
+
+[tsql:option]	>	tsql:languageObject mixin
+	- tsql:noCache (boolean)
+
+[tsql:statement]	>	tsql:languageObject mixin abstract
+
+[tsql:block]	>	tsql:statement, tsql:labeled mixin
+	- tsql:atomic (boolean)
+	- tsql:exceptionGroup (string)
+	- tsql:label (string)
+	+ tsql:exceptionStatements (tsql:statement) sns
+
+[tsql:assignmentStatement]	>	tsql:statement, tsql:expressionStatement mixin
+	+ tsql:command (tsql:command)
+	+ tsql:expression (tsql:expression)
+	+ tsql:variable (tsql:elementSymbol)
+	+ tsql:value (tsql:expression)
+
+[tsql:declareStatement]	>	tsql:assignmentStatement mixin
+	- tsql:variableType (string)
+	+ tsql:command (tsql:command)
+	+ tsql:variable (tsql:elementSymbol)
+
+[tsql:returnStatement]	>	tsql:assignmentStatement mixin
+
+[tsql:ifStatement]	>	tsql:statement mixin
+	+ tsql:condition (tsql:criteria)
+	+ tsql:elseBlock (tsql:block)
+	+ tsql:ifBlock (tsql:block)
+
+[tsql:branchingStatement]	>	tsql:statement mixin
+	- tsql:label (string)
+	- tsql:mode (string) < "BREAK", "CONTINUE", "LEAVE"
+
+[tsql:commandStatement]	>	tsql:statement, tsql:subqueryContainer mixin
+	- tsql:returnable (boolean)
+	+ tsql:command (tsql:command)
+
+[tsql:raiseStatement]	>	tsql:statement, tsql:expressionStatement mixin
+	- tsql:warning (boolean)
+	+ tsql:expression (tsql:expression)
+
+[tsql:loopStatement]	>	tsql:statement, tsql:labeled, tsql:subqueryContainer mixin
+	- tsql:cursorName (string)
+	- tsql:label (string)
+	+ tsql:block (tsql:block)
+	+ tsql:command (tsql:command)
+
+[tsql:whileStatement]	>	tsql:statement, tsql:labeled mixin
+	- tsql:label (string)
+	+ tsql:block (tsql:block)
+	+ tsql:condition (tsql:criteria)
+
+[tsql:exceptionExpression]	>	tsql:expression mixin
+	+ tsql:errorCode (tsql:expression)
+	+ tsql:message (tsql:expression)
+	+ tsql:parentExpression (tsql:expression)
+	+ tsql:sqlState (tsql:expression)
+
+[tsql:array]	>	tsql:expression mixin
+	- tsql:implicit (boolean)
+	+ tsql:expressions (tsql:expression) sns
+
+[tsql:xMLQuery]	>	tsql:expression mixin
+	- tsql:emptyOnEmpty (boolean)
+	- tsql:xquery (string)
+	+ tsql:passing (tsql:derivedColumn) sns
+	+ tsql:namespaces (tsql:xMLNamespaces)
+
+[tsql:xMLNamespaces]	>	tsql:languageObject mixin
+	+ tsql:namespaces (tsql:namespaceItem) sns
+
+[tsql:windowFunction]	>	tsql:expression mixin
+	+ tsql:windowSpecification (tsql:windowSpecification)
+	+ tsql:function (tsql:aggregateSymbol)
+
+[tsql:symbol]	>	tsql:languageObject mixin
+	- tsql:shortName (string)
+	- tsql:name (string)
+	- tsql:outputName (string)
+
+[tsql:aliasSymbol]	>	tsql:symbol, tsql:expression mixin
+	+ tsql:symbol (tsql:expression)
+
+[tsql:elementSymbol]	>	tsql:symbol, tsql:expression mixin
+	- tsql:metadataID (binary)
+	- tsql:typeClass (string)
+	- tsql:displayFullyQualified (boolean)
+	+ tsql:groupSymbol (tsql:groupSymbol)
+
+[tsql:expressionSymbol]	>	tsql:symbol, tsql:expression mixin
+	+ tsql:expression (tsql:expression)
+
+[tsql:groupSymbol]	>	tsql:symbol mixin
+	- tsql:metadataID (binary)
+	- tsql:definition (string)
+
+[tsql:multipleElementSymbol]	>	tsql:expression mixin
+	+ tsql:elementSymbols (tsql:elementSymbol) sns
+	+ tsql:group (tsql:groupSymbol)
+
+[tsql:scalarSubquery]	>	tsql:expression, tsql:subqueryContainer mixin
+	- tsql:typeClass (string)
+	+ tsql:command (tsql:queryCommand)
+
+[tsql:xMLParse]	>	tsql:expression mixin
+	- tsql:wellFormed (boolean)
+	- tsql:document (boolean)
+	+ tsql:expression (tsql:expression)
+
+[tsql:queryString]	>	tsql:expression mixin
+	+ tsql:args (tsql:derivedColumn) sns
+	+ tsql:path (tsql:expression)
+
+[tsql:caseExpression]	>	tsql:expression mixin
+	- tsql:typeClass (string)
+	+ tsql:elseExpression (tsql:expression)
+	+ tsql:expression (tsql:expression)
+	+ tsql:when (tsql:expression) sns
+	+ tsql:then (tsql:expression) sns
+
+[tsql:windowSpecification]	>	tsql:languageObject mixin
+	+ tsql:partition (tsql:expression) sns
+	+ tsql:orderBy (tsql:orderBy)
+
+[tsql:xMLElement]	>	tsql:expression mixin
+	+ tsql:attributes (tsql:xMLAttributes)
+	+ tsql:namespaces (tsql:xMLNamespaces)
+	+ tsql:content (tsql:expression) sns
+
+[tsql:jSONObject]	>	tsql:expression mixin
+	+ tsql:args (tsql:derivedColumn) sns
+
+[tsql:xMLAttributes]	>	tsql:languageObject mixin
+	+ tsql:args (tsql:derivedColumn) sns
+
+[tsql:reference]	>	tsql:expression mixin
+	- tsql:positional (boolean)
+	- tsql:typeClass (string)
+	- tsql:index (long)
+
+[tsql:derivedColumn]	>	tsql:languageObject mixin
+	- tsql:alias (string)
+	- tsql:propagateName (boolean)
+	+ tsql:expression (tsql:expression)
+
+[tsql:constant]	>	tsql:expression mixin
+	- tsql:typeClass (string)
+	- tsql:value (binary)
+	- tsql:multiValued (boolean)
+
+[tsql:xMLForest]	>	tsql:expression mixin
+	+ tsql:arguments (tsql:derivedColumn) sns
+	+ tsql:namespaces (tsql:xMLNamespaces)
+
+[tsql:function]	>	tsql:expression mixin
+	- tsql:typeClass (string)
+	+ tsql:args (tsql:expression) sns
+
+[tsql:aggregateSymbol]	>	tsql:function mixin
+	- tsql:windowed (boolean)
+	- tsql:typeClass (string)
+	- tsql:aggregateFunction (string)
+	- tsql:distinct (boolean)
+	- tsql:implicit (boolean)
+	+ tsql:orderBy (tsql:orderBy)
+	+ tsql:args (tsql:expression) sns
+	+ tsql:condition (tsql:expression)
+
+[tsql:xMLSerialize]	>	tsql:expression mixin
+	- tsql:typeString (string)
+	- tsql:version (string)
+	- tsql:declaration (boolean)
+	- tsql:document (boolean)
+	- tsql:encoding (string)
+	+ tsql:expression (tsql:expression)
+
+[tsql:textLine]	>	tsql:expression mixin
+	- tsql:quote (string)
+	- tsql:includeHeader (boolean)
+	- tsql:encoding (string)
+	- tsql:delimiter (string)
+	+ tsql:expressions (tsql:derivedColumn) sns
+
+[tsql:searchedCaseExpression]	>	tsql:expression mixin
+	- tsql:typeClass (string)
+	+ tsql:elseExpression (tsql:expression)
+	+ tsql:when (tsql:criteria) sns
+	+ tsql:then (tsql:expression) sns
+
+
