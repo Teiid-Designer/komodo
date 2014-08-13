@@ -106,6 +106,14 @@ public class CTree implements StringConstants {
         }
 
         /**
+         * @param klazz
+         * @return child node with class of klazz or null
+         */
+        public T getChild(Class<?> klazz) {
+            return children.get(klazz);
+        }
+
+        /**
          * @param child
          * @return child or the existing child
          */
@@ -375,7 +383,7 @@ public class CTree implements StringConstants {
             parentIfaces.add(pINode);
         }
 
-        INode iNode;
+        INode iNode = null;
         if (parentIfaces.isEmpty()) {
             iNode = interfaceNodes.get(iface);
             if (iNode == null) {
@@ -383,9 +391,12 @@ public class CTree implements StringConstants {
                 interfaceNodes.put(iface, iNode);
             }
         } else {
-            iNode = new INode(this, iface);
             for (INode pINode : parentIfaces) {
-                pINode.addChild(iNode);
+                iNode = pINode.getChild(iface);
+                if (iNode == null) {
+                    iNode = new INode(this, iface);
+                    pINode.addChild(iNode);
+                }
             }
         }
         return iNode;

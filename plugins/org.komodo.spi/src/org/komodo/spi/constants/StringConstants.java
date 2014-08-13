@@ -70,6 +70,11 @@ public interface StringConstants {
     String COLON = ":"; //$NON-NLS-1$
 
     /**
+     * A Semi Colon.
+     */
+    String SEMI_COLON = ";"; //$NON-NLS-1$
+
+    /**
      * A Hyphen.
      */
     String HYPHEN = "-"; //$NON-NLS-1$
@@ -236,8 +241,29 @@ public interface StringConstants {
   String JAR = "jar"; //$NON-NLS-1$
 
   /**
+   * JAVA File Extension
+   */
+  String JAVA = "java"; //$NON-NLS-1$
+
+  /**
    * src directory
    */
   String SRC = "src"; //$NON-NLS-1$
+
+  /**
+   * public
+   */
+  String PUBLIC = "public"; //$NON-NLS-1$
+
+  /**
+   * static
+   */
+  String STATIC = "static"; //$NON-NLS-1$
+
+  /**
+   * final
+   */
+  String FINAL = "final"; //$NON-NLS-1$
+  
 }
 
