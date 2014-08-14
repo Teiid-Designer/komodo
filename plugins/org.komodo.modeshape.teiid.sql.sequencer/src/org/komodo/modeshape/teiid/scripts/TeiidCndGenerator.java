@@ -25,22 +25,27 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.komodo.modeshape.teiid.scripts.CTree.CNode;
+import org.komodo.modeshape.teiid.scripts.CTree.CTreeCallback;
 import org.komodo.modeshape.teiid.scripts.CTree.INode;
 import org.komodo.modeshape.teiid.scripts.CTree.Node;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
+import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
 import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
 import org.komodo.modeshape.teiid.sql.proc.Block;
 import org.komodo.modeshape.teiid.sql.symbol.Symbol;
@@ -268,8 +273,6 @@ public class TeiidCndGenerator implements StringConstants {
         
     }
 
-    private final File targetDirectory;
-
     private final BufferedWriter cndWriter;
 
     private final BufferedWriter lexiconWriter;
@@ -282,7 +285,6 @@ public class TeiidCndGenerator implements StringConstants {
         ArgCheck.isTrue(targetDirectory.isDirectory(), "Parent directory not directory!");
         ArgCheck.isTrue(targetDirectory.canWrite(), "Parent directory not writeable!");
 
-        this.targetDirectory = targetDirectory;
         File cndTargetFile = new File(targetDirectory, TEIID_SQL_CND);
         if (cndTargetFile.exists())
             cndTargetFile.delete();
@@ -346,6 +348,10 @@ public class TeiidCndGenerator implements StringConstants {
         lex(NEW_LINE);
         lex(NEW_LINE);
 
+        lex("import " + Field.class.getCanonicalName() + SEMI_COLON);
+        lex("import " + HashMap.class.getCanonicalName() + SEMI_COLON);
+        lex("import " + Map.class.getCanonicalName() + SEMI_COLON);
+        lex("import " + ASTNode.class.getCanonicalName() + SEMI_COLON);
         lex("import " + StringConstants.class.getCanonicalName() + SEMI_COLON);
         lex(NEW_LINE);
         lex(NEW_LINE);
@@ -353,12 +359,44 @@ public class TeiidCndGenerator implements StringConstants {
 
     private void lexClassDeclaration() throws Exception {
         lex("@SuppressWarnings( { \"javadoc\", \"nls\" })" + NEW_LINE);
-        lex(PUBLIC + SPACE + INTERFACE + SPACE + TEIID_SQL_LEXICON + " extends StringConstants" + SPACE + OPEN_BRACE);
+        lex(PUBLIC + SPACE + CLASS + SPACE + TEIID_SQL_LEXICON + " implements StringConstants" + SPACE + OPEN_BRACE);
         lex(NEW_LINE);
         lex(NEW_LINE);
     }
 
-    private void writeSection1Comment(String comment) throws Exception {
+    private void lexIndexClasses(CTree tree) throws Exception {
+        lex(NEW_LINE);
+        lex(TAB + PRIVATE + SPACE + STATIC + " Map<String, Class<?>> astIndex = new HashMap<String, Class<?>>();" + NEW_LINE);
+        lex(NEW_LINE);
+
+        lex(TAB + STATIC + SPACE + OPEN_BRACE + NEW_LINE);
+
+        CTreeCallback callback = new CTreeCallback() {
+            @Override
+            public void run(Node node) throws Exception {
+                String name = node.klazz().getSimpleName();
+                lex(TAB + TAB + "astIndex.put(" + name + ".class.getSimpleName()" + COMMA + SPACE + name + ".class);" + NEW_LINE);
+            }
+        };
+
+        tree.execute(callback);
+
+        lex(TAB + CLOSE_BRACE + NEW_LINE);
+        lex(NEW_LINE);
+
+        lex(TAB + PUBLIC + SPACE + STATIC + " String getTypeId(Class<? extends ASTNode> astNodeClass) {" + NEW_LINE);
+        lex(TAB + TAB + "try {" + NEW_LINE);
+        lex(TAB + TAB + TAB + "Class<?> astClass = astIndex.get(astNodeClass.getSimpleName());" + NEW_LINE);
+        lex(TAB + TAB + TAB + "Field idField = astClass.getField(\"ID\");" + NEW_LINE);
+        lex(TAB + TAB + TAB + "Object idValue = idField.get(null);" + NEW_LINE);
+        lex(TAB + TAB + TAB + "return idValue.toString();" + NEW_LINE);
+        lex(TAB + TAB + "} catch (Exception ex) {" + NEW_LINE);
+        lex(TAB + TAB + TAB + "throw new RuntimeException(ex);" + NEW_LINE);
+        lex(TAB + TAB + CLOSE_BRACE + NEW_LINE);
+        lex(TAB + CLOSE_BRACE + NEW_LINE);
+    }
+
+private void cndSection1Comment(String comment) throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append("//------------------------------------------------------------------------------");
         buf.append(NEW_LINE);
@@ -377,7 +415,7 @@ public class TeiidCndGenerator implements StringConstants {
         cnd(buf.toString());
     }
 
-    private void writeSection2Comment(String comment) throws Exception {
+    private void cndSection2Comment(String comment) throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append("//==================================================");
         buf.append(NEW_LINE);
@@ -390,7 +428,7 @@ public class TeiidCndGenerator implements StringConstants {
     }
 
     private void writeNamespaces() throws Exception {
-        writeSection1Comment("NAMESPACES");
+        cndSection1Comment("NAMESPACES");
         for (String nm : MODESHAPE_NAMESPACES) {
             cnd(nm);
             cnd(NEW_LINE);
@@ -484,7 +522,7 @@ public class TeiidCndGenerator implements StringConstants {
         lex(TAB + "/**" + NEW_LINE);
         lex(TAB + " * " + nodeName(node.klazz()) + NEW_LINE);
         lex(TAB + " */" + NEW_LINE);
-        lex(TAB + INTERFACE + SPACE + node.klazz().getSimpleName());
+        lex(TAB + PUBLIC + SPACE + INTERFACE + SPACE + node.klazz().getSimpleName());
         
         Iterator<CTree.Node> parentIter = createParentIterator(node);
         if (parentIter.hasNext()) {
@@ -642,7 +680,7 @@ public class TeiidCndGenerator implements StringConstants {
 
         lexBuf.append(TAB).append(TAB)
                   .append("boolean ").append(varName).append("_PROP_MULTIPLE").append(" = ")
-                  .append("true").append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+                  .append(Boolean.toString(aspect.isMultiple())).append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
 
         if (aspect.getConstraints() != null && ! aspect.getConstraints().isEmpty()) {
             lexBuf.append(TAB).append(TAB)
@@ -701,7 +739,7 @@ public class TeiidCndGenerator implements StringConstants {
 
         lexBuf.append(TAB).append(TAB)
                  .append("boolean ").append(varName).append("_REF_MULTIPLE").append(" = ")
-                 .append("true").append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+                 .append(Boolean.toString(aspect.isMultiple())).append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
         
         lex(lexBuf.toString());
     }
@@ -739,10 +777,23 @@ public class TeiidCndGenerator implements StringConstants {
         } else if (parameterClass.isEnum()) {
             // An Enum
             List<String> constraints = new ArrayList<String>();
-            Object[] enumConstants = parameterClass.getEnumConstants();
-            for (Object c : enumConstants) {
-                constraints.add(c.toString());
+
+            // CriteriaOperator.Operator enum is exceptional in that its toString()
+            // does not include the extra != from the NotEquals and since this is a
+            // constraint we don't really want to NOT include it!!
+            if (parameterClass.equals(CriteriaOperator.Operator.class)) {
+                for (CriteriaOperator.Operator op : CriteriaOperator.Operator.values()) {
+                    for (String symbol : op.getSymbols()) {
+                        constraints.add(symbol);
+                    }
+                }
+            } else {
+                Object[] enumConstants = parameterClass.getEnumConstants();
+                for (Object c : enumConstants) {
+                    constraints.add(c.toString());
+                }
             }
+
             PropertyAspect propAspect = new PropertyAspect(aspectName, ModeshapeType.STRING, multiple);
             propAspect.setConstraints(constraints);
             return propAspect;
@@ -787,9 +838,24 @@ public class TeiidCndGenerator implements StringConstants {
                 // which is narrower as this tends to be produced by generics in
                 // the parameters
                 Class<?> deParamType = deMethod.getParameterTypes()[0];
+                ModeshapeType deMType = ModeshapeType.get(deParamType);
+                ModeshapeType mType = ModeshapeType.get(parameterTypes[0]);
+
                 if (deParamType.isAssignableFrom(parameterTypes[0])) {
                     // deMethod is super of method so use method
                     dedupedMethods.put(method.getName(), method);
+                } else if (parameterTypes[0].isAssignableFrom(deParamType)) {
+                    // method is super of deMethod so already using deMethod
+                    continue;
+                } else if (mType != null && deMType == null) {
+                 // method has a modeshape type parameter, prefer that
+                    dedupedMethods.put(method.getName(), method);
+                } else if (deMType != null && mType == null) {
+                    // deMethod has a modeshape type parameter, prefer that
+                    continue;
+                } else {
+                    // Methods have same name but totally unrelated so flag this up
+                    System.err.println(nodeClass + " contains more than one " + method.getName() + ". Not sure which to use!");
                 }
             } else {
                 dedupedMethods.put(method.getName(), method);
@@ -925,7 +991,10 @@ public class TeiidCndGenerator implements StringConstants {
             if (! pkgDir.exists())
                 throw new RuntimeException("The package directory " + pkgDir + " does not exist!");
 
-            for (String srcFile : pkgDir.list()) {
+            List<String> classList = Arrays.asList(pkgDir.list());
+            Collections.sort(classList);
+
+            for (String srcFile : classList) {
                 String javaClass = srcFile.substring(0, srcFile.indexOf(DOT));
                 Class<?> objClass = Class.forName(sqlPkg.getName() + DOT + javaClass);
 
@@ -951,17 +1020,20 @@ public class TeiidCndGenerator implements StringConstants {
 
         System.out.println(tree.toString());
 
+        List<Node> allClasses = new ArrayList<Node>();
         if (! tree.getInterfaceNodes().isEmpty()) {
-            writeSection2Comment("Interfaces");
+            cndSection2Comment("Interfaces");
             for (INode iNode : tree.getInterfaceNodes()) {
                 writeInterfaceNode(iNode);
             }
         }
 
-        writeSection2Comment("Classes");
+        cndSection2Comment("Classes");
         for (CNode cNode : tree.getRoot().getChildren()) {
             writeClassNode(cNode);
         }
+
+        lexIndexClasses(tree);
     }
 
     /**
@@ -980,7 +1052,7 @@ public class TeiidCndGenerator implements StringConstants {
 
             writeNamespaces();
 
-            writeSection1Comment("NODETYPES");
+            cndSection1Comment("NODETYPES");
             writeClassTree();
             cnd(NEW_LINE);
 

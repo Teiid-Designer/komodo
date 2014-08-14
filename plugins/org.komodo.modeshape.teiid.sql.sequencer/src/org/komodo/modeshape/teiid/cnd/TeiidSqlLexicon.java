@@ -22,10 +22,10 @@
 
 package org.komodo.modeshape.teiid.cnd;
 
-import org.komodo.spi.constants.StringConstants;
+import java.lang.reflect.Field;import java.util.HashMap;import java.util.Map;import org.komodo.modeshape.teiid.sql.lang.ASTNode;import org.komodo.spi.constants.StringConstants;
 
 @SuppressWarnings( { "javadoc", "nls" })
-public interface TeiidSqlLexicon extends StringConstants {
+public class TeiidSqlLexicon implements StringConstants {
 
 	interface Namespace {
 		public static final String PREFIX = "tsql";
@@ -33,27 +33,9 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
-	 * tsql:labeled
-	 */
-	interface Labeled {
-
-		String ID = Namespace.PREFIX + COLON + "labeled";
-
-	}
-
-	/**
-	 * tsql:expressionStatement
-	 */
-	interface ExpressionStatement {
-
-		String ID = Namespace.PREFIX + COLON + "expressionStatement";
-
-	}
-
-	/**
 	 * tsql:languageObject
 	 */
-	interface LanguageObject {
+	public interface LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "languageObject";
 
@@ -62,7 +44,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 	/**
 	 * tsql:expression
 	 */
-	interface Expression extends LanguageObject {
+	public interface Expression extends LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "expression";
 
@@ -71,7 +53,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 	/**
 	 * tsql:predicateCriteria
 	 */
-	interface PredicateCriteria extends Expression {
+	public interface PredicateCriteria extends Expression {
 
 		String ID = Namespace.PREFIX + COLON + "predicateCriteria";
 
@@ -80,25 +62,43 @@ public interface TeiidSqlLexicon extends StringConstants {
 	/**
 	 * tsql:subqueryContainer
 	 */
-	interface SubqueryContainer extends LanguageObject {
+	public interface SubqueryContainer extends LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "subqueryContainer";
 
 	}
 
 	/**
+	 * tsql:labeled
+	 */
+	public interface Labeled {
+
+		String ID = Namespace.PREFIX + COLON + "labeled";
+
+	}
+
+	/**
 	 * tsql:targetedCommand
 	 */
-	interface TargetedCommand {
+	public interface TargetedCommand {
 
 		String ID = Namespace.PREFIX + COLON + "targetedCommand";
 
 	}
 
 	/**
+	 * tsql:expressionStatement
+	 */
+	public interface ExpressionStatement {
+
+		String ID = Namespace.PREFIX + COLON + "expressionStatement";
+
+	}
+
+	/**
 	 * tsql:criteria
 	 */
-	interface Criteria extends Expression {
+	public interface Criteria extends Expression {
 
 		String ID = Namespace.PREFIX + COLON + "criteria";
 
@@ -107,42 +107,93 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
-	 * tsql:notCriteria
+	 * tsql:abstractCompareCriteria
 	 */
-	interface NotCriteria extends Criteria {
+	public interface AbstractCompareCriteria extends Criteria, PredicateCriteria {
 
-		String ID = Namespace.PREFIX + COLON + "notCriteria";
+		String ID = Namespace.PREFIX + COLON + "abstractCompareCriteria";
 
-		boolean IS_ABSTRACT = false;
+		boolean IS_ABSTRACT = true;
 
 		/**
-		 * CRITERIA Reference
+		 * OPERATOR Property
 		 */
-		String CRITERIA_REF_NAME = Namespace.PREFIX + COLON + "criteria";
+		String OPERATOR_PROP_NAME = Namespace.PREFIX + COLON + "operator";
 
-		Class<?> CRITERIA_REF_TYPE =  Criteria.class;
+		Class<?> OPERATOR_PROP_TYPE =  String.class;
 
-		boolean CRITERIA_REF_MULTIPLE = true;
+		boolean OPERATOR_PROP_MULTIPLE = false;
+
+		String[] OPERATOR_PROP_CONSTRAINTS = { "=", "<>", "!=", "<", ">", "<=", ">=" };
+
+		/**
+		 * LEFT_EXPRESSION Reference
+		 */
+		String LEFT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "leftExpression";
+
+		Class<?> LEFT_EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean LEFT_EXPRESSION_REF_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:existsCriteria
+	 * tsql:compareCriteria
 	 */
-	interface ExistsCriteria extends Criteria, PredicateCriteria, SubqueryContainer {
+	public interface CompareCriteria extends AbstractCompareCriteria {
 
-		String ID = Namespace.PREFIX + COLON + "existsCriteria";
+		String ID = Namespace.PREFIX + COLON + "compareCriteria";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * NEGATED Property
+		 * OPTIONAL Property
 		 */
-		String NEGATED_PROP_NAME = Namespace.PREFIX + COLON + "negated";
+		String OPTIONAL_PROP_NAME = Namespace.PREFIX + COLON + "optional";
 
-		Class<?> NEGATED_PROP_TYPE =  Boolean.class;
+		Class<?> OPTIONAL_PROP_TYPE =  Boolean.class;
 
-		boolean NEGATED_PROP_MULTIPLE = true;
+		boolean OPTIONAL_PROP_MULTIPLE = false;
+
+		/**
+		 * OPERATOR Property
+		 */
+		String OPERATOR_PROP_NAME = Namespace.PREFIX + COLON + "operator";
+
+		Class<?> OPERATOR_PROP_TYPE =  Long.class;
+
+		boolean OPERATOR_PROP_MULTIPLE = false;
+
+		/**
+		 * RIGHT_EXPRESSION Reference
+		 */
+		String RIGHT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "rightExpression";
+
+		Class<?> RIGHT_EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean RIGHT_EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:subqueryCompareCriteria
+	 */
+	public interface SubqueryCompareCriteria extends AbstractCompareCriteria, SubqueryContainer {
+
+		String ID = Namespace.PREFIX + COLON + "subqueryCompareCriteria";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * PREDICATE_QUANTIFIER Property
+		 */
+		String PREDICATE_QUANTIFIER_PROP_NAME = Namespace.PREFIX + COLON + "predicateQuantifier";
+
+		Class<?> PREDICATE_QUANTIFIER_PROP_TYPE =  String.class;
+
+		boolean PREDICATE_QUANTIFIER_PROP_MULTIPLE = false;
+
+		String[] PREDICATE_QUANTIFIER_PROP_CONSTRAINTS = { "SOME", "ANY", "ALL" };
 
 		/**
 		 * COMMAND Reference
@@ -151,23 +202,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> COMMAND_REF_TYPE =  QueryCommand.class;
 
-		boolean COMMAND_REF_MULTIPLE = true;
-
-		/**
-		 * SUBQUERY_HINT Reference
-		 */
-		String SUBQUERY_HINT_REF_NAME = Namespace.PREFIX + COLON + "subqueryHint";
-
-		Class<?> SUBQUERY_HINT_REF_TYPE =  SubqueryHint.class;
-
-		boolean SUBQUERY_HINT_REF_MULTIPLE = true;
+		boolean COMMAND_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:abstractSetCriteria
 	 */
-	interface AbstractSetCriteria extends Criteria, PredicateCriteria {
+	public interface AbstractSetCriteria extends Criteria, PredicateCriteria {
 
 		String ID = Namespace.PREFIX + COLON + "abstractSetCriteria";
 
@@ -180,7 +222,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> NEGATED_PROP_TYPE =  Boolean.class;
 
-		boolean NEGATED_PROP_MULTIPLE = true;
+		boolean NEGATED_PROP_MULTIPLE = false;
 
 		/**
 		 * EXPRESSION Reference
@@ -189,43 +231,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:subquerySetCriteria
-	 */
-	interface SubquerySetCriteria extends AbstractSetCriteria, SubqueryContainer {
-
-		String ID = Namespace.PREFIX + COLON + "subquerySetCriteria";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * COMMAND Reference
-		 */
-		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
-
-		Class<?> COMMAND_REF_TYPE =  QueryCommand.class;
-
-		boolean COMMAND_REF_MULTIPLE = true;
-
-		/**
-		 * SUBQUERY_HINT Reference
-		 */
-		String SUBQUERY_HINT_REF_NAME = Namespace.PREFIX + COLON + "subqueryHint";
-
-		Class<?> SUBQUERY_HINT_REF_TYPE =  SubqueryHint.class;
-
-		boolean SUBQUERY_HINT_REF_MULTIPLE = true;
+		boolean EXPRESSION_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:setCriteria
 	 */
-	interface SetCriteria extends AbstractSetCriteria {
+	public interface SetCriteria extends AbstractSetCriteria {
 
 		String ID = Namespace.PREFIX + COLON + "setCriteria";
 
@@ -243,38 +256,38 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
-	 * tsql:isNullCriteria
+	 * tsql:subquerySetCriteria
 	 */
-	interface IsNullCriteria extends Criteria, PredicateCriteria {
+	public interface SubquerySetCriteria extends AbstractSetCriteria, SubqueryContainer {
 
-		String ID = Namespace.PREFIX + COLON + "isNullCriteria";
+		String ID = Namespace.PREFIX + COLON + "subquerySetCriteria";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * NEGATED Property
+		 * COMMAND Reference
 		 */
-		String NEGATED_PROP_NAME = Namespace.PREFIX + COLON + "negated";
+		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
 
-		Class<?> NEGATED_PROP_TYPE =  Boolean.class;
+		Class<?> COMMAND_REF_TYPE =  QueryCommand.class;
 
-		boolean NEGATED_PROP_MULTIPLE = true;
+		boolean COMMAND_REF_MULTIPLE = false;
 
 		/**
-		 * EXPRESSION Reference
+		 * SUBQUERY_HINT Reference
 		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+		String SUBQUERY_HINT_REF_NAME = Namespace.PREFIX + COLON + "subqueryHint";
 
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+		Class<?> SUBQUERY_HINT_REF_TYPE =  SubqueryHint.class;
 
-		boolean EXPRESSION_REF_MULTIPLE = true;
+		boolean SUBQUERY_HINT_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:betweenCriteria
 	 */
-	interface BetweenCriteria extends Criteria, PredicateCriteria {
+	public interface BetweenCriteria extends Criteria, PredicateCriteria {
 
 		String ID = Namespace.PREFIX + COLON + "betweenCriteria";
 
@@ -287,7 +300,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> NEGATED_PROP_TYPE =  Boolean.class;
 
-		boolean NEGATED_PROP_MULTIPLE = true;
+		boolean NEGATED_PROP_MULTIPLE = false;
 
 		/**
 		 * LOWER_EXPRESSION Reference
@@ -296,7 +309,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> LOWER_EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean LOWER_EXPRESSION_REF_MULTIPLE = true;
+		boolean LOWER_EXPRESSION_REF_MULTIPLE = false;
 
 		/**
 		 * EXPRESSION Reference
@@ -305,7 +318,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean EXPRESSION_REF_MULTIPLE = true;
+		boolean EXPRESSION_REF_MULTIPLE = false;
 
 		/**
 		 * UPPER_EXPRESSION Reference
@@ -314,161 +327,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> UPPER_EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean UPPER_EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:abstractCompareCriteria
-	 */
-	interface AbstractCompareCriteria extends Criteria, PredicateCriteria {
-
-		String ID = Namespace.PREFIX + COLON + "abstractCompareCriteria";
-
-		boolean IS_ABSTRACT = true;
-
-		/**
-		 * OPERATOR Property
-		 */
-		String OPERATOR_PROP_NAME = Namespace.PREFIX + COLON + "operator";
-
-		Class<?> OPERATOR_PROP_TYPE =  String.class;
-
-		boolean OPERATOR_PROP_MULTIPLE = true;
-
-		String[] OPERATOR_PROP_CONSTRAINTS = { "=", "<>", "<", ">", "<=", ">=" };
-
-		/**
-		 * LEFT_EXPRESSION Reference
-		 */
-		String LEFT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "leftExpression";
-
-		Class<?> LEFT_EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean LEFT_EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:subqueryCompareCriteria
-	 */
-	interface SubqueryCompareCriteria extends AbstractCompareCriteria, SubqueryContainer {
-
-		String ID = Namespace.PREFIX + COLON + "subqueryCompareCriteria";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * PREDICATE_QUANTIFIER Property
-		 */
-		String PREDICATE_QUANTIFIER_PROP_NAME = Namespace.PREFIX + COLON + "predicateQuantifier";
-
-		Class<?> PREDICATE_QUANTIFIER_PROP_TYPE =  String.class;
-
-		boolean PREDICATE_QUANTIFIER_PROP_MULTIPLE = true;
-
-		String[] PREDICATE_QUANTIFIER_PROP_CONSTRAINTS = { "SOME", "ANY", "ALL" };
-
-		/**
-		 * COMMAND Reference
-		 */
-		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
-
-		Class<?> COMMAND_REF_TYPE =  QueryCommand.class;
-
-		boolean COMMAND_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:compareCriteria
-	 */
-	interface CompareCriteria extends AbstractCompareCriteria {
-
-		String ID = Namespace.PREFIX + COLON + "compareCriteria";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * OPTIONAL Property
-		 */
-		String OPTIONAL_PROP_NAME = Namespace.PREFIX + COLON + "optional";
-
-		Class<?> OPTIONAL_PROP_TYPE =  Boolean.class;
-
-		boolean OPTIONAL_PROP_MULTIPLE = true;
-
-		/**
-		 * OPERATOR Property
-		 */
-		String OPERATOR_PROP_NAME = Namespace.PREFIX + COLON + "operator";
-
-		Class<?> OPERATOR_PROP_TYPE =  Long.class;
-
-		boolean OPERATOR_PROP_MULTIPLE = true;
-
-		/**
-		 * RIGHT_EXPRESSION Reference
-		 */
-		String RIGHT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "rightExpression";
-
-		Class<?> RIGHT_EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean RIGHT_EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:matchCriteria
-	 */
-	interface MatchCriteria extends Criteria, PredicateCriteria {
-
-		String ID = Namespace.PREFIX + COLON + "matchCriteria";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * NEGATED Property
-		 */
-		String NEGATED_PROP_NAME = Namespace.PREFIX + COLON + "negated";
-
-		Class<?> NEGATED_PROP_TYPE =  Boolean.class;
-
-		boolean NEGATED_PROP_MULTIPLE = true;
-
-		/**
-		 * ESCAPE_CHAR Property
-		 */
-		String ESCAPE_CHAR_PROP_NAME = Namespace.PREFIX + COLON + "escapeChar";
-
-		Class<?> ESCAPE_CHAR_PROP_TYPE =  String.class;
-
-		boolean ESCAPE_CHAR_PROP_MULTIPLE = true;
-
-		/**
-		 * LEFT_EXPRESSION Reference
-		 */
-		String LEFT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "leftExpression";
-
-		Class<?> LEFT_EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean LEFT_EXPRESSION_REF_MULTIPLE = true;
-
-		/**
-		 * RIGHT_EXPRESSION Reference
-		 */
-		String RIGHT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "rightExpression";
-
-		Class<?> RIGHT_EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean RIGHT_EXPRESSION_REF_MULTIPLE = true;
+		boolean UPPER_EXPRESSION_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:compoundCriteria
 	 */
-	interface CompoundCriteria extends Criteria {
+	public interface CompoundCriteria extends Criteria {
 
 		String ID = Namespace.PREFIX + COLON + "compoundCriteria";
 
@@ -481,7 +347,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> OPERATOR_PROP_TYPE =  Long.class;
 
-		boolean OPERATOR_PROP_MULTIPLE = true;
+		boolean OPERATOR_PROP_MULTIPLE = false;
 
 		/**
 		 * CRITERIA Reference
@@ -495,9 +361,47 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
+	 * tsql:existsCriteria
+	 */
+	public interface ExistsCriteria extends Criteria, PredicateCriteria, SubqueryContainer {
+
+		String ID = Namespace.PREFIX + COLON + "existsCriteria";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * NEGATED Property
+		 */
+		String NEGATED_PROP_NAME = Namespace.PREFIX + COLON + "negated";
+
+		Class<?> NEGATED_PROP_TYPE =  Boolean.class;
+
+		boolean NEGATED_PROP_MULTIPLE = false;
+
+		/**
+		 * COMMAND Reference
+		 */
+		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
+
+		Class<?> COMMAND_REF_TYPE =  QueryCommand.class;
+
+		boolean COMMAND_REF_MULTIPLE = false;
+
+		/**
+		 * SUBQUERY_HINT Reference
+		 */
+		String SUBQUERY_HINT_REF_NAME = Namespace.PREFIX + COLON + "subqueryHint";
+
+		Class<?> SUBQUERY_HINT_REF_TYPE =  SubqueryHint.class;
+
+		boolean SUBQUERY_HINT_REF_MULTIPLE = false;
+
+	}
+
+	/**
 	 * tsql:expressionCriteria
 	 */
-	interface ExpressionCriteria extends Criteria {
+	public interface ExpressionCriteria extends Criteria {
 
 		String ID = Namespace.PREFIX + COLON + "expressionCriteria";
 
@@ -510,14 +414,110 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean EXPRESSION_REF_MULTIPLE = true;
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:isNullCriteria
+	 */
+	public interface IsNullCriteria extends Criteria, PredicateCriteria {
+
+		String ID = Namespace.PREFIX + COLON + "isNullCriteria";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * NEGATED Property
+		 */
+		String NEGATED_PROP_NAME = Namespace.PREFIX + COLON + "negated";
+
+		Class<?> NEGATED_PROP_TYPE =  Boolean.class;
+
+		boolean NEGATED_PROP_MULTIPLE = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:matchCriteria
+	 */
+	public interface MatchCriteria extends Criteria, PredicateCriteria {
+
+		String ID = Namespace.PREFIX + COLON + "matchCriteria";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * NEGATED Property
+		 */
+		String NEGATED_PROP_NAME = Namespace.PREFIX + COLON + "negated";
+
+		Class<?> NEGATED_PROP_TYPE =  Boolean.class;
+
+		boolean NEGATED_PROP_MULTIPLE = false;
+
+		/**
+		 * ESCAPE_CHAR Property
+		 */
+		String ESCAPE_CHAR_PROP_NAME = Namespace.PREFIX + COLON + "escapeChar";
+
+		Class<?> ESCAPE_CHAR_PROP_TYPE =  String.class;
+
+		boolean ESCAPE_CHAR_PROP_MULTIPLE = false;
+
+		/**
+		 * LEFT_EXPRESSION Reference
+		 */
+		String LEFT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "leftExpression";
+
+		Class<?> LEFT_EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean LEFT_EXPRESSION_REF_MULTIPLE = false;
+
+		/**
+		 * RIGHT_EXPRESSION Reference
+		 */
+		String RIGHT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "rightExpression";
+
+		Class<?> RIGHT_EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean RIGHT_EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:notCriteria
+	 */
+	public interface NotCriteria extends Criteria {
+
+		String ID = Namespace.PREFIX + COLON + "notCriteria";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * CRITERIA Reference
+		 */
+		String CRITERIA_REF_NAME = Namespace.PREFIX + COLON + "criteria";
+
+		Class<?> CRITERIA_REF_TYPE =  Criteria.class;
+
+		boolean CRITERIA_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:command
 	 */
-	interface Command extends LanguageObject {
+	public interface Command extends LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "command";
 
@@ -530,7 +530,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> IS_RESOLVED_PROP_TYPE =  Boolean.class;
 
-		boolean IS_RESOLVED_PROP_MULTIPLE = true;
+		boolean IS_RESOLVED_PROP_MULTIPLE = false;
 
 		/**
 		 * SOURCE_HINT Reference
@@ -539,7 +539,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> SOURCE_HINT_REF_TYPE =  SourceHint.class;
 
-		boolean SOURCE_HINT_REF_MULTIPLE = true;
+		boolean SOURCE_HINT_REF_MULTIPLE = false;
 
 		/**
 		 * OPTION Reference
@@ -548,164 +548,105 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> OPTION_REF_TYPE =  Option.class;
 
-		boolean OPTION_REF_MULTIPLE = true;
+		boolean OPTION_REF_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:queryCommand
+	 * tsql:alter
 	 */
-	interface QueryCommand extends Command {
+	public interface Alter extends Command {
 
-		String ID = Namespace.PREFIX + COLON + "queryCommand";
+		String ID = Namespace.PREFIX + COLON + "alter";
 
 		boolean IS_ABSTRACT = true;
 
 		/**
-		 * WITH Reference
+		 * DEFINITION Reference
 		 */
-		String WITH_REF_NAME = Namespace.PREFIX + COLON + "with";
+		String DEFINITION_REF_NAME = Namespace.PREFIX + COLON + "definition";
 
-		Class<?> WITH_REF_TYPE =  WithQueryCommand.class;
+		Class<?> DEFINITION_REF_TYPE =  Command.class;
 
-		boolean WITH_REF_MULTIPLE = true;
+		boolean DEFINITION_REF_MULTIPLE = false;
 
 		/**
-		 * ORDER_BY Reference
+		 * TARGET Reference
 		 */
-		String ORDER_BY_REF_NAME = Namespace.PREFIX + COLON + "orderBy";
+		String TARGET_REF_NAME = Namespace.PREFIX + COLON + "target";
 
-		Class<?> ORDER_BY_REF_TYPE =  OrderBy.class;
+		Class<?> TARGET_REF_TYPE =  GroupSymbol.class;
 
-		boolean ORDER_BY_REF_MULTIPLE = true;
-
-		/**
-		 * LIMIT Reference
-		 */
-		String LIMIT_REF_NAME = Namespace.PREFIX + COLON + "limit";
-
-		Class<?> LIMIT_REF_TYPE =  Limit.class;
-
-		boolean LIMIT_REF_MULTIPLE = true;
+		boolean TARGET_REF_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:setQuery
+	 * tsql:alterProcedure
 	 */
-	interface SetQuery extends QueryCommand {
+	public interface AlterProcedure extends Alter {
 
-		String ID = Namespace.PREFIX + COLON + "setQuery";
+		String ID = Namespace.PREFIX + COLON + "alterProcedure";
 
 		boolean IS_ABSTRACT = false;
-
-		/**
-		 * ALL Property
-		 */
-		String ALL_PROP_NAME = Namespace.PREFIX + COLON + "all";
-
-		Class<?> ALL_PROP_TYPE =  Boolean.class;
-
-		boolean ALL_PROP_MULTIPLE = true;
-
-		/**
-		 * LEFT_QUERY Reference
-		 */
-		String LEFT_QUERY_REF_NAME = Namespace.PREFIX + COLON + "leftQuery";
-
-		Class<?> LEFT_QUERY_REF_TYPE =  QueryCommand.class;
-
-		boolean LEFT_QUERY_REF_MULTIPLE = true;
-
-		/**
-		 * RIGHT_QUERY Reference
-		 */
-		String RIGHT_QUERY_REF_NAME = Namespace.PREFIX + COLON + "rightQuery";
-
-		Class<?> RIGHT_QUERY_REF_TYPE =  QueryCommand.class;
-
-		boolean RIGHT_QUERY_REF_MULTIPLE = true;
 
 	}
 
 	/**
-	 * tsql:query
+	 * tsql:alterTrigger
 	 */
-	interface Query extends QueryCommand {
+	public interface AlterTrigger extends Alter {
 
-		String ID = Namespace.PREFIX + COLON + "query";
+		String ID = Namespace.PREFIX + COLON + "alterTrigger";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * ROW_CONSTRUCTOR Property
+		 * EVENT Property
 		 */
-		String ROW_CONSTRUCTOR_PROP_NAME = Namespace.PREFIX + COLON + "rowConstructor";
+		String EVENT_PROP_NAME = Namespace.PREFIX + COLON + "event";
 
-		Class<?> ROW_CONSTRUCTOR_PROP_TYPE =  Boolean.class;
+		Class<?> EVENT_PROP_TYPE =  String.class;
 
-		boolean ROW_CONSTRUCTOR_PROP_MULTIPLE = true;
+		boolean EVENT_PROP_MULTIPLE = false;
+
+		String[] EVENT_PROP_CONSTRAINTS = { "INSERT", "UPDATE", "DELETE" };
 
 		/**
-		 * INTO Reference
+		 * ENABLED Property
 		 */
-		String INTO_REF_NAME = Namespace.PREFIX + COLON + "into";
+		String ENABLED_PROP_NAME = Namespace.PREFIX + COLON + "enabled";
 
-		Class<?> INTO_REF_TYPE =  Into.class;
+		Class<?> ENABLED_PROP_TYPE =  Boolean.class;
 
-		boolean INTO_REF_MULTIPLE = true;
+		boolean ENABLED_PROP_MULTIPLE = false;
 
 		/**
-		 * HAVING Reference
+		 * CREATE Property
 		 */
-		String HAVING_REF_NAME = Namespace.PREFIX + COLON + "having";
+		String CREATE_PROP_NAME = Namespace.PREFIX + COLON + "create";
 
-		Class<?> HAVING_REF_TYPE =  Criteria.class;
+		Class<?> CREATE_PROP_TYPE =  Boolean.class;
 
-		boolean HAVING_REF_MULTIPLE = true;
+		boolean CREATE_PROP_MULTIPLE = false;
 
-		/**
-		 * GROUP_BY Reference
-		 */
-		String GROUP_BY_REF_NAME = Namespace.PREFIX + COLON + "groupBy";
+	}
 
-		Class<?> GROUP_BY_REF_TYPE =  GroupBy.class;
+	/**
+	 * tsql:alterView
+	 */
+	public interface AlterView extends Alter {
 
-		boolean GROUP_BY_REF_MULTIPLE = true;
+		String ID = Namespace.PREFIX + COLON + "alterView";
 
-		/**
-		 * FROM Reference
-		 */
-		String FROM_REF_NAME = Namespace.PREFIX + COLON + "from";
-
-		Class<?> FROM_REF_TYPE =  From.class;
-
-		boolean FROM_REF_MULTIPLE = true;
-
-		/**
-		 * CRITERIA Reference
-		 */
-		String CRITERIA_REF_NAME = Namespace.PREFIX + COLON + "criteria";
-
-		Class<?> CRITERIA_REF_TYPE =  Criteria.class;
-
-		boolean CRITERIA_REF_MULTIPLE = true;
-
-		/**
-		 * SELECT Reference
-		 */
-		String SELECT_REF_NAME = Namespace.PREFIX + COLON + "select";
-
-		Class<?> SELECT_REF_TYPE =  Select.class;
-
-		boolean SELECT_REF_MULTIPLE = true;
+		boolean IS_ABSTRACT = false;
 
 	}
 
 	/**
 	 * tsql:procedureContainer
 	 */
-	interface ProcedureContainer extends Command {
+	public interface ProcedureContainer extends Command {
 
 		String ID = Namespace.PREFIX + COLON + "procedureContainer";
 
@@ -716,7 +657,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 	/**
 	 * tsql:delete
 	 */
-	interface Delete extends ProcedureContainer, TargetedCommand {
+	public interface Delete extends ProcedureContainer, TargetedCommand {
 
 		String ID = Namespace.PREFIX + COLON + "delete";
 
@@ -729,7 +670,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> CRITERIA_REF_TYPE =  Criteria.class;
 
-		boolean CRITERIA_REF_MULTIPLE = true;
+		boolean CRITERIA_REF_MULTIPLE = false;
 
 		/**
 		 * GROUP Reference
@@ -738,14 +679,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
 
-		boolean GROUP_REF_MULTIPLE = true;
+		boolean GROUP_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:insert
 	 */
-	interface Insert extends ProcedureContainer, TargetedCommand {
+	public interface Insert extends ProcedureContainer, TargetedCommand {
 
 		String ID = Namespace.PREFIX + COLON + "insert";
 
@@ -758,7 +699,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> MERGE_PROP_TYPE =  Boolean.class;
 
-		boolean MERGE_PROP_MULTIPLE = true;
+		boolean MERGE_PROP_MULTIPLE = false;
 
 		/**
 		 * QUERY_EXPRESSION Reference
@@ -767,7 +708,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> QUERY_EXPRESSION_REF_TYPE =  QueryCommand.class;
 
-		boolean QUERY_EXPRESSION_REF_MULTIPLE = true;
+		boolean QUERY_EXPRESSION_REF_MULTIPLE = false;
 
 		/**
 		 * VALUES Reference
@@ -794,52 +735,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
 
-		boolean GROUP_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:update
-	 */
-	interface Update extends ProcedureContainer, TargetedCommand {
-
-		String ID = Namespace.PREFIX + COLON + "update";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * CHANGE_LIST Reference
-		 */
-		String CHANGE_LIST_REF_NAME = Namespace.PREFIX + COLON + "changeList";
-
-		Class<?> CHANGE_LIST_REF_TYPE =  SetClauseList.class;
-
-		boolean CHANGE_LIST_REF_MULTIPLE = true;
-
-		/**
-		 * CRITERIA Reference
-		 */
-		String CRITERIA_REF_NAME = Namespace.PREFIX + COLON + "criteria";
-
-		Class<?> CRITERIA_REF_TYPE =  Criteria.class;
-
-		boolean CRITERIA_REF_MULTIPLE = true;
-
-		/**
-		 * GROUP Reference
-		 */
-		String GROUP_REF_NAME = Namespace.PREFIX + COLON + "group";
-
-		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
-
-		boolean GROUP_REF_MULTIPLE = true;
+		boolean GROUP_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:storedProcedure
 	 */
-	interface StoredProcedure extends ProcedureContainer, TargetedCommand {
+	public interface StoredProcedure extends ProcedureContainer, TargetedCommand {
 
 		String ID = Namespace.PREFIX + COLON + "storedProcedure";
 
@@ -852,7 +755,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> DISPLAY_NAMED_PARAMETERS_PROP_TYPE =  Boolean.class;
 
-		boolean DISPLAY_NAMED_PARAMETERS_PROP_MULTIPLE = true;
+		boolean DISPLAY_NAMED_PARAMETERS_PROP_MULTIPLE = false;
 
 		/**
 		 * CALLED_WITH_RETURN Property
@@ -861,7 +764,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> CALLED_WITH_RETURN_PROP_TYPE =  Boolean.class;
 
-		boolean CALLED_WITH_RETURN_PROP_MULTIPLE = true;
+		boolean CALLED_WITH_RETURN_PROP_MULTIPLE = false;
 
 		/**
 		 * CALLABLE_STATEMENT Property
@@ -870,7 +773,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> CALLABLE_STATEMENT_PROP_TYPE =  Boolean.class;
 
-		boolean CALLABLE_STATEMENT_PROP_MULTIPLE = true;
+		boolean CALLABLE_STATEMENT_PROP_MULTIPLE = false;
 
 		/**
 		 * PROCEDURE_NAME Property
@@ -879,7 +782,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> PROCEDURE_NAME_PROP_TYPE =  String.class;
 
-		boolean PROCEDURE_NAME_PROP_MULTIPLE = true;
+		boolean PROCEDURE_NAME_PROP_MULTIPLE = false;
 
 		/**
 		 * PROCEDUREID Property
@@ -888,7 +791,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> PROCEDUREID_PROP_TYPE =  Object.class;
 
-		boolean PROCEDUREID_PROP_MULTIPLE = true;
+		boolean PROCEDUREID_PROP_MULTIPLE = false;
 
 		/**
 		 * PARAMETER Reference
@@ -897,7 +800,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> PARAMETER_REF_TYPE =  SPParameter.class;
 
-		boolean PARAMETER_REF_MULTIPLE = true;
+		boolean PARAMETER_REF_MULTIPLE = false;
 
 		/**
 		 * GROUP Reference
@@ -906,105 +809,52 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
 
-		boolean GROUP_REF_MULTIPLE = true;
+		boolean GROUP_REF_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:alter
+	 * tsql:update
 	 */
-	interface Alter extends Command {
+	public interface Update extends ProcedureContainer, TargetedCommand {
 
-		String ID = Namespace.PREFIX + COLON + "alter";
-
-		boolean IS_ABSTRACT = true;
-
-		/**
-		 * DEFINITION Reference
-		 */
-		String DEFINITION_REF_NAME = Namespace.PREFIX + COLON + "definition";
-
-		Class<?> DEFINITION_REF_TYPE =  Command.class;
-
-		boolean DEFINITION_REF_MULTIPLE = true;
-
-		/**
-		 * TARGET Reference
-		 */
-		String TARGET_REF_NAME = Namespace.PREFIX + COLON + "target";
-
-		Class<?> TARGET_REF_TYPE =  GroupSymbol.class;
-
-		boolean TARGET_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:alterTrigger
-	 */
-	interface AlterTrigger extends Alter {
-
-		String ID = Namespace.PREFIX + COLON + "alterTrigger";
+		String ID = Namespace.PREFIX + COLON + "update";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * EVENT Property
+		 * CHANGE_LIST Reference
 		 */
-		String EVENT_PROP_NAME = Namespace.PREFIX + COLON + "event";
+		String CHANGE_LIST_REF_NAME = Namespace.PREFIX + COLON + "changeList";
 
-		Class<?> EVENT_PROP_TYPE =  String.class;
+		Class<?> CHANGE_LIST_REF_TYPE =  SetClauseList.class;
 
-		boolean EVENT_PROP_MULTIPLE = true;
-
-		String[] EVENT_PROP_CONSTRAINTS = { "INSERT", "UPDATE", "DELETE" };
+		boolean CHANGE_LIST_REF_MULTIPLE = false;
 
 		/**
-		 * ENABLED Property
+		 * CRITERIA Reference
 		 */
-		String ENABLED_PROP_NAME = Namespace.PREFIX + COLON + "enabled";
+		String CRITERIA_REF_NAME = Namespace.PREFIX + COLON + "criteria";
 
-		Class<?> ENABLED_PROP_TYPE =  Boolean.class;
+		Class<?> CRITERIA_REF_TYPE =  Criteria.class;
 
-		boolean ENABLED_PROP_MULTIPLE = true;
+		boolean CRITERIA_REF_MULTIPLE = false;
 
 		/**
-		 * CREATE Property
+		 * GROUP Reference
 		 */
-		String CREATE_PROP_NAME = Namespace.PREFIX + COLON + "create";
+		String GROUP_REF_NAME = Namespace.PREFIX + COLON + "group";
 
-		Class<?> CREATE_PROP_TYPE =  Boolean.class;
+		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
 
-		boolean CREATE_PROP_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:alterView
-	 */
-	interface AlterView extends Alter {
-
-		String ID = Namespace.PREFIX + COLON + "alterView";
-
-		boolean IS_ABSTRACT = false;
-
-	}
-
-	/**
-	 * tsql:alterProcedure
-	 */
-	interface AlterProcedure extends Alter {
-
-		String ID = Namespace.PREFIX + COLON + "alterProcedure";
-
-		boolean IS_ABSTRACT = false;
+		boolean GROUP_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:dynamicCommand
 	 */
-	interface DynamicCommand extends Command {
+	public interface DynamicCommand extends Command {
 
 		String ID = Namespace.PREFIX + COLON + "dynamicCommand";
 
@@ -1017,7 +867,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> AS_CLAUSE_SET_PROP_TYPE =  Boolean.class;
 
-		boolean AS_CLAUSE_SET_PROP_MULTIPLE = true;
+		boolean AS_CLAUSE_SET_PROP_MULTIPLE = false;
 
 		/**
 		 * UPDATING_MODEL_COUNT Property
@@ -1026,7 +876,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> UPDATING_MODEL_COUNT_PROP_TYPE =  Long.class;
 
-		boolean UPDATING_MODEL_COUNT_PROP_MULTIPLE = true;
+		boolean UPDATING_MODEL_COUNT_PROP_MULTIPLE = false;
 
 		/**
 		 * AS_COLUMNS Reference
@@ -1044,7 +894,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> USING_REF_TYPE =  SetClauseList.class;
 
-		boolean USING_REF_MULTIPLE = true;
+		boolean USING_REF_MULTIPLE = false;
 
 		/**
 		 * SQL Reference
@@ -1053,7 +903,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> SQL_REF_TYPE =  Expression.class;
 
-		boolean SQL_REF_MULTIPLE = true;
+		boolean SQL_REF_MULTIPLE = false;
 
 		/**
 		 * INTO_GROUP Reference
@@ -1062,34 +912,164 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> INTO_GROUP_REF_TYPE =  GroupSymbol.class;
 
-		boolean INTO_GROUP_REF_MULTIPLE = true;
+		boolean INTO_GROUP_REF_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:triggerAction
+	 * tsql:queryCommand
 	 */
-	interface TriggerAction extends Command {
+	public interface QueryCommand extends Command {
 
-		String ID = Namespace.PREFIX + COLON + "triggerAction";
+		String ID = Namespace.PREFIX + COLON + "queryCommand";
+
+		boolean IS_ABSTRACT = true;
+
+		/**
+		 * WITH Reference
+		 */
+		String WITH_REF_NAME = Namespace.PREFIX + COLON + "with";
+
+		Class<?> WITH_REF_TYPE =  WithQueryCommand.class;
+
+		boolean WITH_REF_MULTIPLE = true;
+
+		/**
+		 * ORDER_BY Reference
+		 */
+		String ORDER_BY_REF_NAME = Namespace.PREFIX + COLON + "orderBy";
+
+		Class<?> ORDER_BY_REF_TYPE =  OrderBy.class;
+
+		boolean ORDER_BY_REF_MULTIPLE = false;
+
+		/**
+		 * LIMIT Reference
+		 */
+		String LIMIT_REF_NAME = Namespace.PREFIX + COLON + "limit";
+
+		Class<?> LIMIT_REF_TYPE =  Limit.class;
+
+		boolean LIMIT_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:query
+	 */
+	public interface Query extends QueryCommand {
+
+		String ID = Namespace.PREFIX + COLON + "query";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * BLOCK Reference
+		 * ROW_CONSTRUCTOR Property
 		 */
-		String BLOCK_REF_NAME = Namespace.PREFIX + COLON + "block";
+		String ROW_CONSTRUCTOR_PROP_NAME = Namespace.PREFIX + COLON + "rowConstructor";
 
-		Class<?> BLOCK_REF_TYPE =  Block.class;
+		Class<?> ROW_CONSTRUCTOR_PROP_TYPE =  Boolean.class;
 
-		boolean BLOCK_REF_MULTIPLE = true;
+		boolean ROW_CONSTRUCTOR_PROP_MULTIPLE = false;
+
+		/**
+		 * INTO Reference
+		 */
+		String INTO_REF_NAME = Namespace.PREFIX + COLON + "into";
+
+		Class<?> INTO_REF_TYPE =  Into.class;
+
+		boolean INTO_REF_MULTIPLE = false;
+
+		/**
+		 * HAVING Reference
+		 */
+		String HAVING_REF_NAME = Namespace.PREFIX + COLON + "having";
+
+		Class<?> HAVING_REF_TYPE =  Criteria.class;
+
+		boolean HAVING_REF_MULTIPLE = false;
+
+		/**
+		 * GROUP_BY Reference
+		 */
+		String GROUP_BY_REF_NAME = Namespace.PREFIX + COLON + "groupBy";
+
+		Class<?> GROUP_BY_REF_TYPE =  GroupBy.class;
+
+		boolean GROUP_BY_REF_MULTIPLE = false;
+
+		/**
+		 * FROM Reference
+		 */
+		String FROM_REF_NAME = Namespace.PREFIX + COLON + "from";
+
+		Class<?> FROM_REF_TYPE =  From.class;
+
+		boolean FROM_REF_MULTIPLE = false;
+
+		/**
+		 * CRITERIA Reference
+		 */
+		String CRITERIA_REF_NAME = Namespace.PREFIX + COLON + "criteria";
+
+		Class<?> CRITERIA_REF_TYPE =  Criteria.class;
+
+		boolean CRITERIA_REF_MULTIPLE = false;
+
+		/**
+		 * SELECT Reference
+		 */
+		String SELECT_REF_NAME = Namespace.PREFIX + COLON + "select";
+
+		Class<?> SELECT_REF_TYPE =  Select.class;
+
+		boolean SELECT_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:setQuery
+	 */
+	public interface SetQuery extends QueryCommand {
+
+		String ID = Namespace.PREFIX + COLON + "setQuery";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * ALL Property
+		 */
+		String ALL_PROP_NAME = Namespace.PREFIX + COLON + "all";
+
+		Class<?> ALL_PROP_TYPE =  Boolean.class;
+
+		boolean ALL_PROP_MULTIPLE = false;
+
+		/**
+		 * LEFT_QUERY Reference
+		 */
+		String LEFT_QUERY_REF_NAME = Namespace.PREFIX + COLON + "leftQuery";
+
+		Class<?> LEFT_QUERY_REF_TYPE =  QueryCommand.class;
+
+		boolean LEFT_QUERY_REF_MULTIPLE = false;
+
+		/**
+		 * RIGHT_QUERY Reference
+		 */
+		String RIGHT_QUERY_REF_NAME = Namespace.PREFIX + COLON + "rightQuery";
+
+		Class<?> RIGHT_QUERY_REF_TYPE =  QueryCommand.class;
+
+		boolean RIGHT_QUERY_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:createProcedureCommand
 	 */
-	interface CreateProcedureCommand extends Command {
+	public interface CreateProcedureCommand extends Command {
 
 		String ID = Namespace.PREFIX + COLON + "createProcedureCommand";
 
@@ -1102,7 +1082,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> BLOCK_REF_TYPE =  Block.class;
 
-		boolean BLOCK_REF_MULTIPLE = true;
+		boolean BLOCK_REF_MULTIPLE = false;
 
 		/**
 		 * VIRTUAL_GROUP Reference
@@ -1111,137 +1091,34 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> VIRTUAL_GROUP_REF_TYPE =  GroupSymbol.class;
 
-		boolean VIRTUAL_GROUP_REF_MULTIPLE = true;
+		boolean VIRTUAL_GROUP_REF_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:select
+	 * tsql:triggerAction
 	 */
-	interface Select extends LanguageObject {
+	public interface TriggerAction extends Command {
 
-		String ID = Namespace.PREFIX + COLON + "select";
+		String ID = Namespace.PREFIX + COLON + "triggerAction";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * DISTINCT Property
+		 * BLOCK Reference
 		 */
-		String DISTINCT_PROP_NAME = Namespace.PREFIX + COLON + "distinct";
+		String BLOCK_REF_NAME = Namespace.PREFIX + COLON + "block";
 
-		Class<?> DISTINCT_PROP_TYPE =  Boolean.class;
+		Class<?> BLOCK_REF_TYPE =  Block.class;
 
-		boolean DISTINCT_PROP_MULTIPLE = true;
-
-		/**
-		 * SYMBOLS Reference
-		 */
-		String SYMBOLS_REF_NAME = Namespace.PREFIX + COLON + "symbols";
-
-		Class<?> SYMBOLS_REF_TYPE =  Expression.class;
-
-		boolean SYMBOLS_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:withQueryCommand
-	 */
-	interface WithQueryCommand extends SubqueryContainer {
-
-		String ID = Namespace.PREFIX + COLON + "withQueryCommand";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * COLUMNS Reference
-		 */
-		String COLUMNS_REF_NAME = Namespace.PREFIX + COLON + "columns";
-
-		Class<?> COLUMNS_REF_TYPE =  ElementSymbol.class;
-
-		boolean COLUMNS_REF_MULTIPLE = true;
-
-		/**
-		 * COMMAND Reference
-		 */
-		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
-
-		Class<?> COMMAND_REF_TYPE =  QueryCommand.class;
-
-		boolean COMMAND_REF_MULTIPLE = true;
-
-		/**
-		 * QUERY_EXPRESSION Reference
-		 */
-		String QUERY_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "queryExpression";
-
-		Class<?> QUERY_EXPRESSION_REF_TYPE =  QueryCommand.class;
-
-		boolean QUERY_EXPRESSION_REF_MULTIPLE = true;
-
-		/**
-		 * GROUP_SYMBOL Reference
-		 */
-		String GROUP_SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "groupSymbol";
-
-		Class<?> GROUP_SYMBOL_REF_TYPE =  GroupSymbol.class;
-
-		boolean GROUP_SYMBOL_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:limit
-	 */
-	interface Limit extends LanguageObject {
-
-		String ID = Namespace.PREFIX + COLON + "limit";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * STRICT Property
-		 */
-		String STRICT_PROP_NAME = Namespace.PREFIX + COLON + "strict";
-
-		Class<?> STRICT_PROP_TYPE =  Boolean.class;
-
-		boolean STRICT_PROP_MULTIPLE = true;
-
-		/**
-		 * IMPLICIT Property
-		 */
-		String IMPLICIT_PROP_NAME = Namespace.PREFIX + COLON + "implicit";
-
-		Class<?> IMPLICIT_PROP_TYPE =  Boolean.class;
-
-		boolean IMPLICIT_PROP_MULTIPLE = true;
-
-		/**
-		 * OFFSET Reference
-		 */
-		String OFFSET_REF_NAME = Namespace.PREFIX + COLON + "offset";
-
-		Class<?> OFFSET_REF_TYPE =  Expression.class;
-
-		boolean OFFSET_REF_MULTIPLE = true;
-
-		/**
-		 * ROW_LIMIT Reference
-		 */
-		String ROW_LIMIT_REF_NAME = Namespace.PREFIX + COLON + "rowLimit";
-
-		Class<?> ROW_LIMIT_REF_TYPE =  Expression.class;
-
-		boolean ROW_LIMIT_REF_MULTIPLE = true;
+		boolean BLOCK_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:fromClause
 	 */
-	interface FromClause extends LanguageObject {
+	public interface FromClause extends LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "fromClause";
 
@@ -1254,7 +1131,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> PRESERVE_PROP_TYPE =  Boolean.class;
 
-		boolean PRESERVE_PROP_MULTIPLE = true;
+		boolean PRESERVE_PROP_MULTIPLE = false;
 
 		/**
 		 * MAKE_DEP Property
@@ -1263,7 +1140,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> MAKE_DEP_PROP_TYPE =  Boolean.class;
 
-		boolean MAKE_DEP_PROP_MULTIPLE = true;
+		boolean MAKE_DEP_PROP_MULTIPLE = false;
 
 		/**
 		 * OPTIONAL Property
@@ -1272,7 +1149,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> OPTIONAL_PROP_TYPE =  Boolean.class;
 
-		boolean OPTIONAL_PROP_MULTIPLE = true;
+		boolean OPTIONAL_PROP_MULTIPLE = false;
 
 		/**
 		 * MAX Property
@@ -1281,7 +1158,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> MAX_PROP_TYPE =  Boolean.class;
 
-		boolean MAX_PROP_MULTIPLE = true;
+		boolean MAX_PROP_MULTIPLE = false;
 
 		/**
 		 * JOIN Property
@@ -1290,7 +1167,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> JOIN_PROP_TYPE =  Boolean.class;
 
-		boolean JOIN_PROP_MULTIPLE = true;
+		boolean JOIN_PROP_MULTIPLE = false;
 
 		/**
 		 * MAKE_NOT_DEP Property
@@ -1299,7 +1176,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> MAKE_NOT_DEP_PROP_TYPE =  Boolean.class;
 
-		boolean MAKE_NOT_DEP_PROP_MULTIPLE = true;
+		boolean MAKE_NOT_DEP_PROP_MULTIPLE = false;
 
 		/**
 		 * MAKE_IND Property
@@ -1308,7 +1185,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> MAKE_IND_PROP_TYPE =  Boolean.class;
 
-		boolean MAKE_IND_PROP_MULTIPLE = true;
+		boolean MAKE_IND_PROP_MULTIPLE = false;
 
 		/**
 		 * NO_UNNEST Property
@@ -1317,14 +1194,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> NO_UNNEST_PROP_TYPE =  Boolean.class;
 
-		boolean NO_UNNEST_PROP_MULTIPLE = true;
+		boolean NO_UNNEST_PROP_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:tableFunctionReference
 	 */
-	interface TableFunctionReference extends FromClause {
+	public interface TableFunctionReference extends FromClause {
 
 		String ID = Namespace.PREFIX + COLON + "tableFunctionReference";
 
@@ -1337,14 +1214,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> NAME_PROP_TYPE =  String.class;
 
-		boolean NAME_PROP_MULTIPLE = true;
+		boolean NAME_PROP_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:arrayTable
 	 */
-	interface ArrayTable extends TableFunctionReference {
+	public interface ArrayTable extends TableFunctionReference {
 
 		String ID = Namespace.PREFIX + COLON + "arrayTable";
 
@@ -1366,14 +1243,61 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> ARRAY_VALUE_REF_TYPE =  Expression.class;
 
-		boolean ARRAY_VALUE_REF_MULTIPLE = true;
+		boolean ARRAY_VALUE_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:objectTable
+	 */
+	public interface ObjectTable extends TableFunctionReference {
+
+		String ID = Namespace.PREFIX + COLON + "objectTable";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * ROW_SCRIPT Property
+		 */
+		String ROW_SCRIPT_PROP_NAME = Namespace.PREFIX + COLON + "rowScript";
+
+		Class<?> ROW_SCRIPT_PROP_TYPE =  String.class;
+
+		boolean ROW_SCRIPT_PROP_MULTIPLE = false;
+
+		/**
+		 * SCRIPTING_LANGUAGE Property
+		 */
+		String SCRIPTING_LANGUAGE_PROP_NAME = Namespace.PREFIX + COLON + "scriptingLanguage";
+
+		Class<?> SCRIPTING_LANGUAGE_PROP_TYPE =  String.class;
+
+		boolean SCRIPTING_LANGUAGE_PROP_MULTIPLE = false;
+
+		/**
+		 * COLUMNS Reference
+		 */
+		String COLUMNS_REF_NAME = Namespace.PREFIX + COLON + "columns";
+
+		Class<?> COLUMNS_REF_TYPE =  ObjectColumn.class;
+
+		boolean COLUMNS_REF_MULTIPLE = true;
+
+		/**
+		 * PASSING Reference
+		 */
+		String PASSING_REF_NAME = Namespace.PREFIX + COLON + "passing";
+
+		Class<?> PASSING_REF_TYPE =  DerivedColumn.class;
+
+		boolean PASSING_REF_MULTIPLE = true;
 
 	}
 
 	/**
 	 * tsql:textTable
 	 */
-	interface TextTable extends TableFunctionReference {
+	public interface TextTable extends TableFunctionReference {
 
 		String ID = Namespace.PREFIX + COLON + "textTable";
 
@@ -1386,7 +1310,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> HEADER_PROP_TYPE =  Long.class;
 
-		boolean HEADER_PROP_MULTIPLE = true;
+		boolean HEADER_PROP_MULTIPLE = false;
 
 		/**
 		 * USING_ROW_DELIMITER Property
@@ -1395,7 +1319,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> USING_ROW_DELIMITER_PROP_TYPE =  Boolean.class;
 
-		boolean USING_ROW_DELIMITER_PROP_MULTIPLE = true;
+		boolean USING_ROW_DELIMITER_PROP_MULTIPLE = false;
 
 		/**
 		 * QUOTE Property
@@ -1404,7 +1328,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> QUOTE_PROP_TYPE =  String.class;
 
-		boolean QUOTE_PROP_MULTIPLE = true;
+		boolean QUOTE_PROP_MULTIPLE = false;
 
 		/**
 		 * SELECTOR Property
@@ -1413,7 +1337,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> SELECTOR_PROP_TYPE =  String.class;
 
-		boolean SELECTOR_PROP_MULTIPLE = true;
+		boolean SELECTOR_PROP_MULTIPLE = false;
 
 		/**
 		 * ESCAPE Property
@@ -1422,7 +1346,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> ESCAPE_PROP_TYPE =  Boolean.class;
 
-		boolean ESCAPE_PROP_MULTIPLE = true;
+		boolean ESCAPE_PROP_MULTIPLE = false;
 
 		/**
 		 * SKIP Property
@@ -1431,7 +1355,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> SKIP_PROP_TYPE =  Long.class;
 
-		boolean SKIP_PROP_MULTIPLE = true;
+		boolean SKIP_PROP_MULTIPLE = false;
 
 		/**
 		 * FIXED_WIDTH Property
@@ -1440,7 +1364,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> FIXED_WIDTH_PROP_TYPE =  Boolean.class;
 
-		boolean FIXED_WIDTH_PROP_MULTIPLE = true;
+		boolean FIXED_WIDTH_PROP_MULTIPLE = false;
 
 		/**
 		 * DELIMITER Property
@@ -1449,7 +1373,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> DELIMITER_PROP_TYPE =  String.class;
 
-		boolean DELIMITER_PROP_MULTIPLE = true;
+		boolean DELIMITER_PROP_MULTIPLE = false;
 
 		/**
 		 * COLUMNS Reference
@@ -1467,14 +1391,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> FILE_REF_TYPE =  Expression.class;
 
-		boolean FILE_REF_MULTIPLE = true;
+		boolean FILE_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:xMLTable
 	 */
-	interface XMLTable extends TableFunctionReference {
+	public interface XMLTable extends TableFunctionReference {
 
 		String ID = Namespace.PREFIX + COLON + "xMLTable";
 
@@ -1487,7 +1411,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> USING_DEFAULT_COLUMN_PROP_TYPE =  Boolean.class;
 
-		boolean USING_DEFAULT_COLUMN_PROP_MULTIPLE = true;
+		boolean USING_DEFAULT_COLUMN_PROP_MULTIPLE = false;
 
 		/**
 		 * XQUERY Property
@@ -1496,7 +1420,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> XQUERY_PROP_TYPE =  String.class;
 
-		boolean XQUERY_PROP_MULTIPLE = true;
+		boolean XQUERY_PROP_MULTIPLE = false;
 
 		/**
 		 * COLUMNS Reference
@@ -1523,90 +1447,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> NAMESPACES_REF_TYPE =  XMLNamespaces.class;
 
-		boolean NAMESPACES_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:objectTable
-	 */
-	interface ObjectTable extends TableFunctionReference {
-
-		String ID = Namespace.PREFIX + COLON + "objectTable";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * ROW_SCRIPT Property
-		 */
-		String ROW_SCRIPT_PROP_NAME = Namespace.PREFIX + COLON + "rowScript";
-
-		Class<?> ROW_SCRIPT_PROP_TYPE =  String.class;
-
-		boolean ROW_SCRIPT_PROP_MULTIPLE = true;
-
-		/**
-		 * SCRIPTING_LANGUAGE Property
-		 */
-		String SCRIPTING_LANGUAGE_PROP_NAME = Namespace.PREFIX + COLON + "scriptingLanguage";
-
-		Class<?> SCRIPTING_LANGUAGE_PROP_TYPE =  String.class;
-
-		boolean SCRIPTING_LANGUAGE_PROP_MULTIPLE = true;
-
-		/**
-		 * COLUMNS Reference
-		 */
-		String COLUMNS_REF_NAME = Namespace.PREFIX + COLON + "columns";
-
-		Class<?> COLUMNS_REF_TYPE =  ObjectColumn.class;
-
-		boolean COLUMNS_REF_MULTIPLE = true;
-
-		/**
-		 * PASSING Reference
-		 */
-		String PASSING_REF_NAME = Namespace.PREFIX + COLON + "passing";
-
-		Class<?> PASSING_REF_TYPE =  DerivedColumn.class;
-
-		boolean PASSING_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:unaryFromClause
-	 */
-	interface UnaryFromClause extends FromClause {
-
-		String ID = Namespace.PREFIX + COLON + "unaryFromClause";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * EXPANDED_COMMAND Reference
-		 */
-		String EXPANDED_COMMAND_REF_NAME = Namespace.PREFIX + COLON + "expandedCommand";
-
-		Class<?> EXPANDED_COMMAND_REF_TYPE =  Command.class;
-
-		boolean EXPANDED_COMMAND_REF_MULTIPLE = true;
-
-		/**
-		 * GROUP Reference
-		 */
-		String GROUP_REF_NAME = Namespace.PREFIX + COLON + "group";
-
-		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
-
-		boolean GROUP_REF_MULTIPLE = true;
+		boolean NAMESPACES_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:joinPredicate
 	 */
-	interface JoinPredicate extends FromClause {
+	public interface JoinPredicate extends FromClause {
 
 		String ID = Namespace.PREFIX + COLON + "joinPredicate";
 
@@ -1619,7 +1467,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> LEFT_CLAUSE_REF_TYPE =  FromClause.class;
 
-		boolean LEFT_CLAUSE_REF_MULTIPLE = true;
+		boolean LEFT_CLAUSE_REF_MULTIPLE = false;
 
 		/**
 		 * RIGHT_CLAUSE Reference
@@ -1628,7 +1476,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> RIGHT_CLAUSE_REF_TYPE =  FromClause.class;
 
-		boolean RIGHT_CLAUSE_REF_MULTIPLE = true;
+		boolean RIGHT_CLAUSE_REF_MULTIPLE = false;
 
 		/**
 		 * JOIN_CRITERIA Reference
@@ -1646,14 +1494,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> JOIN_TYPE_REF_TYPE =  JoinType.class;
 
-		boolean JOIN_TYPE_REF_MULTIPLE = true;
+		boolean JOIN_TYPE_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:subqueryFromClause
 	 */
-	interface SubqueryFromClause extends FromClause, SubqueryContainer {
+	public interface SubqueryFromClause extends FromClause, SubqueryContainer {
 
 		String ID = Namespace.PREFIX + COLON + "subqueryFromClause";
 
@@ -1666,7 +1514,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> TABLE_PROP_TYPE =  Boolean.class;
 
-		boolean TABLE_PROP_MULTIPLE = true;
+		boolean TABLE_PROP_MULTIPLE = false;
 
 		/**
 		 * COMMAND Reference
@@ -1675,324 +1523,43 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> COMMAND_REF_TYPE =  Command.class;
 
-		boolean COMMAND_REF_MULTIPLE = true;
+		boolean COMMAND_REF_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:orderByItem
+	 * tsql:unaryFromClause
 	 */
-	interface OrderByItem extends LanguageObject {
+	public interface UnaryFromClause extends FromClause {
 
-		String ID = Namespace.PREFIX + COLON + "orderByItem";
+		String ID = Namespace.PREFIX + COLON + "unaryFromClause";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * NULL_ORDERING Property
+		 * EXPANDED_COMMAND Reference
 		 */
-		String NULL_ORDERING_PROP_NAME = Namespace.PREFIX + COLON + "nullOrdering";
+		String EXPANDED_COMMAND_REF_NAME = Namespace.PREFIX + COLON + "expandedCommand";
 
-		Class<?> NULL_ORDERING_PROP_TYPE =  String.class;
+		Class<?> EXPANDED_COMMAND_REF_TYPE =  Command.class;
 
-		boolean NULL_ORDERING_PROP_MULTIPLE = true;
-
-		String[] NULL_ORDERING_PROP_CONSTRAINTS = { "FIRST", "LAST" };
+		boolean EXPANDED_COMMAND_REF_MULTIPLE = false;
 
 		/**
-		 * ASCENDING Property
+		 * GROUP Reference
 		 */
-		String ASCENDING_PROP_NAME = Namespace.PREFIX + COLON + "ascending";
+		String GROUP_REF_NAME = Namespace.PREFIX + COLON + "group";
 
-		Class<?> ASCENDING_PROP_TYPE =  Boolean.class;
+		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
 
-		boolean ASCENDING_PROP_MULTIPLE = true;
-
-		/**
-		 * SYMBOL Reference
-		 */
-		String SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "symbol";
-
-		Class<?> SYMBOL_REF_TYPE =  Expression.class;
-
-		boolean SYMBOL_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:specificHint
-	 */
-	interface SpecificHint extends LanguageObject {
-
-		String ID = Namespace.PREFIX + COLON + "specificHint";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * TRANSLATOR_NAME Property
-		 */
-		String TRANSLATOR_NAME_PROP_NAME = Namespace.PREFIX + COLON + "translatorName";
-
-		Class<?> TRANSLATOR_NAME_PROP_TYPE =  String.class;
-
-		boolean TRANSLATOR_NAME_PROP_MULTIPLE = true;
-
-		/**
-		 * USE_ALIASES Property
-		 */
-		String USE_ALIASES_PROP_NAME = Namespace.PREFIX + COLON + "useAliases";
-
-		Class<?> USE_ALIASES_PROP_TYPE =  Boolean.class;
-
-		boolean USE_ALIASES_PROP_MULTIPLE = true;
-
-		/**
-		 * HINT Property
-		 */
-		String HINT_PROP_NAME = Namespace.PREFIX + COLON + "hint";
-
-		Class<?> HINT_PROP_TYPE =  String.class;
-
-		boolean HINT_PROP_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:projectedColumn
-	 */
-	interface ProjectedColumn extends LanguageObject {
-
-		String ID = Namespace.PREFIX + COLON + "projectedColumn";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * TYPE Property
-		 */
-		String TYPE_PROP_NAME = Namespace.PREFIX + COLON + "type";
-
-		Class<?> TYPE_PROP_TYPE =  String.class;
-
-		boolean TYPE_PROP_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:xMLColumn
-	 */
-	interface XMLColumn extends ProjectedColumn {
-
-		String ID = Namespace.PREFIX + COLON + "xMLColumn";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * ORDINAL Property
-		 */
-		String ORDINAL_PROP_NAME = Namespace.PREFIX + COLON + "ordinal";
-
-		Class<?> ORDINAL_PROP_TYPE =  Boolean.class;
-
-		boolean ORDINAL_PROP_MULTIPLE = true;
-
-		/**
-		 * PATH Property
-		 */
-		String PATH_PROP_NAME = Namespace.PREFIX + COLON + "path";
-
-		Class<?> PATH_PROP_TYPE =  String.class;
-
-		boolean PATH_PROP_MULTIPLE = true;
-
-		/**
-		 * DEFAULT_EXPRESSION Reference
-		 */
-		String DEFAULT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "defaultExpression";
-
-		Class<?> DEFAULT_EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean DEFAULT_EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:textColumn
-	 */
-	interface TextColumn extends ProjectedColumn {
-
-		String ID = Namespace.PREFIX + COLON + "textColumn";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * SELECTOR Property
-		 */
-		String SELECTOR_PROP_NAME = Namespace.PREFIX + COLON + "selector";
-
-		Class<?> SELECTOR_PROP_TYPE =  String.class;
-
-		boolean SELECTOR_PROP_MULTIPLE = true;
-
-		/**
-		 * ORDINAL Property
-		 */
-		String ORDINAL_PROP_NAME = Namespace.PREFIX + COLON + "ordinal";
-
-		Class<?> ORDINAL_PROP_TYPE =  Boolean.class;
-
-		boolean ORDINAL_PROP_MULTIPLE = true;
-
-		/**
-		 * POSITION Property
-		 */
-		String POSITION_PROP_NAME = Namespace.PREFIX + COLON + "position";
-
-		Class<?> POSITION_PROP_TYPE =  Long.class;
-
-		boolean POSITION_PROP_MULTIPLE = true;
-
-		/**
-		 * NO_TRIM Property
-		 */
-		String NO_TRIM_PROP_NAME = Namespace.PREFIX + COLON + "noTrim";
-
-		Class<?> NO_TRIM_PROP_TYPE =  Boolean.class;
-
-		boolean NO_TRIM_PROP_MULTIPLE = true;
-
-		/**
-		 * WIDTH Property
-		 */
-		String WIDTH_PROP_NAME = Namespace.PREFIX + COLON + "width";
-
-		Class<?> WIDTH_PROP_TYPE =  Long.class;
-
-		boolean WIDTH_PROP_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:objectColumn
-	 */
-	interface ObjectColumn extends ProjectedColumn {
-
-		String ID = Namespace.PREFIX + COLON + "objectColumn";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * PATH Property
-		 */
-		String PATH_PROP_NAME = Namespace.PREFIX + COLON + "path";
-
-		Class<?> PATH_PROP_TYPE =  String.class;
-
-		boolean PATH_PROP_MULTIPLE = true;
-
-		/**
-		 * DEFAULT_EXPRESSION Reference
-		 */
-		String DEFAULT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "defaultExpression";
-
-		Class<?> DEFAULT_EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean DEFAULT_EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:setClauseList
-	 */
-	interface SetClauseList extends LanguageObject {
-
-		String ID = Namespace.PREFIX + COLON + "setClauseList";
-
-		boolean IS_ABSTRACT = false;
-
-	}
-
-	/**
-	 * tsql:groupBy
-	 */
-	interface GroupBy extends LanguageObject {
-
-		String ID = Namespace.PREFIX + COLON + "groupBy";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * ROLLUP Property
-		 */
-		String ROLLUP_PROP_NAME = Namespace.PREFIX + COLON + "rollup";
-
-		Class<?> ROLLUP_PROP_TYPE =  Boolean.class;
-
-		boolean ROLLUP_PROP_MULTIPLE = true;
-
-		/**
-		 * SYMBOLS Reference
-		 */
-		String SYMBOLS_REF_NAME = Namespace.PREFIX + COLON + "symbols";
-
-		Class<?> SYMBOLS_REF_TYPE =  Expression.class;
-
-		boolean SYMBOLS_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:joinType
-	 */
-	interface JoinType extends LanguageObject {
-
-		String ID = Namespace.PREFIX + COLON + "joinType";
-
-		boolean IS_ABSTRACT = false;
-
-	}
-
-	/**
-	 * tsql:sourceHint
-	 */
-	interface SourceHint extends LanguageObject {
-
-		String ID = Namespace.PREFIX + COLON + "sourceHint";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * GENERAL_HINT Property
-		 */
-		String GENERAL_HINT_PROP_NAME = Namespace.PREFIX + COLON + "generalHint";
-
-		Class<?> GENERAL_HINT_PROP_TYPE =  String.class;
-
-		boolean GENERAL_HINT_PROP_MULTIPLE = true;
-
-		/**
-		 * USE_ALIASES Property
-		 */
-		String USE_ALIASES_PROP_NAME = Namespace.PREFIX + COLON + "useAliases";
-
-		Class<?> USE_ALIASES_PROP_TYPE =  Boolean.class;
-
-		boolean USE_ALIASES_PROP_MULTIPLE = true;
-
-		/**
-		 * SOURCE_HINT Reference
-		 */
-		String SOURCE_HINT_REF_NAME = Namespace.PREFIX + COLON + "sourceHint";
-
-		Class<?> SOURCE_HINT_REF_TYPE =  SpecificHint.class;
-
-		boolean SOURCE_HINT_REF_MULTIPLE = true;
+		boolean GROUP_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:from
 	 */
-	interface From extends LanguageObject {
+	public interface From extends LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "from";
 
@@ -2010,9 +1577,38 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
+	 * tsql:groupBy
+	 */
+	public interface GroupBy extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "groupBy";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * ROLLUP Property
+		 */
+		String ROLLUP_PROP_NAME = Namespace.PREFIX + COLON + "rollup";
+
+		Class<?> ROLLUP_PROP_TYPE =  Boolean.class;
+
+		boolean ROLLUP_PROP_MULTIPLE = false;
+
+		/**
+		 * SYMBOLS Reference
+		 */
+		String SYMBOLS_REF_NAME = Namespace.PREFIX + COLON + "symbols";
+
+		Class<?> SYMBOLS_REF_TYPE =  Expression.class;
+
+		boolean SYMBOLS_REF_MULTIPLE = true;
+
+	}
+
+	/**
 	 * tsql:into
 	 */
-	interface Into extends LanguageObject {
+	public interface Into extends LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "into";
 
@@ -2025,63 +1621,72 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
 
-		boolean GROUP_REF_MULTIPLE = true;
+		boolean GROUP_REF_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:orderBy
+	 * tsql:joinType
 	 */
-	interface OrderBy extends LanguageObject {
+	public interface JoinType extends LanguageObject {
 
-		String ID = Namespace.PREFIX + COLON + "orderBy";
+		String ID = Namespace.PREFIX + COLON + "joinType";
 
 		boolean IS_ABSTRACT = false;
 
 	}
 
 	/**
-	 * tsql:subqueryHint
+	 * tsql:limit
 	 */
-	interface SubqueryHint extends LanguageObject {
+	public interface Limit extends LanguageObject {
 
-		String ID = Namespace.PREFIX + COLON + "subqueryHint";
+		String ID = Namespace.PREFIX + COLON + "limit";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * MERGE_JOIN Property
+		 * STRICT Property
 		 */
-		String MERGE_JOIN_PROP_NAME = Namespace.PREFIX + COLON + "mergeJoin";
+		String STRICT_PROP_NAME = Namespace.PREFIX + COLON + "strict";
 
-		Class<?> MERGE_JOIN_PROP_TYPE =  Boolean.class;
+		Class<?> STRICT_PROP_TYPE =  Boolean.class;
 
-		boolean MERGE_JOIN_PROP_MULTIPLE = true;
+		boolean STRICT_PROP_MULTIPLE = false;
 
 		/**
-		 * DEP_JOIN Property
+		 * IMPLICIT Property
 		 */
-		String DEP_JOIN_PROP_NAME = Namespace.PREFIX + COLON + "depJoin";
+		String IMPLICIT_PROP_NAME = Namespace.PREFIX + COLON + "implicit";
 
-		Class<?> DEP_JOIN_PROP_TYPE =  Boolean.class;
+		Class<?> IMPLICIT_PROP_TYPE =  Boolean.class;
 
-		boolean DEP_JOIN_PROP_MULTIPLE = true;
+		boolean IMPLICIT_PROP_MULTIPLE = false;
 
 		/**
-		 * NO_UNNEST Property
+		 * OFFSET Reference
 		 */
-		String NO_UNNEST_PROP_NAME = Namespace.PREFIX + COLON + "noUnnest";
+		String OFFSET_REF_NAME = Namespace.PREFIX + COLON + "offset";
 
-		Class<?> NO_UNNEST_PROP_TYPE =  Boolean.class;
+		Class<?> OFFSET_REF_TYPE =  Expression.class;
 
-		boolean NO_UNNEST_PROP_MULTIPLE = true;
+		boolean OFFSET_REF_MULTIPLE = false;
+
+		/**
+		 * ROW_LIMIT Reference
+		 */
+		String ROW_LIMIT_REF_NAME = Namespace.PREFIX + COLON + "rowLimit";
+
+		Class<?> ROW_LIMIT_REF_TYPE =  Expression.class;
+
+		boolean ROW_LIMIT_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:namespaceItem
 	 */
-	interface NamespaceItem extends LanguageObject {
+	public interface NamespaceItem extends LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "namespaceItem";
 
@@ -2094,7 +1699,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> PREFIX_PROP_TYPE =  String.class;
 
-		boolean PREFIX_PROP_MULTIPLE = true;
+		boolean PREFIX_PROP_MULTIPLE = false;
 
 		/**
 		 * URI Property
@@ -2103,83 +1708,94 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> URI_PROP_TYPE =  String.class;
 
-		boolean URI_PROP_MULTIPLE = true;
+		boolean URI_PROP_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:setClause
+	 * tsql:projectedColumn
 	 */
-	interface SetClause extends LanguageObject {
+	public interface ProjectedColumn extends LanguageObject {
 
-		String ID = Namespace.PREFIX + COLON + "setClause";
+		String ID = Namespace.PREFIX + COLON + "projectedColumn";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * VALUE Reference
+		 * TYPE Property
 		 */
-		String VALUE_REF_NAME = Namespace.PREFIX + COLON + "value";
+		String TYPE_PROP_NAME = Namespace.PREFIX + COLON + "type";
 
-		Class<?> VALUE_REF_TYPE =  Expression.class;
+		Class<?> TYPE_PROP_TYPE =  String.class;
 
-		boolean VALUE_REF_MULTIPLE = true;
-
-		/**
-		 * SYMBOL Reference
-		 */
-		String SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "symbol";
-
-		Class<?> SYMBOL_REF_TYPE =  ElementSymbol.class;
-
-		boolean SYMBOL_REF_MULTIPLE = true;
+		boolean TYPE_PROP_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:sPParameter
+	 * tsql:objectColumn
 	 */
-	interface SPParameter extends LanguageObject {
+	public interface ObjectColumn extends ProjectedColumn {
 
-		String ID = Namespace.PREFIX + COLON + "sPParameter";
+		String ID = Namespace.PREFIX + COLON + "objectColumn";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * CLASS_TYPE_CLASS Property
+		 * PATH Property
 		 */
-		String CLASS_TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "classTypeClass";
+		String PATH_PROP_NAME = Namespace.PREFIX + COLON + "path";
 
-		Class<?> CLASS_TYPE_CLASS_PROP_TYPE =  String.class;
+		Class<?> PATH_PROP_TYPE =  String.class;
 
-		boolean CLASS_TYPE_CLASS_PROP_MULTIPLE = true;
+		boolean PATH_PROP_MULTIPLE = false;
 
 		/**
-		 * METADATAID Property
+		 * DEFAULT_EXPRESSION Reference
 		 */
-		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataID";
+		String DEFAULT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "defaultExpression";
 
-		Class<?> METADATAID_PROP_TYPE =  Object.class;
+		Class<?> DEFAULT_EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean METADATAID_PROP_MULTIPLE = true;
+		boolean DEFAULT_EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:textColumn
+	 */
+	public interface TextColumn extends ProjectedColumn {
+
+		String ID = Namespace.PREFIX + COLON + "textColumn";
+
+		boolean IS_ABSTRACT = false;
 
 		/**
-		 * USING_DEFAULT Property
+		 * SELECTOR Property
 		 */
-		String USING_DEFAULT_PROP_NAME = Namespace.PREFIX + COLON + "usingDefault";
+		String SELECTOR_PROP_NAME = Namespace.PREFIX + COLON + "selector";
 
-		Class<?> USING_DEFAULT_PROP_TYPE =  Boolean.class;
+		Class<?> SELECTOR_PROP_TYPE =  String.class;
 
-		boolean USING_DEFAULT_PROP_MULTIPLE = true;
+		boolean SELECTOR_PROP_MULTIPLE = false;
 
 		/**
-		 * VAR_ARG Property
+		 * ORDINAL Property
 		 */
-		String VAR_ARG_PROP_NAME = Namespace.PREFIX + COLON + "varArg";
+		String ORDINAL_PROP_NAME = Namespace.PREFIX + COLON + "ordinal";
 
-		Class<?> VAR_ARG_PROP_TYPE =  Boolean.class;
+		Class<?> ORDINAL_PROP_TYPE =  Boolean.class;
 
-		boolean VAR_ARG_PROP_MULTIPLE = true;
+		boolean ORDINAL_PROP_MULTIPLE = false;
+
+		/**
+		 * POSITION Property
+		 */
+		String POSITION_PROP_NAME = Namespace.PREFIX + COLON + "position";
+
+		Class<?> POSITION_PROP_TYPE =  Long.class;
+
+		boolean POSITION_PROP_MULTIPLE = false;
 
 		/**
 		 * NAME Property
@@ -2188,41 +1804,79 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> NAME_PROP_TYPE =  String.class;
 
-		boolean NAME_PROP_MULTIPLE = true;
+		boolean NAME_PROP_MULTIPLE = false;
 
 		/**
-		 * INDEX Property
+		 * NO_TRIM Property
 		 */
-		String INDEX_PROP_NAME = Namespace.PREFIX + COLON + "index";
+		String NO_TRIM_PROP_NAME = Namespace.PREFIX + COLON + "noTrim";
 
-		Class<?> INDEX_PROP_TYPE =  Long.class;
+		Class<?> NO_TRIM_PROP_TYPE =  Boolean.class;
 
-		boolean INDEX_PROP_MULTIPLE = true;
+		boolean NO_TRIM_PROP_MULTIPLE = false;
 
 		/**
-		 * PARAMETER_TYPE Property
+		 * WIDTH Property
 		 */
-		String PARAMETER_TYPE_PROP_NAME = Namespace.PREFIX + COLON + "parameterType";
+		String WIDTH_PROP_NAME = Namespace.PREFIX + COLON + "width";
 
-		Class<?> PARAMETER_TYPE_PROP_TYPE =  Long.class;
+		Class<?> WIDTH_PROP_TYPE =  Long.class;
 
-		boolean PARAMETER_TYPE_PROP_MULTIPLE = true;
+		boolean WIDTH_PROP_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:xMLColumn
+	 */
+	public interface XMLColumn extends ProjectedColumn {
+
+		String ID = Namespace.PREFIX + COLON + "xMLColumn";
+
+		boolean IS_ABSTRACT = false;
 
 		/**
-		 * EXPRESSION Reference
+		 * ORDINAL Property
 		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+		String ORDINAL_PROP_NAME = Namespace.PREFIX + COLON + "ordinal";
 
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+		Class<?> ORDINAL_PROP_TYPE =  Boolean.class;
 
-		boolean EXPRESSION_REF_MULTIPLE = true;
+		boolean ORDINAL_PROP_MULTIPLE = false;
+
+		/**
+		 * PATH Property
+		 */
+		String PATH_PROP_NAME = Namespace.PREFIX + COLON + "path";
+
+		Class<?> PATH_PROP_TYPE =  String.class;
+
+		boolean PATH_PROP_MULTIPLE = false;
+
+		/**
+		 * NAME Property
+		 */
+		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
+
+		Class<?> NAME_PROP_TYPE =  String.class;
+
+		boolean NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * DEFAULT_EXPRESSION Reference
+		 */
+		String DEFAULT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "defaultExpression";
+
+		Class<?> DEFAULT_EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean DEFAULT_EXPRESSION_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:option
 	 */
-	interface Option extends LanguageObject {
+	public interface Option extends LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "option";
 
@@ -2235,14 +1889,378 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> NO_CACHE_PROP_TYPE =  Boolean.class;
 
-		boolean NO_CACHE_PROP_MULTIPLE = true;
+		boolean NO_CACHE_PROP_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:orderBy
+	 */
+	public interface OrderBy extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "orderBy";
+
+		boolean IS_ABSTRACT = false;
+
+	}
+
+	/**
+	 * tsql:orderByItem
+	 */
+	public interface OrderByItem extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "orderByItem";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * NULL_ORDERING Property
+		 */
+		String NULL_ORDERING_PROP_NAME = Namespace.PREFIX + COLON + "nullOrdering";
+
+		Class<?> NULL_ORDERING_PROP_TYPE =  String.class;
+
+		boolean NULL_ORDERING_PROP_MULTIPLE = false;
+
+		String[] NULL_ORDERING_PROP_CONSTRAINTS = { "FIRST", "LAST" };
+
+		/**
+		 * ASCENDING Property
+		 */
+		String ASCENDING_PROP_NAME = Namespace.PREFIX + COLON + "ascending";
+
+		Class<?> ASCENDING_PROP_TYPE =  Boolean.class;
+
+		boolean ASCENDING_PROP_MULTIPLE = false;
+
+		/**
+		 * SYMBOL Reference
+		 */
+		String SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "symbol";
+
+		Class<?> SYMBOL_REF_TYPE =  Expression.class;
+
+		boolean SYMBOL_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:sPParameter
+	 */
+	public interface SPParameter extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "sPParameter";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * CLASS_TYPE_CLASS Property
+		 */
+		String CLASS_TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "classTypeClass";
+
+		Class<?> CLASS_TYPE_CLASS_PROP_TYPE =  String.class;
+
+		boolean CLASS_TYPE_CLASS_PROP_MULTIPLE = false;
+
+		/**
+		 * METADATAID Property
+		 */
+		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataID";
+
+		Class<?> METADATAID_PROP_TYPE =  Object.class;
+
+		boolean METADATAID_PROP_MULTIPLE = false;
+
+		/**
+		 * USING_DEFAULT Property
+		 */
+		String USING_DEFAULT_PROP_NAME = Namespace.PREFIX + COLON + "usingDefault";
+
+		Class<?> USING_DEFAULT_PROP_TYPE =  Boolean.class;
+
+		boolean USING_DEFAULT_PROP_MULTIPLE = false;
+
+		/**
+		 * VAR_ARG Property
+		 */
+		String VAR_ARG_PROP_NAME = Namespace.PREFIX + COLON + "varArg";
+
+		Class<?> VAR_ARG_PROP_TYPE =  Boolean.class;
+
+		boolean VAR_ARG_PROP_MULTIPLE = false;
+
+		/**
+		 * NAME Property
+		 */
+		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
+
+		Class<?> NAME_PROP_TYPE =  String.class;
+
+		boolean NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * INDEX Property
+		 */
+		String INDEX_PROP_NAME = Namespace.PREFIX + COLON + "index";
+
+		Class<?> INDEX_PROP_TYPE =  Long.class;
+
+		boolean INDEX_PROP_MULTIPLE = false;
+
+		/**
+		 * PARAMETER_TYPE Property
+		 */
+		String PARAMETER_TYPE_PROP_NAME = Namespace.PREFIX + COLON + "parameterType";
+
+		Class<?> PARAMETER_TYPE_PROP_TYPE =  Long.class;
+
+		boolean PARAMETER_TYPE_PROP_MULTIPLE = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:select
+	 */
+	public interface Select extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "select";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * DISTINCT Property
+		 */
+		String DISTINCT_PROP_NAME = Namespace.PREFIX + COLON + "distinct";
+
+		Class<?> DISTINCT_PROP_TYPE =  Boolean.class;
+
+		boolean DISTINCT_PROP_MULTIPLE = false;
+
+		/**
+		 * SYMBOLS Reference
+		 */
+		String SYMBOLS_REF_NAME = Namespace.PREFIX + COLON + "symbols";
+
+		Class<?> SYMBOLS_REF_TYPE =  Expression.class;
+
+		boolean SYMBOLS_REF_MULTIPLE = true;
+
+	}
+
+	/**
+	 * tsql:setClause
+	 */
+	public interface SetClause extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "setClause";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * VALUE Reference
+		 */
+		String VALUE_REF_NAME = Namespace.PREFIX + COLON + "value";
+
+		Class<?> VALUE_REF_TYPE =  Expression.class;
+
+		boolean VALUE_REF_MULTIPLE = false;
+
+		/**
+		 * SYMBOL Reference
+		 */
+		String SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "symbol";
+
+		Class<?> SYMBOL_REF_TYPE =  ElementSymbol.class;
+
+		boolean SYMBOL_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:setClauseList
+	 */
+	public interface SetClauseList extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "setClauseList";
+
+		boolean IS_ABSTRACT = false;
+
+	}
+
+	/**
+	 * tsql:sourceHint
+	 */
+	public interface SourceHint extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "sourceHint";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * USE_ALIASES Property
+		 */
+		String USE_ALIASES_PROP_NAME = Namespace.PREFIX + COLON + "useAliases";
+
+		Class<?> USE_ALIASES_PROP_TYPE =  Boolean.class;
+
+		boolean USE_ALIASES_PROP_MULTIPLE = false;
+
+		/**
+		 * GENERAL_HINT Property
+		 */
+		String GENERAL_HINT_PROP_NAME = Namespace.PREFIX + COLON + "generalHint";
+
+		Class<?> GENERAL_HINT_PROP_TYPE =  String.class;
+
+		boolean GENERAL_HINT_PROP_MULTIPLE = false;
+
+		/**
+		 * SOURCE_HINT Reference
+		 */
+		String SOURCE_HINT_REF_NAME = Namespace.PREFIX + COLON + "sourceHint";
+
+		Class<?> SOURCE_HINT_REF_TYPE =  SpecificHint.class;
+
+		boolean SOURCE_HINT_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:specificHint
+	 */
+	public interface SpecificHint extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "specificHint";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * TRANSLATOR_NAME Property
+		 */
+		String TRANSLATOR_NAME_PROP_NAME = Namespace.PREFIX + COLON + "translatorName";
+
+		Class<?> TRANSLATOR_NAME_PROP_TYPE =  String.class;
+
+		boolean TRANSLATOR_NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * USE_ALIASES Property
+		 */
+		String USE_ALIASES_PROP_NAME = Namespace.PREFIX + COLON + "useAliases";
+
+		Class<?> USE_ALIASES_PROP_TYPE =  Boolean.class;
+
+		boolean USE_ALIASES_PROP_MULTIPLE = false;
+
+		/**
+		 * HINT Property
+		 */
+		String HINT_PROP_NAME = Namespace.PREFIX + COLON + "hint";
+
+		Class<?> HINT_PROP_TYPE =  String.class;
+
+		boolean HINT_PROP_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:subqueryHint
+	 */
+	public interface SubqueryHint extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "subqueryHint";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * MERGE_JOIN Property
+		 */
+		String MERGE_JOIN_PROP_NAME = Namespace.PREFIX + COLON + "mergeJoin";
+
+		Class<?> MERGE_JOIN_PROP_TYPE =  Boolean.class;
+
+		boolean MERGE_JOIN_PROP_MULTIPLE = false;
+
+		/**
+		 * DEP_JOIN Property
+		 */
+		String DEP_JOIN_PROP_NAME = Namespace.PREFIX + COLON + "depJoin";
+
+		Class<?> DEP_JOIN_PROP_TYPE =  Boolean.class;
+
+		boolean DEP_JOIN_PROP_MULTIPLE = false;
+
+		/**
+		 * NO_UNNEST Property
+		 */
+		String NO_UNNEST_PROP_NAME = Namespace.PREFIX + COLON + "noUnnest";
+
+		Class<?> NO_UNNEST_PROP_TYPE =  Boolean.class;
+
+		boolean NO_UNNEST_PROP_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:withQueryCommand
+	 */
+	public interface WithQueryCommand extends SubqueryContainer {
+
+		String ID = Namespace.PREFIX + COLON + "withQueryCommand";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * COLUMNS Reference
+		 */
+		String COLUMNS_REF_NAME = Namespace.PREFIX + COLON + "columns";
+
+		Class<?> COLUMNS_REF_TYPE =  ElementSymbol.class;
+
+		boolean COLUMNS_REF_MULTIPLE = true;
+
+		/**
+		 * COMMAND Reference
+		 */
+		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
+
+		Class<?> COMMAND_REF_TYPE =  QueryCommand.class;
+
+		boolean COMMAND_REF_MULTIPLE = false;
+
+		/**
+		 * QUERY_EXPRESSION Reference
+		 */
+		String QUERY_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "queryExpression";
+
+		Class<?> QUERY_EXPRESSION_REF_TYPE =  QueryCommand.class;
+
+		boolean QUERY_EXPRESSION_REF_MULTIPLE = false;
+
+		/**
+		 * GROUP_SYMBOL Reference
+		 */
+		String GROUP_SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "groupSymbol";
+
+		Class<?> GROUP_SYMBOL_REF_TYPE =  GroupSymbol.class;
+
+		boolean GROUP_SYMBOL_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:statement
 	 */
-	interface Statement extends LanguageObject {
+	public interface Statement extends LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "statement";
 
@@ -2251,9 +2269,105 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
+	 * tsql:assignmentStatement
+	 */
+	public interface AssignmentStatement extends Statement, ExpressionStatement {
+
+		String ID = Namespace.PREFIX + COLON + "assignmentStatement";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * COMMAND Reference
+		 */
+		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
+
+		Class<?> COMMAND_REF_TYPE =  Command.class;
+
+		boolean COMMAND_REF_MULTIPLE = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+		/**
+		 * VARIABLE Reference
+		 */
+		String VARIABLE_REF_NAME = Namespace.PREFIX + COLON + "variable";
+
+		Class<?> VARIABLE_REF_TYPE =  ElementSymbol.class;
+
+		boolean VARIABLE_REF_MULTIPLE = false;
+
+		/**
+		 * VALUE Reference
+		 */
+		String VALUE_REF_NAME = Namespace.PREFIX + COLON + "value";
+
+		Class<?> VALUE_REF_TYPE =  Expression.class;
+
+		boolean VALUE_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:declareStatement
+	 */
+	public interface DeclareStatement extends AssignmentStatement {
+
+		String ID = Namespace.PREFIX + COLON + "declareStatement";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * VARIABLE_TYPE Property
+		 */
+		String VARIABLE_TYPE_PROP_NAME = Namespace.PREFIX + COLON + "variableType";
+
+		Class<?> VARIABLE_TYPE_PROP_TYPE =  String.class;
+
+		boolean VARIABLE_TYPE_PROP_MULTIPLE = false;
+
+		/**
+		 * COMMAND Reference
+		 */
+		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
+
+		Class<?> COMMAND_REF_TYPE =  Command.class;
+
+		boolean COMMAND_REF_MULTIPLE = false;
+
+		/**
+		 * VARIABLE Reference
+		 */
+		String VARIABLE_REF_NAME = Namespace.PREFIX + COLON + "variable";
+
+		Class<?> VARIABLE_REF_TYPE =  ElementSymbol.class;
+
+		boolean VARIABLE_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:returnStatement
+	 */
+	public interface ReturnStatement extends AssignmentStatement {
+
+		String ID = Namespace.PREFIX + COLON + "returnStatement";
+
+		boolean IS_ABSTRACT = false;
+
+	}
+
+	/**
 	 * tsql:block
 	 */
-	interface Block extends Statement, Labeled {
+	public interface Block extends Statement, Labeled {
 
 		String ID = Namespace.PREFIX + COLON + "block";
 
@@ -2266,7 +2380,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> ATOMIC_PROP_TYPE =  Boolean.class;
 
-		boolean ATOMIC_PROP_MULTIPLE = true;
+		boolean ATOMIC_PROP_MULTIPLE = false;
 
 		/**
 		 * EXCEPTION_GROUP Property
@@ -2275,7 +2389,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> EXCEPTION_GROUP_PROP_TYPE =  String.class;
 
-		boolean EXCEPTION_GROUP_PROP_MULTIPLE = true;
+		boolean EXCEPTION_GROUP_PROP_MULTIPLE = false;
 
 		/**
 		 * LABEL Property
@@ -2284,7 +2398,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> LABEL_PROP_TYPE =  String.class;
 
-		boolean LABEL_PROP_MULTIPLE = true;
+		boolean LABEL_PROP_MULTIPLE = false;
 
 		/**
 		 * EXCEPTION_STATEMENTS Reference
@@ -2298,143 +2412,9 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
-	 * tsql:assignmentStatement
-	 */
-	interface AssignmentStatement extends Statement, ExpressionStatement {
-
-		String ID = Namespace.PREFIX + COLON + "assignmentStatement";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * COMMAND Reference
-		 */
-		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
-
-		Class<?> COMMAND_REF_TYPE =  Command.class;
-
-		boolean COMMAND_REF_MULTIPLE = true;
-
-		/**
-		 * EXPRESSION Reference
-		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
-
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean EXPRESSION_REF_MULTIPLE = true;
-
-		/**
-		 * VARIABLE Reference
-		 */
-		String VARIABLE_REF_NAME = Namespace.PREFIX + COLON + "variable";
-
-		Class<?> VARIABLE_REF_TYPE =  ElementSymbol.class;
-
-		boolean VARIABLE_REF_MULTIPLE = true;
-
-		/**
-		 * VALUE Reference
-		 */
-		String VALUE_REF_NAME = Namespace.PREFIX + COLON + "value";
-
-		Class<?> VALUE_REF_TYPE =  Expression.class;
-
-		boolean VALUE_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:declareStatement
-	 */
-	interface DeclareStatement extends AssignmentStatement {
-
-		String ID = Namespace.PREFIX + COLON + "declareStatement";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * VARIABLE_TYPE Property
-		 */
-		String VARIABLE_TYPE_PROP_NAME = Namespace.PREFIX + COLON + "variableType";
-
-		Class<?> VARIABLE_TYPE_PROP_TYPE =  String.class;
-
-		boolean VARIABLE_TYPE_PROP_MULTIPLE = true;
-
-		/**
-		 * COMMAND Reference
-		 */
-		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
-
-		Class<?> COMMAND_REF_TYPE =  Command.class;
-
-		boolean COMMAND_REF_MULTIPLE = true;
-
-		/**
-		 * VARIABLE Reference
-		 */
-		String VARIABLE_REF_NAME = Namespace.PREFIX + COLON + "variable";
-
-		Class<?> VARIABLE_REF_TYPE =  ElementSymbol.class;
-
-		boolean VARIABLE_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:returnStatement
-	 */
-	interface ReturnStatement extends AssignmentStatement {
-
-		String ID = Namespace.PREFIX + COLON + "returnStatement";
-
-		boolean IS_ABSTRACT = false;
-
-	}
-
-	/**
-	 * tsql:ifStatement
-	 */
-	interface IfStatement extends Statement {
-
-		String ID = Namespace.PREFIX + COLON + "ifStatement";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * CONDITION Reference
-		 */
-		String CONDITION_REF_NAME = Namespace.PREFIX + COLON + "condition";
-
-		Class<?> CONDITION_REF_TYPE =  Criteria.class;
-
-		boolean CONDITION_REF_MULTIPLE = true;
-
-		/**
-		 * ELSE_BLOCK Reference
-		 */
-		String ELSE_BLOCK_REF_NAME = Namespace.PREFIX + COLON + "elseBlock";
-
-		Class<?> ELSE_BLOCK_REF_TYPE =  Block.class;
-
-		boolean ELSE_BLOCK_REF_MULTIPLE = true;
-
-		/**
-		 * IF_BLOCK Reference
-		 */
-		String IF_BLOCK_REF_NAME = Namespace.PREFIX + COLON + "ifBlock";
-
-		Class<?> IF_BLOCK_REF_TYPE =  Block.class;
-
-		boolean IF_BLOCK_REF_MULTIPLE = true;
-
-	}
-
-	/**
 	 * tsql:branchingStatement
 	 */
-	interface BranchingStatement extends Statement {
+	public interface BranchingStatement extends Statement {
 
 		String ID = Namespace.PREFIX + COLON + "branchingStatement";
 
@@ -2447,7 +2427,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> LABEL_PROP_TYPE =  String.class;
 
-		boolean LABEL_PROP_MULTIPLE = true;
+		boolean LABEL_PROP_MULTIPLE = false;
 
 		/**
 		 * MODE Property
@@ -2456,7 +2436,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> MODE_PROP_TYPE =  String.class;
 
-		boolean MODE_PROP_MULTIPLE = true;
+		boolean MODE_PROP_MULTIPLE = false;
 
 		String[] MODE_PROP_CONSTRAINTS = { "BREAK", "CONTINUE", "LEAVE" };
 
@@ -2465,7 +2445,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 	/**
 	 * tsql:commandStatement
 	 */
-	interface CommandStatement extends Statement, SubqueryContainer {
+	public interface CommandStatement extends Statement, SubqueryContainer {
 
 		String ID = Namespace.PREFIX + COLON + "commandStatement";
 
@@ -2478,7 +2458,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> RETURNABLE_PROP_TYPE =  Boolean.class;
 
-		boolean RETURNABLE_PROP_MULTIPLE = true;
+		boolean RETURNABLE_PROP_MULTIPLE = false;
 
 		/**
 		 * COMMAND Reference
@@ -2487,43 +2467,52 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> COMMAND_REF_TYPE =  Command.class;
 
-		boolean COMMAND_REF_MULTIPLE = true;
+		boolean COMMAND_REF_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:raiseStatement
+	 * tsql:ifStatement
 	 */
-	interface RaiseStatement extends Statement, ExpressionStatement {
+	public interface IfStatement extends Statement {
 
-		String ID = Namespace.PREFIX + COLON + "raiseStatement";
+		String ID = Namespace.PREFIX + COLON + "ifStatement";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * WARNING Property
+		 * CONDITION Reference
 		 */
-		String WARNING_PROP_NAME = Namespace.PREFIX + COLON + "warning";
+		String CONDITION_REF_NAME = Namespace.PREFIX + COLON + "condition";
 
-		Class<?> WARNING_PROP_TYPE =  Boolean.class;
+		Class<?> CONDITION_REF_TYPE =  Criteria.class;
 
-		boolean WARNING_PROP_MULTIPLE = true;
+		boolean CONDITION_REF_MULTIPLE = false;
 
 		/**
-		 * EXPRESSION Reference
+		 * ELSE_BLOCK Reference
 		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+		String ELSE_BLOCK_REF_NAME = Namespace.PREFIX + COLON + "elseBlock";
 
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+		Class<?> ELSE_BLOCK_REF_TYPE =  Block.class;
 
-		boolean EXPRESSION_REF_MULTIPLE = true;
+		boolean ELSE_BLOCK_REF_MULTIPLE = false;
+
+		/**
+		 * IF_BLOCK Reference
+		 */
+		String IF_BLOCK_REF_NAME = Namespace.PREFIX + COLON + "ifBlock";
+
+		Class<?> IF_BLOCK_REF_TYPE =  Block.class;
+
+		boolean IF_BLOCK_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:loopStatement
 	 */
-	interface LoopStatement extends Statement, Labeled, SubqueryContainer {
+	public interface LoopStatement extends Statement, Labeled, SubqueryContainer {
 
 		String ID = Namespace.PREFIX + COLON + "loopStatement";
 
@@ -2536,7 +2525,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> CURSOR_NAME_PROP_TYPE =  String.class;
 
-		boolean CURSOR_NAME_PROP_MULTIPLE = true;
+		boolean CURSOR_NAME_PROP_MULTIPLE = false;
 
 		/**
 		 * LABEL Property
@@ -2545,7 +2534,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> LABEL_PROP_TYPE =  String.class;
 
-		boolean LABEL_PROP_MULTIPLE = true;
+		boolean LABEL_PROP_MULTIPLE = false;
 
 		/**
 		 * BLOCK Reference
@@ -2554,7 +2543,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> BLOCK_REF_TYPE =  Block.class;
 
-		boolean BLOCK_REF_MULTIPLE = true;
+		boolean BLOCK_REF_MULTIPLE = false;
 
 		/**
 		 * COMMAND Reference
@@ -2563,14 +2552,43 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> COMMAND_REF_TYPE =  Command.class;
 
-		boolean COMMAND_REF_MULTIPLE = true;
+		boolean COMMAND_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:raiseStatement
+	 */
+	public interface RaiseStatement extends Statement, ExpressionStatement {
+
+		String ID = Namespace.PREFIX + COLON + "raiseStatement";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * WARNING Property
+		 */
+		String WARNING_PROP_NAME = Namespace.PREFIX + COLON + "warning";
+
+		Class<?> WARNING_PROP_TYPE =  Boolean.class;
+
+		boolean WARNING_PROP_MULTIPLE = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:whileStatement
 	 */
-	interface WhileStatement extends Statement, Labeled {
+	public interface WhileStatement extends Statement, Labeled {
 
 		String ID = Namespace.PREFIX + COLON + "whileStatement";
 
@@ -2583,7 +2601,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> LABEL_PROP_TYPE =  String.class;
 
-		boolean LABEL_PROP_MULTIPLE = true;
+		boolean LABEL_PROP_MULTIPLE = false;
 
 		/**
 		 * BLOCK Reference
@@ -2592,7 +2610,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> BLOCK_REF_TYPE =  Block.class;
 
-		boolean BLOCK_REF_MULTIPLE = true;
+		boolean BLOCK_REF_MULTIPLE = false;
 
 		/**
 		 * CONDITION Reference
@@ -2601,14 +2619,14 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> CONDITION_REF_TYPE =  Criteria.class;
 
-		boolean CONDITION_REF_MULTIPLE = true;
+		boolean CONDITION_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:exceptionExpression
 	 */
-	interface ExceptionExpression extends Expression {
+	public interface ExceptionExpression extends Expression {
 
 		String ID = Namespace.PREFIX + COLON + "exceptionExpression";
 
@@ -2621,7 +2639,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> ERROR_CODE_REF_TYPE =  Expression.class;
 
-		boolean ERROR_CODE_REF_MULTIPLE = true;
+		boolean ERROR_CODE_REF_MULTIPLE = false;
 
 		/**
 		 * MESSAGE Reference
@@ -2630,7 +2648,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> MESSAGE_REF_TYPE =  Expression.class;
 
-		boolean MESSAGE_REF_MULTIPLE = true;
+		boolean MESSAGE_REF_MULTIPLE = false;
 
 		/**
 		 * PARENT_EXPRESSION Reference
@@ -2639,7 +2657,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> PARENT_EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean PARENT_EXPRESSION_REF_MULTIPLE = true;
+		boolean PARENT_EXPRESSION_REF_MULTIPLE = false;
 
 		/**
 		 * SQL_STATE Reference
@@ -2648,14 +2666,280 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> SQL_STATE_REF_TYPE =  Expression.class;
 
-		boolean SQL_STATE_REF_MULTIPLE = true;
+		boolean SQL_STATE_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:function
+	 */
+	public interface Function extends Expression {
+
+		String ID = Namespace.PREFIX + COLON + "function";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * TYPE_CLASS Property
+		 */
+		String TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "typeClass";
+
+		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
+
+		boolean TYPE_CLASS_PROP_MULTIPLE = false;
+
+		/**
+		 * ARGS Reference
+		 */
+		String ARGS_REF_NAME = Namespace.PREFIX + COLON + "args";
+
+		Class<?> ARGS_REF_TYPE =  Expression.class;
+
+		boolean ARGS_REF_MULTIPLE = true;
+
+	}
+
+	/**
+	 * tsql:aggregateSymbol
+	 */
+	public interface AggregateSymbol extends Function {
+
+		String ID = Namespace.PREFIX + COLON + "aggregateSymbol";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * WINDOWED Property
+		 */
+		String WINDOWED_PROP_NAME = Namespace.PREFIX + COLON + "windowed";
+
+		Class<?> WINDOWED_PROP_TYPE =  Boolean.class;
+
+		boolean WINDOWED_PROP_MULTIPLE = false;
+
+		/**
+		 * TYPE_CLASS Property
+		 */
+		String TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "typeClass";
+
+		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
+
+		boolean TYPE_CLASS_PROP_MULTIPLE = false;
+
+		/**
+		 * AGGREGATE_FUNCTION Property
+		 */
+		String AGGREGATE_FUNCTION_PROP_NAME = Namespace.PREFIX + COLON + "aggregateFunction";
+
+		Class<?> AGGREGATE_FUNCTION_PROP_TYPE =  String.class;
+
+		boolean AGGREGATE_FUNCTION_PROP_MULTIPLE = false;
+
+		/**
+		 * DISTINCT Property
+		 */
+		String DISTINCT_PROP_NAME = Namespace.PREFIX + COLON + "distinct";
+
+		Class<?> DISTINCT_PROP_TYPE =  Boolean.class;
+
+		boolean DISTINCT_PROP_MULTIPLE = false;
+
+		/**
+		 * IMPLICIT Property
+		 */
+		String IMPLICIT_PROP_NAME = Namespace.PREFIX + COLON + "implicit";
+
+		Class<?> IMPLICIT_PROP_TYPE =  Boolean.class;
+
+		boolean IMPLICIT_PROP_MULTIPLE = false;
+
+		/**
+		 * ORDER_BY Reference
+		 */
+		String ORDER_BY_REF_NAME = Namespace.PREFIX + COLON + "orderBy";
+
+		Class<?> ORDER_BY_REF_TYPE =  OrderBy.class;
+
+		boolean ORDER_BY_REF_MULTIPLE = false;
+
+		/**
+		 * ARGS Reference
+		 */
+		String ARGS_REF_NAME = Namespace.PREFIX + COLON + "args";
+
+		Class<?> ARGS_REF_TYPE =  Expression.class;
+
+		boolean ARGS_REF_MULTIPLE = true;
+
+		/**
+		 * CONDITION Reference
+		 */
+		String CONDITION_REF_NAME = Namespace.PREFIX + COLON + "condition";
+
+		Class<?> CONDITION_REF_TYPE =  Expression.class;
+
+		boolean CONDITION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:symbol
+	 */
+	public interface Symbol extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "symbol";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * SHORT_NAME Property
+		 */
+		String SHORT_NAME_PROP_NAME = Namespace.PREFIX + COLON + "shortName";
+
+		Class<?> SHORT_NAME_PROP_TYPE =  String.class;
+
+		boolean SHORT_NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * NAME Property
+		 */
+		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
+
+		Class<?> NAME_PROP_TYPE =  String.class;
+
+		boolean NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * OUTPUT_NAME Property
+		 */
+		String OUTPUT_NAME_PROP_NAME = Namespace.PREFIX + COLON + "outputName";
+
+		Class<?> OUTPUT_NAME_PROP_TYPE =  String.class;
+
+		boolean OUTPUT_NAME_PROP_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:aliasSymbol
+	 */
+	public interface AliasSymbol extends Symbol, Expression {
+
+		String ID = Namespace.PREFIX + COLON + "aliasSymbol";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * SYMBOL Reference
+		 */
+		String SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "symbol";
+
+		Class<?> SYMBOL_REF_TYPE =  Expression.class;
+
+		boolean SYMBOL_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:elementSymbol
+	 */
+	public interface ElementSymbol extends Symbol, Expression {
+
+		String ID = Namespace.PREFIX + COLON + "elementSymbol";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * METADATAID Property
+		 */
+		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataID";
+
+		Class<?> METADATAID_PROP_TYPE =  Object.class;
+
+		boolean METADATAID_PROP_MULTIPLE = false;
+
+		/**
+		 * TYPE_CLASS Property
+		 */
+		String TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "typeClass";
+
+		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
+
+		boolean TYPE_CLASS_PROP_MULTIPLE = false;
+
+		/**
+		 * DISPLAY_FULLY_QUALIFIED Property
+		 */
+		String DISPLAY_FULLY_QUALIFIED_PROP_NAME = Namespace.PREFIX + COLON + "displayFullyQualified";
+
+		Class<?> DISPLAY_FULLY_QUALIFIED_PROP_TYPE =  Boolean.class;
+
+		boolean DISPLAY_FULLY_QUALIFIED_PROP_MULTIPLE = false;
+
+		/**
+		 * GROUP_SYMBOL Reference
+		 */
+		String GROUP_SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "groupSymbol";
+
+		Class<?> GROUP_SYMBOL_REF_TYPE =  GroupSymbol.class;
+
+		boolean GROUP_SYMBOL_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:expressionSymbol
+	 */
+	public interface ExpressionSymbol extends Symbol, Expression {
+
+		String ID = Namespace.PREFIX + COLON + "expressionSymbol";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:groupSymbol
+	 */
+	public interface GroupSymbol extends Symbol {
+
+		String ID = Namespace.PREFIX + COLON + "groupSymbol";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * METADATAID Property
+		 */
+		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataID";
+
+		Class<?> METADATAID_PROP_TYPE =  Object.class;
+
+		boolean METADATAID_PROP_MULTIPLE = false;
+
+		/**
+		 * DEFINITION Property
+		 */
+		String DEFINITION_PROP_NAME = Namespace.PREFIX + COLON + "definition";
+
+		Class<?> DEFINITION_PROP_TYPE =  String.class;
+
+		boolean DEFINITION_PROP_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:array
 	 */
-	interface Array extends Expression {
+	public interface Array extends Expression {
 
 		String ID = Namespace.PREFIX + COLON + "array";
 
@@ -2668,7 +2952,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> IMPLICIT_PROP_TYPE =  Boolean.class;
 
-		boolean IMPLICIT_PROP_MULTIPLE = true;
+		boolean IMPLICIT_PROP_MULTIPLE = false;
 
 		/**
 		 * EXPRESSIONS Reference
@@ -2682,384 +2966,9 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
-	 * tsql:xMLQuery
-	 */
-	interface XMLQuery extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "xMLQuery";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * EMPTY_ON_EMPTY Property
-		 */
-		String EMPTY_ON_EMPTY_PROP_NAME = Namespace.PREFIX + COLON + "emptyOnEmpty";
-
-		Class<?> EMPTY_ON_EMPTY_PROP_TYPE =  Boolean.class;
-
-		boolean EMPTY_ON_EMPTY_PROP_MULTIPLE = true;
-
-		/**
-		 * XQUERY Property
-		 */
-		String XQUERY_PROP_NAME = Namespace.PREFIX + COLON + "xquery";
-
-		Class<?> XQUERY_PROP_TYPE =  String.class;
-
-		boolean XQUERY_PROP_MULTIPLE = true;
-
-		/**
-		 * PASSING Reference
-		 */
-		String PASSING_REF_NAME = Namespace.PREFIX + COLON + "passing";
-
-		Class<?> PASSING_REF_TYPE =  DerivedColumn.class;
-
-		boolean PASSING_REF_MULTIPLE = true;
-
-		/**
-		 * NAMESPACES Reference
-		 */
-		String NAMESPACES_REF_NAME = Namespace.PREFIX + COLON + "namespaces";
-
-		Class<?> NAMESPACES_REF_TYPE =  XMLNamespaces.class;
-
-		boolean NAMESPACES_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:xMLNamespaces
-	 */
-	interface XMLNamespaces extends LanguageObject {
-
-		String ID = Namespace.PREFIX + COLON + "xMLNamespaces";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * NAMESPACES Reference
-		 */
-		String NAMESPACES_REF_NAME = Namespace.PREFIX + COLON + "namespaces";
-
-		Class<?> NAMESPACES_REF_TYPE =  NamespaceItem.class;
-
-		boolean NAMESPACES_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:windowFunction
-	 */
-	interface WindowFunction extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "windowFunction";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * WINDOW_SPECIFICATION Reference
-		 */
-		String WINDOW_SPECIFICATION_REF_NAME = Namespace.PREFIX + COLON + "windowSpecification";
-
-		Class<?> WINDOW_SPECIFICATION_REF_TYPE =  WindowSpecification.class;
-
-		boolean WINDOW_SPECIFICATION_REF_MULTIPLE = true;
-
-		/**
-		 * FUNCTION Reference
-		 */
-		String FUNCTION_REF_NAME = Namespace.PREFIX + COLON + "function";
-
-		Class<?> FUNCTION_REF_TYPE =  AggregateSymbol.class;
-
-		boolean FUNCTION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:symbol
-	 */
-	interface Symbol extends LanguageObject {
-
-		String ID = Namespace.PREFIX + COLON + "symbol";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * SHORT_NAME Property
-		 */
-		String SHORT_NAME_PROP_NAME = Namespace.PREFIX + COLON + "shortName";
-
-		Class<?> SHORT_NAME_PROP_TYPE =  String.class;
-
-		boolean SHORT_NAME_PROP_MULTIPLE = true;
-
-		/**
-		 * NAME Property
-		 */
-		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
-
-		Class<?> NAME_PROP_TYPE =  String.class;
-
-		boolean NAME_PROP_MULTIPLE = true;
-
-		/**
-		 * OUTPUT_NAME Property
-		 */
-		String OUTPUT_NAME_PROP_NAME = Namespace.PREFIX + COLON + "outputName";
-
-		Class<?> OUTPUT_NAME_PROP_TYPE =  String.class;
-
-		boolean OUTPUT_NAME_PROP_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:aliasSymbol
-	 */
-	interface AliasSymbol extends Symbol, Expression {
-
-		String ID = Namespace.PREFIX + COLON + "aliasSymbol";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * SYMBOL Reference
-		 */
-		String SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "symbol";
-
-		Class<?> SYMBOL_REF_TYPE =  Expression.class;
-
-		boolean SYMBOL_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:elementSymbol
-	 */
-	interface ElementSymbol extends Symbol, Expression {
-
-		String ID = Namespace.PREFIX + COLON + "elementSymbol";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * METADATAID Property
-		 */
-		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataID";
-
-		Class<?> METADATAID_PROP_TYPE =  Object.class;
-
-		boolean METADATAID_PROP_MULTIPLE = true;
-
-		/**
-		 * TYPE_CLASS Property
-		 */
-		String TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "typeClass";
-
-		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
-
-		boolean TYPE_CLASS_PROP_MULTIPLE = true;
-
-		/**
-		 * DISPLAY_FULLY_QUALIFIED Property
-		 */
-		String DISPLAY_FULLY_QUALIFIED_PROP_NAME = Namespace.PREFIX + COLON + "displayFullyQualified";
-
-		Class<?> DISPLAY_FULLY_QUALIFIED_PROP_TYPE =  Boolean.class;
-
-		boolean DISPLAY_FULLY_QUALIFIED_PROP_MULTIPLE = true;
-
-		/**
-		 * GROUP_SYMBOL Reference
-		 */
-		String GROUP_SYMBOL_REF_NAME = Namespace.PREFIX + COLON + "groupSymbol";
-
-		Class<?> GROUP_SYMBOL_REF_TYPE =  GroupSymbol.class;
-
-		boolean GROUP_SYMBOL_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:expressionSymbol
-	 */
-	interface ExpressionSymbol extends Symbol, Expression {
-
-		String ID = Namespace.PREFIX + COLON + "expressionSymbol";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * EXPRESSION Reference
-		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
-
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:groupSymbol
-	 */
-	interface GroupSymbol extends Symbol {
-
-		String ID = Namespace.PREFIX + COLON + "groupSymbol";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * METADATAID Property
-		 */
-		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataID";
-
-		Class<?> METADATAID_PROP_TYPE =  Object.class;
-
-		boolean METADATAID_PROP_MULTIPLE = true;
-
-		/**
-		 * DEFINITION Property
-		 */
-		String DEFINITION_PROP_NAME = Namespace.PREFIX + COLON + "definition";
-
-		Class<?> DEFINITION_PROP_TYPE =  String.class;
-
-		boolean DEFINITION_PROP_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:multipleElementSymbol
-	 */
-	interface MultipleElementSymbol extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "multipleElementSymbol";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * ELEMENT_SYMBOLS Reference
-		 */
-		String ELEMENT_SYMBOLS_REF_NAME = Namespace.PREFIX + COLON + "elementSymbols";
-
-		Class<?> ELEMENT_SYMBOLS_REF_TYPE =  ElementSymbol.class;
-
-		boolean ELEMENT_SYMBOLS_REF_MULTIPLE = true;
-
-		/**
-		 * GROUP Reference
-		 */
-		String GROUP_REF_NAME = Namespace.PREFIX + COLON + "group";
-
-		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
-
-		boolean GROUP_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:scalarSubquery
-	 */
-	interface ScalarSubquery extends Expression, SubqueryContainer {
-
-		String ID = Namespace.PREFIX + COLON + "scalarSubquery";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * TYPE_CLASS Property
-		 */
-		String TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "typeClass";
-
-		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
-
-		boolean TYPE_CLASS_PROP_MULTIPLE = true;
-
-		/**
-		 * COMMAND Reference
-		 */
-		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
-
-		Class<?> COMMAND_REF_TYPE =  QueryCommand.class;
-
-		boolean COMMAND_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:xMLParse
-	 */
-	interface XMLParse extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "xMLParse";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * WELL_FORMED Property
-		 */
-		String WELL_FORMED_PROP_NAME = Namespace.PREFIX + COLON + "wellFormed";
-
-		Class<?> WELL_FORMED_PROP_TYPE =  Boolean.class;
-
-		boolean WELL_FORMED_PROP_MULTIPLE = true;
-
-		/**
-		 * DOCUMENT Property
-		 */
-		String DOCUMENT_PROP_NAME = Namespace.PREFIX + COLON + "document";
-
-		Class<?> DOCUMENT_PROP_TYPE =  Boolean.class;
-
-		boolean DOCUMENT_PROP_MULTIPLE = true;
-
-		/**
-		 * EXPRESSION Reference
-		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
-
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:queryString
-	 */
-	interface QueryString extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "queryString";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * ARGS Reference
-		 */
-		String ARGS_REF_NAME = Namespace.PREFIX + COLON + "args";
-
-		Class<?> ARGS_REF_TYPE =  DerivedColumn.class;
-
-		boolean ARGS_REF_MULTIPLE = true;
-
-		/**
-		 * PATH Reference
-		 */
-		String PATH_REF_NAME = Namespace.PREFIX + COLON + "path";
-
-		Class<?> PATH_REF_TYPE =  Expression.class;
-
-		boolean PATH_REF_MULTIPLE = true;
-
-	}
-
-	/**
 	 * tsql:caseExpression
 	 */
-	interface CaseExpression extends Expression {
+	public interface CaseExpression extends Expression {
 
 		String ID = Namespace.PREFIX + COLON + "caseExpression";
 
@@ -3072,7 +2981,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
 
-		boolean TYPE_CLASS_PROP_MULTIPLE = true;
+		boolean TYPE_CLASS_PROP_MULTIPLE = false;
 
 		/**
 		 * ELSE_EXPRESSION Reference
@@ -3081,7 +2990,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> ELSE_EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean ELSE_EXPRESSION_REF_MULTIPLE = true;
+		boolean ELSE_EXPRESSION_REF_MULTIPLE = false;
 
 		/**
 		 * EXPRESSION Reference
@@ -3090,7 +2999,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean EXPRESSION_REF_MULTIPLE = true;
+		boolean EXPRESSION_REF_MULTIPLE = false;
 
 		/**
 		 * WHEN Reference
@@ -3113,76 +3022,85 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
-	 * tsql:windowSpecification
+	 * tsql:constant
 	 */
-	interface WindowSpecification extends LanguageObject {
+	public interface Constant extends Expression {
 
-		String ID = Namespace.PREFIX + COLON + "windowSpecification";
+		String ID = Namespace.PREFIX + COLON + "constant";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * PARTITION Reference
+		 * TYPE_CLASS Property
 		 */
-		String PARTITION_REF_NAME = Namespace.PREFIX + COLON + "partition";
+		String TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "typeClass";
 
-		Class<?> PARTITION_REF_TYPE =  Expression.class;
+		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
 
-		boolean PARTITION_REF_MULTIPLE = true;
+		boolean TYPE_CLASS_PROP_MULTIPLE = false;
 
 		/**
-		 * ORDER_BY Reference
+		 * VALUE Property
 		 */
-		String ORDER_BY_REF_NAME = Namespace.PREFIX + COLON + "orderBy";
+		String VALUE_PROP_NAME = Namespace.PREFIX + COLON + "value";
 
-		Class<?> ORDER_BY_REF_TYPE =  OrderBy.class;
+		Class<?> VALUE_PROP_TYPE =  Object.class;
 
-		boolean ORDER_BY_REF_MULTIPLE = true;
+		boolean VALUE_PROP_MULTIPLE = false;
+
+		/**
+		 * MULTI_VALUED Property
+		 */
+		String MULTI_VALUED_PROP_NAME = Namespace.PREFIX + COLON + "multiValued";
+
+		Class<?> MULTI_VALUED_PROP_TYPE =  Boolean.class;
+
+		boolean MULTI_VALUED_PROP_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:xMLElement
+	 * tsql:derivedColumn
 	 */
-	interface XMLElement extends Expression {
+	public interface DerivedColumn extends LanguageObject {
 
-		String ID = Namespace.PREFIX + COLON + "xMLElement";
+		String ID = Namespace.PREFIX + COLON + "derivedColumn";
 
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * ATTRIBUTES Reference
+		 * ALIAS Property
 		 */
-		String ATTRIBUTES_REF_NAME = Namespace.PREFIX + COLON + "attributes";
+		String ALIAS_PROP_NAME = Namespace.PREFIX + COLON + "alias";
 
-		Class<?> ATTRIBUTES_REF_TYPE =  XMLAttributes.class;
+		Class<?> ALIAS_PROP_TYPE =  String.class;
 
-		boolean ATTRIBUTES_REF_MULTIPLE = true;
+		boolean ALIAS_PROP_MULTIPLE = false;
 
 		/**
-		 * NAMESPACES Reference
+		 * PROPAGATE_NAME Property
 		 */
-		String NAMESPACES_REF_NAME = Namespace.PREFIX + COLON + "namespaces";
+		String PROPAGATE_NAME_PROP_NAME = Namespace.PREFIX + COLON + "propagateName";
 
-		Class<?> NAMESPACES_REF_TYPE =  XMLNamespaces.class;
+		Class<?> PROPAGATE_NAME_PROP_TYPE =  Boolean.class;
 
-		boolean NAMESPACES_REF_MULTIPLE = true;
+		boolean PROPAGATE_NAME_PROP_MULTIPLE = false;
 
 		/**
-		 * CONTENT Reference
+		 * EXPRESSION Reference
 		 */
-		String CONTENT_REF_NAME = Namespace.PREFIX + COLON + "content";
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
 
-		Class<?> CONTENT_REF_TYPE =  Expression.class;
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean CONTENT_REF_MULTIPLE = true;
+		boolean EXPRESSION_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:jSONObject
 	 */
-	interface JSONObject extends Expression {
+	public interface JSONObject extends Expression {
 
 		String ID = Namespace.PREFIX + COLON + "jSONObject";
 
@@ -3200,11 +3118,40 @@ public interface TeiidSqlLexicon extends StringConstants {
 	}
 
 	/**
-	 * tsql:xMLAttributes
+	 * tsql:multipleElementSymbol
 	 */
-	interface XMLAttributes extends LanguageObject {
+	public interface MultipleElementSymbol extends Expression {
 
-		String ID = Namespace.PREFIX + COLON + "xMLAttributes";
+		String ID = Namespace.PREFIX + COLON + "multipleElementSymbol";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * ELEMENT_SYMBOLS Reference
+		 */
+		String ELEMENT_SYMBOLS_REF_NAME = Namespace.PREFIX + COLON + "elementSymbols";
+
+		Class<?> ELEMENT_SYMBOLS_REF_TYPE =  ElementSymbol.class;
+
+		boolean ELEMENT_SYMBOLS_REF_MULTIPLE = true;
+
+		/**
+		 * GROUP Reference
+		 */
+		String GROUP_REF_NAME = Namespace.PREFIX + COLON + "group";
+
+		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
+
+		boolean GROUP_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:queryString
+	 */
+	public interface QueryString extends Expression {
+
+		String ID = Namespace.PREFIX + COLON + "queryString";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3217,12 +3164,21 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		boolean ARGS_REF_MULTIPLE = true;
 
+		/**
+		 * PATH Reference
+		 */
+		String PATH_REF_NAME = Namespace.PREFIX + COLON + "path";
+
+		Class<?> PATH_REF_TYPE =  Expression.class;
+
+		boolean PATH_REF_MULTIPLE = false;
+
 	}
 
 	/**
 	 * tsql:reference
 	 */
-	interface Reference extends Expression {
+	public interface Reference extends Expression {
 
 		String ID = Namespace.PREFIX + COLON + "reference";
 
@@ -3235,7 +3191,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> POSITIONAL_PROP_TYPE =  Boolean.class;
 
-		boolean POSITIONAL_PROP_MULTIPLE = true;
+		boolean POSITIONAL_PROP_MULTIPLE = false;
 
 		/**
 		 * TYPE_CLASS Property
@@ -3244,7 +3200,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
 
-		boolean TYPE_CLASS_PROP_MULTIPLE = true;
+		boolean TYPE_CLASS_PROP_MULTIPLE = false;
 
 		/**
 		 * INDEX Property
@@ -3253,54 +3209,16 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> INDEX_PROP_TYPE =  Long.class;
 
-		boolean INDEX_PROP_MULTIPLE = true;
+		boolean INDEX_PROP_MULTIPLE = false;
 
 	}
 
 	/**
-	 * tsql:derivedColumn
+	 * tsql:scalarSubquery
 	 */
-	interface DerivedColumn extends LanguageObject {
+	public interface ScalarSubquery extends Expression, SubqueryContainer {
 
-		String ID = Namespace.PREFIX + COLON + "derivedColumn";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * ALIAS Property
-		 */
-		String ALIAS_PROP_NAME = Namespace.PREFIX + COLON + "alias";
-
-		Class<?> ALIAS_PROP_TYPE =  String.class;
-
-		boolean ALIAS_PROP_MULTIPLE = true;
-
-		/**
-		 * PROPAGATE_NAME Property
-		 */
-		String PROPAGATE_NAME_PROP_NAME = Namespace.PREFIX + COLON + "propagateName";
-
-		Class<?> PROPAGATE_NAME_PROP_TYPE =  Boolean.class;
-
-		boolean PROPAGATE_NAME_PROP_MULTIPLE = true;
-
-		/**
-		 * EXPRESSION Reference
-		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
-
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:constant
-	 */
-	interface Constant extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "constant";
+		String ID = Namespace.PREFIX + COLON + "scalarSubquery";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3311,294 +3229,23 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
 
-		boolean TYPE_CLASS_PROP_MULTIPLE = true;
+		boolean TYPE_CLASS_PROP_MULTIPLE = false;
 
 		/**
-		 * VALUE Property
+		 * COMMAND Reference
 		 */
-		String VALUE_PROP_NAME = Namespace.PREFIX + COLON + "value";
+		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
 
-		Class<?> VALUE_PROP_TYPE =  Object.class;
+		Class<?> COMMAND_REF_TYPE =  QueryCommand.class;
 
-		boolean VALUE_PROP_MULTIPLE = true;
-
-		/**
-		 * MULTI_VALUED Property
-		 */
-		String MULTI_VALUED_PROP_NAME = Namespace.PREFIX + COLON + "multiValued";
-
-		Class<?> MULTI_VALUED_PROP_TYPE =  Boolean.class;
-
-		boolean MULTI_VALUED_PROP_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:xMLForest
-	 */
-	interface XMLForest extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "xMLForest";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * ARGUMENTS Reference
-		 */
-		String ARGUMENTS_REF_NAME = Namespace.PREFIX + COLON + "arguments";
-
-		Class<?> ARGUMENTS_REF_TYPE =  DerivedColumn.class;
-
-		boolean ARGUMENTS_REF_MULTIPLE = true;
-
-		/**
-		 * NAMESPACES Reference
-		 */
-		String NAMESPACES_REF_NAME = Namespace.PREFIX + COLON + "namespaces";
-
-		Class<?> NAMESPACES_REF_TYPE =  XMLNamespaces.class;
-
-		boolean NAMESPACES_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:function
-	 */
-	interface Function extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "function";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * TYPE_CLASS Property
-		 */
-		String TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "typeClass";
-
-		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
-
-		boolean TYPE_CLASS_PROP_MULTIPLE = true;
-
-		/**
-		 * ARGS Reference
-		 */
-		String ARGS_REF_NAME = Namespace.PREFIX + COLON + "args";
-
-		Class<?> ARGS_REF_TYPE =  Expression.class;
-
-		boolean ARGS_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:aggregateSymbol
-	 */
-	interface AggregateSymbol extends Function {
-
-		String ID = Namespace.PREFIX + COLON + "aggregateSymbol";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * WINDOWED Property
-		 */
-		String WINDOWED_PROP_NAME = Namespace.PREFIX + COLON + "windowed";
-
-		Class<?> WINDOWED_PROP_TYPE =  Boolean.class;
-
-		boolean WINDOWED_PROP_MULTIPLE = true;
-
-		/**
-		 * TYPE_CLASS Property
-		 */
-		String TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "typeClass";
-
-		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
-
-		boolean TYPE_CLASS_PROP_MULTIPLE = true;
-
-		/**
-		 * AGGREGATE_FUNCTION Property
-		 */
-		String AGGREGATE_FUNCTION_PROP_NAME = Namespace.PREFIX + COLON + "aggregateFunction";
-
-		Class<?> AGGREGATE_FUNCTION_PROP_TYPE =  String.class;
-
-		boolean AGGREGATE_FUNCTION_PROP_MULTIPLE = true;
-
-		/**
-		 * DISTINCT Property
-		 */
-		String DISTINCT_PROP_NAME = Namespace.PREFIX + COLON + "distinct";
-
-		Class<?> DISTINCT_PROP_TYPE =  Boolean.class;
-
-		boolean DISTINCT_PROP_MULTIPLE = true;
-
-		/**
-		 * IMPLICIT Property
-		 */
-		String IMPLICIT_PROP_NAME = Namespace.PREFIX + COLON + "implicit";
-
-		Class<?> IMPLICIT_PROP_TYPE =  Boolean.class;
-
-		boolean IMPLICIT_PROP_MULTIPLE = true;
-
-		/**
-		 * ORDER_BY Reference
-		 */
-		String ORDER_BY_REF_NAME = Namespace.PREFIX + COLON + "orderBy";
-
-		Class<?> ORDER_BY_REF_TYPE =  OrderBy.class;
-
-		boolean ORDER_BY_REF_MULTIPLE = true;
-
-		/**
-		 * ARGS Reference
-		 */
-		String ARGS_REF_NAME = Namespace.PREFIX + COLON + "args";
-
-		Class<?> ARGS_REF_TYPE =  Expression.class;
-
-		boolean ARGS_REF_MULTIPLE = true;
-
-		/**
-		 * CONDITION Reference
-		 */
-		String CONDITION_REF_NAME = Namespace.PREFIX + COLON + "condition";
-
-		Class<?> CONDITION_REF_TYPE =  Expression.class;
-
-		boolean CONDITION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:xMLSerialize
-	 */
-	interface XMLSerialize extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "xMLSerialize";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * TYPE_STRING Property
-		 */
-		String TYPE_STRING_PROP_NAME = Namespace.PREFIX + COLON + "typeString";
-
-		Class<?> TYPE_STRING_PROP_TYPE =  String.class;
-
-		boolean TYPE_STRING_PROP_MULTIPLE = true;
-
-		/**
-		 * VERSION Property
-		 */
-		String VERSION_PROP_NAME = Namespace.PREFIX + COLON + "version";
-
-		Class<?> VERSION_PROP_TYPE =  String.class;
-
-		boolean VERSION_PROP_MULTIPLE = true;
-
-		/**
-		 * DECLARATION Property
-		 */
-		String DECLARATION_PROP_NAME = Namespace.PREFIX + COLON + "declaration";
-
-		Class<?> DECLARATION_PROP_TYPE =  Boolean.class;
-
-		boolean DECLARATION_PROP_MULTIPLE = true;
-
-		/**
-		 * DOCUMENT Property
-		 */
-		String DOCUMENT_PROP_NAME = Namespace.PREFIX + COLON + "document";
-
-		Class<?> DOCUMENT_PROP_TYPE =  Boolean.class;
-
-		boolean DOCUMENT_PROP_MULTIPLE = true;
-
-		/**
-		 * ENCODING Property
-		 */
-		String ENCODING_PROP_NAME = Namespace.PREFIX + COLON + "encoding";
-
-		Class<?> ENCODING_PROP_TYPE =  String.class;
-
-		boolean ENCODING_PROP_MULTIPLE = true;
-
-		/**
-		 * EXPRESSION Reference
-		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
-
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean EXPRESSION_REF_MULTIPLE = true;
-
-	}
-
-	/**
-	 * tsql:textLine
-	 */
-	interface TextLine extends Expression {
-
-		String ID = Namespace.PREFIX + COLON + "textLine";
-
-		boolean IS_ABSTRACT = false;
-
-		/**
-		 * QUOTE Property
-		 */
-		String QUOTE_PROP_NAME = Namespace.PREFIX + COLON + "quote";
-
-		Class<?> QUOTE_PROP_TYPE =  String.class;
-
-		boolean QUOTE_PROP_MULTIPLE = true;
-
-		/**
-		 * INCLUDE_HEADER Property
-		 */
-		String INCLUDE_HEADER_PROP_NAME = Namespace.PREFIX + COLON + "includeHeader";
-
-		Class<?> INCLUDE_HEADER_PROP_TYPE =  Boolean.class;
-
-		boolean INCLUDE_HEADER_PROP_MULTIPLE = true;
-
-		/**
-		 * ENCODING Property
-		 */
-		String ENCODING_PROP_NAME = Namespace.PREFIX + COLON + "encoding";
-
-		Class<?> ENCODING_PROP_TYPE =  String.class;
-
-		boolean ENCODING_PROP_MULTIPLE = true;
-
-		/**
-		 * DELIMITER Property
-		 */
-		String DELIMITER_PROP_NAME = Namespace.PREFIX + COLON + "delimiter";
-
-		Class<?> DELIMITER_PROP_TYPE =  String.class;
-
-		boolean DELIMITER_PROP_MULTIPLE = true;
-
-		/**
-		 * EXPRESSIONS Reference
-		 */
-		String EXPRESSIONS_REF_NAME = Namespace.PREFIX + COLON + "expressions";
-
-		Class<?> EXPRESSIONS_REF_TYPE =  DerivedColumn.class;
-
-		boolean EXPRESSIONS_REF_MULTIPLE = true;
+		boolean COMMAND_REF_MULTIPLE = false;
 
 	}
 
 	/**
 	 * tsql:searchedCaseExpression
 	 */
-	interface SearchedCaseExpression extends Expression {
+	public interface SearchedCaseExpression extends Expression {
 
 		String ID = Namespace.PREFIX + COLON + "searchedCaseExpression";
 
@@ -3611,7 +3258,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> TYPE_CLASS_PROP_TYPE =  String.class;
 
-		boolean TYPE_CLASS_PROP_MULTIPLE = true;
+		boolean TYPE_CLASS_PROP_MULTIPLE = false;
 
 		/**
 		 * ELSE_EXPRESSION Reference
@@ -3620,7 +3267,7 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 		Class<?> ELSE_EXPRESSION_REF_TYPE =  Expression.class;
 
-		boolean ELSE_EXPRESSION_REF_MULTIPLE = true;
+		boolean ELSE_EXPRESSION_REF_MULTIPLE = false;
 
 		/**
 		 * WHEN Reference
@@ -3642,4 +3289,497 @@ public interface TeiidSqlLexicon extends StringConstants {
 
 	}
 
+	/**
+	 * tsql:textLine
+	 */
+	public interface TextLine extends Expression {
+
+		String ID = Namespace.PREFIX + COLON + "textLine";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * QUOTE Property
+		 */
+		String QUOTE_PROP_NAME = Namespace.PREFIX + COLON + "quote";
+
+		Class<?> QUOTE_PROP_TYPE =  String.class;
+
+		boolean QUOTE_PROP_MULTIPLE = false;
+
+		/**
+		 * ENCODING Property
+		 */
+		String ENCODING_PROP_NAME = Namespace.PREFIX + COLON + "encoding";
+
+		Class<?> ENCODING_PROP_TYPE =  String.class;
+
+		boolean ENCODING_PROP_MULTIPLE = false;
+
+		/**
+		 * INCLUDE_HEADER Property
+		 */
+		String INCLUDE_HEADER_PROP_NAME = Namespace.PREFIX + COLON + "includeHeader";
+
+		Class<?> INCLUDE_HEADER_PROP_TYPE =  Boolean.class;
+
+		boolean INCLUDE_HEADER_PROP_MULTIPLE = false;
+
+		/**
+		 * DELIMITER Property
+		 */
+		String DELIMITER_PROP_NAME = Namespace.PREFIX + COLON + "delimiter";
+
+		Class<?> DELIMITER_PROP_TYPE =  String.class;
+
+		boolean DELIMITER_PROP_MULTIPLE = false;
+
+		/**
+		 * EXPRESSIONS Reference
+		 */
+		String EXPRESSIONS_REF_NAME = Namespace.PREFIX + COLON + "expressions";
+
+		Class<?> EXPRESSIONS_REF_TYPE =  DerivedColumn.class;
+
+		boolean EXPRESSIONS_REF_MULTIPLE = true;
+
+	}
+
+	/**
+	 * tsql:windowFunction
+	 */
+	public interface WindowFunction extends Expression {
+
+		String ID = Namespace.PREFIX + COLON + "windowFunction";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * WINDOW_SPECIFICATION Reference
+		 */
+		String WINDOW_SPECIFICATION_REF_NAME = Namespace.PREFIX + COLON + "windowSpecification";
+
+		Class<?> WINDOW_SPECIFICATION_REF_TYPE =  WindowSpecification.class;
+
+		boolean WINDOW_SPECIFICATION_REF_MULTIPLE = false;
+
+		/**
+		 * FUNCTION Reference
+		 */
+		String FUNCTION_REF_NAME = Namespace.PREFIX + COLON + "function";
+
+		Class<?> FUNCTION_REF_TYPE =  AggregateSymbol.class;
+
+		boolean FUNCTION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:windowSpecification
+	 */
+	public interface WindowSpecification extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "windowSpecification";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * PARTITION Reference
+		 */
+		String PARTITION_REF_NAME = Namespace.PREFIX + COLON + "partition";
+
+		Class<?> PARTITION_REF_TYPE =  Expression.class;
+
+		boolean PARTITION_REF_MULTIPLE = true;
+
+		/**
+		 * ORDER_BY Reference
+		 */
+		String ORDER_BY_REF_NAME = Namespace.PREFIX + COLON + "orderBy";
+
+		Class<?> ORDER_BY_REF_TYPE =  OrderBy.class;
+
+		boolean ORDER_BY_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:xMLAttributes
+	 */
+	public interface XMLAttributes extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "xMLAttributes";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * ARGS Reference
+		 */
+		String ARGS_REF_NAME = Namespace.PREFIX + COLON + "args";
+
+		Class<?> ARGS_REF_TYPE =  DerivedColumn.class;
+
+		boolean ARGS_REF_MULTIPLE = true;
+
+	}
+
+	/**
+	 * tsql:xMLElement
+	 */
+	public interface XMLElement extends Expression {
+
+		String ID = Namespace.PREFIX + COLON + "xMLElement";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * ATTRIBUTES Reference
+		 */
+		String ATTRIBUTES_REF_NAME = Namespace.PREFIX + COLON + "attributes";
+
+		Class<?> ATTRIBUTES_REF_TYPE =  XMLAttributes.class;
+
+		boolean ATTRIBUTES_REF_MULTIPLE = false;
+
+		/**
+		 * NAMESPACES Reference
+		 */
+		String NAMESPACES_REF_NAME = Namespace.PREFIX + COLON + "namespaces";
+
+		Class<?> NAMESPACES_REF_TYPE =  XMLNamespaces.class;
+
+		boolean NAMESPACES_REF_MULTIPLE = false;
+
+		/**
+		 * CONTENT Reference
+		 */
+		String CONTENT_REF_NAME = Namespace.PREFIX + COLON + "content";
+
+		Class<?> CONTENT_REF_TYPE =  Expression.class;
+
+		boolean CONTENT_REF_MULTIPLE = true;
+
+	}
+
+	/**
+	 * tsql:xMLForest
+	 */
+	public interface XMLForest extends Expression {
+
+		String ID = Namespace.PREFIX + COLON + "xMLForest";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * ARGUMENTS Reference
+		 */
+		String ARGUMENTS_REF_NAME = Namespace.PREFIX + COLON + "arguments";
+
+		Class<?> ARGUMENTS_REF_TYPE =  DerivedColumn.class;
+
+		boolean ARGUMENTS_REF_MULTIPLE = true;
+
+		/**
+		 * NAMESPACES Reference
+		 */
+		String NAMESPACES_REF_NAME = Namespace.PREFIX + COLON + "namespaces";
+
+		Class<?> NAMESPACES_REF_TYPE =  XMLNamespaces.class;
+
+		boolean NAMESPACES_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:xMLNamespaces
+	 */
+	public interface XMLNamespaces extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "xMLNamespaces";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * NAMESPACES Reference
+		 */
+		String NAMESPACES_REF_NAME = Namespace.PREFIX + COLON + "namespaces";
+
+		Class<?> NAMESPACES_REF_TYPE =  NamespaceItem.class;
+
+		boolean NAMESPACES_REF_MULTIPLE = true;
+
+	}
+
+	/**
+	 * tsql:xMLParse
+	 */
+	public interface XMLParse extends Expression {
+
+		String ID = Namespace.PREFIX + COLON + "xMLParse";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * WELL_FORMED Property
+		 */
+		String WELL_FORMED_PROP_NAME = Namespace.PREFIX + COLON + "wellFormed";
+
+		Class<?> WELL_FORMED_PROP_TYPE =  Boolean.class;
+
+		boolean WELL_FORMED_PROP_MULTIPLE = false;
+
+		/**
+		 * DOCUMENT Property
+		 */
+		String DOCUMENT_PROP_NAME = Namespace.PREFIX + COLON + "document";
+
+		Class<?> DOCUMENT_PROP_TYPE =  Boolean.class;
+
+		boolean DOCUMENT_PROP_MULTIPLE = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:xMLQuery
+	 */
+	public interface XMLQuery extends Expression {
+
+		String ID = Namespace.PREFIX + COLON + "xMLQuery";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * EMPTY_ON_EMPTY Property
+		 */
+		String EMPTY_ON_EMPTY_PROP_NAME = Namespace.PREFIX + COLON + "emptyOnEmpty";
+
+		Class<?> EMPTY_ON_EMPTY_PROP_TYPE =  Boolean.class;
+
+		boolean EMPTY_ON_EMPTY_PROP_MULTIPLE = false;
+
+		/**
+		 * XQUERY Property
+		 */
+		String XQUERY_PROP_NAME = Namespace.PREFIX + COLON + "xquery";
+
+		Class<?> XQUERY_PROP_TYPE =  String.class;
+
+		boolean XQUERY_PROP_MULTIPLE = false;
+
+		/**
+		 * PASSING Reference
+		 */
+		String PASSING_REF_NAME = Namespace.PREFIX + COLON + "passing";
+
+		Class<?> PASSING_REF_TYPE =  DerivedColumn.class;
+
+		boolean PASSING_REF_MULTIPLE = true;
+
+		/**
+		 * NAMESPACES Reference
+		 */
+		String NAMESPACES_REF_NAME = Namespace.PREFIX + COLON + "namespaces";
+
+		Class<?> NAMESPACES_REF_TYPE =  XMLNamespaces.class;
+
+		boolean NAMESPACES_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:xMLSerialize
+	 */
+	public interface XMLSerialize extends Expression {
+
+		String ID = Namespace.PREFIX + COLON + "xMLSerialize";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * TYPE_STRING Property
+		 */
+		String TYPE_STRING_PROP_NAME = Namespace.PREFIX + COLON + "typeString";
+
+		Class<?> TYPE_STRING_PROP_TYPE =  String.class;
+
+		boolean TYPE_STRING_PROP_MULTIPLE = false;
+
+		/**
+		 * VERSION Property
+		 */
+		String VERSION_PROP_NAME = Namespace.PREFIX + COLON + "version";
+
+		Class<?> VERSION_PROP_TYPE =  String.class;
+
+		boolean VERSION_PROP_MULTIPLE = false;
+
+		/**
+		 * DECLARATION Property
+		 */
+		String DECLARATION_PROP_NAME = Namespace.PREFIX + COLON + "declaration";
+
+		Class<?> DECLARATION_PROP_TYPE =  Boolean.class;
+
+		boolean DECLARATION_PROP_MULTIPLE = false;
+
+		/**
+		 * DOCUMENT Property
+		 */
+		String DOCUMENT_PROP_NAME = Namespace.PREFIX + COLON + "document";
+
+		Class<?> DOCUMENT_PROP_TYPE =  Boolean.class;
+
+		boolean DOCUMENT_PROP_MULTIPLE = false;
+
+		/**
+		 * ENCODING Property
+		 */
+		String ENCODING_PROP_NAME = Namespace.PREFIX + COLON + "encoding";
+
+		Class<?> ENCODING_PROP_TYPE =  String.class;
+
+		boolean ENCODING_PROP_MULTIPLE = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+
+	private static Map<String, Class<?>> astIndex = new HashMap<String, Class<?>>();
+
+	static {
+		astIndex.put(LanguageObject.class.getSimpleName(), LanguageObject.class);
+		astIndex.put(Expression.class.getSimpleName(), Expression.class);
+		astIndex.put(PredicateCriteria.class.getSimpleName(), PredicateCriteria.class);
+		astIndex.put(SubqueryContainer.class.getSimpleName(), SubqueryContainer.class);
+		astIndex.put(Labeled.class.getSimpleName(), Labeled.class);
+		astIndex.put(TargetedCommand.class.getSimpleName(), TargetedCommand.class);
+		astIndex.put(ExpressionStatement.class.getSimpleName(), ExpressionStatement.class);
+		astIndex.put(Criteria.class.getSimpleName(), Criteria.class);
+		astIndex.put(AbstractCompareCriteria.class.getSimpleName(), AbstractCompareCriteria.class);
+		astIndex.put(CompareCriteria.class.getSimpleName(), CompareCriteria.class);
+		astIndex.put(SubqueryCompareCriteria.class.getSimpleName(), SubqueryCompareCriteria.class);
+		astIndex.put(AbstractSetCriteria.class.getSimpleName(), AbstractSetCriteria.class);
+		astIndex.put(SetCriteria.class.getSimpleName(), SetCriteria.class);
+		astIndex.put(SubquerySetCriteria.class.getSimpleName(), SubquerySetCriteria.class);
+		astIndex.put(BetweenCriteria.class.getSimpleName(), BetweenCriteria.class);
+		astIndex.put(CompoundCriteria.class.getSimpleName(), CompoundCriteria.class);
+		astIndex.put(ExistsCriteria.class.getSimpleName(), ExistsCriteria.class);
+		astIndex.put(ExpressionCriteria.class.getSimpleName(), ExpressionCriteria.class);
+		astIndex.put(IsNullCriteria.class.getSimpleName(), IsNullCriteria.class);
+		astIndex.put(MatchCriteria.class.getSimpleName(), MatchCriteria.class);
+		astIndex.put(NotCriteria.class.getSimpleName(), NotCriteria.class);
+		astIndex.put(Command.class.getSimpleName(), Command.class);
+		astIndex.put(Alter.class.getSimpleName(), Alter.class);
+		astIndex.put(AlterProcedure.class.getSimpleName(), AlterProcedure.class);
+		astIndex.put(AlterTrigger.class.getSimpleName(), AlterTrigger.class);
+		astIndex.put(AlterView.class.getSimpleName(), AlterView.class);
+		astIndex.put(ProcedureContainer.class.getSimpleName(), ProcedureContainer.class);
+		astIndex.put(Delete.class.getSimpleName(), Delete.class);
+		astIndex.put(Insert.class.getSimpleName(), Insert.class);
+		astIndex.put(StoredProcedure.class.getSimpleName(), StoredProcedure.class);
+		astIndex.put(Update.class.getSimpleName(), Update.class);
+		astIndex.put(DynamicCommand.class.getSimpleName(), DynamicCommand.class);
+		astIndex.put(QueryCommand.class.getSimpleName(), QueryCommand.class);
+		astIndex.put(Query.class.getSimpleName(), Query.class);
+		astIndex.put(SetQuery.class.getSimpleName(), SetQuery.class);
+		astIndex.put(CreateProcedureCommand.class.getSimpleName(), CreateProcedureCommand.class);
+		astIndex.put(TriggerAction.class.getSimpleName(), TriggerAction.class);
+		astIndex.put(FromClause.class.getSimpleName(), FromClause.class);
+		astIndex.put(TableFunctionReference.class.getSimpleName(), TableFunctionReference.class);
+		astIndex.put(ArrayTable.class.getSimpleName(), ArrayTable.class);
+		astIndex.put(ObjectTable.class.getSimpleName(), ObjectTable.class);
+		astIndex.put(TextTable.class.getSimpleName(), TextTable.class);
+		astIndex.put(XMLTable.class.getSimpleName(), XMLTable.class);
+		astIndex.put(JoinPredicate.class.getSimpleName(), JoinPredicate.class);
+		astIndex.put(SubqueryFromClause.class.getSimpleName(), SubqueryFromClause.class);
+		astIndex.put(UnaryFromClause.class.getSimpleName(), UnaryFromClause.class);
+		astIndex.put(From.class.getSimpleName(), From.class);
+		astIndex.put(GroupBy.class.getSimpleName(), GroupBy.class);
+		astIndex.put(Into.class.getSimpleName(), Into.class);
+		astIndex.put(JoinType.class.getSimpleName(), JoinType.class);
+		astIndex.put(Limit.class.getSimpleName(), Limit.class);
+		astIndex.put(NamespaceItem.class.getSimpleName(), NamespaceItem.class);
+		astIndex.put(ProjectedColumn.class.getSimpleName(), ProjectedColumn.class);
+		astIndex.put(ObjectColumn.class.getSimpleName(), ObjectColumn.class);
+		astIndex.put(TextColumn.class.getSimpleName(), TextColumn.class);
+		astIndex.put(XMLColumn.class.getSimpleName(), XMLColumn.class);
+		astIndex.put(Option.class.getSimpleName(), Option.class);
+		astIndex.put(OrderBy.class.getSimpleName(), OrderBy.class);
+		astIndex.put(OrderByItem.class.getSimpleName(), OrderByItem.class);
+		astIndex.put(SPParameter.class.getSimpleName(), SPParameter.class);
+		astIndex.put(Select.class.getSimpleName(), Select.class);
+		astIndex.put(SetClause.class.getSimpleName(), SetClause.class);
+		astIndex.put(SetClauseList.class.getSimpleName(), SetClauseList.class);
+		astIndex.put(SourceHint.class.getSimpleName(), SourceHint.class);
+		astIndex.put(SpecificHint.class.getSimpleName(), SpecificHint.class);
+		astIndex.put(SubqueryHint.class.getSimpleName(), SubqueryHint.class);
+		astIndex.put(WithQueryCommand.class.getSimpleName(), WithQueryCommand.class);
+		astIndex.put(Statement.class.getSimpleName(), Statement.class);
+		astIndex.put(AssignmentStatement.class.getSimpleName(), AssignmentStatement.class);
+		astIndex.put(DeclareStatement.class.getSimpleName(), DeclareStatement.class);
+		astIndex.put(ReturnStatement.class.getSimpleName(), ReturnStatement.class);
+		astIndex.put(Block.class.getSimpleName(), Block.class);
+		astIndex.put(BranchingStatement.class.getSimpleName(), BranchingStatement.class);
+		astIndex.put(CommandStatement.class.getSimpleName(), CommandStatement.class);
+		astIndex.put(IfStatement.class.getSimpleName(), IfStatement.class);
+		astIndex.put(LoopStatement.class.getSimpleName(), LoopStatement.class);
+		astIndex.put(RaiseStatement.class.getSimpleName(), RaiseStatement.class);
+		astIndex.put(WhileStatement.class.getSimpleName(), WhileStatement.class);
+		astIndex.put(ExceptionExpression.class.getSimpleName(), ExceptionExpression.class);
+		astIndex.put(Function.class.getSimpleName(), Function.class);
+		astIndex.put(AggregateSymbol.class.getSimpleName(), AggregateSymbol.class);
+		astIndex.put(Symbol.class.getSimpleName(), Symbol.class);
+		astIndex.put(AliasSymbol.class.getSimpleName(), AliasSymbol.class);
+		astIndex.put(ElementSymbol.class.getSimpleName(), ElementSymbol.class);
+		astIndex.put(ExpressionSymbol.class.getSimpleName(), ExpressionSymbol.class);
+		astIndex.put(GroupSymbol.class.getSimpleName(), GroupSymbol.class);
+		astIndex.put(Array.class.getSimpleName(), Array.class);
+		astIndex.put(CaseExpression.class.getSimpleName(), CaseExpression.class);
+		astIndex.put(Constant.class.getSimpleName(), Constant.class);
+		astIndex.put(DerivedColumn.class.getSimpleName(), DerivedColumn.class);
+		astIndex.put(JSONObject.class.getSimpleName(), JSONObject.class);
+		astIndex.put(MultipleElementSymbol.class.getSimpleName(), MultipleElementSymbol.class);
+		astIndex.put(QueryString.class.getSimpleName(), QueryString.class);
+		astIndex.put(Reference.class.getSimpleName(), Reference.class);
+		astIndex.put(ScalarSubquery.class.getSimpleName(), ScalarSubquery.class);
+		astIndex.put(SearchedCaseExpression.class.getSimpleName(), SearchedCaseExpression.class);
+		astIndex.put(TextLine.class.getSimpleName(), TextLine.class);
+		astIndex.put(WindowFunction.class.getSimpleName(), WindowFunction.class);
+		astIndex.put(WindowSpecification.class.getSimpleName(), WindowSpecification.class);
+		astIndex.put(XMLAttributes.class.getSimpleName(), XMLAttributes.class);
+		astIndex.put(XMLElement.class.getSimpleName(), XMLElement.class);
+		astIndex.put(XMLForest.class.getSimpleName(), XMLForest.class);
+		astIndex.put(XMLNamespaces.class.getSimpleName(), XMLNamespaces.class);
+		astIndex.put(XMLParse.class.getSimpleName(), XMLParse.class);
+		astIndex.put(XMLQuery.class.getSimpleName(), XMLQuery.class);
+		astIndex.put(XMLSerialize.class.getSimpleName(), XMLSerialize.class);
+	}
+
+	public static String getTypeId(Class<? extends ASTNode> astNodeClass) {
+		try {
+			Class<?> astClass = astIndex.get(astNodeClass.getSimpleName());
+			Field idField = astClass.getField("ID");
+			Object idValue = idField.get(null);
+			return idValue.toString();
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 }

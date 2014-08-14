@@ -264,6 +264,10 @@ public interface StringConstants {
    * final
    */
   String FINAL = "final"; //$NON-NLS-1$
-  
+
+  /**
+   * private
+   */
+  String PRIVATE = "private"; //$NON-NLS-1$
 }
 
