@@ -56,7 +56,7 @@ public class TextColumn extends ProjectedColumn implements ITextColumn<LanguageV
      * @return
      */
     public Integer getWidth() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -82,7 +82,7 @@ public class TextColumn extends ProjectedColumn implements ITextColumn<LanguageV
      * @return
      */
     public String getSelector() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -95,7 +95,7 @@ public class TextColumn extends ProjectedColumn implements ITextColumn<LanguageV
      * @return
      */
     public Integer getPosition() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

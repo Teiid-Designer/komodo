@@ -39,7 +39,7 @@ public class AliasSymbol extends Symbol implements Expression, IAliasSymbol<Expr
 
     @Override
     public Expression getSymbol() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

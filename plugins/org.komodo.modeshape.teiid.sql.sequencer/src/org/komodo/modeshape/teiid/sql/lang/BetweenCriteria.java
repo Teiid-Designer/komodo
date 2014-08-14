@@ -46,7 +46,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      */
     @Override
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -60,7 +60,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      */
     @Override
     public Expression getLowerExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -74,7 +74,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      */
     @Override
     public Expression getUpperExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

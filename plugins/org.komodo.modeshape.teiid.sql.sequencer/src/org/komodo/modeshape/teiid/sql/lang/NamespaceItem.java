@@ -40,7 +40,7 @@ public class NamespaceItem extends ASTNode {
      * @return uri
      */
     public String getUri() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -53,7 +53,7 @@ public class NamespaceItem extends ASTNode {
      * @return prefix
      */
     public String getPrefix() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

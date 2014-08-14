@@ -40,13 +40,13 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
 
     @Override
     public int getType() {
-        return TYPE_DYNAMIC;
+        throw new UnsupportedOperationException();
     }
     /** 
      * @return Returns the columns.
      */
     public List<ElementSymbol> getAsColumns() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /** 
@@ -59,7 +59,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
      * @return Returns the intoGroup.
      */
     public GroupSymbol getIntoGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
     
     /** 
@@ -72,7 +72,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
      * @return Returns the sql.
      */
     public Expression getSql() {
-        return null;
+        throw new UnsupportedOperationException();
     }
     
     /** 
@@ -85,7 +85,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
      * @return Returns the using.
      */
     public SetClauseList getUsing() {
-        return null;
+        throw new UnsupportedOperationException();
     }
     
     /** 

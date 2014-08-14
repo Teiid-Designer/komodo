@@ -37,7 +37,7 @@ public class ScalarSubquery extends ASTNode implements Expression, SubqueryConta
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -48,7 +48,7 @@ public class ScalarSubquery extends ASTNode implements Expression, SubqueryConta
 
     @Override
     public QueryCommand getCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

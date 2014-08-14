@@ -35,14 +35,14 @@ public class Array extends ASTNode implements Expression {
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     private List<Expression> getExpressions() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -36,7 +36,7 @@ public class OrderByItem extends ASTNode implements IOrderByItem<Expression, Lan
 
     @Override
     public Expression getSymbol() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -58,7 +58,7 @@ public class OrderByItem extends ASTNode implements IOrderByItem<Expression, Lan
      * @return
      */
     public SortSpecification.NullOrdering getNullOrdering() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -38,7 +38,7 @@ public class SubquerySetCriteria extends AbstractSetCriteria
      * @return
      */
     public SubqueryHint getSubqueryHint() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -49,7 +49,7 @@ public class SubquerySetCriteria extends AbstractSetCriteria
 
     @Override
     public QueryCommand getCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

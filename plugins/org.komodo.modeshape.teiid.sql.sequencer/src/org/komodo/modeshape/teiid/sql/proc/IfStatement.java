@@ -47,7 +47,7 @@ public class IfStatement extends Statement implements IIfStatement<LanguageVisit
      * @return
      */
     public Criteria getCondition() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -60,7 +60,7 @@ public class IfStatement extends Statement implements IIfStatement<LanguageVisit
      * @return
      */
     public Block getIfBlock() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -73,7 +73,7 @@ public class IfStatement extends Statement implements IIfStatement<LanguageVisit
      * @return
      */
     public Block getElseBlock() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

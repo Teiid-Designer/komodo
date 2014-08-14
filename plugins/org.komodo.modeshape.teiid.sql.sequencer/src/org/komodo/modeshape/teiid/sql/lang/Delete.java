@@ -41,17 +41,17 @@ public class Delete extends ProcedureContainer implements TargetedCommand, IDele
      */
     @Override
     public int getType() {
-        return TYPE_DELETE;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<Expression> getProjectedSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public GroupSymbol getGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -60,7 +60,7 @@ public class Delete extends ProcedureContainer implements TargetedCommand, IDele
 
     @Override
     public Criteria getCriteria() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

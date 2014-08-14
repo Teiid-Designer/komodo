@@ -36,14 +36,14 @@ public class XMLForest extends ASTNode implements Expression, IXMLForest<Languag
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public List<DerivedColumn> getArguments() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -56,7 +56,7 @@ public class XMLForest extends ASTNode implements Expression, IXMLForest<Languag
      * @return
      */
     public XMLNamespaces getNamespaces() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

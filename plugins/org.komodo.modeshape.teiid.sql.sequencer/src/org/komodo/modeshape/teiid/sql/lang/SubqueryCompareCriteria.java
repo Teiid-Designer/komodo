@@ -70,7 +70,7 @@ public class SubqueryCompareCriteria extends AbstractCompareCriteria implements 
 
     @Override
     public QueryCommand getCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -79,14 +79,14 @@ public class SubqueryCompareCriteria extends AbstractCompareCriteria implements 
 
     @Override
     public Expression getRightExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     private PredicateQuantifier getPredicateQuantifier() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -36,20 +36,16 @@ public class Update extends ProcedureContainer
         super(p, id);
     }
 
-    /**
-     * Return type of command.
-     * @return TYPE_UPDATE
-     */
     @Override
     public int getType() {
-        return TYPE_UPDATE;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public SetClauseList getChangeList() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -60,7 +56,7 @@ public class Update extends ProcedureContainer
 
     @Override
     public GroupSymbol getGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -73,7 +69,7 @@ public class Update extends ProcedureContainer
      * @return
      */
     public Criteria getCriteria() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -83,7 +79,7 @@ public class Update extends ProcedureContainer
     }
     @Override
     public List<Expression> getProjectedSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

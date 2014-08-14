@@ -36,7 +36,7 @@ public class Constant extends ASTNode implements Expression, IConstant<LanguageV
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -47,7 +47,7 @@ public class Constant extends ASTNode implements Expression, IConstant<LanguageV
 
     @Override
     public Object getValue() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

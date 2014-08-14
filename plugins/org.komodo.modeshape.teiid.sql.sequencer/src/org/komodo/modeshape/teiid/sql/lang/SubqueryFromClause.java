@@ -55,7 +55,7 @@ public class SubqueryFromClause extends FromClause implements SubqueryContainer<
 
     @Override
     public Command getCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -44,7 +44,7 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
      * @return
      */
     private Expression getMessage() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -57,7 +57,7 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
      * @return
      */
     private Expression getSqlState() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -70,7 +70,7 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
      * @return
      */
     private Expression getErrorCode() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

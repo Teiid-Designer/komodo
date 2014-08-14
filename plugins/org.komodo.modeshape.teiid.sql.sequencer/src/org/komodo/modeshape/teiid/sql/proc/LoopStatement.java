@@ -47,7 +47,7 @@ public class LoopStatement extends Statement implements Labeled, SubqueryContain
 
     @Override
     public Command getCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -56,7 +56,7 @@ public class LoopStatement extends Statement implements Labeled, SubqueryContain
 
     @Override
     public String getLabel() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -67,7 +67,7 @@ public class LoopStatement extends Statement implements Labeled, SubqueryContain
      * @return
      */
     private Block getBlock() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -80,7 +80,7 @@ public class LoopStatement extends Statement implements Labeled, SubqueryContain
      * @return
      */
     private String getCursorName() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

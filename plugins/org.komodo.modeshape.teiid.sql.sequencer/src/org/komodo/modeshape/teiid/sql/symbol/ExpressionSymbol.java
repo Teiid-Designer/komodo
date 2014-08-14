@@ -34,7 +34,7 @@ public class ExpressionSymbol extends Symbol implements Expression, IExpressionS
 
     @Override
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -43,7 +43,7 @@ public class ExpressionSymbol extends Symbol implements Expression, IExpressionS
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -40,7 +40,7 @@ public abstract class Alter<T extends Command> extends Command implements IAlter
      * @return the definition
      */
     public T getDefinition() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

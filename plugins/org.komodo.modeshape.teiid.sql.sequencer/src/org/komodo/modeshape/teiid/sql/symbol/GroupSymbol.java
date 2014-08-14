@@ -34,7 +34,7 @@ public class GroupSymbol extends Symbol implements IGroupSymbol<LanguageVisitor>
 
     @Override
     public String getDefinition() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class GroupSymbol extends Symbol implements IGroupSymbol<LanguageVisitor>
 
     @Override
     public Object getMetadataID() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

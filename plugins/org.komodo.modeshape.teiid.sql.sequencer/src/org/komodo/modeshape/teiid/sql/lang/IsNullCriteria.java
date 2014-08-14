@@ -35,7 +35,7 @@ public class IsNullCriteria extends Criteria implements PredicateCriteria, IIsNu
 
     @Override
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

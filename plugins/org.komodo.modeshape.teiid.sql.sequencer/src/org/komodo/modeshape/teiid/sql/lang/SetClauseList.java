@@ -37,7 +37,7 @@ public class SetClauseList extends ASTNode implements ISetClauseList<LanguageVis
      * @return
      */
     public List<SetClause> getSetClauses() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

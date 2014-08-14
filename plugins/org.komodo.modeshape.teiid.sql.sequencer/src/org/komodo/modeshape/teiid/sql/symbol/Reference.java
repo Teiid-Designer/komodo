@@ -37,7 +37,7 @@ public class Reference extends ASTNode implements Expression, IReference<Languag
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -59,7 +59,7 @@ public class Reference extends ASTNode implements Expression, IReference<Languag
 
     @Override
     public IElementSymbol getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -41,7 +41,7 @@ public class GroupBy extends ASTNode implements IGroupBy<Expression, LanguageVis
 
     @Override
     public List<Expression> getSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

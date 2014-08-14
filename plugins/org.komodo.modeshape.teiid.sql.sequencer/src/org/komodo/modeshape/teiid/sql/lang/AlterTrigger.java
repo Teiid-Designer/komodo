@@ -43,14 +43,14 @@ public class AlterTrigger extends Alter<TriggerAction> implements IAlterTrigger<
 
     @Override
     public int getType() {
-        return TYPE_ALTER_TRIGGER;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return the event
      */
     public TriggerEvent getEvent() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -40,7 +40,7 @@ public class WithQueryCommand extends ASTNode
      * @return
      */
     public GroupSymbol getGroupSymbol() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -53,7 +53,7 @@ public class WithQueryCommand extends ASTNode
      * @return
      */
     public List<ElementSymbol> getColumns() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -66,7 +66,7 @@ public class WithQueryCommand extends ASTNode
      * @return
      */
     public QueryCommand getQueryExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -76,7 +76,7 @@ public class WithQueryCommand extends ASTNode
     }
     @Override
     public QueryCommand getCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

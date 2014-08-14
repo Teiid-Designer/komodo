@@ -43,7 +43,7 @@ public class AlterProcedure extends Alter<CreateProcedureCommand> implements IAl
 
     @Override
     public int getType() {
-        return TYPE_ALTER_PROC;
+        throw new UnsupportedOperationException();
     }
 
     /** Accept the visitor. **/

@@ -37,7 +37,7 @@ public class DerivedColumn extends ASTNode implements IDerivedColumn<LanguageVis
      * @return
      */
     public String getAlias() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -50,7 +50,7 @@ public class DerivedColumn extends ASTNode implements IDerivedColumn<LanguageVis
      * @return
      */
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

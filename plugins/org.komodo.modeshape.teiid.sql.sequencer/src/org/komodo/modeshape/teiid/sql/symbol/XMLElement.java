@@ -43,14 +43,14 @@ public class XMLElement extends ASTNode implements Expression, IXMLElement<Langu
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public List<Expression> getContent() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -139,14 +139,14 @@ public class XMLElement extends ASTNode implements Expression, IXMLElement<Langu
      * @return
      */
     public XMLAttributes getAttributes() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public XMLNamespaces getNamespaces() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
 }

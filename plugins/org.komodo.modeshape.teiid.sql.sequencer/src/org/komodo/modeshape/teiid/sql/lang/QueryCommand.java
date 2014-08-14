@@ -28,7 +28,7 @@ public abstract class QueryCommand extends Command
      */
     @Override
     public OrderBy getOrderBy() {
-        return null;
+        throw new UnsupportedOperationException();
     }
     
     /**
@@ -43,7 +43,7 @@ public abstract class QueryCommand extends Command
      * @return limit
      */
     public Limit getLimit() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class QueryCommand extends Command
      * @return with
      */
     public List<WithQueryCommand> getWith() {
-        return null;
+        throw new UnsupportedOperationException();
     }
     
     /**

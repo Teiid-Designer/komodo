@@ -38,7 +38,7 @@ public class SetClause extends ASTNode implements ISetClause<LanguageVisitor> {
      * @return
      */
     public ElementSymbol getSymbol() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -51,7 +51,7 @@ public class SetClause extends ASTNode implements ISetClause<LanguageVisitor> {
      * @return
      */
     public Expression getValue() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

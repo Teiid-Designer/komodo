@@ -52,14 +52,14 @@ public class BranchingStatement extends Statement implements IBranchingStatement
 
     @Override
     public StatementType getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public String getLabel() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -72,7 +72,7 @@ public class BranchingStatement extends Statement implements IBranchingStatement
      * @return
      */
     public BranchingMode getMode() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

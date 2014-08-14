@@ -102,7 +102,7 @@ public abstract class SimpleNode implements Node {
 
     protected <T extends LanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
         if (collection == null)
-            return null;
+            throw new UnsupportedOperationException();
 
         Collection<T> cloned = new HashSet<T>();
         for (T item : collection) {
@@ -114,7 +114,7 @@ public abstract class SimpleNode implements Node {
 
     protected <T extends LanguageObject> List<T> cloneList(List<T> list) {
         if (list == null)
-            return null;
+            throw new UnsupportedOperationException();
 
         List<T> cloned = new ArrayList<T>();
         for (T item : list) {

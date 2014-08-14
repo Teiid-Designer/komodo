@@ -36,7 +36,7 @@ public class From extends ASTNode implements IFrom<FromClause, GroupSymbol, Lang
 
     @Override
     public List<FromClause> getClauses() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class From extends ASTNode implements IFrom<FromClause, GroupSymbol, Lang
 
     @Override
     public List<? extends GroupSymbol> getGroups() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

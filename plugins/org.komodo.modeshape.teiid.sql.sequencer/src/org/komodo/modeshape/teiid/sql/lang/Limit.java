@@ -42,7 +42,7 @@ public class Limit extends ASTNode implements ILimit<LanguageVisitor> {
      * @return
      */
     public Expression getOffset() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -55,7 +55,7 @@ public class Limit extends ASTNode implements ILimit<LanguageVisitor> {
      * @return
      */
     public Expression getRowLimit() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

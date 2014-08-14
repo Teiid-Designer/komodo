@@ -36,14 +36,14 @@ public class TextLine extends ASTNode implements Expression, ITextLine<LanguageV
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public Character getDelimiter() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -56,7 +56,7 @@ public class TextLine extends ASTNode implements Expression, ITextLine<LanguageV
      * @return
      */
     public Character getQuote() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -82,7 +82,7 @@ public class TextLine extends ASTNode implements Expression, ITextLine<LanguageV
      * @return
      */
     public List<DerivedColumn> getExpressions() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -95,7 +95,7 @@ public class TextLine extends ASTNode implements Expression, ITextLine<LanguageV
      * @return
      */
     public String getEncoding() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -61,7 +61,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
      * @return
      */
     public String getExceptionGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -71,7 +71,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
     }
     @Override
     public List<Statement> getStatements() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -87,7 +87,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
 
     @Override
     public String getLabel() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -98,7 +98,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
      * @return
      */
     public List<Statement> getExceptionStatements() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

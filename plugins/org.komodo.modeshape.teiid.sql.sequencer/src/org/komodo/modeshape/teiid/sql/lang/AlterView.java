@@ -43,7 +43,7 @@ public class AlterView  extends Alter<QueryCommand> implements IAlterView<Expres
 
     @Override
     public int getType() {
-        return TYPE_ALTER_VIEW;
+        throw new UnsupportedOperationException();
     }
 
     /** Accept the visitor. **/

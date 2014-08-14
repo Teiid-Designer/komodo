@@ -44,7 +44,7 @@ public class DeclareStatement extends AssignmentStatement implements IDeclareSta
 
     @Override
     public String getVariableType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

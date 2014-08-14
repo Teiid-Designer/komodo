@@ -35,13 +35,9 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
         super(p, id);
     }
 
-    /**
-     * Return type of command.
-     * @return TYPE_STORED_PROCEDURE
-     */
     @Override
     public int getType() {
-        return TYPE_STORED_PROCEDURE;
+        throw new UnsupportedOperationException();
     }
 
     public boolean isCalledWithReturn() {
@@ -74,7 +70,7 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
 
     @Override
     public Object getProcedureID() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -83,12 +79,12 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
 
     @Override
     public GroupSymbol getGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getGroupName() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void setGroup(GroupSymbol group) {
@@ -97,7 +93,7 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
 
     @Override
     public List<SPParameter> getInputParameters() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -106,7 +102,7 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
 
     @Override
     public String getProcedureCallableName() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -115,35 +111,35 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
 
     @Override
     public List<Expression> getProjectedSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     private Object getResultSetParameterKey() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     private Object getProcedureName() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     private Object getMapOfParameters() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     private List<SPParameter> getParameters() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

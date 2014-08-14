@@ -53,7 +53,7 @@ public class CompoundCriteria extends Criteria implements ICompoundCriteria<Crit
 
     @Override
     public List<Criteria> getCriteria() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -63,7 +63,7 @@ public class CompoundCriteria extends Criteria implements ICompoundCriteria<Crit
 
     @Override
     public Criteria getCriteria(int index) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -43,7 +43,7 @@ public class SourceHint extends ASTNode implements ISourceHint {
      * @return general hint
      */
     public String getGeneralHint() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -58,7 +58,7 @@ public class SourceHint extends ASTNode implements ISourceHint {
      * @return source hint with name
      */
     public SpecificHint getSourceHint(String sourceName) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -71,7 +71,7 @@ public class SourceHint extends ASTNode implements ISourceHint {
      * @return map of source hints
      */
     public Map<String, SpecificHint> getSourceHints() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -80,14 +80,14 @@ public class SourceHint extends ASTNode implements ISourceHint {
      * @return specific hint for given name
      */
     public SpecificHint getSpecificHint(String sourceName) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return map of specific hints
      */
     public Map<String, SpecificHint> getSpecificHints() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

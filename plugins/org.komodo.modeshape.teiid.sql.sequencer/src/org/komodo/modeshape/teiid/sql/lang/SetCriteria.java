@@ -36,7 +36,7 @@ public class SetCriteria extends AbstractSetCriteria implements ISetCriteria<Exp
 
     @Override
     public Collection<Expression> getValues() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

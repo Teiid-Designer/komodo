@@ -44,14 +44,14 @@ public class ProjectedColumn extends ASTNode implements IProjectedColumn<Languag
      * @return
      */
     public ElementSymbol getSymbol() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public String getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -41,7 +41,7 @@ public class JSONObject extends ASTNode implements Expression, IJSONObject<Langu
     }
 
     public List<DerivedColumn> getArgs() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

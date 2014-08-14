@@ -23,7 +23,7 @@ public abstract class AbstractSetCriteria extends Criteria implements PredicateC
      * @return the expression
      */
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -49,7 +49,7 @@ public class OrderBy extends ASTNode implements IOrderBy<Expression, OrderByItem
 
     @Override
     public List<OrderByItem> getOrderByItems() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

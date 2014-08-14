@@ -46,7 +46,7 @@ public class RaiseStatement extends Statement implements ExpressionStatement, IR
 
     @Override
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

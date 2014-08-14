@@ -40,7 +40,7 @@ public class XMLNamespaces extends ASTNode implements IXMLNamespaces<LanguageVis
      * @return
      */
     public List<NamespaceItem> getNamespaceItems() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -36,7 +36,7 @@ public class JoinType extends ASTNode implements IJoinType<LanguageVisitor> {
      * @return kind
      */
     public Types getKind() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
