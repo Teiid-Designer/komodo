@@ -100,7 +100,7 @@ public abstract class AbstractTeiidParser implements TeiidParser {
     @Override
     public <T extends LanguageObject> T createASTNode(ASTNodes nodeType) {
         return TeiidNodeFactory.getInstance().create(this, nodeType);
-    };
+    }
 
 	protected String prependSign(String sign, String literal) {
 		if (sign != null && sign.charAt(0) == '-') {

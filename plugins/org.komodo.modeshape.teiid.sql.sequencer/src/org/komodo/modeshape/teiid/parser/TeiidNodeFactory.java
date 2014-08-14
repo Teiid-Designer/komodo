@@ -126,7 +126,7 @@ import org.komodo.spi.constants.StringConstants;
 /**
  * Factory for creating parser nodes
  */
-public class TeiidNodeFactory {
+public class TeiidNodeFactory implements StringConstants {
 
     private static TeiidNodeFactory instance;
 
@@ -186,17 +186,7 @@ public class TeiidNodeFactory {
 
     /* ################## Framework for generating the remainder of this class #################### */
 
-    private static final String DOT = StringConstants.DOT;
-    private static final String UNDERSCORE = "_"; //$NON-NLS-1$
-    private static final String OPEN_BRACKET = "("; //$NON-NLS-1$
-    private static final String CLOSE_BRACKET = ")"; //$NON-NLS-1$
-    private static final String SPEECH_MARK = "\""; //$NON-NLS-1$
-    private static final String SEMI_COLON = ";"; //$NON-NLS-1$
-    private static final String COMMA = ","; //$NON-NLS-1$
     private static final String PREFIX = "JJT"; //$NON-NLS-1$
-    private static final String NEWLINE = "\n"; //$NON-NLS-1$
-    private static final String TAB = "\t"; //$NON-NLS-1$
-    private static final String SPACE = " "; //$NON-NLS-1$
     private static final String NON_NLS = "//$NON-NLS-1$"; //$NON-NLS-1$
     private static final String PACKAGE_NAME = "org.komodo.modeshape.teiid.sql.lang"; //$NON-NLS-1$
     private static final String CONSTANT_CLASS_PREFIX = "Teiid"; //$NON-NLS-1$
@@ -238,12 +228,12 @@ public class TeiidNodeFactory {
     private String createASTNodesEnumDeclaration() {
         StringBuffer buffer = new StringBuffer();
 
-        buffer.append("/**" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * Names of AST nodes to allow creation outside of the parsers" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" *" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * @generated" +  NEWLINE); //$NON-NLS-1$
-        buffer.append(" */" + NEWLINE); //$NON-NLS-1$
-        buffer.append("public enum ASTNodes {" + NEWLINE); //$NON-NLS-1$
+        buffer.append("/**" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * Names of AST nodes to allow creation outside of the parsers" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" *" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * @generated" +  NEW_LINE); //$NON-NLS-1$
+        buffer.append(" */" + NEW_LINE); //$NON-NLS-1$
+        buffer.append("public enum ASTNodes {" + NEW_LINE); //$NON-NLS-1$
 
         return buffer.toString();
     }
@@ -251,14 +241,14 @@ public class TeiidNodeFactory {
     private String createASTNodeEnumValue(String typeName) {
         StringBuffer buffer = new StringBuffer();
 
-        buffer.append(TAB + "/**" + NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + " * " + typeName + NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + " * @generated" +  NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + " */" + NEWLINE); //$NON-NLS-1$
+        buffer.append(TAB + "/**" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + " * " + typeName + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + " * @generated" +  NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + " */" + NEW_LINE); //$NON-NLS-1$
 
         String annotation = AST_NODE_ANNOTATIONS.get(typeName);
         if (annotation != null)
-            buffer.append(TAB + annotation + NEWLINE);
+            buffer.append(TAB + annotation + NEW_LINE);
 
         buffer.append(TAB);
         for (int i = 0; i < typeName.length(); ++i) {
@@ -277,7 +267,7 @@ public class TeiidNodeFactory {
         buffer.append(OPEN_BRACKET + SPEECH_MARK);
         buffer.append(typeName);
         buffer.append(SPEECH_MARK + CLOSE_BRACKET);
-        buffer.append(COMMA + SPACE + NON_NLS + NEWLINE);
+        buffer.append(COMMA + SPACE + NON_NLS + NEW_LINE);
 
         return buffer.toString();
     }
@@ -285,19 +275,19 @@ public class TeiidNodeFactory {
     private String createASTNodesEnumMethods() {
         StringBuffer buffer = new StringBuffer();
 
-        buffer.append(TAB + "private String name" + SEMI_COLON + NEWLINE); //$NON-NLS-1$
-        buffer.append(NEWLINE);
-        buffer.append(TAB + "ASTNodes(String name) {" + NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + TAB + "this.name = name" + SEMI_COLON + NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + "}" + NEWLINE); //$NON-NLS-1$
-        buffer.append(NEWLINE);
-        buffer.append(TAB + "/**" + NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + " * @return Name of this common node" + NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + " */" + NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + "public String getName() {" + NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + TAB + "return name" + SEMI_COLON + NEWLINE); //$NON-NLS-1$
-        buffer.append(TAB + "}" + NEWLINE); //$NON-NLS-1$
-        buffer.append("}" + NEWLINE); //$NON-NLS-1$
+        buffer.append(TAB + "private String name" + SEMI_COLON + NEW_LINE); //$NON-NLS-1$
+        buffer.append(NEW_LINE);
+        buffer.append(TAB + "ASTNodes(String name) {" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + TAB + "this.name = name" + SEMI_COLON + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + "}" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(NEW_LINE);
+        buffer.append(TAB + "/**" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + " * @return Name of this common node" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + " */" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + "public String getName() {" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + TAB + "return name" + SEMI_COLON + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + "}" + NEW_LINE); //$NON-NLS-1$
+        buffer.append("}" + NEW_LINE); //$NON-NLS-1$
 
         return buffer.toString();
     }
@@ -305,41 +295,41 @@ public class TeiidNodeFactory {
     private String createMethodDeclaration(int serverVersion) {
         StringBuffer buffer = new StringBuffer();
 
-        buffer.append("/**" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * Create a version " + serverVersion + " teiid parser node for the given node type." + NEWLINE);  //$NON-NLS-1$//$NON-NLS-2$
-        buffer.append(" *" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * @generated" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" *" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * @param teiidParser" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * @param nodeType" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * @return version " +serverVersion + " teiid parser node" + NEWLINE); //$NON-NLS-1$ //$NON-NLS-2$
-        buffer.append(" */" + NEWLINE); //$NON-NLS-1$
-        buffer.append("private <T extends LanguageObject> T create(Teiid" + serverVersion + "Parser teiidParser, int nodeType) {" + NEWLINE); //$NON-NLS-1$ //$NON-NLS-2$
+        buffer.append("/**" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * Create a version " + serverVersion + " teiid parser node for the given node type." + NEW_LINE);  //$NON-NLS-1$//$NON-NLS-2$
+        buffer.append(" *" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * @generated" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" *" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * @param teiidParser" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * @param nodeType" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * @return version " +serverVersion + " teiid parser node" + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$
+        buffer.append(" */" + NEW_LINE); //$NON-NLS-1$
+        buffer.append("private <T extends LanguageObject> T create(Teiid" + serverVersion + "Parser teiidParser, int nodeType) {" + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$
 
         return buffer.toString();
     }
 
     private String createSwitchCase(String astIdentifier, String typeName, String constantClassName) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("\t\tcase " + constantClassName + DOT + astIdentifier + ":" + NEWLINE); //$NON-NLS-1$ //$NON-NLS-2$
-        buffer.append("\t\t\treturn (T) create" + typeName + "(teiidParser, nodeType)" + SEMI_COLON + NEWLINE); //$NON-NLS-1$ //$NON-NLS-2$
+        buffer.append("\t\tcase " + constantClassName + DOT + astIdentifier + ":" + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$
+        buffer.append("\t\t\treturn (T) create" + typeName + "(teiidParser, nodeType)" + SEMI_COLON + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$
         
         return buffer.toString();
     }
 
     private String createComponentMethod(String typeName) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("/**" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" *" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * @generated" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" *" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * @param teiidParser" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * @param nodeType" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" * @return" + NEWLINE); //$NON-NLS-1$
-        buffer.append(" */" + NEWLINE); //$NON-NLS-1$
-        buffer.append("private " + typeName + " create" + typeName + "(TeiidParser teiidParser, int nodeType) {" + NEWLINE); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        buffer.append(TAB + "return new " + typeName + "(teiidParser, nodeType)" + SEMI_COLON + NEWLINE); //$NON-NLS-1$ //$NON-NLS-2$
-        buffer.append("}" + NEWLINE); //$NON-NLS-1$
+        buffer.append("/**" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" *" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * @generated" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" *" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * @param teiidParser" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * @param nodeType" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" * @return" + NEW_LINE); //$NON-NLS-1$
+        buffer.append(" */" + NEW_LINE); //$NON-NLS-1$
+        buffer.append("private " + typeName + " create" + typeName + "(TeiidParser teiidParser, int nodeType) {" + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        buffer.append(TAB + "return new " + typeName + "(teiidParser, nodeType)" + SEMI_COLON + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$
+        buffer.append("}" + NEW_LINE); //$NON-NLS-1$
 
         return buffer.toString();
     }
@@ -362,7 +352,7 @@ public class TeiidNodeFactory {
             createMethodBuffer.append(createMethodDeclaration(serverVersion));
 
             // Create switch statement
-            createMethodBuffer.append(TAB + "switch (nodeType) {" + NEWLINE); //$NON-NLS-1$
+            createMethodBuffer.append(TAB + "switch (nodeType) {" + NEW_LINE); //$NON-NLS-1$
 
             for (Field field : constantClass.getFields()) {
                 String fieldName = field.getName();
@@ -387,14 +377,14 @@ public class TeiidNodeFactory {
             }
 
             // Complete switch statement
-            createMethodBuffer.append(TAB + TAB + "default:" + NEWLINE); //$NON-NLS-1$
+            createMethodBuffer.append(TAB + TAB + "default:" + NEW_LINE); //$NON-NLS-1$
             createMethodBuffer.append(TAB + TAB + TAB);
             createMethodBuffer.append("throw new IllegalArgumentException(" //$NON-NLS-1$
                                                                 + "Messages.getString(Messages.TeiidParser.invalidNodeType, " //$NON-NLS-1$
                                                                 + "nodeType, teiidParser.getVersion()))"); //$NON-NLS-1$
-            createMethodBuffer.append(SEMI_COLON + NEWLINE);
-            createMethodBuffer.append(TAB + "}" + NEWLINE); //$NON-NLS-1$
-            createMethodBuffer.append("}" + NEWLINE + NEWLINE); //$NON-NLS-1$
+            createMethodBuffer.append(SEMI_COLON + NEW_LINE);
+            createMethodBuffer.append(TAB + "}" + NEW_LINE); //$NON-NLS-1$
+            createMethodBuffer.append("}" + NEW_LINE + NEW_LINE); //$NON-NLS-1$
         }
 
         // Replace the last enum value's comma with a semi-colon
