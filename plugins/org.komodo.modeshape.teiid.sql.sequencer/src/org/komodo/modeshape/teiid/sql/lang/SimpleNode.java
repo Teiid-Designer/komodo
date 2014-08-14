@@ -27,12 +27,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
-import org.komodo.spi.constants.StringConstants;
 
-public class SimpleNode implements Node {
+public abstract class SimpleNode implements Node {
 
-    protected Node parent;
-    protected Node[] children;
+    private Node parent;
+    private Node[] children;
     private int id;
     protected Object value;
     private TeiidParser parser;
@@ -92,19 +91,13 @@ public class SimpleNode implements Node {
     public int jjtGetNumChildren() {
         return (children == null) ? 0 : children.length;
     }
-
+    
     public void jjtSetValue(Object value) {
         this.value = value;
     }
 
     public Object jjtGetValue() {
         return value;
-    }
-
-    @Override
-    public SimpleNode clone() {
-        SimpleNode clone = new SimpleNode(getTeiidParser(), this.getId());
-        return clone;
     }
 
     protected <T extends LanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
@@ -146,20 +139,6 @@ public class SimpleNode implements Node {
         return prefix + toString();
     }
 
-    /* Override this method if you want to customize how the node dumps
-       out its children. */
-
-    public void dump(String prefix) {
-        System.out.println(toString(prefix));
-        if (children != null) {
-            for (int i = 0; i < children.length; ++i) {
-                SimpleNode n = (SimpleNode)children[i];
-                if (n != null) {
-                    n.dump(prefix + StringConstants.SPACE);
-                }
-            }
-        }
-    }
     @Override
     public int hashCode() {
         final int prime = 31;

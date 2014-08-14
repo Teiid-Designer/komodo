@@ -131,8 +131,6 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
             clone.setSqlState(getSqlState().clone());
         if(getMessage() != null)
             clone.setMessage(getMessage().clone());
-        if(getParent() != null)
-            clone.setParent(getParent().clone());
 
         return clone;
     }

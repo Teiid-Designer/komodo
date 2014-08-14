@@ -34,6 +34,15 @@ public class SubqueryFromClause extends FromClause implements SubqueryContainer<
         super(p, id);
     }
 
+    @Override
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setName(String name) {
+    }
+
     public boolean isTable() {
         return false;
     }

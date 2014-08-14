@@ -137,4 +137,21 @@ public class SourceHint extends ASTNode implements ISourceHint {
         return true;
     }
 
+    @Override
+    public SourceHint clone() {
+        SourceHint clone = new SourceHint(this.getTeiidParser(), this.getId());
+
+        if(getGeneralHint() != null)
+            clone.setGeneralHint(getGeneralHint());
+
+        if (getSourceHints() != null) {
+            for (SpecificHint hint : getSourceHints().values()) {
+                clone.setSourceHint(hint.clone());
+            }
+        }
+
+        clone.setUseAliases(isUseAliases());
+
+        return clone;
+    }
 }

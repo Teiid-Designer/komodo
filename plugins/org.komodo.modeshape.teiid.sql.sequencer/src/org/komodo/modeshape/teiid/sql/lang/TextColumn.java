@@ -32,6 +32,13 @@ public class TextColumn extends ProjectedColumn implements ITextColumn<LanguageV
         super(p, id);
     }
 
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setName(String name) {
+    }
+
     /**
      * @return
      */
