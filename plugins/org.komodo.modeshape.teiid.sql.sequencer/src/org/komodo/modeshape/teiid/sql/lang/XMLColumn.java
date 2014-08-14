@@ -33,9 +33,13 @@ public class XMLColumn extends ProjectedColumn implements IXMLColumn<LanguageVis
         super(p, id);
     }
 
-    /**
-     * @return
-     */
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setName(String name) {
+    }
+
     public boolean isOrdinal() {
         return false;
     }

@@ -58,6 +58,14 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
     }
 
     @Override
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setName(String name) {
+    }
+
+    @Override
     public <T> Class<T> getType() {
         return null;
     }

@@ -33,6 +33,13 @@ public class ProjectedColumn extends ASTNode implements IProjectedColumn<Languag
         super(p, id);
     }
 
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setName(String name) {
+    }
+
     /**
      * @return
      */

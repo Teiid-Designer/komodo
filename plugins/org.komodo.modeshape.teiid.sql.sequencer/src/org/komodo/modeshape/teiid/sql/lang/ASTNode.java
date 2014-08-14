@@ -21,6 +21,9 @@
  */
 package org.komodo.modeshape.teiid.sql.lang;
 
+import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
+import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
+import static org.modeshape.jcr.api.JcrConstants.NT_UNSTRUCTURED;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,11 +33,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.common.util.CheckArg;
 import org.modeshape.jcr.api.JcrConstants;
 
@@ -42,7 +47,7 @@ import org.modeshape.jcr.api.JcrConstants;
  * Utility object class designed to facilitate constructing an AST or Abstract Syntax Tree representing nodes and properties that
  * are compatible with ModeShape graph component structure.
  */
-public class ASTNode extends SimpleNode implements LanguageObject, StringConstants, Iterable<ASTNode>, Cloneable {
+public abstract class ASTNode extends SimpleNode implements LanguageObject, StringConstants, Iterable<ASTNode>, Cloneable {
 
     /**
      * 
@@ -52,7 +57,7 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
     /**
      * 
      */
-    public static final String NAME = "name"; //$NON-NLS-1$
+    public static final String IDENTIFIER = "identifier"; //$NON-NLS-1$
 
     /**
      * 
@@ -60,7 +65,7 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
     public static final String VALUE = "value"; //$NON-NLS-1$
 
     private ASTNode parent;
-    private String name;
+    private String astIdentifier;
 
     private final Map<String, Object> properties = new HashMap<String, Object>();
     private final LinkedList<ASTNode> children = new LinkedList<ASTNode>();
@@ -72,6 +77,11 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
      */
     public ASTNode(TeiidParser parser, int nodeTypeIndex) {
         super(parser, nodeTypeIndex);
+
+        String lexiconType = TeiidSqlLexicon.getTypeId(getClass());
+        ArgCheck.isNotNull(lexiconType);
+        setProperty(JCR_MIXIN_TYPES, lexiconType);
+        setProperty(JCR_PRIMARY_TYPE, NT_UNSTRUCTURED);
     }
 
     @Override
@@ -79,6 +89,9 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
         return getTeiidParser().getVersion();
     }
 
+    /**
+     * @return data type service
+     */
     public IDataTypeManagerService getDataTypeService() {
         return getTeiidParser().getDataTypeService();
     }
@@ -115,19 +128,19 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
     }
 
     /**
-     * Get the name of the node.
+     * Get the ast identifier of the node.
      * 
-     * @return the node's name; never null
+     * @return the node's ast identifier; never null
      */
-    public String getName() {
-        return name;
+    public String astIdentifier() {
+        return astIdentifier;
     }
 
     /**
-     * @param name
+     * @param identifier
      */
-    public void setName(String name) {
-        this.name = name;
+    protected void setAstIdentifier(String identifier) {
+        this.astIdentifier = identifier;
     }
 
     /**
@@ -151,7 +164,7 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
             if (sibling == this) {
                 break;
             }
-            if (sibling.getName().equals(this.name)) {
+            if (sibling.astIdentifier().equals(this.astIdentifier)) {
                 ++snsIndex;
             }
         }
@@ -164,11 +177,11 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
      * @return the path of this node; never null
      */
     public String getAbsolutePath() {
-        StringBuilder pathBuilder = new StringBuilder(FORWARD_SLASH).append(this.getName());
-        ASTNode parent = this.getParent();
+        StringBuilder pathBuilder = new StringBuilder(FORWARD_SLASH).append(this.astIdentifier());
+        ASTNode parent = this.parent;
         while (parent != null) {
-            pathBuilder.insert(0, FORWARD_SLASH + parent.getName());
-            parent = parent.getParent();
+            pathBuilder.insert(0, FORWARD_SLASH + parent.astIdentifier());
+            parent = parent.parent;
         }
         return pathBuilder.toString();
     }
@@ -186,14 +199,14 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
     /**
      * Set the property with the given name to the supplied value. Any existing property with the same name will be replaced.
      * 
-     * @param name the name of the property; may not be null
+     * @param identifier the name of the property; may not be null
      * @param value the value of the property; may not be null
      * @return this node, for method chaining purposes
      */
-    public ASTNode setProperty(String name, Object value) {
-        CheckArg.isNotNull(name, NAME);
+    public ASTNode setProperty(String identifier, Object value) {
+        CheckArg.isNotNull(identifier, IDENTIFIER);
         CheckArg.isNotNull(value, VALUE);
-        properties.put(name, value);
+        properties.put(identifier, value);
         return this;
     }
 
@@ -201,15 +214,15 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
      * Set the property with the given name to the supplied values. If there is at least one value, the new property will replace
      * any existing property with the same name. This method does nothing if zero values are supplied.
      * 
-     * @param name the name of the property; may not be null
+     * @param identifier the name of the property; may not be null
      * @param values the values of the property
      * @return this node, for method chaining purposes
      */
-    public ASTNode setProperty(String name, Object... values) {
-        CheckArg.isNotNull(name, NAME);
+    public ASTNode setProperty(String identifier, Object... values) {
+        CheckArg.isNotNull(identifier, IDENTIFIER);
         CheckArg.isNotNull(values, VALUE);
         if (values.length != 0) {
-            properties.put(name, Arrays.asList(values));
+            properties.put(identifier, Arrays.asList(values));
         }
         return this;
     }
@@ -329,7 +342,7 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
         ASTNode result = this.parent;
         if (this.parent != null) {
             // Remove this node from its current parent ...
-            this.parent.children.remove(this);
+            parent.removeChild(this);
             this.parent = null;
         }
         return result;
@@ -392,11 +405,11 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
     }
 
     /**
-     * @param name the name of the child being requested (cannot be <code>null</code> or empty)
+     * @param astIdentifier the identifier of the child being requested (cannot be <code>null</code> or empty)
      * @return a collection of children with the specified name (never <code>null</code> but can be empty)
      */
-    public List<ASTNode> childrenWithName(final String name) {
-        CheckArg.isNotEmpty(name, NAME);
+    public List<ASTNode> childrenWithIdentifier(final String astIdentifier) {
+        CheckArg.isNotEmpty(astIdentifier, IDENTIFIER);
 
         if (this.children.isEmpty()) {
             return Collections.emptyList();
@@ -404,7 +417,7 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
         final List<ASTNode> matches = new ArrayList<ASTNode>();
 
         for (final ASTNode kid : this.children) {
-            if (name.equals(kid.getName())) {
+            if (astIdentifier.equals(kid.astIdentifier())) {
                 matches.add(kid);
             }
         }
@@ -420,6 +433,46 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
      */
     public ASTNode getChild(int index) {
         return this.children.isEmpty() ? null : this.children.get(index);
+    }
+
+    /**
+     * Utility method to obtain the children of a given node that match the given type
+     *
+     * @param nodeType the type property of the target child node; may not be null
+     * @return the list of typed nodes (may be empty)
+     */
+    public List<ASTNode> getChildrenForType(String nodeType ) {
+        CheckArg.isNotNull(nodeType, "nodeType"); //$NON-NLS-1$
+
+        List<ASTNode> childrenOfType = new ArrayList<ASTNode>();
+        for (ASTNode child : getChildren()) {
+            if (child.hasMixin(nodeType)) {
+                childrenOfType.add(child);
+            }
+        }
+
+        return childrenOfType;
+    }
+
+    /**
+     * Utility method to obtain a {@link ASTNode} child of a parent {@link ASTNode} with the given string identifier and node type.
+     *
+     * @param name the name property of the node; may not be null
+     * @param nodeType the type property of the target child node; may not be null
+     * @return the matched child (may be null)
+     */
+    public ASTNode getChildforIdentifierAndType(String identifier, String nodeType) {
+        CheckArg.isNotNull(identifier, "identifier"); //$NON-NLS-1$
+        CheckArg.isNotNull(nodeType, "nodeType"); //$NON-NLS-1$
+
+        for (ASTNode child : getChildren()) {
+            if (child.hasMixin(nodeType)) {
+                if (identifier.equalsIgnoreCase(child.astIdentifier())) {
+                    return child;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -595,7 +648,7 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
         if (other == null) {
             return false;
         }
-        if (!this.name.equals(other.name)) {
+        if (!this.astIdentifier.equals(other.astIdentifier)) {
             return false;
         }
         if (!this.properties.equals(other.properties)) {
@@ -621,21 +674,21 @@ public class ASTNode extends SimpleNode implements LanguageObject, StringConstan
      * </p>
      */
     @Override
-    public ASTNode clone() {
-        return cloneWithoutNewParent();
-    }
+    public abstract ASTNode clone();
+//        return cloneWithoutNewParent();
+//    }
 
-    protected ASTNode cloneWithoutNewParent() {
-        ASTNode result = new ASTNode(getTeiidParser(), getId());
-        result.properties.putAll(this.properties);
-        // Clone the children ...
-        for (ASTNode child : children) {
-            ASTNode childClone = child.cloneWithoutNewParent();
-            // The child has no parent, so add the child to the new result ...
-            result.addLastChild(childClone);
-        }
-        return result;
-    }
+//    protected ASTNode cloneWithoutNewParent() {
+//        ASTNode result = new ASTNode(getTeiidParser(), getId());
+//        result.properties.putAll(this.properties);
+//        // Clone the children ...
+//        for (ASTNode child : children) {
+//            ASTNode childClone = child.cloneWithoutNewParent();
+//            // The child has no parent, so add the child to the new result ...
+//            result.addLastChild(childClone);
+//        }
+//        return result;
+//    }
 
     @Override
     public String toString() {

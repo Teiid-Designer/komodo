@@ -45,19 +45,11 @@ public class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
         super(p, i);
     }
 
-    /**
-     * Get the name of the symbol
-     * @return Name of the symbol, never null
-     */
     @Override
     public String getName() {
         return getShortName();
     }
 
-    /**
-     * @param name
-     */
-    @Override
     public void setName(String name) {
         setShortName(name);
     }

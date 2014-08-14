@@ -34,6 +34,13 @@ public class MultipleElementSymbol extends ASTNode implements Expression, IMulti
         super(p, id);
     }
 
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setName(String name) {
+    }
+
     @Override
     public <T> Class<T> getType() {
         return null;

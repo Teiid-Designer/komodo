@@ -68,4 +68,13 @@ public class SpecificHint extends ASTNode {
 
     public void setTranslatorName(String translatorName) {
     }
+
+    @Override
+    public SpecificHint clone() {
+        SpecificHint clone = new SpecificHint(this.getTeiidParser(), this.getId());
+        clone.setHint(getHint());
+        clone.setTranslatorName(getTranslatorName());
+        clone.setUseAliases(isUseAliases());
+        return clone;
+    }
 }

@@ -54,24 +54,11 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
 
     }
 
-    /**
-     * Get name of this clause.
-     * @return Name of clause
-     */
-    @Override
     public String getName() {
         return null;
 
     }
 
-    /** 
-     * Reset the alias for this subquery from clause and it's pseudo-GroupSymbol.  
-     * WARNING: this will modify the hashCode and equals semantics and will cause this object
-     * to be lost if currently in a HashMap or HashSet.
-     * @param name New name
-     *
-     */
-    @Override
     public void setName(String name) {
     }
 
