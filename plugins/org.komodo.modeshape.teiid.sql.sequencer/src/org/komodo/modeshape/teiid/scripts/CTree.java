@@ -35,6 +35,16 @@ import org.komodo.spi.constants.StringConstants;
 @SuppressWarnings( "nls" )
 public class CTree implements StringConstants {
 
+    public interface CTreeCallback {
+
+        /**
+         * @param node
+         * @throws Exception
+         */
+        void run(Node node) throws Exception;
+
+    }
+
     public static abstract class Node<T extends Node> implements StringConstants {
 
         protected final CTree tree;
@@ -170,6 +180,17 @@ public class CTree implements StringConstants {
             } else if (!this.klazz.equals(other.klazz))
                 return false;
             return true;
+        }
+
+        /**
+         * @param callback
+         */
+        public void execute(CTreeCallback callback) throws Exception {
+            callback.run(this);
+
+            for (Node childNode : getChildren()) {
+                childNode.execute(callback);
+            }
         }
     }
 
@@ -432,4 +453,19 @@ public class CTree implements StringConstants {
         classes.add(objClass);
     }
 
+    /**
+     * Perform a function callback on all nodes in this tree
+     *
+     * @param callback
+     * @throws Exception
+     */
+    public void execute(CTreeCallback callback) throws Exception {
+        for (Node node : getInterfaceNodes()) {
+            node.execute(callback);
+        }
+
+        for (Node node : root.getChildren()) {
+            node.execute(callback);
+        }
+    }
 }
