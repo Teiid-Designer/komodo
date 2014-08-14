@@ -38,7 +38,7 @@ public class XMLAttributes extends ASTNode implements IXMLAttributes<LanguageVis
      * @return
      */
     public List<DerivedColumn> getArgs() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

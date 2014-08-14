@@ -61,7 +61,7 @@ public class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
      */
     @Override
     public final String getShortName() { 
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -77,7 +77,7 @@ public class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
 
     @Override
     public String getOutputName() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

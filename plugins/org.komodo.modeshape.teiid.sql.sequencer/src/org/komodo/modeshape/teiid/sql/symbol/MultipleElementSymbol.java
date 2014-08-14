@@ -43,14 +43,14 @@ public class MultipleElementSymbol extends ASTNode implements Expression, IMulti
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return null if selecting all groups, otherwise the specific group
      */
     public GroupSymbol getGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -61,7 +61,7 @@ public class MultipleElementSymbol extends ASTNode implements Expression, IMulti
 
     @Override
     public List<ElementSymbol> getElementSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void setElementSymbols(List<ElementSymbol> elementSymbols) {

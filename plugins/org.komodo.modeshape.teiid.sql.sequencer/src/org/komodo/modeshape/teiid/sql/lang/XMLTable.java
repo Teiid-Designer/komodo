@@ -39,7 +39,7 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
      * @return
      */
     public String getXquery() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -52,7 +52,7 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
      * @return
      */
     public XMLNamespaces getNamespaces() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -65,7 +65,7 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
      * @return
      */
     public List<DerivedColumn> getPassing() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -76,7 +76,7 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
 
     @Override
     public List<XMLColumn> getColumns() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

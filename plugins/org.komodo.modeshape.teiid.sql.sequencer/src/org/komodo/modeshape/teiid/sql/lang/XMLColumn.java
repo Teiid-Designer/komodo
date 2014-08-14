@@ -54,7 +54,7 @@ public class XMLColumn extends ProjectedColumn implements IXMLColumn<LanguageVis
      * @return
      */
     public String getPath() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -67,7 +67,7 @@ public class XMLColumn extends ProjectedColumn implements IXMLColumn<LanguageVis
      * @return
      */
     public Expression getDefaultExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

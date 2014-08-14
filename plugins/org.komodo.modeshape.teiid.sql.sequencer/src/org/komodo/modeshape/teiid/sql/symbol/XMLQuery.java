@@ -36,14 +36,14 @@ public class XMLQuery extends ASTNode implements Expression, IXMLQuery<LanguageV
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public String getXquery() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -56,7 +56,7 @@ public class XMLQuery extends ASTNode implements Expression, IXMLQuery<LanguageV
      * @return
      */
     public XMLNamespaces getNamespaces() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -69,7 +69,7 @@ public class XMLQuery extends ASTNode implements Expression, IXMLQuery<LanguageV
      * @return
      */
     public List<DerivedColumn> getPassing() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -82,7 +82,7 @@ public class XMLQuery extends ASTNode implements Expression, IXMLQuery<LanguageV
      * @return
      */
     public Boolean isEmptyOnEmpty() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

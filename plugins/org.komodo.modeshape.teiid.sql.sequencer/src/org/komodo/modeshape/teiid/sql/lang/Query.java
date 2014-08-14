@@ -54,17 +54,17 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public List<Expression> getProjectedSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int getType() {
-        return TYPE_QUERY;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Select getSelect() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -73,7 +73,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public From getFrom() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -82,7 +82,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public Into getInto() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -91,7 +91,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public Criteria getCriteria() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -100,7 +100,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public Criteria getHaving() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -109,7 +109,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public GroupBy getGroupBy() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -59,7 +59,7 @@ public class CommandStatement extends Statement implements SubqueryContainer<Com
 
     @Override
     public Command getCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

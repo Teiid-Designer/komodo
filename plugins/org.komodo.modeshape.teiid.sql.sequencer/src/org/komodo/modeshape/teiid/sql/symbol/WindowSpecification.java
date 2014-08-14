@@ -39,7 +39,7 @@ public class WindowSpecification extends ASTNode implements IWindowSpecification
      * @return
      */
     public List<Expression> getPartition() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -52,7 +52,7 @@ public class WindowSpecification extends ASTNode implements IWindowSpecification
      * @return
      */
     public OrderBy getOrderBy() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

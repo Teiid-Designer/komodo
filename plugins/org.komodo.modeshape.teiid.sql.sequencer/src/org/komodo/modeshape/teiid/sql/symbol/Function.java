@@ -36,19 +36,19 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
 
         @Override
         public String getName() {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Class<?> getReturnType() {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         /**
          * @return
          */
         public Object getMethod() {
-            return null;
+            throw new UnsupportedOperationException();
         }
         
     }
@@ -67,7 +67,7 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -76,17 +76,17 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
 
     @Override
     public Expression[] getArgs() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Expression getArg(int index) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public FunctionDescriptor getFunctionDescriptor() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

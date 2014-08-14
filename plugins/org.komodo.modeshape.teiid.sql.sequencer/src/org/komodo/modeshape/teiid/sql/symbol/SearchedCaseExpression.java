@@ -37,7 +37,7 @@ public class SearchedCaseExpression extends ASTNode implements Expression, ISear
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -50,14 +50,14 @@ public class SearchedCaseExpression extends ASTNode implements Expression, ISear
      * @return
      */
     public List<Criteria> getWhen() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void setWhen(List<Criteria> when) {
     }
 
     public List<Expression> getThen() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void setThen(List<Expression> then) {
@@ -68,7 +68,7 @@ public class SearchedCaseExpression extends ASTNode implements Expression, ISear
      * @return
      */
     public Expression getElseExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

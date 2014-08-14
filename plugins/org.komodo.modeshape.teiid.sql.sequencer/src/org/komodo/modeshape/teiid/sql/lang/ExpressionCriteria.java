@@ -37,7 +37,7 @@ public class ExpressionCriteria extends Criteria implements IExpressionCriteria<
      * @return
      */
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

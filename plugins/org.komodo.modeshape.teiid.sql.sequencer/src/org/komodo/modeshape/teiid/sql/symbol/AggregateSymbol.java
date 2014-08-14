@@ -36,12 +36,12 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public FunctionDescriptor getFunctionDescriptor() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -50,7 +50,7 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
 
     @Override
     public org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type getAggregateFunction() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -67,7 +67,7 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
      * @return
      */
     public OrderBy getOrderBy() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -80,7 +80,7 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
      * @return
      */
     public Criteria getCondition() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -104,12 +104,12 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
 
     @Override
     public Expression[] getArgs() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Expression getArg(int index) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

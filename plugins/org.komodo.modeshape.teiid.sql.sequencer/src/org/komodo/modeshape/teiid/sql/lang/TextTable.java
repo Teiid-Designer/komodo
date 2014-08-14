@@ -38,7 +38,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
      * @return
      */
     public Expression getFile() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -49,7 +49,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
 
     @Override
     public List<TextColumn> getColumns() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -62,7 +62,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
      * @return
      */
     public Character getDelimiter() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -88,7 +88,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
      * @return
      */
     public Integer getHeader() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -101,7 +101,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
      * @return
      */
     public Integer getSkip() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -114,7 +114,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
      * @return
      */
     public Character getQuote() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -140,7 +140,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
      * @return
      */
     public String getSelector() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

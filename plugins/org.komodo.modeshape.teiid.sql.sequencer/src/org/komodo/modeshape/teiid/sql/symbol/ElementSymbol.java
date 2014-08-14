@@ -34,12 +34,12 @@ public class ElementSymbol extends Symbol implements Expression, IElementSymbol<
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public GroupSymbol getGroupSymbol() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ElementSymbol extends Symbol implements Expression, IElementSymbol<
 
     @Override
     public ElementSymbol.DisplayMode getDisplayMode() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -70,7 +70,7 @@ public class ElementSymbol extends Symbol implements Expression, IElementSymbol<
 
     @Override
     public Object getMetadataID() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

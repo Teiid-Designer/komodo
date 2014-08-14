@@ -46,7 +46,7 @@ public class ArrayTable extends TableFunctionReference implements IArrayTable<La
      */
     @Override
     public List<ProjectedColumn> getColumns() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -59,7 +59,7 @@ public class ArrayTable extends TableFunctionReference implements IArrayTable<La
      * @return array value
      */
     public Expression getArrayValue() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

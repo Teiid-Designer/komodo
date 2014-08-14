@@ -35,7 +35,7 @@ public class Into extends ASTNode implements IInto<LanguageVisitor> {
 
     @Override
     public GroupSymbol getGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

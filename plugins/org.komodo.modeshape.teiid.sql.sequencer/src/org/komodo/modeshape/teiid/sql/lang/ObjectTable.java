@@ -38,7 +38,7 @@ public class ObjectTable extends TableFunctionReference implements IObjectTable<
      * @return
      */
     public String getRowScript() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -51,7 +51,7 @@ public class ObjectTable extends TableFunctionReference implements IObjectTable<
      * @return
      */
     public List<DerivedColumn> getPassing() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -62,7 +62,7 @@ public class ObjectTable extends TableFunctionReference implements IObjectTable<
 
     @Override
     public List<ObjectColumn> getColumns() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -74,7 +74,7 @@ public class ObjectTable extends TableFunctionReference implements IObjectTable<
      * @return
      */
     public String getScriptingLanguage() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

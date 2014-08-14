@@ -50,7 +50,7 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * @return string representation of operator
      */
     public String getOperatorAsString() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -68,7 +68,7 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * @return Left expression
      */
     public Expression getLeftExpression() {
-        return this.getLeftExpression();
+        throw new UnsupportedOperationException();
     }
 
     /**

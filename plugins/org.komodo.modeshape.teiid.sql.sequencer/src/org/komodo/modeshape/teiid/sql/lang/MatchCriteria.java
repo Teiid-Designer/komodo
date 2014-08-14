@@ -36,7 +36,7 @@ public class MatchCriteria extends Criteria
 
     @Override
     public Expression getLeftExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class MatchCriteria extends Criteria
 
     @Override
     public Expression getRightExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class MatchCriteria extends Criteria
 
     @Override
     public org.komodo.spi.query.sql.lang.IMatchCriteria.MatchMode getMode() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

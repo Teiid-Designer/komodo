@@ -47,7 +47,7 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
 
     @Override
     public ElementSymbol getVariable() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -58,7 +58,7 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
 
     @Override
     public Expression getValue() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -67,14 +67,14 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
 
     @Override
     public Class<?> getExpectedType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public Command getCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -85,7 +85,7 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
 
     @Override
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

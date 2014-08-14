@@ -37,7 +37,7 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -50,7 +50,7 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
 
     @Override
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -60,12 +60,12 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
     }
 
     public List<Expression> getWhenExpressions() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public IExpression getWhenExpression(int index) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -77,12 +77,12 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
     }
 
     public List<Expression> getThenExpressions() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Expression getThenExpression(int index) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void setThen(List<Expression> then) {
@@ -90,7 +90,7 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
 
     @Override
     public Expression getElseExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -35,23 +35,19 @@ public class SetQuery extends QueryCommand
         super(p, id);
     }
 
-    /**
-     * Return type of command.
-     * @return TYPE_QUERY
-     */
     @Override
     public int getType() {
-        return TYPE_QUERY;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Query getProjectedQuery() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<Expression> getProjectedSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -65,7 +61,7 @@ public class SetQuery extends QueryCommand
 
     @Override
     public org.komodo.spi.query.sql.lang.ISetQuery.Operation getOperation() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -76,7 +72,7 @@ public class SetQuery extends QueryCommand
 
     @Override
     public QueryCommand getLeftQuery() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -85,7 +81,7 @@ public class SetQuery extends QueryCommand
 
     @Override
     public QueryCommand getRightQuery() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -94,7 +90,7 @@ public class SetQuery extends QueryCommand
 
     @Override
     public List<QueryCommand> getQueryCommands() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

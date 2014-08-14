@@ -61,7 +61,7 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
      */
     @Override
     public List<? extends Expression> getResultSetColumns() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -70,7 +70,7 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
      */
     @Override
     public Option getOption() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -84,7 +84,7 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
      * @return the sourceHint
      */
     public SourceHint getSourceHint() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -104,7 +104,7 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
      * @return singleton update symbol which is lazily created
      */
     public List<Expression> getUpdateCommandSymbol() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -42,18 +42,18 @@ public class CreateProcedureCommand extends Command
     }
     @Override
     public List<Expression> getProjectedSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
     @Override
     public Block getBlock() {
-        return null;
+        throw new UnsupportedOperationException();
     }
     @Override
     public void setBlock(Block block) {
     }
     @Override
     public GroupSymbol getVirtualGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
     @Override
     public void setVirtualGroup(GroupSymbol view) {

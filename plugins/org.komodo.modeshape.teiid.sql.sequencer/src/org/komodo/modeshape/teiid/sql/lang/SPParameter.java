@@ -124,7 +124,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public Class<?> getClassType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -139,7 +139,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      * @return Expression defining the value of this parameter
      */
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -176,7 +176,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public List<ElementSymbol> getResultSetColumns() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -184,7 +184,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      * @return List of Object representing result set metadata IDs
      */
     public List<Object> getResultSetIDs() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -194,7 +194,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      * @throws IllegalArgumentException If column doesn't exist
      */
     public ElementSymbol getResultSetColumn(int position) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -203,7 +203,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public Object getMetadataID() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -221,7 +221,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public ElementSymbol getParameterSymbol() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

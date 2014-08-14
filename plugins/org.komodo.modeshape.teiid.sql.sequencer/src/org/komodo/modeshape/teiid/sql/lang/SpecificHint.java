@@ -46,7 +46,7 @@ public class SpecificHint extends ASTNode {
      * @return hint
      */
     public String getHint() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -63,7 +63,7 @@ public class SpecificHint extends ASTNode {
     }
 
     public String getTranslatorName() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public void setTranslatorName(String translatorName) {

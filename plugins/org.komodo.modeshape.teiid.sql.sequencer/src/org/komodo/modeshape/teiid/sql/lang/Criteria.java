@@ -52,7 +52,7 @@ public class Criteria extends ASTNode implements Expression, ICriteria<LanguageV
      * @return
      */
     public static List<Criteria> separateCriteriaByAnd(Criteria onCriteria) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /** Accept the visitor. **/

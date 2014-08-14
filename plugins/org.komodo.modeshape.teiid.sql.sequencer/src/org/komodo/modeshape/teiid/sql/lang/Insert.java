@@ -44,12 +44,12 @@ public class Insert extends ProcedureContainer implements TargetedCommand, IInse
 
     @Override
     public List<Expression> getProjectedSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<ElementSymbol> getVariables() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -66,7 +66,7 @@ public class Insert extends ProcedureContainer implements TargetedCommand, IInse
 
     @Override
     public List<Expression> getValues() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class Insert extends ProcedureContainer implements TargetedCommand, IInse
 
     @Override
     public QueryCommand getQueryExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -86,7 +86,7 @@ public class Insert extends ProcedureContainer implements TargetedCommand, IInse
 
     @Override
     public GroupSymbol getGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

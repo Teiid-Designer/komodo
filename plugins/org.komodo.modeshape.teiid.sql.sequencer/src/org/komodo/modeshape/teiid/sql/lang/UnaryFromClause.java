@@ -36,7 +36,7 @@ public class UnaryFromClause extends FromClause implements IUnaryFromClause<Grou
 
     @Override
     public GroupSymbol getGroup() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class UnaryFromClause extends FromClause implements IUnaryFromClause<Grou
      * @return
      */
     public Command getExpandedCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

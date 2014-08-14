@@ -37,14 +37,14 @@ public class TriggerAction extends Command implements ITriggerAction<Expression,
 
     @Override
     public int getType() {
-        return TYPE_TRIGGER_ACTION;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public Block getBlock() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -54,7 +54,7 @@ public class TriggerAction extends Command implements ITriggerAction<Expression,
     }
     @Override
     public List<Expression> getProjectedSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -36,14 +36,14 @@ public class QueryString extends ASTNode implements Expression, IQueryString<Lan
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public Expression getPath() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -53,7 +53,7 @@ public class QueryString extends ASTNode implements Expression, IQueryString<Lan
     }
 
     public List<DerivedColumn> getArgs() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

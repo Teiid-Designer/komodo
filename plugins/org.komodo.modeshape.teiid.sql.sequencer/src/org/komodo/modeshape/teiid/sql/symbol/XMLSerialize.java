@@ -35,14 +35,14 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public String getEncoding() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -55,7 +55,7 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
      * @return
      */
     public String getVersion() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -68,7 +68,7 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
      * @return
      */
     public Boolean getDeclaration() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -81,7 +81,7 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
      * @return
      */
     public Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -94,7 +94,7 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
      * @return
      */
     public Boolean getDocument() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -107,7 +107,7 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
      * @return
      */
     public String getTypeString() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

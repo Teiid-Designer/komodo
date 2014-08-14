@@ -43,7 +43,7 @@ public class ObjectColumn extends ProjectedColumn implements IObjectColumn<Langu
      * @return
      */
     public Object getPath() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -56,7 +56,7 @@ public class ObjectColumn extends ProjectedColumn implements IObjectColumn<Langu
      * @return
      */
     public Expression getDefaultExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

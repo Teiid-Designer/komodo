@@ -35,14 +35,14 @@ public class WindowFunction extends ASTNode implements Expression, IWindowFuncti
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return
      */
     public AggregateSymbol getFunction() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -55,7 +55,7 @@ public class WindowFunction extends ASTNode implements Expression, IWindowFuncti
      * @return
      */
     public WindowSpecification getWindowSpecification() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

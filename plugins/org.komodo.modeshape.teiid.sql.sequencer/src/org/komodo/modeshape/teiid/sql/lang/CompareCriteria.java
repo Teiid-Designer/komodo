@@ -51,7 +51,7 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
 
     @Override
     public Expression getRightExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

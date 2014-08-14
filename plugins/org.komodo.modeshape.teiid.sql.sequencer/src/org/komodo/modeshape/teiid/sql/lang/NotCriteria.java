@@ -34,7 +34,7 @@ public class NotCriteria extends Criteria implements INotCriteria<LanguageVisito
 
     @Override
     public Criteria getCriteria() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

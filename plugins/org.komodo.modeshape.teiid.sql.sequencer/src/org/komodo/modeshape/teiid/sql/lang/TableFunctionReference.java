@@ -55,7 +55,7 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
     }
 
     public String getName() {
-        return null;
+        throw new UnsupportedOperationException();
 
     }
 
@@ -66,7 +66,7 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
      * @return output name
      */
     public String getOutputName() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -74,7 +74,7 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
      * @return GroupSymbol representing the subquery
      */
     public GroupSymbol getGroupSymbol() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -86,7 +86,7 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
      * @return calculated projected symbols
      */
     public List<ElementSymbol> getProjectedSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

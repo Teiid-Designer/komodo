@@ -38,7 +38,7 @@ public class JoinPredicate extends FromClause implements IJoinPredicate<FromClau
 
     @Override
     public FromClause getLeftClause() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -47,7 +47,7 @@ public class JoinPredicate extends FromClause implements IJoinPredicate<FromClau
 
     @Override
     public FromClause getRightClause() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -55,7 +55,7 @@ public class JoinPredicate extends FromClause implements IJoinPredicate<FromClau
     }
 
     public JoinType getJoinType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -65,7 +65,7 @@ public class JoinPredicate extends FromClause implements IJoinPredicate<FromClau
     }
 
     public List<Criteria> getJoinCriteria() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

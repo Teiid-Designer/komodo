@@ -48,7 +48,7 @@ public class WhileStatement extends Statement implements Labeled, IWhileStatemen
      * @return
      */
     public Criteria getCondition() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -61,7 +61,7 @@ public class WhileStatement extends Statement implements Labeled, IWhileStatemen
      * @return
      */
     public Block getBlock() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -72,7 +72,7 @@ public class WhileStatement extends Statement implements Labeled, IWhileStatemen
 
     @Override
     public String getLabel() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

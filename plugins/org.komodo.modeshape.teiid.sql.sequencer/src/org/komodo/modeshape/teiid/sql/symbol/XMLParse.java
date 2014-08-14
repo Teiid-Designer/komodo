@@ -50,7 +50,7 @@ public class XMLParse extends ASTNode implements Expression, IXMLParse<LanguageV
      * @return
      */
     private Expression getExpression() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -122,7 +122,7 @@ public class XMLParse extends ASTNode implements Expression, IXMLParse<LanguageV
 
     @Override
     public <T> Class<T> getType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
 }

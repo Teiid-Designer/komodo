@@ -36,7 +36,7 @@ public class Select extends ASTNode implements ISelect<Expression, LanguageVisit
 
     @Override
     public List<Expression> getSymbols() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

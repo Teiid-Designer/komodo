@@ -43,7 +43,7 @@ public class ExistsCriteria extends Criteria implements PredicateCriteria, Subqu
 
     @Override
     public QueryCommand getCommand() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ExistsCriteria extends Criteria implements PredicateCriteria, Subqu
     }
 
     public SubqueryHint getSubqueryHint() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

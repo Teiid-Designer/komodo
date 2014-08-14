@@ -50,7 +50,7 @@ public class Option extends ASTNode implements IOption<LanguageVisitor> {
 
     @Override
     public Collection<String> getDependentGroups() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -61,7 +61,7 @@ public class Option extends ASTNode implements IOption<LanguageVisitor> {
 
     @Override
     public Collection<String> getNotDependentGroups() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -83,7 +83,7 @@ public class Option extends ASTNode implements IOption<LanguageVisitor> {
 
     @Override
     public Collection<String> getNoCacheGroups() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
