@@ -371,11 +371,11 @@ public class CTree implements StringConstants {
         return classes;
     }
 
-    public boolean isSPIInterface(Class<?> objClass) {
+    public boolean isSPILanguageInterface(Class<?> objClass) {
         if (objClass == null || objClass.getPackage() == null || objClass.getPackage().getName() == null)
             return false;
 
-        return objClass.getPackage().getName().contains("spi");
+        return objClass.getPackage().getName().contains("spi.query.sql");
     }
 
     private boolean isSQLInterface(Class<?> objClass) {
@@ -383,8 +383,12 @@ public class CTree implements StringConstants {
         if (! pkgName.contains(KOMODO))
             return false;
 
+        if (StringConstants.class.equals(objClass))
+            // Ignore StringConstants
+            return false;
+
         // Ignore spi interfaces
-        return ! isSPIInterface(objClass);
+        return ! isSPILanguageInterface(objClass);
     }
 
     private INode addInterface(Class<?> iface) {
