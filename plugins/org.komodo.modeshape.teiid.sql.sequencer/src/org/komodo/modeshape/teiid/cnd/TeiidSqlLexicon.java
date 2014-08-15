@@ -22,7 +22,16 @@
 
 package org.komodo.modeshape.teiid.cnd;
 
-import java.lang.reflect.Field;import java.util.HashMap;import java.util.Map;import org.komodo.modeshape.teiid.sql.lang.ASTNode;import org.komodo.spi.constants.StringConstants;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import org.komodo.modeshape.teiid.sql.lang.ASTNode;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.modeshape.teiid.sql.lang.*;
+import org.komodo.modeshape.teiid.sql.proc.*;
+import org.komodo.modeshape.teiid.sql.symbol.*;
+
 
 @SuppressWarnings( { "javadoc", "nls" })
 public class TeiidSqlLexicon implements StringConstants {
@@ -1593,6 +1602,8 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> ROLLUP_PROP_TYPE =  Boolean.class;
 
 		boolean ROLLUP_PROP_MULTIPLE = false;
+
+		Version ROLLUP_PROP_SINCE_VERSION = Version.TEIID_8_5;
 
 		/**
 		 * SYMBOLS Reference

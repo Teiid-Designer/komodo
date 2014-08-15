@@ -49,7 +49,11 @@ import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
 import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
 import org.komodo.modeshape.teiid.sql.proc.Block;
 import org.komodo.modeshape.teiid.sql.symbol.Symbol;
+import org.komodo.spi.annotation.AnnotationUtils;
+import org.komodo.spi.annotation.Removed;
+import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.value.Reference;
 
@@ -203,6 +207,8 @@ public class TeiidCndGenerator implements StringConstants {
 
         private String name;
         private boolean multiple;
+        private Version sinceVersion;
+        private Version removedVersion;
 
         public Aspect(String name, boolean multiple) {
             this.name = name;
@@ -219,7 +225,23 @@ public class TeiidCndGenerator implements StringConstants {
 
         public abstract String getTypeName();
 
-        public abstract Class<?> getTypeClass();        
+        public abstract Class<?> getTypeClass();
+
+        public Version getSinceVersion() {
+            return this.sinceVersion;
+        }
+
+        public void setSinceVersion(Version sinceVersion) {
+            this.sinceVersion = sinceVersion;
+        }
+
+        public Version getRemovedVersion() {
+            return this.removedVersion;
+        }
+
+        public void setRemovedVersion(Version removedVersion) {
+            this.removedVersion = removedVersion;
+        }
     }
 
     private class ChildAspect extends Aspect {
@@ -348,11 +370,15 @@ public class TeiidCndGenerator implements StringConstants {
         lex(NEW_LINE);
         lex(NEW_LINE);
 
-        lex("import " + Field.class.getCanonicalName() + SEMI_COLON);
-        lex("import " + HashMap.class.getCanonicalName() + SEMI_COLON);
-        lex("import " + Map.class.getCanonicalName() + SEMI_COLON);
-        lex("import " + ASTNode.class.getCanonicalName() + SEMI_COLON);
-        lex("import " + StringConstants.class.getCanonicalName() + SEMI_COLON);
+        lex("import " + Field.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
+        lex("import " + HashMap.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
+        lex("import " + Map.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
+        lex("import " + ASTNode.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
+        lex("import " + StringConstants.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
+        lex("import " + Version.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
+        for (Package sqlPkg : SQL_PACKAGES) {
+            lex("import " + sqlPkg.getName() + DOT + STAR + SEMI_COLON + NEW_LINE);
+        }
         lex(NEW_LINE);
         lex(NEW_LINE);
     }
@@ -631,6 +657,26 @@ private void cndSection1Comment(String comment) throws Exception {
         }
     }
 
+    private void lexTeiidVersions(Aspect aspect, String varName) throws Exception {
+        StringBuffer buf = new StringBuffer();
+
+        if (aspect.getSinceVersion() != null) {
+            buf.append(TAB).append(TAB)
+                        .append("Version ").append(varName).append("_SINCE_VERSION").append(" = ")
+                        .append("Version").append(DOT).append(aspect.getSinceVersion().name())
+                        .append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+        }
+
+        if (aspect.getRemovedVersion() != null) {
+            buf.append(TAB).append(TAB)
+                        .append("Version ").append(varName).append("_REMOVED_VERSION").append(" = ")
+                        .append("Version").append(DOT).append(aspect.getRemovedVersion().name())
+                        .append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
+        }
+
+        lex(buf.toString());
+    }
+
     private void writeProperty(PropertyAspect aspect) throws Exception {
         String prefixName = TSQL_PREFIX + COLON + aspect.getName();
         
@@ -693,6 +739,8 @@ private void cndSection1Comment(String comment) throws Exception {
         }
 
         lex(lexBuf.toString());
+
+        lexTeiidVersions(aspect, varName + "_PROP");
     }
 
     private void writeChildNode(ChildAspect aspect) throws Exception {
@@ -740,8 +788,10 @@ private void cndSection1Comment(String comment) throws Exception {
         lexBuf.append(TAB).append(TAB)
                  .append("boolean ").append(varName).append("_REF_MULTIPLE").append(" = ")
                  .append(Boolean.toString(aspect.isMultiple())).append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
-        
+
         lex(lexBuf.toString());
+
+        lexTeiidVersions(aspect, varName + "_REF");
     }
 
     private Aspect createAspect(Class<?> parameterClass, Method method, Node classNode, boolean multiple) throws Exception {
@@ -749,31 +799,32 @@ private void cndSection1Comment(String comment) throws Exception {
         String aspectType = parameterClass.getSimpleName();
         ModeshapeType mType = ModeshapeType.get(parameterClass);
         boolean isRegistered = classNode.getTree().containsClass(parameterClass);
-        boolean isSPIInterface = classNode.getTree().isSPIInterface(parameterClass);
+        boolean isSPIInterface = classNode.getTree().isSPILanguageInterface(parameterClass);
 
         if (isSPIInterface)
             return null; // Not interested in these methods
 
+        Aspect aspect = null;
         if (mType != null)
             // Basic property like STRING, or DOUBLE
-            return new PropertyAspect(aspectName, mType, multiple);
+            aspect = new PropertyAspect(aspectName, mType, multiple);
         else if (isRegistered)
             // A LanguageObject child
-            return new ChildAspect(aspectName, parameterClass, multiple);
+            aspect = new ChildAspect(aspectName, parameterClass, multiple);
         else if (parameterClass == Class.class)
             // A Class property
-            return new PropertyAspect(aspectName + capitalize(CLASS), ModeshapeType.STRING, multiple);
+            aspect = new PropertyAspect(aspectName + capitalize(CLASS), ModeshapeType.STRING, multiple);
         else if (parameterClass == Object.class) {
             // Need to handle these setObject methods but the actual values will need to be serialised or something tbd.
-            return new PropertyAspect(aspectName, ModeshapeType.BINARY, multiple);
+            aspect = new PropertyAspect(aspectName, ModeshapeType.BINARY, multiple);
         }
         else if (parameterClass.isArray())
             // An Array
-            return createAspect(parameterClass.getComponentType(), method, classNode, true);
+            aspect = createAspect(parameterClass.getComponentType(), method, classNode, true);
         else if (parameterClass == Collection.class || parameterClass == List.class) {
             // A Collection or List
             parameterClass = findGenericClass(parameterClass, method);
-            return createAspect(parameterClass, method, classNode, true);
+            aspect = createAspect(parameterClass, method, classNode, true);
         } else if (parameterClass.isEnum()) {
             // An Enum
             List<String> constraints = new ArrayList<String>();
@@ -796,12 +847,17 @@ private void cndSection1Comment(String comment) throws Exception {
 
             PropertyAspect propAspect = new PropertyAspect(aspectName, ModeshapeType.STRING, multiple);
             propAspect.setConstraints(constraints);
-            return propAspect;
+            aspect = propAspect;
         }
         else
             System.out.println("The class " + classNode.klazz().getSimpleName() + " has the setter method " + method.getName() + " with a parameter type '" + aspectType + "' is not supported");
 
-        return null;
+        if (aspect != null) {
+            aspect.setSinceVersion(AnnotationUtils.getSinceVersion(method, Since.class));
+            aspect.setRemovedVersion(AnnotationUtils.getRemovedVersion(method, Removed.class));
+        }
+
+        return aspect;
     }
 
     private Aspect createAspect(Class<?> parameterClass, Method method, Node classNode) throws Exception {
@@ -1020,7 +1076,6 @@ private void cndSection1Comment(String comment) throws Exception {
 
         System.out.println(tree.toString());
 
-        List<Node> allClasses = new ArrayList<Node>();
         if (! tree.getInterfaceNodes().isEmpty()) {
             cndSection2Comment("Interfaces");
             for (INode iNode : tree.getInterfaceNodes()) {
