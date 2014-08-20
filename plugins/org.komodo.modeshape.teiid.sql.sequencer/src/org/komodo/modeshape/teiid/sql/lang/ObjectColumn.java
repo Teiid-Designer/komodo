@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -33,36 +34,21 @@ public class ObjectColumn extends ProjectedColumn implements IObjectColumn<Langu
         super(p, id);
     }
 
-    /**
-     * @param path
-     */
+    public String getPath() {
+        Object property = getProperty(TeiidSqlLexicon.ObjectColumn.PATH_PROP_NAME);
+        return property == null ? null : property.toString();
+    }
+
     public void setPath(String path) {
+        setProperty(TeiidSqlLexicon.ObjectColumn.PATH_PROP_NAME, path);
     }
 
-    /**
-     * @return
-     */
-    public Object getPath() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param path
-     */
-    public void setPath(Object path) {
-    }
-
-    /**
-     * @return
-     */
     public Expression getDefaultExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.ObjectColumn.DEFAULT_EXPRESSION_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param defaultExpr
-     */
     public void setDefaultExpression(Expression defaultExpr) {
+        addLastChild(TeiidSqlLexicon.ObjectColumn.DEFAULT_EXPRESSION_REF_NAME, defaultExpr);
     }
 
     @Override

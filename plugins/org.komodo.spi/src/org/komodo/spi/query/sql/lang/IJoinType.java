@@ -69,6 +69,23 @@ public interface IJoinType <LV extends ILanguageVisitor> extends ILanguageObject
         public boolean isOuter() {
             return this.outer;
         }
+
+        /**
+         * @param name
+         * @return Types representing the given name
+         */
+        public static Types findType(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (Types type : values()) {
+                if (type.name().equals(name))
+                    return type;
+            }
+
+            return null;
+        }
     }
     
     /**

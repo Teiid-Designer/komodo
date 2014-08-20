@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
@@ -34,25 +35,34 @@ public class GroupSymbol extends Symbol implements IGroupSymbol<LanguageVisitor>
 
     @Override
     public String getDefinition() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.GroupSymbol.DEFINITION_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     @Override
-    public void setDefinition(String newName) {
+    public void setDefinition(String definition) {
+        setProperty(TeiidSqlLexicon.GroupSymbol.DEFINITION_PROP_NAME, definition);
     }
 
     @Override
     public boolean isProcedure() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.GroupSymbol.PROCEDURE_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
+    }
+
+    public void setProcedure(boolean procedure) {
+        setProperty(TeiidSqlLexicon.GroupSymbol.PROCEDURE_PROP_NAME, procedure);
     }
 
     @Override
     public Object getMetadataID() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.GroupSymbol.METADATAID_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     @Override
     public void setMetadataID(Object metadataID) {
+        setProperty(TeiidSqlLexicon.GroupSymbol.METADATAID_PROP_NAME, metadataID);
     }
 
     @Override

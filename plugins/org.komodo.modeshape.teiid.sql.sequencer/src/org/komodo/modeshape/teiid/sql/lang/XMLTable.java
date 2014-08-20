@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.DerivedColumn;
@@ -35,67 +36,50 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
         super(p, id);
     }
 
-    /**
-     * @return
-     */
     public String getXquery() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.XMLTable.XQUERY_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param xquery
-     */
     public void setXquery(String xquery) {
+        setProperty(TeiidSqlLexicon.XMLTable.XQUERY_PROP_NAME, xquery);
     }
 
-    /**
-     * @return
-     */
     public XMLNamespaces getNamespaces() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.XMLTable.NAMESPACES_REF_NAME, XMLNamespaces.class);
     }
 
-    /**
-     * @param xmlNamespaces
-     */
     public void setNamespaces(XMLNamespaces xmlNamespaces) {
+        addLastChild(TeiidSqlLexicon.XMLTable.NAMESPACES_REF_NAME, xmlNamespaces);
     }
 
-    /**
-     * @return
-     */
     public List<DerivedColumn> getPassing() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.XMLTable.PASSING_REF_NAME, DerivedColumn.class);
     }
 
-    /**
-     * @param passingValues
-     */
     public void setPassing(List<DerivedColumn> passingValues) {
+        setChildren(TeiidSqlLexicon.XMLTable.PASSING_REF_NAME, passingValues);
     }
 
     @Override
     public List<XMLColumn> getColumns() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.XMLTable.COLUMNS_REF_NAME, XMLColumn.class);
     }
 
-    /**
-     * @param columns
-     */
     public void setColumns(List<XMLColumn> columns) {
+        setChildren(TeiidSqlLexicon.XMLTable.COLUMNS_REF_NAME, columns);
     }
 
-    /**
-     * @return
-     */
     public boolean isUsingDefaultColumn() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.XMLTable.USING_DEFAULT_COLUMN_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param usingDefaultColumn
-     */
     public void setUsingDefaultColumn(boolean usingDefaultColumn) {
+        setProperty(TeiidSqlLexicon.XMLTable.USING_DEFAULT_COLUMN_PROP_NAME, usingDefaultColumn);
     }
 
     @Override

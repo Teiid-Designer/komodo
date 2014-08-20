@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
@@ -32,38 +33,28 @@ public class CommandStatement extends Statement implements SubqueryContainer<Com
 
     public CommandStatement(TeiidParser p, int id) {
         super(p, id);
+        setType(StatementType.TYPE_COMMAND);
+        setReturnable(true);
     }
 
-    /**
-     * Return the type for this statement, this is one of the types
-     * defined on the statement object.
-     * @return The statement type
-     */
-    @Override
-    public StatementType getType() {
-        return StatementType.TYPE_COMMAND;
-    }
-
-    /**
-     * @return
-     */
     public boolean isReturnable() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.CommandStatement.RETURNABLE_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param returnable
-     */
     public void setReturnable(boolean returnable) {
+        setProperty(TeiidSqlLexicon.CommandStatement.RETURNABLE_PROP_NAME, returnable);
     }
 
     @Override
     public Command getCommand() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, Command.class);
     }
 
     @Override
     public void setCommand(Command command) {
+        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override

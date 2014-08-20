@@ -22,9 +22,12 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.ITextColumn;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 public class TextColumn extends ProjectedColumn implements ITextColumn<LanguageVisitor> {
 
@@ -32,76 +35,60 @@ public class TextColumn extends ProjectedColumn implements ITextColumn<LanguageV
         super(p, id);
     }
 
-    public String getName() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setName(String name) {
-    }
-
     /**
      * @return
      */
+    @Since(Version.TEIID_8_7)
     public boolean isOrdinal() {
-        return false;
+        if (isLessThanTeiidVersion(TeiidSqlLexicon.TextColumn.ORDINAL_PROP_SINCE_VERSION.get()))
+            return false;
+
+        Object property = getProperty(TeiidSqlLexicon.TextColumn.ORDINAL_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setOrdinal(boolean b) {
+    @Since(Version.TEIID_8_7)
+    public void setOrdinal(boolean ordinal) {
+        if (isLessThanTeiidVersion(TeiidSqlLexicon.TextColumn.ORDINAL_PROP_SINCE_VERSION.get()))
+            return;
+
+        setProperty(TeiidSqlLexicon.TextColumn.ORDINAL_PROP_NAME, ordinal);
     }
 
-    /**
-     * @return
-     */
     public Integer getWidth() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextColumn.WIDTH_PROP_NAME);
+        return property == null ? 0 : Integer.parseInt(property.toString());
     }
 
-    /**
-     * @param width
-     */
     public void setWidth(Integer width) {
+        setProperty(TeiidSqlLexicon.TextColumn.WIDTH_PROP_NAME, width);
     }
 
-    /**
-     * @return
-     */
     public boolean isNoTrim() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.TextColumn.NO_TRIM_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param noTrim
-     */
     public void setNoTrim(boolean noTrim) {
+        setProperty(TeiidSqlLexicon.TextColumn.NO_TRIM_PROP_NAME, noTrim);
     }
 
-    /**
-     * @return
-     */
     public String getSelector() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextColumn.SELECTOR_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param selector
-     */
     public void setSelector(String selector) {
+        setProperty(TeiidSqlLexicon.TextColumn.SELECTOR_PROP_NAME, selector);
     }
 
-    /**
-     * @return
-     */
     public Integer getPosition() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextColumn.POSITION_PROP_NAME);
+        return property == null ? null : Integer.parseInt(property.toString());
     }
 
-    /**
-     * @param position
-     */
     public void setPosition(Integer position) {
+        setProperty(TeiidSqlLexicon.TextColumn.POSITION_PROP_NAME, position);
     }
 
     @Override

@@ -27,7 +27,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
@@ -91,6 +90,36 @@ public class AnnotationUtils {
      */
     public static <T extends Annotation> T getAnnotation(AccessibleObject accessibleObject, Class<T> annotationClass) {
         return accessibleObject.getAnnotation(annotationClass);
+    }
+
+    /**
+     * Get the Teiid version for any since annotation possessed by the given object
+     *
+     * @param accessibleObject
+     * @param since
+     * @return teiid version if this object has a since annotation or null
+     */
+    public static Version getSinceVersion(AccessibleObject accessibleObject, Class<Since> since) {
+        Since sinceAnnotation = getAnnotation(accessibleObject, since);
+        if (sinceAnnotation == null)
+            return null;
+
+        return sinceAnnotation.value();
+    }
+
+    /**
+     * Get the Teiid version for any removed annotation possessed by the given object
+     *
+     * @param accessibleObject
+     * @param removed
+     * @return teiid version if this object has a removed annotation or null
+     */
+    public static Version getRemovedVersion(AccessibleObject accessibleObject, Class<Removed> removed) {
+        Removed removedAnnotation = getAnnotation(accessibleObject, removed);
+        if (removedAnnotation == null)
+            return null;
+
+        return removedAnnotation.value();
     }
 
     /**
@@ -359,4 +388,5 @@ public class AnnotationUtils {
         // Found appropriate version pair so return its replaced value
         return rangePair.getReplacedValue();
     }
+
 }

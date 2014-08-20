@@ -2,6 +2,7 @@
 /* JavaCCOptions:MULTI=true,NODE_USES_PARSER=true,VISITOR=true,TRACK_TOKENS=false,NODE_PREFIX=,NODE_EXTENDS=,NODE_FACTORY=TeiidNodeFactory,SUPPORT_CLASS_VISIBILITY_PUBLIC=true */
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -23,13 +24,14 @@ public abstract class AbstractSetCriteria extends Criteria implements PredicateC
      * @return the expression
      */
     public Expression getExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.AbstractSetCriteria.EXPRESSION_REF_NAME, Expression.class);
     }
 
     /**
      * @param expression the expression to set
      */
     public void setExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.AbstractSetCriteria.EXPRESSION_REF_NAME, expression);
     }
 
     /**
@@ -37,14 +39,16 @@ public abstract class AbstractSetCriteria extends Criteria implements PredicateC
      * @return flag indicating whether this criteria contains a NOT
      */
     public boolean isNegated() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.AbstractSetCriteria.NEGATED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
-    
+
     /**
      * Sets the negation flag for this criteria.
      * @param negationFlag true if this criteria contains a NOT; false otherwise
      */
     public void setNegated(boolean negationFlag) {
+        setProperty(TeiidSqlLexicon.AbstractSetCriteria.NEGATED_PROP_NAME, negationFlag);
     }
 
     @Override

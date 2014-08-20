@@ -22,7 +22,6 @@
 package org.komodo.spi.query.sql.lang;
 
 import java.util.List;
-
 import org.komodo.spi.query.sql.ILanguageVisitor;
 
 /**
@@ -43,7 +42,23 @@ public interface ISetQuery<QC extends IQueryCommand,
         /** Represents intersection of two queries */
         INTERSECT,
         /** Represents set difference of two queries */
-        EXCEPT
+        EXCEPT;
+
+        /**
+         * @param name
+         * @return Operation with given name
+         */
+        public static Operation findOperation(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (Operation op : values()) {
+                if (op.name().equals(name))
+                    return op;
+            }
+            return null;
+        }
     }
     
     /**

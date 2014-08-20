@@ -22,10 +22,12 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IWindowFunction;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class WindowFunction extends ASTNode implements Expression, IWindowFunction<LanguageVisitor> {
 
@@ -34,34 +36,29 @@ public class WindowFunction extends ASTNode implements Expression, IWindowFuncti
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @return
-     */
     public AggregateSymbol getFunction() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.WindowFunction.FUNCTION_REF_NAME, AggregateSymbol.class);
     }
 
-    /**
-     * @param agg
-     */
     public void setFunction(AggregateSymbol agg) {
+        addLastChild(TeiidSqlLexicon.WindowFunction.FUNCTION_REF_NAME, agg);
+
+        DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(agg.getType());
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
     }
 
-    /**
-     * @return
-     */
     public WindowSpecification getWindowSpecification() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.WindowFunction.WINDOW_SPECIFICATION_REF_NAME, WindowSpecification.class);
     }
 
-    /**
-     * @param ws
-     */
     public void setWindowSpecification(WindowSpecification ws) {
+        addLastChild(TeiidSqlLexicon.WindowFunction.WINDOW_SPECIFICATION_REF_NAME, ws);
     }
 
     @Override

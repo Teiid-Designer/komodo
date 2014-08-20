@@ -545,6 +545,10 @@ public class DataTypeManagerService implements IDataTypeManagerService {
         ArgCheck.isTrue(AnnotationUtils.isApplicable(dataTypeName, teiidVersion),
                                     Messages.getString(Messages.ERR.ERR_100_001_0001, teiidVersion, dataTypeName));
 
+        if (dataTypeName.isArrayType()) {
+            dataTypeName = dataTypeName.getComponentType();
+        }
+
         for (DefaultDataTypes defaultDataType : DefaultDataTypes.getValues(teiidVersion)) {
             if (defaultDataType.getDataTypeName().equals(dataTypeName)) {
                 return defaultDataType;
@@ -584,6 +588,9 @@ public class DataTypeManagerService implements IDataTypeManagerService {
 
         DefaultDataTypes dataType = findDefaultDataType(dataTypeName);
         checkDataType(dataType, dataTypeName.toString());
+
+        if (dataTypeName.isArrayType())
+            return dataType.getId() + ARRAY_SUFFIX;
 
         return dataType.getId();
     }
@@ -638,6 +645,9 @@ public class DataTypeManagerService implements IDataTypeManagerService {
         DefaultDataTypes dataType = findDefaultDataType(dataTypeName);
         checkDataType(dataType, dataTypeName.toString());
 
+        if (dataTypeName.isArrayType())
+            return dataType.getTypeArrayClass();
+
         return dataType.getTypeClass();
     }
 
@@ -682,6 +692,23 @@ public class DataTypeManagerService implements IDataTypeManagerService {
             return dataType.getId() + ARRAY_SUFFIX;
         
         return dataType.getId();
+    }
+
+    @Override
+    public DataTypeName retrieveDataTypeName(Class<?> typeClass) {
+        if (typeClass == null) {
+            return DefaultDataTypes.NULL.getDataTypeName();
+        }
+
+        DefaultDataTypes dataType = findDefaultDataType(typeClass);
+        if (dataType == null)
+            dataType = DefaultDataTypes.OBJECT;
+
+        DataTypeName dataTypeName = dataType.getDataTypeName();
+        if (typeClass.isArray())
+            return dataTypeName.getArrayType();
+
+        return dataTypeName;
     }
 
     @Override
@@ -1018,5 +1045,58 @@ public class DataTypeManagerService implements IDataTypeManagerService {
     @Override
     public IBinaryType createBinaryType(byte[] bytes) {
         return new BinaryType(bytes);
+    }
+
+    @Override
+    public DataTypeName getCountType() {
+        return DefaultDataTypes.INTEGER.getDataTypeName();
+    }
+
+    @Override
+    public DataTypeName getSumReturnType(DataTypeName sumArgType) {
+        if (sumArgType == null || DataTypeName.NULL.equals(sumArgType))
+            return null;
+
+        switch (sumArgType) {
+            case BIG_DECIMAL:
+                return DataTypeName.BIG_DECIMAL;
+            case BIG_INTEGER:
+                return DataTypeName.BIG_INTEGER;
+            case DOUBLE:
+            case FLOAT:
+                return DataTypeName.DOUBLE;
+            case BYTE:
+            case INTEGER:
+            case LONG:
+            case SHORT:
+                return DataTypeName.LONG;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public DataTypeName getAverageReturnType(DataTypeName avgArgType) {
+        if (avgArgType == null)
+            return null;
+
+        switch (avgArgType) {
+            case BYTE:
+            case SHORT:
+            case INTEGER:
+            case LONG:
+                if(isDecimalAsDouble())
+                    return DataTypeName.DOUBLE;
+                else
+                    return DataTypeName.BIG_DECIMAL;
+            case BIG_INTEGER:
+            case BIG_DECIMAL:
+                return DataTypeName.BIG_DECIMAL;
+            case FLOAT:
+            case DOUBLE:
+                return DataTypeName.DOUBLE;
+            default:
+                return null;
+        }
     }
 }

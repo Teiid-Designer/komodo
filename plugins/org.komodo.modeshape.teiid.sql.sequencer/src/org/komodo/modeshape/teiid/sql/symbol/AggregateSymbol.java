@@ -22,11 +22,13 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.modeshape.teiid.sql.lang.OrderBy;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class AggregateSymbol extends Function implements IAggregateSymbol<LanguageVisitor> {
 
@@ -34,115 +36,133 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
         super(p, id);
     }
 
-    @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    private void calculateType() {
+        switch (getAggregateFunction()) {
+            case COUNT:
+                assignDataTypeName(getDataTypeService().getCountType(), false);
+                break;
+            case SUM:
+                if (this.getArg(0) != null) {
+                    Class<?> expressionType = this.getArg(0).getType();
+                    DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(expressionType);
+                    assignDataTypeName(getDataTypeService().getSumReturnType(dataTypeName), false);
+                }
+                break;
+            case AVG:
+                if (this.getArg(0) != null) {
+                    Class<?> expressionType = this.getArg(0).getType();
+                    DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(expressionType);
+                    assignDataTypeName(getDataTypeService().getAverageReturnType(dataTypeName), false);
+                }
+                break;
+            case ARRAY_AGG:
+                if (this.getArg(0) != null) {
+                    Class<?> expressionType = this.getArg(0).getType();
+                    DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(expressionType);
+                    assignDataTypeName(dataTypeName, true);
+                }
+                break;
+            case TEXTAGG:
+                assignDataTypeName(DataTypeName.BLOB, false);
+                break;
+            case USER_DEFINED:
+                // TODO need to consider if we ever need to define this.
+            case JSONARRAY_AGG:
+                assignDataTypeName(DataTypeName.CLOB, false);
+                break;
+            case STRING_AGG:
+                setType(super.getType());
+                break;
+            case EVERY:
+            case SOME:
+            case ANY:
+                assignDataTypeName(DataTypeName.BOOLEAN, false);
+                break;
+            case STDDEV_POP: 
+            case STDDEV_SAMP:
+            case VAR_SAMP:
+            case VAR_POP:
+                assignDataTypeName(DataTypeName.DOUBLE, false);
+                break;
+            case RANK:
+            case ROW_NUMBER:
+            case DENSE_RANK:
+                assignDataTypeName(DataTypeName.INTEGER, false);
+                break;
+            default:
+                // ignore and carry on
+        }
+
+        if (this.getArgs().length == 0) {
+            return;
+        }
+
+        setType(this.getArg(0).getType());
     }
 
     @Override
-    public FunctionDescriptor getFunctionDescriptor() {
-        throw new UnsupportedOperationException();
+    public void setName(String name) {
+        super.setName(name);
+        if (getAggregateFunction() == null) {
+            Type aggregateFunction = Type.findAggregateFunction(name);
+            setAggregateFunction(aggregateFunction == null ? Type.USER_DEFINED : aggregateFunction);
+        }
     }
 
     @Override
-    public void setFunctionDescriptor(FunctionDescriptor fd) {
+    public Type getAggregateFunction() {
+        Object property = getProperty(TeiidSqlLexicon.AggregateSymbol.AGGREGATE_FUNCTION_PROP_NAME);
+        return property == null ? null : Type.findAggregateFunction(property.toString());
     }
 
-    @Override
-    public org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type getAggregateFunction() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param name
-     */
     public void setAggregateFunction(String name) {
+        setProperty(TeiidSqlLexicon.AggregateSymbol.AGGREGATE_FUNCTION_PROP_NAME, name);
+        calculateType();
     }
 
     @Override
-    public void setAggregateFunction(org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type aggregateFunction) {
+    public void setAggregateFunction(Type aggregateFunction) {
+        setAggregateFunction(aggregateFunction.name());
     }
 
-    /**
-     * @return
-     */
     public OrderBy getOrderBy() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.AggregateSymbol.ORDER_BY_REF_NAME, OrderBy.class);
     }
 
-    /**
-     * @param orderBy
-     */
     public void setOrderBy(OrderBy orderBy) {
+        addLastChild(TeiidSqlLexicon.AggregateSymbol.ORDER_BY_REF_NAME, orderBy);
     }
 
-    /**
-     * @return
-     */
     public Criteria getCondition() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.AggregateSymbol.CONDITION_REF_NAME, Criteria.class);
     }
 
-    /**
-     * @param condition
-     */
     public void setCondition(Expression condition) {
+        addLastChild(TeiidSqlLexicon.AggregateSymbol.CONDITION_REF_NAME, condition);
     }
 
-    /**
-     * @return
-     */
     public boolean isDistinct() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.AggregateSymbol.DISTINCT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setDistinct(boolean b) {
+    public void setDistinct(boolean distinct) {
+        setProperty(TeiidSqlLexicon.AggregateSymbol.DISTINCT_PROP_NAME, distinct);
     }
 
-    @Override
-    public Expression[] getArgs() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Expression getArg(int index) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param args
-     */
     @Override
     public void setArgs(Expression[] args) {
+        super.setArgs(args);
+        calculateType();
     }
 
-    @Override
-    public boolean isImplicit() {
-        return false;
-    }
-
-    public void setImplicit(boolean b) {
-
-    }
-
-    @Override
-    public void setType(Class<?> type) {
-    }
-
-    /**
-     * @return
-     */
     public boolean isWindowed() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.AggregateSymbol.WINDOWED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param windowed
-     */
     public void setWindowed(boolean windowed) {
+        setProperty(TeiidSqlLexicon.AggregateSymbol.WINDOWED_PROP_NAME, windowed);
     }
 
     @Override

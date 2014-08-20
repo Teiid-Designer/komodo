@@ -39,7 +39,7 @@ public interface Expression extends LanguageObject, IExpression<LanguageVisitor>
      * @return The type, as defined by a Java class
      */
     @Override
-    <T> Class<T> getType();
+    Class<?> getType();
 
     /**
      * @param obj

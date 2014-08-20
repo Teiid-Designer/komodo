@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
@@ -31,56 +32,33 @@ public class IfStatement extends Statement implements IIfStatement<LanguageVisit
 
     public IfStatement(TeiidParser p, int id) {
         super(p, id);
+        setType(StatementType.TYPE_IF);
     }
 
-    /**
-     * Return the type for this statement, this is one of the types
-     * defined on the statement object.
-     * @return The statement type
-     */
-    @Override
-    public StatementType getType() {
-        return StatementType.TYPE_IF;
-    }
-
-    /**
-     * @return
-     */
     public Criteria getCondition() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.IfStatement.CONDITION_REF_NAME, Criteria.class);
     }
 
-    /**
-     * @param criteria
-     */
     public void setCondition(Criteria criteria) {
+        addLastChild(TeiidSqlLexicon.IfStatement.CONDITION_REF_NAME, criteria);
     }
 
-    /**
-     * @return
-     */
     public Block getIfBlock() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.IfStatement.IF_BLOCK_REF_NAME, Block.class);
     }
 
-    /**
-     * @param asBlock
-     */
     public void setIfBlock(Block asBlock) {
+        addLastChild(TeiidSqlLexicon.IfStatement.IF_BLOCK_REF_NAME, asBlock);
     }
 
-    /**
-     * @return
-     */
     public Block getElseBlock() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.IfStatement.ELSE_BLOCK_REF_NAME, Block.class);
     }
 
-    /**
-     * @param asBlock
-     */
     public void setElseBlock(Block asBlock) {
+        addLastChild(TeiidSqlLexicon.IfStatement.ELSE_BLOCK_REF_NAME, asBlock);
     }
+
     @Override
     public int hashCode() {
         final int prime = 31;

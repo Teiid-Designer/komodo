@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.lang.INotCriteria;
@@ -34,13 +35,11 @@ public class NotCriteria extends Criteria implements INotCriteria<LanguageVisito
 
     @Override
     public Criteria getCriteria() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.NotCriteria.CRITERIA_REF_NAME, Criteria.class);
     }
 
-    /**
-     * @param crit
-     */
     public void setCriteria(Criteria crit) {
+        addLastChild(TeiidSqlLexicon.NotCriteria.CRITERIA_REF_NAME, crit);
     }
 
     @Override

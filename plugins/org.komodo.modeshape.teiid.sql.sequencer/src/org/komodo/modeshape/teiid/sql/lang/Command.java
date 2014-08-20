@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -41,12 +42,23 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
         super(p, id);
     }
 
+    @Override
+    public int getType() {
+        Object property = getProperty(TeiidSqlLexicon.Command.TYPE_PROP_NAME);
+        return property == null ? -1 : Integer.parseInt(property.toString());
+    }
+
+    protected void setType(int typeId) {
+        setProperty(TeiidSqlLexicon.Command.TYPE_PROP_NAME, typeId);
+    }
+
     /**
      * @return true if command has been resolved
      */
     @Override
     public boolean isResolved() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Command.IS_RESOLVED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
@@ -54,6 +66,7 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
      * @param isResolved whether this command is resolved or not
      */
     public void setIsResolved(boolean isResolved) {
+        setProperty(TeiidSqlLexicon.Command.IS_RESOLVED_PROP_NAME, isResolved);
     }
 
     /**
@@ -70,7 +83,7 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
      */
     @Override
     public Option getOption() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Command.OPTION_REF_NAME, Option.class);
     }
 
     /**
@@ -78,26 +91,28 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
      * @param option New option clause
      */
     public void setOption(Option option) {
+        addLastChild(TeiidSqlLexicon.Command.OPTION_REF_NAME, option);
     }
 
     /**
      * @return the sourceHint
      */
     public SourceHint getSourceHint() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Command.SOURCE_HINT_REF_NAME, SourceHint.class);
     }
 
     /**
      * @param sourceHint the sourceHint to set
      */
     public void setSourceHint(SourceHint sourceHint) {
+        addLastChild(TeiidSqlLexicon.Command.SOURCE_HINT_REF_NAME, sourceHint);
     }
 
     /**
      * @return whether this object returns a result set
      */
     public boolean returnsResultSet() {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     /**

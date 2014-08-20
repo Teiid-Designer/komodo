@@ -37,8 +37,8 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.common.util.CheckArg;
 import org.modeshape.jcr.api.JcrConstants;
@@ -82,11 +82,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
         ArgCheck.isNotNull(lexiconType);
         setProperty(JCR_MIXIN_TYPES, lexiconType);
         setProperty(JCR_PRIMARY_TYPE, NT_UNSTRUCTURED);
-    }
-
-    @Override
-    public ITeiidVersion getTeiidVersion() {
-        return getTeiidParser().getVersion();
+        setAstIdentifier(lexiconType);
     }
 
     /**
@@ -197,6 +193,26 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     }
 
     /**
+     * Get the multi property values with the supplied name.
+     * If we know that the required property is definitely multi-valued
+     * then this avoids having to cast the return Object to a collection 
+     * 
+     * @param name the property name; never null
+     * @return the collection of property values, or null if no such property exists on the node
+     */
+    public Collection<Object> getProperties(String name) {
+        Object property = properties.get(name);
+        if (property == null)
+            return null;
+        else if (property instanceof Collection) {
+            Collection<Object> properties = (Collection<Object>) property;
+            return properties;
+        }
+
+        return Collections.singleton(property);
+    }
+
+    /**
      * Set the property with the given name to the supplied value. Any existing property with the same name will be replaced.
      * 
      * @param identifier the name of the property; may not be null
@@ -205,8 +221,26 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      */
     public ASTNode setProperty(String identifier, Object value) {
         CheckArg.isNotNull(identifier, IDENTIFIER);
-        CheckArg.isNotNull(value, VALUE);
+        if (value == null)
+            properties.remove(identifier);
+
         properties.put(identifier, value);
+        return this;
+    }
+
+    public ASTNode addProperty(String identifier, Object value) {
+        CheckArg.isNotNull(identifier, IDENTIFIER);
+        CheckArg.isNotNull(value, VALUE);
+
+        Object property = properties.get(identifier);
+        if (property instanceof Collection) {
+            Collection<Object> properties = (Collection<Object>) property;
+            properties.add(value);
+            this.properties.put(identifier, properties);
+        } else {
+            properties.put(identifier, value);
+        }
+
         return this;
     }
 
@@ -421,7 +455,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
                 matches.add(kid);
             }
         }
-        return matches;
+        return Collections.unmodifiableList(matches);
     }
 
     /**
@@ -451,7 +485,45 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
             }
         }
 
-        return childrenOfType;
+        return Collections.unmodifiableList(childrenOfType);
+    }
+
+    /**
+     * Utility method to obtain a {@link ASTNode} child of a parent {@link ASTNode} with the given string identifier and node type.
+     *
+     * @param name the name property of the node; may not be null
+     * @return the matched child (may be null)
+     */
+    public <T> T getChildforIdentifierAndRefType(String identifier, Class<T> referenceTypeClass) {
+        CheckArg.isNotNull(identifier, "identifier"); //$NON-NLS-1$
+
+        for (ASTNode child : getChildren()) {
+            if (identifier.equalsIgnoreCase(child.astIdentifier())) {
+                if (referenceTypeClass.isInstance(child))
+                    return (T) child;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Utility method to obtain the children of a parent {@link ASTNode} with the given string identifier and node type.
+     *
+     * @param name the name property of the node; may not be null
+     * @return the matched children or an empty collection
+     */
+    public <T> List<T> getChildrenforIdentifierAndRefType(String identifier, Class<T> referenceTypeClass) {
+        CheckArg.isNotNull(identifier, "identifier"); //$NON-NLS-1$
+        List<T> children = new ArrayList<T>();
+        
+        for (ASTNode child : getChildren()) {
+            if (identifier.equalsIgnoreCase(child.astIdentifier())) {
+                if (referenceTypeClass.isInstance(child))
+                    children.add((T) child);
+            }
+        }
+
+        return Collections.unmodifiableList(children);
     }
 
     /**
@@ -492,11 +564,42 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * 
      * @param child the node that should be added as the last child; may not be null
      */
-    public void addLastChild(ASTNode child) {
+    private void addLastChild(ASTNode child) {
         assert child != null;
         this.children.addLast(child);
         child.removeFromParent();
         child.parent = this;
+    }
+
+    /**
+     * Convenience method for appending a child LanguageObject
+     *
+     * @param referenceName
+     * @param languageObject
+     */
+    public void addLastChild(String referenceName, LanguageObject languageObject) {
+        if (languageObject == null)
+            return;
+
+        ArgCheck.isInstanceOf(ASTNode.class, languageObject);
+
+        ASTNode childNode = (ASTNode)languageObject;
+        childNode.setAstIdentifier(referenceName);
+        addLastChild(childNode);
+    }
+
+    public void setChildren(String referenceName, Collection<? extends LanguageObject> languageObjects) {
+        if (languageObjects == null)
+            return;
+
+        List<ASTNode> existingChildren = childrenWithIdentifier(referenceName);
+        for (ASTNode child : existingChildren) {
+            removeChild(child);
+        }
+
+        for (LanguageObject object : languageObjects) {
+            addLastChild(referenceName, object);
+        }
     }
 
     /**
@@ -542,6 +645,16 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
         }
         if (third != null) {
             this.addLastChild(third);
+        }
+    }
+
+    /**
+     * Remove the children with the given ast identifier
+     */
+    public void removeChildren(String astIdentifier) {
+        List<ASTNode> childrenWithIdentifier = this.childrenWithIdentifier(astIdentifier);
+        for (ASTNode child : childrenWithIdentifier) {
+            removeChild(child);
         }
     }
 
@@ -665,6 +778,15 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
             }
         }
         return true;
+    }
+
+    protected Class<?> convertTypeClassPropertyToClass(String propertyName) {
+        Object property = getProperty(propertyName);
+        if (property == null)
+            return null;
+
+        DataTypeName dataTypeName = DataTypeName.findDataTypeName(property.toString());
+        return getDataTypeService().getDefaultDataClass(dataTypeName);
     }
 
     /**

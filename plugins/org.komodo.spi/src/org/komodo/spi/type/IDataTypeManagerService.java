@@ -1,7 +1,6 @@
 package org.komodo.spi.type;
 
 import java.util.Set;
-import org.komodo.spi.annotation.Since;
 import org.komodo.spi.annotation.Updated;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
@@ -15,34 +14,81 @@ public interface IDataTypeManagerService {
      * teiid DataTypeManager
      */
     enum DataTypeName {
-        STRING,
-        BOOLEAN,
-        BYTE,
-        SHORT,
-        CHAR,
-        INTEGER,
-        LONG,
-        BIG_INTEGER,
-        FLOAT,
-        DOUBLE,
-        BIG_DECIMAL,
-        DATE,
-        TIME,
-        TIMESTAMP,
-        OBJECT,
-        NULL,
-        BLOB,
-        CLOB,
-        XML,
-        VARCHAR,
-        TINYINT,
-        SMALLINT,
-        BIGINT,
-        REAL,
-        DECIMAL,
-        
-        @Since(Version.TEIID_8_0)
-        VARBINARY
+        STRING,                         STRING_ARRAY,
+        BOOLEAN,                     BOOLEAN_ARRAY,
+        BYTE,                             BYTE_ARRAY,
+        SHORT,                         SHORT_ARRAY,
+        CHAR,                           CHAR_ARRAY,
+        INTEGER,                      INTEGER_ARRAY,
+        LONG,                           LONG_ARRAY,
+        BIG_INTEGER,              BIG_INTEGER_ARRAY,
+        FLOAT,                          FLOAT_ARRAY,
+        DOUBLE,                       DOUBLE_ARRAY,
+        BIG_DECIMAL,              BIG_DECIMAL_ARRAY,
+        DATE,                            DATE_ARRAY,
+        TIME,                            TIME_ARRAY,
+        TIMESTAMP,                 TIMESTAMP_ARRAY,
+        OBJECT,                         OBJECT_ARRAY,
+        NULL,                            NULL_ARRAY,
+        BLOB,                            BLOB_ARRAY,
+        CLOB,                            CLOB_ARRAY,
+        XML,                              XML_ARRAY,
+        VARCHAR,                     VARCHAR_ARRAY,
+        TINYINT,                       TINYINT_ARRAY,
+        SMALLINT,                    SMALLINT_ARRAY,
+        BIGINT,                         BIGINT_ARRAY,
+        REAL,                             REAL_ARRAY,
+        DECIMAL,                      DECIMAL_ARRAY,
+        VARBINARY,                  VARBINARY_ARRAY;
+
+        private static final String ARRAY_SUFFIX = "_ARRAY"; //$NON-NLS-1$
+
+        /**
+         * @return whether this is an array type
+         */
+        public boolean isArrayType() {
+            return name().endsWith(ARRAY_SUFFIX);
+        }
+
+        /**
+         * @return component type of this DataTypeName
+         */
+        public DataTypeName getComponentType() {
+            if (isArrayType()) {
+                String rootName = name().substring(0, name().indexOf(ARRAY_SUFFIX));
+                return findDataTypeName(rootName);
+            }
+
+            return this;
+        }
+
+        /**
+         * @return array type of this DataTypeName
+         */
+        public DataTypeName getArrayType() {
+            if (isArrayType())
+                return this;
+
+            String arrayTypeName = name() + ARRAY_SUFFIX;
+            return findDataTypeName(arrayTypeName);
+        }
+
+        /**
+         * @param name
+         * @return DataTypeName for the given name
+         */
+        public static DataTypeName findDataTypeName(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (DataTypeName dtn : values()) {
+                if (dtn.name().equals(name))
+                    return dtn;
+            }
+
+            return null;
+        }
     }
 
     public enum DataTypeAliases {
@@ -130,14 +176,23 @@ public interface IDataTypeManagerService {
     Class<?> getDataTypeClass(String name);
     
     /**
-     * Get the runtime type for the given class
+     * Get the runtime type for the given class as a String
      *  
      * @param typeClass
      * 
      * @return runtime type
      */
     String getDataTypeName(Class<?> typeClass);
-    
+
+    /**
+     * Retrieve the runtime type for the given class as a {@link DataTypeName}
+     *  
+     * @param typeClass
+     * 
+     * @return runtime type as a {@link DataTypeName}
+     */
+    DataTypeName retrieveDataTypeName(Class<?> typeClass);
+
     /**
      * Get a set of all data type names.
      * 
@@ -238,4 +293,25 @@ public interface IDataTypeManagerService {
      * @return whether decimals are treated as doubles
      */
     boolean isDecimalAsDouble();
+
+    /**
+     * @return the data type name for the count type
+     */
+    DataTypeName getCountType();
+
+    /**
+     * For the given argument type, find the sum function's return type
+     *
+     * @param sumArgType
+     * @return sum return type or null if argument is not an appropriate type for sum expressions
+     */
+    DataTypeName getSumReturnType(DataTypeName sumArgType);
+
+    /**
+     * For the given argument type, find the average function's return type
+     *
+     * @param avgArgType
+     * @return average return type or null if argument is not an appropriate type for avg expressions
+     */
+    DataTypeName getAverageReturnType(DataTypeName avgArgType);
 }

@@ -3,6 +3,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -27,31 +28,33 @@ public abstract class Alter<T extends Command> extends Command implements IAlter
      * @return the target
      */
     public GroupSymbol getTarget() {
-        return this.getTarget();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Alter.TARGET_REF_NAME, GroupSymbol.class);
     }
 
     /**
      * @param target the target to set
      */
     public void setTarget(GroupSymbol target) {
+        addLastChild(TeiidSqlLexicon.Alter.TARGET_REF_NAME, target);
     }
 
     /**
      * @return the definition
      */
     public T getDefinition() {
-        throw new UnsupportedOperationException();
+        return (T) getChildforIdentifierAndRefType(TeiidSqlLexicon.Alter.DEFINITION_REF_NAME, Command.class);
     }
 
     /**
      * @param definition the definition to set
      */
     public void setDefinition(T definition) {
+        addLastChild(TeiidSqlLexicon.Alter.DEFINITION_REF_NAME, definition);
     }
 
     @Override
     public List<Expression> getProjectedSymbols() {
-        return getUpdateCommandSymbol();
+        throw new UnsupportedOperationException();
     }
 
     @Override

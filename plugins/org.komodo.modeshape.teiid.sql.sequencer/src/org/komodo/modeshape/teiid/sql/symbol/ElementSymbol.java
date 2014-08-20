@@ -22,9 +22,11 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.symbol.IElementSymbol;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class ElementSymbol extends Symbol implements Expression, IElementSymbol<GroupSymbol, LanguageVisitor> {
 
@@ -33,48 +35,70 @@ public class ElementSymbol extends Symbol implements Expression, IElementSymbol<
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
+    }
+
+    @Override
+    public void setType(Class<?> type) {
+        DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(type);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
     }
 
     @Override
     public GroupSymbol getGroupSymbol() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.ElementSymbol.GROUP_SYMBOL_REF_NAME, GroupSymbol.class);
     }
 
     @Override
     public void setGroupSymbol(GroupSymbol groupSymbol) {
+        addLastChild(TeiidSqlLexicon.ElementSymbol.GROUP_SYMBOL_REF_NAME, groupSymbol);
     }
 
     @Override
     public boolean isExternalReference() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.ElementSymbol.EXTERNAL_REFERENCE_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    @Override
-    public void setDisplayFullyQualified(boolean value) {
+    public void setExternalReference(boolean externalReference) {
+        setProperty(TeiidSqlLexicon.ElementSymbol.EXTERNAL_REFERENCE_PROP_NAME, externalReference);
     }
 
     @Override
     public ElementSymbol.DisplayMode getDisplayMode() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.ElementSymbol.DISPLAY_MODE_PROP_NAME);
+        return property == null ? DisplayMode.OUTPUT_NAME : DisplayMode.findDisplayMode(property.toString());
     }
 
     @Override
-    public void setDisplayMode(ElementSymbol.DisplayMode outputName) {
+    public void setDisplayMode(DisplayMode displayMode) {
+        setProperty(TeiidSqlLexicon.ElementSymbol.DISPLAY_MODE_PROP_NAME, displayMode.name());
+        setProperty(
+                    TeiidSqlLexicon.ElementSymbol.DISPLAY_FULLY_QUALIFIED_PROP_NAME,
+                    DisplayMode.FULLY_QUALIFIED.equals(displayMode));
+    }
+
+    public boolean isDisplayFullyQualified() {
+        Object property = getProperty(TeiidSqlLexicon.ElementSymbol.DISPLAY_FULLY_QUALIFIED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     @Override
-    public void setType(Class<Object> targetType) {
+    public void setDisplayFullyQualified(boolean displayFullyQualified) {
+        setDisplayMode(displayFullyQualified ? DisplayMode.FULLY_QUALIFIED : DisplayMode.SHORT_OUTPUT_NAME);
     }
 
     @Override
     public Object getMetadataID() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.ElementSymbol.METADATAID_PROP_NAME);
+        return property == null ? null : property;
     }
 
     @Override
     public void setMetadataID(Object metadataID) {
+        setProperty(TeiidSqlLexicon.ElementSymbol.METADATAID_PROP_NAME, metadataID);
     }
 
     @Override

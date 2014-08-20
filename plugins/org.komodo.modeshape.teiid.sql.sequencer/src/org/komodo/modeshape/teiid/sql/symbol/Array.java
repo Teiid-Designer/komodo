@@ -23,9 +23,12 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.utils.ArgCheck;
 
 public class Array extends ASTNode implements Expression {
 
@@ -34,33 +37,34 @@ public class Array extends ASTNode implements Expression {
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @return
-     */
+    public void setType(Class<?> type) {
+        if (type != null) {
+            ArgCheck.isTrue(type.isArray(), "type not array"); //$NON-NLS-1$
+        }
+        DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(type);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
+    }
+
     private List<Expression> getExpressions() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.Array.EXPRESSIONS_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param arrayExpressions
-     */
     public void setExpressions(List<Expression> arrayExpressions) {
-    }
-    /**
-     * @return
-     */
-    private boolean isImplicit() {
-        return false;
+        setChildren(TeiidSqlLexicon.Array.EXPRESSIONS_REF_NAME, arrayExpressions);
     }
 
-    /**
-     * @param implicit
-     */
-    private void setImplicit(boolean implicit) {
+    public boolean isImplicit() {
+        Object property = getProperty(TeiidSqlLexicon.Array.IMPLICIT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
+    }
+
+    public void setImplicit(boolean implicit) {
+        setProperty(TeiidSqlLexicon.Array.IMPLICIT_PROP_NAME, implicit);
     }
 
     @Override

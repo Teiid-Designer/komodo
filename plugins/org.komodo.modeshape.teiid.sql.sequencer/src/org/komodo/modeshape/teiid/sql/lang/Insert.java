@@ -23,23 +23,22 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
+import org.komodo.modeshape.teiid.sql.util.SymbolMap;
 import org.komodo.spi.query.sql.lang.IInsert;
 
 public class Insert extends ProcedureContainer implements TargetedCommand, IInsert<ElementSymbol, Expression, GroupSymbol, QueryCommand, LanguageVisitor> {
 
     public Insert(TeiidParser p, int id) {
         super(p, id);
-    }
-
-    @Override
-    public int getType() {
-        return 0;
+        setType(TYPE_INSERT);
     }
 
     @Override
@@ -49,58 +48,97 @@ public class Insert extends ProcedureContainer implements TargetedCommand, IInse
 
     @Override
     public List<ElementSymbol> getVariables() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.Insert.VARIABLES_REF_NAME, ElementSymbol.class);
     }
 
     @Override
     public void addVariable(ElementSymbol symbol) {
+        addLastChild(TeiidSqlLexicon.Insert.VARIABLES_REF_NAME, symbol);
     }
 
     @Override
     public void addVariables(Collection<ElementSymbol> symbols) {
+        for (ElementSymbol es : symbols) {
+            addVariable(es);
+        }
     }
 
     @Override
     public void setVariables(Collection<ElementSymbol> vars) {
+        setChildren(TeiidSqlLexicon.Insert.VARIABLES_REF_NAME, vars);
     }
 
     @Override
     public List<Expression> getValues() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                               TeiidSqlLexicon.Insert.VALUES_REF_NAME, Expression.class);
+    }
+
+    public void addValue(Expression value) {
+        addLastChild(TeiidSqlLexicon.Insert.VALUES_REF_NAME, value);
     }
 
     @Override
     public void setValues(List<? extends Expression> values) {
+        setChildren(TeiidSqlLexicon.Insert.VALUES_REF_NAME, values);
     }
 
     @Override
     public QueryCommand getQueryExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Insert.QUERY_EXPRESSION_REF_NAME, QueryCommand.class);
     }
 
     /**
      * @param query
      */
     public void setQueryExpression(QueryCommand query) {
+        if (isTeiid8OrGreater() && query instanceof Query) {
+            /*
+             * Modified in Teiid 8.6 due to TEIID-2698.
+             * This moves the addition of values from the parser to here
+             * and is backward compatible with all previous version 8+ parsers.
+             */
+            Query expr = (Query)query;
+            //a singl row constructor query is the same as values 
+            if (expr.isRowConstructor()) {
+                List<Expression> emptyList = Collections.emptyList();
+                setValues(emptyList);
+                removeChildren(TeiidSqlLexicon.Insert.QUERY_EXPRESSION_REF_NAME);
+                for (Expression ex : expr.getSelect().getSymbols()) {
+                    addValue(SymbolMap.getExpression(ex));
+                }
+                if (expr.getOption() != null && this.getOption() == null) {
+                    //this isn't ideal, parsing associates the option with values
+                    this.setOption(expr.getOption());
+                }
+                return;
+            }
+        }
+
+        addLastChild(TeiidSqlLexicon.Insert.QUERY_EXPRESSION_REF_NAME, query);
     }
 
     @Override
     public GroupSymbol getGroup() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, GroupSymbol.class);
     }
 
     @Override
     public void setGroup(GroupSymbol group) {
+        addLastChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, group);
     }
 
     private boolean isMerge() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Insert.MERGE_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
      * @param merge
      */
     public void setMerge(boolean merge) {
+        setProperty(TeiidSqlLexicon.Insert.MERGE_PROP_NAME, merge);
     }
 
     @Override

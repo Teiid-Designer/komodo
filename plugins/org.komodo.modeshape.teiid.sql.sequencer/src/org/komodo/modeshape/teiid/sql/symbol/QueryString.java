@@ -23,43 +23,40 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IQueryString;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class QueryString extends ASTNode implements Expression, IQueryString<LanguageVisitor> {
 
     public QueryString(TeiidParser p, int id) {
         super(p, id);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.STRING.name());
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @return
-     */
     public Expression getPath() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.QueryString.PATH_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param path
-     */
     public void setPath(Expression path) {
+        addLastChild(TeiidSqlLexicon.QueryString.PATH_REF_NAME, path);
     }
 
     public List<DerivedColumn> getArgs() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.QueryString.ARGS_REF_NAME, DerivedColumn.class);
     }
 
-    /**
-     * @param args
-     */
     public void setArgs(List<DerivedColumn> args) {
+        setChildren(TeiidSqlLexicon.QueryString.ARGS_REF_NAME, args);
     }
 
     @Override

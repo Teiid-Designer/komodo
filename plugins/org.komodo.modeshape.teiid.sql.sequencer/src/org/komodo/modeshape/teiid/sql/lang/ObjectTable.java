@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.DerivedColumn;
@@ -34,53 +35,40 @@ public class ObjectTable extends TableFunctionReference implements IObjectTable<
         super(p, id);
     }
 
-    /**
-     * @return
-     */
     public String getRowScript() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.ObjectTable.ROW_SCRIPT_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param rowScript
-     */
     public void setRowScript(String rowScript) {
+        setProperty(TeiidSqlLexicon.ObjectTable.ROW_SCRIPT_PROP_NAME, rowScript);
     }
 
-    /**
-     * @return
-     */
     public List<DerivedColumn> getPassing() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.ObjectTable.PASSING_REF_NAME, DerivedColumn.class);
     }
 
-    /**
-     * @param passingValues
-     */
     public void setPassing(List<DerivedColumn> passingValues) {
+        setChildren(TeiidSqlLexicon.ObjectTable.PASSING_REF_NAME, passingValues);
     }
 
     @Override
     public List<ObjectColumn> getColumns() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.ObjectTable.COLUMNS_REF_NAME, ObjectColumn.class);
     }
 
-    /**
-     * @param columns
-     */
     public void setColumns(List<ObjectColumn> columns) {
     }
-    /**
-     * @return
-     */
+
     public String getScriptingLanguage() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.ObjectTable.SCRIPTING_LANGUAGE_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param lang
-     */
     public void setScriptingLanguage(String lang) {
+        setProperty(TeiidSqlLexicon.ObjectTable.SCRIPTING_LANGUAGE_PROP_NAME, lang);
     }
 
     @Override

@@ -23,52 +23,59 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLElement;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class XMLElement extends ASTNode implements Expression, IXMLElement<LanguageVisitor> {
 
     public XMLElement(TeiidParser p, int id) {
         super(p, id);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.XML.name());
     }
 
     public String getName() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.XMLElement.NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     public void setName(String name) {
+        setProperty(TeiidSqlLexicon.XMLElement.NAME_PROP_NAME, name);
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @return
-     */
     public List<Expression> getContent() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.XMLElement.CONTENT_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param content
-     */
     public void setContent(List<Expression> content) {
+        setChildren(TeiidSqlLexicon.XMLElement.CONTENT_REF_NAME, content);
     }
 
-    /**
-     * @param xmlNamespaces
-     */
+    public XMLNamespaces getNamespaces() {
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.XMLElement.NAMESPACES_REF_NAME, XMLNamespaces.class);
+    }
+
     public void setNamespaces(XMLNamespaces xmlNamespaces) {
+        addLastChild(TeiidSqlLexicon.XMLElement.NAMESPACES_REF_NAME, xmlNamespaces);
     }
 
-    /**
-     * @param xmlAttributes
-     */
+    public XMLAttributes getAttributes() {
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.XMLElement.ATTRIBUTES_REF_NAME, XMLAttributes.class);
+    }
+
     public void setAttributes(XMLAttributes xmlAttributes) {
+        addLastChild(TeiidSqlLexicon.XMLElement.ATTRIBUTES_REF_NAME, xmlAttributes);
     }
 
     @Override
@@ -133,20 +140,6 @@ public class XMLElement extends ASTNode implements Expression, IXMLElement<Langu
             clone.setName(getName());
 
         return clone;
-    }
-
-    /**
-     * @return
-     */
-    public XMLAttributes getAttributes() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return
-     */
-    public XMLNamespaces getNamespaces() {
-        throw new UnsupportedOperationException();
     }
 
 }

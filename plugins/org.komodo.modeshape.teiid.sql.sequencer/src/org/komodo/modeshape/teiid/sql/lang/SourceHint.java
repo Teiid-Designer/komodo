@@ -22,7 +22,8 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
-import java.util.Map;
+import java.util.Collection;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.lang.ISourceHint;
 
@@ -43,64 +44,43 @@ public class SourceHint extends ASTNode implements ISourceHint {
      * @return general hint
      */
     public String getGeneralHint() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.SourceHint.GENERAL_HINT_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     /**
      * @param generalHint
      */
     public void setGeneralHint(String generalHint) {
+        setProperty(TeiidSqlLexicon.SourceHint.GENERAL_HINT_PROP_NAME, generalHint);
     }
 
-    /**
-     * @param sourceName
-     *
-     * @return source hint with name
-     */
-    public SpecificHint getSourceHint(String sourceName) {
-        throw new UnsupportedOperationException();
+    public Collection<SpecificHint> getSourceHints() {
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.SourceHint.SOURCE_HINTS_REF_NAME, SpecificHint.class);
     }
 
-    /**
-     * @param specificHint
-     */
-    public void setSourceHint(SpecificHint specificHint) {
+    public void addSourceHint(SpecificHint specificHint) {
+        addLastChild(TeiidSqlLexicon.SourceHint.SOURCE_HINTS_REF_NAME, specificHint);
     }
 
-    /**
-     * @return map of source hints
-     */
-    public Map<String, SpecificHint> getSourceHints() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param sourceName
-     *
-     * @return specific hint for given name
-     */
-    public SpecificHint getSpecificHint(String sourceName) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return map of specific hints
-     */
-    public Map<String, SpecificHint> getSpecificHints() {
-        throw new UnsupportedOperationException();
+    public void setSourceHints(Collection<SpecificHint> specificHint) {
+        setChildren(TeiidSqlLexicon.SourceHint.SOURCE_HINTS_REF_NAME, specificHint);
     }
 
     /**
      * @return use aliases flag
      */
     public boolean isUseAliases() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.SourceHint.USE_ALIASES_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
      * @param useAliases
      */
     public void setUseAliases(boolean useAliases) {
+        setProperty(TeiidSqlLexicon.SourceHint.USE_ALIASES_PROP_NAME, useAliases);
     }
 
     @Override
@@ -145,9 +125,7 @@ public class SourceHint extends ASTNode implements ISourceHint {
             clone.setGeneralHint(getGeneralHint());
 
         if (getSourceHints() != null) {
-            for (SpecificHint hint : getSourceHints().values()) {
-                clone.setSourceHint(hint.clone());
-            }
+            clone.setSourceHints(cloneCollection(getSourceHints()));
         }
 
         clone.setUseAliases(isUseAliases());

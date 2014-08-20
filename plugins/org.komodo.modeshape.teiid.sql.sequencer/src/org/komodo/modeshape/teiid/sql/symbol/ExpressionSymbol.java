@@ -22,9 +22,11 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.symbol.IExpressionSymbol;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class ExpressionSymbol extends Symbol implements Expression, IExpressionSymbol<Expression, LanguageVisitor> {
 
@@ -33,17 +35,22 @@ public class ExpressionSymbol extends Symbol implements Expression, IExpressionS
     }
 
     @Override
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
+    }
+
+    @Override
     public Expression getExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.ExpressionSymbol.EXPRESSION_REF_NAME, Expression.class);
     }
 
     @Override
     public void setExpression(Expression expression) {
-    }
+        addLastChild(TeiidSqlLexicon.ExpressionSymbol.EXPRESSION_REF_NAME, expression);
 
-    @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+        DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(expression.getType());
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
     }
 
     @Override

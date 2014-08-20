@@ -23,7 +23,9 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.ISubqueryFromClause;
@@ -36,34 +38,39 @@ public class SubqueryFromClause extends FromClause implements SubqueryContainer<
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.SubqueryFromClause.NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     @Override
     public void setName(String name) {
+        setProperty(TeiidSqlLexicon.SubqueryFromClause.NAME_PROP_NAME, name);
     }
 
     public boolean isTable() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.SubqueryFromClause.TABLE_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param table
-     */
     public void setTable(boolean table) {
+        setProperty(TeiidSqlLexicon.SubqueryFromClause.TABLE_PROP_NAME, table);
     }
 
     @Override
     public Command getCommand() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, Command.class);
     }
 
     @Override
     public void setCommand(Command command) {
+        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override
     public void collectGroups(Collection<GroupSymbol> groups) {
+        GroupSymbol symbol = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
+        symbol.setName(getName());
+        groups.add(symbol);
     }
 
     @Override

@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -46,13 +47,14 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      */
     @Override
     public Expression getExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.BetweenCriteria.EXPRESSION_REF_NAME, Expression.class);
     }
 
     /**
      * @param expression the expression to set
      */
     public void setExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.BetweenCriteria.EXPRESSION_REF_NAME, expression);
     }
 
     /**
@@ -60,13 +62,14 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      */
     @Override
     public Expression getLowerExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.BetweenCriteria.LOWER_EXPRESSION_REF_NAME, Expression.class);
     }
 
     /**
      * @param lowerExpression
      */
     public void setLowerExpression(Expression lowerExpression) {
+        addLastChild(TeiidSqlLexicon.BetweenCriteria.LOWER_EXPRESSION_REF_NAME, lowerExpression);
     }
 
     /**
@@ -74,13 +77,14 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      */
     @Override
     public Expression getUpperExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.BetweenCriteria.UPPER_EXPRESSION_REF_NAME, Expression.class);
     }
 
     /**
      * @param upperExpression
      */
     public void setUpperExpression(Expression upperExpression) {
+        addLastChild(TeiidSqlLexicon.BetweenCriteria.UPPER_EXPRESSION_REF_NAME, upperExpression);
     }
 
     /**
@@ -88,7 +92,8 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      */
     @Override
     public boolean isNegated() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.BetweenCriteria.NEGATED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
@@ -96,6 +101,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      */
     @Override
     public void setNegated(boolean negated) {
+        setProperty(TeiidSqlLexicon.BetweenCriteria.NEGATED_PROP_NAME, negated);
     }
 
     @Override

@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -34,49 +35,34 @@ public class Update extends ProcedureContainer
 
     public Update(TeiidParser p, int id) {
         super(p, id);
+        setType(TYPE_UPDATE);
     }
 
-    @Override
-    public int getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return
-     */
     public SetClauseList getChangeList() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Update.CHANGE_LIST_REF_NAME, SetClauseList.class);
     }
 
-    /**
-     * @param setClauseList
-     */
     public void setChangeList(SetClauseList setClauseList) {
+        addLastChild(TeiidSqlLexicon.Update.CHANGE_LIST_REF_NAME, setClauseList);
     }
 
     @Override
     public GroupSymbol getGroup() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, GroupSymbol.class);
     }
 
-    /**
-     * @param groupSymbol
-     */
     public void setGroup(GroupSymbol groupSymbol) {
+        addLastChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, groupSymbol);
     }
 
-    /**
-     * @return
-     */
     public Criteria getCriteria() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Update.CRITERIA_REF_NAME, Criteria.class);
     }
 
-    /**
-     * @param criteria
-     */
     public void setCriteria(Criteria criteria) {
+        addLastChild(TeiidSqlLexicon.Update.CRITERIA_REF_NAME, criteria);
     }
+
     @Override
     public List<Expression> getProjectedSymbols() {
         throw new UnsupportedOperationException();

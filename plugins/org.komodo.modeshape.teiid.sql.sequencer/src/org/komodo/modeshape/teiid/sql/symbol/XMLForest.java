@@ -23,47 +23,43 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLForest;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class XMLForest extends ASTNode implements Expression, IXMLForest<LanguageVisitor> {
 
     public XMLForest(TeiidParser p, int id) {
         super(p, id);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.XML.name());
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @return
-     */
     public List<DerivedColumn> getArguments() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.XMLForest.ARGUMENTS_REF_NAME, DerivedColumn.class);
     }
 
-    /**
-     * @param args
-     */
     public void setArguments(List<DerivedColumn> args) {
+        setChildren(TeiidSqlLexicon.XMLForest.ARGUMENTS_REF_NAME, args);
     }
 
-    /**
-     * @return
-     */
     public XMLNamespaces getNamespaces() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.XMLForest.NAMESPACES_REF_NAME, XMLNamespaces.class);
     }
 
-    /**
-     * @param xmlNamespaces
-     */
     public void setNamespaces(XMLNamespaces xmlNamespaces) {
+        addLastChild(TeiidSqlLexicon.XMLForest.NAMESPACES_REF_NAME, xmlNamespaces);
     }
+
     @Override
     public int hashCode() {
         final int prime = 31;

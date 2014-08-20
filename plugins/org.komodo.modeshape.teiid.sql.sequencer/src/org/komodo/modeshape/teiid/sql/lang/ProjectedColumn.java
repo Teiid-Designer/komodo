@@ -22,7 +22,9 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.spi.query.sql.lang.IProjectedColumn;
@@ -34,30 +36,30 @@ public class ProjectedColumn extends ASTNode implements IProjectedColumn<Languag
     }
 
     public String getName() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.ProjectedColumn.NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     public void setName(String name) {
+        setProperty(TeiidSqlLexicon.ProjectedColumn.NAME_PROP_NAME, name);
     }
 
-    /**
-     * @return
-     */
     public ElementSymbol getSymbol() {
-        throw new UnsupportedOperationException();
+        ElementSymbol symbol = getTeiidParser().createASTNode(ASTNodes.ELEMENT_SYMBOL);
+        symbol.setName(getName());
+        Class<?> typeClass = getTeiidParser().getDataTypeService().getDataTypeClass(getType());
+        symbol.setType(typeClass);
+
+        return symbol;
     }
 
-    /**
-     * @return
-     */
     public String getType() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.ProjectedColumn.TYPE_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param type
-     */
     public void setType(String type) {
+        setProperty(TeiidSqlLexicon.ProjectedColumn.TYPE_PROP_NAME, type);
     }
 
     @Override
@@ -65,7 +67,6 @@ public class ProjectedColumn extends ASTNode implements IProjectedColumn<Languag
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((this.getName() == null) ? 0 : this.getName().hashCode());
-        result = prime * result + ((this.getSymbol() == null) ? 0 : this.getSymbol().hashCode());
         result = prime * result + ((this.getType() == null) ? 0 : this.getType().hashCode());
         return result;
     }
@@ -83,11 +84,6 @@ public class ProjectedColumn extends ASTNode implements IProjectedColumn<Languag
             if (other.getName() != null)
                 return false;
         } else if (!this.getName().equals(other.getName()))
-            return false;
-        if (this.getSymbol() == null) {
-            if (other.getSymbol() != null)
-                return false;
-        } else if (!this.getSymbol().equals(other.getSymbol()))
             return false;
         if (this.getType() == null) {
             if (other.getType() != null)

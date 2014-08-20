@@ -21,6 +21,7 @@
  ************************************************************************************/
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 
 /**
@@ -40,26 +41,30 @@ public class NamespaceItem extends ASTNode {
      * @return uri
      */
     public String getUri() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.NamespaceItem.URI_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     /**
      * @param uri the uri to set
      */
     public void setUri(String uri) {
+        setProperty(TeiidSqlLexicon.NamespaceItem.URI_PROP_NAME, uri);
     }
 
     /**
      * @return prefix
      */
     public String getPrefix() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.NamespaceItem.PREFIX_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     /**
     * @param prefix the prefix to set
     */
     public void setPrefix(String prefix) {
+        setProperty(TeiidSqlLexicon.NamespaceItem.PREFIX_PROP_NAME, prefix);
     }
 
     @Override

@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -35,20 +36,23 @@ public class IsNullCriteria extends Criteria implements PredicateCriteria, IIsNu
 
     @Override
     public Expression getExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.IsNullCriteria.EXPRESSION_REF_NAME, Expression.class);
     }
 
     @Override
     public void setExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.IsNullCriteria.EXPRESSION_REF_NAME, expression);
     }
 
     @Override
     public boolean isNegated() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.IsNullCriteria.NEGATED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     @Override
     public void setNegated(boolean value) {
+        setProperty(TeiidSqlLexicon.IsNullCriteria.NEGATED_PROP_NAME, value);
     }
 
     @Override

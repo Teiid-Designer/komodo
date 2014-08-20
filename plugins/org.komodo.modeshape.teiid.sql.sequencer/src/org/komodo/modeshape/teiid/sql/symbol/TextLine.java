@@ -23,85 +23,72 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.ITextLine;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class TextLine extends ASTNode implements Expression, ITextLine<LanguageVisitor> {
 
     public TextLine(TeiidParser p, int id) {
         super(p, id);
+        if (isTeiidVersionOrGreater(Version.TEIID_8_5.get()))
+            setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.STRING_ARRAY.name());
+        else
+            setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.STRING.name());
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @return
-     */
     public Character getDelimiter() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextLine.DELIMITER_PROP_NAME);
+        return property == null ? null : property.toString().charAt(0);
     }
 
-    /**
-     * @param delimiter
-     */
     public void setDelimiter(Character delimiter) {
+        setProperty(TeiidSqlLexicon.TextLine.DELIMITER_PROP_NAME, delimiter);
     }
 
-    /**
-     * @return
-     */
     public Character getQuote() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextLine.QUOTE_PROP_NAME);
+        return property == null ? null : property.toString().charAt(0);
     }
 
-    /**
-     * @param quote
-     */
     public void setQuote(Character quote) {
+        setProperty(TeiidSqlLexicon.TextLine.QUOTE_PROP_NAME, quote);
     }
 
-    /**
-     * @return
-     */
     public boolean isIncludeHeader() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.TextLine.INCLUDE_HEADER_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param header
-     */
     public void setIncludeHeader(boolean header) {
+        setProperty(TeiidSqlLexicon.TextLine.INCLUDE_HEADER_PROP_NAME, header);
     }
 
-    /**
-     * @return
-     */
     public List<DerivedColumn> getExpressions() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.TextLine.EXPRESSIONS_REF_NAME, DerivedColumn.class);
     }
 
-    /**
-     * @param expressions
-     */
     public void setExpressions(List<DerivedColumn> expressions) {
+        setChildren(TeiidSqlLexicon.TextLine.EXPRESSIONS_REF_NAME, expressions);
     }
 
-    /**
-     * @return
-     */
     public String getEncoding() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextLine.ENCODING_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param encoding
-     */
     public void setEncoding(String encoding) {
+        setProperty(TeiidSqlLexicon.TextLine.ENCODING_PROP_NAME, encoding);
     }
 
     @Override

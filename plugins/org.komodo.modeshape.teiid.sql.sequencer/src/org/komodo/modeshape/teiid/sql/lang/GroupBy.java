@@ -23,10 +23,13 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IGroupBy;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 public class GroupBy extends ASTNode implements IGroupBy<Expression, LanguageVisitor> {
 
@@ -41,27 +44,40 @@ public class GroupBy extends ASTNode implements IGroupBy<Expression, LanguageVis
 
     @Override
     public List<Expression> getSymbols() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.GroupBy.SYMBOLS_REF_NAME, Expression.class);
     }
 
     @Override
     public void addSymbol(Expression symbol) {
+        addLastChild(TeiidSqlLexicon.GroupBy.SYMBOLS_REF_NAME, symbol);
     }
 
     /**
      * @param expressions
      */
     public void setSymbols(List<Expression> expressions) {
+        setChildren(TeiidSqlLexicon.GroupBy.SYMBOLS_REF_NAME, expressions);
     }
 
+    @Since(Version.TEIID_8_5)
     public boolean isRollup() {
-        return false;
+        if (isLessThanTeiidVersion(TeiidSqlLexicon.GroupBy.ROLLUP_PROP_SINCE_VERSION.get()))
+            return false;
+
+        Object property = getProperty(TeiidSqlLexicon.GroupBy.ROLLUP_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
      * @param rollup
      */
+    @Since(Version.TEIID_8_5)
     public void setRollup(boolean rollup) {
+        if (isLessThanTeiidVersion(TeiidSqlLexicon.GroupBy.ROLLUP_PROP_SINCE_VERSION.get()))
+            return;
+
+        setProperty(TeiidSqlLexicon.GroupBy.ROLLUP_PROP_NAME, rollup);
     }
 
     @Override

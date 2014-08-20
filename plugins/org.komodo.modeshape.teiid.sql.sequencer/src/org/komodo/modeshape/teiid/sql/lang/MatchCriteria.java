@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -30,55 +31,66 @@ import org.komodo.spi.query.sql.lang.IMatchCriteria;
 public class MatchCriteria extends Criteria
     implements PredicateCriteria, IMatchCriteria<Expression, LanguageVisitor> {
 
+    /** The internal null escape character */
+    public static final char NULL_ESCAPE_CHAR = 0;
+
     public MatchCriteria(TeiidParser p, int id) {
         super(p, id);
     }
 
     @Override
     public Expression getLeftExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.MatchCriteria.LEFT_EXPRESSION_REF_NAME, Expression.class);
     }
 
     @Override
     public void setLeftExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.MatchCriteria.LEFT_EXPRESSION_REF_NAME, expression);
     }
 
     @Override
     public Expression getRightExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.MatchCriteria.RIGHT_EXPRESSION_REF_NAME, Expression.class);
     }
 
     @Override
     public void setRightExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.MatchCriteria.RIGHT_EXPRESSION_REF_NAME, expression);
     }
 
     @Override
     public char getEscapeChar() {
-        return 0;
+        Object property = getProperty(TeiidSqlLexicon.MatchCriteria.ESCAPE_CHAR_PROP_NAME);
+        return property == null ? NULL_ESCAPE_CHAR : property.toString().charAt(0);
     }
 
     @Override
     public void setEscapeChar(char escapeChar) {
+        setProperty(TeiidSqlLexicon.MatchCriteria.ESCAPE_CHAR_PROP_NAME, escapeChar);
     }
 
     @Override
     public boolean isNegated() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.MatchCriteria.NEGATED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     @Override
     public void setNegated(boolean value) {
+        setProperty(TeiidSqlLexicon.MatchCriteria.NEGATED_PROP_NAME, value);
     }
 
     @Override
-    public org.komodo.spi.query.sql.lang.IMatchCriteria.MatchMode getMode() {
-        throw new UnsupportedOperationException();
+    public MatchMode getMode() {
+        Object property = getProperty(TeiidSqlLexicon.MatchCriteria.MODE_PROP_NAME);
+        return property == null ? MatchMode.LIKE : MatchMode.findMatchMode(property.toString());
     }
 
     /**
      * @param matchMode
      */
     public void setMode(MatchMode matchMode) {
+        setProperty(TeiidSqlLexicon.MatchCriteria.MODE_PROP_NAME, matchMode.name());
     }
 
     @Override

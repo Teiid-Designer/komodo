@@ -39,11 +39,7 @@ public class AlterProcedure extends Alter<CreateProcedureCommand> implements IAl
      */
     public AlterProcedure(TeiidParser p, int id) {
         super(p, id);
-    }
-
-    @Override
-    public int getType() {
-        throw new UnsupportedOperationException();
+        setType(TYPE_ALTER_PROC);
     }
 
     /** Accept the visitor. **/

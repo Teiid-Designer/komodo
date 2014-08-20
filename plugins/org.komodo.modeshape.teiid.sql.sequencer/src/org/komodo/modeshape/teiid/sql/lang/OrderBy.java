@@ -23,7 +23,9 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IOrderBy;
@@ -39,19 +41,44 @@ public class OrderBy extends ASTNode implements IOrderBy<Expression, OrderByItem
         return 0;
     }
 
-    @Override
-    public void addVariable(Expression expression) {
+    public Expression getVariable(int index) {
+        return getOrderByItems().get(index).getSymbol();
     }
 
     @Override
-    public void addVariable(Expression element, boolean orderType) {
+    public void addVariable(Expression expression) {
+        addVariable(expression, true);
+    }
+
+    /**
+     * Adds a new variable to the list of order by elements with the
+     * specified sort order
+     *
+     * @param expression Expression to add
+     * @param type True for ascending, false for descending
+     */
+    @Override
+    public void addVariable(Expression expression, boolean orderType) {
+        OrderByItem orderByItem = getTeiidParser().createASTNode(ASTNodes.ORDER_BY_ITEM);
+        orderByItem.setSymbol(expression);
+        orderByItem.setAscending(orderType);
+        addOrderByItem(orderByItem);
     }
 
     @Override
     public List<OrderByItem> getOrderByItems() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.OrderBy.ORDER_BY_ITEMS_REF_NAME, OrderByItem.class);
     }
 
+    public void addOrderByItem(OrderByItem item) {
+        addLastChild(TeiidSqlLexicon.OrderBy.ORDER_BY_ITEMS_REF_NAME, item);
+    }
+
+    public void setOrderByItems(List<OrderByItem> items) {
+        setChildren(TeiidSqlLexicon.OrderBy.ORDER_BY_ITEMS_REF_NAME, items);
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -85,7 +112,7 @@ public class OrderBy extends ASTNode implements IOrderBy<Expression, OrderByItem
     @Override
     public OrderBy clone() {
         OrderBy clone = new OrderBy(this.getTeiidParser(), this.getId());
-        clone.getOrderByItems().addAll(cloneList(getOrderByItems()));
+        clone.setOrderByItems(cloneList(getOrderByItems()));
         return clone;
     }
 

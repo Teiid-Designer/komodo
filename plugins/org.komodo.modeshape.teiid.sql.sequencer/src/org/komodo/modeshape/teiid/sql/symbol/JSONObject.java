@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -33,21 +34,21 @@ public class JSONObject extends ASTNode implements Expression, IJSONObject<Langu
 
     public JSONObject(TeiidParser p, int id) {
         super(p, id);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.CLOB.name());
     }
 
     @Override
     public Class<?> getType() {
-        return getTeiidParser().getDataTypeService().getDefaultDataClass(DataTypeName.CLOB);
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
     public List<DerivedColumn> getArgs() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.JSONObject.ARGS_REF_NAME, DerivedColumn.class);
     }
 
-    /**
-     * @param args
-     */
     public void setArgs(List<DerivedColumn> args) {
+        setChildren(TeiidSqlLexicon.JSONObject.ARGS_REF_NAME, args);
     }
 
     @Override

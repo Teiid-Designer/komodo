@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
@@ -42,38 +43,47 @@ public class CompoundCriteria extends Criteria implements ICompoundCriteria<Crit
 
     @Override
     public int getOperator() {
-        return 0;
+        Object property = getProperty(TeiidSqlLexicon.CompoundCriteria.OPERATOR_PROP_NAME);
+        return property == null ? -1 : Integer.parseInt(property.toString());
     }
 
     /**
-     * @param or
+     * @param operator
      */
-    public void setOperator(int or) {
+    public void setOperator(int operator) {
+        setProperty(TeiidSqlLexicon.CompoundCriteria.OPERATOR_PROP_NAME, operator);
     }
 
     @Override
     public List<Criteria> getCriteria() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                               TeiidSqlLexicon.CompoundCriteria.CRITERIA_REF_NAME, Criteria.class);
     }
 
     @Override
     public int getCriteriaCount() {
-        return 0;
+        return getCriteria().size();
     }
 
     @Override
     public Criteria getCriteria(int index) {
-        throw new UnsupportedOperationException();
+        List<Criteria> criteria = getCriteria();
+        if (index >= criteria.size() || index < 0)
+            return null;
+
+        return criteria.get(index);
     }
 
     @Override
     public void addCriteria(Criteria criteria) {
+        addLastChild(TeiidSqlLexicon.CompoundCriteria.CRITERIA_REF_NAME, criteria);
     }
 
     /**
      * @param criteria
      */
     public void setCriteria(List<Criteria> criteria) {
+        setChildren(TeiidSqlLexicon.CompoundCriteria.CRITERIA_REF_NAME, criteria);
     }
 
     @Override

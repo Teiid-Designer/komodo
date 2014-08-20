@@ -22,12 +22,14 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.QueryCommand;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryContainer;
 import org.komodo.spi.query.sql.symbol.IScalarSubquery;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class ScalarSubquery extends ASTNode implements Expression, SubqueryContainer<QueryCommand>, IScalarSubquery<LanguageVisitor, QueryCommand> {
 
@@ -36,23 +38,24 @@ public class ScalarSubquery extends ASTNode implements Expression, SubqueryConta
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @param type
-     */
-    public void setType(Class<Object> type) {
+    public void setType(Class<?> type) {
+        DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(type);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
     }
 
     @Override
     public QueryCommand getCommand() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, QueryCommand.class);
     }
 
     @Override
     public void setCommand(QueryCommand command) {
+        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override

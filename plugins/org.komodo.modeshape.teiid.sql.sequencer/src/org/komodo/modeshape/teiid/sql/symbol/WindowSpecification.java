@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -35,30 +36,22 @@ public class WindowSpecification extends ASTNode implements IWindowSpecification
         super(p, id);
     }
 
-    /**
-     * @return
-     */
     public List<Expression> getPartition() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.WindowSpecification.PARTITION_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param partitionList
-     */
     public void setPartition(List<Expression> partitionList) {
+        setChildren(TeiidSqlLexicon.WindowSpecification.PARTITION_REF_NAME, partitionList);
     }
 
-    /**
-     * @return
-     */
     public OrderBy getOrderBy() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.WindowSpecification.ORDER_BY_REF_NAME, OrderBy.class);
     }
 
-    /**
-     * @param orderBy
-     */
     public void setOrderBy(OrderBy orderBy) {
+        addLastChild(TeiidSqlLexicon.WindowSpecification.ORDER_BY_REF_NAME, orderBy);
     }
 
     @Override

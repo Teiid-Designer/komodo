@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -34,37 +35,37 @@ public class MultipleElementSymbol extends ASTNode implements Expression, IMulti
         super(p, id);
     }
 
+    @Override
+    public Class<?> getType() {
+        return null;
+    }
+
     public String getName() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.MultipleElementSymbol.NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     public void setName(String name) {
+        setProperty(TeiidSqlLexicon.MultipleElementSymbol.NAME_PROP_NAME, name);
     }
 
-    @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return null if selecting all groups, otherwise the specific group
-     */
     public GroupSymbol getGroup() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.MultipleElementSymbol.GROUP_REF_NAME, GroupSymbol.class);
     }
 
-    /**
-     * @param group
-     */
     public void setGroup(GroupSymbol group) {
+        addLastChild(TeiidSqlLexicon.MultipleElementSymbol.GROUP_REF_NAME, group);
     }
 
     @Override
     public List<ElementSymbol> getElementSymbols() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.MultipleElementSymbol.ELEMENT_SYMBOLS_REF_NAME, ElementSymbol.class);
     }
 
     public void setElementSymbols(List<ElementSymbol> elementSymbols) {
+        setChildren(TeiidSqlLexicon.MultipleElementSymbol.ELEMENT_SYMBOLS_REF_NAME, elementSymbols);
     }
 
     @Override

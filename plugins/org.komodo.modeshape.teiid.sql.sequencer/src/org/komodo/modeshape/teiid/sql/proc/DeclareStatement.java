@@ -22,10 +22,10 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
-import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.IDeclareStatement;
 
@@ -35,22 +35,14 @@ public class DeclareStatement extends AssignmentStatement implements IDeclareSta
         super(p, id);
     }
 
-    /**
-     * @param variableID
-     */
-    @Override
-    public void setVariable(ElementSymbol variableID) {
-    }
-
     @Override
     public String getVariableType() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.DeclareStatement.VARIABLE_TYPE_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param type
-     */
     public void setVariableType(String type) {
+        setProperty(TeiidSqlLexicon.DeclareStatement.VARIABLE_TYPE_PROP_NAME, type);
     }
 
     /**

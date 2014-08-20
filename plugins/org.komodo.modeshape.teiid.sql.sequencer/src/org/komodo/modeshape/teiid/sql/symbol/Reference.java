@@ -22,12 +22,12 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
-import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.symbol.IElementSymbol;
 import org.komodo.spi.query.sql.symbol.IReference;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class Reference extends ASTNode implements Expression, IReference<LanguageVisitor> {
 
@@ -36,49 +36,43 @@ public class Reference extends ASTNode implements Expression, IReference<Languag
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @param type
-     */
-    public void setType(Class<Object> type) {
+    public void setType(Class<?> type) {
+        DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(type);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
     }
 
     @Override
     public boolean isPositional() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Reference.POSITIONAL_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setPositional(boolean b) {
+    public void setPositional(boolean positional) {
+        setProperty(TeiidSqlLexicon.Reference.POSITIONAL_PROP_NAME, positional);
     }
 
     @Override
-    public IElementSymbol getExpression() {
-        throw new UnsupportedOperationException();
+    public ElementSymbol getExpression() {
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.Reference.EXPRESSION_REF_NAME, ElementSymbol.class);
     }
 
-    /**
-     * @param clone
-     */
-    public void setExpression(ILanguageObject clone) {
+    public void setExpression(ElementSymbol elementSymbol) {
+        addLastChild(TeiidSqlLexicon.Reference.EXPRESSION_REF_NAME, elementSymbol);
+        setType(elementSymbol.getType());
     }
 
-    /**
-     * @return
-     */
     public int getIndex() {
-        return 0;
+        Object property = getProperty(TeiidSqlLexicon.Reference.INDEX_PROP_NAME);
+        return property == null ? 0 : Integer.parseInt(property.toString());
     }
 
-    /**
-     * @param referenceIndex
-     */
     public void setIndex(int referenceIndex) {
+        setProperty(TeiidSqlLexicon.Reference.INDEX_PROP_NAME, referenceIndex);
     }
 
     @Override

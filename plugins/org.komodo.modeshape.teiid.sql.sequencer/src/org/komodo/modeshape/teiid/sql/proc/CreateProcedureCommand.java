@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.proc;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
@@ -35,29 +36,36 @@ public class CreateProcedureCommand extends Command
 
     public CreateProcedureCommand(TeiidParser p, int id) {
         super(p, id);
+        setType(TYPE_UPDATE_PROCEDURE);
     }
+
     @Override
-    public int getType() {
-        return 0;
+    public Block getBlock() {
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.CreateProcedureCommand.BLOCK_REF_NAME, Block.class);
     }
+
+    @Override
+    public void setBlock(Block block) {
+        addLastChild(TeiidSqlLexicon.CreateProcedureCommand.BLOCK_REF_NAME, block);
+    }
+
+    @Override
+    public GroupSymbol getVirtualGroup() {
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.CreateProcedureCommand.VIRTUAL_GROUP_REF_NAME, GroupSymbol.class);
+    }
+
+    @Override
+    public void setVirtualGroup(GroupSymbol view) {
+        addLastChild(TeiidSqlLexicon.CreateProcedureCommand.VIRTUAL_GROUP_REF_NAME, view);
+    }
+
     @Override
     public List<Expression> getProjectedSymbols() {
         throw new UnsupportedOperationException();
     }
-    @Override
-    public Block getBlock() {
-        throw new UnsupportedOperationException();
-    }
-    @Override
-    public void setBlock(Block block) {
-    }
-    @Override
-    public GroupSymbol getVirtualGroup() {
-        throw new UnsupportedOperationException();
-    }
-    @Override
-    public void setVirtualGroup(GroupSymbol view) {
-    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -65,6 +73,7 @@ public class CreateProcedureCommand extends Command
         result = prime * result + ((this.getBlock() == null) ? 0 : this.getBlock().hashCode());
         return result;
     }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -73,13 +82,15 @@ public class CreateProcedureCommand extends Command
         CreateProcedureCommand other = (CreateProcedureCommand)obj;
         if (this.getBlock() == null) {
             if (other.getBlock() != null) return false;
-        } else if (!this.getBlock().equals(other.getBlock())) return false;
+        } else if (!this.getBlock().equals(other.getBlock()))return false;
         return true;
     }
+
     @Override
     public void acceptVisitor(LanguageVisitor visitor) {
         visitor.visit(this);
     }
+
     @Override
     public CreateProcedureCommand clone() {
         CreateProcedureCommand clone = new CreateProcedureCommand(this.getTeiidParser(), this.getId());

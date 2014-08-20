@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.lang.IJoinType;
@@ -36,23 +37,33 @@ public class JoinType extends ASTNode implements IJoinType<LanguageVisitor> {
      * @return kind
      */
     public Types getKind() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.JoinType.KIND_PROP_NAME);
+        return property == null ? Types.JOIN_CROSS : Types.findType(property.toString());
     }
 
     /**
      * @param kind
      */
     public void setKind(Types kind) {
+        setProperty(TeiidSqlLexicon.JoinType.KIND_PROP_NAME, kind.name());
     }
 
     @Override
     public int getTypeCode() {
-        return 0;
+        Types kind = getKind();
+        if (kind == null)
+            return Types.JOIN_CROSS.getTypeCode();
+
+        return kind.getTypeCode();
     }
 
     @Override
     public boolean isOuter() {
-        return false;
+        Types kind = getKind();
+        if (kind == null)
+            return Types.JOIN_CROSS.isOuter();
+
+        return kind.isOuter();
     }
 
     @Override

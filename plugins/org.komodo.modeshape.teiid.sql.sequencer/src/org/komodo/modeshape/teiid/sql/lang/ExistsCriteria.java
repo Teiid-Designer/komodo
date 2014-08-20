@@ -22,7 +22,9 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.lang.IExistsCriteria;
 
@@ -30,34 +32,41 @@ public class ExistsCriteria extends Criteria implements PredicateCriteria, Subqu
 
     public ExistsCriteria(TeiidParser p, int id) {
         super(p, id);
+
+        SubqueryHint subqueryHint = getTeiidParser().createASTNode(ASTNodes.SUBQUERY_HINT);
+        setSubqueryHint(subqueryHint);
     }
 
     @Override
     public boolean isNegated() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.ExistsCriteria.NEGATED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     @Override
     public void setNegated(boolean value) {
+        setProperty(TeiidSqlLexicon.ExistsCriteria.NEGATED_PROP_NAME, value);
     }
 
     @Override
     public QueryCommand getCommand() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, QueryCommand.class);
     }
 
     @Override
     public void setCommand(QueryCommand command) {
+        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     public SubqueryHint getSubqueryHint() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.ExistsCriteria.SUBQUERY_HINT_REF_NAME, SubqueryHint.class);
     }
 
     /**
      * @param hint
      */
     public void setSubqueryHint(SubqueryHint hint) {
+        addLastChild(TeiidSqlLexicon.ExistsCriteria.SUBQUERY_HINT_REF_NAME, hint);
     }
 
     @Override

@@ -22,10 +22,15 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.ICriteria;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
@@ -40,19 +45,54 @@ public class Criteria extends ASTNode implements Expression, ICriteria<LanguageV
      */
     public Criteria(TeiidParser p, int id) {
         super(p, id);
+        assignTypeName(DataTypeName.BOOLEAN);
     }
 
     @Override
     public Class<?> getType() {
-        return getDataTypeService().getDefaultDataClass(DataTypeName.BOOLEAN);
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
+    }
+
+    private void assignTypeName(DataTypeName dataTypeName) {
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
     }
 
     /**
-     * @param onCriteria
-     * @return
+     * Helper method for {@link #separateCriteriaByAnd(Criteria)} that 
+     * can be called recursively to collect parts.
+     * @param crit Crit to break apart
+     * @param parts Collection to add parts to
      */
-    public static List<Criteria> separateCriteriaByAnd(Criteria onCriteria) {
-        throw new UnsupportedOperationException();
+    private static void separateCriteria(Criteria crit, Collection<Criteria> parts) {
+        if(crit instanceof CompoundCriteria) {
+            CompoundCriteria compCrit = (CompoundCriteria) crit;
+            if(compCrit.getOperator() == ICompoundCriteria.AND) {
+                for (Criteria conjunct : compCrit.getCriteria()) {
+                    separateCriteria(conjunct, parts);
+                }
+            } else {
+                parts.add(crit);    
+            }
+        } else {
+            parts.add(crit);        
+        }   
+    }
+
+    /**
+     * This utility method will pull apart a tree of criteria by breaking all
+     * compound AND criteria apart.  For instance, ((A=1 AND B=2) AND C=3) 
+     * will be broken into A=1, B=2, C=3.  
+     * @param crit Criteria to break apart
+     * @return List of Criteria, empty list if crit is null
+     */     
+    public static List<Criteria> separateCriteriaByAnd(Criteria crit) {
+        if(crit == null) { 
+            return Collections.emptyList();
+        }
+        
+        List<Criteria> parts = new ArrayList<Criteria>();
+        separateCriteria(crit, parts);
+        return parts;           
     }
 
     /** Accept the visitor. **/

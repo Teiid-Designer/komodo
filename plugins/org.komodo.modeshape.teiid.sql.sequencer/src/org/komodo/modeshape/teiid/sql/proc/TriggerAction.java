@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.proc;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
@@ -33,25 +34,17 @@ public class TriggerAction extends Command implements ITriggerAction<Expression,
 
     public TriggerAction(TeiidParser p, int id) {
         super(p, id);
+        setType(TYPE_TRIGGER_ACTION);
     }
 
-    @Override
-    public int getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return
-     */
     public Block getBlock() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.TriggerAction.BLOCK_REF_NAME, Block.class);
     }
 
-    /**
-     * @param b
-     */
-    public void setBlock(Block b) {
+    public void setBlock(Block block) {
+        addLastChild(TeiidSqlLexicon.TriggerAction.BLOCK_REF_NAME, block);
     }
+
     @Override
     public List<Expression> getProjectedSymbols() {
         throw new UnsupportedOperationException();

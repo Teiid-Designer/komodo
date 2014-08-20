@@ -113,7 +113,6 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
      * and replace int with {@link CriteriaOperator.Operator}
      */
     @Deprecated
-    @Override
     public void setOperator(int operator) {
         this.operator = Operator.findOperator(operator);
     }

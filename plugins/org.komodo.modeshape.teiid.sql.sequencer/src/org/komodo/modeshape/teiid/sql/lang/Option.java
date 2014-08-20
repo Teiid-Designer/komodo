@@ -22,7 +22,10 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.lang.IOption;
@@ -50,46 +53,75 @@ public class Option extends ASTNode implements IOption<LanguageVisitor> {
 
     @Override
     public Collection<String> getDependentGroups() {
-        throw new UnsupportedOperationException();
+        Collection<Object> properties = getProperties(TeiidSqlLexicon.Option.DEPENDENT_GROUPS_PROP_NAME);
+        if (properties == null)
+            return null;
+
+        List<String> dps = new ArrayList<String>();
+        for (Object o : properties)
+            dps.add(o.toString());
+
+        return dps;
     }
 
-    /**
-     * @param id
-     */
-    public void addDependentGroup(String id) {
+    public void addDependentGroup(String groupId) {
+        addProperty(TeiidSqlLexicon.Option.DEPENDENT_GROUPS_PROP_NAME, groupId);
+    }
+
+    public void setDependentGroups(Collection<String> groupIds) {
+        setProperty(TeiidSqlLexicon.Option.DEPENDENT_GROUPS_PROP_NAME, groupIds);
     }
 
     @Override
     public Collection<String> getNotDependentGroups() {
-        throw new UnsupportedOperationException();
+        Collection<Object> properties = getProperties(TeiidSqlLexicon.Option.NOT_DEPENDENT_GROUPS_PROP_NAME);
+        if (properties == null)
+            return null;
+
+        List<String> dps = new ArrayList<String>();
+        for (Object o : properties)
+            dps.add(o.toString());
+
+        return dps;
     }
 
-    /**
-     * @param id
-     */
-    public void addNotDependentGroup(String id) {
+    public void addNotDependentGroup(String groupId) {
+        addProperty(TeiidSqlLexicon.Option.NOT_DEPENDENT_GROUPS_PROP_NAME, groupId);
+    }
+
+    public void setNotDependentGroups(Collection<String> groupIds) {
+        setProperty(TeiidSqlLexicon.Option.NOT_DEPENDENT_GROUPS_PROP_NAME, groupIds);  
     }
 
     @Override
     public boolean isNoCache() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Option.NO_CACHE_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setNoCache(boolean b) {
+    public void setNoCache(boolean noCache) {
+        setProperty(TeiidSqlLexicon.Option.NO_CACHE_PROP_NAME, noCache);
     }
 
     @Override
     public Collection<String> getNoCacheGroups() {
-        throw new UnsupportedOperationException();
+        Collection<Object> properties = getProperties(TeiidSqlLexicon.Option.NO_CACHE_GROUPS_PROP_NAME);
+        if (properties == null)
+            return null;
+
+        List<String> dps = new ArrayList<String>();
+        for (Object o : properties)
+            dps.add(o.toString());
+
+        return dps;        
     }
 
-    /**
-     * @param id
-     */
-    public void addNoCacheGroup(String id) {
+    public void addNoCacheGroup(String groupId) {
+        addProperty(TeiidSqlLexicon.Option.NO_CACHE_GROUPS_PROP_NAME, groupId);
+    }
+
+    public void setNoCacheGroups(Collection<String> groupIds) {
+        setProperty(TeiidSqlLexicon.Option.NO_CACHE_GROUPS_PROP_NAME, groupIds);
     }
 
     @Override

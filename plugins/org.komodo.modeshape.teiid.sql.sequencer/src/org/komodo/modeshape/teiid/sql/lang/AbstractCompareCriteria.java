@@ -22,7 +22,9 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.Messages;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator.Operator;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 
 /**
@@ -43,14 +45,24 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * @return The operator
      */
     public int getOperator() {
-        return -1;
+        Object property = getProperty(TeiidSqlLexicon.AbstractCompareCriteria.OPERATOR_PROP_NAME);
+        if (property == null)
+            return -1;
+
+        Operator operator = CriteriaOperator.Operator.findOperator(property.toString());
+        return operator.getIndex();
     }
 
     /**
      * @return string representation of operator
      */
     public String getOperatorAsString() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.AbstractCompareCriteria.OPERATOR_PROP_NAME);
+        if (property == null)
+            return null;
+
+        Operator operator = CriteriaOperator.Operator.findOperator(property.toString());
+        return operator.getSymbols().iterator().next();
     }
 
     /**
@@ -61,6 +73,8 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
         if (operator.isLessThan(CriteriaOperator.Operator.EQ) || operator.isGreaterThan(CriteriaOperator.Operator.GE)) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0001, operator));
         }
+
+        setProperty(TeiidSqlLexicon.AbstractCompareCriteria.OPERATOR_PROP_NAME, operator.name());
     }
 
     /**
@@ -68,7 +82,8 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * @return Left expression
      */
     public Expression getLeftExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, Expression.class);
     }
 
     /**
@@ -76,6 +91,7 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * @param expression Left expression
      */
     public void setLeftExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, expression);
     }
 
     /**

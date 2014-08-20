@@ -23,72 +23,59 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLQuery;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class XMLQuery extends ASTNode implements Expression, IXMLQuery<LanguageVisitor> {
 
     public XMLQuery(TeiidParser p, int id) {
         super(p, id);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.XML.name());
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @return
-     */
     public String getXquery() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.XMLQuery.XQUERY_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param xquery
-     */
     public void setXquery(String xquery) {
+        setProperty(TeiidSqlLexicon.XMLQuery.XQUERY_PROP_NAME, xquery);
     }
 
-    /**
-     * @return
-     */
     public XMLNamespaces getNamespaces() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.XMLQuery.NAMESPACES_REF_NAME, XMLNamespaces.class);
     }
 
-    /**
-     * @param xmlNamespaces
-     */
     public void setNamespaces(XMLNamespaces xmlNamespaces) {
+        addLastChild(TeiidSqlLexicon.XMLQuery.NAMESPACES_REF_NAME, xmlNamespaces);
     }
 
-    /**
-     * @return
-     */
     public List<DerivedColumn> getPassing() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.XMLQuery.PASSING_REF_NAME, DerivedColumn.class);
     }
 
-    /**
-     * @param passingValues
-     */
     public void setPassing(List<DerivedColumn> passingValues) {
+        setChildren(TeiidSqlLexicon.XMLQuery.PASSING_REF_NAME, passingValues);
     }
 
-    /**
-     * @return
-     */
     public Boolean isEmptyOnEmpty() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.XMLQuery.EMPTY_ON_EMPTY_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param empty
-     */
     public void setEmptyOnEmpty(Boolean empty) {
+        setProperty(TeiidSqlLexicon.XMLQuery.EMPTY_ON_EMPTY_PROP_NAME, empty);
     }
 
     @Override

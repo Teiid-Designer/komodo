@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -37,13 +38,15 @@ public class ExpressionCriteria extends Criteria implements IExpressionCriteria<
      * @return
      */
     public Expression getExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                            TeiidSqlLexicon.ExpressionCriteria.EXPRESSION_REF_NAME, Expression.class);
     }
 
     /**
      * @param expression
      */
     public void setExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.ExpressionCriteria.EXPRESSION_REF_NAME, expression);
     }
 
     @Override

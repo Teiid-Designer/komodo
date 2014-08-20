@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
@@ -32,51 +33,34 @@ public class WhileStatement extends Statement implements Labeled, IWhileStatemen
 
     public WhileStatement(TeiidParser p, int id) {
         super(p, id);
+        setType(StatementType.TYPE_WHILE);
     }
 
-    /**
-     * Return the type for this statement, this is one of the types
-     * defined on the statement object.
-     * @return The statement type
-     */
-    @Override
-    public StatementType getType() {
-        return StatementType.TYPE_WHILE;
-    }
-
-    /**
-     * @return
-     */
     public Criteria getCondition() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.WhileStatement.CONDITION_REF_NAME, Criteria.class);
     }
 
-    /**
-     * @param criteria
-     */
     public void setCondition(Criteria criteria) {
+        addLastChild(TeiidSqlLexicon.WhileStatement.CONDITION_REF_NAME, criteria);
     }
 
-    /**
-     * @return
-     */
     public Block getBlock() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.WhileStatement.BLOCK_REF_NAME, Block.class);
     }
 
-    /**
-     * @param asBlock
-     */
-    public void setBlock(Block asBlock) {
+    public void setBlock(Block block) {
+        addLastChild(TeiidSqlLexicon.WhileStatement.BLOCK_REF_NAME, block);
     }
 
     @Override
     public String getLabel() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.Labeled.LABEL_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     @Override
     public void setLabel(String label) {
+        setProperty(TeiidSqlLexicon.Labeled.LABEL_PROP_NAME, label);
     }
 
     @Override

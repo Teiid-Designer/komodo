@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
@@ -36,51 +37,42 @@ public class WithQueryCommand extends ASTNode
         super(p, id);
     }
 
-    /**
-     * @return
-     */
     public GroupSymbol getGroupSymbol() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.WithQueryCommand.GROUP_SYMBOL_REF_NAME, GroupSymbol.class);
     }
 
-    /**
-     * @param groupSymbol
-     */
     public void setGroupSymbol(GroupSymbol groupSymbol) {
+        addLastChild(TeiidSqlLexicon.WithQueryCommand.GROUP_SYMBOL_REF_NAME, groupSymbol);
     }
 
-    /**
-     * @return
-     */
     public List<ElementSymbol> getColumns() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.WithQueryCommand.COLUMNS_REF_NAME, ElementSymbol.class);
     }
 
-    /**
-     * @param columns
-     */
     public void setColumns(List<ElementSymbol> columns) {
+        setChildren(TeiidSqlLexicon.WithQueryCommand.COLUMNS_REF_NAME, columns);
     }
 
-    /**
-     * @return
-     */
     public QueryCommand getQueryExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.WithQueryCommand.QUERY_EXPRESSION_REF_NAME, QueryCommand.class);
     }
 
-    /**
-     * @param queryExpression
-     */
     public void setQueryExpression(QueryCommand queryExpression) {
+        addLastChild(TeiidSqlLexicon.WithQueryCommand.QUERY_EXPRESSION_REF_NAME, queryExpression);
     }
+
     @Override
     public QueryCommand getCommand() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, QueryCommand.class);
     }
 
     @Override
     public void setCommand(QueryCommand command) {
+        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override
