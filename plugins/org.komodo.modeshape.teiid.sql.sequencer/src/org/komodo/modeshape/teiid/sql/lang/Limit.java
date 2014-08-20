@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -42,51 +43,58 @@ public class Limit extends ASTNode implements ILimit<LanguageVisitor> {
      * @return
      */
     public Expression getOffset() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Limit.OFFSET_REF_NAME, Expression.class);
     }
 
     /**
      * @param offset
      */
     public void setOffset(Expression offset) {
+        addLastChild(TeiidSqlLexicon.Limit.OFFSET_REF_NAME, offset);
     }
 
     /**
      * @return
      */
     public Expression getRowLimit() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Limit.ROW_LIMIT_REF_NAME, Expression.class);
     }
 
     /**
      * @param limit
      */
     public void setRowLimit(Expression limit) {
+        addLastChild(TeiidSqlLexicon.Limit.ROW_LIMIT_REF_NAME, limit);
     }
 
     /**
      * @return
      */
     public boolean isStrict() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Limit.STRICT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
-     * @param b
+     * @param strict
      */
-    public void setStrict(boolean b) {
+    public void setStrict(boolean strict) {
+        setProperty(TeiidSqlLexicon.Limit.STRICT_PROP_NAME, strict);
     }
+
     /**
      * @return
      */
     public boolean isImplicit() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Limit.IMPLICIT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
      * @param implicit
      */
     public void setImplicit(boolean implicit) {
+        setProperty(TeiidSqlLexicon.Limit.IMPLICIT_PROP_NAME, implicit);
     }
 
     @Override

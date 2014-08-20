@@ -22,13 +22,14 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
-import java.util.Iterator;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ISPParameter;
+import org.komodo.utils.KLog;
 
 /**
 * Represents a StoredProcedure's parameter for encapsulation in the Query framework
@@ -62,7 +63,6 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
         super(p, id);
     }
 
-    @SuppressWarnings( "unused" )
     private ElementSymbol createElementSymbol(String name) {
         ElementSymbol symbol = getTeiidParser().createASTNode(ASTNodes.ELEMENT_SYMBOL);
         symbol.setName(name);
@@ -75,7 +75,8 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public String getName() {
-        return this.getParameterSymbol().getName();
+        Object property = getProperty(TeiidSqlLexicon.SPParameter.NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     /**
@@ -84,20 +85,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public void setName(String name) {
-    }
-
-    /**
-     * @param parameterInfo
-     */
-    @Override
-    public void setParameterType(ParameterInfo parameterInfo) {
-    }
-
-    /**
-     * Set parameter type according to class constants.
-     * @param parameterType Type to set
-     */
-    public void setParameterType(int parameterType) {
+        setProperty(TeiidSqlLexicon.SPParameter.NAME_PROP_NAME, name);
     }
 
     /**
@@ -106,32 +94,50 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public int getParameterType() {
-        return 0;
+        Object property = getProperty(TeiidSqlLexicon.SPParameter.PARAMETER_TYPE_PROP_NAME);
+        return property == null ? -1 : Integer.parseInt(property.toString());
     }
 
     /**
-     * Set class type - MetaMatrix runtime types.
-     * @param classType
-     * for types
+     * Set parameter type according to class constants.
+     *
+     * @param parameterType Type to set
+     */
+    public void setParameterType(int parameterType) {
+        setProperty(TeiidSqlLexicon.SPParameter.PARAMETER_TYPE_PROP_NAME, parameterType);
+    }
+
+    /**
+     * @param parameterInfo
      */
     @Override
-    public void setClassType(Class<?> classType) {
+    public void setParameterType(ParameterInfo parameterInfo) {
+        setParameterType(parameterInfo.index());
     }
 
     /**
-     * Get class type - MetaMatrix runtime types.
-     * @return MetaMatrix runtime type description
+     * Get class type
+     * @return Runtime type description
      */
     @Override
     public Class<?> getClassType() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.SPParameter.CLASS_TYPE_CLASS_PROP_NAME);
+        try {
+            return property == null ? null : Class.forName(property.toString());
+        } catch (ClassNotFoundException ex) {
+            KLog.getLogger().error(ex.getLocalizedMessage(), ex);
+            return null;
+        }
     }
 
     /**
-     * Set the expression defining this parameter
-     * @param expression The expression defining this parameter's value
+     * Set class type
+     *
+     * @param classType for types
      */
-    public void setExpression(Expression expression) {
+    @Override
+    public void setClassType(Class<?> classType) {
+       setProperty(TeiidSqlLexicon.SPParameter.CLASS_TYPE_CLASS_PROP_NAME, classType.getCanonicalName()); 
     }
 
     /**
@@ -139,15 +145,15 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      * @return Expression defining the value of this parameter
      */
     public Expression getExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SPParameter.EXPRESSION_REF_NAME, Expression.class);
     }
 
     /**
-     * Set the positional index of this parameter
-     * @param index The positional index of this parameter
+     * Set the expression defining this parameter
+     * @param expression The expression defining this parameter's value
      */
-    public void setIndex(int index) {
-
+    public void setExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.SPParameter.EXPRESSION_REF_NAME, expression);
     }
 
     /**
@@ -155,8 +161,26 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      * @return The index
      */
     public int getIndex() {
-        return 0;
+        Object property = getProperty(TeiidSqlLexicon.SPParameter.INDEX_PROP_NAME);
+        return property == null ? 0 : Integer.parseInt(property.toString());
+    }
 
+    /**
+     * Set the positional index of this parameter
+     * @param index The positional index of this parameter
+     */
+    public void setIndex(int index) {
+        setProperty(TeiidSqlLexicon.SPParameter.INDEX_PROP_NAME, index);
+    }
+
+    /**
+     * Get the result set columns.  If none exist, return empty list.
+     * @return List of ElementSymbol representing result set columns
+     */
+    @Override
+    public List<ElementSymbol> getResultSetColumns() {
+        return getChildrenforIdentifierAndRefType(
+                                               TeiidSqlLexicon.SPParameter.RESULT_SET_COLUMN_REF_NAME, ElementSymbol.class);
     }
 
     /**
@@ -168,33 +192,14 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public void addResultSetColumn(String colName, Class<?> type, Object id) {
+        ElementSymbol elementSymbol = createElementSymbol(colName);
+        elementSymbol.setType(type);
+        elementSymbol.setMetadataID(id);
+        addLastChild(TeiidSqlLexicon.SPParameter.RESULT_SET_COLUMN_REF_NAME, elementSymbol);
     }
 
-    /**
-     * Get the result set columns.  If none exist, return empty list.
-     * @return List of ElementSymbol representing result set columns
-     */
-    @Override
-    public List<ElementSymbol> getResultSetColumns() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Get the result set metadata IDs.  If none exist, return empty list.
-     * @return List of Object representing result set metadata IDs
-     */
-    public List<Object> getResultSetIDs() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Get a particular result set column at the specified position.
-     * @param position Position of the result set column
-     * @return Element symbol representing the result set column at position
-     * @throws IllegalArgumentException If column doesn't exist
-     */
-    public ElementSymbol getResultSetColumn(int position) {
-        throw new UnsupportedOperationException();
+    public void setResultSetColumn(List<ElementSymbol> resultColumns) {
+        setChildren(TeiidSqlLexicon.SPParameter.RESULT_SET_COLUMN_REF_NAME, resultColumns);
     }
 
     /**
@@ -203,7 +208,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public Object getMetadataID() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SPParameter.METADATAID_PROP_NAME, Object.class);
     }
 
     /**
@@ -212,6 +217,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public void setMetadataID(Object metadataID) {
+        setProperty(TeiidSqlLexicon.SPParameter.METADATAID_PROP_NAME, metadataID);
     }
 
     /**
@@ -221,7 +227,38 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      */
     @Override
     public ElementSymbol getParameterSymbol() {
-        throw new UnsupportedOperationException();
+        ElementSymbol elementSymbol = createElementSymbol(getName());
+        elementSymbol.setMetadataID(getMetadataID());
+        elementSymbol.setType(getClassType());
+        return elementSymbol;
+    }
+
+    public boolean isUsingDefault() {
+        Object property = getProperty(TeiidSqlLexicon.SPParameter.USING_DEFAULT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
+    }
+
+    public void setUsingDefault(boolean usingDefault) {
+        setProperty(TeiidSqlLexicon.SPParameter.USING_DEFAULT_PROP_NAME, usingDefault);
+    }
+
+    public boolean isVarArg() {
+        Object property = getProperty(TeiidSqlLexicon.SPParameter.VAR_ARG_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
+    }
+
+    public void setVarArg(boolean varArg) {
+        setProperty(TeiidSqlLexicon.SPParameter.VAR_ARG_PROP_NAME, varArg);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.getExpression() == null) ? 0 : this.getExpression().hashCode());
+        result = prime * result + this.getIndex();
+        result = prime * result + ((this.getTeiidParser() == null) ? 0 : this.getTeiidParser().hashCode());
+        return result;
     }
 
     @Override
@@ -248,16 +285,6 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
         return true;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.getExpression() == null) ? 0 : this.getExpression().hashCode());
-        result = prime * result + this.getIndex();
-        result = prime * result + ((this.getTeiidParser() == null) ? 0 : this.getTeiidParser().hashCode());
-        return result;
-    }
-
     /**
      * @see java.lang.Object#toString()
      */
@@ -269,36 +296,6 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
         return "?"; //$NON-NLS-1$
     }
 
-    /**
-     * @return usingDefault
-     */
-    public boolean isUsingDefault() {
-        return false;
-        
-    }
-
-    /**
-     * @param usingDefault
-     */
-    public void setUsingDefault(boolean usingDefault) {
-        
-    }
-
-    /**
-     * @param varArg
-     */
-    public void setVarArg(boolean varArg) {
-        
-    }
-
-    /**
-     * @return varArg
-     */
-    public boolean isVarArg() {
-        return false;
-        
-    }
-
     @Override
     public SPParameter clone() {
         SPParameter clone = new SPParameter(getTeiidParser(), getId());
@@ -308,14 +305,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
         if (getExpression() != null) {
             clone.setExpression(getExpression().clone());
         }
-        if (this.getResultSetColumns() != null) {
-            Iterator<ElementSymbol> iter = this.getResultSetColumns().iterator();
-            Iterator<Object> idIter = this.getResultSetIDs().iterator();
-            while (iter.hasNext()) {
-                ElementSymbol column = iter.next();
-                clone.addResultSetColumn(column.getName(), column.getType(), idIter.next());
-            }
-        }
+
         clone.setUsingDefault(isUsingDefault());
         clone.setVarArg(isVarArg());
         return clone;

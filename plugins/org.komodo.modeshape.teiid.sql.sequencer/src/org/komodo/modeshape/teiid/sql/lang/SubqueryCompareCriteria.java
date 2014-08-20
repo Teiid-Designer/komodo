@@ -22,9 +22,12 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.symbol.ScalarSubquery;
 import org.komodo.spi.query.sql.lang.ISubqueryCompareCriteria;
 
 public class SubqueryCompareCriteria extends AbstractCompareCriteria implements SubqueryContainer<QueryCommand>, ISubqueryCompareCriteria<LanguageVisitor, QueryCommand> {
@@ -62,6 +65,22 @@ public class SubqueryCompareCriteria extends AbstractCompareCriteria implements 
 
             throw new IllegalStateException();
         }
+
+        /**
+         * @param name
+         * @return PredicateQuantifier with given name
+         */
+        public static PredicateQuantifier findPredicateQuantifier(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (PredicateQuantifier pq : values()) {
+                if (pq.name().equals(name))
+                    return pq;
+            }
+            return null;
+        }
     }
 
     public SubqueryCompareCriteria(TeiidParser p, int id) {
@@ -70,29 +89,28 @@ public class SubqueryCompareCriteria extends AbstractCompareCriteria implements 
 
     @Override
     public QueryCommand getCommand() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, QueryCommand.class);
     }
 
     @Override
     public void setCommand(QueryCommand command) {
+        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override
     public Expression getRightExpression() {
-        throw new UnsupportedOperationException();
+        ScalarSubquery scalarSubquery = getTeiidParser().createASTNode(ASTNodes.SCALAR_SUBQUERY);
+        scalarSubquery.setCommand(getCommand());
+        return scalarSubquery;
     }
 
-    /**
-     * @return
-     */
-    private PredicateQuantifier getPredicateQuantifier() {
-        throw new UnsupportedOperationException();
+    public PredicateQuantifier getPredicateQuantifier() {
+        Object property = getProperty(TeiidSqlLexicon.SubqueryCompareCriteria.PREDICATE_QUANTIFIER_PROP_NAME);
+        return property == null ? PredicateQuantifier.ALL : PredicateQuantifier.findPredicateQuantifier(property.toString());
     }
 
-    /**
-     * @param any
-     */
     public void setPredicateQuantifier(PredicateQuantifier any) {
+        setProperty(TeiidSqlLexicon.SubqueryCompareCriteria.PREDICATE_QUANTIFIER_PROP_NAME, any.name());
     }
 
     @Override

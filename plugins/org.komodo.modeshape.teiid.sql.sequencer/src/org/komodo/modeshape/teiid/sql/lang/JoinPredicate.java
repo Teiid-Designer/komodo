@@ -22,9 +22,12 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IJoinPredicate;
@@ -34,48 +37,68 @@ public class JoinPredicate extends FromClause implements IJoinPredicate<FromClau
 
     public JoinPredicate(TeiidParser p, int id) {
         super(p, id);
+        JoinType joinType = p.createASTNode(ASTNodes.JOIN_TYPE);
+        joinType.setKind(JoinType.Types.JOIN_INNER);
+        setJoinType(joinType);
     }
 
     @Override
     public FromClause getLeftClause() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.JoinPredicate.LEFT_CLAUSE_REF_NAME, FromClause.class);
     }
 
     @Override
     public void setLeftClause(FromClause fromClause) {
+        addLastChild(TeiidSqlLexicon.JoinPredicate.LEFT_CLAUSE_REF_NAME, fromClause);
     }
 
     @Override
     public FromClause getRightClause() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.JoinPredicate.RIGHT_CLAUSE_REF_NAME, FromClause.class);
     }
 
     @Override
     public void setRightClause(FromClause fromClause) {
+        addLastChild(TeiidSqlLexicon.JoinPredicate.RIGHT_CLAUSE_REF_NAME, fromClause);
     }
 
     public JoinType getJoinType() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.JoinPredicate.JOIN_TYPE_REF_NAME, JoinType.class);
     }
 
     /**
      * @param joinType
      */
     public void setJoinType(JoinType joinType) {
+        addLastChild(TeiidSqlLexicon.JoinPredicate.JOIN_TYPE_REF_NAME, joinType);
     }
 
     public List<Criteria> getJoinCriteria() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.JoinPredicate.JOIN_CRITERIA_REF_NAME, Criteria.class);
     }
 
     /**
      * @param separateCriteriaByAnd
      */
     public void setJoinCriteria(List<Criteria> criteria) {
+        List<Criteria> newCriteria = new ArrayList<Criteria>();
+        for (Criteria criterium : criteria) {
+            newCriteria.addAll(Criteria.separateCriteriaByAnd(criterium));
+        }
+
+        setChildren(TeiidSqlLexicon.JoinPredicate.JOIN_CRITERIA_REF_NAME, newCriteria);
     }
 
     @Override
     public void collectGroups(Collection<GroupSymbol> groups) {
+        FromClause leftClause = getLeftClause();
+        FromClause rightClause = getRightClause();
+        if (leftClause != null)
+            leftClause.collectGroups(groups);
+
+        if (rightClause != null)
+            rightClause.collectGroups(groups);
     }
 
     @Override

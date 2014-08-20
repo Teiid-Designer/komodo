@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -33,43 +34,31 @@ public class DerivedColumn extends ASTNode implements IDerivedColumn<LanguageVis
         super(p, id);
     }
 
-    /**
-     * @return
-     */
     public String getAlias() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.DerivedColumn.ALIAS_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param alias
-     */
     public void setAlias(String alias) {
+        setProperty(TeiidSqlLexicon.DerivedColumn.ALIAS_PROP_NAME, alias);
     }
 
-    /**
-     * @return
-     */
     public Expression getExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.DerivedColumn.EXPRESSION_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param expression
-     */
     public void setExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.DerivedColumn.EXPRESSION_REF_NAME, expression);
     }
 
-    /**
-     * @return
-     */
     public boolean isPropagateName() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.DerivedColumn.PROPAGATE_NAME_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setPropagateName(boolean b) {
+    public void setPropagateName(boolean propogateName) {
+        setProperty(TeiidSqlLexicon.DerivedColumn.PROPAGATE_NAME_PROP_NAME, propogateName);
     }
 
     @Override

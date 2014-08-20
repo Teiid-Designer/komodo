@@ -22,8 +22,11 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import java.util.ArrayList;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IFrom;
@@ -36,29 +39,48 @@ public class From extends ASTNode implements IFrom<FromClause, GroupSymbol, Lang
 
     @Override
     public List<FromClause> getClauses() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                               TeiidSqlLexicon.From.CLAUSES_REF_NAME, FromClause.class);
     }
 
     @Override
     public void setClauses(List<? extends FromClause> clauses) {
+        setChildren(TeiidSqlLexicon.From.CLAUSES_REF_NAME, clauses);
     }
 
     @Override
     public void addClause(FromClause clause) {
+        addLastChild(TeiidSqlLexicon.From.CLAUSES_REF_NAME, clause);
     }
 
     @Override
     public List<? extends GroupSymbol> getGroups() {
-        throw new UnsupportedOperationException();
+        List<GroupSymbol> groups = new ArrayList<GroupSymbol>();
+        List<FromClause> clauses = getClauses();
+        if (clauses.isEmpty())
+            return groups;
+
+        for (int i = 0; i < clauses.size(); i++) {
+            FromClause clause = clauses.get(i);
+            clause.collectGroups(groups);
+        }
+            
+        return groups;
     }
 
     @Override
     public boolean containsGroup(GroupSymbol group) {
-        return false;
+        return getGroups().contains(group);
     }
 
     @Override
     public void addGroup(GroupSymbol group) {
+        if( group == null )
+            return;
+
+        UnaryFromClause unaryFromClause = getTeiidParser().createASTNode(ASTNodes.UNARY_FROM_CLAUSE);
+        unaryFromClause.setGroup(group);
+        addClause(unaryFromClause);
     }
 
     @Override

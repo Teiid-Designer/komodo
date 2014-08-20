@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
@@ -34,30 +35,20 @@ public class SetClause extends ASTNode implements ISetClause<LanguageVisitor> {
         super(p, id);
     }
 
-    /**
-     * @return
-     */
     public ElementSymbol getSymbol() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SetClause.SYMBOL_REF_NAME, ElementSymbol.class);
     }
 
-    /**
-     * @param symbol
-     */
     public void setSymbol(ElementSymbol symbol) {
+        addLastChild(TeiidSqlLexicon.SetClause.SYMBOL_REF_NAME, symbol);
     }
 
-    /**
-     * @return
-     */
     public Expression getValue() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SetClause.VALUE_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param value
-     */
     public void setValue(Expression value) {
+        addLastChild(TeiidSqlLexicon.SetClause.VALUE_REF_NAME, value);
     }
 
     @Override

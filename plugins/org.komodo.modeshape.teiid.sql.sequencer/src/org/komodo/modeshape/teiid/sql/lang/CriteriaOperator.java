@@ -146,5 +146,22 @@ public interface CriteriaOperator {
 
             throw new UnsupportedOperationException("Symbol '" + symbol + "' has no operator in version " + version); //$NON-NLS-1$ //$NON-NLS-2$
         }
+
+        /**
+         * @param name
+         * @return Operator for given name
+         */
+        public static Operator findOperator(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (Operator operator : values()) {
+                if (operator.name().equals(name))
+                    return operator;
+            }
+
+            return null;
+        }
     }
 }

@@ -24,6 +24,7 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -36,17 +37,13 @@ public class XMLNamespaces extends ASTNode implements IXMLNamespaces<LanguageVis
         super(p, id);
     }
 
-    /**
-     * @return
-     */
     public List<NamespaceItem> getNamespaceItems() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.XMLNamespaces.NAMESPACE_ITEMS_REF_NAME, NamespaceItem.class);
     }
 
-    /**
-     * @param namespaces
-     */
-    public void setNamespaces(List<NamespaceItem> namespaces) {
+    public void setNamespaceItems(List<NamespaceItem> namespaces) {
+        setChildren(TeiidSqlLexicon.XMLNamespaces.NAMESPACE_ITEMS_REF_NAME, namespaces);
     }
 
     @Override
@@ -88,7 +85,7 @@ public class XMLNamespaces extends ASTNode implements IXMLNamespaces<LanguageVis
             for (NamespaceItem item : getNamespaceItems()) {
                 cloneList.add(item.clone());
             }
-            clone.setNamespaces(cloneList);
+            clone.setNamespaceItems(cloneList);
         }
 
         return clone;

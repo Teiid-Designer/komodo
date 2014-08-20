@@ -39,7 +39,23 @@ public interface IMatchCriteria<E extends IExpression, LV extends ILanguageVisit
         /**
          * The escape char is typically not used in regex mode.
          */
-        REGEX
+        REGEX;
+
+        /**
+         * @param name
+         * @return MatchMode for given name
+         */
+        public static MatchMode findMatchMode(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (MatchMode mm : values()) {
+                if (mm.name().equals(name))
+                    return mm;
+            }
+            return null;
+        }
     }
     
     /**

@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -33,48 +34,33 @@ public class XMLColumn extends ProjectedColumn implements IXMLColumn<LanguageVis
         super(p, id);
     }
 
-    public String getName() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setName(String name) {
-    }
-
     public boolean isOrdinal() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.XMLColumn.ORDINAL_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setOrdinal(boolean b) {
+    public void setOrdinal(boolean ordinal) {
+        setProperty(TeiidSqlLexicon.XMLColumn.ORDINAL_PROP_NAME, ordinal);
     }
 
-    /**
-     * @return
-     */
     public String getPath() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.XMLColumn.PATH_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param path
-     */
     public void setPath(String path) {
+        setProperty(TeiidSqlLexicon.XMLColumn.PATH_PROP_NAME, path);
     }
 
-    /**
-     * @return
-     */
     public Expression getDefaultExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.XMLColumn.DEFAULT_EXPRESSION_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param defaultExpr
-     */
     public void setDefaultExpression(Expression defaultExpr) {
+        addLastChild(TeiidSqlLexicon.XMLColumn.DEFAULT_EXPRESSION_REF_NAME, defaultExpr);
     }
+
     @Override
     public int hashCode() {
         final int prime = 31;

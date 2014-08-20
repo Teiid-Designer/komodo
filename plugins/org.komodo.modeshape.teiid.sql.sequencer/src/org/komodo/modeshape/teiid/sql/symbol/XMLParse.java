@@ -22,54 +22,49 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLParse;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class XMLParse extends ASTNode implements Expression, IXMLParse<LanguageVisitor> {
 
     public XMLParse(TeiidParser p, int id) {
         super(p, id);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.XML.name());
     }
 
-    /**
-     * @return
-     */
-    private boolean isDocument() {
-        return false;
+    @Override
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @param doc
-     */
+    public boolean isDocument() {
+        Object property = getProperty(TeiidSqlLexicon.XMLParse.DOCUMENT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
+    }
+
     public void setDocument(boolean doc) {
+        setProperty(TeiidSqlLexicon.XMLParse.DOCUMENT_PROP_NAME, doc);
     }
 
-    /**
-     * @return
-     */
-    private Expression getExpression() {
-        throw new UnsupportedOperationException();
+    public Expression getExpression() {
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.XMLParse.EXPRESSION_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param expr
-     */
     public void setExpression(Expression expr) {
+        addLastChild(TeiidSqlLexicon.XMLParse.EXPRESSION_REF_NAME, expr);
     }
 
-    /**
-     * @return
-     */
-    private boolean isWellFormed() {
-        return false;
+    public boolean isWellFormed() {
+        Object property = getProperty(TeiidSqlLexicon.XMLParse.WELL_FORMED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param wellformed
-     */
     public void setWellFormed(boolean wellformed) {
+        setProperty(TeiidSqlLexicon.XMLParse.WELL_FORMED_PROP_NAME, wellformed);
     }
 
     @Override
@@ -118,11 +113,6 @@ public class XMLParse extends ASTNode implements Expression, IXMLParse<LanguageV
         clone.setWellFormed(isWellFormed());
 
         return clone;
-    }
-
-    @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
     }
 
 }

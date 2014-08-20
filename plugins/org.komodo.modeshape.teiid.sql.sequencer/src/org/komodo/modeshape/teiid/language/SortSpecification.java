@@ -32,5 +32,21 @@ public interface SortSpecification {
     enum NullOrdering {
         FIRST,
         LAST;
+
+        /**
+         * @param name
+         * @return value with given name
+         */
+        public static NullOrdering findNullOrdering(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (NullOrdering no : values()) {
+                if (no.name().equals(name))
+                    return no;
+            }
+            return null;
+        }
     }
 }

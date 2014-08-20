@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -36,11 +37,13 @@ public class SetCriteria extends AbstractSetCriteria implements ISetCriteria<Exp
 
     @Override
     public Collection<Expression> getValues() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.SetCriteria.VALUES_REF_NAME, Expression.class);
     }
 
     @Override
     public void setValues(Collection<Expression> values) {
+        setChildren(TeiidSqlLexicon.SetCriteria.VALUES_REF_NAME, values);
     }
 
     @Override

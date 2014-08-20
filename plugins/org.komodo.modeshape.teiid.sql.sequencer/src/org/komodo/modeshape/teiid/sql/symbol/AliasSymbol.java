@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.symbol.IAliasSymbol;
@@ -33,17 +34,18 @@ public class AliasSymbol extends Symbol implements Expression, IAliasSymbol<Expr
     }
 
     @Override
-    public <T> Class<T> getType() {
+    public Class<?> getType() {
         return this.getSymbol().getType();
     }
 
     @Override
     public Expression getSymbol() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.AliasSymbol.SYMBOL_REF_NAME, Expression.class);
     }
 
     @Override
     public void setSymbol(Expression symbol) {
+        addLastChild(TeiidSqlLexicon.AliasSymbol.SYMBOL_REF_NAME, symbol);
     }
 
     @Override

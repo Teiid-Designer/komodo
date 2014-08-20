@@ -21,6 +21,7 @@
  ************************************************************************************/
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 
 public class SubqueryHint extends ASTNode {
@@ -39,28 +40,32 @@ public class SubqueryHint extends ASTNode {
         super(p, id);
     }
 
-    public void setMergeJoin(boolean semiJoin) {
-    }
-
     public boolean isMergeJoin() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.SubqueryHint.MERGE_JOIN_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    public void setNoUnnest(boolean noUnnest) {
-
+    public void setMergeJoin(boolean semiJoin) {
+        setProperty(TeiidSqlLexicon.SubqueryHint.MERGE_JOIN_PROP_NAME, semiJoin);
     }
 
     public boolean isNoUnnest() {
-        return false;
-
+        Object property = getProperty(TeiidSqlLexicon.SubqueryHint.NO_UNNEST_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    public void setDepJoin(boolean b) {
+    public void setNoUnnest(boolean noUnnest) {
+        setProperty(TeiidSqlLexicon.SubqueryHint.NO_UNNEST_PROP_NAME, noUnnest);
     }
 
     public boolean isDepJoin() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.SubqueryHint.DEP_JOIN_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
+
+    public void setDepJoin(boolean depJoin) {
+        setProperty(TeiidSqlLexicon.SubqueryHint.DEP_JOIN_PROP_NAME, depJoin);
+    }    
 
     @Override
     public boolean equals(Object obj) {

@@ -62,6 +62,23 @@ public interface IAggregateSymbol<LV extends ILanguageVisitor>
 
         @Since(Version.TEIID_8_0)
         USER_DEFINED;
+
+        /**
+         * @param name
+         * @return Type for given name
+         */
+        public static Type findAggregateFunction(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (Type type : values()) {
+                if (type.name().equals(name))
+                    return type;
+            }
+
+            return null;
+        }
     }
 
     /**

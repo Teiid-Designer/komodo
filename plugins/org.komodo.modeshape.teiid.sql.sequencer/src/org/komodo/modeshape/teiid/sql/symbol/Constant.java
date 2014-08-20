@@ -23,10 +23,12 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.math.BigDecimal;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IConstant;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class Constant extends ASTNode implements Expression, IConstant<LanguageVisitor> {
 
@@ -35,36 +37,58 @@ public class Constant extends ASTNode implements Expression, IConstant<LanguageV
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @param arg
-     */
-    public void setType(Class arg) {
+    private void assignType(DataTypeName dataTypeName) {
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
+    }
+
+    public void setType(Class<?> type) {
+        DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(type);
+        assignType(dataTypeName);
     }
 
     @Override
     public Object getValue() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.Constant.VALUE_PROP_NAME);
+        return property == null ? null : property;
     }
 
-    /**
-     * @param arg
-     */
     public void setValue(Object arg) {
+        setProperty(TeiidSqlLexicon.Constant.VALUE_PROP_NAME, arg);
+        if (arg == null) {
+            assignType(DataTypeName.NULL);
+        } else { 
+            Class<?> type = arg.getClass();
+
+            Class<?> originalType = type;
+            while (type.isArray() && !type.getComponentType().isPrimitive()) {
+                type = type.getComponentType();
+            }
+
+            DataTypeName dataTypeName = getTeiidParser().getDataTypeService().retrieveDataTypeName(type);
+            if (dataTypeName != null && originalType.isArray()) {
+                //array of a runtime-type
+                assignType(dataTypeName.getArrayType());
+            } else if (dataTypeName != null) {
+                assignType(dataTypeName);
+            } else if (originalType.isArray() && !originalType.getComponentType().isPrimitive())
+                assignType(DataTypeName.OBJECT_ARRAY);
+            else
+                assignType(DataTypeName.OBJECT);
+        }
     }
 
     @Override
     public boolean isMultiValued() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Constant.MULTI_VALUED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param multiValued
-     */
     public void setMultiValued(boolean multiValued) {
+        setProperty(TeiidSqlLexicon.Constant.MULTI_VALUED_PROP_NAME, multiValued);
     }
 
     @Override

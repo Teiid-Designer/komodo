@@ -23,7 +23,9 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
@@ -42,39 +44,20 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
         super(p, id);
     }
 
-    /**
-     * @param copy
-     */
-    public void copy(TableFunctionReference copy) {
+    public String getName() {
+        Object property = getProperty(TeiidSqlLexicon.TableFunctionReference.NAME_PROP_NAME);
+        return property == null ? null : property.toString();
+    }
 
+    public void setName(String name) {
+        setProperty(TeiidSqlLexicon.TableFunctionReference.NAME_PROP_NAME, name);
     }
 
     @Override
     public void collectGroups(Collection<GroupSymbol> groups) {
-
-    }
-
-    public String getName() {
-        throw new UnsupportedOperationException();
-
-    }
-
-    public void setName(String name) {
-    }
-
-    /**
-     * @return output name
-     */
-    public String getOutputName() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Get GroupSymbol representing the named subquery 
-     * @return GroupSymbol representing the subquery
-     */
-    public GroupSymbol getGroupSymbol() {
-        throw new UnsupportedOperationException();
+        GroupSymbol symbol = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
+        symbol.setName(getName());
+        groups.add(symbol);
     }
 
     /**
@@ -94,7 +77,7 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
         final int prime = 31;
         int result = super.hashCode();
 //        result = prime * result + ((this.getCorrelatedReferences() == null) ? 0 : this.getCorrelatedReferences().hashCode());
-        result = prime * result + ((this.getGroupSymbol() == null) ? 0 : this.getGroupSymbol().hashCode());
+        result = prime * result + ((this.getName() == null) ? 0 : this.getName().hashCode());
         return result;
     }
 
@@ -107,15 +90,10 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
         if (getClass() != obj.getClass())
             return false;
         TableFunctionReference other = (TableFunctionReference)obj;
-//        if (this.getCorrelatedReferences() == null) {
-//            if (other.getCorrelatedReferences() != null)
-//                return false;
-//        } else if (!this.getCorrelatedReferences().equals(other.getCorrelatedReferences()))
-//            return false;
-        if (this.getGroupSymbol() == null) {
-            if (other.getGroupSymbol() != null)
+        if (this.getName() == null) {
+            if (other.getName() != null)
                 return false;
-        } else if (!this.getGroupSymbol().equals(other.getGroupSymbol()))
+        } else if (!this.getName().equals(other.getName()))
             return false;
         return true;
     }

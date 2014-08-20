@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -33,15 +34,7 @@ public class Delete extends ProcedureContainer implements TargetedCommand, IDele
 
     public Delete(TeiidParser p, int id) {
         super(p, id);
-    }
-
-    /**
-     * Return type of command.
-     * @return {@link Command#TYPE_DELETE}
-     */
-    @Override
-    public int getType() {
-        throw new UnsupportedOperationException();
+        setType(TYPE_DELETE);
     }
 
     @Override
@@ -51,20 +44,22 @@ public class Delete extends ProcedureContainer implements TargetedCommand, IDele
 
     @Override
     public GroupSymbol getGroup() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, GroupSymbol.class);
     }
 
     @Override
     public void setGroup(GroupSymbol group) {
+        addLastChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, group);
     }
 
     @Override
     public Criteria getCriteria() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Delete.CRITERIA_REF_NAME, Criteria.class);
     }
 
     @Override
     public void setCriteria(Criteria criteria) {
+        addLastChild(TeiidSqlLexicon.Delete.CRITERIA_REF_NAME, criteria);
     }
 
     @Override

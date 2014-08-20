@@ -22,7 +22,10 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -33,11 +36,7 @@ public class SetQuery extends QueryCommand
 
     public SetQuery(TeiidParser p, int id) {
         super(p, id);
-    }
-
-    @Override
-    public int getType() {
-        throw new UnsupportedOperationException();
+        setType(TYPE_QUERY);
     }
 
     @Override
@@ -52,45 +51,48 @@ public class SetQuery extends QueryCommand
 
     @Override
     public boolean isAll() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.SetQuery.ALL_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     @Override
     public void setAll(boolean value) {
+        setProperty(TeiidSqlLexicon.SetQuery.ALL_PROP_NAME, value);
     }
 
     @Override
-    public org.komodo.spi.query.sql.lang.ISetQuery.Operation getOperation() {
-        throw new UnsupportedOperationException();
+    public Operation getOperation() {
+        Object property = getProperty(TeiidSqlLexicon.SetQuery.OPERATION_PROP_NAME);
+        return property == null ? null : Operation.findOperation(property.toString());
     }
 
-    /**
-     * @param operation
-     */
     public void setOperation(Operation operation) {
+        setProperty(TeiidSqlLexicon.SetQuery.OPERATION_PROP_NAME, operation.name());
     }
 
     @Override
     public QueryCommand getLeftQuery() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SetQuery.LEFT_QUERY_REF_NAME, QueryCommand.class);
     }
 
     @Override
     public void setLeftQuery(QueryCommand query) {
+        addLastChild(TeiidSqlLexicon.SetQuery.LEFT_QUERY_REF_NAME, query);
     }
 
     @Override
     public QueryCommand getRightQuery() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SetQuery.RIGHT_QUERY_REF_NAME, QueryCommand.class);
     }
 
     @Override
     public void setRightQuery(QueryCommand query) {
+        addLastChild(TeiidSqlLexicon.SetQuery.RIGHT_QUERY_REF_NAME, query);
     }
 
     @Override
     public List<QueryCommand> getQueryCommands() {
-        throw new UnsupportedOperationException();
+        return Collections.unmodifiableList(Arrays.asList(getLeftQuery(), getRightQuery()));
     }
 
     @Override

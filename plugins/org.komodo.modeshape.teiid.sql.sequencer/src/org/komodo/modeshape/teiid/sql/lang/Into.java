@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
@@ -35,13 +36,14 @@ public class Into extends ASTNode implements IInto<LanguageVisitor> {
 
     @Override
     public GroupSymbol getGroup() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Into.GROUP_REF_NAME, GroupSymbol.class);
     }
 
     /**
      * @param groupSymbol
      */
     public void setGroup(GroupSymbol groupSymbol) {
+        addLastChild(TeiidSqlLexicon.Into.GROUP_REF_NAME, groupSymbol);
     }
 
     @Override

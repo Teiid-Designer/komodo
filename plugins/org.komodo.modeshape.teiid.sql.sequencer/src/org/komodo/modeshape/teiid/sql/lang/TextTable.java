@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -32,134 +33,97 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
 
     public TextTable(TeiidParser p, int id) {
         super(p, id);
+        setUsingRowDelimiter(true);
     }
 
-    /**
-     * @return
-     */
     public Expression getFile() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.TextTable.FILE_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param file
-     */
     public void setFile(Expression file) {
+        addLastChild(TeiidSqlLexicon.TextTable.FILE_REF_NAME, file);
     }
 
     @Override
     public List<TextColumn> getColumns() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.TextTable.COLUMNS_REF_NAME, TextColumn.class);
     }
 
-    /**
-     * @param columns
-     */
     public void setColumns(List<TextColumn> columns) {
+        setChildren(TeiidSqlLexicon.TextTable.COLUMNS_REF_NAME, columns);
     }
 
-    /**
-     * @return
-     */
     public Character getDelimiter() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextTable.DELIMITER_PROP_NAME);
+        return property == null ? null : property.toString().charAt(0);
     }
 
-    /**
-     * @param delimiter
-     */
     public void setDelimiter(Character delimiter) {
+        setProperty(TeiidSqlLexicon.TextTable.DELIMITER_PROP_NAME, delimiter);
     }
 
-    /**
-     * @return
-     */
     public boolean isEscape() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.TextTable.ESCAPE_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param escape
-     */
     public void setEscape(boolean escape) {
+        setProperty(TeiidSqlLexicon.TextTable.ESCAPE_PROP_NAME, escape);
     }
 
-    /**
-     * @return
-     */
     public Integer getHeader() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextTable.HEADER_PROP_NAME);
+        return property == null ? null : Integer.parseInt(property.toString());
     }
 
-    /**
-     * @param header
-     */
     public void setHeader(Integer header) {
+        setProperty(TeiidSqlLexicon.TextTable.HEADER_PROP_NAME, header);
     }
 
-    /**
-     * @return
-     */
     public Integer getSkip() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextTable.SKIP_PROP_NAME);
+        return property == null ? null : Integer.parseInt(property.toString());
     }
 
-    /**
-     * @param skip
-     */
     public void setSkip(Integer skip) {
+        setProperty(TeiidSqlLexicon.TextTable.SKIP_PROP_NAME, skip);
     }
 
-    /**
-     * @return
-     */
     public Character getQuote() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextTable.QUOTE_PROP_NAME);
+        return property == null ? null : property.toString().charAt(0);
     }
 
-    /**
-     * @param quote
-     */
     public void setQuote(Character quote) {
+        setProperty(TeiidSqlLexicon.TextTable.QUOTE_PROP_NAME, quote);
     }
 
-    /**
-     * @return
-     */
     public boolean isUsingRowDelimiter() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.TextTable.USING_ROW_DELIMITER_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param useRowDelimiter
-     */
     public void setUsingRowDelimiter(boolean useRowDelimiter) {
+        setProperty(TeiidSqlLexicon.TextTable.USING_ROW_DELIMITER_PROP_NAME, useRowDelimiter);
     }
 
-    /**
-     * @return
-     */
     public String getSelector() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.TextTable.SELECTOR_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param selector
-     */
     public void setSelector(String selector) {
+        setProperty(TeiidSqlLexicon.TextTable.SELECTOR_PROP_NAME, selector);
     }
 
-    /**
-     * @return
-     */
     public boolean isFixedWidth() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.TextTable.FIXED_WIDTH_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setFixedWidth(boolean b) {
+    public void setFixedWidth(boolean fixedWidth) {
+        setProperty(TeiidSqlLexicon.TextTable.FIXED_WIDTH_PROP_NAME, fixedWidth);
     }
 
     @Override

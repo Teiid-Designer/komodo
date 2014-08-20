@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -41,21 +42,13 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
     }
 
     @Override
-    public int getOperator() {
-        return 0;
-    }
-
-    @Override
-    public void setOperator(int operator) {
-    }
-
-    @Override
     public Expression getRightExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.CompareCriteria.RIGHT_EXPRESSION_REF_NAME, Expression.class);
     }
 
     @Override
     public void setRightExpression(Expression expression) {
+        addLastChild(TeiidSqlLexicon.CompareCriteria.RIGHT_EXPRESSION_REF_NAME, expression);
     }
 
     /**
@@ -63,7 +56,8 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
      * during processing.
      */
     public Boolean isOptional() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.AbstractCompareCriteria.OPERATOR_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
@@ -72,6 +66,7 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
      * @param isOptional
      */
     public void setOptional(Boolean isOptional) {
+        setProperty(TeiidSqlLexicon.AbstractCompareCriteria.OPERATOR_PROP_NAME, isOptional);
     }
 
     @Override
@@ -117,7 +112,8 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
         if (getRightExpression() != null)
             clone.setRightExpression(getRightExpression().clone());
         clone.setOptional(isOptional());
-        clone.setOperator(getOperator());
+        if (getOperatorAsString() != null)
+            clone.setOperator(CriteriaOperator.Operator.findOperator(getOperator()));
 
         if (getLeftExpression() != null)
             clone.setLeftExpression(getLeftExpression().clone());

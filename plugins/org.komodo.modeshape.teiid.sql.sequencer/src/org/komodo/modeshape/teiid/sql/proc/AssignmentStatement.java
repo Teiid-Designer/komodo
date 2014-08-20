@@ -22,74 +22,88 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
+import org.komodo.modeshape.teiid.sql.lang.QueryCommand;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.symbol.ScalarSubquery;
 import org.komodo.spi.query.sql.proc.IAssignmentStatement;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class AssignmentStatement extends Statement implements ExpressionStatement, IAssignmentStatement<Expression, LanguageVisitor> {
 
     public AssignmentStatement(TeiidParser p, int id) {
         super(p, id);
-    }
-
-    /**
-     * Return the type for this statement, this is one of the types
-     * defined on the statement object.
-     * @return The type of this statement
-     */
-    @Override
-    public StatementType getType() {
-        return StatementType.TYPE_ASSIGNMENT;
+        setType(StatementType.TYPE_ASSIGNMENT);
     }
 
     @Override
     public ElementSymbol getVariable() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.AssignmentStatement.VARIABLE_REF_NAME, ElementSymbol.class);
     }
 
-    /**
-     * @param elementSymbol
-     */
     public void setVariable(ElementSymbol elementSymbol) {
+        addLastChild(TeiidSqlLexicon.AssignmentStatement.VARIABLE_REF_NAME, elementSymbol);
+        
+        Class<?> type = elementSymbol.getType();
+        DataTypeName dataType = getDataTypeService().retrieveDataTypeName(type);
+        setProperty(TeiidSqlLexicon.ExpressionStatement.EXPECTED_TYPE_CLASS_PROP_NAME, dataType.name());
     }
 
     @Override
     public Expression getValue() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.AssignmentStatement.VALUE_REF_NAME, Expression.class);
+    }
+
+    /**
+     * Both setters need to exist due to implementing different interfaces
+     * To avoid any pain, simply store the same Expression in both.
+     *
+     * @param value
+     */
+    private void assignValue(Expression value) {
+        addLastChild(TeiidSqlLexicon.ExpressionStatement.EXPRESSION_REF_NAME, value);
+        addLastChild(TeiidSqlLexicon.AssignmentStatement.VALUE_REF_NAME, value);
     }
 
     @Override
     public void setValue(Expression value) {
+        assignValue(value);
     }
 
-    @Override
-    public Class<?> getExpectedType() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return
-     */
     public Command getCommand() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.AssignmentStatement.COMMAND_REF_NAME, Command.class);
     }
 
-    /**
-     * @param value
-     */
-    public void setCommand(Command value) {
+    public void setCommand(Command command) {
+        if (command instanceof QueryCommand) {
+            ScalarSubquery ssq = getTeiidParser().createASTNode(ASTNodes.SCALAR_SUBQUERY);
+            ssq.setCommand((QueryCommand) command);
+            setValue(ssq);
+        } else
+            addLastChild(TeiidSqlLexicon.AssignmentStatement.COMMAND_REF_NAME, command);
     }
 
     @Override
     public Expression getExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.ExpressionStatement.EXPRESSION_REF_NAME, Expression.class);
     }
 
     @Override
     public void setExpression(Expression expr) {
+        assignValue(expr);
+    }
+
+    @Override
+    public Class<?> getExpectedType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.ExpressionStatement.EXPECTED_TYPE_CLASS_PROP_NAME);
     }
 
     @Override

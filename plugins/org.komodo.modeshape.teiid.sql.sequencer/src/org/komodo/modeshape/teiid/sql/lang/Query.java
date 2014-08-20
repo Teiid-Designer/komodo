@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -32,19 +33,22 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     public Query(TeiidParser p, int id) {
         super(p, id);
+        setType(TYPE_QUERY);
     }
 
     /**
      * @return row constructor flag
      */
     public boolean isRowConstructor() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Query.ROW_CONSTRUCTOR_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
-     * @param b
+     * @param rowConstructor
      */
-    public void setRowConstructor(boolean b) {
+    public void setRowConstructor(boolean rowConstructor) {
+        setProperty(TeiidSqlLexicon.Query.ROW_CONSTRUCTOR_PROP_NAME, rowConstructor);
     }
 
     @Override
@@ -58,62 +62,63 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
     }
 
     @Override
-    public int getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Select getSelect() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Query.SELECT_REF_NAME, Select.class);
     }
 
     @Override
     public void setSelect(Select select) {
+        addLastChild(TeiidSqlLexicon.Query.SELECT_REF_NAME, select);
     }
 
     @Override
     public From getFrom() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Query.FROM_REF_NAME, From.class);
     }
 
     @Override
     public void setFrom(From from) {
+        addLastChild(TeiidSqlLexicon.Query.FROM_REF_NAME, from);
     }
 
     @Override
     public Into getInto() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Query.INTO_REF_NAME, Into.class);
     }
 
     @Override
     public void setInto(Into into) {
+        addLastChild(TeiidSqlLexicon.Query.INTO_REF_NAME, into);
     }
 
     @Override
     public Criteria getCriteria() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Query.CRITERIA_REF_NAME, Criteria.class);
     }
 
     @Override
     public void setCriteria(Criteria where) {
+        addLastChild(TeiidSqlLexicon.Query.CRITERIA_REF_NAME, where);
     }
 
     @Override
     public Criteria getHaving() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Query.HAVING_REF_NAME, Criteria.class);
     }
 
     @Override
     public void setHaving(Criteria having) {
+        addLastChild(TeiidSqlLexicon.Query.HAVING_REF_NAME, having);
     }
 
     @Override
     public GroupBy getGroupBy() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.Query.GROUP_BY_REF_NAME, GroupBy.class);
     }
 
     @Override
     public void setGroupBy(GroupBy groupBy) {
+        addLastChild(TeiidSqlLexicon.Query.GROUP_BY_REF_NAME, groupBy);
     }
 
     @Override

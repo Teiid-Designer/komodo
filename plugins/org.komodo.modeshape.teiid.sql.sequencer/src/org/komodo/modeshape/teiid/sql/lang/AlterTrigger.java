@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.proc.TriggerAction;
@@ -39,51 +40,52 @@ public class AlterTrigger extends Alter<TriggerAction> implements IAlterTrigger<
      */
     public AlterTrigger(TeiidParser p, int id) {
         super(p, id);
-    }
-
-    @Override
-    public int getType() {
-        throw new UnsupportedOperationException();
+        setType(TYPE_ALTER_TRIGGER);
     }
 
     /**
      * @return the event
      */
     public TriggerEvent getEvent() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.AlterTrigger.EVENT_PROP_NAME);
+        return TriggerEvent.findTriggerEvent(property.toString());
     }
 
     /**
      * @param event the event to set
      */
     public void setEvent(TriggerEvent event) {
+        setProperty(TeiidSqlLexicon.AlterTrigger.EVENT_PROP_NAME, event);
     }
 
     /**
      * @return the create
      */
     public boolean isCreate() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.AlterTrigger.CREATE_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
      * @param create the create to set
      */
     public void setCreate(boolean create) {
-
+        setProperty(TeiidSqlLexicon.AlterTrigger.CREATE_PROP_NAME, create);
     }
 
     /**
      * @return the enabled
      */
     public Boolean getEnabled() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.AlterTrigger.ENABLED_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
      * @param enabled the enabled to set
      */
     public void setEnabled(Boolean enabled) {
+        setProperty(TeiidSqlLexicon.AlterTrigger.ENABLED_PROP_NAME, enabled);
     }
 
     @Override

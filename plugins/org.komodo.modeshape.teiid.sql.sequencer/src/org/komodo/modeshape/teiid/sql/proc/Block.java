@@ -23,88 +23,107 @@
 package org.komodo.modeshape.teiid.sql.proc;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Labeled;
+import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
+import org.komodo.modeshape.teiid.sql.symbol.Symbol;
+import org.komodo.spi.query.sql.ISQLConstants;
 import org.komodo.spi.query.sql.proc.IBlock;
 
 public class Block extends Statement implements Labeled, IBlock<Statement, LanguageVisitor> {
 
     public Block(TeiidParser p, int id) {
         super(p, id);
+        setType(StatementType.TYPE_COMPOUND);
     }
 
-    /**
-     * Return the type for this statement, this is one of the types
-     * defined on the statement object.
-     * @return The statement type
-     */
-    @Override
-    public StatementType getType() {
-        return StatementType.TYPE_COMPOUND;
-    }
-
-    /**
-     * @return
-     */
     public boolean isAtomic() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Block.ATOMIC_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setAtomic(boolean b) {
+    public void setAtomic(boolean atomic) {
+        setProperty(TeiidSqlLexicon.Block.ATOMIC_PROP_NAME, atomic);
     }
 
-    /**
-     * @return
-     */
     public String getExceptionGroup() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.Block.EXCEPTION_GROUP_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param eId
-     */
     public void setExceptionGroup(String eId) {
+        setProperty(TeiidSqlLexicon.Block.EXCEPTION_GROUP_PROP_NAME, eId);
     }
+
     @Override
     public List<Statement> getStatements() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.Block.STATEMENTS_REF_NAME, Statement.class);
     }
 
-    /**
-     * @param stmt
-     * @param b
-     */
-    public void addStatement(Statement stmt, boolean b) {
+    private void internalAddStatement(Statement statement, boolean exception) {
+        if (exception) {
+            addLastChild(TeiidSqlLexicon.Block.EXCEPTION_STATEMENTS_REF_NAME, statement);
+        } else {
+            addLastChild(TeiidSqlLexicon.Block.STATEMENTS_REF_NAME, statement);
+        }
+    }
+
+    public void addStatement(Statement statement, boolean exception) {
+        if (statement instanceof AssignmentStatement) {
+            AssignmentStatement stmt = (AssignmentStatement)statement;
+            Command cmd = stmt.getCommand();
+            if (cmd != null) {
+                CommandStatement cs = getTeiidParser().createASTNode(ASTNodes.COMMAND_STATEMENT);
+                cs.setCommand(cmd);
+                internalAddStatement(cs, exception);
+                stmt.setCommand(null);
+                stmt.setExpression(null);
+                ElementSymbol variable = stmt.getVariable();
+                if (variable != null && variable.getShortName().equalsIgnoreCase(ISQLConstants.ROWCOUNT) 
+                        && variable.getGroupSymbol() != null && variable.getGroupSymbol().getName().equalsIgnoreCase(ISQLConstants.VARIABLES)) {
+                    return;
+                }
+                String fullName = ISQLConstants.VARIABLES + Symbol.SEPARATOR + ISQLConstants.ROWCOUNT;
+                ElementSymbol es = getTeiidParser().createASTNode(ASTNodes.ELEMENT_SYMBOL);
+                es.setName(fullName);
+                stmt.setExpression(es);
+            }
+        }
+        internalAddStatement(statement, exception);
     }
 
     @Override
     public void addStatement(Statement statement) {
+        addStatement(statement, false);
+    }
+
+    public void setStatements(List<Statement> statements) {
+        setChildren(TeiidSqlLexicon.Block.STATEMENTS_REF_NAME, statements);
     }
 
     @Override
     public String getLabel() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.Labeled.LABEL_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     @Override
     public void setLabel(String label) {
+        setProperty(TeiidSqlLexicon.Labeled.LABEL_PROP_NAME, label);
     }
 
-    /**
-     * @return
-     */
     public List<Statement> getExceptionStatements() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.Block.EXCEPTION_STATEMENTS_REF_NAME, Statement.class);
     }
 
-    /**
-     * @param cloneList
-     */
-    public void setExceptionStatements(List<Statement> cloneList) {
+    public void setExceptionStatements(List<Statement> exceptionStatements) {
+        setChildren(TeiidSqlLexicon.Block.EXCEPTION_STATEMENTS_REF_NAME, exceptionStatements);
     }
 
     @Override
@@ -137,7 +156,8 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
         } else if (!this.getLabel().equals(other.getLabel())) return false;
         if (this.getStatements() == null) {
             if (other.getStatements() != null) return false;
-        } else if (!this.getStatements().equals(other.getStatements())) return false;
+        } else if (!this.getStatements().equals(other.getStatements()))
+            return false;
         return true;
     }
 
@@ -159,7 +179,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
             clone.setExceptionStatements(cloneList(getExceptionStatements()));
         if(getStatements() != null) {
             for (Statement statement : getStatements())
-                clone.addStatement(statement);
+                clone.addStatement(statement.clone());
         }
     
         return clone;

@@ -22,7 +22,9 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
@@ -32,28 +34,28 @@ public class SubquerySetCriteria extends AbstractSetCriteria
 
     public SubquerySetCriteria(TeiidParser p, int id) {
         super(p, id);
+
+        SubqueryHint subqueryHint = getTeiidParser().createASTNode(ASTNodes.SUBQUERY_HINT);
+        setSubqueryHint(subqueryHint);
     }
 
-    /**
-     * @return
-     */
     public SubqueryHint getSubqueryHint() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.SubquerySetCriteria.SUBQUERY_HINT_REF_NAME, SubqueryHint.class);
     }
 
-    /**
-     * @param hint
-     */
     public void setSubqueryHint(SubqueryHint hint) {
+        addLastChild(TeiidSqlLexicon.SubquerySetCriteria.SUBQUERY_HINT_REF_NAME, hint);
     }
 
     @Override
     public QueryCommand getCommand() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, QueryCommand.class);
     }
 
     @Override
     public void setCommand(QueryCommand command) {
+        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override

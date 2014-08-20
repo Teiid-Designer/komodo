@@ -23,11 +23,14 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.Arrays;
+import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.symbol.Function.FunctionDescriptor;
 import org.komodo.spi.query.sql.symbol.IFunction;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.komodo.spi.udf.IFunctionDescriptor;
 
 public class Function extends ASTNode implements Expression, IFunction<FunctionDescriptor, LanguageVisitor> {
@@ -44,9 +47,6 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
             throw new UnsupportedOperationException();
         }
 
-        /**
-         * @return
-         */
         public Object getMethod() {
             throw new UnsupportedOperationException();
         }
@@ -59,29 +59,78 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.Function.NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     public void setName(String name) {
+        setProperty(TeiidSqlLexicon.Function.NAME_PROP_NAME, name);
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
+    }
+
+    protected void setArrayType(boolean isArrayType) {
+        setProperty(TeiidSqlLexicon.Function.ARRAY_TYPE_PROP_NAME, isArrayType);
+    }
+
+    protected void assignDataTypeName(DataTypeName dataTypeName, boolean isArray) {
+        if (dataTypeName == null)
+            return;
+
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
+        setArrayType(isArray);
     }
 
     @Override
     public void setType(Class<?> type) {
+        DataTypeName dataType = getDataTypeService().retrieveDataTypeName(type);
+        assignDataTypeName(dataType, false);
     }
 
+    public List<Expression> getArguments() {
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.Function.ARGS_REF_NAME, Expression.class);
+    }
     @Override
     public Expression[] getArgs() {
-        throw new UnsupportedOperationException();
+        List<Expression> arguments = getArguments();
+        if (arguments == null)
+            return new Expression[0];
+
+        return arguments.toArray(new Expression[0]);
     }
 
     @Override
     public Expression getArg(int index) {
-        throw new UnsupportedOperationException();
+        List<Expression> args = getArguments();
+        if (index < 0 || index >= args.size())
+            return null;
+
+        return args.get(index);
+    }
+
+    public void setArgs(Expression[] args) {
+        if (args == null) {
+            setChildren(TeiidSqlLexicon.Function.ARGS_REF_NAME, null);
+            return;
+        }
+
+        for (Expression arg : args) {
+            addLastChild(TeiidSqlLexicon.Function.ARGS_REF_NAME, arg);
+        }
+    }
+
+    @Override
+    public boolean isImplicit() {
+        Object property = getProperty(TeiidSqlLexicon.Function.IMPLICIT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
+    }
+
+    public void setImplicit(boolean implicit) {
+        setProperty(TeiidSqlLexicon.Function.IMPLICIT_PROP_NAME, implicit);
     }
 
     @Override
@@ -91,16 +140,7 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
 
     @Override
     public void setFunctionDescriptor(FunctionDescriptor fd) {
-    }
-
-    /**
-     * @param expressions
-     */
-    public void setArgs(Expression[] expressions) {
-    }
-    @Override
-    public boolean isImplicit() {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -122,11 +162,11 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
         if (getClass() != obj.getClass()) return false;
         Function other = (Function)obj;
 
-        if (this.getFunctionDescriptor() != null && other.getFunctionDescriptor() != null) {
-            if (!this.getFunctionDescriptor().getMethod().equals(other.getFunctionDescriptor().getMethod())) {
-                return false;
-            }
-        }
+//        if (this.getFunctionDescriptor() != null && other.getFunctionDescriptor() != null) {
+//            if (!this.getFunctionDescriptor().getMethod().equals(other.getFunctionDescriptor().getMethod())) {
+//                return false;
+//            }
+//        }
 
         if (this.getName() == null) {
             if (other.getName() != null) return false;

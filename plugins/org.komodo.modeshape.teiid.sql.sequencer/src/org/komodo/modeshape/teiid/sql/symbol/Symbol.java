@@ -21,6 +21,7 @@
  ************************************************************************************/
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -35,7 +36,7 @@ public class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
     /**
      * Character used to delimit name components in a symbol
      */
-    public static final String SEPARATOR = "."; //$NON-NLS-1$
+    public static final String SEPARATOR = DOT;
 
     /**
      * @param p
@@ -45,43 +46,51 @@ public class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
         super(p, i);
     }
 
+    private void assignName(String name) {
+        // 2 properties used interchangeably
+        setProperty(TeiidSqlLexicon.Symbol.NAME_PROP_NAME, name);
+        setProperty(TeiidSqlLexicon.Symbol.SHORT_NAME_PROP_NAME, name);        
+    }
+
+    private String shortenName(String name) {
+        int index = name.lastIndexOf(Symbol.SEPARATOR);
+        if(index >= 0) {
+            return name.substring(index+1);
+        }
+        return name;
+    }
+
     @Override
     public String getName() {
-        return getShortName();
+        Object property = getProperty(TeiidSqlLexicon.Symbol.NAME_PROP_NAME);
+        return property == null ? null : shortenName(property.toString());
     }
 
     public void setName(String name) {
-        setShortName(name);
+        assignName(name);
     }
 
-    /**
-     * Get the short name of the element
-     *
-     * @return Short name of the symbol (un-dotted)
-     */
     @Override
     public final String getShortName() { 
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.Symbol.SHORT_NAME_PROP_NAME);
+        return property == null ? null : shortenName(property.toString());
     }
 
-    /**
-     * Change the symbol's name.  This will change the symbol's hash code
-     * and canonical name!!!!!!!!!!!!!!!!!  If this symbol is in a hashed
-     * collection, it will be lost!
-     *
-     * @param name New name
-     */
     @Override
     public void setShortName(String name) {
+        assignName(name);
+        setOutputName(null);
     }
 
     @Override
     public String getOutputName() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.Symbol.OUTPUT_NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     @Override
     public void setOutputName(String outputName) {
+        setProperty(TeiidSqlLexicon.Symbol.OUTPUT_NAME_PROP_NAME, outputName);
     }
 
     @Override

@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 public abstract class SimpleNode implements Node {
 
@@ -43,6 +45,28 @@ public abstract class SimpleNode implements Node {
 
     public TeiidParser getTeiidParser() {
         return parser;
+    }
+
+    public ITeiidVersion getTeiidVersion() {
+        return getTeiidParser().getVersion();
+    }
+
+    protected boolean isTeiidVersionOrGreater(ITeiidVersion teiidVersion) {
+        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+        return minVersion.equals(teiidVersion) || minVersion.isGreaterThan(teiidVersion);
+    }
+
+    protected boolean isLessThanTeiidVersion(ITeiidVersion teiidVersion) {
+        ITeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
+        return maxVersion.isLessThan(teiidVersion);
+    }
+
+    protected boolean isTeiid8OrGreater() {
+        return isTeiidVersionOrGreater(Version.TEIID_8_0.get());
+    }
+
+    protected boolean isTeiid87OrGreater() {
+        return isTeiidVersionOrGreater(Version.TEIID_8_7.get());
     }
 
     /**

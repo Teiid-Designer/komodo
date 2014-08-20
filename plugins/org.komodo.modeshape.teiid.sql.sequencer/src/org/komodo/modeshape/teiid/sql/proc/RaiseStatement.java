@@ -22,53 +22,42 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.IRaiseStatement;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class RaiseStatement extends Statement implements ExpressionStatement, IRaiseStatement<LanguageVisitor, Expression> {
 
     public RaiseStatement(TeiidParser p, int id) {
         super(p, id);
-    }
-
-    /**
-     * Return the type for this statement, this is one of the types
-     * defined on the statement object.
-     * @return The statement type
-     */
-    @Override
-    public StatementType getType() {
-        return StatementType.TYPE_ERROR;
+        setType(StatementType.TYPE_ERROR);
     }
 
     @Override
     public Expression getExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.ExpressionStatement.EXPRESSION_REF_NAME, Expression.class);
     }
 
     @Override
     public void setExpression(Expression expr) {
+        addLastChild(TeiidSqlLexicon.ExpressionStatement.EXPRESSION_REF_NAME, expr);
     }
 
-    /**
-     * @return
-     */
     public boolean isWarning() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.RaiseStatement.WARNING_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param warning
-     */
     public void setWarning(boolean warning) {
+        setProperty(TeiidSqlLexicon.RaiseStatement.WARNING_PROP_NAME, warning);
     }
 
     @Override
     public Class<?> getExpectedType() {
-        return getTeiidParser().getDataTypeService().getDefaultDataClass(DataTypeName.OBJECT);
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -22,123 +22,122 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
+import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
 import org.komodo.spi.query.sql.lang.IStoredProcedure;
 
 public class StoredProcedure extends ProcedureContainer implements TargetedCommand, IStoredProcedure<SPParameter, Expression, LanguageVisitor> {
 
     public StoredProcedure(TeiidParser p, int id) {
         super(p, id);
-    }
-
-    @Override
-    public int getType() {
-        throw new UnsupportedOperationException();
+        setType(TYPE_STORED_PROCEDURE);
     }
 
     public boolean isCalledWithReturn() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.StoredProcedure.CALLED_WITH_RETURN_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setCalledWithReturn(boolean b) {
+    public void setCalledWithReturn(boolean calledWithReturn) {
+        setProperty(TeiidSqlLexicon.StoredProcedure.CALLED_WITH_RETURN_PROP_NAME, calledWithReturn);
     }
 
     public boolean isCallableStatement() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.StoredProcedure.CALLABLE_STATEMENT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param b
-     */
-    public void setCallableStatement(boolean b) {
+    public void setCallableStatement(boolean callableStatement) {
+        setProperty(TeiidSqlLexicon.StoredProcedure.CALLABLE_STATEMENT_PROP_NAME, callableStatement);
     }
 
     public boolean isDisplayNamedParameters() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.StoredProcedure.DISPLAY_NAMED_PARAMETERS_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     @Override
-    public void setDisplayNamedParameters(boolean b) {
+    public void setDisplayNamedParameters(boolean displayNamedParameters) {
+        setProperty(TeiidSqlLexicon.StoredProcedure.DISPLAY_NAMED_PARAMETERS_PROP_NAME, displayNamedParameters);
     }
 
     @Override
     public Object getProcedureID() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.StoredProcedure.PROCEDUREID_PROP_NAME, Object.class);
     }
 
     @Override
     public void setProcedureID(Object procedureID) {
+        setProperty(TeiidSqlLexicon.StoredProcedure.PROCEDUREID_PROP_NAME, procedureID);
     }
 
     @Override
     public GroupSymbol getGroup() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, GroupSymbol.class);
     }
 
     @Override
     public String getGroupName() {
-        throw new UnsupportedOperationException();
+        GroupSymbol group = getGroup();
+        return group == null ? null : group.getName();
     }
 
     public void setGroup(GroupSymbol group) {
-
+        addLastChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, group);
     }
 
     @Override
     public List<SPParameter> getInputParameters() {
-        throw new UnsupportedOperationException();
+        List<SPParameter> parameters = new ArrayList<SPParameter>(getParameters());
+        Iterator<SPParameter> params = parameters.iterator();
+        while (params.hasNext()) {
+            SPParameter param = params.next();
+            if(param.getParameterType() != ParameterInfo.IN.index() && param.getParameterType() != ParameterInfo.INOUT.index()) {
+                params.remove();
+            }
+        }
+        return parameters;
+    }
+
+    public List<SPParameter> getParameters() {
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.StoredProcedure.PARAMETER_REF_NAME, SPParameter.class);
     }
 
     @Override
     public void setParameter(SPParameter parameter) {
+        addLastChild(TeiidSqlLexicon.StoredProcedure.PARAMETER_REF_NAME, parameter);
     }
 
     @Override
     public String getProcedureCallableName() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.StoredProcedure.CALLABLE_STATEMENT_PROP_NAME);
+        return property == null ? getProcedureName() : property.toString();
+    }
+
+    public void setProcedureCallableName(String callableName) {
+        setProperty(TeiidSqlLexicon.StoredProcedure.CALLABLE_STATEMENT_PROP_NAME, callableName);
+    }
+
+    public String getProcedureName() {
+        Object property = getProperty(TeiidSqlLexicon.StoredProcedure.PROCEDURE_NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     @Override
     public void setProcedureName(String procFullName) {
+        setProperty(TeiidSqlLexicon.StoredProcedure.PROCEDURE_NAME_PROP_NAME, procFullName);
     }
 
     @Override
     public List<Expression> getProjectedSymbols() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return
-     */
-    private Object getResultSetParameterKey() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return
-     */
-    private Object getProcedureName() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return
-     */
-    private Object getMapOfParameters() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return
-     */
-    private List<SPParameter> getParameters() {
         throw new UnsupportedOperationException();
     }
 
@@ -149,9 +148,7 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
         result = prime * result + (this.isCalledWithReturn() ? 1231 : 1237);
         result = prime * result + (this.isDisplayNamedParameters() ? 1231 : 1237);
         result = prime * result + (this.isCallableStatement() ? 1231 : 1237);
-        result = prime * result + ((this.getMapOfParameters() == null) ? 0 : this.getMapOfParameters().hashCode());
         result = prime * result + ((this.getProcedureName() == null) ? 0 : this.getProcedureName().hashCode());
-        result = prime * result + ((this.getResultSetParameterKey() == null) ? 0 : this.getResultSetParameterKey().hashCode());
         return result;
     }
 
@@ -170,20 +167,10 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
             return false;
         if (this.isCallableStatement() != other.isCallableStatement())
             return false;
-        if (this.getMapOfParameters() == null) {
-            if (other.getMapOfParameters() != null)
-                return false;
-        } else if (!this.getMapOfParameters().equals(other.getMapOfParameters()))
-            return false;
         if (this.getProcedureName() == null) {
             if (other.getProcedureName() != null)
                 return false;
         } else if (!this.getProcedureName().equals(other.getProcedureName()))
-            return false;
-        if (this.getResultSetParameterKey() == null) {
-            if (other.getResultSetParameterKey() != null)
-                return false;
-        } else if (!this.getResultSetParameterKey().equals(other.getResultSetParameterKey()))
             return false;
         return true;
     }

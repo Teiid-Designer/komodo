@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -106,6 +107,23 @@ public abstract class Statement extends ASTNode implements IStatement<LanguageVi
          * Represents a RETURN statement
          */
         TYPE_RETURN;
+
+        /**
+         * @param name
+         * @return StatementType for given name
+         */
+        public static StatementType findStatementType(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (StatementType statementType : values()) {
+                if (statementType.name().equals(name))
+                    return statementType;
+            }
+
+            return null;
+        }
     }
 
     /**
@@ -120,7 +138,14 @@ public abstract class Statement extends ASTNode implements IStatement<LanguageVi
      * Return type of statement to make it easier to build switch statements by statement type.
      * @return Type from TYPE constants
      */
-    public abstract StatementType getType();
+    public StatementType getType() {
+        Object property = getProperty(TeiidSqlLexicon.Statement.TYPE_PROP_NAME);
+        return property == null ? null : StatementType.findStatementType(property.toString());
+    }
+
+    protected void setType(StatementType statementType) {
+        setProperty(TeiidSqlLexicon.Statement.TYPE_PROP_NAME, statementType.name());
+    }
 
     /**
      * Deep clone statement to produce a new identical statement.

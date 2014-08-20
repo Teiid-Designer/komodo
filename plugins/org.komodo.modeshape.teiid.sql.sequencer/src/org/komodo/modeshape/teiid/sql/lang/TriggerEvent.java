@@ -38,5 +38,18 @@ public enum TriggerEvent {
     /**
      * Delete event
      */
-    DELETE
+    DELETE;
+
+    public static TriggerEvent findTriggerEvent(String name) {
+        if (name == null)
+            return null;
+
+        name = name.toUpperCase();
+        for (TriggerEvent event : TriggerEvent.values()) {
+            if (event.name().equals(name))
+                return event;
+        }
+
+        return null;
+    }
 }

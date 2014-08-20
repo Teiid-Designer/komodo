@@ -22,10 +22,12 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<LanguageVisitor> {
 
@@ -34,86 +36,65 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @return
-     */
-    public String getEncoding() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param enc
-     */
-    public void setEncoding(String enc) {
-    }
-
-    /**
-     * @return
-     */
-    public String getVersion() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param ver
-     */
-    public void setVersion(String ver) {
-    }
-
-    /**
-     * @return
-     */
-    public Boolean getDeclaration() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param declr
-     */
-    public void setDeclaration(Boolean declr) {
-    }
-
-    /**
-     * @return
-     */
-    public Expression getExpression() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param expr
-     */
-    public void setExpression(Expression expr) {
-    }
-
-    /**
-     * @return
-     */
-    public Boolean getDocument() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param doc
-     */
-    public void setDocument(Boolean doc) {
-    }
-
-    /**
-     * @return
-     */
     public String getTypeString() {
-        throw new UnsupportedOperationException();
+        Class<?> type = getType(); 
+        return getDataTypeService().getDataTypeName(type);
     }
 
-    /**
-     * @param image
-     */
-    public void setTypeString(String image) {
+    public void setTypeString(String typeString) {
+        DataTypeName dataTypeName = DataTypeName.findDataTypeName(typeString);
+        if (dataTypeName == null)
+            setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, (Object) null);
+        else
+            setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
+    }
+
+    public String getEncoding() {
+        Object property = getProperty(TeiidSqlLexicon.XMLSerialize.ENCODING_PROP_NAME);
+        return property == null ? null : property.toString();
+    }
+
+    public void setEncoding(String enc) {
+        setProperty(TeiidSqlLexicon.XMLSerialize.ENCODING_PROP_NAME, enc);
+    }
+
+    public String getVersion() {
+        Object property = getProperty(TeiidSqlLexicon.XMLSerialize.VERSION_PROP_NAME);
+        return property == null ? null : property.toString();
+    }
+
+    public void setVersion(String ver) {
+        setProperty(TeiidSqlLexicon.XMLSerialize.VERSION_PROP_NAME, ver);
+    }
+
+    public Boolean getDeclaration() {
+        Object property = getProperty(TeiidSqlLexicon.XMLSerialize.DECLARATION_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
+    }
+
+    public void setDeclaration(Boolean declr) {
+        setProperty(TeiidSqlLexicon.XMLSerialize.DECLARATION_PROP_NAME, declr);
+    }
+
+    public Expression getExpression() {
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.XMLSerialize.EXPRESSION_REF_NAME, Expression.class);
+    }
+
+    public void setExpression(Expression expr) {
+        addLastChild(TeiidSqlLexicon.XMLSerialize.EXPRESSION_REF_NAME, expr);
+    }
+
+    public Boolean getDocument() {
+        Object property = getProperty(TeiidSqlLexicon.XMLSerialize.DOCUMENT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
+    }
+
+    public void setDocument(Boolean doc) {
+        setProperty(TeiidSqlLexicon.XMLSerialize.DOCUMENT_PROP_NAME, doc);
     }
 
     @Override

@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -34,17 +35,13 @@ public class XMLAttributes extends ASTNode implements IXMLAttributes<LanguageVis
         super(p, id);
     }
 
-    /**
-     * @return
-     */
     public List<DerivedColumn> getArgs() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.XMLAttributes.ARGS_REF_NAME, DerivedColumn.class);
     }
 
-    /**
-     * @param args
-     */
     public void setArgs(List<DerivedColumn> args) {
+        setChildren(TeiidSqlLexicon.XMLAttributes.ARGS_REF_NAME, args);
     }
 
     @Override

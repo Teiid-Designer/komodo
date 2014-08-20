@@ -40,7 +40,24 @@ public interface IElementSymbol<G extends IGroupSymbol, LV extends ILanguageVisi
         OUTPUT_NAME,
 
         // short name
-        SHORT_OUTPUT_NAME
+        SHORT_OUTPUT_NAME;
+
+        /**
+         * @param name
+         * @return DisplayMode with given name
+         */
+        public static DisplayMode findDisplayMode(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (DisplayMode displayMode : values()) {
+                if (displayMode.name().equals(name))
+                    return displayMode;
+            }
+
+            return null;
+        }
     }
     
     /**
@@ -77,7 +94,7 @@ public interface IElementSymbol<G extends IGroupSymbol, LV extends ILanguageVisi
     /**
      * @param targetType
      */
-    void setType(Class<Object> targetType);
+    void setType(Class<?> targetType);
     
     /**
      * Get the metadata ID that this group symbol resolves to.  If

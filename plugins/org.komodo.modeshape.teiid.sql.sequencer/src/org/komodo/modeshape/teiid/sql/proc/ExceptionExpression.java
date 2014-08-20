@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -33,57 +34,54 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
 
     public ExceptionExpression(TeiidParser p, int id) {
         super(p, id);
+        assignTypeName(DataTypeName.OBJECT);
     }
 
     @Override
     public Class<?> getType() {
-        return getTeiidParser().getDataTypeService().getDefaultDataClass(DataTypeName.OBJECT);
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @return
-     */
-    private Expression getMessage() {
-        throw new UnsupportedOperationException();
+    private void assignTypeName(DataTypeName dataTypeName) {
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
     }
 
-    /**
-     * @param errMsg
-     */
+    public Expression getMessage() {
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.ExceptionExpression.MESSAGE_REF_NAME, Expression.class);
+    }
+
     public void setMessage(Expression errMsg) {
+        addLastChild(TeiidSqlLexicon.ExceptionExpression.MESSAGE_REF_NAME, errMsg);
     }
 
-    /**
-     * @return
-     */
-    private Expression getSqlState() {
-        throw new UnsupportedOperationException();
+    public Expression getSqlState() {
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.ExceptionExpression.SQL_STATE_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param sqlState
-     */
     public void setSqlState(Expression sqlState) {
+        addLastChild(TeiidSqlLexicon.ExceptionExpression.SQL_STATE_REF_NAME, sqlState);
     }
 
-    /**
-     * @return
-     */
-    private Expression getErrorCode() {
-        throw new UnsupportedOperationException();
+    public Expression getErrorCode() {
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.ExceptionExpression.ERROR_CODE_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param errCode
-     */
     public void setErrorCode(Expression errCode) {
+        addLastChild(TeiidSqlLexicon.ExceptionExpression.ERROR_CODE_REF_NAME, errCode);
     }
 
-    /**
-     * @param parent
-     */
-    public void setParentExpression(Expression parent) {
+    public Expression getParentExpression() {
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.ExceptionExpression.PARENT_EXPRESSION_REF_NAME, Expression.class);
     }
+
+    public void setParentExpression(Expression parent) {
+        addLastChild(TeiidSqlLexicon.ExceptionExpression.PARENT_EXPRESSION_REF_NAME, parent);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -107,9 +105,9 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
         if (this.getMessage() == null) {
             if (other.getMessage() != null) return false;
         } else if (!this.getMessage().equals(other.getMessage())) return false;
-        if (this.getParent() == null) {
-            if (other.getParent() != null) return false;
-        } else if (!this.getParent().equals(other.getParent())) return false;
+        if (this.getParentExpression() == null) {
+            if (other.getParentExpression() != null) return false;
+        } else if (!this.getParentExpression().equals(other.getParentExpression())) return false;
         if (this.getSqlState() == null) {
             if (other.getSqlState() != null) return false;
         } else if (!this.getSqlState().equals(other.getSqlState())) return false;

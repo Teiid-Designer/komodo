@@ -25,6 +25,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
@@ -36,82 +37,87 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
 
     public DynamicCommand(TeiidParser p, int id) {
         super(p, id);
+        setType(TYPE_DYNAMIC);
     }
 
-    @Override
-    public int getType() {
-        throw new UnsupportedOperationException();
-    }
     /** 
      * @return Returns the columns.
      */
     public List<ElementSymbol> getAsColumns() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                               TeiidSqlLexicon.DynamicCommand.AS_COLUMNS_REF_NAME, ElementSymbol.class);
     }
 
     /** 
      * @param columns The columns to set.
      */
     public void setAsColumns(List<ElementSymbol> columns) {
+        setChildren(TeiidSqlLexicon.DynamicCommand.AS_CLAUSE_SET_PROP_NAME, columns);
     }
     
     /** 
      * @return Returns the intoGroup.
      */
     public GroupSymbol getIntoGroup() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.DynamicCommand.INTO_GROUP_REF_NAME, GroupSymbol.class);
     }
     
     /** 
      * @param intoGroup The intoGroup to set.
      */
     public void setIntoGroup(GroupSymbol intoGroup) {
+        addLastChild(TeiidSqlLexicon.DynamicCommand.INTO_GROUP_REF_NAME, intoGroup);
     }
     
     /** 
      * @return Returns the sql.
      */
     public Expression getSql() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.DynamicCommand.SQL_REF_NAME, Expression.class);
     }
     
     /** 
      * @param sql The sql to set.
      */
     public void setSql(Expression sql) {
+        addLastChild(TeiidSqlLexicon.DynamicCommand.SQL_REF_NAME, sql);
     }
             
     /** 
      * @return Returns the using.
      */
     public SetClauseList getUsing() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.DynamicCommand.USING_REF_NAME, SetClauseList.class);
     }
     
     /** 
      * @param using The using to set.
      */
     public void setUsing(SetClauseList using) {
+        addLastChild(TeiidSqlLexicon.DynamicCommand.USING_REF_NAME, using);
     }
 
     /** 
      * @return Returns the asClauseSet.
      */
     public boolean isAsClauseSet() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.DynamicCommand.AS_CLAUSE_SET_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /** 
      * @param asClauseSet The asClauseSet to set.
      */
     public void setAsClauseSet(boolean asClauseSet) {
+        setProperty(TeiidSqlLexicon.DynamicCommand.AS_CLAUSE_SET_PROP_NAME, asClauseSet);
     }
 
     /**
      * @return updating model count
      */
     public int getUpdatingModelCount() {
-        return 0;
+        Object property = getProperty(TeiidSqlLexicon.DynamicCommand.UPDATING_MODEL_COUNT_PROP_NAME);
+        return property == null ? 0 : Integer.parseInt(property.toString());
     }
 
     /**
@@ -123,6 +129,8 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
         } else if (count > 2) {
             count = 2;
         }
+
+        setProperty(TeiidSqlLexicon.DynamicCommand.UPDATING_MODEL_COUNT_PROP_NAME, count);
     }
 
     @Override

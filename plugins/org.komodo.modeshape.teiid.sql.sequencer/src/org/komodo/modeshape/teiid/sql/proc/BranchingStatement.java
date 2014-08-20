@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.proc.IBranchingStatement;
@@ -43,42 +44,57 @@ public class BranchingStatement extends Statement implements IBranchingStatement
         /**
          * ANSI - allowed to leave any block 
          */
-        LEAVE
+        LEAVE;
+
+        /**
+         * @param name
+         * @return BranchingMode for given name
+         */
+        public static BranchingMode findBranchingMode(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (BranchingMode mode : values()) {
+                if (mode.name().equals(name))
+                    return mode;
+            }
+
+            return null;
+        }
     }
 
     public BranchingStatement(TeiidParser p, int id) {
         super(p, id);
+        setType(StatementType.TYPE_BREAK);
     }
 
-    @Override
-    public StatementType getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return
-     */
     public String getLabel() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.BranchingStatement.LABEL_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param label
-     */
     public void setLabel(String label) {
+        setProperty(TeiidSqlLexicon.BranchingStatement.LABEL_PROP_NAME, label);
     }
 
-    /**
-     * @return
-     */
     public BranchingMode getMode() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.BranchingStatement.MODE_PROP_NAME);
+        return property == null ? BranchingMode.BREAK : BranchingMode.findBranchingMode(property.toString());
     }
 
-    /**
-     * @param mode
-     */
     public void setMode(BranchingMode mode) {
+        setProperty(TeiidSqlLexicon.BranchingStatement.MODE_PROP_NAME, mode);
+        switch (mode) {
+            case BREAK:
+                setType(StatementType.TYPE_BREAK);
+                return;
+            case CONTINUE:
+                setType(StatementType.TYPE_CONTINUE);
+                return;
+            case LEAVE:
+                setType(StatementType.TYPE_LEAVE);
+        }
     }
 
     @Override

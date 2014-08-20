@@ -3,6 +3,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -28,7 +29,7 @@ public abstract class QueryCommand extends Command
      */
     @Override
     public OrderBy getOrderBy() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.QueryCommand.ORDER_BY_REF_NAME, OrderBy.class);
     }
     
     /**
@@ -37,32 +38,30 @@ public abstract class QueryCommand extends Command
      */
     @Override
     public void setOrderBy(OrderBy orderBy) {
+        addLastChild(TeiidSqlLexicon.QueryCommand.ORDER_BY_REF_NAME, orderBy);
     }
 
-    /**
-     * @return limit
-     */
     public Limit getLimit() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.QueryCommand.LIMIT_REF_NAME, Limit.class);
     }
 
-    /**
-     * @param limit
-     */
     public void setLimit(Limit limit) {
+        addLastChild(TeiidSqlLexicon.QueryCommand.LIMIT_REF_NAME, limit);
     }
     
     /**
      * @return with
      */
     public List<WithQueryCommand> getWith() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.QueryCommand.WITH_REF_NAME, WithQueryCommand.class);
     }
     
     /**
      * @param with
      */
     public void setWith(List<WithQueryCommand> with) {
+        setChildren(TeiidSqlLexicon.QueryCommand.WITH_REF_NAME, with);
     }
 
     @Override

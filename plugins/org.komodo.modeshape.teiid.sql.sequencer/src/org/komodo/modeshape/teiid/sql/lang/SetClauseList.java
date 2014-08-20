@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.query.sql.lang.ISetClauseList;
@@ -33,17 +34,17 @@ public class SetClauseList extends ASTNode implements ISetClauseList<LanguageVis
         super(p, id);
     }
 
-    /**
-     * @return
-     */
     public List<SetClause> getSetClauses() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.SetClauseList.SET_CLAUSES_REF_NAME, SetClause.class);
     }
 
-    /**
-     * @param setClause
-     */
-    public void addClause(SetClause setClause) {
+    public void addSetClause(SetClause setClause) {
+        addLastChild(TeiidSqlLexicon.SetClauseList.SET_CLAUSES_REF_NAME, setClause);
+    }
+
+    public void setSetClauses(List<SetClause> setClauses) {
+        setChildren(TeiidSqlLexicon.SetClauseList.SET_CLAUSES_REF_NAME, setClauses);
     }
 
     @Override

@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.language.SortSpecification;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
@@ -36,35 +37,31 @@ public class OrderByItem extends ASTNode implements IOrderByItem<Expression, Lan
 
     @Override
     public Expression getSymbol() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.OrderByItem.SYMBOL_REF_NAME, Expression.class);
     }
 
     @Override
     public void setSymbol(Expression symbol) {
+        addLastChild(TeiidSqlLexicon.OrderByItem.SYMBOL_REF_NAME, symbol);
     }
 
     @Override
     public boolean isAscending() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.OrderByItem.ASCENDING_PROP_NAME);
+        return property == null ? true : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param ascending
-     */
     public void setAscending(boolean ascending) {
+        setProperty(TeiidSqlLexicon.OrderByItem.ASCENDING_PROP_NAME, ascending);
     }
 
-    /**
-     * @return
-     */
     public SortSpecification.NullOrdering getNullOrdering() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.OrderByItem.NULL_ORDERING_PROP_NAME);
+        return property == null ? null : SortSpecification.NullOrdering.findNullOrdering(property.toString());
     }
 
-    /**
-     * @param nullOrdering
-     */
     public void setNullOrdering(SortSpecification.NullOrdering nullOrdering) {
+        setProperty(TeiidSqlLexicon.OrderByItem.NULL_ORDERING_PROP_NAME, nullOrdering.name());
     }
 
     @Override

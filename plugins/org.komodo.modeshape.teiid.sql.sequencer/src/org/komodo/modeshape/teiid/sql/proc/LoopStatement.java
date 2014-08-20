@@ -22,6 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
@@ -33,60 +34,46 @@ public class LoopStatement extends Statement implements Labeled, SubqueryContain
 
     public LoopStatement(TeiidParser p, int id) {
         super(p, id);
-    }
-
-    /**
-     * Return the type for this statement, this is one of the types
-     * defined on the statement object.
-     * @return The statement type
-     */
-    @Override
-    public StatementType getType() {
-        return StatementType.TYPE_LOOP;
+        setType(StatementType.TYPE_LOOP);
     }
 
     @Override
     public Command getCommand() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, Command.class);
     }
 
     @Override
     public void setCommand(Command command) {
+        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override
     public String getLabel() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.Labeled.LABEL_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     @Override
     public void setLabel(String label) {
+        setProperty(TeiidSqlLexicon.Labeled.LABEL_PROP_NAME, label);
     }
 
-    /**
-     * @return
-     */
     private Block getBlock() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.LoopStatement.BLOCK_REF_NAME, Block.class);
     }
 
-    /**
-     * @param asBlock
-     */
     public void setBlock(Block asBlock) {
+        addLastChild(TeiidSqlLexicon.LoopStatement.BLOCK_REF_NAME, asBlock);
     }
 
-    /**
-     * @return
-     */
     private String getCursorName() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.LoopStatement.CURSOR_NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @param cursor
-     */
     public void setCursorName(String cursor) {
+        setProperty(TeiidSqlLexicon.LoopStatement.CURSOR_NAME_PROP_NAME, cursor);
     }
 
     @Override

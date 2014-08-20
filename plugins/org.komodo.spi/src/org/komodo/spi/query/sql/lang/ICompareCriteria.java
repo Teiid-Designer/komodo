@@ -53,13 +53,6 @@ public interface ICompareCriteria<E extends IExpression, LV extends ILanguageVis
      * @return The operator
      */
     int getOperator();
-
-    /**
-     * Set the operator
-     * 
-     * @param operator
-     */
-    void setOperator(int operator);
     
     /**
      * Get the string version of the operator

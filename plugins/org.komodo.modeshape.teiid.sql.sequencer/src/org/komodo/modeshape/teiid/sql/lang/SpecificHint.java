@@ -21,6 +21,7 @@
  */
 package org.komodo.modeshape.teiid.sql.lang;
 
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 
 /**
@@ -36,37 +37,31 @@ public class SpecificHint extends ASTNode {
         super(p, id);
     }
 
-    /**
-     * @param hint
-     */
-    public void setHint(String hint) {
-    }
-
-    /**
-     * @return hint
-     */
     public String getHint() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.SpecificHint.HINT_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
-    /**
-     * @return use aliases
-     */
+    public void setHint(String hint) {
+        setProperty(TeiidSqlLexicon.SpecificHint.HINT_PROP_NAME, hint);
+    }
+
     public boolean isUseAliases() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.SpecificHint.USE_ALIASES_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
-    /**
-     * @param useAliases
-     */
     public void setUseAliases(boolean useAliases) {
+        setProperty(TeiidSqlLexicon.SpecificHint.USE_ALIASES_PROP_NAME, useAliases);
     }
 
     public String getTranslatorName() {
-        throw new UnsupportedOperationException();
+        Object property = getProperty(TeiidSqlLexicon.SpecificHint.TRANSLATOR_NAME_PROP_NAME);
+        return property == null ? null : property.toString();
     }
 
     public void setTranslatorName(String translatorName) {
+        setProperty(TeiidSqlLexicon.SpecificHint.TRANSLATOR_NAME_PROP_NAME, translatorName);
     }
 
     @Override

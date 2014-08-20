@@ -23,11 +23,13 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.spi.query.sql.symbol.ISearchedCaseExpression;
+import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class SearchedCaseExpression extends ASTNode implements Expression, ISearchedCaseExpression<LanguageVisitor> {
 
@@ -36,45 +38,40 @@ public class SearchedCaseExpression extends ASTNode implements Expression, ISear
     }
 
     @Override
-    public <T> Class<T> getType() {
-        throw new UnsupportedOperationException();
+    public Class<?> getType() {
+        return convertTypeClassPropertyToClass(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME);
     }
 
-    /**
-     * @param type
-     */
-    public void setType(Class<Object> type) {
+    public void setType(Class<?> type) {
+        DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(type);
+        setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
     }
 
-    /**
-     * @return
-     */
-    public List<Criteria> getWhen() {
-        throw new UnsupportedOperationException();
+    public List<? extends Criteria> getWhen() {
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.SearchedCaseExpression.WHEN_REF_NAME, Criteria.class);
     }
 
-    public void setWhen(List<Criteria> when) {
+    public void setWhen(List<? extends Criteria> when) {
+        setChildren(TeiidSqlLexicon.SearchedCaseExpression.WHEN_REF_NAME, when);
     }
 
-    public List<Expression> getThen() {
-        throw new UnsupportedOperationException();
+    public List<? extends Expression> getThen() {
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.SearchedCaseExpression.THEN_REF_NAME, Expression.class);
     }
 
-    public void setThen(List<Expression> then) {
+    public void setThen(List<? extends Expression> then) {
+        setChildren(TeiidSqlLexicon.SearchedCaseExpression.THEN_REF_NAME, then);
     }
 
-
-    /**
-     * @return
-     */
     public Expression getElseExpression() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(
+                                               TeiidSqlLexicon.SearchedCaseExpression.ELSE_EXPRESSION_REF_NAME, Expression.class);
     }
 
-    /**
-     * @param elseExpression
-     */
     public void setElseExpression(Expression elseExpression) {
+        addLastChild(TeiidSqlLexicon.SearchedCaseExpression.ELSE_EXPRESSION_REF_NAME, elseExpression);
     }
 
     @Override

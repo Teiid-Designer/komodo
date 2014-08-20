@@ -23,9 +23,14 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbol;
+import org.komodo.modeshape.teiid.sql.symbol.MultipleElementSymbol;
+import org.komodo.modeshape.teiid.sql.symbol.Symbol;
 import org.komodo.spi.query.sql.lang.ISelect;
 
 public class Select extends ASTNode implements ISelect<Expression, LanguageVisitor> {
@@ -36,29 +41,66 @@ public class Select extends ASTNode implements ISelect<Expression, LanguageVisit
 
     @Override
     public List<Expression> getSymbols() {
-        throw new UnsupportedOperationException();
+        return getChildrenforIdentifierAndRefType(
+                                                  TeiidSqlLexicon.Select.SYMBOLS_REF_NAME, Expression.class);
     }
 
-    @Override
-    public void setSymbols(List<? extends Expression> symbols) {
+    public Expression getSymbol( int index ) {
+        return getSymbols().get(index);
     }
 
     @Override
     public void addSymbol(Expression expression) {
+        Expression symbol = wrapSymbol(expression);
+        addLastChild(TeiidSqlLexicon.Select.SYMBOLS_REF_NAME, symbol);
+    }
+
+    /**
+     * @param expression
+     * @return
+     */
+    private Expression wrapSymbol(Expression expression) {
+        if (expression == null)
+            return null;
+
+        if (expression instanceof Symbol)
+            return expression;
+
+        if (expression instanceof MultipleElementSymbol)
+            return expression;
+
+        ExpressionSymbol exSymbol = getTeiidParser().createASTNode(ASTNodes.EXPRESSION_SYMBOL);
+        exSymbol.setName("expr" + (getSymbols().size() + 1)); //$NON-NLS-1$
+        exSymbol.setExpression(expression);
+        expression = exSymbol;
+
+        return exSymbol;
     }
 
     @Override
+    public void setSymbols(List<? extends Expression> symbols) {
+        setChildren(TeiidSqlLexicon.Select.SYMBOLS_REF_NAME, symbols);
+    }
+
+    /**
+     * Checks for a Select * clause
+     * @return True if Select * is used
+     */
+    @Override
     public boolean isStar() {
-        return false;
+        List<Expression> symbols = getSymbols();
+        return (symbols.size() == 1 && symbols.get(0) instanceof MultipleElementSymbol && ((MultipleElementSymbol)symbols.get(0)).getGroup() == null);
     }
 
     @Override
     public boolean isDistinct() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.Select.DISTINCT_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     @Override
     public void setDistinct(boolean isDistinct) {
+        setProperty(TeiidSqlLexicon.Select.DISTINCT_PROP_NAME, isDistinct);
     }
 
     @Override

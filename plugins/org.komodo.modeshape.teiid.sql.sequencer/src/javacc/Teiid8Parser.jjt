@@ -1562,7 +1562,7 @@ SetClauseList setClauseList(boolean shortName, ParseInfo info) #SetClauseList :
     value = expression(info)
     {
         ElementSymbol symbol = elementSymbol(element);
-        jjtThis.addClause(setClause(symbol, value));
+        jjtThis.addSetClause(setClause(symbol, value));
     }
 	(<COMMA>
 	 element = id(null)
@@ -1570,7 +1570,7 @@ SetClauseList setClauseList(boolean shortName, ParseInfo info) #SetClauseList :
      value = expression(info)
      {
      	  symbol = elementSymbol(element);
-          jjtThis.addClause(setClause(symbol, value));
+          jjtThis.addSetClause(setClause(symbol, value));
      }
 	)*
 	{
@@ -3735,12 +3735,12 @@ OrderBy orderby(ParseInfo info) #OrderBy :
 	<ORDER> <BY>
 	item = sortSpecification(info)
 	{
-    	jjtThis.getOrderByItems().add(item);
+    	jjtThis.addOrderByItem(item);
 	}
 	(<COMMA>
 		item = sortSpecification(info)
 		{
-    		jjtThis.getOrderByItems().add(item);
+    		jjtThis.addOrderByItem(item);
 		}
 	)*
 	{
@@ -4847,7 +4847,7 @@ XMLNamespaces xmlNamespaces(ParseInfo info) #XMLNamespaces :
 	)*
 	<RPAREN>
 	{
-	    jjtThis.setNamespaces(namespaces);
+	    jjtThis.setNamespaceItems(namespaces);
 	    return jjtThis;
 	}
 }

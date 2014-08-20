@@ -23,6 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
@@ -36,28 +37,25 @@ public class UnaryFromClause extends FromClause implements IUnaryFromClause<Grou
 
     @Override
     public GroupSymbol getGroup() {
-        throw new UnsupportedOperationException();
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.UnaryFromClause.GROUP_REF_NAME, GroupSymbol.class);
     }
 
     @Override
     public void setGroup(GroupSymbol group) {
+        addLastChild(TeiidSqlLexicon.UnaryFromClause.GROUP_REF_NAME, group);
+    }
+
+    public Command getExpandedCommand() {
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.UnaryFromClause.EXPANDED_COMMAND_REF_NAME, Command.class);
+    }
+
+    public void setExpandedCommand(Command command) {
+        addLastChild(TeiidSqlLexicon.UnaryFromClause.EXPANDED_COMMAND_REF_NAME, command);
     }
 
     @Override
     public void collectGroups(Collection<GroupSymbol> groups) {
-    }
-
-    /**
-     * @return
-     */
-    public Command getExpandedCommand() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param command
-     */
-    public void setExpandedCommand(Command command) {
+        groups.add(getGroup());
     }
 
     @Override

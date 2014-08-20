@@ -3,6 +3,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
@@ -39,50 +40,67 @@ public abstract class FromClause extends ASTNode implements IFromClause<Language
     }
 
     /**
-     * @return whether has any hints set
+     * @return whether any hints set
      */
     public boolean hasHint() {
-        return false;
+        return isOptional() || isMakeInd() || isMakeNotDep() || isNoUnnest() || isPreserve() || 
+            (getMax() == 0 && !isJoin()); // makeDep.isSimple() in teiid language
     }
 
     @Override
     public boolean isOptional() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.FromClause.OPTIONAL_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
     
     @Override
     public void setOptional(boolean optional) {
+        setProperty(TeiidSqlLexicon.FromClause.OPTIONAL_PROP_NAME, optional);
     }
     
     /**
      * @return make ind flag
      */
     public boolean isMakeInd() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.FromClause.MAKE_IND_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
     
     /**
      * @param makeInd
      */
     public void setMakeInd(boolean makeInd) {
+        setProperty(TeiidSqlLexicon.FromClause.MAKE_IND_PROP_NAME, makeInd);
+    }
+
+    /**
+     * @return no unnest flag
+     */
+    public boolean isNoUnnest() {
+        Object property = getProperty(TeiidSqlLexicon.FromClause.NO_UNNEST_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     /**
      * @param noUnnest
      */
     public void setNoUnnest(boolean noUnnest) {
-    }
-    
-    /**
-     * @return no unnest flag
-     */
-    public boolean isNoUnnest() {
-        return false;
+        setProperty(TeiidSqlLexicon.FromClause.NO_UNNEST_PROP_NAME, noUnnest);
     }
 
     @Override
     public boolean isMakeDep() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.FromClause.MAKE_DEP_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
+    }
+
+    @Override
+    public void setMakeDep(boolean makeDep) {
+        setProperty(TeiidSqlLexicon.FromClause.MAKE_DEP_PROP_NAME, makeDep);
+        if (makeDep) {
+            setJoin(! makeDep);
+            setMax(makeDep ? 0 : 1);
+        }
     }
 
     /**
@@ -92,10 +110,12 @@ public abstract class FromClause extends ASTNode implements IFromClause<Language
      * @return join flag
      */
     public boolean isJoin() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.FromClause.JOIN_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     public void setJoin(boolean join) {
+        setProperty(TeiidSqlLexicon.FromClause.JOIN_PROP_NAME, join);
     }
 
     /**
@@ -104,37 +124,39 @@ public abstract class FromClause extends ASTNode implements IFromClause<Language
      *
      * @return join flag
      */
-    public boolean isMax() {
-        return false;
+    public int getMax() {
+        Object property = getProperty(TeiidSqlLexicon.FromClause.MAX_PROP_NAME);
+        return property == null ? 0 : Integer.parseInt(property.toString());
     }
 
-    public void setMax(boolean max) {
-    }
-
-    @Override
-    public void setMakeDep(boolean makeDep) {
+    public void setMax(int max) {
+        setProperty(TeiidSqlLexicon.FromClause.MAX_PROP_NAME, max);
     }
 
     @Override
     public boolean isMakeNotDep() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.FromClause.MAKE_NOT_DEP_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
 
     @Override
     public void setMakeNotDep(boolean makeNotDep) {
+        setProperty(TeiidSqlLexicon.FromClause.MAKE_NOT_DEP_PROP_NAME, makeNotDep);
     }
     
     /**
      * @return preserve flag
      */
     public boolean isPreserve() {
-        return false;
+        Object property = getProperty(TeiidSqlLexicon.FromClause.PRESERVE_PROP_NAME);
+        return property == null ? false : Boolean.parseBoolean(property.toString());
     }
     
     /**
      * @param preserve
      */
     public void setPreserve(boolean preserve) {
+        setProperty(TeiidSqlLexicon.FromClause.PRESERVE_PROP_NAME, preserve);
     }
 
     /**
@@ -147,7 +169,7 @@ public abstract class FromClause extends ASTNode implements IFromClause<Language
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + (this.isJoin() ? 1231 : 1237);
-        result = prime * result + (this.isMax() ? 1231 : 1237);
+        result = prime * result + this.getMax();
         result = prime * result + (this.isMakeInd() ? 1231 : 1237);
         result = prime * result + (this.isMakeNotDep() ? 1231 : 1237);
         result = prime * result + (this.isNoUnnest() ? 1231 : 1237);
@@ -164,7 +186,7 @@ public abstract class FromClause extends ASTNode implements IFromClause<Language
         FromClause other = (FromClause)obj;
 
         if (this.isJoin() != other.isJoin()) return false;
-        if (this.isMax() != other.isMax()) return false;
+        if (this.getMax() != other.getMax()) return false;
         if (this.isMakeInd() != other.isMakeInd()) return false;
         if (this.isMakeNotDep() != other.isMakeNotDep()) return false;
         if (this.isNoUnnest() != other.isNoUnnest()) return false;
