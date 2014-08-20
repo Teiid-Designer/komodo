@@ -132,6 +132,14 @@ public class TeiidCndGenerator implements StringConstants {
         "<" + TSQL_PREFIX + "='" + TSQL_NAMESPACE + "'>"
     };
 
+    private static final String[] IGNORED_METHOD_NAMES = {
+        "getTeiidParser"
+    };
+
+    private static final List<String> IGNORED_METHOD_LIST = Arrays.asList(IGNORED_METHOD_NAMES);
+
+    private static final String GET = "get";
+
     private static final String SET = "set";
 
     private enum ModeshapeType {
@@ -577,13 +585,17 @@ private void cndSection1Comment(String comment) throws Exception {
         lex(NEW_LINE);
     }
 
+    private boolean isGetter(Method method) {
+        return method.getName().startsWith(GET);
+    }
+
     private boolean isSetter(Method method) {
         return method.getName().startsWith(SET);
     }
 
-    private String getSetterName(Method method) {
+    private String extractRootName(Method method) {
         String name = method.getName();
-        name = name.substring(SET.length());
+        name = name.substring(SET.length()); // Set and Get are the same length so this works for either!
         name = toLowerCamelCase(name);
         return name;
     }
@@ -795,7 +807,7 @@ private void cndSection1Comment(String comment) throws Exception {
     }
 
     private Aspect createAspect(Class<?> parameterClass, Method method, Node classNode, boolean multiple) throws Exception {
-        String aspectName = getSetterName(method);
+        String aspectName = extractRootName(method);
         String aspectType = parameterClass.getSimpleName();
         ModeshapeType mType = ModeshapeType.get(parameterClass);
         boolean isRegistered = classNode.getTree().containsClass(parameterClass);
@@ -840,8 +852,10 @@ private void cndSection1Comment(String comment) throws Exception {
                 }
             } else {
                 Object[] enumConstants = parameterClass.getEnumConstants();
-                for (Object c : enumConstants) {
-                    constraints.add(c.toString());
+                if (enumConstants != null) {
+                    for (Object c : enumConstants) {
+                        constraints.add(c.toString());
+                    }
                 }
             }
 
@@ -879,49 +893,71 @@ private void cndSection1Comment(String comment) throws Exception {
 
         Map<String, Method> dedupedMethods = new HashMap<String, Method>();
         for (Method method : nodeClass.getDeclaredMethods()) {
-            if (! isSetter(method))
+
+            if (nodeClass.isInterface() && ! isGetter(method))
+                continue; // extract getter from interfaces
+            else if (! nodeClass.isInterface() && ! isSetter(method))
+                continue; // extract setters from classes
+
+            Method overriddenMethod = findOverriddenMethod(node, method);
+            // overriddenMethod should be highest possible declaration
+            if (overriddenMethod != null)
+                continue; // No need to create an aspect for this method as we should use the parent declaration
+
+            if (IGNORED_METHOD_LIST.contains(method.getName()))
                 continue;
 
-            Class<?>[] parameterTypes = method.getParameterTypes();
-            if (parameterTypes.length > 1)
-                throw new Exception("The class " + node.klazz().getSimpleName() + " has the setter method '" + method.getName() + "' with multiple parameters");
-            else if (parameterTypes.length == 0)
-                throw new Exception("The class " + node.klazz().getSimpleName() + " has the setter method '" + method.getName() + "' with no parameters");
-
-            Method deMethod = dedupedMethods.get(method.getName());
-            if (deMethod != null) {
-                // Already have a method of this name so need to determine
-                // which is narrower as this tends to be produced by generics in
-                // the parameters
-                Class<?> deParamType = deMethod.getParameterTypes()[0];
-                ModeshapeType deMType = ModeshapeType.get(deParamType);
-                ModeshapeType mType = ModeshapeType.get(parameterTypes[0]);
-
-                if (deParamType.isAssignableFrom(parameterTypes[0])) {
-                    // deMethod is super of method so use method
-                    dedupedMethods.put(method.getName(), method);
-                } else if (parameterTypes[0].isAssignableFrom(deParamType)) {
-                    // method is super of deMethod so already using deMethod
-                    continue;
-                } else if (mType != null && deMType == null) {
-                 // method has a modeshape type parameter, prefer that
-                    dedupedMethods.put(method.getName(), method);
-                } else if (deMType != null && mType == null) {
-                    // deMethod has a modeshape type parameter, prefer that
-                    continue;
-                } else {
-                    // Methods have same name but totally unrelated so flag this up
-                    System.err.println(nodeClass + " contains more than one " + method.getName() + ". Not sure which to use!");
-                }
-            } else {
+            if (isGetter(method)) {
                 dedupedMethods.put(method.getName(), method);
+            } else if (isSetter(method)) {
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                if (parameterTypes.length > 1)
+                    throw new Exception("The class " + node.klazz().getSimpleName() + " has the setter method '" + method.getName() + "' with multiple parameters");
+                else if (parameterTypes.length == 0)
+                    throw new Exception("The class " + node.klazz().getSimpleName() + " has the setter method '" + method.getName() + "' with no parameters");
+
+                Method deMethod = dedupedMethods.get(method.getName());
+                if (deMethod != null) {
+                    // Already have a method of this name so need to determine
+                    // which is narrower as this tends to be produced by generics in
+                    // the parameters
+                    Class<?> deParamType = deMethod.getParameterTypes()[0];
+                    ModeshapeType deMType = ModeshapeType.get(deParamType);
+                    ModeshapeType mType = ModeshapeType.get(parameterTypes[0]);
+
+                    if (deParamType.isAssignableFrom(parameterTypes[0])) {
+                        // deMethod is super of method so use method
+                        dedupedMethods.put(method.getName(), method);
+                    } else if (parameterTypes[0].isAssignableFrom(deParamType)) {
+                        // method is super of deMethod so already using deMethod
+                        continue;
+                    } else if (mType != null && deMType == null) {
+                        // method has a modeshape type parameter, prefer that
+                        dedupedMethods.put(method.getName(), method);
+                    } else if (deMType != null && mType == null) {
+                        // deMethod has a modeshape type parameter, prefer that
+                        continue;
+                    } else {
+                        // Methods have same name but totally unrelated so flag this up
+                        System.err.println(nodeClass + " contains more than one " + method.getName() + ". Not sure which to use!");
+                    }
+                } else {
+                    dedupedMethods.put(method.getName(), method);
+                }
             }
         }
 
         for (Method method : dedupedMethods.values()) {
-            Class<?>[] parameterTypes = method.getParameterTypes();
-            Aspect aspect = createAspect(parameterTypes[0], method, node);
+            Class<?> parameterClass = null;
+            if (isGetter(method)) {
+                parameterClass = method.getReturnType();
+            } else {
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                parameterClass  = parameterTypes[0];
+            }
 
+            Aspect aspect = createAspect(parameterClass, method, node);
+            
             if (aspect instanceof PropertyAspect)
                 propertyAspects.add((PropertyAspect) aspect);
             else if (aspect instanceof ChildAspect)
@@ -935,6 +971,50 @@ private void cndSection1Comment(String comment) throws Exception {
         for (ChildAspect aspect : childAspects) {
             writeChildNode(aspect);
         }
+    }
+
+    private Method findOverriddenMethod(Node node, Method method) throws Exception {
+        Class<?> klazz = node.klazz();
+        String rootMethodName = extractRootName(method);
+
+        if (ASTNode.class.equals(klazz))
+            return null; // Try and short-circuit for performance
+
+        Method overriddenMethod = null;
+
+        Class<?> superClass = klazz.getSuperclass();
+        while (superClass != null) {
+            for (Method dmethod : superClass.getDeclaredMethods()) {
+                if (dmethod.getName().equals(rootMethodName)) {
+                    overriddenMethod = dmethod;
+                    break;
+                }
+            }
+
+            superClass = superClass.getSuperclass();
+        }
+
+        if (overriddenMethod != null)
+            return overriddenMethod;
+
+        Class<?>[] interfaces = klazz.getInterfaces();
+        if (interfaces == null)
+            return overriddenMethod;
+
+        for (Class<?> iface : interfaces) {
+            if (node.getTree().isSPILanguageInterface(iface))
+                continue;
+
+            for (Method dmethod : iface.getDeclaredMethods()) {
+                // Need to compare setters with getters for the interfaces
+                if (extractRootName(dmethod).equals(rootMethodName)) {
+                    overriddenMethod = dmethod;
+                    break;
+                }
+            }
+        }
+
+        return overriddenMethod;
     }
 
     private void lexId(Node node) throws Exception {
@@ -957,11 +1037,16 @@ private void cndSection1Comment(String comment) throws Exception {
 
         writeMixinDeclaration();
 
-        cnd(NEW_LINE + NEW_LINE);
+        cnd(NEW_LINE);
 
         lex(SPACE + OPEN_BRACE + NEW_LINE);
         lexId(iNode);
         lex(NEW_LINE);
+
+        // Write properties and child fields of this node
+        writeAspects(iNode);
+
+        cnd(NEW_LINE);
         lex(TAB + CLOSE_BRACE + NEW_LINE + NEW_LINE);
 
         // Write the children out
@@ -1077,13 +1162,13 @@ private void cndSection1Comment(String comment) throws Exception {
         System.out.println(tree.toString());
 
         if (! tree.getInterfaceNodes().isEmpty()) {
-            cndSection2Comment("Interfaces");
+            cndSection2Comment("Derived from Language Object Interfaces");
             for (INode iNode : tree.getInterfaceNodes()) {
                 writeInterfaceNode(iNode);
             }
         }
 
-        cndSection2Comment("Classes");
+        cndSection2Comment("Derived from Language Object Classes");
         for (CNode cNode : tree.getRoot().getChildren()) {
             writeClassNode(cNode);
         }

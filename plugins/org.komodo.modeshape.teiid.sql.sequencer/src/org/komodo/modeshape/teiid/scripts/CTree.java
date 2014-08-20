@@ -375,6 +375,9 @@ public class CTree implements StringConstants {
         if (objClass == null || objClass.getPackage() == null || objClass.getPackage().getName() == null)
             return false;
 
+        if (objClass.isEnum())
+            return false;
+
         return objClass.getPackage().getName().contains("spi.query.sql");
     }
 
