@@ -43,7 +43,7 @@ public class Into extends ASTNode implements IInto<LanguageVisitor> {
      * @param groupSymbol
      */
     public void setGroup(GroupSymbol groupSymbol) {
-        addLastChild(TeiidSqlLexicon.Into.GROUP_REF_NAME, groupSymbol);
+        setChild(TeiidSqlLexicon.Into.GROUP_REF_NAME, groupSymbol);
     }
 
     @Override

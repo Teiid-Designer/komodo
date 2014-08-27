@@ -55,7 +55,7 @@ public class MultipleElementSymbol extends ASTNode implements Expression, IMulti
     }
 
     public void setGroup(GroupSymbol group) {
-        addLastChild(TeiidSqlLexicon.MultipleElementSymbol.GROUP_REF_NAME, group);
+        setChild(TeiidSqlLexicon.MultipleElementSymbol.GROUP_REF_NAME, group);
     }
 
     @Override

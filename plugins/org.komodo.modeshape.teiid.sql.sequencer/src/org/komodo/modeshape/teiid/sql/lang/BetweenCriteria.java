@@ -54,7 +54,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      * @param expression the expression to set
      */
     public void setExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.BetweenCriteria.EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.BetweenCriteria.EXPRESSION_REF_NAME, expression);
     }
 
     /**
@@ -69,7 +69,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      * @param lowerExpression
      */
     public void setLowerExpression(Expression lowerExpression) {
-        addLastChild(TeiidSqlLexicon.BetweenCriteria.LOWER_EXPRESSION_REF_NAME, lowerExpression);
+        setChild(TeiidSqlLexicon.BetweenCriteria.LOWER_EXPRESSION_REF_NAME, lowerExpression);
     }
 
     /**
@@ -84,7 +84,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      * @param upperExpression
      */
     public void setUpperExpression(Expression upperExpression) {
-        addLastChild(TeiidSqlLexicon.BetweenCriteria.UPPER_EXPRESSION_REF_NAME, upperExpression);
+        setChild(TeiidSqlLexicon.BetweenCriteria.UPPER_EXPRESSION_REF_NAME, upperExpression);
     }
 
     /**

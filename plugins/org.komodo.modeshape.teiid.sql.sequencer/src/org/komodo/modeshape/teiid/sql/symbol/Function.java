@@ -113,6 +113,8 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
     }
 
     public void setArgs(Expression[] args) {
+        removeChildren(TeiidSqlLexicon.Function.ARGS_REF_NAME);
+
         if (args == null) {
             setChildren(TeiidSqlLexicon.Function.ARGS_REF_NAME, null);
             return;

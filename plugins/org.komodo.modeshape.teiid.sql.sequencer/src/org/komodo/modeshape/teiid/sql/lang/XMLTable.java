@@ -51,7 +51,7 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
     }
 
     public void setNamespaces(XMLNamespaces xmlNamespaces) {
-        addLastChild(TeiidSqlLexicon.XMLTable.NAMESPACES_REF_NAME, xmlNamespaces);
+        setChild(TeiidSqlLexicon.XMLTable.NAMESPACES_REF_NAME, xmlNamespaces);
     }
 
     public List<DerivedColumn> getPassing() {

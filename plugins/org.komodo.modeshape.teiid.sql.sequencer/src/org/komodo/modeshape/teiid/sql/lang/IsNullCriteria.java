@@ -41,7 +41,7 @@ public class IsNullCriteria extends Criteria implements PredicateCriteria, IIsNu
 
     @Override
     public void setExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.IsNullCriteria.EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.IsNullCriteria.EXPRESSION_REF_NAME, expression);
     }
 
     @Override

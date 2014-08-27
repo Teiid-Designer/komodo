@@ -52,7 +52,7 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
     }
 
     public void setExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.CaseExpression.EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.CaseExpression.EXPRESSION_REF_NAME, expression);
     }
 
     public List<Expression> getWhenExpressions() {
@@ -103,7 +103,7 @@ public class CaseExpression extends ASTNode implements Expression, ICaseExpressi
     }
 
     public void setElseExpression(Expression elseExpression) {
-        addLastChild(TeiidSqlLexicon.CaseExpression.ELSE_EXPRESSION_REF_NAME, elseExpression);
+        setChild(TeiidSqlLexicon.CaseExpression.ELSE_EXPRESSION_REF_NAME, elseExpression);
     }
 
     @Override

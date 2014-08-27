@@ -47,7 +47,7 @@ public class ExpressionSymbol extends Symbol implements Expression, IExpressionS
 
     @Override
     public void setExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.ExpressionSymbol.EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.ExpressionSymbol.EXPRESSION_REF_NAME, expression);
 
         DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(expression.getType());
         setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());

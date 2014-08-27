@@ -66,7 +66,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
      * @param intoGroup The intoGroup to set.
      */
     public void setIntoGroup(GroupSymbol intoGroup) {
-        addLastChild(TeiidSqlLexicon.DynamicCommand.INTO_GROUP_REF_NAME, intoGroup);
+        setChild(TeiidSqlLexicon.DynamicCommand.INTO_GROUP_REF_NAME, intoGroup);
     }
     
     /** 
@@ -80,7 +80,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
      * @param sql The sql to set.
      */
     public void setSql(Expression sql) {
-        addLastChild(TeiidSqlLexicon.DynamicCommand.SQL_REF_NAME, sql);
+        setChild(TeiidSqlLexicon.DynamicCommand.SQL_REF_NAME, sql);
     }
             
     /** 
@@ -94,7 +94,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
      * @param using The using to set.
      */
     public void setUsing(SetClauseList using) {
-        addLastChild(TeiidSqlLexicon.DynamicCommand.USING_REF_NAME, using);
+        setChild(TeiidSqlLexicon.DynamicCommand.USING_REF_NAME, using);
     }
 
     /** 

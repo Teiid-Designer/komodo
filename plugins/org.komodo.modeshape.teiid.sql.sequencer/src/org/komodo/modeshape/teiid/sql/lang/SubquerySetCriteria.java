@@ -44,7 +44,7 @@ public class SubquerySetCriteria extends AbstractSetCriteria
     }
 
     public void setSubqueryHint(SubqueryHint hint) {
-        addLastChild(TeiidSqlLexicon.SubquerySetCriteria.SUBQUERY_HINT_REF_NAME, hint);
+        setChild(TeiidSqlLexicon.SubquerySetCriteria.SUBQUERY_HINT_REF_NAME, hint);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class SubquerySetCriteria extends AbstractSetCriteria
 
     @Override
     public void setCommand(QueryCommand command) {
-        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
+        setChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override

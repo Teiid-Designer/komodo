@@ -38,7 +38,7 @@ public abstract class QueryCommand extends Command
      */
     @Override
     public void setOrderBy(OrderBy orderBy) {
-        addLastChild(TeiidSqlLexicon.QueryCommand.ORDER_BY_REF_NAME, orderBy);
+        setChild(TeiidSqlLexicon.QueryCommand.ORDER_BY_REF_NAME, orderBy);
     }
 
     public Limit getLimit() {
@@ -46,7 +46,7 @@ public abstract class QueryCommand extends Command
     }
 
     public void setLimit(Limit limit) {
-        addLastChild(TeiidSqlLexicon.QueryCommand.LIMIT_REF_NAME, limit);
+        setChild(TeiidSqlLexicon.QueryCommand.LIMIT_REF_NAME, limit);
     }
     
     /**

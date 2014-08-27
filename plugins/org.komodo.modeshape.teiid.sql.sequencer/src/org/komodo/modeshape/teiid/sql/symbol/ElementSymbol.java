@@ -53,7 +53,7 @@ public class ElementSymbol extends Symbol implements Expression, IElementSymbol<
 
     @Override
     public void setGroupSymbol(GroupSymbol groupSymbol) {
-        addLastChild(TeiidSqlLexicon.ElementSymbol.GROUP_SYMBOL_REF_NAME, groupSymbol);
+        setChild(TeiidSqlLexicon.ElementSymbol.GROUP_SYMBOL_REF_NAME, groupSymbol);
     }
 
     @Override

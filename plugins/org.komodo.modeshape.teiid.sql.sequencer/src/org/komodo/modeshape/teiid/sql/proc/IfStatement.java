@@ -40,7 +40,7 @@ public class IfStatement extends Statement implements IIfStatement<LanguageVisit
     }
 
     public void setCondition(Criteria criteria) {
-        addLastChild(TeiidSqlLexicon.IfStatement.CONDITION_REF_NAME, criteria);
+        setChild(TeiidSqlLexicon.IfStatement.CONDITION_REF_NAME, criteria);
     }
 
     public Block getIfBlock() {
@@ -48,7 +48,7 @@ public class IfStatement extends Statement implements IIfStatement<LanguageVisit
     }
 
     public void setIfBlock(Block asBlock) {
-        addLastChild(TeiidSqlLexicon.IfStatement.IF_BLOCK_REF_NAME, asBlock);
+        setChild(TeiidSqlLexicon.IfStatement.IF_BLOCK_REF_NAME, asBlock);
     }
 
     public Block getElseBlock() {
@@ -56,7 +56,7 @@ public class IfStatement extends Statement implements IIfStatement<LanguageVisit
     }
 
     public void setElseBlock(Block asBlock) {
-        addLastChild(TeiidSqlLexicon.IfStatement.ELSE_BLOCK_REF_NAME, asBlock);
+        setChild(TeiidSqlLexicon.IfStatement.ELSE_BLOCK_REF_NAME, asBlock);
     }
 
     @Override

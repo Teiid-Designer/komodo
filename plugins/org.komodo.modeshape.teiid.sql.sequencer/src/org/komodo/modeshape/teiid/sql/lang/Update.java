@@ -43,7 +43,7 @@ public class Update extends ProcedureContainer
     }
 
     public void setChangeList(SetClauseList setClauseList) {
-        addLastChild(TeiidSqlLexicon.Update.CHANGE_LIST_REF_NAME, setClauseList);
+        setChild(TeiidSqlLexicon.Update.CHANGE_LIST_REF_NAME, setClauseList);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class Update extends ProcedureContainer
     }
 
     public void setGroup(GroupSymbol groupSymbol) {
-        addLastChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, groupSymbol);
+        setChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, groupSymbol);
     }
 
     public Criteria getCriteria() {
@@ -60,7 +60,7 @@ public class Update extends ProcedureContainer
     }
 
     public void setCriteria(Criteria criteria) {
-        addLastChild(TeiidSqlLexicon.Update.CRITERIA_REF_NAME, criteria);
+        setChild(TeiidSqlLexicon.Update.CRITERIA_REF_NAME, criteria);
     }
 
     @Override

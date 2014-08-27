@@ -153,7 +153,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      * @param expression The expression defining this parameter's value
      */
     public void setExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.SPParameter.EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.SPParameter.EXPRESSION_REF_NAME, expression);
     }
 
     /**

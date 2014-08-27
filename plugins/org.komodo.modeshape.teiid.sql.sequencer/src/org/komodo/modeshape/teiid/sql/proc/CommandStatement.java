@@ -54,7 +54,7 @@ public class CommandStatement extends Statement implements SubqueryContainer<Com
 
     @Override
     public void setCommand(Command command) {
-        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
+        setChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override

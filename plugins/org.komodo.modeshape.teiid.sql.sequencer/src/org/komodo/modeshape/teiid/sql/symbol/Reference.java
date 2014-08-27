@@ -62,7 +62,7 @@ public class Reference extends ASTNode implements Expression, IReference<Languag
     }
 
     public void setExpression(ElementSymbol elementSymbol) {
-        addLastChild(TeiidSqlLexicon.Reference.EXPRESSION_REF_NAME, elementSymbol);
+        setChild(TeiidSqlLexicon.Reference.EXPRESSION_REF_NAME, elementSymbol);
         setType(elementSymbol.getType());
     }
 

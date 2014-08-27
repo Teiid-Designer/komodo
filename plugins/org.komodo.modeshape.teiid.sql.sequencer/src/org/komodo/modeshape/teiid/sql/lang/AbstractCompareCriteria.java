@@ -91,7 +91,7 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * @param expression Left expression
      */
     public void setLeftExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, expression);
     }
 
     /**

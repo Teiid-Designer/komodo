@@ -48,7 +48,7 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
 
     @Override
     public void setRightExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.CompareCriteria.RIGHT_EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.CompareCriteria.RIGHT_EXPRESSION_REF_NAME, expression);
     }
 
     /**

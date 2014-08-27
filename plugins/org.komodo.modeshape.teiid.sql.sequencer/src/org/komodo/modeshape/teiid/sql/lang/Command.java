@@ -91,7 +91,7 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
      * @param option New option clause
      */
     public void setOption(Option option) {
-        addLastChild(TeiidSqlLexicon.Command.OPTION_REF_NAME, option);
+        setChild(TeiidSqlLexicon.Command.OPTION_REF_NAME, option);
     }
 
     /**
@@ -105,7 +105,7 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
      * @param sourceHint the sourceHint to set
      */
     public void setSourceHint(SourceHint sourceHint) {
-        addLastChild(TeiidSqlLexicon.Command.SOURCE_HINT_REF_NAME, sourceHint);
+        setChild(TeiidSqlLexicon.Command.SOURCE_HINT_REF_NAME, sourceHint);
     }
 
     /**

@@ -68,7 +68,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public void setSelect(Select select) {
-        addLastChild(TeiidSqlLexicon.Query.SELECT_REF_NAME, select);
+        setChild(TeiidSqlLexicon.Query.SELECT_REF_NAME, select);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public void setFrom(From from) {
-        addLastChild(TeiidSqlLexicon.Query.FROM_REF_NAME, from);
+        setChild(TeiidSqlLexicon.Query.FROM_REF_NAME, from);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public void setInto(Into into) {
-        addLastChild(TeiidSqlLexicon.Query.INTO_REF_NAME, into);
+        setChild(TeiidSqlLexicon.Query.INTO_REF_NAME, into);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public void setCriteria(Criteria where) {
-        addLastChild(TeiidSqlLexicon.Query.CRITERIA_REF_NAME, where);
+        setChild(TeiidSqlLexicon.Query.CRITERIA_REF_NAME, where);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public void setHaving(Criteria having) {
-        addLastChild(TeiidSqlLexicon.Query.HAVING_REF_NAME, having);
+        setChild(TeiidSqlLexicon.Query.HAVING_REF_NAME, having);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
 
     @Override
     public void setGroupBy(GroupBy groupBy) {
-        addLastChild(TeiidSqlLexicon.Query.GROUP_BY_REF_NAME, groupBy);
+        setChild(TeiidSqlLexicon.Query.GROUP_BY_REF_NAME, groupBy);
     }
 
     @Override

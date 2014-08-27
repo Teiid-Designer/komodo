@@ -45,7 +45,7 @@ public class LoopStatement extends Statement implements Labeled, SubqueryContain
 
     @Override
     public void setCommand(Command command) {
-        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
+        setChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class LoopStatement extends Statement implements Labeled, SubqueryContain
     }
 
     public void setBlock(Block asBlock) {
-        addLastChild(TeiidSqlLexicon.LoopStatement.BLOCK_REF_NAME, asBlock);
+        setChild(TeiidSqlLexicon.LoopStatement.BLOCK_REF_NAME, asBlock);
     }
 
     private String getCursorName() {

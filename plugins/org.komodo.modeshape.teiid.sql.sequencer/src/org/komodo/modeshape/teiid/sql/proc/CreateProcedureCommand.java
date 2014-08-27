@@ -47,7 +47,7 @@ public class CreateProcedureCommand extends Command
 
     @Override
     public void setBlock(Block block) {
-        addLastChild(TeiidSqlLexicon.CreateProcedureCommand.BLOCK_REF_NAME, block);
+        setChild(TeiidSqlLexicon.CreateProcedureCommand.BLOCK_REF_NAME, block);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class CreateProcedureCommand extends Command
 
     @Override
     public void setVirtualGroup(GroupSymbol view) {
-        addLastChild(TeiidSqlLexicon.CreateProcedureCommand.VIRTUAL_GROUP_REF_NAME, view);
+        setChild(TeiidSqlLexicon.CreateProcedureCommand.VIRTUAL_GROUP_REF_NAME, view);
     }
 
     @Override

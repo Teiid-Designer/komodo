@@ -49,7 +49,7 @@ public class JoinPredicate extends FromClause implements IJoinPredicate<FromClau
 
     @Override
     public void setLeftClause(FromClause fromClause) {
-        addLastChild(TeiidSqlLexicon.JoinPredicate.LEFT_CLAUSE_REF_NAME, fromClause);
+        setChild(TeiidSqlLexicon.JoinPredicate.LEFT_CLAUSE_REF_NAME, fromClause);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class JoinPredicate extends FromClause implements IJoinPredicate<FromClau
 
     @Override
     public void setRightClause(FromClause fromClause) {
-        addLastChild(TeiidSqlLexicon.JoinPredicate.RIGHT_CLAUSE_REF_NAME, fromClause);
+        setChild(TeiidSqlLexicon.JoinPredicate.RIGHT_CLAUSE_REF_NAME, fromClause);
     }
 
     public JoinType getJoinType() {
@@ -70,7 +70,7 @@ public class JoinPredicate extends FromClause implements IJoinPredicate<FromClau
      * @param joinType
      */
     public void setJoinType(JoinType joinType) {
-        addLastChild(TeiidSqlLexicon.JoinPredicate.JOIN_TYPE_REF_NAME, joinType);
+        setChild(TeiidSqlLexicon.JoinPredicate.JOIN_TYPE_REF_NAME, joinType);
     }
 
     public List<Criteria> getJoinCriteria() {

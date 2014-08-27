@@ -51,7 +51,7 @@ public class WindowSpecification extends ASTNode implements IWindowSpecification
     }
 
     public void setOrderBy(OrderBy orderBy) {
-        addLastChild(TeiidSqlLexicon.WindowSpecification.ORDER_BY_REF_NAME, orderBy);
+        setChild(TeiidSqlLexicon.WindowSpecification.ORDER_BY_REF_NAME, orderBy);
     }
 
     @Override

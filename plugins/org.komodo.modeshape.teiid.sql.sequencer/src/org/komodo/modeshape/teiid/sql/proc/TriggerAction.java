@@ -42,7 +42,7 @@ public class TriggerAction extends Command implements ITriggerAction<Expression,
     }
 
     public void setBlock(Block block) {
-        addLastChild(TeiidSqlLexicon.TriggerAction.BLOCK_REF_NAME, block);
+        setChild(TeiidSqlLexicon.TriggerAction.BLOCK_REF_NAME, block);
     }
 
     @Override
