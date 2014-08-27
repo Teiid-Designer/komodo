@@ -130,7 +130,7 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
     }
 
     public void setOrderBy(OrderBy orderBy) {
-        addLastChild(TeiidSqlLexicon.AggregateSymbol.ORDER_BY_REF_NAME, orderBy);
+        setChild(TeiidSqlLexicon.AggregateSymbol.ORDER_BY_REF_NAME, orderBy);
     }
 
     public Criteria getCondition() {
@@ -138,7 +138,7 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
     }
 
     public void setCondition(Expression condition) {
-        addLastChild(TeiidSqlLexicon.AggregateSymbol.CONDITION_REF_NAME, condition);
+        setChild(TeiidSqlLexicon.AggregateSymbol.CONDITION_REF_NAME, condition);
     }
 
     public boolean isDistinct() {

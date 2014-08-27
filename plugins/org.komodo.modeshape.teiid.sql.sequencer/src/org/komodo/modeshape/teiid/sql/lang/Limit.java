@@ -50,7 +50,7 @@ public class Limit extends ASTNode implements ILimit<LanguageVisitor> {
      * @param offset
      */
     public void setOffset(Expression offset) {
-        addLastChild(TeiidSqlLexicon.Limit.OFFSET_REF_NAME, offset);
+        setChild(TeiidSqlLexicon.Limit.OFFSET_REF_NAME, offset);
     }
 
     /**
@@ -64,7 +64,7 @@ public class Limit extends ASTNode implements ILimit<LanguageVisitor> {
      * @param limit
      */
     public void setRowLimit(Expression limit) {
-        addLastChild(TeiidSqlLexicon.Limit.ROW_LIMIT_REF_NAME, limit);
+        setChild(TeiidSqlLexicon.Limit.ROW_LIMIT_REF_NAME, limit);
     }
 
     /**

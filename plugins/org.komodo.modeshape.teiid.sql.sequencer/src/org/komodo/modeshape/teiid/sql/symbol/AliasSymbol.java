@@ -45,7 +45,7 @@ public class AliasSymbol extends Symbol implements Expression, IAliasSymbol<Expr
 
     @Override
     public void setSymbol(Expression symbol) {
-        addLastChild(TeiidSqlLexicon.AliasSymbol.SYMBOL_REF_NAME, symbol);
+        setChild(TeiidSqlLexicon.AliasSymbol.SYMBOL_REF_NAME, symbol);
     }
 
     @Override

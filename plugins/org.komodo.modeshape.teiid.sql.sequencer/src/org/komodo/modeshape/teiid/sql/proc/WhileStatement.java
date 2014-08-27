@@ -41,7 +41,7 @@ public class WhileStatement extends Statement implements Labeled, IWhileStatemen
     }
 
     public void setCondition(Criteria criteria) {
-        addLastChild(TeiidSqlLexicon.WhileStatement.CONDITION_REF_NAME, criteria);
+        setChild(TeiidSqlLexicon.WhileStatement.CONDITION_REF_NAME, criteria);
     }
 
     public Block getBlock() {
@@ -49,7 +49,7 @@ public class WhileStatement extends Statement implements Labeled, IWhileStatemen
     }
 
     public void setBlock(Block block) {
-        addLastChild(TeiidSqlLexicon.WhileStatement.BLOCK_REF_NAME, block);
+        setChild(TeiidSqlLexicon.WhileStatement.BLOCK_REF_NAME, block);
     }
 
     @Override

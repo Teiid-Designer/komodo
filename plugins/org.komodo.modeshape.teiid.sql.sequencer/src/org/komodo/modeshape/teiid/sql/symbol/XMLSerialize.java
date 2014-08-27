@@ -85,7 +85,7 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
     }
 
     public void setExpression(Expression expr) {
-        addLastChild(TeiidSqlLexicon.XMLSerialize.EXPRESSION_REF_NAME, expr);
+        setChild(TeiidSqlLexicon.XMLSerialize.EXPRESSION_REF_NAME, expr);
     }
 
     public Boolean getDocument() {

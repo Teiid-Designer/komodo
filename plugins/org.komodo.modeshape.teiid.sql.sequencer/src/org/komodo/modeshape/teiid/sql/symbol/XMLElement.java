@@ -66,7 +66,7 @@ public class XMLElement extends ASTNode implements Expression, IXMLElement<Langu
     }
 
     public void setNamespaces(XMLNamespaces xmlNamespaces) {
-        addLastChild(TeiidSqlLexicon.XMLElement.NAMESPACES_REF_NAME, xmlNamespaces);
+        setChild(TeiidSqlLexicon.XMLElement.NAMESPACES_REF_NAME, xmlNamespaces);
     }
 
     public XMLAttributes getAttributes() {
@@ -75,7 +75,7 @@ public class XMLElement extends ASTNode implements Expression, IXMLElement<Langu
     }
 
     public void setAttributes(XMLAttributes xmlAttributes) {
-        addLastChild(TeiidSqlLexicon.XMLElement.ATTRIBUTES_REF_NAME, xmlAttributes);
+        setChild(TeiidSqlLexicon.XMLElement.ATTRIBUTES_REF_NAME, xmlAttributes);
     }
 
     @Override

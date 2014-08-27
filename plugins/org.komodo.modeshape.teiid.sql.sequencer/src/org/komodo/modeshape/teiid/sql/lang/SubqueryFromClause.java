@@ -63,7 +63,7 @@ public class SubqueryFromClause extends FromClause implements SubqueryContainer<
 
     @Override
     public void setCommand(Command command) {
-        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
+        setChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override

@@ -42,7 +42,7 @@ public class UnaryFromClause extends FromClause implements IUnaryFromClause<Grou
 
     @Override
     public void setGroup(GroupSymbol group) {
-        addLastChild(TeiidSqlLexicon.UnaryFromClause.GROUP_REF_NAME, group);
+        setChild(TeiidSqlLexicon.UnaryFromClause.GROUP_REF_NAME, group);
     }
 
     public Command getExpandedCommand() {
@@ -50,7 +50,7 @@ public class UnaryFromClause extends FromClause implements IUnaryFromClause<Grou
     }
 
     public void setExpandedCommand(Command command) {
-        addLastChild(TeiidSqlLexicon.UnaryFromClause.EXPANDED_COMMAND_REF_NAME, command);
+        setChild(TeiidSqlLexicon.UnaryFromClause.EXPANDED_COMMAND_REF_NAME, command);
     }
 
     @Override

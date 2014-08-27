@@ -42,7 +42,7 @@ public class OrderByItem extends ASTNode implements IOrderByItem<Expression, Lan
 
     @Override
     public void setSymbol(Expression symbol) {
-        addLastChild(TeiidSqlLexicon.OrderByItem.SYMBOL_REF_NAME, symbol);
+        setChild(TeiidSqlLexicon.OrderByItem.SYMBOL_REF_NAME, symbol);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class Delete extends ProcedureContainer implements TargetedCommand, IDele
 
     @Override
     public void setGroup(GroupSymbol group) {
-        addLastChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, group);
+        setChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, group);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class Delete extends ProcedureContainer implements TargetedCommand, IDele
 
     @Override
     public void setCriteria(Criteria criteria) {
-        addLastChild(TeiidSqlLexicon.Delete.CRITERIA_REF_NAME, criteria);
+        setChild(TeiidSqlLexicon.Delete.CRITERIA_REF_NAME, criteria);
     }
 
     @Override

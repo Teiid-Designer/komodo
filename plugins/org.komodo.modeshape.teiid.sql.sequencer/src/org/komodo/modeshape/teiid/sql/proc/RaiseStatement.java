@@ -43,7 +43,7 @@ public class RaiseStatement extends Statement implements ExpressionStatement, IR
 
     @Override
     public void setExpression(Expression expr) {
-        addLastChild(TeiidSqlLexicon.ExpressionStatement.EXPRESSION_REF_NAME, expr);
+        setChild(TeiidSqlLexicon.ExpressionStatement.EXPRESSION_REF_NAME, expr);
     }
 
     public boolean isWarning() {

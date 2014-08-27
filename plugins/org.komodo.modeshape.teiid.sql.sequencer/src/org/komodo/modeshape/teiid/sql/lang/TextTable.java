@@ -41,7 +41,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
     }
 
     public void setFile(Expression file) {
-        addLastChild(TeiidSqlLexicon.TextTable.FILE_REF_NAME, file);
+        setChild(TeiidSqlLexicon.TextTable.FILE_REF_NAME, file);
     }
 
     @Override

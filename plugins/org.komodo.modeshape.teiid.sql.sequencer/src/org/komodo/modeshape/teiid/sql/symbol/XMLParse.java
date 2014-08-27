@@ -55,7 +55,7 @@ public class XMLParse extends ASTNode implements Expression, IXMLParse<LanguageV
     }
 
     public void setExpression(Expression expr) {
-        addLastChild(TeiidSqlLexicon.XMLParse.EXPRESSION_REF_NAME, expr);
+        setChild(TeiidSqlLexicon.XMLParse.EXPRESSION_REF_NAME, expr);
     }
 
     public boolean isWellFormed() {

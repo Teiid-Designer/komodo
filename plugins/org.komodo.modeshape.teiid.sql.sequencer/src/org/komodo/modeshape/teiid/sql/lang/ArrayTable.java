@@ -69,7 +69,7 @@ public class ArrayTable extends TableFunctionReference implements IArrayTable<La
      * @param arrayValue
      */
     public void setArrayValue(Expression arrayValue) {
-        addLastChild(TeiidSqlLexicon.ArrayTable.ARRAY_VALUE_REF_NAME, arrayValue);
+        setChild(TeiidSqlLexicon.ArrayTable.ARRAY_VALUE_REF_NAME, arrayValue);
     }
 
     

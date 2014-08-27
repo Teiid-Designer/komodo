@@ -48,7 +48,7 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
     }
 
     public void setVariable(ElementSymbol elementSymbol) {
-        addLastChild(TeiidSqlLexicon.AssignmentStatement.VARIABLE_REF_NAME, elementSymbol);
+        setChild(TeiidSqlLexicon.AssignmentStatement.VARIABLE_REF_NAME, elementSymbol);
         
         Class<?> type = elementSymbol.getType();
         DataTypeName dataType = getDataTypeService().retrieveDataTypeName(type);
@@ -67,8 +67,8 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
      * @param value
      */
     private void assignValue(Expression value) {
-        addLastChild(TeiidSqlLexicon.ExpressionStatement.EXPRESSION_REF_NAME, value);
-        addLastChild(TeiidSqlLexicon.AssignmentStatement.VALUE_REF_NAME, value);
+        setChild(TeiidSqlLexicon.ExpressionStatement.EXPRESSION_REF_NAME, value);
+        setChild(TeiidSqlLexicon.AssignmentStatement.VALUE_REF_NAME, value);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
             ssq.setCommand((QueryCommand) command);
             setValue(ssq);
         } else
-            addLastChild(TeiidSqlLexicon.AssignmentStatement.COMMAND_REF_NAME, command);
+            setChild(TeiidSqlLexicon.AssignmentStatement.COMMAND_REF_NAME, command);
     }
 
     @Override

@@ -43,7 +43,7 @@ public class WithQueryCommand extends ASTNode
     }
 
     public void setGroupSymbol(GroupSymbol groupSymbol) {
-        addLastChild(TeiidSqlLexicon.WithQueryCommand.GROUP_SYMBOL_REF_NAME, groupSymbol);
+        setChild(TeiidSqlLexicon.WithQueryCommand.GROUP_SYMBOL_REF_NAME, groupSymbol);
     }
 
     public List<ElementSymbol> getColumns() {
@@ -61,7 +61,7 @@ public class WithQueryCommand extends ASTNode
     }
 
     public void setQueryExpression(QueryCommand queryExpression) {
-        addLastChild(TeiidSqlLexicon.WithQueryCommand.QUERY_EXPRESSION_REF_NAME, queryExpression);
+        setChild(TeiidSqlLexicon.WithQueryCommand.QUERY_EXPRESSION_REF_NAME, queryExpression);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class WithQueryCommand extends ASTNode
 
     @Override
     public void setCommand(QueryCommand command) {
-        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
+        setChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override

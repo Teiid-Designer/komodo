@@ -57,7 +57,7 @@ public class XMLForest extends ASTNode implements Expression, IXMLForest<Languag
     }
 
     public void setNamespaces(XMLNamespaces xmlNamespaces) {
-        addLastChild(TeiidSqlLexicon.XMLForest.NAMESPACES_REF_NAME, xmlNamespaces);
+        setChild(TeiidSqlLexicon.XMLForest.NAMESPACES_REF_NAME, xmlNamespaces);
     }
 
     @Override

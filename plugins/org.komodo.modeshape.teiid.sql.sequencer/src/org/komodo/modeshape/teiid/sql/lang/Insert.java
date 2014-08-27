@@ -116,7 +116,7 @@ public class Insert extends ProcedureContainer implements TargetedCommand, IInse
             }
         }
 
-        addLastChild(TeiidSqlLexicon.Insert.QUERY_EXPRESSION_REF_NAME, query);
+        setChild(TeiidSqlLexicon.Insert.QUERY_EXPRESSION_REF_NAME, query);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class Insert extends ProcedureContainer implements TargetedCommand, IInse
 
     @Override
     public void setGroup(GroupSymbol group) {
-        addLastChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, group);
+        setChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, group);
     }
 
     private boolean isMerge() {

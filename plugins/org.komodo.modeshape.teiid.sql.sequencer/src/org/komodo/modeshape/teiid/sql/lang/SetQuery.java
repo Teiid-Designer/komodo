@@ -77,7 +77,7 @@ public class SetQuery extends QueryCommand
 
     @Override
     public void setLeftQuery(QueryCommand query) {
-        addLastChild(TeiidSqlLexicon.SetQuery.LEFT_QUERY_REF_NAME, query);
+        setChild(TeiidSqlLexicon.SetQuery.LEFT_QUERY_REF_NAME, query);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class SetQuery extends QueryCommand
 
     @Override
     public void setRightQuery(QueryCommand query) {
-        addLastChild(TeiidSqlLexicon.SetQuery.RIGHT_QUERY_REF_NAME, query);
+        setChild(TeiidSqlLexicon.SetQuery.RIGHT_QUERY_REF_NAME, query);
     }
 
     @Override

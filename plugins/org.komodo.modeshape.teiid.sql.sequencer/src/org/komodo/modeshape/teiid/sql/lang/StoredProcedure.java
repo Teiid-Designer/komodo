@@ -90,7 +90,7 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
     }
 
     public void setGroup(GroupSymbol group) {
-        addLastChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, group);
+        setChild(TeiidSqlLexicon.TargetedCommand.GROUP_REF_NAME, group);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
 
     @Override
     public void setParameter(SPParameter parameter) {
-        addLastChild(TeiidSqlLexicon.StoredProcedure.PARAMETER_REF_NAME, parameter);
+        setChild(TeiidSqlLexicon.StoredProcedure.PARAMETER_REF_NAME, parameter);
     }
 
     @Override

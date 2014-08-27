@@ -46,7 +46,7 @@ public class WindowFunction extends ASTNode implements Expression, IWindowFuncti
     }
 
     public void setFunction(AggregateSymbol agg) {
-        addLastChild(TeiidSqlLexicon.WindowFunction.FUNCTION_REF_NAME, agg);
+        setChild(TeiidSqlLexicon.WindowFunction.FUNCTION_REF_NAME, agg);
 
         DataTypeName dataTypeName = getDataTypeService().retrieveDataTypeName(agg.getType());
         setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, dataTypeName.name());
@@ -58,7 +58,7 @@ public class WindowFunction extends ASTNode implements Expression, IWindowFuncti
     }
 
     public void setWindowSpecification(WindowSpecification ws) {
-        addLastChild(TeiidSqlLexicon.WindowFunction.WINDOW_SPECIFICATION_REF_NAME, ws);
+        setChild(TeiidSqlLexicon.WindowFunction.WINDOW_SPECIFICATION_REF_NAME, ws);
     }
 
     @Override

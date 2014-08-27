@@ -39,7 +39,7 @@ public class NotCriteria extends Criteria implements INotCriteria<LanguageVisito
     }
 
     public void setCriteria(Criteria crit) {
-        addLastChild(TeiidSqlLexicon.NotCriteria.CRITERIA_REF_NAME, crit);
+        setChild(TeiidSqlLexicon.NotCriteria.CRITERIA_REF_NAME, crit);
     }
 
     @Override

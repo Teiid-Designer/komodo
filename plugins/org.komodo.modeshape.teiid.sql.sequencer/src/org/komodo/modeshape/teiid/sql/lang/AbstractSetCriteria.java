@@ -31,7 +31,7 @@ public abstract class AbstractSetCriteria extends Criteria implements PredicateC
      * @param expression the expression to set
      */
     public void setExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.AbstractSetCriteria.EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.AbstractSetCriteria.EXPRESSION_REF_NAME, expression);
     }
 
     /**

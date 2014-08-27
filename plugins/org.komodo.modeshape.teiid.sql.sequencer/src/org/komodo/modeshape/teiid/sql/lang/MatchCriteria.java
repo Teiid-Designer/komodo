@@ -45,7 +45,7 @@ public class MatchCriteria extends Criteria
 
     @Override
     public void setLeftExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.MatchCriteria.LEFT_EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.MatchCriteria.LEFT_EXPRESSION_REF_NAME, expression);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class MatchCriteria extends Criteria
 
     @Override
     public void setRightExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.MatchCriteria.RIGHT_EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.MatchCriteria.RIGHT_EXPRESSION_REF_NAME, expression);
     }
 
     @Override

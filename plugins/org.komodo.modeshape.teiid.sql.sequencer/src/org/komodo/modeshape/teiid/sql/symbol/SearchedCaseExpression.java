@@ -71,7 +71,7 @@ public class SearchedCaseExpression extends ASTNode implements Expression, ISear
     }
 
     public void setElseExpression(Expression elseExpression) {
-        addLastChild(TeiidSqlLexicon.SearchedCaseExpression.ELSE_EXPRESSION_REF_NAME, elseExpression);
+        setChild(TeiidSqlLexicon.SearchedCaseExpression.ELSE_EXPRESSION_REF_NAME, elseExpression);
     }
 
     @Override

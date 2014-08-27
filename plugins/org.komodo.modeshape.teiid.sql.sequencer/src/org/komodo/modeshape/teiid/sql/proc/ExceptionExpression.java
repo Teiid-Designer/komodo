@@ -52,7 +52,7 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
     }
 
     public void setMessage(Expression errMsg) {
-        addLastChild(TeiidSqlLexicon.ExceptionExpression.MESSAGE_REF_NAME, errMsg);
+        setChild(TeiidSqlLexicon.ExceptionExpression.MESSAGE_REF_NAME, errMsg);
     }
 
     public Expression getSqlState() {
@@ -61,7 +61,7 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
     }
 
     public void setSqlState(Expression sqlState) {
-        addLastChild(TeiidSqlLexicon.ExceptionExpression.SQL_STATE_REF_NAME, sqlState);
+        setChild(TeiidSqlLexicon.ExceptionExpression.SQL_STATE_REF_NAME, sqlState);
     }
 
     public Expression getErrorCode() {
@@ -70,7 +70,7 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
     }
 
     public void setErrorCode(Expression errCode) {
-        addLastChild(TeiidSqlLexicon.ExceptionExpression.ERROR_CODE_REF_NAME, errCode);
+        setChild(TeiidSqlLexicon.ExceptionExpression.ERROR_CODE_REF_NAME, errCode);
     }
 
     public Expression getParentExpression() {
@@ -79,7 +79,7 @@ public class ExceptionExpression extends ASTNode implements Expression, IExcepti
     }
 
     public void setParentExpression(Expression parent) {
-        addLastChild(TeiidSqlLexicon.ExceptionExpression.PARENT_EXPRESSION_REF_NAME, parent);
+        setChild(TeiidSqlLexicon.ExceptionExpression.PARENT_EXPRESSION_REF_NAME, parent);
     }
 
     @Override

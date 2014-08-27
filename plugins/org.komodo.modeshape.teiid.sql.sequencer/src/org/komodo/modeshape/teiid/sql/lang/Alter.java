@@ -35,7 +35,7 @@ public abstract class Alter<T extends Command> extends Command implements IAlter
      * @param target the target to set
      */
     public void setTarget(GroupSymbol target) {
-        addLastChild(TeiidSqlLexicon.Alter.TARGET_REF_NAME, target);
+        setChild(TeiidSqlLexicon.Alter.TARGET_REF_NAME, target);
     }
 
     /**
@@ -49,7 +49,7 @@ public abstract class Alter<T extends Command> extends Command implements IAlter
      * @param definition the definition to set
      */
     public void setDefinition(T definition) {
-        addLastChild(TeiidSqlLexicon.Alter.DEFINITION_REF_NAME, definition);
+        setChild(TeiidSqlLexicon.Alter.DEFINITION_REF_NAME, definition);
     }
 
     @Override

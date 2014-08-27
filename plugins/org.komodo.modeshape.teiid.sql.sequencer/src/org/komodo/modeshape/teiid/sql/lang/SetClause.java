@@ -40,7 +40,7 @@ public class SetClause extends ASTNode implements ISetClause<LanguageVisitor> {
     }
 
     public void setSymbol(ElementSymbol symbol) {
-        addLastChild(TeiidSqlLexicon.SetClause.SYMBOL_REF_NAME, symbol);
+        setChild(TeiidSqlLexicon.SetClause.SYMBOL_REF_NAME, symbol);
     }
 
     public Expression getValue() {
@@ -48,7 +48,7 @@ public class SetClause extends ASTNode implements ISetClause<LanguageVisitor> {
     }
 
     public void setValue(Expression value) {
-        addLastChild(TeiidSqlLexicon.SetClause.VALUE_REF_NAME, value);
+        setChild(TeiidSqlLexicon.SetClause.VALUE_REF_NAME, value);
     }
 
     @Override

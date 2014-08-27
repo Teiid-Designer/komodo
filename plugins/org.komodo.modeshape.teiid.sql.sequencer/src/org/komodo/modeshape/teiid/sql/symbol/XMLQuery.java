@@ -57,7 +57,7 @@ public class XMLQuery extends ASTNode implements Expression, IXMLQuery<LanguageV
     }
 
     public void setNamespaces(XMLNamespaces xmlNamespaces) {
-        addLastChild(TeiidSqlLexicon.XMLQuery.NAMESPACES_REF_NAME, xmlNamespaces);
+        setChild(TeiidSqlLexicon.XMLQuery.NAMESPACES_REF_NAME, xmlNamespaces);
     }
 
     public List<DerivedColumn> getPassing() {

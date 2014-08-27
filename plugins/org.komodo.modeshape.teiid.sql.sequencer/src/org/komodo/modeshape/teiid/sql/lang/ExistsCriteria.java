@@ -55,7 +55,7 @@ public class ExistsCriteria extends Criteria implements PredicateCriteria, Subqu
 
     @Override
     public void setCommand(QueryCommand command) {
-        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
+        setChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     public SubqueryHint getSubqueryHint() {
@@ -66,7 +66,7 @@ public class ExistsCriteria extends Criteria implements PredicateCriteria, Subqu
      * @param hint
      */
     public void setSubqueryHint(SubqueryHint hint) {
-        addLastChild(TeiidSqlLexicon.ExistsCriteria.SUBQUERY_HINT_REF_NAME, hint);
+        setChild(TeiidSqlLexicon.ExistsCriteria.SUBQUERY_HINT_REF_NAME, hint);
     }
 
     @Override

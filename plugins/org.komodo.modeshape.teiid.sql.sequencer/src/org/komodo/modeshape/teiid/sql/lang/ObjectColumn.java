@@ -48,7 +48,7 @@ public class ObjectColumn extends ProjectedColumn implements IObjectColumn<Langu
     }
 
     public void setDefaultExpression(Expression defaultExpr) {
-        addLastChild(TeiidSqlLexicon.ObjectColumn.DEFAULT_EXPRESSION_REF_NAME, defaultExpr);
+        setChild(TeiidSqlLexicon.ObjectColumn.DEFAULT_EXPRESSION_REF_NAME, defaultExpr);
     }
 
     @Override

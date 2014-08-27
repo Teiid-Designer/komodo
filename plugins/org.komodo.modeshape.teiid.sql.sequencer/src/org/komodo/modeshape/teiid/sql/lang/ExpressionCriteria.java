@@ -46,7 +46,7 @@ public class ExpressionCriteria extends Criteria implements IExpressionCriteria<
      * @param expression
      */
     public void setExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.ExpressionCriteria.EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.ExpressionCriteria.EXPRESSION_REF_NAME, expression);
     }
 
     @Override

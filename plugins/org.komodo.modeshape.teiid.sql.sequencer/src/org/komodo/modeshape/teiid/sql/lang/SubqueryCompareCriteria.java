@@ -94,7 +94,7 @@ public class SubqueryCompareCriteria extends AbstractCompareCriteria implements 
 
     @Override
     public void setCommand(QueryCommand command) {
-        addLastChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
+        setChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
     @Override

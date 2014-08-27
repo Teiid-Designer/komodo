@@ -49,7 +49,7 @@ public class DerivedColumn extends ASTNode implements IDerivedColumn<LanguageVis
     }
 
     public void setExpression(Expression expression) {
-        addLastChild(TeiidSqlLexicon.DerivedColumn.EXPRESSION_REF_NAME, expression);
+        setChild(TeiidSqlLexicon.DerivedColumn.EXPRESSION_REF_NAME, expression);
     }
 
     public boolean isPropagateName() {

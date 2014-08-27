@@ -47,7 +47,7 @@ public class QueryString extends ASTNode implements Expression, IQueryString<Lan
     }
 
     public void setPath(Expression path) {
-        addLastChild(TeiidSqlLexicon.QueryString.PATH_REF_NAME, path);
+        setChild(TeiidSqlLexicon.QueryString.PATH_REF_NAME, path);
     }
 
     public List<DerivedColumn> getArgs() {

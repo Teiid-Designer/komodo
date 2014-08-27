@@ -58,7 +58,7 @@ public class XMLColumn extends ProjectedColumn implements IXMLColumn<LanguageVis
     }
 
     public void setDefaultExpression(Expression defaultExpr) {
-        addLastChild(TeiidSqlLexicon.XMLColumn.DEFAULT_EXPRESSION_REF_NAME, defaultExpr);
+        setChild(TeiidSqlLexicon.XMLColumn.DEFAULT_EXPRESSION_REF_NAME, defaultExpr);
     }
 
     @Override
