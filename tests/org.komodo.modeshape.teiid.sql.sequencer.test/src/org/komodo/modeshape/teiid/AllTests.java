@@ -23,6 +23,11 @@ package org.komodo.modeshape.teiid;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.komodo.modeshape.teiid.sequencer.v8.TestTeiid8SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v84.TestTeiid84SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v85.TestTeiid85SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v86.TestTeiid86SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v87.TestTeiid87SqlSequencer;
 import org.komodo.modeshape.teiid.sql.v8.Test8Cloning;
 import org.komodo.modeshape.teiid.sql.v8.Test8SQLStringVisitor;
 import org.komodo.modeshape.teiid.sql.v8.TestQuery8Parser;
@@ -54,6 +59,13 @@ import org.komodo.modeshape.teiid.sql.v87.TestQuery87Parser;
                                         Test87Cloning.class,
                                         TestQuery87Parser.class,
                                         Test87SQLStringVisitor.class,
+
+                                        // sequencer
+                                        TestTeiid8SqlSequencer.class,
+                                        TestTeiid84SqlSequencer.class,
+                                        TestTeiid85SqlSequencer.class,
+                                        TestTeiid86SqlSequencer.class,
+                                        TestTeiid87SqlSequencer.class
                                     } )
 public class AllTests {
     // nothing to do

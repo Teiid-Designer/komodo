@@ -52,7 +52,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
      * @param columns The columns to set.
      */
     public void setAsColumns(List<ElementSymbol> columns) {
-        setChildren(TeiidSqlLexicon.DynamicCommand.AS_CLAUSE_SET_PROP_NAME, columns);
+        setChildren(TeiidSqlLexicon.DynamicCommand.AS_COLUMNS_REF_NAME, columns);
     }
     
     /** 

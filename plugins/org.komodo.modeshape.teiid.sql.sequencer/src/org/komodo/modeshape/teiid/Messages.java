@@ -76,6 +76,12 @@ public class Messages {
     }
 
     @SuppressWarnings( "javadoc" )
+    public enum TeiidSqlSequencer {
+        ErrorSequencingContent,
+        ErrorParsingContent;
+    }
+
+    @SuppressWarnings( "javadoc" )
     public enum TeiidParser {
         Unknown_join_type,
         Aggregate_only_top_level,

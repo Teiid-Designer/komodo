@@ -60,7 +60,7 @@
 [tsql:criteria]	>	tsql:expression mixin
 
 [tsql:abstractCompareCriteria]	>	tsql:criteria, tsql:predicateCriteria mixin abstract
-	- tsql:operator (string) < "=", "<>", "!=", "<", ">", "<=", ">="
+	- tsql:operator (string) < "EQ", "NE", "LT", "GT", "LE", "GE"
 	+ tsql:leftExpression (tsql:expression)
 
 [tsql:compareCriteria]	>	tsql:abstractCompareCriteria mixin
