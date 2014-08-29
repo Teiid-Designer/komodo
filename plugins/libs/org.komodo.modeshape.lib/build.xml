@@ -16,12 +16,13 @@
 
 	<import file="${GIT-HOME}/scripts/build-common.xml" />
 
-	<!-- Comma-separated list of required libraries -->
+	<!-- Comma-separated minimum list of required libraries -->
 	<property name="libs" value="jcr.jar,
 								 modeshape-jcr.jar,
 		 						 modeshape-jcr-api.jar,
 								 modeshape-common.jar,
 								 modeshape-sequencer-ddl.jar,
+								 modeshape-schematic.jar,
 		                         logback-core.jar,
 								 logback-classic.jar,
 								 slf4j-api.jar"/>
