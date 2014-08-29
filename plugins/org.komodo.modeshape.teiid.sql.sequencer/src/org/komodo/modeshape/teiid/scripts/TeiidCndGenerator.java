@@ -398,6 +398,19 @@ public class TeiidCndGenerator implements StringConstants {
         lex(NEW_LINE);
     }
 
+    private void lexTeiidVersionProperty() throws Exception {
+        StringBuffer buf = new StringBuffer();
+        buf.append(TAB + "/**" + NEW_LINE)
+             .append(TAB + " * Property name used for specifying a teiid version. This property should" + NEW_LINE)
+             .append(TAB + " * be added to the Sequencer's output node prior to sequencing." + NEW_LINE)
+             .append(TAB + " */" + NEW_LINE)
+             .append(TAB + PUBLIC + SPACE + STATIC + SPACE + "String TEIID_VERSION_PROPERTY = ")
+             .append("Namespace.PREFIX + COLON + \"teiidVersion\"" + SEMI_COLON)
+             .append(NEW_LINE)
+             .append(NEW_LINE);
+        lex(buf.toString());
+    }
+
     private void lexIndexClasses(CTree tree) throws Exception {
         lex(NEW_LINE);
         lex(TAB + PRIVATE + SPACE + STATIC + " Map<String, Class<?>> astIndex = new HashMap<String, Class<?>>();" + NEW_LINE);
@@ -470,7 +483,8 @@ private void cndSection1Comment(String comment) throws Exception {
         cnd(NEW_LINE);
 
         StringBuffer buf = new StringBuffer();
-        buf.append(TAB).append(INTERFACE).append(" Namespace ").append(OPEN_BRACE).append(NEW_LINE);
+        buf.append(TAB).append(PUBLIC).append(SPACE).append(INTERFACE).append(" Namespace ")
+             .append(OPEN_BRACE).append(NEW_LINE);
 
         buf.append(TAB).append(TAB).append(PUBLIC).append(SPACE).append(STATIC).append(SPACE).append(FINAL)
              .append(SPACE).append("String PREFIX = ").append(SPEECH_MARK).append(TSQL_PREFIX)
@@ -842,13 +856,11 @@ private void cndSection1Comment(String comment) throws Exception {
             List<String> constraints = new ArrayList<String>();
 
             // CriteriaOperator.Operator enum is exceptional in that its toString()
-            // does not include the extra != from the NotEquals and since this is a
-            // constraint we don't really want to NOT include it!!
+            // is overridden to display the supported symbol so need to explicitly
+            // add its names
             if (parameterClass.equals(CriteriaOperator.Operator.class)) {
                 for (CriteriaOperator.Operator op : CriteriaOperator.Operator.values()) {
-                    for (String symbol : op.getSymbols()) {
-                        constraints.add(symbol);
-                    }
+                    constraints.add(op.name());
                 }
             } else {
                 Object[] enumConstants = parameterClass.getEnumConstants();
@@ -1191,6 +1203,8 @@ private void cndSection1Comment(String comment) throws Exception {
             lexClassDeclaration();
 
             writeNamespaces();
+
+            lexTeiidVersionProperty();
 
             cndSection1Comment("NODETYPES");
             writeClassTree();

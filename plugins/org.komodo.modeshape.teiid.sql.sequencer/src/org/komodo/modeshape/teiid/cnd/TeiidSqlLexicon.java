@@ -36,10 +36,16 @@ import org.komodo.modeshape.teiid.sql.symbol.*;
 @SuppressWarnings( { "javadoc", "nls" })
 public class TeiidSqlLexicon implements StringConstants {
 
-	interface Namespace {
+	public interface Namespace {
 		public static final String PREFIX = "tsql";
 		public static final String URI = "http://www.teiid.org/sql/1.0";
 	}
+
+	/**
+	 * Property name used for specifying a teiid version. This property should
+	 * be added to the Sequencer's output node prior to sequencing.
+	 */
+	public static String TEIID_VERSION_PROPERTY = Namespace.PREFIX + COLON + "teiidVersion";
 
 	/**
 	 * tsql:targetedCommand
@@ -187,7 +193,7 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		boolean OPERATOR_PROP_MULTIPLE = false;
 
-		String[] OPERATOR_PROP_CONSTRAINTS = { "=", "<>", "!=", "<", ">", "<=", ">=" };
+		String[] OPERATOR_PROP_CONSTRAINTS = { "EQ", "NE", "LT", "GT", "LE", "GE" };
 
 		/**
 		 * LEFT_EXPRESSION Reference
