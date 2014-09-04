@@ -1307,7 +1307,7 @@ CommandStatement sqlStatement(ParseInfo info) #CommandStatement :
         elementID = elementSymbol(var);
         SPParameter parameter = new SPParameter(this, 1, SPParameter.RETURN_VALUE, "return"); //$NON-NLS-1$
         parameter.setExpression(elementID);
-	    storedProcedure.setParameter(parameter);  
+	    storedProcedure.addParameter(parameter);  
 	    storedProcedure.setCalledWithReturn(true);            
       } 
       (nonReserved(":=")|<EQ>)
@@ -1580,7 +1580,7 @@ StoredProcedure callableStatement(ParseInfo info) :
 	[<QMARK> <EQ>
 	 {
 	   parameter = new SPParameter(this, parameterIndex++, SPParameter.RETURN_VALUE, "return"); //$NON-NLS-1$
-	   storedProcedure.setParameter(parameter);
+	   storedProcedure.addParameter(parameter);
 	   storedProcedure.setCalledWithReturn(true);
 	 }
 	]
@@ -1674,14 +1674,14 @@ StoredProcedure executeUnnamedParams(ParseInfo info, StoredProcedure storedProce
 		{
 				parameter = new SPParameter(this, parameterIndex++, value);
 				parameter.setParameterType(SPParameter.IN);
-				storedProcedure.setParameter(parameter);
+				storedProcedure.addParameter(parameter);
 		}
 		(	<COMMA>
 			value = expression(info)
 			{
 					parameter = new SPParameter(this, parameterIndex++, value);
 					parameter.setParameterType(SPParameter.IN);
-					storedProcedure.setParameter(parameter);
+					storedProcedure.addParameter(parameter);
 			}
 		)*
 	)?
@@ -1712,7 +1712,7 @@ StoredProcedure executeNamedParams(ParseInfo info, StoredProcedure storedProcedu
 			parameter = new SPParameter(this, parameterIndex++, value);
 			parameter.setName(name);
 			parameter.setParameterType(SPParameter.IN);
-			storedProcedure.setParameter(parameter);
+			storedProcedure.addParameter(parameter);
 			parameter = null;
 		}
 		(	<COMMA>
@@ -1723,7 +1723,7 @@ StoredProcedure executeNamedParams(ParseInfo info, StoredProcedure storedProcedu
 				parameter = new SPParameter(this, parameterIndex++, value);
 				parameter.setName(name);
 				parameter.setParameterType(SPParameter.IN);
-				storedProcedure.setParameter(parameter);
+				storedProcedure.addParameter(parameter);
 				parameter = null;
 			}
 		)*

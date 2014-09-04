@@ -112,7 +112,7 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
     }
 
     @Override
-    public void setParameter(SPParameter parameter) {
+    public void addParameter(SPParameter parameter) {
         setChild(TeiidSqlLexicon.StoredProcedure.PARAMETER_REF_NAME, parameter);
     }
 
@@ -188,7 +188,7 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
 
         if (getParameters() != null) {
             for (SPParameter parameter : getParameters()) {
-                clone.setParameter(parameter.clone());
+                clone.addParameter(parameter.clone());
             }
         }
 

@@ -1501,7 +1501,7 @@ Statement assignStatement(ParseInfo info) :
 		StoredProcedure storedProcedure = (StoredProcedure)value;
 	    SPParameter parameter = new SPParameter(this, 1, SPParameter.RETURN_VALUE, "return"); //$NON-NLS-1$
 	    parameter.setExpression(elementID);
-		storedProcedure.setParameter(parameter);  
+		storedProcedure.addParameter(parameter);  
 		storedProcedure.setCalledWithReturn(true);
 		CommandStatement cs = createASTNode(ASTNodes.COMMAND_STATEMENT);
 		cs.setCommand(storedProcedure);
@@ -1764,7 +1764,7 @@ StoredProcedure callableStatement(ParseInfo info) :
 	[<QMARK> <EQ>
 	 {
 	   parameter = new SPParameter(this, parameterIndex++, SPParameter.RETURN_VALUE, "return"); //$NON-NLS-1$
-	   storedProcedure.setParameter(parameter);
+	   storedProcedure.addParameter(parameter);
 	   storedProcedure.setCalledWithReturn(true);
 	 }
 	]
@@ -1873,7 +1873,7 @@ void executeNamedParams(ParseInfo info, StoredProcedure storedProcedure, int par
 			parameter = new SPParameter(this, parameterIndex++, value);
 			parameter.setName(name);
 			parameter.setParameterType(SPParameter.IN);
-			storedProcedure.setParameter(parameter);
+			storedProcedure.addParameter(parameter);
 			parameter = null;
 		}
 		(	<COMMA>
@@ -1884,7 +1884,7 @@ void executeNamedParams(ParseInfo info, StoredProcedure storedProcedure, int par
 				parameter = new SPParameter(this, parameterIndex++, value);
 				parameter.setName(name);
 				parameter.setParameterType(SPParameter.IN);
-				storedProcedure.setParameter(parameter);
+				storedProcedure.addParameter(parameter);
 				parameter = null;
 			}
 		)*
