@@ -1389,7 +1389,7 @@ Statement assignStatement(ParseInfo info) :
 	    parameter.setParameterType(SPParameter.RETURN_VALUE);
 	    parameter.setName("return"); //$NON-NLS-1$
 	    parameter.setExpression(elementID);
-		storedProcedure.setParameter(parameter);  
+		storedProcedure.addParameter(parameter);  
 		storedProcedure.setCalledWithReturn(true);
 		CommandStatement cs = createASTNode(ASTNodes.COMMAND_STATEMENT);
 		cs.setCommand(storedProcedure);
@@ -1655,7 +1655,7 @@ StoredProcedure callableStatement(ParseInfo info) :
 	   parameter.setIndex(parameterIndex++);
 	   parameter.setParameterType(SPParameter.RETURN_VALUE);
 	   parameter.setName("return"); //$NON-NLS-1$
-	   storedProcedure.setParameter(parameter);
+	   storedProcedure.addParameter(parameter);
 	   storedProcedure.setCalledWithReturn(true);
 	 }
 	]
@@ -1766,7 +1766,7 @@ void executeNamedParams(ParseInfo info, StoredProcedure storedProcedure, int par
 			parameter.setExpression(value);
 			parameter.setName(name);
 			parameter.setParameterType(SPParameter.IN);
-			storedProcedure.setParameter(parameter);
+			storedProcedure.addParameter(parameter);
 			parameter = null;
 		}
 		(	<COMMA>
@@ -1779,7 +1779,7 @@ void executeNamedParams(ParseInfo info, StoredProcedure storedProcedure, int par
 				parameter.setExpression(value);
 				parameter.setName(name);
 				parameter.setParameterType(SPParameter.IN);
-				storedProcedure.setParameter(parameter);
+				storedProcedure.addParameter(parameter);
 				parameter = null;
 			}
 		)*
@@ -5354,6 +5354,15 @@ SpecificHint specificHint() #SpecificHint :
 }
 
 SubqueryHint subqueryHint() #SubqueryHint :
+{
+}
+{
+    {
+        return jjtThis;
+    }
+}
+
+MakeDep makeDep() #MakeDep :
 {
 }
 {

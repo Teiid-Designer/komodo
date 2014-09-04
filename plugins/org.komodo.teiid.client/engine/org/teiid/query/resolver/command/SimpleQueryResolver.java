@@ -559,7 +559,7 @@ public class SimpleQueryResolver extends CommandResolver {
 			        ref.setExpression(paramSymbol);
 			        clonedParam.setExpression(ref);
 			        clonedParam.setIndex(paramIndex++);
-			        storedProcedureCommand.setParameter(clonedParam);
+			        storedProcedureCommand.addParameter(clonedParam);
 			        
 			        String aliasName = paramSymbol.getShortName();
 			        

@@ -128,7 +128,7 @@ public class ExecResolver extends ProcedureContainerResolver {
             }
             SPParameter clonedParam = metadataParameter.clone();
             clonedMetadataParams.add(clonedParam);
-            storedProcedureCommand.setParameter(clonedParam);
+            storedProcedureCommand.addParameter(clonedParam);
         }
         
         if (storedProcedureCommand.isCalledWithReturn() && !hasReturnValue) {
@@ -256,7 +256,7 @@ public class ExecResolver extends ProcedureContainerResolver {
             }
             SPParameter clonedParam = metadataParameter.clone();
             clonedMetadataParams.add(clonedParam);
-            storedProcedureCommand.setParameter(clonedParam);
+            storedProcedureCommand.addParameter(clonedParam);
         }
         
         if (storedProcedureCommand.isCalledWithReturn() && !hasReturnValue) {

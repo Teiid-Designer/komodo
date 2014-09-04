@@ -163,7 +163,7 @@ public class StoredProcedure extends ProcedureContainer
     *   are invalid.
     */
     @Override
-    public void setParameter(SPParameter parameter){
+    public void addParameter(SPParameter parameter){
         if(parameter == null){
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0011));
         }
@@ -396,7 +396,7 @@ public class StoredProcedure extends ProcedureContainer
         
         if(getParameters() != null) {
             for (SPParameter parameter : getParameters()) {
-                clone.setParameter(parameter.clone());
+                clone.addParameter(parameter.clone());
             }
         }
         

@@ -50,7 +50,7 @@ public class TestQuery87Parser extends TestQuery86Parser {
         StoredProcedure storedQuery = getFactory().newStoredProcedure();
         storedQuery.setProcedureName("proc1");
         SPParameter parameter = getFactory().newSPParameter(1, getFactory().newConstant("param1"));
-        storedQuery.setParameter(parameter);
+        storedQuery.addParameter(parameter);
         From from = getFactory().newFrom();
         SubqueryFromClause sfc = getFactory().newSubqueryFromClause("x", storedQuery);
         from.addClause(sfc);

@@ -1432,7 +1432,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
         StoredProcedure proc = getFactory().newStoredProcedure();
         proc.setProcedureName("myproc");
         SPParameter param = getFactory().newSPParameter(1, getFactory().newReference(0));
-        proc.setParameter(param);
+        proc.addParameter(param);
         helpTest(proc, "EXEC myproc(?)");
     }
 
@@ -1442,10 +1442,10 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
         proc.setProcedureName("myproc");
         SPParameter param1 = getFactory().newSPParameter(1, getFactory().newConstant(new Integer(5)));
         param1.setParameterType(ISPParameter.ParameterInfo.IN);
-        proc.setParameter(param1);
+        proc.addParameter(param1);
 
         SPParameter param2 = getFactory().newSPParameter(2, ISPParameter.ParameterInfo.OUT, "x");
-        proc.setParameter(param2);
+        proc.addParameter(param2);
 
         helpTest(proc, "EXEC myproc(5)");
     }
@@ -1456,11 +1456,11 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
         proc.setProcedureName("myproc");
 
         SPParameter param2 = getFactory().newSPParameter(2, ISPParameter.ParameterInfo.OUT, "x");
-        proc.setParameter(param2);
+        proc.addParameter(param2);
 
         SPParameter param1 = getFactory().newSPParameter(1, getFactory().newConstant(new Integer(5)));
         param1.setParameterType(ISPParameter.ParameterInfo.IN);
-        proc.setParameter(param1);
+        proc.addParameter(param1);
 
         helpTest(proc, "EXEC myproc(5)");
     }
@@ -1471,7 +1471,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
         proc.setProcedureName("myproc");
 
         SPParameter param = getFactory().newSPParameter(1, ISPParameter.ParameterInfo.RETURN_VALUE, "ret");
-        proc.setParameter(param);
+        proc.addParameter(param);
         helpTest(proc, "EXEC myproc()");
     }
 
@@ -1482,7 +1482,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
         proc.setProcedureName("myproc");
         SPParameter param = getFactory().newSPParameter(1, getFactory().newReference(0));
         param.setName("p1");//$NON-NLS-1$
-        proc.setParameter(param);
+        proc.addParameter(param);
         helpTest(proc, "EXEC myproc(p1 => ?)");
     }
 
@@ -1493,10 +1493,10 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
         proc.setProcedureName("myproc");
         SPParameter param = getFactory().newSPParameter(1, getFactory().newReference(0));
         param.setName("p1");//$NON-NLS-1$
-        proc.setParameter(param);
+        proc.addParameter(param);
         SPParameter param2 = getFactory().newSPParameter(2, getFactory().newReference(0));
         param2.setName("p2");//$NON-NLS-1$
-        proc.setParameter(param2);
+        proc.addParameter(param2);
         helpTest(proc, "EXEC myproc(p1 => ?, p2 => ?)");
     }
 
@@ -1514,10 +1514,10 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
         proc.setProcedureName("myproc");
         SPParameter param = getFactory().newSPParameter(1, getFactory().newReference(0));
         param.setName("in");//$NON-NLS-1$
-        proc.setParameter(param);
+        proc.addParameter(param);
         SPParameter param2 = getFactory().newSPParameter(2, getFactory().newReference(0));
         param2.setName("in2");//$NON-NLS-1$
-        proc.setParameter(param2);
+        proc.addParameter(param2);
         helpTest(proc, "EXEC myproc(\"in\" => ?, in2 => ?)");
     }
 

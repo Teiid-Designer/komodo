@@ -2620,7 +2620,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         storedQuery.setProcedureName("proc1");
         SPParameter parameter = getFactory().newSPParameter(1, getFactory().newConstant("param1"));
         parameter.setParameterType(ParameterInfo.IN);
-        storedQuery.setParameter(parameter);
+        storedQuery.addParameter(parameter);
         helpTest("Exec proc1('param1')", "EXEC proc1('param1')", storedQuery);
         helpTest("execute proc1('param1')", "EXEC proc1('param1')", storedQuery);
     }
@@ -2630,7 +2630,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         StoredProcedure storedQuery = getFactory().newStoredProcedure();
         storedQuery.setProcedureName("proc1");
         SPParameter parameter = getFactory().newSPParameter(1, getFactory().newConstant("param1"));
-        storedQuery.setParameter(parameter);
+        storedQuery.addParameter(parameter);
         From from = getFactory().newFrom();
         SubqueryFromClause sfc = getFactory().newSubqueryFromClause("X", storedQuery);
         from.addClause(sfc);
@@ -2647,7 +2647,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         StoredProcedure storedQuery = getFactory().newStoredProcedure();
         storedQuery.setProcedureName("proc1");
         SPParameter parameter = getFactory().newSPParameter(1, getFactory().newConstant("param1"));
-        storedQuery.setParameter(parameter);
+        storedQuery.addParameter(parameter);
         From from = getFactory().newFrom();
         SubqueryFromClause sfc = getFactory().newSubqueryFromClause("x", storedQuery);
         from.addClause(sfc);
@@ -2987,7 +2987,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         storedQuery.setProcedureName("proc1");
         SPParameter parameter = getFactory().newSPParameter(1, getFactory().newElementSymbol("param1"));
         parameter.setParameterType(ParameterInfo.IN);
-        storedQuery.setParameter(parameter);
+        storedQuery.addParameter(parameter);
         helpTest("Exec proc1(param1)", "EXEC proc1(param1)", storedQuery);
         helpTest("execute proc1(param1)", "EXEC proc1(param1)", storedQuery);
     }
@@ -4078,7 +4078,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         SPParameter parameter = getFactory().newSPParameter(1, getFactory().newConstant("paramValue1"));
         parameter.setName("param1");
         parameter.setParameterType(ParameterInfo.IN);
-        storedQuery.setParameter(parameter);
+        storedQuery.addParameter(parameter);
         helpTest("Exec proc1(param1 = 'paramValue1')", "EXEC proc1(param1 => 'paramValue1')", storedQuery);
         helpTest("execute proc1(param1 = 'paramValue1')", "EXEC proc1(param1 => 'paramValue1')", storedQuery);
     }
@@ -4091,11 +4091,11 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         SPParameter param1 = getFactory().newSPParameter(1, getFactory().newConstant("paramValue1"));
         param1.setName("param1");
         param1.setParameterType(ParameterInfo.IN);
-        storedQuery.setParameter(param1);
+        storedQuery.addParameter(param1);
         SPParameter param2 = getFactory().newSPParameter(2, getFactory().newConstant("paramValue2"));
         param2.setName("param2");
         param2.setParameterType(ParameterInfo.IN);
-        storedQuery.setParameter(param2);
+        storedQuery.addParameter(param2);
         helpTest("Exec proc1(param1 = 'paramValue1', param2 = 'paramValue2')",
                  "EXEC proc1(param1 => 'paramValue1', param2 => 'paramValue2')",
                  storedQuery);
@@ -4110,7 +4110,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         storedQuery.setProcedureName("proc1");
         SPParameter param1 = getFactory().newSPParameter(1, getFactory().newCompareCriteria(getFactory().newConstant("a"), Operator.EQ, getFactory().newConstant("b")));
         param1.setParameterType(ParameterInfo.IN);
-        storedQuery.setParameter(param1);
+        storedQuery.addParameter(param1);
         helpTest("Exec proc1('a' = 'b')", "EXEC proc1(('a' = 'b'))", storedQuery);
     }
 
@@ -4123,11 +4123,11 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         SPParameter param1 = getFactory().newSPParameter(1, getFactory().newConstant("paramValue1"));
         param1.setName("in"); //<---RESERVED WORD
         param1.setParameterType(ParameterInfo.IN);
-        storedQuery.setParameter(param1);
+        storedQuery.addParameter(param1);
         SPParameter param2 = getFactory().newSPParameter(2, getFactory().newConstant("paramValue2"));
         param2.setName("in2");
         param2.setParameterType(ParameterInfo.IN);
-        storedQuery.setParameter(param2);
+        storedQuery.addParameter(param2);
         helpTest("Exec proc1(\"in\" = 'paramValue1', in2 = 'paramValue2')",
                  "EXEC proc1(\"in\" => 'paramValue1', in2 => 'paramValue2')",
                  storedQuery);
