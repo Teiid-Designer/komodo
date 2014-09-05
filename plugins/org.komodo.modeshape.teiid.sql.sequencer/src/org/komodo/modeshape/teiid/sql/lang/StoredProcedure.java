@@ -108,12 +108,16 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
 
     public List<SPParameter> getParameters() {
         return getChildrenforIdentifierAndRefType(
-                                                  TeiidSqlLexicon.StoredProcedure.PARAMETER_REF_NAME, SPParameter.class);
+                                                  TeiidSqlLexicon.StoredProcedure.PARAMETERS_REF_NAME, SPParameter.class);
     }
 
     @Override
     public void addParameter(SPParameter parameter) {
-        setChild(TeiidSqlLexicon.StoredProcedure.PARAMETER_REF_NAME, parameter);
+        addLastChild(TeiidSqlLexicon.StoredProcedure.PARAMETERS_REF_NAME, parameter);
+    }
+
+    public void setParameters(List<SPParameter> parameters) {
+        setChildren(TeiidSqlLexicon.StoredProcedure.PARAMETERS_REF_NAME, parameters);
     }
 
     @Override

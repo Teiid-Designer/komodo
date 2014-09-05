@@ -197,7 +197,6 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         Expression actual = parser.parseExpression(sql);
         String actualString = actual.toString();
         assertEquals("Command objects do not match: ", expected, actual);
-//        assertEquals("SQL strings do not match: ", expectedString, actualString);
     }
 
     protected void helpStmtTest(String stmt, String expectedString, Statement expectedStmt) throws Exception {

@@ -5,11 +5,11 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.Collection;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
-import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IFromClause;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  * A FromClause is an interface for subparts held in a FROM clause.  One 
@@ -18,18 +18,8 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
  * is the {@link JoinPredicate} which represents a join between two FromClauses
  * and may contain criteria.
  */
-public abstract class FromClause extends ASTNode implements IFromClause<LanguageVisitor> {
-
-    /**
-     * 
-     */
-    public static final String MAKEIND = "MAKEIND"; //$NON-NLS-1$
-
-    /**
-     * 
-     */
-    @Since(Version.TEIID_8_0)
-    public static final String PRESERVE = "PRESERVE"; //$NON-NLS-1$
+public abstract class FromClause extends ASTNode
+    implements IFromClause<LanguageVisitor>, TeiidSQLConstants.Reserved {
 
     /**
      * @param p
@@ -43,8 +33,8 @@ public abstract class FromClause extends ASTNode implements IFromClause<Language
      * @return whether any hints set
      */
     public boolean hasHint() {
-        return isOptional() || isMakeInd() || isMakeNotDep() || isNoUnnest() || isPreserve() || 
-            (getMax() == 0 && !isJoin()); // makeDep.isSimple() in teiid language
+        MakeDep makeDep = getMakeDependency();
+        return isOptional() || isMakeInd() || (makeDep != null && makeDep.isSimple()) || isMakeNotDep() || isNoUnnest() || isPreserve();
     }
 
     @Override
@@ -90,47 +80,33 @@ public abstract class FromClause extends ASTNode implements IFromClause<Language
 
     @Override
     public boolean isMakeDep() {
-        Object property = getProperty(TeiidSqlLexicon.FromClause.MAKE_DEP_PROP_NAME);
-        return property == null ? false : Boolean.parseBoolean(property.toString());
+        return getMakeDependency() != null;
     }
 
     @Override
     public void setMakeDep(boolean makeDep) {
-        setProperty(TeiidSqlLexicon.FromClause.MAKE_DEP_PROP_NAME, makeDep);
         if (makeDep) {
-            setJoin(! makeDep);
-            setMax(makeDep ? 0 : 1);
+            if (getMakeDependency() == null) {
+                MakeDep makeDependency = getTeiidParser().createASTNode(ASTNodes.MAKE_DEP);
+                setMakeDependency(makeDependency);
+            }
+        } else {
+            removeChildren(TeiidSqlLexicon.FromClause.MAKE_DEPENDENCY_REF_NAME);
         }
     }
 
     /**
-     * Both this and isMax() are components of the former MakeDep
-     * class.
-     *
-     * @return join flag
+     * @return MakeDep
      */
-    public boolean isJoin() {
-        Object property = getProperty(TeiidSqlLexicon.FromClause.JOIN_PROP_NAME);
-        return property == null ? false : Boolean.parseBoolean(property.toString());
-    }
-
-    public void setJoin(boolean join) {
-        setProperty(TeiidSqlLexicon.FromClause.JOIN_PROP_NAME, join);
+    public MakeDep getMakeDependency() {
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.FromClause.MAKE_DEPENDENCY_REF_NAME, MakeDep.class);
     }
 
     /**
-     * Both this and isJoin() are components of the former MakeDep
-     * class.
-     *
-     * @return join flag
+     * @param makeDep
      */
-    public int getMax() {
-        Object property = getProperty(TeiidSqlLexicon.FromClause.MAX_PROP_NAME);
-        return property == null ? 0 : Integer.parseInt(property.toString());
-    }
-
-    public void setMax(int max) {
-        setProperty(TeiidSqlLexicon.FromClause.MAX_PROP_NAME, max);
+    public void setMakeDependency(MakeDep makeDep) {
+        setChild(TeiidSqlLexicon.FromClause.MAKE_DEPENDENCY_REF_NAME, makeDep);
     }
 
     @Override
@@ -168,8 +144,7 @@ public abstract class FromClause extends ASTNode implements IFromClause<Language
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + (this.isJoin() ? 1231 : 1237);
-        result = prime * result + this.getMax();
+        result = prime * result + (this.getMakeDependency() == null ? 0 : this.getMakeDependency().hashCode());
         result = prime * result + (this.isMakeInd() ? 1231 : 1237);
         result = prime * result + (this.isMakeNotDep() ? 1231 : 1237);
         result = prime * result + (this.isNoUnnest() ? 1231 : 1237);
@@ -185,8 +160,7 @@ public abstract class FromClause extends ASTNode implements IFromClause<Language
         if (getClass() != obj.getClass()) return false;
         FromClause other = (FromClause)obj;
 
-        if (this.isJoin() != other.isJoin()) return false;
-        if (this.getMax() != other.getMax()) return false;
+        if (this.getMakeDependency() != other.getMakeDependency()) return false;
         if (this.isMakeInd() != other.isMakeInd()) return false;
         if (this.isMakeNotDep() != other.isMakeNotDep()) return false;
         if (this.isNoUnnest() != other.isNoUnnest()) return false;

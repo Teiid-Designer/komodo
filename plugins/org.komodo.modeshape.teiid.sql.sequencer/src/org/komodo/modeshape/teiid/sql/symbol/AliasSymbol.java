@@ -88,6 +88,8 @@ public class AliasSymbol extends Symbol implements Expression, IAliasSymbol<Expr
             clone.setShortName(getShortName());
         if (getName() != null)
             clone.setName(getName());
+        if (getOutputName() != null)
+            clone.setOutputName(getOutputName());
 
         return clone;
     }

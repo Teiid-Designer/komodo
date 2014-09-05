@@ -55,7 +55,7 @@ public class AlterTrigger extends Alter<TriggerAction> implements IAlterTrigger<
      * @param event the event to set
      */
     public void setEvent(TriggerEvent event) {
-        setProperty(TeiidSqlLexicon.AlterTrigger.EVENT_PROP_NAME, event);
+        setProperty(TeiidSqlLexicon.AlterTrigger.EVENT_PROP_NAME, event.name());
     }
 
     /**

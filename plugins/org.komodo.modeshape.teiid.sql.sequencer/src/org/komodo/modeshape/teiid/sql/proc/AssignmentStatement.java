@@ -68,7 +68,8 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
      */
     private void assignValue(Expression value) {
         setChild(TeiidSqlLexicon.ExpressionStatement.EXPRESSION_REF_NAME, value);
-        setChild(TeiidSqlLexicon.AssignmentStatement.VALUE_REF_NAME, value);
+        // Cannot store the same reference under 2 references as adding the value will 'move' the child to the new parent
+        setChild(TeiidSqlLexicon.AssignmentStatement.VALUE_REF_NAME, value.clone());
     }
 
     @Override

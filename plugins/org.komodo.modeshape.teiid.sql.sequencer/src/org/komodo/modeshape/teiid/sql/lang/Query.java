@@ -204,7 +204,7 @@ public class Query extends QueryCommand implements IQuery<Select, From, Into, Cr
         if (getWith() != null)
             clone.setWith(cloneList(getWith()));
         if (getSourceHint() != null)
-            clone.setSourceHint(getSourceHint());
+            clone.setSourceHint(getSourceHint().clone());
         if (getOption() != null)
             clone.setOption(getOption().clone());
 

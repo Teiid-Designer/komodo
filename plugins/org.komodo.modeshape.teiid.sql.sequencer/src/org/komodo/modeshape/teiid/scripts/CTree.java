@@ -30,11 +30,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.constants.StringConstants;
 
+/**
+ * Implementation of a tree of a set of java classes and interfaces
+ */
 @SuppressWarnings( "nls" )
 public class CTree implements StringConstants {
 
+    /**
+     * Callback for executing a function on all nodes in the tree
+     */
     public interface CTreeCallback {
 
         /**
@@ -45,6 +52,10 @@ public class CTree implements StringConstants {
 
     }
 
+    /**
+     *
+     * @param <T>
+     */
     public static abstract class Node<T extends Node> implements StringConstants {
 
         protected final CTree tree;
@@ -184,6 +195,7 @@ public class CTree implements StringConstants {
 
         /**
          * @param callback
+         * @throws Exception
          */
         public void execute(CTreeCallback callback) throws Exception {
             callback.run(this);
@@ -239,6 +251,9 @@ public class CTree implements StringConstants {
             super(tree, klazz);
         }
 
+        /**
+         * @return parents of this node
+         */
         public CNode getParent() {
             Iterator<CNode> iterator = getParents().iterator();
             if (iterator.hasNext())
@@ -371,6 +386,10 @@ public class CTree implements StringConstants {
         return classes;
     }
 
+    /**
+     * @param objClass
+     * @return is the given class part of the SPI rather than a language object
+     */
     public boolean isSPILanguageInterface(Class<?> objClass) {
         if (objClass == null || objClass.getPackage() == null || objClass.getPackage().getName() == null)
             return false;
@@ -388,6 +407,12 @@ public class CTree implements StringConstants {
 
         if (StringConstants.class.equals(objClass))
             // Ignore StringConstants
+            return false;
+
+        if (TeiidSQLConstants.Reserved.class.equals(objClass) ||
+                TeiidSQLConstants.NonReserved.class.equals(objClass) ||
+                TeiidSQLConstants.Tokens.class.equals(objClass))
+            // Ignore SQLConstants interfaces
             return false;
 
         // Ignore spi interfaces

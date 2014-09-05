@@ -79,7 +79,7 @@ public interface IDataTypeManagerService {
          */
         public static DataTypeName findDataTypeName(String name) {
             if (name == null)
-                return null;
+                return DataTypeName.NULL;
 
             name = name.toUpperCase();
             for (DataTypeName dtn : values()) {
@@ -314,4 +314,10 @@ public interface IDataTypeManagerService {
      * @return average return type or null if argument is not an appropriate type for avg expressions
      */
     DataTypeName getAverageReturnType(DataTypeName avgArgType);
+
+    /**
+     * @param type
+     * @return whether this is a LOB-based class
+     */
+    boolean isLOB(Class<?> type);
 }

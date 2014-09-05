@@ -62,11 +62,13 @@ public abstract class MultiUseAbstractTest {
 
     private static JcrSession session;
 
+    private static ModeShapeEngine engine;
+
     private static void startEngine() throws Exception {
         if (repository != null)
             return;
 
-        ModeShapeEngine engine = new ModeShapeEngine();
+        engine = new ModeShapeEngine();
         engine.start();
 
         InputStream inputStream = MultiUseAbstractTest.class.getResourceAsStream(TEST_REPOSITORY_CONFIG);
@@ -104,8 +106,11 @@ public abstract class MultiUseAbstractTest {
     private static void stopRepository() throws Exception {
         try {
             clearRepository();
+            engine.shutdown();
         } finally {
             session = null;
+            repository = null;
+            engine = null;
         }
     }
 
@@ -153,6 +158,10 @@ public abstract class MultiUseAbstractTest {
 
     protected JcrSession session() {
         return session;
+    }
+
+    protected Workspace workspace() {
+        return session.getWorkspace();
     }
 
     protected JcrSession newSession() throws RepositoryException {

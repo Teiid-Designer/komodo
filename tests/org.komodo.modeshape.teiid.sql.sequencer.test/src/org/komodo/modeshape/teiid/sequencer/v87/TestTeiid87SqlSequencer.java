@@ -64,7 +64,7 @@ public class TestTeiid87SqlSequencer extends TestTeiid86SqlSequencer {
         Node storedProcNode = verify(cmdStmtNode, SubqueryContainer.COMMAND_REF_NAME, StoredProcedure.ID);
         verifyProperty(storedProcNode, StoredProcedure.PROCEDURE_NAME_PROP_NAME, "proc1");
 
-        Node param1Node = verify(storedProcNode, StoredProcedure.PARAMETER_REF_NAME, SPParameter.ID);
+        Node param1Node = verify(storedProcNode, StoredProcedure.PARAMETERS_REF_NAME, SPParameter.ID);
         verifyProperty(param1Node, SPParameter.PARAMETER_TYPE_PROP_NAME, 1);
         verifyProperty(param1Node, SPParameter.INDEX_PROP_NAME, 1);
         verifyConstant(param1Node, SPParameter.EXPRESSION_REF_NAME, "param1");

@@ -37,6 +37,13 @@
 [tsql:targetedCommand] mixin
 	+ tsql:group (tsql:groupSymbol)
 
+[tsql:expressionStatement] mixin
+	- tsql:expectedTypeClass (string)
+	+ tsql:expression (tsql:expression)
+
+[tsql:labeled] mixin
+	- tsql:label (string)
+
 [tsql:languageObject] mixin
 
 [tsql:expression]	>	tsql:languageObject mixin
@@ -46,13 +53,6 @@
 
 [tsql:subqueryContainer]	>	tsql:languageObject mixin
 	+ tsql:command (tsql:command)
-
-[tsql:labeled] mixin
-	- tsql:label (string)
-
-[tsql:expressionStatement] mixin
-	- tsql:expectedTypeClass (string)
-	+ tsql:expression (tsql:expression)
 
 //==================================================
 //  Derived from Language Object Classes
@@ -147,8 +147,8 @@
 	- tsql:callableStatement (boolean)
 	- tsql:procedureName (string)
 	- tsql:procedureCallableName (string)
-	- tsql:procedureID (binary)
-	+ tsql:parameter (tsql:sPParameter)
+	- tsql:procedureiD (string)
+	+ tsql:parameters (tsql:spParameter) sns
 
 [tsql:update]	>	tsql:procedureContainer, tsql:targetedCommand mixin
 	+ tsql:changeList (tsql:setClauseList)
@@ -193,11 +193,10 @@
 	- tsql:preserve (boolean)
 	- tsql:makeDep (boolean)
 	- tsql:optional (boolean)
-	- tsql:max (long)
-	- tsql:join (boolean)
 	- tsql:makeNotDep (boolean)
 	- tsql:makeInd (boolean)
 	- tsql:noUnnest (boolean)
+	+ tsql:makeDependency (tsql:makeDep)
 
 [tsql:tableFunctionReference]	>	tsql:fromClause mixin abstract
 	- tsql:name (string)
@@ -224,18 +223,18 @@
 	+ tsql:columns (tsql:textColumn) sns
 	+ tsql:file (tsql:expression)
 
-[tsql:xMLTable]	>	tsql:tableFunctionReference mixin
+[tsql:xmlTable]	>	tsql:tableFunctionReference mixin
 	- tsql:usingDefaultColumn (boolean)
 	- tsql:xquery (string)
-	+ tsql:columns (tsql:xMLColumn) sns
+	+ tsql:columns (tsql:xmlColumn) sns
 	+ tsql:passing (tsql:derivedColumn) sns
-	+ tsql:namespaces (tsql:xMLNamespaces)
+	+ tsql:namespaces (tsql:xmlNamespaces)
 
 [tsql:joinPredicate]	>	tsql:fromClause mixin
 	+ tsql:leftClause (tsql:fromClause)
 	+ tsql:rightClause (tsql:fromClause)
-	+ tsql:joinCriteria (tsql:criteria) sns
 	+ tsql:joinType (tsql:joinType)
+	+ tsql:joinCriteria (tsql:criteria) sns
 
 [tsql:subqueryFromClause]	>	tsql:fromClause, tsql:subqueryContainer mixin
 	- tsql:name (string)
@@ -264,9 +263,15 @@
 	+ tsql:offset (tsql:expression)
 	+ tsql:rowLimit (tsql:expression)
 
+[tsql:makeDep]	>	tsql:languageObject mixin
+	- tsql:max (long)
+	- tsql:join (boolean)
+
 [tsql:namespaceItem]	>	tsql:languageObject mixin
 	- tsql:prefix (string)
 	- tsql:uri (string)
+
+[tsql:nullNode]	>	tsql:languageObject mixin
 
 [tsql:projectedColumn]	>	tsql:languageObject mixin
 	- tsql:type (string)
@@ -283,7 +288,7 @@
 	- tsql:noTrim (boolean)
 	- tsql:width (long)
 
-[tsql:xMLColumn]	>	tsql:projectedColumn mixin
+[tsql:xmlColumn]	>	tsql:projectedColumn mixin
 	- tsql:ordinal (boolean)
 	- tsql:path (string)
 	+ tsql:defaultExpression (tsql:expression)
@@ -293,6 +298,7 @@
 	- tsql:noCache (boolean)
 	- tsql:notDependentGroups (string) multiple
 	- tsql:noCacheGroups (string) multiple
+	+ tsql:dependentGroupOptions (tsql:makeDep) sns
 
 [tsql:orderBy]	>	tsql:languageObject mixin
 	+ tsql:orderByItems (tsql:orderByItem) sns
@@ -302,9 +308,9 @@
 	- tsql:ascending (boolean)
 	+ tsql:symbol (tsql:expression)
 
-[tsql:sPParameter]	>	tsql:languageObject mixin
+[tsql:spParameter]	>	tsql:languageObject mixin
 	- tsql:classTypeClass (string)
-	- tsql:metadataID (binary)
+	- tsql:metadataiD (string)
 	- tsql:usingDefault (boolean)
 	- tsql:varArg (boolean)
 	- tsql:name (string)
@@ -390,8 +396,8 @@
 [tsql:exceptionExpression]	>	tsql:expression mixin
 	+ tsql:errorCode (tsql:expression)
 	+ tsql:message (tsql:expression)
-	+ tsql:parentExpression (tsql:expression)
 	+ tsql:sqlState (tsql:expression)
+	+ tsql:parentExpression (tsql:expression)
 
 [tsql:function]	>	tsql:expression mixin
 	- tsql:arrayType (boolean)
@@ -408,7 +414,7 @@
 	+ tsql:args (tsql:expression) sns
 	+ tsql:condition (tsql:expression)
 
-[tsql:symbol]	>	tsql:languageObject mixin
+[tsql:symbol]	>	tsql:languageObject mixin abstract
 	- tsql:shortName (string)
 	- tsql:name (string)
 	- tsql:outputName (string)
@@ -417,7 +423,7 @@
 	+ tsql:symbol (tsql:expression)
 
 [tsql:elementSymbol]	>	tsql:symbol, tsql:expression mixin
-	- tsql:metadataID (binary)
+	- tsql:metadataiD (string)
 	- tsql:displayMode (string) < "FULLY_QUALIFIED", "OUTPUT_NAME", "SHORT_OUTPUT_NAME"
 	- tsql:displayFullyQualified (boolean)
 	- tsql:externalReference (boolean)
@@ -427,7 +433,7 @@
 	+ tsql:expression (tsql:expression)
 
 [tsql:groupSymbol]	>	tsql:symbol mixin
-	- tsql:metadataID (binary)
+	- tsql:metadataiD (string)
 	- tsql:procedure (boolean)
 	- tsql:definition (string)
 
@@ -442,7 +448,7 @@
 	+ tsql:then (tsql:expression) sns
 
 [tsql:constant]	>	tsql:expression mixin
-	- tsql:value (binary)
+	- tsql:value (string)
 	- tsql:multiValued (boolean)
 
 [tsql:derivedColumn]	>	tsql:languageObject mixin
@@ -450,7 +456,7 @@
 	- tsql:propagateName (boolean)
 	+ tsql:expression (tsql:expression)
 
-[tsql:jSONObject]	>	tsql:expression mixin
+[tsql:jsonObject]	>	tsql:expression mixin
 	+ tsql:args (tsql:derivedColumn) sns
 
 [tsql:multipleElementSymbol]	>	tsql:expression mixin
@@ -489,34 +495,34 @@
 	+ tsql:partition (tsql:expression) sns
 	+ tsql:orderBy (tsql:orderBy)
 
-[tsql:xMLAttributes]	>	tsql:languageObject mixin
+[tsql:xmlAttributes]	>	tsql:languageObject mixin
 	+ tsql:args (tsql:derivedColumn) sns
 
-[tsql:xMLElement]	>	tsql:expression mixin
+[tsql:xmlElement]	>	tsql:expression mixin
 	- tsql:name (string)
-	+ tsql:attributes (tsql:xMLAttributes)
-	+ tsql:namespaces (tsql:xMLNamespaces)
+	+ tsql:attributes (tsql:xmlAttributes)
+	+ tsql:namespaces (tsql:xmlNamespaces)
 	+ tsql:content (tsql:expression) sns
 
-[tsql:xMLForest]	>	tsql:expression mixin
+[tsql:xmlForest]	>	tsql:expression mixin
 	+ tsql:arguments (tsql:derivedColumn) sns
-	+ tsql:namespaces (tsql:xMLNamespaces)
+	+ tsql:namespaces (tsql:xmlNamespaces)
 
-[tsql:xMLNamespaces]	>	tsql:languageObject mixin
+[tsql:xmlNamespaces]	>	tsql:languageObject mixin
 	+ tsql:namespaceItems (tsql:namespaceItem) sns
 
-[tsql:xMLParse]	>	tsql:expression mixin
+[tsql:xmlParse]	>	tsql:expression mixin
 	- tsql:wellFormed (boolean)
 	- tsql:document (boolean)
 	+ tsql:expression (tsql:expression)
 
-[tsql:xMLQuery]	>	tsql:expression mixin
+[tsql:xmlQuery]	>	tsql:expression mixin
 	- tsql:emptyOnEmpty (boolean)
 	- tsql:xquery (string)
 	+ tsql:passing (tsql:derivedColumn) sns
-	+ tsql:namespaces (tsql:xMLNamespaces)
+	+ tsql:namespaces (tsql:xmlNamespaces)
 
-[tsql:xMLSerialize]	>	tsql:expression mixin
+[tsql:xmlSerialize]	>	tsql:expression mixin
 	- tsql:typeString (string)
 	- tsql:version (string)
 	- tsql:declaration (boolean)

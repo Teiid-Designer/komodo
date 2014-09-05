@@ -42,6 +42,7 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import org.junit.Test;
+import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractCompareCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractSetCriteria;
@@ -187,10 +188,6 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
             expectedValuesIterator.remove();
         }
         assertTrue(expectedValuesList.isEmpty());
-    }
-
-    protected void verifyExpression( Node node, String expectedValue ) throws Exception {
-//        verifyProperty(node, DDL_EXPRESSION, expectedValue);
     }
 
     protected void verifyBaseProperties( Node node, String primaryType, String mixinType) throws RepositoryException {
@@ -368,12 +365,29 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         return verifyExpressionSymbol(parentNode, refName, -1, expSymbolExpressionId);
     }
 
-    protected String deriveProcPrefix() {
-        String procPrefix = "BEGIN ";
-        if (getTeiidVersion().isLessThan(TeiidVersion.Version.TEIID_8_4.get()))
-            procPrefix = "CREATE VIRTUAL PROCEDURE " + procPrefix;
+    protected String deriveProcPrefix(boolean useNewLine) {
+        StringBuilder builder = new StringBuilder();
+        
+        if (getTeiidVersion().isLessThan(TeiidVersion.Version.TEIID_8_4.get())) {
+            builder.append("CREATE VIRTUAL PROCEDURE");
+            if (useNewLine)
+                builder.append(NEW_LINE);
+            else
+                builder.append(SPACE);
+        }
 
-        return procPrefix;
+        builder.append("BEGIN");
+
+        if (!useNewLine)
+            builder.append(SPACE);
+        
+        return builder.toString();
+    }
+
+    protected void verifySql(String expectedSql, Node topNode) throws Exception {
+        TeiidSqlNodeVisitor visitor = new TeiidSqlNodeVisitor();
+        String actualSql = visitor.getTeiidSql(getTeiidVersion(), topNode);
+        assertEquals(expectedSql, actualSql);
     }
 
     @Test
@@ -412,6 +426,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node rightExpression = verify(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, ElementSymbol.ID);
         verifyProperty(rightExpression, Symbol.NAME_PROP_NAME, "g2.a2");
+
+        verifySql("SELECT * FROM g1 INNER JOIN g2 ON g1.a1 = g2.a2", fileNode);
     }
 
     /** SELECT * FROM g1 cross join g2 */
@@ -431,6 +447,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
+    
+        verifySql("SELECT * FROM g1 CROSS JOIN g2", fileNode);
     }
 
     /** SELECT * FROM (g1 cross join g2), g3 */
@@ -452,6 +470,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
 
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 2, "g3");
+    
+        verifySql("SELECT * FROM g1 CROSS JOIN g2, g3", fileNode);
     }
 
     /** SELECT * FROM (g1 cross join g2) cross join g3 */
@@ -476,6 +496,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
         verifyUnaryFromClauseGroup(jpNode1, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g3");
+    
+        verifySql("SELECT * FROM (g1 CROSS JOIN g2) CROSS JOIN g3", fileNode);
     }
 
     /** SELECT * FROM (g1 cross join g2) cross join (g3 cross join g4) */
@@ -506,6 +528,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         verifyUnaryFromClauseGroup(jpNode3, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g3");
         verifyUnaryFromClauseGroup(jpNode3, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g4");
+    
+        verifySql("SELECT * FROM (g1 CROSS JOIN g2) CROSS JOIN (g3 CROSS JOIN g4)", fileNode);
     }
 
     /** SELECT * FROM g1 cross join (g2 cross join g3) */
@@ -531,6 +555,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g2");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g3");
+    
+        verifySql("SELECT * FROM g1 CROSS JOIN (g2 CROSS JOIN g3)", fileNode);
     }
 
     /** SELECT * FROM g1 cross join (g2 cross join g3), g4 */
@@ -557,6 +583,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g3");
         
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 2, "g4");
+    
+        verifySql("SELECT * FROM g1 CROSS JOIN (g2 CROSS JOIN g3), g4", fileNode);
     }
 
     /** SELECT * FROM g1 cross join (g2 cross join g3), g4, g5 cross join g6 */
@@ -590,6 +618,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         verifyUnaryFromClauseGroup(jpNode3, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g5");
         verifyUnaryFromClauseGroup(jpNode3, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g6");
+    
+        verifySql("SELECT * FROM g1 CROSS JOIN (g2 CROSS JOIN g3), g4, g5 CROSS JOIN g6", fileNode);
     }
 
     /** SELECT * FROM g1, g2 inner join g3 on g2.a=g3.a */
@@ -622,6 +652,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node rightExpression = verify(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, ElementSymbol.ID);
         verifyProperty(rightExpression, Symbol.NAME_PROP_NAME, "g3.a");
+    
+        verifySql("SELECT * FROM g1, g2 INNER JOIN g3 ON g2.a = g3.a", fileNode);
     }
 
     /** Select myG.a myA, myH.b from g myG right outer join h myH on myG.x=myH.x */
@@ -652,6 +684,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node rightExpression = verify(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, ElementSymbol.ID);
         verifyProperty(rightExpression, Symbol.NAME_PROP_NAME, "myH.x");
+    
+        verifySql("SELECT myG.a AS myA, myH.b FROM g AS myG RIGHT OUTER JOIN h AS myH ON myG.x = myH.x", fileNode);
     }
 
     /** Select myG.x myX, myH.y from g myG right join h myH on myG.x=myH.x */
@@ -682,6 +716,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node rightExpression = verify(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, ElementSymbol.ID);
         verifyProperty(rightExpression, Symbol.NAME_PROP_NAME, "myH.x");
+    
+        verifySql("SELECT myG.a AS myA, myH.b FROM g AS myG RIGHT OUTER JOIN h AS myH ON myG.x = myH.x", fileNode);
     }
 
     /** Select myG.a myA, myH.b from g myG left outer join h myH on myG.x=myH.x */
@@ -712,6 +748,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node rightExpression = verify(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, ElementSymbol.ID);
         verifyProperty(rightExpression, Symbol.NAME_PROP_NAME, "myH.x");
+    
+        verifySql("SELECT myG.a AS myA, myH.b FROM g AS myG LEFT OUTER JOIN h AS myH ON myG.x = myH.x", fileNode);
     }
 
     /** Select myG.a myA, myH.b from g myG left join h myH on myG.x=myH.x */
@@ -742,6 +780,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node rightExpression = verify(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, ElementSymbol.ID);
         verifyProperty(rightExpression, Symbol.NAME_PROP_NAME, "myH.x");
+    
+        verifySql("SELECT myG.a AS myA, myH.b FROM g AS myG LEFT OUTER JOIN h AS myH ON myG.x = myH.x", fileNode);
     }
 
     /** Select myG.a myA, myH.b from g myG full outer join h myH on myG.x=myH.x */
@@ -772,6 +812,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node rightExpression = verify(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, ElementSymbol.ID);
         verifyProperty(rightExpression, Symbol.NAME_PROP_NAME, "myH.x");
+    
+        verifySql("SELECT myG.a AS myA, myH.b FROM g AS myG FULL OUTER JOIN h AS myH ON myG.x = myH.x", fileNode);
     }
 
     /** Select g.a, h.b from g full join h on g.x=h.x */
@@ -802,6 +844,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node rightExpression = verify(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, ElementSymbol.ID);
         verifyProperty(rightExpression, Symbol.NAME_PROP_NAME, "myH.x");
+
+        verifySql("SELECT myG.a AS myA, myH.b FROM g AS myG FULL OUTER JOIN h AS myH ON myG.x = myH.x", fileNode);
     }
 
     // ======================= Convert ==============================================
@@ -823,6 +867,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT CONVERT(CONVERT(a, timestamp), string) FROM g */
@@ -847,6 +893,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+
+        verifySql(sql, fileNode);
     }
 
     // ======================= Functions ==============================================
@@ -874,6 +922,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+    
+        verifySql("SELECT (5 + length(concat(a, 'x'))) FROM g", fileNode);
     }
 
     /** SELECT REPLACE(a, 'x', 'y') AS y FROM g */
@@ -893,6 +943,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT cast(a as string) FROM g */
@@ -911,6 +963,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+    
+        verifySql("SELECT cast(a AS string) FROM g", fileNode);
     }
 
     /** SELECT cast(cast(a as timestamp) as string) FROM g */
@@ -932,6 +986,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+    
+        verifySql("SELECT cast(cast(a AS timestamp) AS string) FROM g", fileNode);
     }
 
     /** SELECT left(fullname, 3) as x FROM sys.groups */
@@ -951,12 +1007,14 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "sys.groups");
+    
+        verifySql("SELECT left(fullname, 3) AS x FROM sys.groups", fileNode);
     }
 
     /** SELECT right(fullname, 3) as x FROM sys.groups */
     @Test
     public void testRightFunction() throws Exception {
-        String sql = "SELECT right(fullname, 3) as x FROM sys.groups";
+        String sql = "SELECT right(fullname, 3) AS x FROM sys.groups";
         Node fileNode = sequenceSql(sql);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
@@ -970,7 +1028,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "sys.groups");
+
+        verifySql(sql, fileNode);
     }
+
 
     @Test
     public void testInsertIntoSelect() throws Exception {
@@ -986,6 +1047,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node selectNode = verify(queryNode, Query.SELECT_REF_NAME, Select.ID);
         Node constantNode = verifyExpressionSymbol(selectNode, Select.SYMBOLS_REF_NAME, Constant.ID);
         verifyProperty(constantNode, Constant.VALUE_PROP_NAME, 1);
+
+        verifySql("INSERT INTO tempA SELECT 1", fileNode);
     }
 
     // ======================= Group By ==============================================
@@ -1012,6 +1075,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyProperty(havingNode, AbstractCompareCriteria.OPERATOR_PROP_NAME, CriteriaOperator.Operator.EQ.name());
         verifyElementSymbol(havingNode, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, "b");
         verifyConstant(havingNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, 5);
+    
+        verifySql("SELECT a FROM m.g GROUP BY b, c HAVING b = 5", fileNode);
     }
 
     /** SELECT COUNT(a) AS c FROM m.g */
@@ -1030,6 +1095,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "m.g");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT a FROM m.g GROUP BY a HAVING COUNT(b) > 0*/
@@ -1058,6 +1125,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyElementSymbol(aggregateNode, AggregateSymbol.ARGS_REF_NAME, "b");
         
         verifyConstant(havingNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, 0);
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT 5-null, a.g1.c1 FROM a.g1 */
@@ -1077,6 +1146,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "a.g1");
+    
+        verifySql("SELECT (5 - null), a.g1.c1 FROM a.g1", fileNode);
     }
 
     /** SELECT 'abc' FROM a.g1 */
@@ -1093,6 +1164,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "a.g1");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT 'O''Leary' FROM a.g1 */
@@ -1109,6 +1182,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "a.g1");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT '''abc''' FROM a.g1 */
@@ -1125,6 +1200,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "a.g1");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT 'a''b''c' FROM a.g1 */
@@ -1141,6 +1218,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "a.g1");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT " "" " FROM a.g1 */
@@ -1156,6 +1235,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "a.g1");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT 123456789012 FROM a.g1 */
@@ -1172,6 +1253,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "a.g1");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT {d'2002-10-02'} FROM m.g1 */
@@ -1188,12 +1271,14 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "m.g1");
+    
+        verifySql(sql, fileNode);
     }
 
-    /** SELECT {t '11:10:00' } FROM m.g1 */
+    /** SELECT {t'11:10:00'} FROM m.g1 */
     @Test
     public void testTimeLiteral1() throws Exception {
-        String sql = "SELECT {t '11:10:00' } FROM m.g1";
+        String sql = "SELECT {t'11:10:00'} FROM m.g1";
         Node fileNode = sequenceSql(sql);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
@@ -1204,6 +1289,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "m.g1");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT {b'true'} FROM m.g1 */
@@ -1219,6 +1306,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node constantNode = verifyExpressionSymbol(selectNode, Select.SYMBOLS_REF_NAME, Constant.ID);
         verifyProperty(constantNode, Constant.VALUE_PROP_NAME, expected);
         verifyProperty(constantNode, Expression.TYPE_CLASS_PROP_NAME, DataTypeName.BOOLEAN.name());
+    
+        verifySql("SELECT TRUE", fileNode);
     }
 
     /** SELECT TRUE FROM m.g1 */
@@ -1234,6 +1323,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node constantNode = verifyExpressionSymbol(selectNode, Select.SYMBOLS_REF_NAME, Constant.ID);
         verifyProperty(constantNode, Constant.VALUE_PROP_NAME, expected);
         verifyProperty(constantNode, Expression.TYPE_CLASS_PROP_NAME, DataTypeName.BOOLEAN.name());
+    
+        verifySql("SELECT TRUE", fileNode);
     }
 
     /** SELECT {b'false'} FROM m.g1 */
@@ -1249,6 +1340,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node constantNode = verifyExpressionSymbol(selectNode, Select.SYMBOLS_REF_NAME, Constant.ID);
         verifyProperty(constantNode, Constant.VALUE_PROP_NAME, expected);
         verifyProperty(constantNode, Expression.TYPE_CLASS_PROP_NAME, DataTypeName.BOOLEAN.name());
+    
+        verifySql("SELECT FALSE", fileNode);
     }
 
     /** SELECT FALSE FROM m.g1 */
@@ -1264,7 +1357,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node constantNode = verifyExpressionSymbol(selectNode, Select.SYMBOLS_REF_NAME, Constant.ID);
         verifyProperty(constantNode, Constant.VALUE_PROP_NAME, expected);
         verifyProperty(constantNode, Expression.TYPE_CLASS_PROP_NAME, DataTypeName.BOOLEAN.name());
+
+        verifySql("SELECT FALSE", fileNode);
     }
+
 
     @Test
     public void testBooleanLiteralUnknown() throws Exception {
@@ -1278,6 +1374,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         assertFalse(constantNode.hasProperty(Constant.VALUE_PROP_NAME));
 
         verifyProperty(constantNode, Expression.TYPE_CLASS_PROP_NAME, DataTypeName.BOOLEAN.name());
+    
+        verifySql("SELECT UNKNOWN", fileNode);
     }
 
     /** SELECT DISTINCT a FROM g */
@@ -1294,6 +1392,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT ALL a FROM g */
@@ -1310,6 +1410,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+
+        verifySql("SELECT a FROM g", fileNode);
     }
 
     //=========================Aliasing==============================================
@@ -1328,6 +1430,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "myG", "g");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT myG.*, myH.b FROM g AS myG, h AS myH */
@@ -1346,6 +1450,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "myG", "g");
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 2, "myH", "h");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT myG.a, myH.b FROM g myG, h myH */
@@ -1364,6 +1470,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "myG", "g");
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 2, "myH", "h");
+
+        verifySql("SELECT myG.*, myH.b FROM g AS myG, h AS myH", fileNode);
     }
 
     // ======================= Misc ==============================================
@@ -1384,6 +1492,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node criteriaNode = verify(queryNode, Query.CRITERIA_REF_NAME, IsNullCriteria.ID);
         verifyElementSymbol(criteriaNode, IsNullCriteria.EXPRESSION_REF_NAME, "a");
+    
+        verifySql("SELECT a FROM db.g WHERE a IS NULL", fileNode);
     }
 
     /** Select a From db.g Where a IS NOT NULL */
@@ -1403,6 +1513,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node criteriaNode = verify(queryNode, Query.CRITERIA_REF_NAME, IsNullCriteria.ID);
         verifyElementSymbol(criteriaNode, IsNullCriteria.EXPRESSION_REF_NAME, "a");
         verifyProperty(criteriaNode, IsNullCriteria.NEGATED_PROP_NAME, true);
+    
+        verifySql("SELECT a FROM db.g WHERE a IS NOT NULL", fileNode);
     }
 
     /** Select a From db.g Where Not a IS NULL */
@@ -1423,6 +1535,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         
         Node isNullCriteriaNode = verify(notCriteriaNode, NotCriteria.CRITERIA_REF_NAME, IsNullCriteria.ID);
         verifyElementSymbol(isNullCriteriaNode, IsNullCriteria.EXPRESSION_REF_NAME, "a");
+    
+        verifySql("SELECT a FROM db.g WHERE NOT (a IS NULL)", fileNode);
     }
 
     /** SELECT a from db.g where a <> "value" */
@@ -1443,6 +1557,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyProperty(criteriaNode, AbstractCompareCriteria.OPERATOR_PROP_NAME, CriteriaOperator.Operator.NE.name());
         verifyElementSymbol(criteriaNode, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, "a");
         verifyElementSymbol(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, "value");
+    
+        verifySql("SELECT a FROM db.g WHERE a <> \"value\"", fileNode);
     }
 
     /** SELECT a from db.g where a != "value" */
@@ -1463,6 +1579,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyProperty(criteriaNode, AbstractCompareCriteria.OPERATOR_PROP_NAME, CriteriaOperator.Operator.NE.name());
         verifyElementSymbol(criteriaNode, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, "a");
         verifyConstant(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, "value");
+    
+        verifySql("SELECT a FROM db.g WHERE a <> 'value'", fileNode);
     }
 
     /** SELECT a from db."g" where a = 5 */
@@ -1483,6 +1601,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyProperty(criteriaNode, AbstractCompareCriteria.OPERATOR_PROP_NAME, CriteriaOperator.Operator.EQ.name());
         verifyElementSymbol(criteriaNode, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, "a");
         verifyConstant(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, 5);
+    
+        verifySql("SELECT a FROM db.g WHERE a = 5", fileNode);
     }
 
     /** SELECT * FROM model.doc WHERE ab.cd.@ef = 'abc' */
@@ -1503,6 +1623,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyProperty(criteriaNode, AbstractCompareCriteria.OPERATOR_PROP_NAME, CriteriaOperator.Operator.EQ.name());
         verifyElementSymbol(criteriaNode, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, "ab.cd.@ef");
         verifyConstant(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, "abc");
+    
+        verifySql(sql, fileNode);
     }
 
     /** SELECT a from db.g where a BETWEEN 1000 AND 2000 */
@@ -1523,6 +1645,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyElementSymbol(criteriaNode, BetweenCriteria.EXPRESSION_REF_NAME, "a");
         verifyConstant(criteriaNode, BetweenCriteria.LOWER_EXPRESSION_REF_NAME, 1000);
         verifyConstant(criteriaNode, BetweenCriteria.UPPER_EXPRESSION_REF_NAME, 2000);
+    
+        verifySql("SELECT a FROM db.g WHERE a BETWEEN 1000 AND 2000", fileNode);
     }
 
     /** SELECT a FROM db.g WHERE b IN (1000,5000)*/
@@ -1543,6 +1667,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyElementSymbol(criteriaNode, AbstractSetCriteria.EXPRESSION_REF_NAME, "b");
         verifyConstant(criteriaNode, SetCriteria.VALUES_REF_NAME, 1, 1000);
         verifyConstant(criteriaNode, SetCriteria.VALUES_REF_NAME, 2, 5000);
+
+        verifySql("SELECT a FROM db.g WHERE b IN (1000, 5000)", fileNode);
     }
 
     // ================================== order by ==================================
@@ -1570,7 +1696,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node obItemNode = verify(orderByNode, OrderBy.ORDER_BY_ITEMS_REF_NAME, OrderByItem.ID);
         verifyElementSymbol(obItemNode, OrderByItem.SYMBOL_REF_NAME, "c");
         verifyProperty(obItemNode, OrderByItem.ASCENDING_PROP_NAME, false);
+
+        verifySql("SELECT a FROM db.g WHERE b = aString ORDER BY c DESC", fileNode);
     }
+
 
     @Test
     public void testOrderByNullOrdering() throws Exception {
@@ -1599,6 +1728,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyElementSymbol(obItem2Node, OrderByItem.SYMBOL_REF_NAME, "d");
         verifyProperty(obItem2Node, OrderByItem.ASCENDING_PROP_NAME, false);
         verifyProperty(obItem2Node, OrderByItem.NULL_ORDERING_PROP_NAME, NullOrdering.LAST.name());
+
+        verifySql("SELECT a FROM db.g WHERE b = aString ORDER BY c NULLS FIRST, d DESC NULLS LAST", fileNode);
     }
 
 //    // ================================== match ====================================
@@ -1622,6 +1753,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyProperty(criteriaNode, MatchCriteria.ESCAPE_CHAR_PROP_NAME, "#");
         verifyElementSymbol(criteriaNode, MatchCriteria.LEFT_EXPRESSION_REF_NAME, "b");
         verifyConstant(criteriaNode, MatchCriteria.RIGHT_EXPRESSION_REF_NAME, "#String");
+    
+        verifySql("SELECT a FROM db.g WHERE b LIKE '#String' ESCAPE '#'", fileNode);
     }
 
     /** SELECT a */
@@ -1637,6 +1770,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node constantNode = verifyExpressionSymbol(selectNode, Select.SYMBOLS_REF_NAME, 2, Constant.ID);
         verifyProperty(constantNode, Constant.VALUE_PROP_NAME, 5);
         verifyProperty(constantNode, Expression.TYPE_CLASS_PROP_NAME, DataTypeName.INTEGER.name());
+    
+        verifySql(sql, fileNode);
     }
 
     /** INSERT INTO m.g (a) VALUES (?) */
@@ -1652,11 +1787,14 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node refNode = verify(insertNode, Insert.VALUES_REF_NAME, Reference.ID);
         verifyProperty(refNode, Reference.INDEX_PROP_NAME, 0);
         verifyProperty(refNode, Reference.POSITIONAL_PROP_NAME, true);
+
+        verifySql(sql, fileNode);
     }
+
 
     @Test
     public void testIfStatement() throws Exception {
-        String sql = deriveProcPrefix() + "IF(c = 5) BEGIN DECLARE short a; END ELSE BEGIN DECLARE short b; END END";
+        String sql = deriveProcPrefix(false) + "IF(c = 5) BEGIN DECLARE short a; END ELSE BEGIN DECLARE short b; END END";
         Node fileNode = sequenceSql(sql);
 
         Node procNode = verify(fileNode, CreateProcedureCommand.ID, CreateProcedureCommand.ID);
@@ -1677,11 +1815,23 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyProperty(criteriaNode, AbstractCompareCriteria.OPERATOR_PROP_NAME, CriteriaOperator.Operator.EQ.name());
         verifyElementSymbol(criteriaNode, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, "c");
         verifyConstant(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, 5);
+
+        verifySql(deriveProcPrefix(true) + NEW_LINE
+                  + "IF(c = 5)" + NEW_LINE
+                  + "BEGIN" + NEW_LINE
+                  + "DECLARE short a;" + NEW_LINE
+                  + "END" + NEW_LINE
+                  + "ELSE" + NEW_LINE
+                  + "BEGIN" + NEW_LINE
+                  + "DECLARE short b;" + NEW_LINE
+                  + "END" + NEW_LINE
+                  + "END", fileNode);
     }
+
 
     @Test
     public void testDynamicCommandStatement() throws Exception {
-        String sql = deriveProcPrefix() + "exec string 'SELECT a1 FROM g WHERE a2 = 5' as a1 string into #g; END";
+        String sql = deriveProcPrefix(false) + "exec string 'SELECT a1 FROM g WHERE a2 = 5' as a1 string into #g; END";
         Node fileNode = sequenceSql(sql);
 
         Node procNode = verify(fileNode, CreateProcedureCommand.ID, CreateProcedureCommand.ID);
@@ -1694,7 +1844,12 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyElementSymbol(dynCmdNode, DynamicCommand.AS_COLUMNS_REF_NAME, "a1");
         Node intoGroupNode = verify(dynCmdNode, DynamicCommand.INTO_GROUP_REF_NAME, GroupSymbol.ID);
         verifyProperty(intoGroupNode, Symbol.NAME_PROP_NAME, "#g");
+
+        verifySql(deriveProcPrefix(true) + NEW_LINE
+                  + "EXECUTE IMMEDIATE 'SELECT a1 FROM g WHERE a2 = 5' AS a1 string INTO #g;" + NEW_LINE
+                  + "END", fileNode);
     }
+
 
     @Test
     public void testSubquerySetCriteriaWithExec() throws Exception {
@@ -1722,7 +1877,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node storedProcNode = verify(sqFromClause, SubqueryContainer.COMMAND_REF_NAME, StoredProcedure.ID);
         verifyProperty(storedProcNode, StoredProcedure.PROCEDURE_NAME_PROP_NAME, "m.sq1");
+
+        verifySql("SELECT a FROM db.g WHERE b IN (SELECT * FROM (EXEC m.sq1()) AS x)", fileNode);
     }
+
 
     @Test
     public void testSubquerySetCriteriaWithUnion() throws Exception {
@@ -1755,11 +1913,14 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyElementSymbol(u2SelectNode, Select.SYMBOLS_REF_NAME, "x2");
         Node u2FromNode = verify(u2QueryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(u2FromNode, From.CLAUSES_REF_NAME, "db.g3");
+
+        verifySql(sql, fileNode);
     }
+
 
     @Test
     public void testLoopStatement() throws Exception {
-        String sql = deriveProcPrefix() + "LOOP ON (SELECT c1, c2 FROM m.g) AS mycursor BEGIN DECLARE integer x; x=mycursor.c1; END END";
+        String sql = deriveProcPrefix(false) + "LOOP ON (SELECT c1, c2 FROM m.g) AS mycursor BEGIN DECLARE integer x; x=mycursor.c1; END END";
         Node fileNode = sequenceSql(sql);
 
         Node procNode = verify(fileNode, CreateProcedureCommand.ID, CreateProcedureCommand.ID);
@@ -1783,7 +1944,16 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node assignStmtNode = verify(blockNode, Block.STATEMENTS_REF_NAME, 2, AssignmentStatement.ID);
         verifyElementSymbol(assignStmtNode, AssignmentStatement.VARIABLE_REF_NAME, "x");
         verifyElementSymbol(assignStmtNode, AssignmentStatement.VALUE_REF_NAME, "mycursor.c1");
+
+        verifySql(deriveProcPrefix(true) + NEW_LINE
+                      + "LOOP ON (SELECT c1, c2 FROM m.g) AS mycursor" + NEW_LINE
+                      + "BEGIN" + NEW_LINE
+                      + "DECLARE integer x;" + NEW_LINE
+                      + "x = mycursor.c1;" + NEW_LINE
+                      + "END" + NEW_LINE
+                      + "END", fileNode);
     }
+
 
     @Test
     public void testXmlElement() throws Exception {
@@ -1799,7 +1969,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+
+        verifySql("SELECT XMLELEMENT(NAME \"table\", 'x') FROM g", fileNode);
     }
+
 
     @Test
     public void testXmlElementWithAttributes() throws Exception {
@@ -1818,7 +1991,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+
+        verifySql("SELECT XMLELEMENT(NAME y, XMLATTRIBUTES('a' AS val)) FROM g", fileNode);
     }
+
 
     @Test
     public void testTextTable() throws Exception {
@@ -1846,8 +2022,11 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node txtCol2Node = verify(txtTblNode, TextTable.COLUMNS_REF_NAME, 2, TextColumn.ID);
         verifyProperty(txtCol2Node, ProjectedColumn.NAME_PROP_NAME, "y");
-        verifyProperty(txtCol2Node, ProjectedColumn.TYPE_PROP_NAME, "date");        
+        verifyProperty(txtCol2Node, ProjectedColumn.TYPE_PROP_NAME, "date");  
+
+        verifySql("SELECT * FROM TEXTTABLE(file COLUMNS x string, y date DELIMITER ',' ESCAPE '\"' HEADER SKIP 10) AS x", fileNode);
     }
+
 
     @Test
     public void testWindowFunction() throws Exception {
@@ -1855,8 +2034,6 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fileNode = sequenceSql(sql);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
-
-        traverse(queryNode);
 
         Node selectNode = verify(queryNode, Query.SELECT_REF_NAME, Select.ID);
         Node winFnNode = verifyExpressionSymbol(selectNode, Select.SYMBOLS_REF_NAME, WindowFunction.ID);
@@ -1874,6 +2051,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
+
+        verifySql("SELECT ROW_NUMBER() OVER (PARTITION BY x ORDER BY y) FROM g", fileNode);
     }
 
 }

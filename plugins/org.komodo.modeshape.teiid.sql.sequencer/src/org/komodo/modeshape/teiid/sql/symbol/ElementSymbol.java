@@ -160,6 +160,8 @@ public class ElementSymbol extends Symbol implements Expression, IElementSymbol<
             clone.setDisplayMode(getDisplayMode());
         if (getShortName() != null)
             clone.setShortName(getShortName());
+        if (getName() != null)
+            clone.setName(getName());
         if (getOutputName() != null)
             clone.setOutputName(getOutputName());
 
