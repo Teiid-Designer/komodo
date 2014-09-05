@@ -31,12 +31,7 @@ import org.komodo.spi.query.sql.symbol.ISymbol;
 /**
  *
  */
-public class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
-
-    /**
-     * Character used to delimit name components in a symbol
-     */
-    public static final String SEPARATOR = DOT;
+public abstract class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
 
     /**
      * @param p
@@ -52,18 +47,10 @@ public class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
         setProperty(TeiidSqlLexicon.Symbol.SHORT_NAME_PROP_NAME, name);        
     }
 
-    private String shortenName(String name) {
-        int index = name.lastIndexOf(Symbol.SEPARATOR);
-        if(index >= 0) {
-            return name.substring(index+1);
-        }
-        return name;
-    }
-
     @Override
     public String getName() {
         Object property = getProperty(TeiidSqlLexicon.Symbol.NAME_PROP_NAME);
-        return property == null ? null : shortenName(property.toString());
+        return property == null ? null : property.toString();
     }
 
     public void setName(String name) {
@@ -71,9 +58,9 @@ public class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
     }
 
     @Override
-    public final String getShortName() { 
+    public String getShortName() { 
         Object property = getProperty(TeiidSqlLexicon.Symbol.SHORT_NAME_PROP_NAME);
-        return property == null ? null : shortenName(property.toString());
+        return property == null ? null : property.toString();
     }
 
     @Override
@@ -119,18 +106,6 @@ public class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
     @Override
     public void acceptVisitor(LanguageVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public Symbol clone() {
-        Symbol clone = new Symbol(this.getTeiidParser(), this.getId());
-
-        if(getShortName() != null)
-            clone.setShortName(getShortName());
-        if(getName() != null)
-            clone.setName(getName());
-
-        return clone;
     }
 
 }

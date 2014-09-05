@@ -52,6 +52,7 @@ import org.komodo.modeshape.teiid.sql.lang.JoinPredicate;
 import org.komodo.modeshape.teiid.sql.lang.JoinType;
 import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
 import org.komodo.modeshape.teiid.sql.lang.Limit;
+import org.komodo.modeshape.teiid.sql.lang.MakeDep;
 import org.komodo.modeshape.teiid.sql.lang.MatchCriteria;
 import org.komodo.modeshape.teiid.sql.lang.NamespaceItem;
 import org.komodo.modeshape.teiid.sql.lang.NotCriteria;
@@ -977,7 +978,13 @@ public class TeiidNodeFactory implements StringConstants {
          * SubqueryHint
          * @generated
          */
-        SUBQUERY_HINT("SubqueryHint"); //$NON-NLS-1$
+        SUBQUERY_HINT("SubqueryHint"), //$NON-NLS-1$
+
+        /**
+         * MakeDep
+         * @generated
+         */
+        MAKE_DEP("MakeDep"); //$NON-NLS-1$
 
         private String name;
 
@@ -2062,6 +2069,18 @@ public class TeiidNodeFactory implements StringConstants {
     }
 
     /**
+     *
+     * @generated
+     *
+     * @param teiidParser
+     * @param nodeType
+     * @return
+     */
+    private MakeDep createMakeDep(TeiidParser teiidParser, int nodeType) {
+        return new MakeDep(teiidParser, nodeType);
+    }
+
+    /**
      * Create a version 8 teiid parser node for the given node type.
      *
      * @generated
@@ -2250,6 +2269,8 @@ public class TeiidNodeFactory implements StringConstants {
                 return (T) createSpecificHint(teiidParser, nodeType);
             case Teiid8ParserTreeConstants.JJTSUBQUERYHINT:
                 return (T) createSubqueryHint(teiidParser, nodeType);
+            case Teiid8ParserTreeConstants.JJTMAKEDEP:
+                return (T) createMakeDep(teiidParser, nodeType);
             default:
                 throw new IllegalArgumentException(Messages.getString(Messages.TeiidParser.invalidNodeType, nodeType, teiidParser.getVersion()));
         }

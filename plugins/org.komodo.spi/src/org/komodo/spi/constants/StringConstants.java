@@ -90,6 +90,16 @@ public interface StringConstants {
     String SPEECH_MARK = "\""; //$NON-NLS-1$
 
     /**
+     * A Quote mark.
+     */
+    String QUOTE_MARK = "'"; //$NON-NLS-1$
+
+    /**
+     * A Question mark.
+     */
+    String QUESTION_MARK = "?"; //$NON-NLS-1$
+
+    /**
      * Two Dots
      */
     String DOT_DOT = ".."; //$NON-NLS-1$
@@ -103,6 +113,11 @@ public interface StringConstants {
      * interface
      */
     String INTERFACE = "interface"; //$NON-NLS-1$
+
+    /**
+     * enum
+     */
+    String ENUM = "enum"; //$NON-NLS-1$
 
     /**
      * xml extension
@@ -184,6 +199,16 @@ public interface StringConstants {
      * Plus Sign
      */
     String PLUS = "+"; //$NON-NLS-1$
+
+    /**
+     * Multiple Sign
+     */
+    String MULTIPLY = STAR;
+
+    /**
+     * Divide Sign
+     */
+    String DIVIDE = FORWARD_SLASH;
 
 	/**
    * komodo

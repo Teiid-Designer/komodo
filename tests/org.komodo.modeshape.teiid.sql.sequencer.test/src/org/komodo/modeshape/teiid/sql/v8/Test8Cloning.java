@@ -217,7 +217,7 @@ public class Test8Cloning extends AbstractTestCloning {
         Block ifBlock = getFactory().newBlock();
         Statement continueStmt = getFactory().newBranchingStatement(BranchingMode.CONTINUE);
         ifBlock.addStatement(continueStmt);
-        Criteria crit = getFactory().newCompareCriteria(x, Operator.GT,  getFactory().newConstant(new Integer(5)));
+        Criteria crit = getFactory().newCompareCriteria(x.clone(), Operator.GT,  getFactory().newConstant(new Integer(5)));
         IfStatement ifStmt = getFactory().newIfStatement(crit, ifBlock);
         block.addStatement(ifStmt); 
         

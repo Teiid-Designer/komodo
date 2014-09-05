@@ -25,6 +25,7 @@ package org.komodo.modeshape.teiid.sql.symbol;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IMultipleElementSymbol;
@@ -47,6 +48,9 @@ public class MultipleElementSymbol extends ASTNode implements Expression, IMulti
 
     public void setName(String name) {
         setProperty(TeiidSqlLexicon.MultipleElementSymbol.NAME_PROP_NAME, name);
+        GroupSymbol group = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
+        group.setName(name);
+        setGroup(group);
     }
 
     public GroupSymbol getGroup() {

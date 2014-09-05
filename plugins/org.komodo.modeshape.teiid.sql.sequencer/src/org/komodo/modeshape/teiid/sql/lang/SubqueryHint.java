@@ -23,14 +23,10 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.NonReserved;
+import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.Reserved;
 
-public class SubqueryHint extends ASTNode {
-
-    public static String MJ = "MJ"; //$NON-NLS-1$
-
-    public static String NOUNNEST = "NO_UNNEST"; //$NON-NLS-1$
-
-    public static String DJ = "DJ"; //$NON-NLS-1$
+public class SubqueryHint extends ASTNode implements NonReserved, Reserved {
 
     /**
      * @param p

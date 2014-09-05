@@ -25,7 +25,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -69,6 +68,10 @@ public class TeiidCndGenerator implements StringConstants {
     
     private static final String GENERATOR_HOME_SRC_DIR = SRC_DIR + File.separator + convertPackageToDirPath(TeiidCndGenerator.class.getPackage());
 
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         TeiidCndGenerator ccf = new TeiidCndGenerator(chooseTargetDirectory());
         ccf.generate();
@@ -133,7 +136,7 @@ public class TeiidCndGenerator implements StringConstants {
     };
 
     private static final String[] IGNORED_METHOD_NAMES = {
-        "getTeiidParser"
+        "getTeiidParser", "getTeiidVersion"
     };
 
     private static final List<String> IGNORED_METHOD_LIST = Arrays.asList(IGNORED_METHOD_NAMES);
@@ -142,6 +145,9 @@ public class TeiidCndGenerator implements StringConstants {
 
     private static final String SET = "set";
 
+    /**
+     * Modeshape types for properties
+     */
     private enum ModeshapeType {
         STRING("STRING", String.class),
         BINARY("BINARY", Object.class),
@@ -185,7 +191,9 @@ public class TeiidCndGenerator implements StringConstants {
         }
     }
 
-    // Modeshape attributes for properties and children
+    /**
+     * Modeshape attributes for properties and children
+     */
     private enum Attributes {
         PRIMARY(true),
         AUTOCREATED(true),
@@ -210,7 +218,10 @@ public class TeiidCndGenerator implements StringConstants {
             return lowerCase;
         }
     }
-    
+
+    /**
+     * Container for capturing information about a node reference or property
+     */
     private abstract class Aspect {
 
         private String name;
@@ -252,6 +263,9 @@ public class TeiidCndGenerator implements StringConstants {
         }
     }
 
+    /**
+     * Aspect representing a node reference
+     */
     private class ChildAspect extends Aspect {
 
         private Class<?> klazz;
@@ -272,6 +286,9 @@ public class TeiidCndGenerator implements StringConstants {
         }
     }
 
+    /**
+     * Aspect representing a node property
+     */
     private class PropertyAspect extends Aspect {
 
         private List<String> constraints;
@@ -303,12 +320,19 @@ public class TeiidCndGenerator implements StringConstants {
         
     }
 
+    /**
+     * Writer for the generation of the modeshape cnd file
+     */
     private final BufferedWriter cndWriter;
 
+    /**
+     * Writer for generating the TeiidSqlLexicon java class
+     */
     private final BufferedWriter lexiconWriter;
 
     /**
      * @param targetDirectory
+     * @throws Exception
      */
     public TeiidCndGenerator(File targetDirectory) throws Exception {
         ArgCheck.isNotNull(targetDirectory);
@@ -328,10 +352,43 @@ public class TeiidCndGenerator implements StringConstants {
         lexiconWriter = new BufferedWriter(new FileWriter(lexiconTargetFile));
     }
 
+    /**
+     * @param name
+     * @return 'Select' to 'select', 'TextTable' to 'textTable' and 'XMLAttributes' to 'xmlAttributes' 
+     */
     private String toLowerCamelCase(String name) {
-        return name.substring(0, 1).toLowerCase() + name.substring(1);
+        StringBuffer buf = new StringBuffer();
+
+        for (int i = 0; i < name.length(); ++i) {
+            Character c = name.charAt(i);
+            if (i == 0 && Character.isUpperCase(c)) {
+                buf.append(Character.toLowerCase(c));
+                continue;
+            }
+
+            if (i > 0 && Character.isUpperCase(c)) {
+                Character c1 = null;
+
+                if ((i + 1) < name.length()) {
+                    c1 = name.charAt(i + 1);
+                }
+
+                if (c1 != null && Character.isUpperCase(c1)) {
+                    buf.append(Character.toLowerCase(c));
+                    continue;
+                }
+            }
+
+            buf.append(c);
+        }
+
+        return buf.toString();
     }
 
+    /**
+     * @param name
+     * @return 'TextTable' to 'TEXT_TABLE'
+     */
     private String camelCaseToUnderscores(String name) {
         StringBuffer buf = new StringBuffer();
 
@@ -355,18 +412,39 @@ public class TeiidCndGenerator implements StringConstants {
         return buf.toString();
     }
 
+    /**
+     * @param name
+     * @return 'select' to 'Select'
+     */
     private String capitalize(String name) {
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 
+    /**
+     * Adds the given token to the cnd writer
+     *
+     * @param token
+     * @throws Exception
+     */
     private void cnd(String token) throws Exception {
         cndWriter.write(token);
     }
 
+    /**
+     * Adds the given token to the lex writer
+     *
+     * @param token
+     * @throws Exception
+     */
     private void lex(String token) throws Exception {
         lexiconWriter.write(token);
     }
 
+    /**
+     * Generate the package declaration of the Lexicon java file
+     *
+     * @throws Exception
+     */
     private void lexPackage() throws Exception {
         File genDir = new File(GENERATOR_HOME_SRC_DIR);
         File cndDir = new File(genDir.getParentFile(), "cnd");
@@ -378,7 +456,6 @@ public class TeiidCndGenerator implements StringConstants {
         lex(NEW_LINE);
         lex(NEW_LINE);
 
-        lex("import " + Field.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
         lex("import " + HashMap.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
         lex("import " + Map.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
         lex("import " + ASTNode.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
@@ -391,6 +468,11 @@ public class TeiidCndGenerator implements StringConstants {
         lex(NEW_LINE);
     }
 
+    /**
+     * Generate the class declaration of the Lexicon java file
+     *
+     * @throws Exception
+     */
     private void lexClassDeclaration() throws Exception {
         lex("@SuppressWarnings( { \"javadoc\", \"nls\" })" + NEW_LINE);
         lex(PUBLIC + SPACE + CLASS + SPACE + TEIID_SQL_LEXICON + " implements StringConstants" + SPACE + OPEN_BRACE);
@@ -398,6 +480,11 @@ public class TeiidCndGenerator implements StringConstants {
         lex(NEW_LINE);
     }
 
+    /**
+     * Generate the teiid version property constant of the Lexicon java file
+     *
+     * @throws Exception
+     */
     private void lexTeiidVersionProperty() throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append(TAB + "/**" + NEW_LINE)
@@ -411,39 +498,198 @@ public class TeiidCndGenerator implements StringConstants {
         lex(buf.toString());
     }
 
-    private void lexIndexClasses(CTree tree) throws Exception {
-        lex(NEW_LINE);
-        lex(TAB + PRIVATE + SPACE + STATIC + " Map<String, Class<?>> astIndex = new HashMap<String, Class<?>>();" + NEW_LINE);
-        lex(NEW_LINE);
-
-        lex(TAB + STATIC + SPACE + OPEN_BRACE + NEW_LINE);
+    /**
+     *  Generate enum of all classes
+     */
+    private void lexEnumClasses(CTree tree) throws Exception {
+        final StringBuffer lexBuffer = new StringBuffer();
+        lexBuffer.append(NEW_LINE)
+                      .append(TAB + "/**" + NEW_LINE)
+                      .append(TAB + " * Enumeration of lexicon classes and their identifiers" + NEW_LINE)
+                      .append(TAB + " */" + NEW_LINE)
+                      .append(TAB + PUBLIC + SPACE + ENUM + SPACE + "LexTokens" + SPACE)
+                      .append(OPEN_BRACE + NEW_LINE);
 
         CTreeCallback callback = new CTreeCallback() {
             @Override
             public void run(Node node) throws Exception {
                 String name = node.klazz().getSimpleName();
-                lex(TAB + TAB + "astIndex.put(" + name + ".class.getSimpleName()" + COMMA + SPACE + name + ".class);" + NEW_LINE);
+                
+                // TODO Ugly hack but not sure what else to do!!
+                String terminator = COMMA;
+                if (name.equals("XMLSerialize"))
+                    terminator = SEMI_COLON;
+
+                lexBuffer.append(TAB + TAB + camelCaseToUnderscores(name) + SPACE + OPEN_BRACKET)
+                              .append(name + ".ID" + COMMA + SPACE)
+                              .append(name + DOT + CLASS + CLOSE_BRACKET + terminator + NEW_LINE + NEW_LINE);
             }
         };
 
         tree.execute(callback);
 
-        lex(TAB + CLOSE_BRACE + NEW_LINE);
-        lex(NEW_LINE);
+        lexBuffer.append(NEW_LINE)
+                      .append(TAB + TAB + PRIVATE + SPACE + "String id;" + NEW_LINE + NEW_LINE)
+                      .append(TAB + TAB + PRIVATE + SPACE + "Class<?> klazz;" + NEW_LINE + NEW_LINE)
+                      .append(TAB + TAB + PRIVATE + SPACE + "LexTokens(String id, Class<?> klazz)" + OPEN_BRACE)
+                      .append(NEW_LINE + NEW_LINE)
+                      .append(TAB + TAB + TAB + "this.id = id;" + NEW_LINE)
+                      .append(TAB + TAB + TAB + "this.klazz = klazz;" + NEW_LINE)
+                      .append(TAB + TAB + CLOSE_BRACE + NEW_LINE);
 
-        lex(TAB + PUBLIC + SPACE + STATIC + " String getTypeId(Class<? extends ASTNode> astNodeClass) {" + NEW_LINE);
-        lex(TAB + TAB + "try {" + NEW_LINE);
-        lex(TAB + TAB + TAB + "Class<?> astClass = astIndex.get(astNodeClass.getSimpleName());" + NEW_LINE);
-        lex(TAB + TAB + TAB + "Field idField = astClass.getField(\"ID\");" + NEW_LINE);
-        lex(TAB + TAB + TAB + "Object idValue = idField.get(null);" + NEW_LINE);
-        lex(TAB + TAB + TAB + "return idValue.toString();" + NEW_LINE);
-        lex(TAB + TAB + "} catch (Exception ex) {" + NEW_LINE);
-        lex(TAB + TAB + TAB + "throw new RuntimeException(ex);" + NEW_LINE);
-        lex(TAB + TAB + CLOSE_BRACE + NEW_LINE);
-        lex(TAB + CLOSE_BRACE + NEW_LINE);
+        lexBuffer.append(NEW_LINE)
+                      .append(TAB + TAB + PUBLIC + SPACE + "String getId()" + SPACE + OPEN_BRACE + NEW_LINE)
+                      .append(TAB + TAB + TAB + "return this.id;" + NEW_LINE)
+                      .append(TAB + TAB + CLOSE_BRACE + NEW_LINE);
+
+        lexBuffer.append(NEW_LINE)
+                      .append(TAB + TAB + PUBLIC + SPACE + "Class<?> getTSqlClass()" + SPACE + OPEN_BRACE + NEW_LINE)
+                      .append(TAB + TAB + TAB + "return this.klazz;" + NEW_LINE)
+                      .append(TAB + TAB + CLOSE_BRACE + NEW_LINE);
+
+        lexBuffer.append(NEW_LINE)
+                     .append(TAB + TAB + PUBLIC + SPACE + STATIC + SPACE + "LexTokens findClass(String id)")
+                         .append(SPACE + OPEN_BRACE + NEW_LINE)
+                     .append(TAB + TAB + TAB + "for (LexTokens tSqlClass : LexTokens.values()) ")
+                         .append(OPEN_BRACE + NEW_LINE)
+                     .append(TAB + TAB + TAB + TAB + "if (tSqlClass.getId().equals(id))" + NEW_LINE)
+                     .append(TAB + TAB + TAB + TAB + TAB + "return tSqlClass;" + NEW_LINE)
+                     .append(TAB + TAB + TAB + CLOSE_BRACE + NEW_LINE)
+                     .append(TAB + TAB + TAB + "return null;" + NEW_LINE)
+                     .append(TAB + TAB + CLOSE_BRACE + NEW_LINE)
+                     .append(TAB + CLOSE_BRACE + NEW_LINE);
+
+        lex(lexBuffer.toString());
     }
 
-private void cndSection1Comment(String comment) throws Exception {
+    /**
+     * Generate the index of the Lexicon java file
+     *
+     * @param tree
+     * @throws Exception
+     */
+    private void lexIndexClasses(CTree tree) throws Exception {
+        final StringBuffer lexBuffer = new StringBuffer();
+
+        lexBuffer.append(NEW_LINE)
+                     .append(TAB + PRIVATE + SPACE + STATIC)
+                     .append(" Map<String, LexTokens> astIndex = new HashMap<String, LexTokens>();")
+                     .append(NEW_LINE);
+
+        lexBuffer.append(NEW_LINE)
+                     .append(TAB + STATIC + SPACE + OPEN_BRACE + NEW_LINE);
+
+        CTreeCallback callback = new CTreeCallback() {
+            @Override
+            public void run(Node node) throws Exception {
+                String name = node.klazz().getSimpleName();
+                lexBuffer.append(TAB + TAB + "astIndex.put(" + name + ".class.getSimpleName()")
+                              .append(COMMA + SPACE + "LexTokens." + camelCaseToUnderscores(name))
+                              .append(CLOSE_BRACKET + SEMI_COLON + NEW_LINE);
+            }
+        };
+
+        tree.execute(callback);
+
+        lexBuffer.append(TAB + CLOSE_BRACE + NEW_LINE);
+
+        lexBuffer.append(NEW_LINE)
+                      .append(TAB + PUBLIC + SPACE + STATIC)
+                      .append(" String getTypeId(Class<? extends ASTNode> astNodeClass) {" + NEW_LINE)
+                      .append(TAB + TAB + "LexTokens lexToken = astIndex.get(astNodeClass.getSimpleName());")
+                      .append(NEW_LINE)
+                      .append(TAB + TAB + "return lexToken.getId();" + NEW_LINE)
+                      .append(TAB + CLOSE_BRACE + NEW_LINE);
+
+        lex(lexBuffer.toString());
+    }
+
+    /**
+     * Generate the redirect function of the Lexicon java file
+     *
+     * @param tree
+     * @throws Exception
+     */
+    private void lexRedirectFunction(CTree tree) throws Exception {
+        final StringBuffer lexBuffer = new StringBuffer();
+
+        lexBuffer.append(NEW_LINE)
+                      .append(TAB + "/**" + NEW_LINE)
+                      .append(TAB + " * Callback interface that clients should implement" + NEW_LINE)
+                      .append(TAB + " * to all class redirection using {@link TeiidSqlLexicon#redirect}" + NEW_LINE)
+                      .append(TAB + " */" + NEW_LINE)
+                      .append(TAB + PUBLIC + SPACE + INTERFACE + SPACE + "TeiidSqlCallback" + SPACE)
+                      .append(OPEN_BRACE + NEW_LINE);
+        
+        CTreeCallback callback = new CTreeCallback() {
+            @Override
+            public void run(Node node) throws Exception {
+                if (Modifier.isAbstract(node.klazz().getModifiers()))
+                    return;
+
+                String name = node.klazz().getSimpleName();
+                lexBuffer.append(NEW_LINE)
+                              .append(TAB + TAB + "Object " + toLowerCamelCase(name) + OPEN_BRACKET)
+                              .append("TeiidSqlContext context" + CLOSE_BRACKET + SPACE) 
+                              .append("throws Exception" + SEMI_COLON + NEW_LINE);
+            }
+        };
+
+        tree.execute(callback);
+
+        lexBuffer.append(TAB + CLOSE_BRACE + NEW_LINE);
+
+        lexBuffer.append(NEW_LINE)
+                      .append(TAB + "/**" + NEW_LINE)
+                      .append(TAB + " * Enables conversion of lexicon interfaces into visitor type pattern" + NEW_LINE)
+                      .append(TAB + " * where each lexicon interface is represented by a method in the" + NEW_LINE)
+                      .append(TAB + " * {@link TeiidSqlCallback} interface." + NEW_LINE + NEW_LINE)
+                      .append(TAB + " * @param token" + NEW_LINE)
+                      .append(TAB + " * @param callback" + NEW_LINE)
+                      .append(TAB + " * @param context" + NEW_LINE)
+                      .append(TAB + " * @throws exception" + NEW_LINE)
+                      .append(TAB + " */" + NEW_LINE)
+                      .append(TAB + PUBLIC + SPACE + STATIC + SPACE + "void redirect(LexTokens token," + SPACE)
+                          .append("TeiidSqlCallback callback, TeiidSqlContext context)" + SPACE)
+                          .append("throws Exception" + OPEN_BRACE + NEW_LINE);
+
+        lexBuffer.append(NEW_LINE)
+                      .append(TAB + TAB + "switch(token)" + SPACE + OPEN_BRACE + NEW_LINE);
+
+        callback = new CTreeCallback() {
+            @Override
+            public void run(Node node) throws Exception {
+                if (Modifier.isAbstract(node.klazz().getModifiers()))
+                    return;
+
+                String name = node.klazz().getSimpleName();
+                lexBuffer.append(NEW_LINE)
+                              .append(TAB + TAB + TAB + "case " + camelCaseToUnderscores(name) + COLON + NEW_LINE)
+                              .append(TAB + TAB + TAB + TAB + "callback." + toLowerCamelCase(name))
+                                      .append(OPEN_BRACKET + "context" + CLOSE_BRACKET + SEMI_COLON + NEW_LINE)
+                              .append(TAB + TAB + TAB + TAB + "break;" + NEW_LINE);
+            }
+        };
+
+        tree.execute(callback);
+
+        lexBuffer.append(NEW_LINE)
+                      .append(TAB + TAB + TAB + "default" + COLON + NEW_LINE)
+                      .append(TAB + TAB + TAB + TAB + "throw new UnsupportedOperationException()" + SEMI_COLON + NEW_LINE);
+        
+        lexBuffer.append(TAB + TAB + CLOSE_BRACE + NEW_LINE)
+                      .append(TAB + CLOSE_BRACE + NEW_LINE);
+
+        lex(lexBuffer.toString());
+    }
+
+    /**
+     * Generate a section 1 style comment for the cnd file
+     *
+     * @param comment
+     * @throws Exception
+     */
+    private void cndSection1Comment(String comment) throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append("//------------------------------------------------------------------------------");
         buf.append(NEW_LINE);
@@ -462,6 +708,12 @@ private void cndSection1Comment(String comment) throws Exception {
         cnd(buf.toString());
     }
 
+    /**
+     * Generate a section 2 style comment for the cnd file
+     *
+     * @param comment
+     * @throws Exception
+     */
     private void cndSection2Comment(String comment) throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append("//==================================================");
@@ -474,6 +726,11 @@ private void cndSection1Comment(String comment) throws Exception {
         cnd(buf.toString());
     }
 
+    /**
+     * Generate the namespace-related pragmas for both the cnd and lexicon files
+     *
+     * @throws Exception
+     */
     private void writeNamespaces() throws Exception {
         cndSection1Comment("NAMESPACES");
         for (String nm : MODESHAPE_NAMESPACES) {
@@ -499,6 +756,10 @@ private void cndSection1Comment(String comment) throws Exception {
         lex(buf.toString());
     }
 
+    /**
+     * @param objClass
+     * @return objClass is {@link ASTNode}
+     */
     private boolean isRootClass(Class<?> objClass) {
         if (objClass == ASTNode.class)
             return true;
@@ -506,18 +767,38 @@ private void cndSection1Comment(String comment) throws Exception {
         return false;
     }
 
+    /**
+     * @param objClass
+     * @param fromClass
+     * @return is objClass assignable from fromClass
+     */
     private boolean assignable(Class<?> objClass, Class<?> fromClass) {
         return fromClass.isAssignableFrom(objClass);
     }
 
+    /**
+     * @param objClass
+     * @return is objClass an interface
+     */
     private boolean isInterface(Class<?> objClass) {
         return objClass.isInterface();
     }
 
+    /**
+     * @param objClass
+     * @return is objClass an enum
+     */
     private boolean isEnum(Class<?> objClass) {
         return objClass.isEnum();
     }
 
+    /**
+     * Generate the fully-qualified node name from the given class
+     *
+     * @param data
+     * @return generated name
+     * @throws Exception
+     */
     private String nodeName(Class<?> data) throws Exception {
         StringBuffer buf = new StringBuffer();
         String name = data.getSimpleName();
@@ -527,6 +808,10 @@ private void cndSection1Comment(String comment) throws Exception {
         return buf.toString();
     }
 
+    /**
+     * @param node
+     * @return Iterator of the tree node's parents
+     */
     private Iterator<CTree.Node> createParentIterator(CTree.Node node) {
         List<CTree.Node> parents = new ArrayList<CTree.Node>(node.getParents());
 
@@ -539,6 +824,11 @@ private void cndSection1Comment(String comment) throws Exception {
         return parentIter;
     }
 
+    /**
+     * Append 'inherits' pragma to both the lex and cnd files
+     *
+     * @throws Exception
+     */
     private void writeInheritsFrom() throws Exception {
         cnd(TAB);
         cnd(CLOSE_ANGLE_BRACKET);
@@ -547,6 +837,12 @@ private void cndSection1Comment(String comment) throws Exception {
         lex(" extends ");
     }
 
+    /**
+     * Append the list of parents from the given iterator to both the cnd and lexicon files
+     *
+     * @param parentIter
+     * @throws Exception
+     */
     private void writeParentList(Iterator<? extends CTree.Node> parentIter) throws Exception {
         while(parentIter.hasNext()) {
             CTree.Node parentNode = parentIter.next();
@@ -562,6 +858,12 @@ private void cndSection1Comment(String comment) throws Exception {
         }
     }
 
+    /**
+     * Append the node declaration to both the cnd and lexicon files
+     *
+     * @param node
+     * @throws Exception
+     */
     private void writeNodeDeclaration(CTree.Node node) throws Exception {
         cnd(OPEN_SQUARE_BRACKET);
         cnd(nodeName(node.klazz()));
@@ -581,11 +883,22 @@ private void cndSection1Comment(String comment) throws Exception {
         }
     }
 
-    private void writeMixinDeclaration() throws Exception {
+    /**
+     * Append the mixin type declaration to the cnd file
+     *
+     * @throws Exception
+     */
+    private void cndMixinDeclaration() throws Exception {
         // All node types are mixin
         cnd(SPACE + "mixin");
     }
 
+    /**
+     * Append an abstract type declaration to both the cnd and lexicon files
+     *
+     * @param klazz
+     * @throws Exception
+     */
     private void writeAbstractDeclaration(Class<?> klazz) throws Exception {
         boolean isAbstract = false;
 
@@ -599,14 +912,26 @@ private void cndSection1Comment(String comment) throws Exception {
         lex(NEW_LINE);
     }
 
+    /**
+     * @param method
+     * @return is getter method
+     */
     private boolean isGetter(Method method) {
         return method.getName().startsWith(GET);
     }
 
+    /**
+     * @param method
+     * @return is setter method
+     */
     private boolean isSetter(Method method) {
         return method.getName().startsWith(SET);
     }
 
+    /**
+     * @param method
+     * @return the name of the method minux the setter/getter prefix
+     */
     private String extractRootName(Method method) {
         String name = method.getName();
         name = name.substring(SET.length()); // Set and Get are the same length so this works for either!
@@ -614,6 +939,12 @@ private void cndSection1Comment(String comment) throws Exception {
         return name;
     }
 
+    /**
+     * Append the attributes to given buffer for use in the cnd file
+     *
+     * @param buf
+     * @param attributes
+     */
     private void appendAttributes(StringBuffer buf, List<Attributes> attributes) {
         if (attributes == null || attributes.isEmpty())
             return;
@@ -631,6 +962,12 @@ private void cndSection1Comment(String comment) throws Exception {
         }
     }
 
+    /**
+     * Append the list of constraints to the given buffer for use in both the cnd and lexicon files
+     *
+     * @param buf
+     * @param constraints
+     */
     private void appendConstraints(StringBuffer buf, List<String> constraints) {
         if (constraints == null || constraints.isEmpty())
             return;
@@ -648,6 +985,14 @@ private void cndSection1Comment(String comment) throws Exception {
         }
     }
 
+    /**
+     * Finds the generic class from a parameter class, eg. String in Collection<String>
+     * 
+     * @param parameterClass
+     * @param method
+     * @return the generic class used in the given parameter class
+     * @throws Exception
+     */
     private Class<?> findGenericClass(Class<?> parameterClass, Method method) throws Exception {
         // Get the generic type information for this method parameter
         try {
@@ -683,6 +1028,13 @@ private void cndSection1Comment(String comment) throws Exception {
         }
     }
 
+    /**
+     * Append the teiid version annotations for the given aspect to the lexicon file
+     *
+     * @param aspect
+     * @param varName
+     * @throws Exception
+     */
     private void lexTeiidVersions(Aspect aspect, String varName) throws Exception {
         StringBuffer buf = new StringBuffer();
 
@@ -703,6 +1055,12 @@ private void cndSection1Comment(String comment) throws Exception {
         lex(buf.toString());
     }
 
+    /**
+     * Append the given property to both the cnd and lexicon files
+     *
+     * @param aspect
+     * @throws Exception
+     */
     private void writeProperty(PropertyAspect aspect) throws Exception {
         String prefixName = TSQL_PREFIX + COLON + aspect.getName();
         
@@ -769,6 +1127,12 @@ private void cndSection1Comment(String comment) throws Exception {
         lexTeiidVersions(aspect, varName + "_PROP");
     }
 
+    /**
+     * Append the given child reference to both the cnd and lexicon files
+     *
+     * @param aspect
+     * @throws Exception
+     */
     private void writeChildNode(ChildAspect aspect) throws Exception {
         StringBuffer cndBuf = new StringBuffer();
         cndBuf.append(TAB);
@@ -820,6 +1184,16 @@ private void cndSection1Comment(String comment) throws Exception {
         lexTeiidVersions(aspect, varName + "_REF");
     }
 
+    /**
+     * Create an {@link Aspect} from the given method
+     *
+     * @param parameterClass
+     * @param method
+     * @param classNode
+     * @param multiple
+     * @return
+     * @throws Exception
+     */
     private Aspect createAspect(Class<?> parameterClass, Method method, Node classNode, boolean multiple) throws Exception {
         String aspectName = extractRootName(method);
         String aspectType = parameterClass.getSimpleName();
@@ -841,8 +1215,8 @@ private void cndSection1Comment(String comment) throws Exception {
             // A Class property
             aspect = new PropertyAspect(aspectName + capitalize(CLASS), ModeshapeType.STRING, multiple);
         else if (parameterClass == Object.class) {
-            // Need to handle these setObject methods but the actual values will need to be serialised or something tbd.
-            aspect = new PropertyAspect(aspectName, ModeshapeType.BINARY, multiple);
+            // Need to handle these setObject methods but the actual value should be converted to a string
+            aspect = new PropertyAspect(aspectName, ModeshapeType.STRING, multiple);
         }
         else if (parameterClass.isArray())
             // An Array
@@ -886,6 +1260,15 @@ private void cndSection1Comment(String comment) throws Exception {
         return aspect;
     }
 
+    /**
+     * Create an {@link Aspect} from the given method
+     *
+     * @param parameterClass
+     * @param method
+     * @param classNode
+     * @return
+     * @throws Exception
+     */
     private Aspect createAspect(Class<?> parameterClass, Method method, Node classNode) throws Exception {
         return createAspect(parameterClass, method, classNode, false);
     }
@@ -985,6 +1368,14 @@ private void cndSection1Comment(String comment) throws Exception {
         }
     }
 
+    /**
+     * Determine any method that the given method may override
+     *
+     * @param node
+     * @param method
+     * @return
+     * @throws Exception
+     */
     private Method findOverriddenMethod(Node node, Method method) throws Exception {
         Class<?> klazz = node.klazz();
         String rootMethodName = extractRootName(method);
@@ -1029,6 +1420,12 @@ private void cndSection1Comment(String comment) throws Exception {
         return overriddenMethod;
     }
 
+    /**
+     * Append the id for the given node in the lexicon file
+     *
+     * @param node
+     * @throws Exception
+     */
     private void lexId(Node node) throws Exception {
         
         String name = node.klazz().getSimpleName();
@@ -1044,10 +1441,16 @@ private void cndSection1Comment(String comment) throws Exception {
         lex(NEW_LINE);
     }
 
+    /**
+     * Append the given interface node to both the cnd and lexicon files
+     *
+     * @param iNode
+     * @throws Exception
+     */
     private void writeInterfaceNode(CTree.INode iNode) throws Exception {
         writeNodeDeclaration(iNode);
 
-        writeMixinDeclaration();
+        cndMixinDeclaration();
 
         cnd(NEW_LINE);
 
@@ -1067,6 +1470,12 @@ private void cndSection1Comment(String comment) throws Exception {
         }
     }
 
+    /**
+     * Append the given class node to both the cnd and lexicon files
+     *
+     * @param classNode
+     * @throws Exception
+     */
     private void writeClassNode(CTree.CNode classNode) throws Exception {    
         writeNodeDeclaration(classNode);
 
@@ -1112,7 +1521,7 @@ private void cndSection1Comment(String comment) throws Exception {
             writeParentList(classInterfaces.iterator());
         }
 
-        writeMixinDeclaration();
+        cndMixinDeclaration();
 
         // Open brace of the interface
         lex(SPACE + OPEN_BRACE + NEW_LINE);
@@ -1135,6 +1544,11 @@ private void cndSection1Comment(String comment) throws Exception {
         }
     }
 
+    /**
+     * Generate the class tree and write it to both the cnd and lexicon files
+     *
+     * @throws Exception
+     */
     private void writeClassTree() throws Exception {
         CTree tree = new CTree(ASTNode.class);
 
@@ -1185,11 +1599,14 @@ private void cndSection1Comment(String comment) throws Exception {
             writeClassNode(cNode);
         }
 
+        lexEnumClasses(tree);
         lexIndexClasses(tree);
+        lexRedirectFunction(tree);
     }
 
     /**
-     * 
+     * Generate the cnd and lexicon files
+     * @throws Exception
      */
     public void generate() throws Exception {
         try {

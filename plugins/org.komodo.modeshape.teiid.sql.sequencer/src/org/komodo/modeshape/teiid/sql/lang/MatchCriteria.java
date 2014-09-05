@@ -31,11 +31,10 @@ import org.komodo.spi.query.sql.lang.IMatchCriteria;
 public class MatchCriteria extends Criteria
     implements PredicateCriteria, IMatchCriteria<Expression, LanguageVisitor> {
 
-    /** The internal null escape character */
-    public static final char NULL_ESCAPE_CHAR = 0;
-
     public MatchCriteria(TeiidParser p, int id) {
         super(p, id);
+        setMode(MatchMode.LIKE);
+        setEscapeChar(NULL_ESCAPE_CHAR);
     }
 
     @Override

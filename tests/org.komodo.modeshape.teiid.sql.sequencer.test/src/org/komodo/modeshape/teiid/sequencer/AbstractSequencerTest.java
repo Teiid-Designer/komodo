@@ -116,8 +116,10 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
     @Override
     @After
     public void afterEach() throws Exception {
-        for (EventListenerIterator it = observationManager.getRegisteredEventListeners(); it.hasNext();) {
-            observationManager.removeEventListener(it.nextEventListener());
+        if (observationManager != null) {
+            for (EventListenerIterator it = observationManager.getRegisteredEventListeners(); it.hasNext();) {
+                observationManager.removeEventListener(it.nextEventListener());
+            }
         }
         super.afterEach();
         cleanupData();

@@ -30,9 +30,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
@@ -47,7 +47,7 @@ import org.modeshape.jcr.api.JcrConstants;
  * Utility object class designed to facilitate constructing an AST or Abstract Syntax Tree representing nodes and properties that
  * are compatible with ModeShape graph component structure.
  */
-public abstract class ASTNode extends SimpleNode implements LanguageObject, StringConstants, Iterable<ASTNode>, Cloneable {
+public abstract class ASTNode extends SimpleNode implements LanguageObject, StringConstants, Cloneable {
 
     /**
      * 
@@ -64,12 +64,60 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      */
     public static final String VALUE = "value"; //$NON-NLS-1$
 
+    private class ChildNodeIterator implements Iterator<ASTNode> {
+
+        private Iterator<Object> childrenIterator;
+
+        private Iterator<ASTNode> currentIterator;
+
+        public ChildNodeIterator() {
+            this.childrenIterator = children.values().iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return currentIterator != null ? currentIterator.hasNext() : childrenIterator.hasNext();
+        }
+
+        @Override
+        public ASTNode next() {
+            if (currentIterator != null && currentIterator.hasNext()) {
+                ASTNode next = currentIterator.next();
+                if (! currentIterator.hasNext())
+                    currentIterator = null;
+
+                return next;
+            }
+
+            Object nextObject = childrenIterator.next();
+            if (nextObject instanceof ASTNode) {
+                currentIterator = null;
+                return (ASTNode) nextObject;
+            }
+            else if (nextObject instanceof List) {
+                currentIterator = ((List)nextObject).iterator();
+                return currentIterator.next();
+            }
+
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     private ASTNode parent;
     private String astIdentifier;
 
     private final Map<String, Object> properties = new HashMap<String, Object>();
-    private final LinkedList<ASTNode> children = new LinkedList<ASTNode>();
-    private final List<ASTNode> childrenView = Collections.unmodifiableList(children);
+    private final Map<String, Object> children = new HashMap<String, Object>();
+
+    // Cached by getAbsolutePath() - do not use directly
+    private String absolutePath = null;
+
+    private javax.jcr.Node sequencedNode;
 
     /**
      * @param parser
@@ -83,6 +131,20 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
         setProperty(JCR_MIXIN_TYPES, lexiconType);
         setProperty(JCR_PRIMARY_TYPE, NT_UNSTRUCTURED);
         setAstIdentifier(lexiconType);
+    }
+
+    /**
+     * @return the sequencedNode
+     */
+    public javax.jcr.Node getSequencedNode() {
+        return this.sequencedNode;
+    }
+
+    /**
+     * @param sequencedNode the sequencedNode to set
+     */
+    public void setSequencedNode(javax.jcr.Node sequencedNode) {
+        this.sequencedNode = sequencedNode;
     }
 
     /**
@@ -146,25 +208,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
         return (String)properties.get(JcrConstants.JCR_PRIMARY_TYPE);
     }
 
-    /**
-     * Get the current same-name-sibling index.
-     * 
-     * @return the SNS index, or 1 if this is the first sibling with the same name
-     */
-    public int getSameNameSiblingIndex() {
-        int snsIndex = 1;
-        if (this.parent == null) {
-            return snsIndex;
-        } // Go through all the children ...
-        for (ASTNode sibling : this.parent.getChildren()) {
-            if (sibling == this) {
-                break;
-            }
-            if (sibling.astIdentifier().equals(this.astIdentifier)) {
-                ++snsIndex;
-            }
-        }
-        return snsIndex;
+    private void recalculatePath() {
+        this.absolutePath = null;
     }
 
     /**
@@ -173,13 +218,17 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @return the path of this node; never null
      */
     public String getAbsolutePath() {
-        StringBuilder pathBuilder = new StringBuilder(FORWARD_SLASH).append(this.astIdentifier());
-        ASTNode parent = this.parent;
-        while (parent != null) {
-            pathBuilder.insert(0, FORWARD_SLASH + parent.astIdentifier());
-            parent = parent.parent;
+        if (absolutePath == null) {
+            StringBuilder pathBuilder = new StringBuilder(FORWARD_SLASH).append(this.astIdentifier());
+            ASTNode parent = this.parent;
+            while (parent != null) {
+                pathBuilder.insert(0, FORWARD_SLASH + parent.astIdentifier());
+                parent = parent.parent;
+            }
+            absolutePath = pathBuilder.toString();
         }
-        return pathBuilder.toString();
+
+        return absolutePath;
     }
 
     /**
@@ -239,11 +288,16 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
         CheckArg.isNotNull(identifier, IDENTIFIER);
         CheckArg.isNotNull(value, VALUE);
 
-        Object property = properties.get(identifier);
-        if (property instanceof Collection) {
-            Collection<Object> properties = (Collection<Object>) property;
+        Object existingValue = properties.get(identifier);
+        if (existingValue instanceof Collection) {
+            Collection<Object> properties = (Collection<Object>) existingValue;
             properties.add(value);
             this.properties.put(identifier, properties);
+        } else if (existingValue != null) {
+            Collection<Object> values = new ArrayList<Object>();
+            values.add(existingValue);
+            values.add(value);
+            properties.put(identifier, values);
         } else {
             properties.put(identifier, value);
         }
@@ -287,6 +341,25 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
         return new ArrayList<String>(properties.keySet());
     }
 
+    private void appendChild(ASTNode child) {
+        String key = child.astIdentifier();
+
+        Object value = this.children.get(key);
+        if (value instanceof ASTNode) {
+            List<Object> values = new ArrayList<Object>();
+            values.add(value);
+            values.add(child);
+            this.children.put(key, values);
+        } else if (value instanceof List) {
+            List<Object> values = (List<Object>) value;
+            values.add(child);
+            this.children.put(key, values);
+        } else {
+            // Neither a list or ASTNode so directly add the map
+            this.children.put(key, child);
+        }
+    }
+
     /**
      * @return all mixin properties
      */
@@ -321,54 +394,10 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
         removeFromParent();
         if (parent != null) {
             this.parent = parent;
-            this.parent.children.add(this);
-        }
-    }
+            this.parent.appendChild(this);
 
-    /**
-     * Insert the supplied node into the plan node tree immediately above this node. If this node has a parent when this method is
-     * called, the new parent essentially takes the place of this node within the list of children of the old parent. This method
-     * does nothing if the supplied new parent is null.
-     * <p>
-     * For example, consider a plan node tree before this method is called:
-     * 
-     * <pre>
-     *        A
-     *      / | \
-     *     /  |  \
-     *    B   C   D
-     * </pre>
-     * 
-     * Then after this method is called with <code>c.insertAsParent(e)</code>, the resulting plan node tree will be:
-     * 
-     * <pre>
-     *        A
-     *      / | \
-     *     /  |  \
-     *    B   E   D
-     *        |
-     *        |
-     *        C
-     * </pre>
-     * 
-     * </p>
-     * <p>
-     * Also note that the node on which this method is called ('C' in the example above) will always be added as the
-     * last child to the new parent. This allows the new parent to already have children before
-     * this method is called.
-     * </p>
-     * 
-     * @param newParent the new parent; method does nothing if this is null
-     */
-    public void insertAsParent(ASTNode newParent) {
-        if (newParent == null) {
-            return;
+            this.recalculatePath();
         }
-        newParent.removeFromParent();
-        if (this.parent != null) {
-            this.parent.replaceChild(this, newParent);
-        }
-        newParent.addLastChild(this);
     }
 
     /**
@@ -385,37 +414,9 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
             // Remove this node from its current parent ...
             parent.removeChild(this);
             this.parent = null;
+            this.recalculatePath();
         }
         return result;
-    }
-
-    /**
-     * Replace the supplied child with another node. If the replacement is already a child of this node, this method effectively
-     * swaps the position of the child and replacement nodes.
-     * 
-     * @param child the node that is already a child and that is to be replaced; may not be null and must be a child
-     * @param replacement the node that is to replace the 'child' node; may not be null
-     * @return true if the child was successfully replaced
-     */
-    public boolean replaceChild(ASTNode child, ASTNode replacement) {
-        assert child != null;
-        assert replacement != null;
-        if (child.parent == this) {
-            int i = this.children.indexOf(child);
-            if (replacement.parent == this) {
-                // Swapping the positions ...
-                int j = this.children.indexOf(replacement);
-                this.children.set(i, replacement);
-                this.children.set(j, child);
-                return true;
-            } // The replacement is not yet a child ...
-            this.children.set(i, replacement);
-            replacement.removeFromParent();
-            replacement.parent = this;
-            child.parent = null;
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -428,24 +429,6 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     }
 
     /**
-     * Get the first child.
-     * 
-     * @return the first child, or null if there are no children
-     */
-    public ASTNode getFirstChild() {
-        return this.children.isEmpty() ? null : this.children.getFirst();
-    }
-
-    /**
-     * Get the last child.
-     * 
-     * @return the last child, or null if there are no children
-     */
-    public ASTNode getLastChild() {
-        return this.children.isEmpty() ? null : this.children.getLast();
-    }
-
-    /**
      * @param astIdentifier the identifier of the child being requested (cannot be <code>null</code> or empty)
      * @return a collection of children with the specified name (never <code>null</code> but can be empty)
      */
@@ -455,44 +438,22 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
         if (this.children.isEmpty()) {
             return Collections.emptyList();
         }
+
         final List<ASTNode> matches = new ArrayList<ASTNode>();
 
-        for (final ASTNode kid : this.children) {
-            if (astIdentifier.equals(kid.astIdentifier())) {
-                matches.add(kid);
-            }
+        for (Map.Entry<String, Object> childEntry : this.children.entrySet()) {
+            if (! childEntry.getKey().equals(astIdentifier))
+                continue;
+
+            Object value = childEntry.getValue();
+            if (value instanceof ASTNode)
+                matches.add((ASTNode) value);
+            else if (value instanceof List)
+                matches.addAll((Collection<? extends ASTNode>) value);
+
         }
+
         return Collections.unmodifiableList(matches);
-    }
-
-    /**
-     * Get the child at the supplied index.
-     * 
-     * @param index the index
-     * @return the child, or null if there are no children
-     * @throws IndexOutOfBoundsException if the index is not valid given the number of children
-     */
-    public ASTNode getChild(int index) {
-        return this.children.isEmpty() ? null : this.children.get(index);
-    }
-
-    /**
-     * Utility method to obtain the children of a given node that match the given type
-     *
-     * @param nodeType the type property of the target child node; may not be null
-     * @return the list of typed nodes (may be empty)
-     */
-    public List<ASTNode> getChildrenForType(String nodeType ) {
-        CheckArg.isNotNull(nodeType, "nodeType"); //$NON-NLS-1$
-
-        List<ASTNode> childrenOfType = new ArrayList<ASTNode>();
-        for (ASTNode child : getChildren()) {
-            if (child.hasMixin(nodeType)) {
-                childrenOfType.add(child);
-            }
-        }
-
-        return Collections.unmodifiableList(childrenOfType);
     }
 
     /**
@@ -505,12 +466,14 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     public <T> T getChildforIdentifierAndRefType(String identifier, Class<T> referenceTypeClass) {
         CheckArg.isNotNull(identifier, "identifier"); //$NON-NLS-1$
 
-        for (ASTNode child : getChildren()) {
-            if (identifier.equalsIgnoreCase(child.astIdentifier())) {
-                if (referenceTypeClass.isInstance(child))
-                    return (T) child;
-            }
+        Object value = children.get(identifier);
+        if (value instanceof ASTNode && referenceTypeClass.isInstance(value))
+            return (T) value;
+        else if (value instanceof List) {
+            List<ASTNode> values = (List<ASTNode>) value;
+            return referenceTypeClass.isInstance(values.get(0)) ? (T) values.get(0) : null;
         }
+
         return null;
     }
 
@@ -523,49 +486,20 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      */
     public <T> List<T> getChildrenforIdentifierAndRefType(String identifier, Class<T> referenceTypeClass) {
         CheckArg.isNotNull(identifier, "identifier"); //$NON-NLS-1$
+        Object value = this.children.get(identifier);
+
         List<T> children = new ArrayList<T>();
-        
-        for (ASTNode child : getChildren()) {
-            if (identifier.equalsIgnoreCase(child.astIdentifier())) {
-                if (referenceTypeClass.isInstance(child))
-                    children.add((T) child);
+        if (value instanceof ASTNode && referenceTypeClass.isInstance(value))
+            children.add((T) value);
+        else if (value instanceof List) {
+            List<ASTNode> values = (List<ASTNode>) value;
+            for (ASTNode astNode : values) {
+                if (referenceTypeClass.isInstance(astNode))
+                    children.add((T) astNode);
             }
         }
 
         return Collections.unmodifiableList(children);
-    }
-
-    /**
-     * Utility method to obtain a {@link ASTNode} child of a parent {@link ASTNode} with the given string identifier and node type.
-     *
-     * @param identifier the identifier property of the node; may not be null
-     * @param nodeType the type property of the target child node; may not be null
-     * @return the matched child (may be null)
-     */
-    public ASTNode getChildforIdentifierAndType(String identifier, String nodeType) {
-        CheckArg.isNotNull(identifier, "identifier"); //$NON-NLS-1$
-        CheckArg.isNotNull(nodeType, "nodeType"); //$NON-NLS-1$
-
-        for (ASTNode child : getChildren()) {
-            if (child.hasMixin(nodeType)) {
-                if (identifier.equalsIgnoreCase(child.astIdentifier())) {
-                    return child;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Add the supplied node to the front of the list of children.
-     * 
-     * @param child the node that should be added as the first child; may not be null
-     */
-    public void addFirstChild(ASTNode child) {
-        assert child != null;
-        this.children.addFirst(child);
-        child.removeFromParent();
-        child.parent = this;
     }
 
     /**
@@ -575,9 +509,10 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      */
     private void addLastChild(ASTNode child) {
         assert child != null;
-        this.children.addLast(child);
+        this.appendChild(child);
         child.removeFromParent();
         child.parent = this;
+        child.recalculatePath();
     }
 
     /**
@@ -588,9 +523,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      */
     public void addLastChild(String referenceName, LanguageObject languageObject) {
         if (languageObject == null)
-            return;
-
-        ArgCheck.isInstanceOf(ASTNode.class, languageObject);
+            languageObject = new NullNode(getTeiidParser());
 
         ASTNode childNode = (ASTNode)languageObject;
         childNode.setAstIdentifier(referenceName);
@@ -605,12 +538,12 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param languageObject
      */
     public void setChild(String referenceName, LanguageObject languageObject) {
+        removeChildren(referenceName);
+
         if (languageObject == null)
             return;
 
         ArgCheck.isInstanceOf(ASTNode.class, languageObject);
-
-        removeChildren(referenceName);
         addLastChild(referenceName, languageObject);
     }
     
@@ -622,59 +555,13 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param languageObjects
      */
     public void setChildren(String referenceName, Collection<? extends LanguageObject> languageObjects) {
+        removeChildren(referenceName);
+
         if (languageObjects == null)
             return;
 
-        removeChildren(referenceName);
-
         for (LanguageObject object : languageObjects) {
             addLastChild(referenceName, object);
-        }
-    }
-
-    /**
-     * Add the supplied nodes at the end of the list of children.
-     * 
-     * @param otherChildren the children to add; may not be null
-     */
-    public void addChildren(Iterable<ASTNode> otherChildren) {
-        assert otherChildren != null;
-        for (ASTNode planNode : otherChildren) {
-            this.addLastChild(planNode);
-        }
-    }
-
-    /**
-     * Add the supplied nodes at the end of the list of children.
-     * 
-     * @param first the first child to add
-     * @param second the second child to add
-     */
-    public void addChildren(ASTNode first, ASTNode second) {
-        if (first != null) {
-            this.addLastChild(first);
-        }
-        if (second != null) {
-            this.addLastChild(second);
-        }
-    }
-
-    /**
-     * Add the supplied nodes at the end of the list of children.
-     * 
-     * @param first the first child to add
-     * @param second the second child to add
-     * @param third the third child to add
-     */
-    public void addChildren(ASTNode first, ASTNode second, ASTNode third) {
-        if (first != null) {
-            this.addLastChild(first);
-        }
-        if (second != null) {
-            this.addLastChild(second);
-        }
-        if (third != null) {
-            this.addLastChild(third);
         }
     }
 
@@ -697,35 +584,27 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @return true if the child was removed from this node, or false if the supplied node was not a child of this node
      */
     public boolean removeChild(ASTNode child) {
-        boolean result = this.children.remove(child);
+        String key = child.astIdentifier();
+        boolean result = false;
+
+        Object value = this.children.remove(key);
+
+        if (value instanceof ASTNode) {
+            result = true;
+        } else if (value instanceof List) {
+            // if value is a list then we need to remove the child
+            // and put the list back
+            List<ASTNode> values = (List<ASTNode>) value;
+            result = values.remove(child);
+            this.children.put(key, values);
+        }
+
         if (result) {
             child.parent = null;
+            child.recalculatePath();
         }
+
         return result;
-    }
-
-    /**
-     * Remove the child node from this node, and replace that child with its first child (if there is one).
-     * 
-     * @param child the child to be extracted; may not be null and must have at most 1 child
-     * @see #extractFromParent()
-     */
-    public void extractChild(ASTNode child) {
-        if (child.getChildCount() == 0) {
-            removeChild(child);
-        } else {
-            ASTNode grandChild = child.getFirstChild();
-            replaceChild(child, grandChild);
-        }
-    }
-
-    /**
-     * Extract this node from its parent, but replace this node with its child (if there is one).
-     * 
-     * @see #extractChild(ASTNode)
-     */
-    public void extractFromParent() {
-        this.parent.extractChild(this);
     }
 
     /**
@@ -734,8 +613,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * 
      * @return the list of children, which immediately reflects changes but which cannot be modified directly; never null
      */
-    public List<ASTNode> getChildren() {
-        return childrenView;
+    public Iterator<ASTNode> getChildren() {
+        return new ChildNodeIterator();
     }
 
     /**
@@ -745,42 +624,14 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     public List<ASTNode> getChildren(final String mixin) {
         final List<ASTNode> result = new ArrayList<ASTNode>();
 
-        for (final ASTNode kid : getChildren()) {
+        Iterator<ASTNode> nodeIter = getChildren();
+        while(nodeIter.hasNext()) {
+            ASTNode kid = nodeIter.next();
             if (kid.getMixins().contains(mixin)) {
                 result.add(kid);
             }
         }
         return result;
-    }
-
-    /**
-     * {@inheritDoc}     * <p>
-     * This iterator is immutable.
-     * </p>
-     * 
-     * @see java.lang.Iterable#iterator()
-     */
-    @Override
-    public Iterator<ASTNode> iterator() {
-        return childrenView.iterator();
-    }
-
-    /**
-     * Remove all children from this node. All nodes immediately become orphaned. The resulting list will be mutable.
-     * 
-     * @return a copy of all the of the children that were removed (and which have no parent); never null
-     */
-    public List<ASTNode> removeAllChildren() {
-        if (this.children.isEmpty()) {
-            return new ArrayList<ASTNode>(0);
-        }
-        List<ASTNode> copyOfChildren = new ArrayList<ASTNode>(this.children);
-        for (Iterator<ASTNode> childIter = this.children.iterator(); childIter.hasNext();) {
-            ASTNode child = childIter.next();
-            childIter.remove();
-            child.parent = null;
-        }
-        return copyOfChildren;
     }
 
     /**
@@ -802,8 +653,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
         if (this.getChildCount() != other.getChildCount()) {
             return false;
         }
-        Iterator<ASTNode> thisChildren = this.getChildren().iterator();
-        Iterator<ASTNode> thatChildren = other.getChildren().iterator();
+        Iterator<ASTNode> thisChildren = this.getChildren();
+        Iterator<ASTNode> thatChildren = other.getChildren();
         while (thisChildren.hasNext() && thatChildren.hasNext()) {
             if (!thisChildren.next().isSameAs(thatChildren.next())) {
                 return false;

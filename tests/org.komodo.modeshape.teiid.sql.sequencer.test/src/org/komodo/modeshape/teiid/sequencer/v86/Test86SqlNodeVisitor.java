@@ -19,24 +19,24 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
 */
-package org.komodo.modeshape.teiid.sql.v87;
+package org.komodo.modeshape.teiid.sequencer.v86;
 
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.komodo.modeshape.teiid.sql.v85.Test85SQLStringVisitor;
+import org.komodo.modeshape.teiid.sequencer.v85.Test85SqlNodeVisitor;
 
 /**
  *
  */
 @SuppressWarnings( {"javadoc"} )
-public class Test87SQLStringVisitor extends Test85SQLStringVisitor {
+public class Test86SqlNodeVisitor extends Test85SqlNodeVisitor {
 
-    protected Test87SQLStringVisitor(ITeiidVersion teiidVersion) {
+    protected Test86SqlNodeVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
-    public Test87SQLStringVisitor() {
-        this(Version.TEIID_8_7.get());
+    public Test86SqlNodeVisitor() {
+        this(Version.TEIID_8_6.get());
     }
 
 }

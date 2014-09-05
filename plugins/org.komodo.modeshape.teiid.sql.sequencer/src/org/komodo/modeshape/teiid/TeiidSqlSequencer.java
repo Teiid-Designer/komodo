@@ -25,10 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import javax.jcr.Binary;
 import javax.jcr.NamespaceRegistry;
@@ -63,8 +62,6 @@ public class TeiidSqlSequencer extends Sequencer {
     private static ITeiidVersion DEFAULT_TEIID_VERSION = Version.TEIID_8_7.get();
 
     private static final KLog LOGGER = KLog.getLogger();
-
-    private final Map<ASTNode, Node> nodeMap = new HashMap<ASTNode, Node>();
 
     private ITeiidVersion teiidVersion = DEFAULT_TEIID_VERSION;
 
@@ -107,9 +104,6 @@ public class TeiidSqlSequencer extends Sequencer {
             setTeiidVersion(new TeiidVersion(versionProp.getString()));
         }
 
-        // make sure node map is empty
-        this.nodeMap.clear();
-
         // Perform the parsing
         final ASTNode rootNode;
         QueryParser parser = createParser();
@@ -127,19 +121,25 @@ public class TeiidSqlSequencer extends Sequencer {
             stream.close();
         }
 
+        convertASTNode(rootNode, outputNode);
+        return true;
+    }
+
+    public void convertASTNode(final ASTNode rootNode, Node outputNode) throws RepositoryException {
         Queue<ASTNode> queue = new LinkedList<ASTNode>();
         queue.add(rootNode);
+
         while (queue.peek() != null) {
             ASTNode astNode = queue.poll();
             Node sequenceNode = createFromASTNode(outputNode, astNode);
             appendNodeProperties(astNode, sequenceNode);
 
             // Add the children to the queue ...
-            for (ASTNode child : astNode.getChildren()) {
-                queue.add(child);
+            Iterator<ASTNode> childIter = astNode.getChildren();
+            while(childIter.hasNext()) {
+                queue.add(childIter.next());
             }
         }
-        return true;
     }
 
     private void appendNodeProperties(ASTNode astNode, Node sequenceNode) throws RepositoryException {
@@ -187,7 +187,7 @@ public class TeiidSqlSequencer extends Sequencer {
             sequenceNode = parentNode.addNode(jcrName, astNode.getPrimaryType());
         }
 
-        this.nodeMap.put(astNode, sequenceNode);
+        astNode.setSequencedNode(sequenceNode);
         for (String mixin : astNode.getMixins()) {
             sequenceNode.addMixin(mixin);
         }
@@ -223,6 +223,10 @@ public class TeiidSqlSequencer extends Sequencer {
     }
 
     private Node getNode(final ASTNode node) {
-        return this.nodeMap.get(node);
+        if (node == null)
+            return null;
+
+        Node sequencedNode = node.getSequencedNode();
+        return sequencedNode;
     }
 }

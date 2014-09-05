@@ -19,10 +19,11 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
 */
-package org.komodo.modeshape.teiid.sql.v85;
+package org.komodo.modeshape.teiid.sequencer.v84;
 
 import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
+import org.komodo.modeshape.teiid.sequencer.v8.Test8SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sql.lang.Delete;
 import org.komodo.modeshape.teiid.sql.proc.AssignmentStatement;
 import org.komodo.modeshape.teiid.sql.proc.Block;
@@ -30,22 +31,21 @@ import org.komodo.modeshape.teiid.sql.proc.CommandStatement;
 import org.komodo.modeshape.teiid.sql.proc.CreateProcedureCommand;
 import org.komodo.modeshape.teiid.sql.proc.RaiseStatement;
 import org.komodo.modeshape.teiid.sql.proc.Statement;
-import org.komodo.modeshape.teiid.sql.v8.Test8SQLStringVisitor;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  *
  */
-@SuppressWarnings( {"nls", "javadoc"} )
-public class Test85SQLStringVisitor extends Test8SQLStringVisitor {
+@SuppressWarnings( {"javadoc"} )
+public class Test84SqlNodeVisitor extends Test8SqlNodeVisitor {
 
-    protected Test85SQLStringVisitor(ITeiidVersion teiidVersion) {
+    protected Test84SqlNodeVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
-    public Test85SQLStringVisitor() {
-        this(Version.TEIID_8_5.get());
+    public Test84SqlNodeVisitor() {
+        this(Version.TEIID_8_4.get());
     }
 
     @Override
@@ -96,10 +96,4 @@ public class Test85SQLStringVisitor extends Test8SQLStringVisitor {
         helpTest(cup, "BEGIN\nDELETE FROM g;\na = 1;\nRAISE 'My Error';\nEND");
     }
 
-    @Override
-    @Test
-    public void testReturnStatement() throws Exception {
-        helpTest(parser.parseProcedure("begin if (true) return 1; return; end", false),
-                 "BEGIN\nIF(TRUE)\nBEGIN\nRETURN 1;\nEND\nRETURN;\nEND");
-    }
 }

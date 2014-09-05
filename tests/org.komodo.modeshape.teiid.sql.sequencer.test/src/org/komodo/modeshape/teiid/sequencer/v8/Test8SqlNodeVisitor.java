@@ -19,13 +19,13 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
 */
-package org.komodo.modeshape.teiid.sql.v8;
+package org.komodo.modeshape.teiid.sequencer.v8;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.sql.AbstractTestSQLStringVisitor;
+import org.komodo.modeshape.teiid.sequencer.AbstractTestSqlNodeVisitor;
 import org.komodo.modeshape.teiid.sql.lang.Delete;
 import org.komodo.modeshape.teiid.sql.lang.From;
 import org.komodo.modeshape.teiid.sql.lang.Insert;
@@ -42,6 +42,7 @@ import org.komodo.modeshape.teiid.sql.symbol.Array;
 import org.komodo.modeshape.teiid.sql.symbol.Constant;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.v8.Test8Factory;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
@@ -49,15 +50,15 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
  *
  */
 @SuppressWarnings( {"nls", "javadoc"} )
-public class Test8SQLStringVisitor extends AbstractTestSQLStringVisitor {
+public class Test8SqlNodeVisitor extends AbstractTestSqlNodeVisitor {
 
     private Test8Factory factory;
 
-    protected Test8SQLStringVisitor(ITeiidVersion teiidVersion) {
+    protected Test8SqlNodeVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
-    public Test8SQLStringVisitor() {
+    public Test8SqlNodeVisitor() {
         this(Version.TEIID_8_0.get());
     }
 
@@ -68,7 +69,6 @@ public class Test8SQLStringVisitor extends AbstractTestSQLStringVisitor {
 
         return factory;
     }
-
 
     @Test
     public void testMerge1() {
@@ -223,12 +223,6 @@ public class Test8SQLStringVisitor extends AbstractTestSQLStringVisitor {
         expr.add(getFactory().newConstant(1));
         Array array = getFactory().newArray(expr);
         helpTest(array, "(e1, 1)");
-    }
-
-    @Test
-    public void testReturnStatement() throws Exception {
-        helpTest(parser.parseProcedure("begin if (true) return 1; return; end", false),
-                 "CREATE VIRTUAL PROCEDURE\nBEGIN\nIF(TRUE)\nBEGIN\nRETURN 1;\nEND\nRETURN;\nEND");
     }
 
     @Test

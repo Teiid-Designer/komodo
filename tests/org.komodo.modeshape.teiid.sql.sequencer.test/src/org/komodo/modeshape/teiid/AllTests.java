@@ -23,23 +23,24 @@ package org.komodo.modeshape.teiid;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.komodo.modeshape.teiid.sequencer.v8.Test8SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v8.TestTeiid8SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v84.Test84SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v84.TestTeiid84SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v85.Test85SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v85.TestTeiid85SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v86.Test86SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v86.TestTeiid86SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v87.Test87SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v87.TestTeiid87SqlSequencer;
 import org.komodo.modeshape.teiid.sql.v8.Test8Cloning;
-import org.komodo.modeshape.teiid.sql.v8.Test8SQLStringVisitor;
 import org.komodo.modeshape.teiid.sql.v8.TestQuery8Parser;
 import org.komodo.modeshape.teiid.sql.v84.TestQuery84Parser;
 import org.komodo.modeshape.teiid.sql.v85.Test85Cloning;
-import org.komodo.modeshape.teiid.sql.v85.Test85SQLStringVisitor;
 import org.komodo.modeshape.teiid.sql.v85.TestQuery85Parser;
 import org.komodo.modeshape.teiid.sql.v86.Test86Cloning;
-import org.komodo.modeshape.teiid.sql.v86.Test86SQLStringVisitor;
 import org.komodo.modeshape.teiid.sql.v86.TestQuery86Parser;
 import org.komodo.modeshape.teiid.sql.v87.Test87Cloning;
-import org.komodo.modeshape.teiid.sql.v87.Test87SQLStringVisitor;
 import org.komodo.modeshape.teiid.sql.v87.TestQuery87Parser;
 
 @SuppressWarnings( "javadoc" )
@@ -47,18 +48,22 @@ import org.komodo.modeshape.teiid.sql.v87.TestQuery87Parser;
 @Suite.SuiteClasses( {
                                         // query.sql
                                         Test8Cloning.class,
+                                        Test85Cloning.class,
+                                        Test86Cloning.class,
+                                        Test87Cloning.class,
+
                                         TestQuery8Parser.class,
                                         TestQuery84Parser.class,
-                                        Test8SQLStringVisitor.class,
-                                        Test85Cloning.class,
                                         TestQuery85Parser.class,
-                                        Test85SQLStringVisitor.class,
-                                        Test86Cloning.class,
                                         TestQuery86Parser.class,
-                                        Test86SQLStringVisitor.class,
-                                        Test87Cloning.class,
                                         TestQuery87Parser.class,
-                                        Test87SQLStringVisitor.class,
+
+                                        // string node visitor
+                                        Test8SqlNodeVisitor.class,
+                                        Test84SqlNodeVisitor.class,
+                                        Test85SqlNodeVisitor.class,
+                                        Test86SqlNodeVisitor.class,
+                                        Test87SqlNodeVisitor.class,
 
                                         // sequencer
                                         TestTeiid8SqlSequencer.class,

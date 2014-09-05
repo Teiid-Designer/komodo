@@ -124,7 +124,8 @@ public class ArrayTable extends TableFunctionReference implements IArrayTable<La
         clone.setOptional(isOptional());
         clone.setMakeInd(isMakeInd());
         clone.setNoUnnest(isNoUnnest());
-        clone.setMakeDep(isMakeDep());
+        if (getMakeDependency() != null)
+            clone.setMakeDependency(getMakeDependency().clone());
         clone.setMakeNotDep(isMakeNotDep());
         clone.setPreserve(isPreserve());
 

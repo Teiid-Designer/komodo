@@ -48,6 +48,7 @@ Bundle-ClassPath: .,
  lib/xmlbeans.jar,
  lib/xz.jar
 Export-Package: javax.jcr,
+ javax.jcr.nodetype,
  javax.jcr.observation,
  org.komodo.modeshape.lib,
  org.modeshape.common,

@@ -27,25 +27,12 @@ import java.util.Collection;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.query.sql.lang.IOption;
 
-public class Option extends ASTNode implements IOption<LanguageVisitor> {
-
-    /**
-     * Make Dep token
-     */
-    public final static String MAKEDEP = "MAKEDEP"; //$NON-NLS-1$
-
-    /**
-     * Make Not Dep token
-     */
-    public final static String MAKENOTDEP = "MAKENOTDEP"; //$NON-NLS-1$
-
-    /**
-     * Optional token
-     */
-    public final static String OPTIONAL = "optional"; //$NON-NLS-1$
+public class Option extends ASTNode implements IOption<LanguageVisitor>, TeiidSQLConstants.Reserved {
 
     public Option(TeiidParser p, int id) {
         super(p, id);
@@ -66,10 +53,33 @@ public class Option extends ASTNode implements IOption<LanguageVisitor> {
 
     public void addDependentGroup(String groupId) {
         addProperty(TeiidSqlLexicon.Option.DEPENDENT_GROUPS_PROP_NAME, groupId);
+        /*
+         * group options should remain in sync with the collection of dependency groupIds
+         */
+        MakeDep groupOption = getTeiidParser().createASTNode(ASTNodes.MAKE_DEP);
+        addGroupOption(groupOption);
     }
 
     public void setDependentGroups(Collection<String> groupIds) {
         setProperty(TeiidSqlLexicon.Option.DEPENDENT_GROUPS_PROP_NAME, groupIds);
+        /*
+         * group options should remain in sync with the collection of dependency groupIds
+         */
+        for (int i = 0; i < groupIds.size(); ++i) {
+            MakeDep groupOption = getTeiidParser().createASTNode(ASTNodes.MAKE_DEP);
+            addGroupOption(groupOption);
+        }
+    }
+
+    /*
+     * group options should remain in sync with the collection of dependency groupIds
+     */
+    private void addGroupOption(MakeDep groupOption) {
+        addLastChild(TeiidSqlLexicon.Option.DEPENDENT_GROUP_OPTIONS_REF_NAME, groupOption);
+    }
+
+    public void setDependentGroupOptions(Collection<MakeDep> groupOptions) {
+        setChildren(TeiidSqlLexicon.Option.DEPENDENT_GROUP_OPTIONS_REF_NAME, groupOptions);
     }
 
     @Override

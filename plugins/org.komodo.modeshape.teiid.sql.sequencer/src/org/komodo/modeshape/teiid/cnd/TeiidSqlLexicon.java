@@ -22,7 +22,6 @@
 
 package org.komodo.modeshape.teiid.cnd;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -62,6 +61,51 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
 
 		boolean GROUP_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:expressionStatement
+	 */
+	public interface ExpressionStatement {
+
+		String ID = Namespace.PREFIX + COLON + "expressionStatement";
+
+		/**
+		 * EXPECTED_TYPE_CLASS Property
+		 */
+		String EXPECTED_TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "expectedTypeClass";
+
+		Class<?> EXPECTED_TYPE_CLASS_PROP_TYPE =  String.class;
+
+		boolean EXPECTED_TYPE_CLASS_PROP_MULTIPLE = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:labeled
+	 */
+	public interface Labeled {
+
+		String ID = Namespace.PREFIX + COLON + "labeled";
+
+		/**
+		 * LABEL Property
+		 */
+		String LABEL_PROP_NAME = Namespace.PREFIX + COLON + "label";
+
+		Class<?> LABEL_PROP_TYPE =  String.class;
+
+		boolean LABEL_PROP_MULTIPLE = false;
 
 	}
 
@@ -116,51 +160,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> COMMAND_REF_TYPE =  Command.class;
 
 		boolean COMMAND_REF_MULTIPLE = false;
-
-	}
-
-	/**
-	 * tsql:labeled
-	 */
-	public interface Labeled {
-
-		String ID = Namespace.PREFIX + COLON + "labeled";
-
-		/**
-		 * LABEL Property
-		 */
-		String LABEL_PROP_NAME = Namespace.PREFIX + COLON + "label";
-
-		Class<?> LABEL_PROP_TYPE =  String.class;
-
-		boolean LABEL_PROP_MULTIPLE = false;
-
-	}
-
-	/**
-	 * tsql:expressionStatement
-	 */
-	public interface ExpressionStatement {
-
-		String ID = Namespace.PREFIX + COLON + "expressionStatement";
-
-		/**
-		 * EXPECTED_TYPE_CLASS Property
-		 */
-		String EXPECTED_TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "expectedTypeClass";
-
-		Class<?> EXPECTED_TYPE_CLASS_PROP_TYPE =  String.class;
-
-		boolean EXPECTED_TYPE_CLASS_PROP_MULTIPLE = false;
-
-		/**
-		 * EXPRESSION Reference
-		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
-
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean EXPRESSION_REF_MULTIPLE = false;
 
 	}
 
@@ -831,20 +830,20 @@ public class TeiidSqlLexicon implements StringConstants {
 		/**
 		 * PROCEDUREID Property
 		 */
-		String PROCEDUREID_PROP_NAME = Namespace.PREFIX + COLON + "procedureID";
+		String PROCEDUREID_PROP_NAME = Namespace.PREFIX + COLON + "procedureiD";
 
-		Class<?> PROCEDUREID_PROP_TYPE =  Object.class;
+		Class<?> PROCEDUREID_PROP_TYPE =  String.class;
 
 		boolean PROCEDUREID_PROP_MULTIPLE = false;
 
 		/**
-		 * PARAMETER Reference
+		 * PARAMETERS Reference
 		 */
-		String PARAMETER_REF_NAME = Namespace.PREFIX + COLON + "parameter";
+		String PARAMETERS_REF_NAME = Namespace.PREFIX + COLON + "parameters";
 
-		Class<?> PARAMETER_REF_TYPE =  SPParameter.class;
+		Class<?> PARAMETERS_REF_TYPE =  SPParameter.class;
 
-		boolean PARAMETER_REF_MULTIPLE = false;
+		boolean PARAMETERS_REF_MULTIPLE = true;
 
 	}
 
@@ -1189,24 +1188,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean OPTIONAL_PROP_MULTIPLE = false;
 
 		/**
-		 * MAX Property
-		 */
-		String MAX_PROP_NAME = Namespace.PREFIX + COLON + "max";
-
-		Class<?> MAX_PROP_TYPE =  Long.class;
-
-		boolean MAX_PROP_MULTIPLE = false;
-
-		/**
-		 * JOIN Property
-		 */
-		String JOIN_PROP_NAME = Namespace.PREFIX + COLON + "join";
-
-		Class<?> JOIN_PROP_TYPE =  Boolean.class;
-
-		boolean JOIN_PROP_MULTIPLE = false;
-
-		/**
 		 * MAKE_NOT_DEP Property
 		 */
 		String MAKE_NOT_DEP_PROP_NAME = Namespace.PREFIX + COLON + "makeNotDep";
@@ -1232,6 +1213,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> NO_UNNEST_PROP_TYPE =  Boolean.class;
 
 		boolean NO_UNNEST_PROP_MULTIPLE = false;
+
+		/**
+		 * MAKE_DEPENDENCY Reference
+		 */
+		String MAKE_DEPENDENCY_REF_NAME = Namespace.PREFIX + COLON + "makeDependency";
+
+		Class<?> MAKE_DEPENDENCY_REF_TYPE =  MakeDep.class;
+
+		boolean MAKE_DEPENDENCY_REF_MULTIPLE = false;
 
 	}
 
@@ -1433,11 +1423,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:xMLTable
+	 * tsql:xmlTable
 	 */
 	public interface XMLTable extends TableFunctionReference {
 
-		String ID = Namespace.PREFIX + COLON + "xMLTable";
+		String ID = Namespace.PREFIX + COLON + "xmlTable";
 
 		boolean IS_ABSTRACT = false;
 
@@ -1516,15 +1506,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean RIGHT_CLAUSE_REF_MULTIPLE = false;
 
 		/**
-		 * JOIN_CRITERIA Reference
-		 */
-		String JOIN_CRITERIA_REF_NAME = Namespace.PREFIX + COLON + "joinCriteria";
-
-		Class<?> JOIN_CRITERIA_REF_TYPE =  Criteria.class;
-
-		boolean JOIN_CRITERIA_REF_MULTIPLE = true;
-
-		/**
 		 * JOIN_TYPE Reference
 		 */
 		String JOIN_TYPE_REF_NAME = Namespace.PREFIX + COLON + "joinType";
@@ -1532,6 +1513,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> JOIN_TYPE_REF_TYPE =  JoinType.class;
 
 		boolean JOIN_TYPE_REF_MULTIPLE = false;
+
+		/**
+		 * JOIN_CRITERIA Reference
+		 */
+		String JOIN_CRITERIA_REF_NAME = Namespace.PREFIX + COLON + "joinCriteria";
+
+		Class<?> JOIN_CRITERIA_REF_TYPE =  Criteria.class;
+
+		boolean JOIN_CRITERIA_REF_MULTIPLE = true;
 
 	}
 
@@ -1734,6 +1724,35 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
+	 * tsql:makeDep
+	 */
+	public interface MakeDep extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "makeDep";
+
+		boolean IS_ABSTRACT = false;
+
+		/**
+		 * MAX Property
+		 */
+		String MAX_PROP_NAME = Namespace.PREFIX + COLON + "max";
+
+		Class<?> MAX_PROP_TYPE =  Long.class;
+
+		boolean MAX_PROP_MULTIPLE = false;
+
+		/**
+		 * JOIN Property
+		 */
+		String JOIN_PROP_NAME = Namespace.PREFIX + COLON + "join";
+
+		Class<?> JOIN_PROP_TYPE =  Boolean.class;
+
+		boolean JOIN_PROP_MULTIPLE = false;
+
+	}
+
+	/**
 	 * tsql:namespaceItem
 	 */
 	public interface NamespaceItem extends LanguageObject {
@@ -1759,6 +1778,17 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> URI_PROP_TYPE =  String.class;
 
 		boolean URI_PROP_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:nullNode
+	 */
+	public interface NullNode extends LanguageObject {
+
+		String ID = Namespace.PREFIX + COLON + "nullNode";
+
+		boolean IS_ABSTRACT = false;
 
 	}
 
@@ -1879,11 +1909,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:xMLColumn
+	 * tsql:xmlColumn
 	 */
 	public interface XMLColumn extends ProjectedColumn {
 
-		String ID = Namespace.PREFIX + COLON + "xMLColumn";
+		String ID = Namespace.PREFIX + COLON + "xmlColumn";
 
 		boolean IS_ABSTRACT = false;
 
@@ -1961,6 +1991,15 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		boolean NO_CACHE_GROUPS_PROP_MULTIPLE = true;
 
+		/**
+		 * DEPENDENT_GROUP_OPTIONS Reference
+		 */
+		String DEPENDENT_GROUP_OPTIONS_REF_NAME = Namespace.PREFIX + COLON + "dependentGroupOptions";
+
+		Class<?> DEPENDENT_GROUP_OPTIONS_REF_TYPE =  MakeDep.class;
+
+		boolean DEPENDENT_GROUP_OPTIONS_REF_MULTIPLE = true;
+
 	}
 
 	/**
@@ -2024,11 +2063,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:sPParameter
+	 * tsql:spParameter
 	 */
 	public interface SPParameter extends LanguageObject {
 
-		String ID = Namespace.PREFIX + COLON + "sPParameter";
+		String ID = Namespace.PREFIX + COLON + "spParameter";
 
 		boolean IS_ABSTRACT = false;
 
@@ -2044,9 +2083,9 @@ public class TeiidSqlLexicon implements StringConstants {
 		/**
 		 * METADATAID Property
 		 */
-		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataID";
+		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataiD";
 
-		Class<?> METADATAID_PROP_TYPE =  Object.class;
+		Class<?> METADATAID_PROP_TYPE =  String.class;
 
 		boolean METADATAID_PROP_MULTIPLE = false;
 
@@ -2687,15 +2726,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean MESSAGE_REF_MULTIPLE = false;
 
 		/**
-		 * PARENT_EXPRESSION Reference
-		 */
-		String PARENT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "parentExpression";
-
-		Class<?> PARENT_EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean PARENT_EXPRESSION_REF_MULTIPLE = false;
-
-		/**
 		 * SQL_STATE Reference
 		 */
 		String SQL_STATE_REF_NAME = Namespace.PREFIX + COLON + "sqlState";
@@ -2703,6 +2733,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> SQL_STATE_REF_TYPE =  Expression.class;
 
 		boolean SQL_STATE_REF_MULTIPLE = false;
+
+		/**
+		 * PARENT_EXPRESSION Reference
+		 */
+		String PARENT_EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "parentExpression";
+
+		Class<?> PARENT_EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean PARENT_EXPRESSION_REF_MULTIPLE = false;
 
 	}
 
@@ -2834,7 +2873,7 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		String ID = Namespace.PREFIX + COLON + "symbol";
 
-		boolean IS_ABSTRACT = false;
+		boolean IS_ABSTRACT = true;
 
 		/**
 		 * SHORT_NAME Property
@@ -2897,9 +2936,9 @@ public class TeiidSqlLexicon implements StringConstants {
 		/**
 		 * METADATAID Property
 		 */
-		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataID";
+		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataiD";
 
-		Class<?> METADATAID_PROP_TYPE =  Object.class;
+		Class<?> METADATAID_PROP_TYPE =  String.class;
 
 		boolean METADATAID_PROP_MULTIPLE = false;
 
@@ -2975,9 +3014,9 @@ public class TeiidSqlLexicon implements StringConstants {
 		/**
 		 * METADATAID Property
 		 */
-		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataID";
+		String METADATAID_PROP_NAME = Namespace.PREFIX + COLON + "metadataiD";
 
-		Class<?> METADATAID_PROP_TYPE =  Object.class;
+		Class<?> METADATAID_PROP_TYPE =  String.class;
 
 		boolean METADATAID_PROP_MULTIPLE = false;
 
@@ -3091,7 +3130,7 @@ public class TeiidSqlLexicon implements StringConstants {
 		 */
 		String VALUE_PROP_NAME = Namespace.PREFIX + COLON + "value";
 
-		Class<?> VALUE_PROP_TYPE =  Object.class;
+		Class<?> VALUE_PROP_TYPE =  String.class;
 
 		boolean VALUE_PROP_MULTIPLE = false;
 
@@ -3145,11 +3184,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:jSONObject
+	 * tsql:jsonObject
 	 */
 	public interface JSONObject extends Expression {
 
-		String ID = Namespace.PREFIX + COLON + "jSONObject";
+		String ID = Namespace.PREFIX + COLON + "jsonObject";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3433,11 +3472,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:xMLAttributes
+	 * tsql:xmlAttributes
 	 */
 	public interface XMLAttributes extends LanguageObject {
 
-		String ID = Namespace.PREFIX + COLON + "xMLAttributes";
+		String ID = Namespace.PREFIX + COLON + "xmlAttributes";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3453,11 +3492,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:xMLElement
+	 * tsql:xmlElement
 	 */
 	public interface XMLElement extends Expression {
 
-		String ID = Namespace.PREFIX + COLON + "xMLElement";
+		String ID = Namespace.PREFIX + COLON + "xmlElement";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3500,11 +3539,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:xMLForest
+	 * tsql:xmlForest
 	 */
 	public interface XMLForest extends Expression {
 
-		String ID = Namespace.PREFIX + COLON + "xMLForest";
+		String ID = Namespace.PREFIX + COLON + "xmlForest";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3529,11 +3568,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:xMLNamespaces
+	 * tsql:xmlNamespaces
 	 */
 	public interface XMLNamespaces extends LanguageObject {
 
-		String ID = Namespace.PREFIX + COLON + "xMLNamespaces";
+		String ID = Namespace.PREFIX + COLON + "xmlNamespaces";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3549,11 +3588,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:xMLParse
+	 * tsql:xmlParse
 	 */
 	public interface XMLParse extends Expression {
 
-		String ID = Namespace.PREFIX + COLON + "xMLParse";
+		String ID = Namespace.PREFIX + COLON + "xmlParse";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3587,11 +3626,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:xMLQuery
+	 * tsql:xmlQuery
 	 */
 	public interface XMLQuery extends Expression {
 
-		String ID = Namespace.PREFIX + COLON + "xMLQuery";
+		String ID = Namespace.PREFIX + COLON + "xmlQuery";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3634,11 +3673,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:xMLSerialize
+	 * tsql:xmlSerialize
 	 */
 	public interface XMLSerialize extends Expression {
 
-		String ID = Namespace.PREFIX + COLON + "xMLSerialize";
+		String ID = Namespace.PREFIX + COLON + "xmlSerialize";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3699,125 +3738,941 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 
-	private static Map<String, Class<?>> astIndex = new HashMap<String, Class<?>>();
+	/**
+	 * Enumeration of lexicon classes and their identifiers
+	 */
+	public enum LexTokens {
+		TARGETED_COMMAND (TargetedCommand.ID, TargetedCommand.class),
+
+		EXPRESSION_STATEMENT (ExpressionStatement.ID, ExpressionStatement.class),
+
+		LABELED (Labeled.ID, Labeled.class),
+
+		LANGUAGE_OBJECT (LanguageObject.ID, LanguageObject.class),
+
+		EXPRESSION (Expression.ID, Expression.class),
+
+		PREDICATE_CRITERIA (PredicateCriteria.ID, PredicateCriteria.class),
+
+		SUBQUERY_CONTAINER (SubqueryContainer.ID, SubqueryContainer.class),
+
+		CRITERIA (Criteria.ID, Criteria.class),
+
+		ABSTRACT_COMPARE_CRITERIA (AbstractCompareCriteria.ID, AbstractCompareCriteria.class),
+
+		COMPARE_CRITERIA (CompareCriteria.ID, CompareCriteria.class),
+
+		SUBQUERY_COMPARE_CRITERIA (SubqueryCompareCriteria.ID, SubqueryCompareCriteria.class),
+
+		ABSTRACT_SET_CRITERIA (AbstractSetCriteria.ID, AbstractSetCriteria.class),
+
+		SET_CRITERIA (SetCriteria.ID, SetCriteria.class),
+
+		SUBQUERY_SET_CRITERIA (SubquerySetCriteria.ID, SubquerySetCriteria.class),
+
+		BETWEEN_CRITERIA (BetweenCriteria.ID, BetweenCriteria.class),
+
+		COMPOUND_CRITERIA (CompoundCriteria.ID, CompoundCriteria.class),
+
+		EXISTS_CRITERIA (ExistsCriteria.ID, ExistsCriteria.class),
+
+		EXPRESSION_CRITERIA (ExpressionCriteria.ID, ExpressionCriteria.class),
+
+		IS_NULL_CRITERIA (IsNullCriteria.ID, IsNullCriteria.class),
+
+		MATCH_CRITERIA (MatchCriteria.ID, MatchCriteria.class),
+
+		NOT_CRITERIA (NotCriteria.ID, NotCriteria.class),
+
+		COMMAND (Command.ID, Command.class),
+
+		ALTER (Alter.ID, Alter.class),
+
+		ALTER_PROCEDURE (AlterProcedure.ID, AlterProcedure.class),
+
+		ALTER_TRIGGER (AlterTrigger.ID, AlterTrigger.class),
+
+		ALTER_VIEW (AlterView.ID, AlterView.class),
+
+		PROCEDURE_CONTAINER (ProcedureContainer.ID, ProcedureContainer.class),
+
+		DELETE (Delete.ID, Delete.class),
+
+		INSERT (Insert.ID, Insert.class),
+
+		STORED_PROCEDURE (StoredProcedure.ID, StoredProcedure.class),
+
+		UPDATE (Update.ID, Update.class),
+
+		DYNAMIC_COMMAND (DynamicCommand.ID, DynamicCommand.class),
+
+		QUERY_COMMAND (QueryCommand.ID, QueryCommand.class),
+
+		QUERY (Query.ID, Query.class),
+
+		SET_QUERY (SetQuery.ID, SetQuery.class),
+
+		CREATE_PROCEDURE_COMMAND (CreateProcedureCommand.ID, CreateProcedureCommand.class),
+
+		TRIGGER_ACTION (TriggerAction.ID, TriggerAction.class),
+
+		FROM_CLAUSE (FromClause.ID, FromClause.class),
+
+		TABLE_FUNCTION_REFERENCE (TableFunctionReference.ID, TableFunctionReference.class),
+
+		ARRAY_TABLE (ArrayTable.ID, ArrayTable.class),
+
+		OBJECT_TABLE (ObjectTable.ID, ObjectTable.class),
+
+		TEXT_TABLE (TextTable.ID, TextTable.class),
+
+		XML_TABLE (XMLTable.ID, XMLTable.class),
+
+		JOIN_PREDICATE (JoinPredicate.ID, JoinPredicate.class),
+
+		SUBQUERY_FROM_CLAUSE (SubqueryFromClause.ID, SubqueryFromClause.class),
+
+		UNARY_FROM_CLAUSE (UnaryFromClause.ID, UnaryFromClause.class),
+
+		FROM (From.ID, From.class),
+
+		GROUP_BY (GroupBy.ID, GroupBy.class),
+
+		INTO (Into.ID, Into.class),
+
+		JOIN_TYPE (JoinType.ID, JoinType.class),
+
+		LIMIT (Limit.ID, Limit.class),
+
+		MAKE_DEP (MakeDep.ID, MakeDep.class),
+
+		NAMESPACE_ITEM (NamespaceItem.ID, NamespaceItem.class),
+
+		NULL_NODE (NullNode.ID, NullNode.class),
+
+		PROJECTED_COLUMN (ProjectedColumn.ID, ProjectedColumn.class),
+
+		OBJECT_COLUMN (ObjectColumn.ID, ObjectColumn.class),
+
+		TEXT_COLUMN (TextColumn.ID, TextColumn.class),
+
+		XML_COLUMN (XMLColumn.ID, XMLColumn.class),
+
+		OPTION (Option.ID, Option.class),
+
+		ORDER_BY (OrderBy.ID, OrderBy.class),
+
+		ORDER_BY_ITEM (OrderByItem.ID, OrderByItem.class),
+
+		SP_PARAMETER (SPParameter.ID, SPParameter.class),
+
+		SELECT (Select.ID, Select.class),
+
+		SET_CLAUSE (SetClause.ID, SetClause.class),
+
+		SET_CLAUSE_LIST (SetClauseList.ID, SetClauseList.class),
+
+		SOURCE_HINT (SourceHint.ID, SourceHint.class),
+
+		SPECIFIC_HINT (SpecificHint.ID, SpecificHint.class),
+
+		SUBQUERY_HINT (SubqueryHint.ID, SubqueryHint.class),
+
+		WITH_QUERY_COMMAND (WithQueryCommand.ID, WithQueryCommand.class),
+
+		STATEMENT (Statement.ID, Statement.class),
+
+		ASSIGNMENT_STATEMENT (AssignmentStatement.ID, AssignmentStatement.class),
+
+		DECLARE_STATEMENT (DeclareStatement.ID, DeclareStatement.class),
+
+		RETURN_STATEMENT (ReturnStatement.ID, ReturnStatement.class),
+
+		BLOCK (Block.ID, Block.class),
+
+		BRANCHING_STATEMENT (BranchingStatement.ID, BranchingStatement.class),
+
+		COMMAND_STATEMENT (CommandStatement.ID, CommandStatement.class),
+
+		IF_STATEMENT (IfStatement.ID, IfStatement.class),
+
+		LOOP_STATEMENT (LoopStatement.ID, LoopStatement.class),
+
+		RAISE_STATEMENT (RaiseStatement.ID, RaiseStatement.class),
+
+		WHILE_STATEMENT (WhileStatement.ID, WhileStatement.class),
+
+		EXCEPTION_EXPRESSION (ExceptionExpression.ID, ExceptionExpression.class),
+
+		FUNCTION (Function.ID, Function.class),
+
+		AGGREGATE_SYMBOL (AggregateSymbol.ID, AggregateSymbol.class),
+
+		SYMBOL (Symbol.ID, Symbol.class),
+
+		ALIAS_SYMBOL (AliasSymbol.ID, AliasSymbol.class),
+
+		ELEMENT_SYMBOL (ElementSymbol.ID, ElementSymbol.class),
+
+		EXPRESSION_SYMBOL (ExpressionSymbol.ID, ExpressionSymbol.class),
+
+		GROUP_SYMBOL (GroupSymbol.ID, GroupSymbol.class),
+
+		ARRAY (Array.ID, Array.class),
+
+		CASE_EXPRESSION (CaseExpression.ID, CaseExpression.class),
+
+		CONSTANT (Constant.ID, Constant.class),
+
+		DERIVED_COLUMN (DerivedColumn.ID, DerivedColumn.class),
+
+		JSON_OBJECT (JSONObject.ID, JSONObject.class),
+
+		MULTIPLE_ELEMENT_SYMBOL (MultipleElementSymbol.ID, MultipleElementSymbol.class),
+
+		QUERY_STRING (QueryString.ID, QueryString.class),
+
+		REFERENCE (Reference.ID, Reference.class),
+
+		SCALAR_SUBQUERY (ScalarSubquery.ID, ScalarSubquery.class),
+
+		SEARCHED_CASE_EXPRESSION (SearchedCaseExpression.ID, SearchedCaseExpression.class),
+
+		TEXT_LINE (TextLine.ID, TextLine.class),
+
+		WINDOW_FUNCTION (WindowFunction.ID, WindowFunction.class),
+
+		WINDOW_SPECIFICATION (WindowSpecification.ID, WindowSpecification.class),
+
+		XML_ATTRIBUTES (XMLAttributes.ID, XMLAttributes.class),
+
+		XML_ELEMENT (XMLElement.ID, XMLElement.class),
+
+		XML_FOREST (XMLForest.ID, XMLForest.class),
+
+		XML_NAMESPACES (XMLNamespaces.ID, XMLNamespaces.class),
+
+		XML_PARSE (XMLParse.ID, XMLParse.class),
+
+		XML_QUERY (XMLQuery.ID, XMLQuery.class),
+
+		XML_SERIALIZE (XMLSerialize.ID, XMLSerialize.class);
+
+
+		private String id;
+
+		private Class<?> klazz;
+
+		private LexTokens(String id, Class<?> klazz){
+
+			this.id = id;
+			this.klazz = klazz;
+		}
+
+		public String getId() {
+			return this.id;
+		}
+
+		public Class<?> getTSqlClass() {
+			return this.klazz;
+		}
+
+		public static LexTokens findClass(String id) {
+			for (LexTokens tSqlClass : LexTokens.values()) {
+				if (tSqlClass.getId().equals(id))
+					return tSqlClass;
+			}
+			return null;
+		}
+	}
+
+	private static Map<String, LexTokens> astIndex = new HashMap<String, LexTokens>();
 
 	static {
-		astIndex.put(TargetedCommand.class.getSimpleName(), TargetedCommand.class);
-		astIndex.put(LanguageObject.class.getSimpleName(), LanguageObject.class);
-		astIndex.put(Expression.class.getSimpleName(), Expression.class);
-		astIndex.put(PredicateCriteria.class.getSimpleName(), PredicateCriteria.class);
-		astIndex.put(SubqueryContainer.class.getSimpleName(), SubqueryContainer.class);
-		astIndex.put(Labeled.class.getSimpleName(), Labeled.class);
-		astIndex.put(ExpressionStatement.class.getSimpleName(), ExpressionStatement.class);
-		astIndex.put(Criteria.class.getSimpleName(), Criteria.class);
-		astIndex.put(AbstractCompareCriteria.class.getSimpleName(), AbstractCompareCriteria.class);
-		astIndex.put(CompareCriteria.class.getSimpleName(), CompareCriteria.class);
-		astIndex.put(SubqueryCompareCriteria.class.getSimpleName(), SubqueryCompareCriteria.class);
-		astIndex.put(AbstractSetCriteria.class.getSimpleName(), AbstractSetCriteria.class);
-		astIndex.put(SetCriteria.class.getSimpleName(), SetCriteria.class);
-		astIndex.put(SubquerySetCriteria.class.getSimpleName(), SubquerySetCriteria.class);
-		astIndex.put(BetweenCriteria.class.getSimpleName(), BetweenCriteria.class);
-		astIndex.put(CompoundCriteria.class.getSimpleName(), CompoundCriteria.class);
-		astIndex.put(ExistsCriteria.class.getSimpleName(), ExistsCriteria.class);
-		astIndex.put(ExpressionCriteria.class.getSimpleName(), ExpressionCriteria.class);
-		astIndex.put(IsNullCriteria.class.getSimpleName(), IsNullCriteria.class);
-		astIndex.put(MatchCriteria.class.getSimpleName(), MatchCriteria.class);
-		astIndex.put(NotCriteria.class.getSimpleName(), NotCriteria.class);
-		astIndex.put(Command.class.getSimpleName(), Command.class);
-		astIndex.put(Alter.class.getSimpleName(), Alter.class);
-		astIndex.put(AlterProcedure.class.getSimpleName(), AlterProcedure.class);
-		astIndex.put(AlterTrigger.class.getSimpleName(), AlterTrigger.class);
-		astIndex.put(AlterView.class.getSimpleName(), AlterView.class);
-		astIndex.put(ProcedureContainer.class.getSimpleName(), ProcedureContainer.class);
-		astIndex.put(Delete.class.getSimpleName(), Delete.class);
-		astIndex.put(Insert.class.getSimpleName(), Insert.class);
-		astIndex.put(StoredProcedure.class.getSimpleName(), StoredProcedure.class);
-		astIndex.put(Update.class.getSimpleName(), Update.class);
-		astIndex.put(DynamicCommand.class.getSimpleName(), DynamicCommand.class);
-		astIndex.put(QueryCommand.class.getSimpleName(), QueryCommand.class);
-		astIndex.put(Query.class.getSimpleName(), Query.class);
-		astIndex.put(SetQuery.class.getSimpleName(), SetQuery.class);
-		astIndex.put(CreateProcedureCommand.class.getSimpleName(), CreateProcedureCommand.class);
-		astIndex.put(TriggerAction.class.getSimpleName(), TriggerAction.class);
-		astIndex.put(FromClause.class.getSimpleName(), FromClause.class);
-		astIndex.put(TableFunctionReference.class.getSimpleName(), TableFunctionReference.class);
-		astIndex.put(ArrayTable.class.getSimpleName(), ArrayTable.class);
-		astIndex.put(ObjectTable.class.getSimpleName(), ObjectTable.class);
-		astIndex.put(TextTable.class.getSimpleName(), TextTable.class);
-		astIndex.put(XMLTable.class.getSimpleName(), XMLTable.class);
-		astIndex.put(JoinPredicate.class.getSimpleName(), JoinPredicate.class);
-		astIndex.put(SubqueryFromClause.class.getSimpleName(), SubqueryFromClause.class);
-		astIndex.put(UnaryFromClause.class.getSimpleName(), UnaryFromClause.class);
-		astIndex.put(From.class.getSimpleName(), From.class);
-		astIndex.put(GroupBy.class.getSimpleName(), GroupBy.class);
-		astIndex.put(Into.class.getSimpleName(), Into.class);
-		astIndex.put(JoinType.class.getSimpleName(), JoinType.class);
-		astIndex.put(Limit.class.getSimpleName(), Limit.class);
-		astIndex.put(NamespaceItem.class.getSimpleName(), NamespaceItem.class);
-		astIndex.put(ProjectedColumn.class.getSimpleName(), ProjectedColumn.class);
-		astIndex.put(ObjectColumn.class.getSimpleName(), ObjectColumn.class);
-		astIndex.put(TextColumn.class.getSimpleName(), TextColumn.class);
-		astIndex.put(XMLColumn.class.getSimpleName(), XMLColumn.class);
-		astIndex.put(Option.class.getSimpleName(), Option.class);
-		astIndex.put(OrderBy.class.getSimpleName(), OrderBy.class);
-		astIndex.put(OrderByItem.class.getSimpleName(), OrderByItem.class);
-		astIndex.put(SPParameter.class.getSimpleName(), SPParameter.class);
-		astIndex.put(Select.class.getSimpleName(), Select.class);
-		astIndex.put(SetClause.class.getSimpleName(), SetClause.class);
-		astIndex.put(SetClauseList.class.getSimpleName(), SetClauseList.class);
-		astIndex.put(SourceHint.class.getSimpleName(), SourceHint.class);
-		astIndex.put(SpecificHint.class.getSimpleName(), SpecificHint.class);
-		astIndex.put(SubqueryHint.class.getSimpleName(), SubqueryHint.class);
-		astIndex.put(WithQueryCommand.class.getSimpleName(), WithQueryCommand.class);
-		astIndex.put(Statement.class.getSimpleName(), Statement.class);
-		astIndex.put(AssignmentStatement.class.getSimpleName(), AssignmentStatement.class);
-		astIndex.put(DeclareStatement.class.getSimpleName(), DeclareStatement.class);
-		astIndex.put(ReturnStatement.class.getSimpleName(), ReturnStatement.class);
-		astIndex.put(Block.class.getSimpleName(), Block.class);
-		astIndex.put(BranchingStatement.class.getSimpleName(), BranchingStatement.class);
-		astIndex.put(CommandStatement.class.getSimpleName(), CommandStatement.class);
-		astIndex.put(IfStatement.class.getSimpleName(), IfStatement.class);
-		astIndex.put(LoopStatement.class.getSimpleName(), LoopStatement.class);
-		astIndex.put(RaiseStatement.class.getSimpleName(), RaiseStatement.class);
-		astIndex.put(WhileStatement.class.getSimpleName(), WhileStatement.class);
-		astIndex.put(ExceptionExpression.class.getSimpleName(), ExceptionExpression.class);
-		astIndex.put(Function.class.getSimpleName(), Function.class);
-		astIndex.put(AggregateSymbol.class.getSimpleName(), AggregateSymbol.class);
-		astIndex.put(Symbol.class.getSimpleName(), Symbol.class);
-		astIndex.put(AliasSymbol.class.getSimpleName(), AliasSymbol.class);
-		astIndex.put(ElementSymbol.class.getSimpleName(), ElementSymbol.class);
-		astIndex.put(ExpressionSymbol.class.getSimpleName(), ExpressionSymbol.class);
-		astIndex.put(GroupSymbol.class.getSimpleName(), GroupSymbol.class);
-		astIndex.put(Array.class.getSimpleName(), Array.class);
-		astIndex.put(CaseExpression.class.getSimpleName(), CaseExpression.class);
-		astIndex.put(Constant.class.getSimpleName(), Constant.class);
-		astIndex.put(DerivedColumn.class.getSimpleName(), DerivedColumn.class);
-		astIndex.put(JSONObject.class.getSimpleName(), JSONObject.class);
-		astIndex.put(MultipleElementSymbol.class.getSimpleName(), MultipleElementSymbol.class);
-		astIndex.put(QueryString.class.getSimpleName(), QueryString.class);
-		astIndex.put(Reference.class.getSimpleName(), Reference.class);
-		astIndex.put(ScalarSubquery.class.getSimpleName(), ScalarSubquery.class);
-		astIndex.put(SearchedCaseExpression.class.getSimpleName(), SearchedCaseExpression.class);
-		astIndex.put(TextLine.class.getSimpleName(), TextLine.class);
-		astIndex.put(WindowFunction.class.getSimpleName(), WindowFunction.class);
-		astIndex.put(WindowSpecification.class.getSimpleName(), WindowSpecification.class);
-		astIndex.put(XMLAttributes.class.getSimpleName(), XMLAttributes.class);
-		astIndex.put(XMLElement.class.getSimpleName(), XMLElement.class);
-		astIndex.put(XMLForest.class.getSimpleName(), XMLForest.class);
-		astIndex.put(XMLNamespaces.class.getSimpleName(), XMLNamespaces.class);
-		astIndex.put(XMLParse.class.getSimpleName(), XMLParse.class);
-		astIndex.put(XMLQuery.class.getSimpleName(), XMLQuery.class);
-		astIndex.put(XMLSerialize.class.getSimpleName(), XMLSerialize.class);
+		astIndex.put(TargetedCommand.class.getSimpleName(), LexTokens.TARGETED_COMMAND);
+		astIndex.put(ExpressionStatement.class.getSimpleName(), LexTokens.EXPRESSION_STATEMENT);
+		astIndex.put(Labeled.class.getSimpleName(), LexTokens.LABELED);
+		astIndex.put(LanguageObject.class.getSimpleName(), LexTokens.LANGUAGE_OBJECT);
+		astIndex.put(Expression.class.getSimpleName(), LexTokens.EXPRESSION);
+		astIndex.put(PredicateCriteria.class.getSimpleName(), LexTokens.PREDICATE_CRITERIA);
+		astIndex.put(SubqueryContainer.class.getSimpleName(), LexTokens.SUBQUERY_CONTAINER);
+		astIndex.put(Criteria.class.getSimpleName(), LexTokens.CRITERIA);
+		astIndex.put(AbstractCompareCriteria.class.getSimpleName(), LexTokens.ABSTRACT_COMPARE_CRITERIA);
+		astIndex.put(CompareCriteria.class.getSimpleName(), LexTokens.COMPARE_CRITERIA);
+		astIndex.put(SubqueryCompareCriteria.class.getSimpleName(), LexTokens.SUBQUERY_COMPARE_CRITERIA);
+		astIndex.put(AbstractSetCriteria.class.getSimpleName(), LexTokens.ABSTRACT_SET_CRITERIA);
+		astIndex.put(SetCriteria.class.getSimpleName(), LexTokens.SET_CRITERIA);
+		astIndex.put(SubquerySetCriteria.class.getSimpleName(), LexTokens.SUBQUERY_SET_CRITERIA);
+		astIndex.put(BetweenCriteria.class.getSimpleName(), LexTokens.BETWEEN_CRITERIA);
+		astIndex.put(CompoundCriteria.class.getSimpleName(), LexTokens.COMPOUND_CRITERIA);
+		astIndex.put(ExistsCriteria.class.getSimpleName(), LexTokens.EXISTS_CRITERIA);
+		astIndex.put(ExpressionCriteria.class.getSimpleName(), LexTokens.EXPRESSION_CRITERIA);
+		astIndex.put(IsNullCriteria.class.getSimpleName(), LexTokens.IS_NULL_CRITERIA);
+		astIndex.put(MatchCriteria.class.getSimpleName(), LexTokens.MATCH_CRITERIA);
+		astIndex.put(NotCriteria.class.getSimpleName(), LexTokens.NOT_CRITERIA);
+		astIndex.put(Command.class.getSimpleName(), LexTokens.COMMAND);
+		astIndex.put(Alter.class.getSimpleName(), LexTokens.ALTER);
+		astIndex.put(AlterProcedure.class.getSimpleName(), LexTokens.ALTER_PROCEDURE);
+		astIndex.put(AlterTrigger.class.getSimpleName(), LexTokens.ALTER_TRIGGER);
+		astIndex.put(AlterView.class.getSimpleName(), LexTokens.ALTER_VIEW);
+		astIndex.put(ProcedureContainer.class.getSimpleName(), LexTokens.PROCEDURE_CONTAINER);
+		astIndex.put(Delete.class.getSimpleName(), LexTokens.DELETE);
+		astIndex.put(Insert.class.getSimpleName(), LexTokens.INSERT);
+		astIndex.put(StoredProcedure.class.getSimpleName(), LexTokens.STORED_PROCEDURE);
+		astIndex.put(Update.class.getSimpleName(), LexTokens.UPDATE);
+		astIndex.put(DynamicCommand.class.getSimpleName(), LexTokens.DYNAMIC_COMMAND);
+		astIndex.put(QueryCommand.class.getSimpleName(), LexTokens.QUERY_COMMAND);
+		astIndex.put(Query.class.getSimpleName(), LexTokens.QUERY);
+		astIndex.put(SetQuery.class.getSimpleName(), LexTokens.SET_QUERY);
+		astIndex.put(CreateProcedureCommand.class.getSimpleName(), LexTokens.CREATE_PROCEDURE_COMMAND);
+		astIndex.put(TriggerAction.class.getSimpleName(), LexTokens.TRIGGER_ACTION);
+		astIndex.put(FromClause.class.getSimpleName(), LexTokens.FROM_CLAUSE);
+		astIndex.put(TableFunctionReference.class.getSimpleName(), LexTokens.TABLE_FUNCTION_REFERENCE);
+		astIndex.put(ArrayTable.class.getSimpleName(), LexTokens.ARRAY_TABLE);
+		astIndex.put(ObjectTable.class.getSimpleName(), LexTokens.OBJECT_TABLE);
+		astIndex.put(TextTable.class.getSimpleName(), LexTokens.TEXT_TABLE);
+		astIndex.put(XMLTable.class.getSimpleName(), LexTokens.XML_TABLE);
+		astIndex.put(JoinPredicate.class.getSimpleName(), LexTokens.JOIN_PREDICATE);
+		astIndex.put(SubqueryFromClause.class.getSimpleName(), LexTokens.SUBQUERY_FROM_CLAUSE);
+		astIndex.put(UnaryFromClause.class.getSimpleName(), LexTokens.UNARY_FROM_CLAUSE);
+		astIndex.put(From.class.getSimpleName(), LexTokens.FROM);
+		astIndex.put(GroupBy.class.getSimpleName(), LexTokens.GROUP_BY);
+		astIndex.put(Into.class.getSimpleName(), LexTokens.INTO);
+		astIndex.put(JoinType.class.getSimpleName(), LexTokens.JOIN_TYPE);
+		astIndex.put(Limit.class.getSimpleName(), LexTokens.LIMIT);
+		astIndex.put(MakeDep.class.getSimpleName(), LexTokens.MAKE_DEP);
+		astIndex.put(NamespaceItem.class.getSimpleName(), LexTokens.NAMESPACE_ITEM);
+		astIndex.put(NullNode.class.getSimpleName(), LexTokens.NULL_NODE);
+		astIndex.put(ProjectedColumn.class.getSimpleName(), LexTokens.PROJECTED_COLUMN);
+		astIndex.put(ObjectColumn.class.getSimpleName(), LexTokens.OBJECT_COLUMN);
+		astIndex.put(TextColumn.class.getSimpleName(), LexTokens.TEXT_COLUMN);
+		astIndex.put(XMLColumn.class.getSimpleName(), LexTokens.XML_COLUMN);
+		astIndex.put(Option.class.getSimpleName(), LexTokens.OPTION);
+		astIndex.put(OrderBy.class.getSimpleName(), LexTokens.ORDER_BY);
+		astIndex.put(OrderByItem.class.getSimpleName(), LexTokens.ORDER_BY_ITEM);
+		astIndex.put(SPParameter.class.getSimpleName(), LexTokens.SP_PARAMETER);
+		astIndex.put(Select.class.getSimpleName(), LexTokens.SELECT);
+		astIndex.put(SetClause.class.getSimpleName(), LexTokens.SET_CLAUSE);
+		astIndex.put(SetClauseList.class.getSimpleName(), LexTokens.SET_CLAUSE_LIST);
+		astIndex.put(SourceHint.class.getSimpleName(), LexTokens.SOURCE_HINT);
+		astIndex.put(SpecificHint.class.getSimpleName(), LexTokens.SPECIFIC_HINT);
+		astIndex.put(SubqueryHint.class.getSimpleName(), LexTokens.SUBQUERY_HINT);
+		astIndex.put(WithQueryCommand.class.getSimpleName(), LexTokens.WITH_QUERY_COMMAND);
+		astIndex.put(Statement.class.getSimpleName(), LexTokens.STATEMENT);
+		astIndex.put(AssignmentStatement.class.getSimpleName(), LexTokens.ASSIGNMENT_STATEMENT);
+		astIndex.put(DeclareStatement.class.getSimpleName(), LexTokens.DECLARE_STATEMENT);
+		astIndex.put(ReturnStatement.class.getSimpleName(), LexTokens.RETURN_STATEMENT);
+		astIndex.put(Block.class.getSimpleName(), LexTokens.BLOCK);
+		astIndex.put(BranchingStatement.class.getSimpleName(), LexTokens.BRANCHING_STATEMENT);
+		astIndex.put(CommandStatement.class.getSimpleName(), LexTokens.COMMAND_STATEMENT);
+		astIndex.put(IfStatement.class.getSimpleName(), LexTokens.IF_STATEMENT);
+		astIndex.put(LoopStatement.class.getSimpleName(), LexTokens.LOOP_STATEMENT);
+		astIndex.put(RaiseStatement.class.getSimpleName(), LexTokens.RAISE_STATEMENT);
+		astIndex.put(WhileStatement.class.getSimpleName(), LexTokens.WHILE_STATEMENT);
+		astIndex.put(ExceptionExpression.class.getSimpleName(), LexTokens.EXCEPTION_EXPRESSION);
+		astIndex.put(Function.class.getSimpleName(), LexTokens.FUNCTION);
+		astIndex.put(AggregateSymbol.class.getSimpleName(), LexTokens.AGGREGATE_SYMBOL);
+		astIndex.put(Symbol.class.getSimpleName(), LexTokens.SYMBOL);
+		astIndex.put(AliasSymbol.class.getSimpleName(), LexTokens.ALIAS_SYMBOL);
+		astIndex.put(ElementSymbol.class.getSimpleName(), LexTokens.ELEMENT_SYMBOL);
+		astIndex.put(ExpressionSymbol.class.getSimpleName(), LexTokens.EXPRESSION_SYMBOL);
+		astIndex.put(GroupSymbol.class.getSimpleName(), LexTokens.GROUP_SYMBOL);
+		astIndex.put(Array.class.getSimpleName(), LexTokens.ARRAY);
+		astIndex.put(CaseExpression.class.getSimpleName(), LexTokens.CASE_EXPRESSION);
+		astIndex.put(Constant.class.getSimpleName(), LexTokens.CONSTANT);
+		astIndex.put(DerivedColumn.class.getSimpleName(), LexTokens.DERIVED_COLUMN);
+		astIndex.put(JSONObject.class.getSimpleName(), LexTokens.JSON_OBJECT);
+		astIndex.put(MultipleElementSymbol.class.getSimpleName(), LexTokens.MULTIPLE_ELEMENT_SYMBOL);
+		astIndex.put(QueryString.class.getSimpleName(), LexTokens.QUERY_STRING);
+		astIndex.put(Reference.class.getSimpleName(), LexTokens.REFERENCE);
+		astIndex.put(ScalarSubquery.class.getSimpleName(), LexTokens.SCALAR_SUBQUERY);
+		astIndex.put(SearchedCaseExpression.class.getSimpleName(), LexTokens.SEARCHED_CASE_EXPRESSION);
+		astIndex.put(TextLine.class.getSimpleName(), LexTokens.TEXT_LINE);
+		astIndex.put(WindowFunction.class.getSimpleName(), LexTokens.WINDOW_FUNCTION);
+		astIndex.put(WindowSpecification.class.getSimpleName(), LexTokens.WINDOW_SPECIFICATION);
+		astIndex.put(XMLAttributes.class.getSimpleName(), LexTokens.XML_ATTRIBUTES);
+		astIndex.put(XMLElement.class.getSimpleName(), LexTokens.XML_ELEMENT);
+		astIndex.put(XMLForest.class.getSimpleName(), LexTokens.XML_FOREST);
+		astIndex.put(XMLNamespaces.class.getSimpleName(), LexTokens.XML_NAMESPACES);
+		astIndex.put(XMLParse.class.getSimpleName(), LexTokens.XML_PARSE);
+		astIndex.put(XMLQuery.class.getSimpleName(), LexTokens.XML_QUERY);
+		astIndex.put(XMLSerialize.class.getSimpleName(), LexTokens.XML_SERIALIZE);
 	}
 
 	public static String getTypeId(Class<? extends ASTNode> astNodeClass) {
-		try {
-			Class<?> astClass = astIndex.get(astNodeClass.getSimpleName());
-			Field idField = astClass.getField("ID");
-			Object idValue = idField.get(null);
-			return idValue.toString();
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
+		LexTokens lexToken = astIndex.get(astNodeClass.getSimpleName());
+		return lexToken.getId();
+	}
+
+	/**
+	 * Callback interface that clients should implement
+	 * to all class redirection using {@link TeiidSqlLexicon#redirect}
+	 */
+	public interface TeiidSqlCallback {
+
+		Object criteria(TeiidSqlContext context) throws Exception;
+
+		Object compareCriteria(TeiidSqlContext context) throws Exception;
+
+		Object subqueryCompareCriteria(TeiidSqlContext context) throws Exception;
+
+		Object setCriteria(TeiidSqlContext context) throws Exception;
+
+		Object subquerySetCriteria(TeiidSqlContext context) throws Exception;
+
+		Object betweenCriteria(TeiidSqlContext context) throws Exception;
+
+		Object compoundCriteria(TeiidSqlContext context) throws Exception;
+
+		Object existsCriteria(TeiidSqlContext context) throws Exception;
+
+		Object expressionCriteria(TeiidSqlContext context) throws Exception;
+
+		Object isNullCriteria(TeiidSqlContext context) throws Exception;
+
+		Object matchCriteria(TeiidSqlContext context) throws Exception;
+
+		Object notCriteria(TeiidSqlContext context) throws Exception;
+
+		Object alterProcedure(TeiidSqlContext context) throws Exception;
+
+		Object alterTrigger(TeiidSqlContext context) throws Exception;
+
+		Object alterView(TeiidSqlContext context) throws Exception;
+
+		Object delete(TeiidSqlContext context) throws Exception;
+
+		Object insert(TeiidSqlContext context) throws Exception;
+
+		Object storedProcedure(TeiidSqlContext context) throws Exception;
+
+		Object update(TeiidSqlContext context) throws Exception;
+
+		Object dynamicCommand(TeiidSqlContext context) throws Exception;
+
+		Object query(TeiidSqlContext context) throws Exception;
+
+		Object setQuery(TeiidSqlContext context) throws Exception;
+
+		Object createProcedureCommand(TeiidSqlContext context) throws Exception;
+
+		Object triggerAction(TeiidSqlContext context) throws Exception;
+
+		Object arrayTable(TeiidSqlContext context) throws Exception;
+
+		Object objectTable(TeiidSqlContext context) throws Exception;
+
+		Object textTable(TeiidSqlContext context) throws Exception;
+
+		Object xmlTable(TeiidSqlContext context) throws Exception;
+
+		Object joinPredicate(TeiidSqlContext context) throws Exception;
+
+		Object subqueryFromClause(TeiidSqlContext context) throws Exception;
+
+		Object unaryFromClause(TeiidSqlContext context) throws Exception;
+
+		Object from(TeiidSqlContext context) throws Exception;
+
+		Object groupBy(TeiidSqlContext context) throws Exception;
+
+		Object into(TeiidSqlContext context) throws Exception;
+
+		Object joinType(TeiidSqlContext context) throws Exception;
+
+		Object limit(TeiidSqlContext context) throws Exception;
+
+		Object makeDep(TeiidSqlContext context) throws Exception;
+
+		Object namespaceItem(TeiidSqlContext context) throws Exception;
+
+		Object nullNode(TeiidSqlContext context) throws Exception;
+
+		Object projectedColumn(TeiidSqlContext context) throws Exception;
+
+		Object objectColumn(TeiidSqlContext context) throws Exception;
+
+		Object textColumn(TeiidSqlContext context) throws Exception;
+
+		Object xmlColumn(TeiidSqlContext context) throws Exception;
+
+		Object option(TeiidSqlContext context) throws Exception;
+
+		Object orderBy(TeiidSqlContext context) throws Exception;
+
+		Object orderByItem(TeiidSqlContext context) throws Exception;
+
+		Object spParameter(TeiidSqlContext context) throws Exception;
+
+		Object select(TeiidSqlContext context) throws Exception;
+
+		Object setClause(TeiidSqlContext context) throws Exception;
+
+		Object setClauseList(TeiidSqlContext context) throws Exception;
+
+		Object sourceHint(TeiidSqlContext context) throws Exception;
+
+		Object specificHint(TeiidSqlContext context) throws Exception;
+
+		Object subqueryHint(TeiidSqlContext context) throws Exception;
+
+		Object withQueryCommand(TeiidSqlContext context) throws Exception;
+
+		Object assignmentStatement(TeiidSqlContext context) throws Exception;
+
+		Object declareStatement(TeiidSqlContext context) throws Exception;
+
+		Object returnStatement(TeiidSqlContext context) throws Exception;
+
+		Object block(TeiidSqlContext context) throws Exception;
+
+		Object branchingStatement(TeiidSqlContext context) throws Exception;
+
+		Object commandStatement(TeiidSqlContext context) throws Exception;
+
+		Object ifStatement(TeiidSqlContext context) throws Exception;
+
+		Object loopStatement(TeiidSqlContext context) throws Exception;
+
+		Object raiseStatement(TeiidSqlContext context) throws Exception;
+
+		Object whileStatement(TeiidSqlContext context) throws Exception;
+
+		Object exceptionExpression(TeiidSqlContext context) throws Exception;
+
+		Object function(TeiidSqlContext context) throws Exception;
+
+		Object aggregateSymbol(TeiidSqlContext context) throws Exception;
+
+		Object aliasSymbol(TeiidSqlContext context) throws Exception;
+
+		Object elementSymbol(TeiidSqlContext context) throws Exception;
+
+		Object expressionSymbol(TeiidSqlContext context) throws Exception;
+
+		Object groupSymbol(TeiidSqlContext context) throws Exception;
+
+		Object array(TeiidSqlContext context) throws Exception;
+
+		Object caseExpression(TeiidSqlContext context) throws Exception;
+
+		Object constant(TeiidSqlContext context) throws Exception;
+
+		Object derivedColumn(TeiidSqlContext context) throws Exception;
+
+		Object jsonObject(TeiidSqlContext context) throws Exception;
+
+		Object multipleElementSymbol(TeiidSqlContext context) throws Exception;
+
+		Object queryString(TeiidSqlContext context) throws Exception;
+
+		Object reference(TeiidSqlContext context) throws Exception;
+
+		Object scalarSubquery(TeiidSqlContext context) throws Exception;
+
+		Object searchedCaseExpression(TeiidSqlContext context) throws Exception;
+
+		Object textLine(TeiidSqlContext context) throws Exception;
+
+		Object windowFunction(TeiidSqlContext context) throws Exception;
+
+		Object windowSpecification(TeiidSqlContext context) throws Exception;
+
+		Object xmlAttributes(TeiidSqlContext context) throws Exception;
+
+		Object xmlElement(TeiidSqlContext context) throws Exception;
+
+		Object xmlForest(TeiidSqlContext context) throws Exception;
+
+		Object xmlNamespaces(TeiidSqlContext context) throws Exception;
+
+		Object xmlParse(TeiidSqlContext context) throws Exception;
+
+		Object xmlQuery(TeiidSqlContext context) throws Exception;
+
+		Object xmlSerialize(TeiidSqlContext context) throws Exception;
+	}
+
+	/**
+	 * Enables conversion of lexicon interfaces into visitor type pattern
+	 * where each lexicon interface is represented by a method in the
+	 * {@link TeiidSqlCallback} interface.
+
+	 * @param token
+	 * @param callback
+	 * @param context
+	 * @throws exception
+	 */
+	public static void redirect(LexTokens token, TeiidSqlCallback callback, TeiidSqlContext context) throws Exception{
+
+		switch(token) {
+
+			case CRITERIA:
+				callback.criteria(context);
+				break;
+
+			case COMPARE_CRITERIA:
+				callback.compareCriteria(context);
+				break;
+
+			case SUBQUERY_COMPARE_CRITERIA:
+				callback.subqueryCompareCriteria(context);
+				break;
+
+			case SET_CRITERIA:
+				callback.setCriteria(context);
+				break;
+
+			case SUBQUERY_SET_CRITERIA:
+				callback.subquerySetCriteria(context);
+				break;
+
+			case BETWEEN_CRITERIA:
+				callback.betweenCriteria(context);
+				break;
+
+			case COMPOUND_CRITERIA:
+				callback.compoundCriteria(context);
+				break;
+
+			case EXISTS_CRITERIA:
+				callback.existsCriteria(context);
+				break;
+
+			case EXPRESSION_CRITERIA:
+				callback.expressionCriteria(context);
+				break;
+
+			case IS_NULL_CRITERIA:
+				callback.isNullCriteria(context);
+				break;
+
+			case MATCH_CRITERIA:
+				callback.matchCriteria(context);
+				break;
+
+			case NOT_CRITERIA:
+				callback.notCriteria(context);
+				break;
+
+			case ALTER_PROCEDURE:
+				callback.alterProcedure(context);
+				break;
+
+			case ALTER_TRIGGER:
+				callback.alterTrigger(context);
+				break;
+
+			case ALTER_VIEW:
+				callback.alterView(context);
+				break;
+
+			case DELETE:
+				callback.delete(context);
+				break;
+
+			case INSERT:
+				callback.insert(context);
+				break;
+
+			case STORED_PROCEDURE:
+				callback.storedProcedure(context);
+				break;
+
+			case UPDATE:
+				callback.update(context);
+				break;
+
+			case DYNAMIC_COMMAND:
+				callback.dynamicCommand(context);
+				break;
+
+			case QUERY:
+				callback.query(context);
+				break;
+
+			case SET_QUERY:
+				callback.setQuery(context);
+				break;
+
+			case CREATE_PROCEDURE_COMMAND:
+				callback.createProcedureCommand(context);
+				break;
+
+			case TRIGGER_ACTION:
+				callback.triggerAction(context);
+				break;
+
+			case ARRAY_TABLE:
+				callback.arrayTable(context);
+				break;
+
+			case OBJECT_TABLE:
+				callback.objectTable(context);
+				break;
+
+			case TEXT_TABLE:
+				callback.textTable(context);
+				break;
+
+			case XML_TABLE:
+				callback.xmlTable(context);
+				break;
+
+			case JOIN_PREDICATE:
+				callback.joinPredicate(context);
+				break;
+
+			case SUBQUERY_FROM_CLAUSE:
+				callback.subqueryFromClause(context);
+				break;
+
+			case UNARY_FROM_CLAUSE:
+				callback.unaryFromClause(context);
+				break;
+
+			case FROM:
+				callback.from(context);
+				break;
+
+			case GROUP_BY:
+				callback.groupBy(context);
+				break;
+
+			case INTO:
+				callback.into(context);
+				break;
+
+			case JOIN_TYPE:
+				callback.joinType(context);
+				break;
+
+			case LIMIT:
+				callback.limit(context);
+				break;
+
+			case MAKE_DEP:
+				callback.makeDep(context);
+				break;
+
+			case NAMESPACE_ITEM:
+				callback.namespaceItem(context);
+				break;
+
+			case NULL_NODE:
+				callback.nullNode(context);
+				break;
+
+			case PROJECTED_COLUMN:
+				callback.projectedColumn(context);
+				break;
+
+			case OBJECT_COLUMN:
+				callback.objectColumn(context);
+				break;
+
+			case TEXT_COLUMN:
+				callback.textColumn(context);
+				break;
+
+			case XML_COLUMN:
+				callback.xmlColumn(context);
+				break;
+
+			case OPTION:
+				callback.option(context);
+				break;
+
+			case ORDER_BY:
+				callback.orderBy(context);
+				break;
+
+			case ORDER_BY_ITEM:
+				callback.orderByItem(context);
+				break;
+
+			case SP_PARAMETER:
+				callback.spParameter(context);
+				break;
+
+			case SELECT:
+				callback.select(context);
+				break;
+
+			case SET_CLAUSE:
+				callback.setClause(context);
+				break;
+
+			case SET_CLAUSE_LIST:
+				callback.setClauseList(context);
+				break;
+
+			case SOURCE_HINT:
+				callback.sourceHint(context);
+				break;
+
+			case SPECIFIC_HINT:
+				callback.specificHint(context);
+				break;
+
+			case SUBQUERY_HINT:
+				callback.subqueryHint(context);
+				break;
+
+			case WITH_QUERY_COMMAND:
+				callback.withQueryCommand(context);
+				break;
+
+			case ASSIGNMENT_STATEMENT:
+				callback.assignmentStatement(context);
+				break;
+
+			case DECLARE_STATEMENT:
+				callback.declareStatement(context);
+				break;
+
+			case RETURN_STATEMENT:
+				callback.returnStatement(context);
+				break;
+
+			case BLOCK:
+				callback.block(context);
+				break;
+
+			case BRANCHING_STATEMENT:
+				callback.branchingStatement(context);
+				break;
+
+			case COMMAND_STATEMENT:
+				callback.commandStatement(context);
+				break;
+
+			case IF_STATEMENT:
+				callback.ifStatement(context);
+				break;
+
+			case LOOP_STATEMENT:
+				callback.loopStatement(context);
+				break;
+
+			case RAISE_STATEMENT:
+				callback.raiseStatement(context);
+				break;
+
+			case WHILE_STATEMENT:
+				callback.whileStatement(context);
+				break;
+
+			case EXCEPTION_EXPRESSION:
+				callback.exceptionExpression(context);
+				break;
+
+			case FUNCTION:
+				callback.function(context);
+				break;
+
+			case AGGREGATE_SYMBOL:
+				callback.aggregateSymbol(context);
+				break;
+
+			case ALIAS_SYMBOL:
+				callback.aliasSymbol(context);
+				break;
+
+			case ELEMENT_SYMBOL:
+				callback.elementSymbol(context);
+				break;
+
+			case EXPRESSION_SYMBOL:
+				callback.expressionSymbol(context);
+				break;
+
+			case GROUP_SYMBOL:
+				callback.groupSymbol(context);
+				break;
+
+			case ARRAY:
+				callback.array(context);
+				break;
+
+			case CASE_EXPRESSION:
+				callback.caseExpression(context);
+				break;
+
+			case CONSTANT:
+				callback.constant(context);
+				break;
+
+			case DERIVED_COLUMN:
+				callback.derivedColumn(context);
+				break;
+
+			case JSON_OBJECT:
+				callback.jsonObject(context);
+				break;
+
+			case MULTIPLE_ELEMENT_SYMBOL:
+				callback.multipleElementSymbol(context);
+				break;
+
+			case QUERY_STRING:
+				callback.queryString(context);
+				break;
+
+			case REFERENCE:
+				callback.reference(context);
+				break;
+
+			case SCALAR_SUBQUERY:
+				callback.scalarSubquery(context);
+				break;
+
+			case SEARCHED_CASE_EXPRESSION:
+				callback.searchedCaseExpression(context);
+				break;
+
+			case TEXT_LINE:
+				callback.textLine(context);
+				break;
+
+			case WINDOW_FUNCTION:
+				callback.windowFunction(context);
+				break;
+
+			case WINDOW_SPECIFICATION:
+				callback.windowSpecification(context);
+				break;
+
+			case XML_ATTRIBUTES:
+				callback.xmlAttributes(context);
+				break;
+
+			case XML_ELEMENT:
+				callback.xmlElement(context);
+				break;
+
+			case XML_FOREST:
+				callback.xmlForest(context);
+				break;
+
+			case XML_NAMESPACES:
+				callback.xmlNamespaces(context);
+				break;
+
+			case XML_PARSE:
+				callback.xmlParse(context);
+				break;
+
+			case XML_QUERY:
+				callback.xmlQuery(context);
+				break;
+
+			case XML_SERIALIZE:
+				callback.xmlSerialize(context);
+				break;
+
+			default:
+				throw new UnsupportedOperationException();
 		}
 	}
 }

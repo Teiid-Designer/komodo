@@ -773,6 +773,11 @@ public class DataTypeManagerService implements IDataTypeManagerService {
         return AnnotationUtils.getUpdatedName(dataSourceType, dataSourceType.id(), teiidVersion);
     }
 
+    @Override
+    public boolean isLOB(Class<?> type) {
+        return DefaultDataTypes.isLOB(type);
+    }
+
     /**
      * Is the data type represented by the given type id comparable
      *

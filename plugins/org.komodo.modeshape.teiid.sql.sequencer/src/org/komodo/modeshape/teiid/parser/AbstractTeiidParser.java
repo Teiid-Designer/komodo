@@ -116,7 +116,7 @@ public abstract class AbstractTeiidParser implements TeiidParser {
 			parameter.setIndex(paramIndex++);
 			parameter.setExpression(value);
 			parameter.setParameterType(SPParameter.IN);
-			storedProcedure.setParameter(parameter);
+			storedProcedure.addParameter(parameter);
 		}
 	}
 
