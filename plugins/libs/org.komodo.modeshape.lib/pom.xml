@@ -14,8 +14,8 @@
 
     <properties>
         <modeshape.version>3.8.0.Final</modeshape.version>
-        <version.slf4j.api>1.6.1</version.slf4j.api>
-        <version.logback>0.9.29</version.logback>
+        <!-- Should be the same as specified in the modeshape bom. Cannot pick it up directly -->
+        <logback.version>1.0.9</logback.version>
     </properties>
 
     <profiles>
@@ -34,48 +34,17 @@
                             <execution>
                                 <id>copy-dependencies-src</id>
                                 <goals>
-                                    <goal>copy</goal>
+                                    <goal>copy-dependencies</goal>
                                 </goals>
                                 <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>javax.jcr</groupId>
-                                            <artifactId>jcr</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.modeshape</groupId>
-                                            <artifactId>modeshape-jcr</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.modeshape</groupId>
-                                            <artifactId>modeshape-common</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.modeshape</groupId>
-                                            <artifactId>modeshape-sequencer-ddl</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>ch.qos.logback</groupId>
-                                            <artifactId>logback-core</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>ch.qos.logback</groupId>
-                                            <artifactId>logback-classic</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.slf4j</groupId>
-                                            <artifactId>slf4j-api</artifactId>
-                                            <classifier>sources</classifier>
-                                        </artifactItem>
-                                    </artifactItems>
+                                    <classifier>sources</classifier>
+                                    <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
                                     <skip>false</skip>
                                     <stripVersion>true</stripVersion>
+                                    <excludeGroupIds>
+                            			org.jboss.tools.komodo.plugins,
+                            			org.jboss.tools.komodo.plugins.libs
+                           			</excludeGroupIds>
                                     <outputDirectory>${project.basedir}/libsrc</outputDirectory>
                                 </configuration>
                             </execution>
@@ -95,41 +64,16 @@
                     <execution>
                         <id>copy-dependencies</id>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>javax.jcr</groupId>
-                                    <artifactId>jcr</artifactId>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.modeshape</groupId>
-                                    <artifactId>modeshape-jcr</artifactId>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.modeshape</groupId>
-                                    <artifactId>modeshape-common</artifactId>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.modeshape</groupId>
-                                    <artifactId>modeshape-sequencer-ddl</artifactId>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>ch.qos.logback</groupId>
-                                    <artifactId>logback-core</artifactId>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>ch.qos.logback</groupId>
-                                    <artifactId>logback-classic</artifactId>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>slf4j-api</artifactId>
-                                </artifactItem>
-                            </artifactItems>
                             <skip>false</skip>
                             <stripVersion>true</stripVersion>
+                            <overWriteIfNewer>false</overWriteIfNewer>
+                            <excludeGroupIds>
+                            	org.jboss.tools.komodo.plugins,
+                            	org.jboss.tools.komodo.plugins.libs
+                           	</excludeGroupIds>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
                         </configuration>
                     </execution>
@@ -259,6 +203,24 @@
             </snapshots>
         </repository>
     </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Import the ModeShape BOM for embedded usage. This adds to 
+                the "dependenciesManagement" section defaults for all of the modules we might 
+                need, but we still have to include in the "dependencies" section the modules 
+                we DO need. The benefit is that we don't have to specify the versions of 
+                any of those modules. -->
+            <dependency>
+                <groupId>org.modeshape.bom</groupId>
+                <artifactId>modeshape-bom-embedded</artifactId>
+                <version>${modeshape.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
     <dependencies>
         <dependency>
             <groupId>javax.jcr</groupId>
@@ -276,11 +238,15 @@
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-sequencer-ddl</artifactId>
         </dependency>
-        <!-- Our code implements a custom logger using LogBack (which implements 
-            the SLF4J API) and implements ModeShape's logging factory -->
+        <dependency>
+            <groupId>org.modeshape</groupId>
+            <artifactId>modeshape-schematic</artifactId>
+        </dependency>
+        <!-- Not included in modeshape bom explicitly but need it for LogConfigurator -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -291,35 +257,4 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
-    <dependencyManagement>
-        <dependencies>
-            <!-- Import the ModeShape BOM for embedded usage. This adds to 
-                the "dependenciesManagement" section defaults for all of the modules we might 
-                need, but we still have to include in the "dependencies" section the modules 
-                we DO need. The benefit is that we don't have to specify the versions of 
-                any of those modules. -->
-            <dependency>
-                <groupId>org.modeshape.bom</groupId>
-                <artifactId>modeshape-bom-embedded</artifactId>
-                <version>${modeshape.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>${version.logback}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${version.logback}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${version.slf4j.api}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 </project>

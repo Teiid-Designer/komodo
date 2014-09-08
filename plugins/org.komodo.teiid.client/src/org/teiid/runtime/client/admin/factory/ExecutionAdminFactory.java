@@ -19,7 +19,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.teiid.runtime.client.admin;
+package org.teiid.runtime.client.admin.factory;
 
 import java.sql.Driver;
 import java.util.HashMap;
@@ -32,6 +32,7 @@ import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.jdbc.TeiidDriver;
+import org.teiid.runtime.client.admin.ExecutionAdmin;
 import org.teiid.runtime.client.query.QueryService;
 
 /**

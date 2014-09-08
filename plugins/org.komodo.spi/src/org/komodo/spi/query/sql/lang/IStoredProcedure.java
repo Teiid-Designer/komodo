@@ -22,7 +22,6 @@
 package org.komodo.spi.query.sql.lang;
 
 import java.util.List;
-
 import org.komodo.spi.query.sql.ILanguageVisitor;
 
 /**
@@ -37,7 +36,7 @@ public interface IStoredProcedure<P extends ISPParameter, E extends IExpression,
     
     List<P> getInputParameters();
 
-    void setParameter(P parameter);
+    void addParameter(P parameter);
     
     String getProcedureCallableName();
 

@@ -57,12 +57,22 @@ public interface StringConstants {
     /**
      * The String "\t"
      */
-    String TAB = "\n"; //$NON-NLS-1$
+    String TAB = "\t"; //$NON-NLS-1$
     
     /**
      * A Comma.
      */
     String COMMA = ","; //$NON-NLS-1$
+
+    /**
+     * A Colon.
+     */
+    String COLON = ":"; //$NON-NLS-1$
+
+    /**
+     * A Semi Colon.
+     */
+    String SEMI_COLON = ";"; //$NON-NLS-1$
 
     /**
      * A Hyphen.
@@ -75,14 +85,39 @@ public interface StringConstants {
     String DOT = "."; //$NON-NLS-1$
 
     /**
+     * A Speech mark.
+     */
+    String SPEECH_MARK = "\""; //$NON-NLS-1$
+
+    /**
+     * A Quote mark.
+     */
+    String QUOTE_MARK = "'"; //$NON-NLS-1$
+
+    /**
+     * A Question mark.
+     */
+    String QUESTION_MARK = "?"; //$NON-NLS-1$
+
+    /**
      * Two Dots
      */
     String DOT_DOT = ".."; //$NON-NLS-1$
 
     /**
-     * class extension
+     * class
      */
     String CLASS = "class"; //$NON-NLS-1$
+
+    /**
+     * interface
+     */
+    String INTERFACE = "interface"; //$NON-NLS-1$
+
+    /**
+     * enum
+     */
+    String ENUM = "enum"; //$NON-NLS-1$
 
     /**
      * xml extension
@@ -116,6 +151,16 @@ public interface StringConstants {
     String EQUALS = "="; //$NON-NLS-1$
 
     /**
+     * Open Bracket
+     */
+    String OPEN_BRACKET = "("; //$NON-NLS-1$
+
+    /**
+     * Close Bracket
+     */
+    String CLOSE_BRACKET = ")"; //$NON-NLS-1$
+
+    /**
      * Open Angle Bracket
      */
 	String OPEN_ANGLE_BRACKET = "<"; //$NON-NLS-1$
@@ -134,6 +179,36 @@ public interface StringConstants {
      * Close Square Bracket
      */
     String CLOSE_SQUARE_BRACKET = "]"; //$NON-NLS-1$
+
+    /**
+     * Open Brace
+     */
+    String OPEN_BRACE = "{"; //$NON-NLS-1$
+
+    /**
+     * Close Brace
+     */
+    String CLOSE_BRACE = "}"; //$NON-NLS-1$
+
+    /**
+     * Minus Sign
+     */
+    String MINUS = "-"; //$NON-NLS-1$
+
+    /**
+     * Plus Sign
+     */
+    String PLUS = "+"; //$NON-NLS-1$
+
+    /**
+     * Multiple Sign
+     */
+    String MULTIPLY = STAR;
+
+    /**
+     * Divide Sign
+     */
+    String DIVIDE = FORWARD_SLASH;
 
 	/**
    * komodo
@@ -189,5 +264,35 @@ public interface StringConstants {
    * JAR File Extension
    */
   String JAR = "jar"; //$NON-NLS-1$
+
+  /**
+   * JAVA File Extension
+   */
+  String JAVA = "java"; //$NON-NLS-1$
+
+  /**
+   * src directory
+   */
+  String SRC = "src"; //$NON-NLS-1$
+
+  /**
+   * public
+   */
+  String PUBLIC = "public"; //$NON-NLS-1$
+
+  /**
+   * static
+   */
+  String STATIC = "static"; //$NON-NLS-1$
+
+  /**
+   * final
+   */
+  String FINAL = "final"; //$NON-NLS-1$
+
+  /**
+   * private
+   */
+  String PRIVATE = "private"; //$NON-NLS-1$
 }
 

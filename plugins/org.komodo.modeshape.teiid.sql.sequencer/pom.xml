@@ -1,0 +1,87 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jboss.tools.komodo</groupId>
+		<artifactId>plugins</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<groupId>org.jboss.tools.komodo.plugins</groupId>
+	<artifactId>org.komodo.modeshape.teiid.sql.sequencer</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>eclipse-plugin</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.basedir}/src/org/komodo/modeshape/teiid/parser</directory>
+							<includes>
+								<include>**/v*/Teiid*Parser.java</include>
+								<include>**/v*/Teiid*ParserConstants.java</include>
+								<include>**/v*/Teiid*ParserTokenManager.java</include>
+							</includes>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>javacc-maven-plugin</artifactId>
+				<version>2.6</version>
+				<executions>
+					<execution>
+						<id>javacc</id>
+						<goals>
+							<goal>jjtree-javacc</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<sourceDirectory>${project.basedir}</sourceDirectory>
+					<includes>
+						<include>src/javacc/*Parser.jjt</include>
+					</includes>
+					<!-- 
+					        These options should be an identical superset of the options
+					        configured in the javacc/*.jjt files
+					-->
+					<buildNodeFiles>false</buildNodeFiles>
+					<errorReporting>true</errorReporting>
+					<grammarEncoding>UTF-8</grammarEncoding>
+					<ignoreCase>true</ignoreCase>
+					<interimDirectory>${project.basedir}/src</interimDirectory>
+					<isStatic>false</isStatic>
+					<javaUnicodeEscape>true</javaUnicodeEscape>
+					<keepLineColumn>true</keepLineColumn>
+					<multi>true</multi>
+					<nodeClass>ASTNode</nodeClass>
+					<nodeDefaultVoid>true</nodeDefaultVoid>
+					<nodeFactory>TeiidNodeFactory</nodeFactory>
+					<nodePackage>org.komodo.modeshape.teiid.sql.lang</nodePackage>
+					<nodePrefix/>
+					<nodeScopeHook>false</nodeScopeHook>
+					<nodeUsesParser>true</nodeUsesParser>
+					<outputDirectory>${project.basedir}/src</outputDirectory>
+					<unicodeInput>false</unicodeInput>
+					<visitor>false</visitor>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tychoVersion}</version>
+				<!-- not strictly needed but this suppresses warnings when compiling 
+					that the default value (1.5) is being overwritten by the value in the MANIFEST.MF -->
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

@@ -5,7 +5,6 @@ package org.teiid.query.sql.symbol.v8;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
@@ -157,14 +156,10 @@ public class Aggregate8Symbol extends Function implements AggregateSymbol {
             case TEXTAGG:
                 return DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass();
             case USER_DEFINED:
-                // TODO
-                // Dont want to bring in function descriptors if one can help it
-                // May need this for resolving
-
-//                if (this.getFunctionDescriptor() == null) {
-//                    return null;
-//                }
-//                return this.getFunctionDescriptor().getReturnType();
+                if (this.getFunctionDescriptor() == null) {
+                    return null;
+                }
+                return this.getFunctionDescriptor().getReturnType();
             case JSONARRAY_AGG:
                 return DataTypeManagerService.DefaultDataTypes.CLOB.getTypeClass();
             case STRING_AGG:

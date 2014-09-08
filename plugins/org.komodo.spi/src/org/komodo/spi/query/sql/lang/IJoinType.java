@@ -21,12 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.sql.ILanguageVisitor;
 
 /**
  *
  */
-public interface IJoinType <LV extends ILanguageVisitor> extends ILanguageObject<LV> {
+public interface IJoinType <LV extends ILanguageVisitor> extends ILanguageObject<LV>, StringConstants {
 
     /**
      * Delineation of the category of join type
@@ -68,6 +69,33 @@ public interface IJoinType <LV extends ILanguageVisitor> extends ILanguageObject
         
         public boolean isOuter() {
             return this.outer;
+        }
+
+        public String toPrintStatement() {
+            String name = name();
+            String JOIN = "JOIN"; //$NON-NLS-1$
+            
+            name = name.substring((JOIN + UNDERSCORE).length());
+            name = name.replaceAll(UNDERSCORE, SPACE);
+            name = name + SPACE + JOIN;
+            return name;
+        }
+
+        /**
+         * @param name
+         * @return Types representing the given name
+         */
+        public static Types findType(String name) {
+            if (name == null)
+                return null;
+
+            name = name.toUpperCase();
+            for (Types type : values()) {
+                if (type.name().equals(name))
+                    return type;
+            }
+
+            return null;
         }
     }
     
