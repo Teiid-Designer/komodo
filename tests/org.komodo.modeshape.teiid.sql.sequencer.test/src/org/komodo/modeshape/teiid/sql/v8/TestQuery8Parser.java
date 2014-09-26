@@ -148,8 +148,8 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testLikeWithEscapeException() {
-//        helpException("SELECT a from db.g where b like '#String' escape '#1'", "TEIID31100 Parsing error: Encountered \"like '#String' escape [*]'#1'[*]\" at line 1, column 50.\nTEIID30398 LIKE/SIMILAR TO ESCAPE value must be a single character: [#1].");
-        helpException("SELECT a from db.g where b like '#String' escape '#1'", null);
+        String expectedMsg = buildErrorMessage("'#1'", 1, 50, "LIKE/SIMILAR TO ESCAPE requires the value should have a length of 1 character only");
+        helpException("SELECT a from db.g where b like '#String' escape '#1'", expectedMsg);
     }
 
     @Test
@@ -192,23 +192,34 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testWindowedExpression() {
+        String expectedMsg = buildErrorMessage("over", 1, 18, "Cannot window a non-aggregate expression");
         String sql = "SELECT foo(x, y) over ()";
-        helpException(sql);
+        helpException(sql, expectedMsg);
     }
 
     @Test
     public void testInvalidLimit() {
-        helpException("SELECT * FROM pm1.g1 LIMIT -5");
+        String expectedMsg = buildErrorMessage("-", 1, 28, "Value must be absolute and not be prefixed with + or -");
+        helpException("SELECT * FROM pm1.g1 LIMIT -5", expectedMsg);
     }
 
     @Test
     public void testInvalidLimit_Offset() {
-        helpException("SELECT * FROM pm1.g1 LIMIT -1, 100");
+        String expectedMsg = buildErrorMessage("-", 1, 28, "Value must be absolute and not be prefixed with + or -");
+        helpException("SELECT * FROM pm1.g1 LIMIT -1, 100", expectedMsg);
     }
 
     @Test
     public void testTextTableNegativeWidth() {
-        helpException("SELECT * from texttable(null columns x string width -1) as x");
+        String expectedMsg = buildErrorMessage("-", 1, 53, "Value must be absolute and not be prefixed with + or -");
+        helpException("SELECT * from texttable(null columns x string width -1) as x", expectedMsg);
+    }
+
+    @Test
+    public void testTextTableNonNumericalWidthValue() {
+        String expectedMsg = buildDefaultErrorMessage("p", 1, 53);
+    
+        helpException("SELECT * from texttable(null columns x string width p) as x", expectedMsg);
     }
 
     @Test
@@ -316,22 +327,48 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
         helpTest(sql, expected, command);
     }
 
+    private String buildProcedureVersionMsg() {
+        return "Syntax is for Teiid Version 8.4.0+ while current Teiid Version is " + this.teiidVersion.toString() + ". Required Syntax: CREATE VIRTUAL PROCEDURE BEGIN";
+    }
+    
     @Test
     public void testIfElseWithoutBeginAndWithoutCreateVirtualProcedurePrefix() {
+        String mainMsg = buildErrorMessage("BEGIN", 1, 1, "The SQL expression starting with \"BEGIN\" is not valid.");
         String sql = "BEGIN IF (x > 1) select 1; IF (x > 1) select 1; ELSE select 1; END"; //$NON-NLS-1$
-        /* CREATE VIRTUAL PROCEDURE is a required prefix for version 8.0 - 8.4 */
-        helpException(sql);
 
-        this.teiidVersion = Version.TEIID_8_1.get();
-        this.parser = new QueryParser(teiidVersion);
-        helpException(sql);
+        Version[] versions = new Version[] {
+            Version.TEIID_8_0,
+            Version.TEIID_8_1,
+            Version.TEIID_8_2,
+            Version.TEIID_8_3
+        };
 
-        this.teiidVersion = Version.TEIID_8_2.get();
-        this.parser = new QueryParser(teiidVersion);
-        helpException(sql);
+        for (Version version : versions) {
+            this.teiidVersion = version.get();
+            this.parser = new QueryParser(teiidVersion);
 
-        this.teiidVersion = Version.TEIID_8_3.get();
-        this.parser = new QueryParser(teiidVersion);
-        helpException(sql);
+            /* CREATE VIRTUAL PROCEDURE is a required prefix for version 8.0 - 8.4 */
+            helpException(sql, mainMsg + SPACE + buildProcedureVersionMsg());
+
+            /* Check that the rest of the query is parsed despite the missing prefix by adding in deliberate error later on */
+            String fullMsg = mainMsg + SPACE + buildProcedureVersionMsg() + NEW_LINE
+                                + buildDefaultErrorMessage("ELSEselect", 1, 49) + NEW_LINE
+                                + "Was expecting one of:" + NEW_LINE
+                                + "    \"else\" ..." + NEW_LINE
+                                + "    \"end\" ..." + NEW_LINE
+                                + "    \"exception\" ..." + NEW_LINE
+                                + "    ";
+        
+            /* Deliberate mistake for ELSE keyword in IF clause */
+            String sql2 = "BEGIN IF (x > 1) select 1; IF (x > 1) select 1; ELSEselect 1; END"; //$NON-NLS-1$
+            /* CREATE VIRTUAL PROCEDURE is a required prefix for version 8.0 - 8.4 */
+            helpException(sql2, fullMsg);
+        }
+    }
+
+    @Test
+    public void testGroupByRollup() {
+        String expectedMsg = buildErrorMessage("rollup", 1, 28, "Syntax is for Teiid Version 8.5.0+ while current Teiid Version is " + teiidVersion.toString());
+        helpException("SELECT a FROM m.g GROUP BY rollup(b, c)", expectedMsg);
     }
 }

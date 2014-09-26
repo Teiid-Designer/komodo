@@ -22,6 +22,8 @@
 package org.komodo.modeshape.teiid.parser;
 
 import java.io.Reader;
+import java.util.List;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidParser.ParsingError;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
@@ -52,11 +54,11 @@ public interface TeiidParser {
     IDataTypeManagerService getDataTypeService();
 
     /**
-     * Reinitialise the parser against the new sql reader
+     * Reset the parser against the new sql reader
      *
      * @param sql
      */
-    void ReInit(Reader sql);
+    void reset(Reader sql);
 
     /**
      * @param nodeType
@@ -135,5 +137,10 @@ public interface TeiidParser {
      * @throws Exception 
      */
     Command procedureBodyCommand(ParseInfo parseInfo) throws Exception;
+
+    /**
+     * @return any errors accumulated while parsing
+     */
+    List<ParsingError> getErrors();
 
 }

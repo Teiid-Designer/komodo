@@ -21,14 +21,26 @@
 */
 package org.komodo.modeshape.teiid.sql.v86;
 
+import static org.junit.Assert.fail;
+import java.util.Arrays;
+import org.junit.Test;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
+import org.komodo.modeshape.teiid.sql.lang.Query;
+import org.komodo.modeshape.teiid.sql.lang.Select;
+import org.komodo.modeshape.teiid.sql.symbol.AggregateSymbol;
+import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
+import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbol;
+import org.komodo.modeshape.teiid.sql.symbol.WindowFunction;
+import org.komodo.modeshape.teiid.sql.symbol.WindowSpecification;
+import org.komodo.modeshape.teiid.sql.v85.TestQuery85Parser;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.komodo.modeshape.teiid.sql.v85.TestQuery85Parser;
 
 /**
  *
  */
-@SuppressWarnings( {"javadoc"} )
+@SuppressWarnings( {"nls", "javadoc"} )
 public class TestQuery86Parser extends TestQuery85Parser {
 
     protected TestQuery86Parser(ITeiidVersion teiidVersion) {
@@ -39,4 +51,33 @@ public class TestQuery86Parser extends TestQuery85Parser {
         this(Version.TEIID_8_6.get());
     }
 
+    @Override
+    @Test
+    public void testWindowedExpression() {
+        String sql = "SELECT foo(x, y) over ()";
+        String expectedSql = "SELECT foo(ALL x, y) OVER ()";
+
+        try {
+            ElementSymbol x = getFactory().newElementSymbol("x");
+            ElementSymbol y = getFactory().newElementSymbol("y");
+            AggregateSymbol aggSym = getFactory().newAggregateSymbol("foo", false, null);
+            aggSym.setArgs(new Expression[] {x, y});
+            WindowSpecification ws = getFactory().newWindowSpecification();
+
+            WindowFunction wf = getFactory().newWindowFunction("");
+            wf.setFunction(aggSym);
+            wf.setWindowSpecification(ws);
+
+            ExpressionSymbol es = getFactory().newNode(ASTNodes.EXPRESSION_SYMBOL);
+            es.setName("expr1");
+            es.setExpression(wf);
+
+            Select select = getFactory().newSelect(Arrays.asList(es));
+            Query query = getFactory().newQuery(select, null);
+
+            helpTest(sql, expectedSql, query);
+        } catch (Exception ex) {
+            fail(ex.getMessage());
+        }
+    }
 }
