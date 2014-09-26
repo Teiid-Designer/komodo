@@ -24,7 +24,6 @@ package org.teiid.query.sql;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.sql.Date;
@@ -32,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.junit.Test;
 import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
 import org.komodo.spi.runtime.version.ITeiidVersion;
@@ -4560,7 +4558,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         helpException("SELECT * FROM g1 inner join g2");
     }
 
-    /** SELECT a FROM m.g GROUP BY a, b HAVING COUNT(AVG(b)) */
+    /** SELECT a FROM m.g GROUP BY a, b HAVING COUNT(b) AS x = 5*/
     @Test
     public void testFailNestedAggregateInHaving() {
         helpException("SELECT a FROM m.g GROUP BY a, b HAVING COUNT(b) AS x = 5");
