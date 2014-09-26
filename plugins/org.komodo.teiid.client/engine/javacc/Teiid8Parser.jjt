@@ -4388,11 +4388,17 @@ Expression windowSpecification(Expression agg, ParseInfo info) :
 	<OVER>
 	{
 	  if (!(agg instanceof AggregateSymbol)) {
+
+	  	if (versionLessThan(Version.TEIID_8_6)) {
+	   		throw new ParseException(Messages.getString(Messages.TeiidParser.invalid_window, agg));
+    	}
+
 	    if (!(agg instanceof Function)) {
           throw new ParseException(Messages.getString(Messages.TeiidParser.invalid_window, agg));
         }
         Function f = (Function)agg;
         AggregateSymbol aggSymbol = createASTNode(ASTNodes.AGGREGATE_SYMBOL);
+        aggSymbol.setName(f.getName());
         aggSymbol.setAggregateFunction(f.getName());
         aggSymbol.setDistinct(false);
         aggSymbol.setArgs(f.getArgs());

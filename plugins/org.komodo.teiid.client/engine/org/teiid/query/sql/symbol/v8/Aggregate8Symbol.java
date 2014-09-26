@@ -189,7 +189,11 @@ public class Aggregate8Symbol extends Function implements AggregateSymbol {
 
     @Override
     public void setAggregateFunction(String aggregateFunction) {
-        setAggregateFunction(Type.valueOf(aggregateFunction));
+        Type funcType = Type.findAggregateFunction(aggregateFunction);
+        if (funcType == null)
+            funcType = Type.USER_DEFINED;
+
+        setAggregateFunction(funcType);
     }
 
     @Override
