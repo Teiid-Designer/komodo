@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
  */
 public class Messages {
 
-    private static final String BUNDLE_NAME = "org.teiid.runtime.client.messages"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME = "org.komodo.modeshape.teiid.messages"; //$NON-NLS-1$
 
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
@@ -116,7 +116,14 @@ public class Messages {
         proc_type_conflict,
         param_out,
         teiid_version_failure,
-        teiid_version_atleast_failure;
+        teiid_version_atleast_failure,
+        invalid_reserved_word_use,
+        no_from_clause,
+        invalid_command,
+        invalid_function_args,
+        invalid_join_clause,
+        unexpected_token,
+        parsing_error;
         
         @Override
         public String toString() {

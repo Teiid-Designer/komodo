@@ -37,7 +37,11 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
     }
 
     private void calculateType() {
-        switch (getAggregateFunction()) {
+        IAggregateSymbol.Type aggregateFunction = getAggregateFunction();
+        if (aggregateFunction == null)
+            return;
+
+        switch (aggregateFunction) {
             case COUNT:
                 assignDataTypeName(getDataTypeService().getCountType(), false);
                 break;
@@ -116,7 +120,11 @@ public class AggregateSymbol extends Function implements IAggregateSymbol<Langua
     }
 
     public void setAggregateFunction(String name) {
-        setProperty(TeiidSqlLexicon.AggregateSymbol.AGGREGATE_FUNCTION_PROP_NAME, name);
+        IAggregateSymbol.Type funcType = IAggregateSymbol.Type.findAggregateFunction(name);
+        if (funcType == null)
+            funcType = Type.USER_DEFINED;
+
+        setProperty(TeiidSqlLexicon.AggregateSymbol.AGGREGATE_FUNCTION_PROP_NAME, funcType.name());
         calculateType();
     }
 

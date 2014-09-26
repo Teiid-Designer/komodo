@@ -22,7 +22,9 @@
 
 package org.komodo.modeshape.teiid.parser;
 
+import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +41,7 @@ import org.komodo.modeshape.teiid.sql.lang.StoredProcedure;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
@@ -46,6 +49,59 @@ import org.komodo.utils.StringUtil;
 import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
 
 public abstract class AbstractTeiidParser implements TeiidParser {
+
+    public static class ParsingError implements StringConstants {
+
+        private final String token;
+
+        private final int line;
+
+        private final int column;
+
+        private final String message;
+
+        public ParsingError(String token, int line, int column, String message) {
+            this.token = token;
+            this.line = line;
+            this.column = column;
+            this.message = message;
+        }
+
+        /**
+         * @return the token
+         */
+        public String getToken() {
+            return this.token;
+        }
+
+        /**
+         * @return the line
+         */
+        public int getLine() {
+            return this.line;
+        }
+
+        /**
+         * @return the column
+         */
+        public int getColumn() {
+            return this.column;
+        }
+
+        /**
+         * @return the message
+         */
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public String toString() {
+            return Messages.getString(Messages.TeiidParser.parsing_error, token, line, column, message);
+        }
+    }
+
+    protected List<ParsingError> errors = new ArrayList<ParsingError>();
 
     protected Pattern udtPattern = Pattern.compile("(\\w+)\\s*\\(\\s*(\\d+),\\s*(\\d+),\\s*(\\d+)\\)"); //$NON-NLS-1$
     
@@ -61,6 +117,19 @@ public abstract class AbstractTeiidParser implements TeiidParser {
     @Override
     public ITeiidVersion getVersion() {
         return version;
+    }
+
+    @Override
+    public List<ParsingError> getErrors() {
+        return Collections.unmodifiableList(errors);
+    }
+
+    protected abstract void ReInit(Reader reader);
+
+    @Override
+    public void reset(Reader reader) {
+        errors.clear();
+        ReInit(reader);
     }
 
     /**
@@ -209,6 +278,9 @@ public abstract class AbstractTeiidParser implements TeiidParser {
     }
 
 	protected String normalizeStringLiteral(String s) {
+	    if (s == null)
+	        return null;
+
 		int start = 1;
 		boolean unescape = false;
   		if (s.charAt(0) == 'N') {
@@ -231,9 +303,10 @@ public abstract class AbstractTeiidParser implements TeiidParser {
 	 * @return normalized string id
 	 */
 	protected String normalizeId(String s) {
-		if (s.indexOf('"') == -1) {
+		if (s == null || s.indexOf('"') == -1) {
 			return s;
 		}
+
 		List<String> nameParts = new LinkedList<String>();
 		while (s.length() > 0) {
 			if (s.charAt(0) == '"') {

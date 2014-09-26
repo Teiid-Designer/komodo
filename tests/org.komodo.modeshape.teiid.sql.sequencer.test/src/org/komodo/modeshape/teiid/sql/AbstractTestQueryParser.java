@@ -32,7 +32,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
+import org.komodo.modeshape.teiid.Messages;
 import org.komodo.modeshape.teiid.TeiidClientException;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.language.SortSpecification;
 import org.komodo.modeshape.teiid.parser.ParseInfo;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
@@ -106,6 +108,7 @@ import org.komodo.modeshape.teiid.sql.symbol.XMLForest;
 import org.komodo.modeshape.teiid.sql.symbol.XMLParse;
 import org.komodo.modeshape.teiid.sql.symbol.XMLQuery;
 import org.komodo.modeshape.teiid.sql.symbol.XMLSerialize;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
 import org.komodo.spi.runtime.version.ITeiidVersion;
@@ -115,7 +118,7 @@ import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
  *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
+public abstract class AbstractTestQueryParser extends AbstractTest<Command> implements StringConstants {
 
     /**
      * @param teiidVersion 
@@ -130,11 +133,9 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
 
     protected void helpTest(String sql, String expectedString, Command expectedCommand, ParseInfo info) {
         Command actualCommand = null;
-        String actualString = null;
 
         try {
             actualCommand = parser.parseCommand(sql, info);
-            actualString = actualCommand.toString();
         } catch (Throwable e) {
             e.printStackTrace();
             if (e instanceof TeiidClientException) {
@@ -172,38 +173,42 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         assertEquals("SQL strings do not match: ", expectedString, actualString);
     }
 
-    protected void helpException(String sql) {
-        helpException(sql, null);
-    }
-
     protected void helpException(String sql, String expected) {
         try {
             parser.parseCommand(sql);
             fail("Expected exception for parsing " + sql);
         } catch (Exception e) {
-            if (expected != null) {
-                assertEquals(expected, e.getMessage());
-            }
+
+            assertTrue(e.getMessage().contains(expected));
+
+            if (e.getMessage().contains(TeiidSqlLexicon.Namespace.PREFIX))
+                fail("Error message should not contain the toString() representation of a modeshape node");
+
         } catch (AssertionError e) {
             throw e;
         } catch (Error e) {
-            if (expected != null) {
-                assertEquals(expected, e.getMessage());
-            }
+            throw e;
         }
     }
 
     protected void helpTestExpression(String sql, String expectedString, Expression expected) throws Exception {
         Expression actual = parser.parseExpression(sql);
-        String actualString = actual.toString();
         assertEquals("Command objects do not match: ", expected, actual);
     }
 
     protected void helpStmtTest(String stmt, String expectedString, Statement expectedStmt) throws Exception {
         Statement actualStmt = parser.getTeiidParser(stmt).statement(new ParseInfo());
-        String actualString = actualStmt.toString();
         assertEquals("Language objects do not match: ", expectedStmt, actualStmt);
 //        assertEquals("SQL strings do not match: ", expectedString, actualString);
+    }
+
+    protected String buildErrorMessage(String token, int line, int column, String message) {
+        return Messages.getString(Messages.TeiidParser.parsing_error, token, line, column, message);
+    }
+
+    protected String buildDefaultErrorMessage(String token, int line, int column) {
+        String message = "Unexpected token \"" + token + "\" encountered.";
+        return buildErrorMessage(token, line, column, message);
     }
 
  // ======================== Joins ===============================================
@@ -4567,144 +4572,180 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
     /** SELECT * FROM g1 inner join g2 */
     @Test
     public void testInvalidInnerJoin() {
-        helpException("SELECT * FROM g1 inner join g2");
+        String expectedMsg = buildErrorMessage("g2", 1, 29, "The parsed join clause is invalid");
+        helpException("SELECT * FROM g1 inner join g2", expectedMsg);
     }
 
-    /** SELECT a FROM m.g GROUP BY a, b HAVING COUNT(AVG(b)) */
+    /** SELECT a FROM m.g GROUP BY a, b HAVING COUNT(b) AS x = 5*/
     @Test
     public void testFailNestedAggregateInHaving() {
-        helpException("SELECT a FROM m.g GROUP BY a, b HAVING COUNT(b) AS x = 5");
+        String expectedMsg = buildDefaultErrorMessage("AS", 1, 49);
+        helpException("SELECT a FROM m.g GROUP BY a, b HAVING COUNT(b) AS x = 5", expectedMsg);
     }
 
     /** SELECT a FROM m.g GROUP BY a, b AS x */
     @Test
-    public void testFailAliasInHaving() {
-        helpException("SELECT a FROM m.g GROUP BY a, b AS x");
+    public void testFailAliasInGroupBy() {
+        String expectedMsg = buildDefaultErrorMessage("AS", 1, 33);
+        helpException("SELECT a FROM m.g GROUP BY a, b AS x", expectedMsg);
     }
 
     @Test
-    public void testExceptionLength() {
+    public void testNoStartBracket() {
+        String expectedMessage = buildDefaultErrorMessage("select", 1, 46);
+
+        String sql = "SELECT * FROM Customer where Customer.Name = select lastname from CUSTOMER where acctid = 9)";
+        helpException(sql, expectedMessage);
+    }
+
+    @Test
+    public void testNoEndBracket() {
+        String expectedMessage = buildDefaultErrorMessage("select", 1, 47);
         String sql = "SELECT * FROM Customer where Customer.Name = (select lastname from CUSTOMER where acctid = 9";
-        helpException(sql);
+        helpException(sql, expectedMessage);
     }
 
     /** SELECT {d'bad'} FROM m.g1 */
     @Test
     public void testDateLiteralFail() {
-        helpException("SELECT {d'bad'} FROM m.g1");
+        String expectedMessage = buildErrorMessage("'bad'", 1, 10, "TEIID10061 Failed to transform String to Date.  Expected format = yyyy-mm-dd for bad");
+        helpException("SELECT {d'bad'} FROM m.g1", expectedMessage);
     }
 
     /** SELECT {t 'xyz'} FROM m.g1 */
     @Test
     public void testTimeLiteralFail() {
-        helpException("SELECT {t 'xyz'} FROM m.g1");
+        String expectedMsg = buildErrorMessage("'xyz'", 1, 11, "TEIID10068 Failed to transform String to Time.  Expected format = hh:mm:ss for xyz");
+        helpException("SELECT {t 'xyz'} FROM m.g1", expectedMsg);
     }
 
     /** SELECT a AS or FROM g */
     @Test
     public void testAliasInSelectUsingKeywordFails() {
-        helpException("SELECT a AS or FROM g");
+        String expectedMsg = buildErrorMessage("AS", 1, 10, "\"or\" is reserved and cannot be used as an id");
+        helpException("SELECT a AS or FROM g", expectedMsg);
     }
 
     /** SELECT or.a FROM g AS or */
     @Test
     public void testAliasInFromUsingKeywordFails() {
-        helpException("SELECT or.a FROM g AS or");
+        String expectedMsg = buildErrorMessage("AS", 1, 20, "\"or\" is reserved and cannot be used as an id");
+        helpException("SELECT or.a FROM g AS or", expectedMsg);
     }
 
     /** FROM g WHERE a = 'aString' */
     @Test
     public void testFailsNoSelectClause() {
-        helpException("FROM g WHERE a = 'aString'");
+        String expectedMsg = buildErrorMessage("FROM", 1, 1, "The SQL expression starting with \"FROM\" is not valid.");
+        helpException("FROM g WHERE a = 'aString'", expectedMsg);
     }
 
     /** SELECT a WHERE a = 'aString' */
     @Test
-    public void testFailsNoFromClause() {
-        helpException("SELECT a WHERE a = 'aString'");
+    public void testFailsNoFromClause1() {
+        String expectedMsg = buildErrorMessage("WHERE", 1, 10, "SELECT Statement: No FROM clause before \"WHERE\"");
+        helpException("SELECT a WHERE a = 'aString'", expectedMsg);
+    }
+
+    /** SELECT a WHERE a = 'aString' */
+    @Test
+    public void testFailsNoFromClause2() {
+        String expectedMsg = buildErrorMessage("GROUP", 1, 10, "SELECT Statement: No FROM clause before \"GROUP BY\"");
+        helpException("SELECT a GROUP BY a", expectedMsg);
+    }
+
+    /** SELECT a WHERE a = 'aString' */
+    @Test
+    public void testFailsNoFromClause3() {
+        String expectedMsg = buildErrorMessage("HAVING", 1, 10, "SELECT Statement: No FROM clause before \"HAVING\"");
+        helpException("SELECT a HAVING b=5", expectedMsg);
     }
 
     /** SELECT xx.yy%.a from xx.yy */
     @Test
     public void testFailsWildcardInSelect() {
-        helpException("SELECT xx.yy%.a from xx.yy");
+        String expectedMsg = buildErrorMessage("SELECT", 1, 1, "The SQL expression starting with \"SELECT\" is not valid. Lexical error at line 1, column 13.  Encountered: \"%\" (37), after : \"\"");
+        helpException("SELECT xx.yy%.a from xx.yy", expectedMsg);
     }
 
     /** SELECT a from g ORDER BY b DSC*/
     @Test
     public void testFailsDSCMisspelled() {
-        helpException("SELECT a from g ORDER BY b DSC");
+        String expectedMsg = buildDefaultErrorMessage("DSC", 1, 28);
+        helpException("SELECT a from g ORDER BY b DSC", expectedMsg);
     }
 
     /** SELECT a, b FROM (SELECT c FROM m.g2) */
     @Test
     public void testSubqueryInvalid() {
-        helpException("SELECT a, b FROM (SELECT c FROM m.g2)");
+        String expectedMsg = buildDefaultErrorMessage("SELECT", 1, 19);
+        helpException("SELECT a, b FROM (SELECT c FROM m.g2)", expectedMsg);
     }
 
     //as clause should use short names
     @Test
     public void testDynamicCommandStatement2() {
-        helpException("create virtual procedure begin execute string z as variables.a1 string, a2 integer into #g; end");
+        String expectedMsg = buildErrorMessage("variables.a1", 1, 52, "Invalid simple identifier format: [variables.a1]");
+        helpException("create virtual procedure begin execute string z as variables.a1 string, a2 integer into #g; end", expectedMsg);
     }
 
     //using clause should use short names
     @Test
     public void testDynamicCommandStatement3() {
-        helpException("create virtual procedure begin execute string z as a1 string, a2 integer into #g using variables.x=variables.y; end");
+        String expectedMsg = buildErrorMessage("variables.x", 1, 88, "Invalid simple identifier format: [variables.x]");
+        helpException("create virtual procedure begin execute string z as a1 string, a2 integer into #g using variables.x=variables.y; end", expectedMsg);
     }
 
     //into clause requires as clause
     @Test
     public void testDynamicCommandStatement4() {
-        helpException("create virtual procedure begin execute string z into #g using x=variables.y; end");
+        String expectedMsg = buildDefaultErrorMessage("into", 1, 49);
+        helpException("create virtual procedure begin execute string z into #g using x=variables.y; end", expectedMsg);
     }
 
     @Test
     public void testBadScalarSubqueryExpression() {
-        helpException("SELECT e1, length(SELECT e1 FROM m.g1) as X FROM m.g2");
+        String expectedMsg = buildErrorMessage("(", 1, 18, "The parsed function \"length\" has invalid function arguments");
+        helpException("SELECT e1, length(SELECT e1 FROM m.g1) as X FROM m.g2", expectedMsg);
     }
 
     @Test
     public void testAliasInSingleQuotes() throws Exception {
-
-        GroupSymbol g = getFactory().newGroupSymbol("x.y.z");
-        From from = getFactory().newFrom();
-        from.addGroup(g);
-
-        AliasSymbol as = getFactory().newAliasSymbol("fooAlias", getFactory().newElementSymbol("fooKey"));
-        Select select = getFactory().newSelect();
-        select.addSymbol(as);
-
-        helpException("SELECT fooKey 'fooAlias' FROM x.\"y\".z");
+        String expectedMsg = buildDefaultErrorMessage("'fooAlias'", 1, 15);
+        helpException("SELECT fooKey 'fooAlias' FROM x.\"y\".z", expectedMsg);
     }
 
     @Test
     public void testOrderByWithNumbers_AsNegitiveInt() {
-        helpException("SELECT x, y FROM z order by -1");
+        String expectedMsg = buildErrorMessage("1", 1, 30, "Invalid order by position: -1");
+        helpException("SELECT x, y FROM z order by -1", expectedMsg);
     }
 
     @Test
     public void testBadAlias() {
+        String expectedMsg = buildErrorMessage("a.x", 1, 13, "Invalid alias format: [a.x]");
         String sql = "select a as a.x from foo";
 
-        helpException(sql);
+        helpException(sql, expectedMsg);
     }
 
     @Test
     public void testUnionJoin1() {
+        String expectedMsg = buildDefaultErrorMessage("join", 1, 32);
         String sql = "select * from pm1.g1 union all join pm1.g2 where g1.e1 = 1";
 
-        helpException(sql);
+        helpException(sql, expectedMsg);
     }
 
     @Test
     public void testTextTableColumns() throws Exception {
-        helpException("SELECT * from texttable(foo x string)");
+        String expectedMsg = buildDefaultErrorMessage("x", 1, 29);
+        helpException("SELECT * from texttable(foo x string)", expectedMsg);
     }
 
     @Test
     public void testTrim1() {
-        helpException("select trim('xy' from e1) from pm1.g1");
+        String expectedMsg = buildErrorMessage("from", 1, 18, "Argument requires the value should have a length of 1 character only");
+        helpException("select trim('xy' from e1) from pm1.g1", expectedMsg);
     }
 }

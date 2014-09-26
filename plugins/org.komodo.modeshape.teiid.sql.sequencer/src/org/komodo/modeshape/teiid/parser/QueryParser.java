@@ -24,13 +24,17 @@ package org.komodo.modeshape.teiid.parser;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Iterator;
+import java.util.List;
 import org.komodo.modeshape.teiid.Messages;
 import org.komodo.modeshape.teiid.TeiidClientException;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidParser.ParsingError;
 import org.komodo.modeshape.teiid.parser.v8.Teiid8Parser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.annotation.Since;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.IQueryParser;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
@@ -41,7 +45,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
  * input stream.  Putting multiple queries into the same stream will result
  * in unpredictable and most likely incorrect behavior.</p>
  */
-public class QueryParser implements IQueryParser {
+public class QueryParser implements IQueryParser, StringConstants {
 
 	private TeiidParser teiidParser;
 
@@ -95,7 +99,7 @@ public class QueryParser implements IQueryParser {
 		if(teiidParser == null) {
 		    teiidParser = createTeiidParser(sql);
 		} else
-		    teiidParser.ReInit(sql);
+		    teiidParser.reset(sql);
 
 		return teiidParser;
 	}
@@ -172,11 +176,14 @@ public class QueryParser implements IQueryParser {
         
     	Command result = null;
         try{
+            TeiidParser teiidParser = getTeiidParser(sql);
             if (designerCommands) {
-                result = getTeiidParser(sql).designerCommand(parseInfo);
+                result = teiidParser.designerCommand(parseInfo);
             } else {
-                result = getTeiidParser(sql).command(parseInfo);
+                result = teiidParser.command(parseInfo);
             }
+
+            analyzeErrors(teiidParser);
         } catch(Exception e) {
            throw convertParserException(e);
         }
@@ -184,12 +191,28 @@ public class QueryParser implements IQueryParser {
 		return result;
 	}
 
+    private void analyzeErrors(TeiidParser teiidParser) throws Exception {
+        List<ParsingError> errors = teiidParser.getErrors();
+        if (! errors.isEmpty()) {
+            StringBuffer buf = new StringBuffer();
+            Iterator<ParsingError> iterator = errors.iterator();
+            while (iterator.hasNext()) {
+                ParsingError error = iterator.next();
+                buf.append(error.toString());
+                if (iterator.hasNext())
+                    buf.append(NEW_LINE);
+            }
+
+            throw new Exception(buf.toString());
+        }
+    }
+
     /**
      * @param e
      * @return
      */
 	private TeiidClientException convertParserException(Exception e) {
-        TeiidClientException qpe = new TeiidClientException(e, Messages.getString(Messages.TeiidParser.lexicalError, e.getMessage()));
+        TeiidClientException qpe = new TeiidClientException(e, e.getMessage());
         return qpe;
     }
 
@@ -211,8 +234,9 @@ public class QueryParser implements IQueryParser {
 
         Criteria result = null;
         try{
-            result = getTeiidParser(sql).criteria(dummyInfo);
-
+            TeiidParser teiidParser = getTeiidParser(sql);
+            result = teiidParser.criteria(dummyInfo);
+            analyzeErrors(teiidParser);
         } catch(Exception e) {
             throw convertParserException(e);
         }
@@ -238,7 +262,9 @@ public class QueryParser implements IQueryParser {
 
         Expression result = null;
         try{
-            result = getTeiidParser(sql).expression(dummyInfo);
+            TeiidParser teiidParser = getTeiidParser(sql);
+            result = teiidParser.expression(dummyInfo);
+            analyzeErrors(teiidParser);
         } catch (Exception e) {
             throw convertParserException(e);
         }
@@ -260,8 +286,9 @@ public class QueryParser implements IQueryParser {
 
         Expression result = null;
         try {
-            result = getTeiidParser(sql).selectExpression(dummyInfo);
-
+            TeiidParser teiidParser = getTeiidParser(sql);
+            result = teiidParser.selectExpression(dummyInfo);
+            analyzeErrors(teiidParser);
         } catch (Exception e) {
             throw convertParserException(e);
         }
