@@ -280,13 +280,6 @@ public class Teiid8Parser extends AbstractTeiidParser {
 		errorHandle(token, msg);
 	}
 
-	private void errorMissingOpeningBracket(Token token) {		errorHandle(token, "Expected opening bracket but missing");
-	}
-
-	private void errorMissingClosingBracket(Token token) {
-		errorHandle(token, "Expected closing bracket but missing");
-	}
-
 } // end class
 
 PARSER_END(Teiid8Parser)

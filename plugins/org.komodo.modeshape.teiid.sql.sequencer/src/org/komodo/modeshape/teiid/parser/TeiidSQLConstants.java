@@ -42,15 +42,19 @@ public abstract class TeiidSQLConstants {
         String NEWLINE = NEW_LINE;
         String EQ = EQUALS;
         String NE = "<>";
+        String NE2 = "!=";
         String LT = "<";
         String GT = ">";
         String LE = "<=";
         String GE = ">=";
         String LPAREN = OPEN_BRACKET;
         String RPAREN = CLOSE_BRACKET;
+        String LBRACE = OPEN_BRACE;
+        String RBRACE = CLOSE_BRACE;
         String TICK = "'";
         String LOGICAL_OR = "||";
         String LOGICAL_AND = "&&";
+        String DOLLAR = "$";
     }
 
     public interface NonReserved {
@@ -69,6 +73,9 @@ public abstract class TeiidSQLConstants {
         String MAX = "MAX";
         String MIN = "MIN";
         String COUNT = "COUNT";
+        String ROW_NUMBER = "ROW_NUMBER";
+        String RANK = "RANK";
+        String DENSE_RANK = "DENSE_RANK";
         String AVG = "AVG";
         String SUM = "SUM";
         //texttable
@@ -82,6 +89,7 @@ public abstract class TeiidSQLConstants {
         //xmltable
         String ORDINALITY = "ORDINALITY";
         String PASSING = "PASSING";
+        String NAME = "NAME";
         String PATH = "PATH";
         //xmlserialize
         String DOCUMENT = "DOCUMENT";
@@ -92,6 +100,7 @@ public abstract class TeiidSQLConstants {
         String EMPTY = "EMPTY";
         //querystring function
         String QUERYSTRING = "QUERYSTRING";
+        String NAMESPACE = "NAMESPACE";
         //xmlparse
         String WELLFORMED = "WELLFORMED";
         //agg
@@ -104,6 +113,11 @@ public abstract class TeiidSQLConstants {
         String NULLS = "NULLS";
         String FIRST = "FIRST";
         String LAST = "LAST";
+        String NEXT = "NEXT";
+        String SUBSTRING = "SUBSTRING";
+        String EXTRACT = "EXTRACT";
+        String TO_CHARS = "TO_CHARS";
+        String TO_BYTES = "TO_BYTES";
         
         String KEY = "KEY";
         
@@ -129,9 +143,11 @@ public abstract class TeiidSQLConstants {
         String XMLDECLARATION = "XMLDECLARATION";
         String VARIADIC = "VARIADIC";
         String INDEX = "INDEX";
+        String ACCESSPATTERN = "ACCESSPATTERN";
         String EXCEPTION = "EXCEPTION";
         String RAISE = "RAISE";
         String CHAIN = "CHAIN";
+        String JSONARRAY_AGG = "JSONARRAY_AGG";
         String JSONOBJECT = "JSONOBJECT";
         @Since(Version.TEIID_8_7)
         String AUTO_INCREMENT = "AUTO_INCREMENT";
@@ -142,6 +158,33 @@ public abstract class TeiidSQLConstants {
 
         // Limit
         String NON_STRICT = "NON_STRICT";
+
+        // Data Types
+        String STRING = "STRING";
+        String VARBINARY = "VARBINARY";
+        String VARCHAR = "VARCHAR";
+        String BOOLEAN = "BOOLEAN";
+        String BYTE = "BYTE";
+        String TINYINT = "TINYINT";
+        String SHORT = "SHORT";
+        String SMALLINT = "SMALLINT";
+        String CHAR = "CHAR";
+        String INTEGER = "INTEGER";
+        String LONG = "LONG";
+        String BIGINT = "BIGINT";
+        String BIGINTEGER = "BIGINTEGER";
+        String FLOAT = "FLOAT";
+        String REAL = "REAL";
+        String DOUBLE = "DOUBLE";
+        String BIGDECIMAL = "BIGDECIMAL";
+        String DECIMAL = "DECIMAL";
+        String DATE = "DATE";
+        String TIME = "TIME";
+        String TIMESTAMP = "TIMESTAMP";
+        String OBJECT = "OBJECT";
+        String BLOB = "BLOB";
+        String CLOB = "CLOB";
+        String XML = "XML";
     }
     
     public interface Reserved {
@@ -404,9 +447,8 @@ public abstract class TeiidSQLConstants {
         
         // SQL 2008 words
         String ARRAY_AGG= "ARRAY_AGG";
-        
-        //SQL/XML
-        
+
+        //SQL/XML        
         String XML = "XML";
         String XMLAGG = "XMLAGG";
         String XMLATTRIBUTES = "XMLATTRIBUTES";
@@ -448,6 +490,10 @@ public abstract class TeiidSQLConstants {
         String SEMI = "SEMI";
 
         String NO_DEFAULT = "NO DEFAULT";
+
+        String VARBINARY = "VARBINARY";
+        String BOOLEAN = "BOOLEAN";
+        String TINYINT = "TINYINT";
     }
 
     private static ITeiidVersion CACHED_TEIID_VERSION = null;

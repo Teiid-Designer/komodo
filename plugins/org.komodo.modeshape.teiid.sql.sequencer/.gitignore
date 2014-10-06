@@ -14,3 +14,5 @@ src/org/komodo/modeshape/teiid/sql/*/*ParserTreeConstants.java
 
 lib/*
 libsrc/*
+
+src/org/komodo/modeshape/teiid/parser/syntax/*

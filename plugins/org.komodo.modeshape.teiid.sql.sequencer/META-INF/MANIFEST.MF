@@ -10,3 +10,4 @@ Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
  org.komodo.modeshape.lib;bundle-version="[1.0.0,2.0.0)",
  org.komodo.teiid.client;bundle-version="1.0.0",
  org.komodo.utils;bundle-version="1.0.0"
+Export-Package: org.komodo.modeshape.teiid.parser
