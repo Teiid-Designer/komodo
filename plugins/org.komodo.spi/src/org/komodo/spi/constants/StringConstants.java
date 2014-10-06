@@ -161,6 +161,11 @@ public interface StringConstants {
     String CLOSE_BRACKET = ")"; //$NON-NLS-1$
 
     /**
+     * Hash Symbol
+     */
+    String HASH = "#"; //$NON-NLS-1$
+
+    /**
      * Open Angle Bracket
      */
 	String OPEN_ANGLE_BRACKET = "<"; //$NON-NLS-1$
@@ -209,6 +214,11 @@ public interface StringConstants {
      * Divide Sign
      */
     String DIVIDE = FORWARD_SLASH;
+
+    /**
+     * Pipe Sign
+     */
+    String PIPE = "|"; //$NON-NLS-1$
 
 	/**
    * komodo

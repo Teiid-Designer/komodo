@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.komodo.eclipse.sql.ui;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: %pluginProvider
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.ui;bundle-version="3.106.0",
+ org.eclipse.osgi,
+ org.eclipse.core.runtime.compatibility;bundle-version="3.2.200",
+ org.eclipse.core.runtime,
+ org.komodo.spi,
+ org.eclipse.jface.text;bundle-version="3.9.0",
+ org.eclipse.ui.workbench.texteditor;bundle-version="3.9.0",
+ org.komodo.utils,
+ org.komodo.modeshape.teiid.sql.sequencer

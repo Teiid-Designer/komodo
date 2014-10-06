@@ -1,0 +1,7840 @@
+/*
+* JBoss, Home of Professional Open Source.
+* See the COPYRIGHT.txt file distributed with this work for information
+* regarding copyright ownership. Some portions may be licensed
+* to Red Hat, Inc. under one or more contributor license agreements.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+*
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+* 02110-1301 USA.
+*/
+options
+{
+	BUILD_NODE_FILES = false;
+	ERROR_REPORTING = true;
+	IGNORE_CASE = true;
+	JAVA_UNICODE_ESCAPE = true;
+	MULTI = false;
+	NODE_DEFAULT_VOID = true;
+	NODE_PACKAGE = "org.komodo.modeshape.teiid.sql.syntax";
+	NODE_PREFIX = "";
+	NODE_SCOPE_HOOK = false;
+	NODE_USES_PARSER = true;
+	GRAMMAR_ENCODING = "UTF-8";
+	KEEP_LINE_COLUMN = true;
+	STATIC = false;
+	UNICODE_INPUT = false;
+	VISITOR = false;
+}
+
+PARSER_BEGIN(TeiidSyntaxParser)
+/*
+* JBoss, Home of Professional Open Source.
+* See the COPYRIGHT.txt file distributed with this work for information
+* regarding copyright ownership. Some portions may be licensed
+* to Red Hat, Inc. under one or more contributor license agreements.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+*
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+* 02110-1301 USA.
+*/
+package org.komodo.modeshape.teiid.parser.syntax;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.regex.Matcher;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidParser;
+import org.komodo.modeshape.teiid.parser.ParseInfo;
+import org.komodo.modeshape.teiid.sql.lang.Command;
+import org.komodo.modeshape.teiid.sql.lang.Criteria;
+import org.komodo.modeshape.teiid.sql.proc.Statement;
+import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.modeshape.teiid.Messages;
+import org.komodo.utils.StringUtil;
+import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
+import org.komodo.modeshape.teiid.parser.bnf.BNF;
+
+@ SuppressWarnings({"nls", "unused", "javadoc"})
+public class TeiidSyntaxParser extends AbstractTeiidParser {
+
+	private Set <String> expectedTokens = new HashSet<String>();
+
+	private BNF bnf = new BNF(getVersion());
+
+	@ Override
+	public ITeiidVersion getVersion() {
+		if (version == null) version = new TeiidVersion("8.x.x");
+		return version;
+	}
+
+	private void requiresVersionAtLeast(Version version) throws ParseException {
+		if (versionAtLeast(version))
+			return;
+
+		// Syntax is for Teiid Version $RVERSION+ while current Teiid Version is $CVERSION.
+		String message = Messages.getString(Messages.TeiidParser.teiid_version_atleast_failure, version.get().toString(), getVersion().toString());
+		throw new ParseException(message);
+	}
+
+	/*
+	 * Appends to the proposals list the given values
+	 */
+	private void ppAppend(String ... values) {
+		if (values == null)
+			return;
+
+		for (Object value : values) {
+			if (value == null)
+				continue;
+
+			if (value instanceof String[]) {
+				expectedTokens.addAll(Arrays.asList((String[]) value));
+			} else if (value instanceof String) {
+				expectedTokens.add((String) value);
+			}
+		}
+	}
+
+	/*
+	 * Clears then set the proposals list to the given values
+	 */
+	private void ppSet(String ... values) {
+		expectedTokens.clear();
+
+		if (values == null)
+			return;
+
+		ppAppend(values);
+	}
+
+	public Set<String> getExpected() {
+		return Collections.unmodifiableSet(expectedTokens);
+	}
+
+} // end class
+
+PARSER_END(TeiidSyntaxParser)
+
+TOKEN_MGR_DECLS :
+{
+	int commentNestingDepth;
+}
+
+SKIP :
+{
+	" "
+|   "\t"
+|   "\n"
+|   "\r"
+}
+
+MORE :
+{
+	"/*"
+	{
+		commentNestingDepth = 1;
+	}
+	: IN_MULTI_LINE_COMMENT
+}
+
+< IN_MULTI_LINE_COMMENT >
+MORE :
+{
+	"/*"
+	{
+		commentNestingDepth += 1;
+	}
+}
+
+< IN_MULTI_LINE_COMMENT >
+SPECIAL_TOKEN :
+{
+	"*/"
+	{
+		commentNestingDepth -= 1;
+		SwitchTo(commentNestingDepth == 0 ? DEFAULT : IN_MULTI_LINE_COMMENT);
+	}
+}
+
+< IN_MULTI_LINE_COMMENT >
+MORE :
+{
+	< ~
+	[ ] >
+}
+
+TOKEN :
+{
+	< STRING : "string" >
+|
+	< VARBINARY : "varbinary" >
+|
+	< VARCHAR : "varchar" >
+|
+	< BOOLEAN : "boolean" >
+|
+	< BYTE : "byte" >
+|
+	< TINYINT : "tinyint" >
+|
+	< SHORT : "short" >
+|
+	< SMALLINT : "smallint" >
+|
+	< CHAR : "char" >
+|
+	< INTEGER : "integer" >
+|
+	< LONG : "long" >
+|
+	< BIGINT : "bigint" >
+|
+	< BIGINTEGER : "biginteger" >
+|
+	< FLOAT : "float" >
+|
+	< REAL : "real" >
+|
+	< DOUBLE : "double" >
+|
+	< BIGDECIMAL : "bigdecimal" >
+|
+	< DECIMAL : "decimal" >
+|
+	< DATE : "date" >
+|
+	< TIME : "time" >
+|
+	< TIMESTAMP : "timestamp" >
+|
+	< OBJECT : "object" >
+|
+	< BLOB : "blob" >
+|
+	< CLOB : "clob" >
+|
+	< XML : "xml" >
+}
+
+TOKEN :
+{
+	< CAST : "cast" >
+|
+	< CONVERT : "convert" >
+}
+
+TOKEN :
+{
+	< ADD : "add" >
+|
+	< ALL : "all" >
+|
+	< ALTER : "alter" >
+|
+	< AND : "and" >
+|
+	< ANY : "any" >
+|
+	< ARRAY : "array" >
+|
+	< ARRAY_AGG : "array_agg" >
+|
+	< AS : "as" >
+|
+	< ASC : "asc" >
+|
+	< ATOMIC : "atomic" >
+|
+	< AUTORIZATION : "authorization" >
+|
+	< BEGIN : "begin" >
+|
+	< BETWEEN : "between" >
+|
+	< BINARY : "binary" >
+|
+	< BOTH : "both" >
+|
+	< BREAK : "break" >
+|
+	< BY : "by" >
+|
+	< CALL : "call" >
+|
+	< CALLED : "called" >
+|
+	< CASCADED : "cascaded" >
+|
+	< CASE : "case" >
+|
+	< CHARACTER : "character" >
+|
+	< CHECK : "check" >
+|
+	< CLOSE : "close" >
+|
+	< COLLATE : "collate" >
+|
+	< COLUMN : "column" >
+|
+	< COMMIT : "commit" >
+|
+	< CONNECT : "connect" >
+|
+	< CONSTRAINT : "constraint" >
+|
+	< CONTINUE : "continue" >
+|
+	< CORRESPONDING : "corresponding" >
+|
+	< CURRENT_DATE : "current_date" >
+|
+	< CURRENT_TIME : "current_time" >
+|
+	< CURRENT_TIMESTAMP : "current_timestamp" >
+|
+	< CURRENT_USER : "current_user" >
+|
+	< CREATE : "create" >
+|
+	< CRITERIA : "criteria" >
+|
+	< CROSS : "cross" >
+|
+	< CURSOR : "cursor" >
+|
+	< DAY : "day" >
+|
+	< DEALLOCATE : "deallocate" >
+|
+	< DEFAULT_KEYWORD : "default" >
+|
+	< DECLARE : "declare" >
+|
+	< DELETE : "delete" >
+|
+	< DESC : "desc" >
+|
+	< DESCRIBE : "describe" >
+|
+	< DETERMINISTIC : "deterministic" >
+|
+	< DISCONNECT : "disconnect" >
+|
+	< DISTINCT : "distinct" >
+|
+	< DROP : "drop" >
+|
+	< EACH : "each" >
+|
+	< ELSE : "else" >
+|
+	< END : "end" >
+|
+	< ERROR : "error" >
+|
+	< ESCAPE : "escape" >
+|
+	< EXCEPT : "except" >
+|
+	< EXEC : "exec" >
+|
+	< EXECUTE : "execute" >
+|
+	< EXTERNAL : "external" >
+|
+	< EXISTS : "exists" >
+|
+	< FALSE : "false" >
+|
+	< FETCH : "fetch" >
+|
+	< FILTER : "filter" >
+|
+	< FOR : "for" >
+|
+	< FOREIGN : "foreign" >
+|
+	< FROM : "from" >
+|
+	< FULL : "full" >
+|
+	< FUNCTION : "function" >
+|
+	< GET : "get" >
+|
+	< GLOBAL : "global" >
+|
+	< GRANT : "grant" >
+|
+	< GROUP : "group" >
+|
+	< HAS : "has" >
+|
+	< HAVING : "having" >
+|
+	< HOLD : "hold" >
+|
+	< HOUR : "hour" >
+|
+	< IF : "if" >
+|
+	< IDENTITY : "identity" >
+|
+	< IMMEDIATE : "immediate" >
+|
+	< IN : "in" >
+|
+	< INDICATOR : "indicator" >
+|
+	< INNER : "inner" >
+|
+	< INPUT : "input" >
+|
+	< INOUT : "inout" >
+|
+	< INSENSITIVE : "insensitive" >
+|
+	< INSERT : "insert" >
+|
+	< INTERSECT : "intersect" >
+|
+	< INTERVAL : "interval" >
+|
+	< INTO : "into" >
+|
+	< IS : "is" >
+|
+	< ISOLATION : "isolation" >
+|
+	< JOIN : "join" >
+|
+	< LEFT : "left" >
+|
+	< LANGUAGE : "language" >
+|
+	< LARGE : "large" >
+|
+	< LEADING : "leading" >
+|
+	< LEAVE : "leave" >
+|
+	< LIKE : "like" >
+|
+	< LIKE_REGEX : "like_regex" >
+|
+	< LIMIT : "limit" >
+|
+	< LOCAL : "local" >
+|
+	< LOOP : "loop" >
+|
+	< MAKEDEP : "makedep" >
+|
+	< MAKENOTDEP : "makenotdep" >
+|
+	< MATCH : "match" >
+|
+	< MERGE : "merge" >
+|
+	< METHOD : "method" >
+|
+	< MINUTE : "minute" >
+|
+	< MODIFIES : "modifies" >
+|
+	< MODULE : "module" >
+|
+	< MONTH : "month" >
+|
+	< NATURAL : "natural" >
+|
+	< NEW : "new" >
+|
+	< NOCACHE : "nocache" >
+|
+	< NO : "no" >
+|
+	< NONE : "none" >
+|
+	< NOT : "not" >
+|
+	< NULL : "null" >
+|
+	< OF : "of" >
+|
+	< OFFSET : "offset" >
+|
+	< OLD : "old" >
+|
+	< ON : "on" >
+|
+	< ONLY : "only" >
+|
+	< OPEN : "open" >
+|
+	< OPTION : "option" >
+|
+	< OPTIONS : "options" >
+|
+	< OR : "or" >
+|
+	< ORDER : "order" >
+|
+	< OUT : "out" >
+|
+	< OUTER : "outer" >
+|
+	< OUTPUT : "output" >
+|
+	< OVER : "over" >
+|
+	< OVERLAPS : "OVERLAPS" >
+|
+	< PARAMETER : "parameter" >
+|
+	< PARTITION : "partition" >
+|
+	< PRECISION : "precision" >
+|
+	< PREPARE : "prepare" >
+|
+	< PRIMARY : "primary" >
+|
+	< PROCEDURE : "procedure" >
+|
+	< RANGE : "range" >
+|
+	< READS : "reads" >
+|
+	< RECURSIVE : "recursive" >
+|
+	< REFERENCES : "REFERENCES" >
+|
+	< REFERENCING : "REFERENCING" >
+|
+	< RETURN : "return" >
+|
+	< RETURNS : "returns" >
+|
+	< REVOKE : "REVOKE" >
+|
+	< RIGHT : "right" >
+|
+	< ROLLBACK : "ROLLBACK" >
+|
+	< ROLLUP : "ROLLUP" >
+|
+	< ROW : "row" >
+|
+	< ROWS : "rows" >
+|
+	< SAVEPOINT : "savepoint" >
+|
+	< SCROLL : "scroll" >
+|
+	< SEARCH : "search" >
+|
+	< SECOND : "second" >
+|
+	< SELECT : "select" >
+|
+	< SENSITIVE : "sensitive" >
+|
+	< SESSION_USER : "session_user" >
+|
+	< SET : "set" >
+|
+	< SIMILAR : "similar" >
+|
+	< SPECIFIC : "specific" >
+|
+	< SOME : "some" >
+|
+	< SQL : "sql" >
+|
+	< SQLEXCEPTION : "sqlexception" >
+|
+	< SQLSTATE : "sqlstate" >
+|
+	< SQLWARNING : "sqlwarning" >
+|
+	< START : "start" >
+|
+	< STATIC : "static" >
+|
+	< SYSTEM : "system" >
+|
+	< SYSTEM_USER : "system_user" >
+|
+	< TABLE : "table" >
+|
+	< TEMPORARY : "temporary" >
+|
+	< THEN : "then" >
+|
+	< TIMEZONE_HOUR : "timezone_hour" >
+|
+	< TIMEZONE_MINUTE : "timezone_minute" >
+|
+	< TO : "to" >
+|
+	< TRAILING : "trailing" >
+|
+	< TRANSLATE : "translate" >
+|
+	< TRIGGER : "trigger" >
+|
+	< TRUE : "true" >
+|
+	< UNION : "union" >
+|
+	< UNIQUE : "unique" >
+|
+	< UNKNOWN : "unknown" >
+|
+	< USER : "user" >
+|
+	< UPDATE : "update" >
+|
+	< USING : "using" >
+|
+	< VALUE : "value" >
+|
+	< VALUES : "values" >
+|
+	< VIRTUAL : "virtual" >
+|
+	< WHEN : "when" >
+|
+	< WHENEVER : "whenever" >
+|
+	< WHERE : "where" >
+|
+	< WITH : "with" >
+|
+	< WHILE : "while" >
+|
+	< WINDOW : "window" >
+|
+	< WITHIN : "within" >
+|
+	< WITHOUT : "without" >
+|
+	< YEAR : "year" >
+|
+	< ALLOCATE : "allocate" >
+|
+	< ARE : "are" >
+|
+	< ASENSITIVE : "asensitive" >
+|
+	< ASYMETRIC : "asymetric" >
+|
+	< CYCLE : "cycle" >
+|
+	< DEC : "dec" >
+|
+	< DEREF : "deref" >
+|
+	< DYNAMIC : "dynamic" >
+|
+	< ELEMENT : "element" >
+|
+	< FREE : "free" >
+|
+	< INT : "int" >
+|
+	< LATERAL : "lateral" >
+|
+	< LOCALTIME : "localtime" >
+|
+	< LOCALTIMESTAMP : "localtimestamp" >
+|
+	< MEMBER : "member" >
+|
+	< MULTISET : "multiset" >
+|
+	< NATIONAL : "national" >
+|
+	< NCHAR : "nchar" >
+|
+	< NCLOB : "nclob" >
+|
+	< NUMERIC : "numeric" >
+|
+	< RELEASE : "release" >
+|
+	< SPECIFICTYPE : "specifictype" >
+|
+	< SYMETRIC : "symetric" >
+|
+	< SUBMULTILIST : "submultilist" >
+|
+	< TRANSLATION : "translation" >
+|
+	< TREAT : "treat" >
+|
+	< VARYING : "varying" >
+}
+
+TOKEN :
+{
+	< XMLAGG : "xmlagg" >
+|
+	< XMLATTRIBUTES : "xmlattributes" >
+|
+	< XMLBINARY : "xmlbinary" >
+|
+	< XMLCAST : "xmlcast" >
+|
+	< XMLCONCAT : "xmlconcat" >
+|
+	< XMLCOMMENT : "xmlcomment" >
+|
+	< XMLDOCUMENT : "xmldocument" >
+|
+	< XMLELEMENT : "xmlelement" >
+|
+	< XMLEXISTS : "xmlexists" >
+|
+	< XMLFOREST : "xmlforest" >
+|
+	< XMLITERATE : "xmliterate" >
+|
+	< XMLNAMESPACES : "xmlnamespaces" >
+|
+	< XMLPARSE : "xmlparse" >
+|
+	< XMLPI : "xmlpi" >
+|
+	< XMLQUERY : "xmlquery" >
+|
+	< XMLSERIALIZE : "xmlserialize" >
+|
+	< XMLTABLE : "xmltable" >
+|
+	< XMLTEXT : "xmltext" >
+|
+	< XMLVALIDATE : "xmlvalidate" >
+}
+
+TOKEN :
+{
+	< DATALINK : "datalink" >
+|
+	< DLNEWCOPY : "dlnewcopy" >
+|
+	< DLPREVIOUSCOPY : "dlpreviouscopy" >
+|
+	< DLURLCOMPLETE : "dlurlcomplete" >
+|
+	< DLURLCOMPLETEWRITE : "dlurlcompletewrite" >
+|
+	< DLURLCOMPLETEONLY : "dlurlcompleteonly" >
+|
+	< DLURLPATH : "dlurlpath" >
+|
+	< DLURLPATHWRITE : "dlurlpathwrite" >
+|
+	< DLURLPATHONLY : "dlurlpathonly" >
+|
+	< DLURLSCHEME : "dlurlscheme" >
+|
+	< DLURLSERVER : "dlurlserver" >
+|
+	< DLVALUE : "dlvalue" >
+|
+	< IMPORT : "import" >
+}
+
+TOKEN :
+{
+	< INSTEAD : "instead" >
+|
+	< ENABLED : "enabled" >
+|
+	< DISABLED : "disabled" >
+|
+	< VIEW : "view" >
+|
+	< KEY : "key" >
+|
+	< SERIAL : "serial" >
+|
+	< TEXTAGG : "textagg" >
+|
+	< COUNT : "count" >
+|
+	< ROW_NUMBER : "row_number" >
+|
+	< RANK : "rank" >
+|
+	< DENSE_RANK : "dense_rank" >
+|
+	< SUM : "sum" >
+|
+	< AVG : "avg" >
+|
+	< MIN : "min" >
+|
+	< MAX : "max" >
+|
+	< EVERY : "every" >
+|
+	< STDDEV_POP : "stddev_pop" >
+|
+	< STDDEV_SAMP : "stddev_samp" >
+|
+	< VAR_SAMP : "var_samp" >
+|
+	< VAR_POP : "var_pop" >
+|
+	< DOCUMENT : "document" >
+|
+	< CONTENT : "content" >
+|
+	< TRIM : "trim" >
+|
+	< EMPTY : "empty" >
+|
+	< ORDINALITY : "ordinality" >
+|
+	< PATH : "path" >
+|
+	< FIRST : "first" >
+|
+	< LAST : "last" >
+|
+	< NEXT : "next" >
+|
+	< SUBSTRING : "substring" >
+|
+	< EXTRACT : "extract" >
+|
+	< TO_CHARS : "to_chars" >
+|
+	< TO_BYTES : "to_bytes" >
+|
+	< TIMESTAMPADD : "timestampadd" >
+|
+	< TIMESTAMPDIFF : "timestampdiff" >
+|
+	< QUERYSTRING : "querystring" >
+|
+	< NAMESPACE : "namespace" >
+|
+	< RESULT : "result" >
+|
+	< INDEX : "index" >
+|
+	< ACCESSPATTERN : "accesspattern" >
+|
+	< AUTO_INCREMENT : "auto_increment" >
+|
+	< WELLFORMED : "wellformed" >
+|
+	< SQL_TSI_FRAC_SECOND : "sql_tsi_frac_second" >
+|
+	< SQL_TSI_SECOND : "sql_tsi_second" >
+|
+	< SQL_TSI_MINUTE : "sql_tsi_minute" >
+|
+	< SQL_TSI_HOUR : "sql_tsi_hour" >
+|
+	< SQL_TSI_DAY : "sql_tsi_day" >
+|
+	< SQL_TSI_WEEK : "sql_tsi_week" >
+|
+	< SQL_TSI_MONTH : "sql_tsi_month" >
+|
+	< SQL_TSI_QUARTER : "sql_tsi_quarter" >
+|
+	< SQL_TSI_YEAR : "sql_tsi_year" >
+|
+	< TEXTTABLE : "texttable" >
+|
+	< ARRAYTABLE : "arraytable" >
+|
+	< SELECTOR : "selector" >
+|
+	< SKIP_KEYWORD : "skip" >
+|
+	< WIDTH : "width" >
+|
+	< PASSING : "passing" >
+|
+	< NAME : "name" >
+|
+	< ENCODING : "encoding" >
+|
+	< COLUMNS : "columns" >
+|
+	< DELIMITER : "delimiter" >
+|
+	< QUOTE : "quote" >
+|
+	< HEADER : "header" >
+|
+	< NULLS : "nulls" >
+|
+	< OBJECTTABLE : "objecttable" >
+|
+	< VERSION : "version" >
+|
+	< INCLUDING : "including" >
+|
+	< EXCLUDING : "excluding" >
+|
+	< XMLDECLARATION : "xmldeclaration" >
+|
+	< VARIADIC : "variadic" >
+|
+	< EXCEPTION : "exception" >
+|
+	< RAISE : "raise" >
+|
+	< CHAIN : "chain" >
+|
+	< JSONARRAY_AGG : "jsonarray_agg" >
+|
+	< JSONOBJECT : "jsonobject" >
+}
+
+/*
+ all in group identifier
+*/
+TOKEN :
+{
+	< ALL_IN_GROUP :
+	< ID >
+	< PERIOD >
+	< STAR >>
+}
+
+/*
+ identifier
+*/
+TOKEN :
+{
+	< ID :
+	< QUOTED_ID > (
+	< PERIOD >
+	< QUOTED_ID >)* >
+}
+
+TOKEN :
+{
+	< #QUOTED_ID :
+		< ID_PART >
+	|
+		(
+			"\""
+			(
+				("\"\"")
+			|   ~
+	[ "\"" ]
+			)+
+			"\""
+		) >
+}
+
+TOKEN :
+{
+	< #ID_PART :
+		(
+			(
+				"@"
+			|   "#"
+			|
+	< LETTER >
+			)
+			(
+				< LETTER >
+			|   "_"
+			|
+	< DIGIT >
+			)*
+		) >
+}
+
+/*
+ escaped function
+*/
+TOKEN :
+{
+	< ESCAPEDFUNCTION : "{" "fn" >
+}
+
+/*
+ escaped join
+*/
+TOKEN :
+{
+	< ESCAPEDJOIN : "{" "oj" >
+}
+
+/*
+ escaped type
+*/
+TOKEN :
+{
+	< ESCAPEDTYPE :
+		"{"
+		(
+			"d"
+		|   "t"
+		|   "ts"
+		|   "b"
+		) >
+}
+
+/*
+ decimal numeric literal
+*/
+TOKEN :
+{
+	< DECIMALVAL : (
+	< DIGIT >)*
+	< PERIOD >
+	< UNSIGNEDINTEGER >>
+}
+
+/*
+ approximate numeric literal
+*/
+TOKEN :
+{
+	< FLOATVAL :
+		< DIGIT >
+	< PERIOD >
+	< UNSIGNEDINTEGER > [ "e", "E" ]
+		(
+			< PLUS >
+		|
+	< MINUS >
+		)?
+		< UNSIGNEDINTEGER >>
+}
+
+/*
+ string literal
+*/
+TOKEN :
+{
+	< STRINGVAL :
+		(
+			(
+				"N"
+			|   "E"
+			)?
+			"'"
+			(
+				("''")
+			|   ~
+	[ "'" ]
+			)*
+			"'"
+		) >
+}
+
+TOKEN :
+{
+	< #LETTER :
+		(
+			[ "a"-"z", "A"-"Z" ]
+		|
+	[ "œ"-"�" ]
+		) >
+}
+
+TOKEN :
+{
+	< #DIGIT : [ "0"-"9" ] >
+}
+
+/*
+ unsigned integer literal
+*/
+TOKEN :
+{
+	< UNSIGNEDINTEGER : (
+	< DIGIT >)+ >
+}
+
+/*
+ binary string literal
+*/
+TOKEN :
+{
+	< BINARYSTRINGVAL :
+		(
+			"X"
+		|   "x" "'" (
+	< HEXIT >
+	< HEXIT >)+ "'"
+		) >
+}
+
+TOKEN :
+{
+	< #HEXIT :
+		(
+			[ "a"-"f", "A"-"F" ]
+		|
+	< DIGIT >
+		) >
+}
+
+TOKEN :
+{
+	< COMMA : "," >
+|
+	< PERIOD : "." >
+|
+	< LPAREN : "(" >
+|
+	< RPAREN : ")" >
+|
+	< LBRACE : "{" >
+|
+	< RBRACE : "}" >
+|
+	< LSBRACE : "[" >
+|
+	< RSBRACE : "]" >
+|
+	< EQ : "=" >
+|
+	< NE : "<>" >
+|
+	< NE2 : "!=" >
+|
+	< LT : "<" >
+|
+	< LE : "<=" >
+|
+	< GT : ">" >
+|
+	< GE : ">=" >
+|
+	< STAR : "*" >
+|
+	< SLASH : "/" >
+|
+	< PLUS : "+" >
+|
+	< MINUS : "-" >
+|
+	< QMARK : "?" >
+|
+	< DOLLAR : "$" >
+|
+	< SEMICOLON : ";" >
+|
+	< COLON : ":" >
+|
+	< CONCAT_OP : "||" >
+}
+
+void stringVal() :
+{}
+{
+//	try
+//	{
+		< STRINGVAL >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void nonReserved() :
+{}
+{
+//	try
+//	{
+		(
+			< INSTEAD >
+			|
+			< VIEW >
+			|
+			< ENABLED >
+			|
+			< DISABLED >
+			|
+			< KEY >
+			|
+			< SERIAL >
+			|
+			< TEXTAGG >
+			|
+			< COUNT >
+			|
+			< ROW_NUMBER >
+			|
+			< RANK >
+			|
+			< DENSE_RANK >
+			|
+			< SUM >
+			|
+			< AVG >
+			|
+			< MIN >
+			|
+			< MAX >
+			|
+			< EVERY >
+			|
+			< STDDEV_POP >
+			|
+			< STDDEV_SAMP >
+			|
+			< VAR_SAMP >
+			|
+			< VAR_POP >
+			|
+			< DOCUMENT >
+			|
+			< CONTENT >
+			|
+			< TRIM >
+			|
+			< EMPTY >
+			|
+			< ORDINALITY >
+			|
+			< PATH >
+			|
+			< FIRST >
+			|
+			< LAST >
+			|
+			< NEXT >
+			|
+			< SUBSTRING >
+			|
+			< EXTRACT >
+			|
+			< TO_CHARS >
+			|
+			< TO_BYTES >
+			|
+			< TIMESTAMPADD >
+			|
+			< TIMESTAMPDIFF >
+			|
+			< QUERYSTRING >
+			|
+			< NAMESPACE >
+			|
+			< RESULT >
+			|
+			< INDEX >
+			|
+			< ACCESSPATTERN >
+			|
+			< AUTO_INCREMENT >
+			|
+			< WELLFORMED >
+			|
+			< SQL_TSI_FRAC_SECOND >
+			|
+			< SQL_TSI_SECOND >
+			|
+			< SQL_TSI_MINUTE >
+			|
+			< SQL_TSI_HOUR >
+			|
+			< SQL_TSI_DAY >
+			|
+			< SQL_TSI_WEEK >
+			|
+			< SQL_TSI_MONTH >
+			|
+			< SQL_TSI_QUARTER >
+			|
+			< SQL_TSI_YEAR >
+			|
+			< TEXTTABLE >
+			|
+			< ARRAYTABLE >
+			|
+			< SELECTOR >
+			|
+			< SKIP_KEYWORD >
+			|
+			< WIDTH >
+			|
+			< PASSING >
+			|
+			< NAME >
+			|
+			< ENCODING >
+			|
+			< COLUMNS >
+			|
+			< DELIMITER >
+			|
+			< QUOTE >
+			|
+			< HEADER >
+			|
+			< NULLS >
+			|
+			< OBJECTTABLE >
+			|
+			< VERSION >
+			|
+			< INCLUDING >
+			|
+			< EXCLUDING >
+			|
+			< XMLDECLARATION >
+			|
+			< VARIADIC >
+			|
+			< RAISE >
+			|
+			< EXCEPTION >
+			|
+			< CHAIN >
+			|
+			< JSONARRAY_AGG >
+			|
+			< JSONOBJECT >
+		)
+	
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void id() :
+{}
+{
+//	try
+//	{
+		(
+			< ID >
+			{
+				ppSet(null);
+			}
+			|
+			nonReserved()
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+/*
+ * Top-Level function so includes try catch
+ */
+Command command(ParseInfo info) :
+{
+	ppSet(bnf.command());
+}
+{
+	try
+	{
+		(
+			LOOKAHEAD(2)
+			createProcedure(info)
+			{
+				ppAppend(bnf.command(BNF.createProcedure));
+			}
+			|
+			userCommand(info)
+			{
+				ppAppend(bnf.command(BNF.userCommand));
+			}
+			|
+			callableStatement(info)
+			{
+				ppAppend(bnf.command(BNF.callableStatement));
+			}
+		)
+
+		[ < SEMICOLON > ]
+
+		< EOF >
+		{
+			ppSet(null);
+		}
+	}
+	catch (ParseException ex)
+	{}
+
+	{
+		return null;
+	}
+}
+
+/*
+ * Top-Level function so includes try catch
+ */
+Command designerCommand(ParseInfo info) :
+{
+	ppSet(bnf.designerCommand());
+}
+{
+	try
+	{
+		(
+			LOOKAHEAD(2)
+			createProcedure(info)
+			{
+				ppAppend(bnf.designerCommand(BNF.createProcedure));
+			}
+			|
+			forEachRowTriggerAction(info)
+			{
+				ppAppend(bnf.designerCommand(BNF.forEachRowTriggerAction));
+			}
+			|
+			userCommand(info)
+			{
+				ppAppend(bnf.designerCommand(BNF.userCommand));
+			}
+		)
+
+		[ < SEMICOLON > ]
+		< EOF >
+	
+		{
+			ppSet(null);
+		}
+	}
+	catch (ParseException ex)
+	{}
+
+	{
+		return null;
+	}
+}
+
+void createTrigger(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< CREATE >
+		{
+			ppSet(bnf.createTrigger(BNF.CREATE));
+		}
+
+		< TRIGGER >
+		{
+			ppSet(bnf.createTrigger(BNF.TRIGGER));
+		}
+
+		< ON >
+		{
+			ppSet(bnf.createTrigger(BNF.ON));
+		}
+
+		id()
+		{
+			ppAppend(bnf.createTrigger(BNF.id));
+		}
+
+		< INSTEAD >
+		{
+			ppSet(bnf.createTrigger(BNF.INSTEAD));
+		}
+
+		< OF >
+		{
+			ppSet(bnf.createTrigger(BNF.OF));
+		}
+
+		(
+			< INSERT >
+			{
+				ppSet(bnf.createTrigger(BNF.INSERT));
+			}
+			|
+			< UPDATE >
+			{
+				ppSet(bnf.createTrigger(BNF.UPDATE));
+	   		}
+			|
+			< DELETE >
+			{
+				ppSet(bnf.createTrigger(BNF.DELETE));
+			}
+		)
+		< AS >
+		{
+			ppSet(bnf.createTrigger(BNF.AS));
+		}
+
+		forEachRowTriggerAction(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void alter(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< ALTER >
+		{
+			ppSet(bnf.alter(BNF.ALTER));
+		}
+		(
+			(
+				< VIEW >
+				{
+					ppSet(bnf.alter(BNF.VIEW));
+				}
+
+				id()
+				{
+					ppAppend(bnf.alter(BNF.VIEW, BNF.id));
+				}
+
+				< AS >
+				{
+					ppSet(bnf.alter(BNF.VIEW, BNF.AS));
+				}
+
+				queryExpression(info)
+			)
+			|
+			(
+				< PROCEDURE >
+				{
+					ppSet(bnf.alter(BNF.PROCEDURE));
+				}
+
+				id()
+				{
+					ppAppend(bnf.alter(BNF.PROCEDURE, BNF.id));
+				}
+
+				< AS >
+				{
+					ppSet(bnf.alter(BNF.PROCEDURE, BNF.AS));
+				}
+
+				statement(info)
+			)
+			|
+			(
+				< TRIGGER >
+				{
+					ppSet(bnf.alter(BNF.TRIGGER));
+				}
+
+				< ON >
+				{
+					ppSet(bnf.alter(BNF.ON));
+				}
+
+				id()
+				{
+					ppAppend(bnf.alter(BNF.TRIGGER, BNF.id));
+				}
+
+				< INSTEAD >
+				{
+					ppSet(bnf.alter(BNF.INSTEAD));
+				}
+
+				< OF >
+				{
+					ppSet(bnf.alter(BNF.OF));
+				}
+
+				(
+					< INSERT >
+					{
+						ppSet(bnf.alter(BNF.INSERT));
+					}
+					|
+					< UPDATE >
+					{
+						ppSet(bnf.alter(BNF.UPDATE));
+					}
+					|
+					< DELETE >
+					{
+						ppSet(bnf.alter(BNF.DELETE));
+					}
+				)
+				(
+					(
+						< AS >
+						{
+							ppSet(bnf.alter(BNF.OF, BNF.AS));
+						}
+
+						forEachRowTriggerAction(info)
+					)
+					|
+					< ENABLED >
+					{
+						ppSet(null);
+					}
+					|
+					< DISABLED >
+					{
+						ppSet(null);
+					}
+				)
+			)
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+Command forEachRowTriggerAction(ParseInfo info) :
+{
+	ppAppend(bnf.forEachRowTriggerAction(0));
+}
+{
+//	try
+//	{
+		< FOR >
+		{
+			ppSet(bnf.forEachRowTriggerAction(BNF.FOR));
+		}
+		< EACH >
+		{
+			ppSet(bnf.forEachRowTriggerAction(BNF.EACH));
+		}
+		< ROW >
+		{
+			ppSet(bnf.forEachRowTriggerAction(BNF.ROW));
+		}
+		(
+			LOOKAHEAD(1)
+			(
+				< BEGIN >
+				{
+					ppSet(bnf.forEachRowTriggerAction(BNF.BEGIN));
+				}
+				[
+					< ATOMIC >
+					{
+						ppSet(bnf.forEachRowTriggerAction(BNF.ATOMIC));
+					}
+				]
+				(
+					statement(info)
+					{
+						ppSet(bnf.forEachRowTriggerAction(BNF.statement));
+					}
+				)*
+
+	   			< END >
+	   			{
+					ppSet(null);
+				}
+	   		)
+			|
+			statement(info)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+
+	{
+		return null;
+	}
+}
+
+void userCommand(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			queryExpression(info)
+			|
+			storedProcedure(info)
+			|
+			insert(info)
+			|
+			update(info)
+			|
+			delete(info)
+			|
+			alter(info)
+			|
+			createTrigger(info)
+			|
+			compoundStatement(info)
+			{
+				requiresVersionAtLeast(Version.TEIID_8_4);
+			}
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void errorStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< ERROR >
+		{
+			ppSet(bnf.errorStatement(BNF.ERROR));
+		}
+
+		 expression(info)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void raiseStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< RAISE >
+		{
+			ppSet(bnf.raiseStatement(BNF.RAISE));
+		}
+
+		[
+			< SQLWARNING >
+			{
+				ppSet(bnf.raiseStatement(BNF.SQLWARNING));
+			}
+		]
+
+		exceptionReference(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void exceptionReference(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		id()
+		|
+		exception(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void exception(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< SQLEXCEPTION >
+		{
+			ppSet(bnf.exception(BNF.SQLEXCEPTION));
+		}
+
+		commonValueExpression(info)
+		{
+			ppAppend(bnf.exception(BNF.SQLEXCEPTION, BNF.commonValueExpression));
+		}
+
+		[
+			< SQLSTATE >
+			{
+				ppSet(bnf.exception(BNF.SQLSTATE));
+			}
+
+			commonValueExpression(info)
+			{
+				ppAppend(bnf.exception(BNF.SQLSTATE, BNF.commonValueExpression));
+			}
+
+			[
+				< COMMA >
+				{
+					ppSet(bnf.exception(BNF.COMMA));
+				}
+
+				commonValueExpression(info)
+				{
+					ppAppend(bnf.exception(BNF.COMMA, BNF.commonValueExpression));
+				}
+			]
+		]
+
+		[
+			< CHAIN >
+			{
+				ppSet(bnf.exception(BNF.CHAIN));
+			}
+
+			exceptionReference(info)
+		]
+
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+Statement statement(ParseInfo info) :
+{
+	ppAppend(bnf.statement(0));
+}
+{
+//	try
+//	{
+		(
+			LOOKAHEAD(2)
+			(
+				[
+					id()
+					{
+						ppAppend(bnf.statement(BNF.id));
+					}
+
+					< COLON >
+					{
+						ppSet(bnf.statement(BNF.COLON));
+					}
+				]
+
+				(
+					loopStatement(info)
+					|
+					whileStatement(info)
+					|
+					compoundStatement(info)
+				)
+			)
+			|
+			(
+				ifStatement(info)
+				|
+				delimitedStatement(info)
+			)
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+
+	{
+		return null;
+	}
+}
+
+void delimitedStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			LOOKAHEAD(2)
+			assignStatement(info)
+			{
+				ppAppend(bnf.delimitedStatement(BNF.assignStatement));
+			}
+			|
+			sqlStatement(info)
+			{
+				ppAppend(bnf.delimitedStatement(BNF.sqlStatement));
+			}
+			|
+			errorStatement(info)
+			{
+				ppAppend(bnf.delimitedStatement(BNF.errorStatement));
+			}
+			|
+			raiseStatement(info)
+			{
+				ppAppend(bnf.delimitedStatement(BNF.raiseStatement));
+			}
+			|
+			declareStatement(info)
+			{
+				ppAppend(bnf.delimitedStatement(BNF.declareStatement));
+			}
+			|
+			branchingStatement(info)
+			{
+				ppAppend(bnf.delimitedStatement(BNF.branchingStatement));
+			}
+			|
+			returnStatement(info)
+			{
+				ppAppend(bnf.delimitedStatement(BNF.returnStatement));
+			}
+		)
+
+		< SEMICOLON >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void compoundStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< BEGIN >
+		{
+			ppSet(bnf.compoundStatement(BNF.BEGIN));
+		}
+		[
+			[
+				< NOT >
+				{
+					ppSet(bnf.compoundStatement(BNF.NOT));
+				}
+			]
+
+			< ATOMIC >
+			{
+				ppSet(bnf.compoundStatement(BNF.ATOMIC));
+			}
+		]
+		(
+			LOOKAHEAD(2)
+			statement(info)
+			{
+				ppAppend(bnf.compoundStatement(BNF.BEGIN, BNF.statement));
+			}
+		)*
+
+		[
+			< EXCEPTION >
+			{
+				ppSet(bnf.compoundStatement(BNF.EXCEPTION));
+			}
+
+			id()
+			{
+				ppAppend(bnf.compoundStatement(BNF.id));
+			}
+
+			(
+				statement(info)
+				{
+					ppAppend(bnf.compoundStatement(BNF.EXCEPTION, BNF.statement));
+				}
+			)*
+		]
+
+		< END >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void branchingStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			(
+				(
+					< BREAK >
+					{
+						ppSet(bnf.branchingStatement(BNF.BREAK));
+					}
+					|
+					< CONTINUE >
+					{
+						ppSet(bnf.branchingStatement(BNF.CONTINUE));
+					}
+				)
+
+				[ id() ]
+
+			)
+			|
+			(
+				< LEAVE >
+				{
+					ppSet(bnf.branchingStatement(BNF.LEAVE));
+				}
+
+				id()
+			)
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void returnStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< RETURN >
+		{
+			ppSet(bnf.returnStatement(BNF.RETURN));
+		}
+
+		[ expression(info) ]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void whileStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< WHILE >
+		{
+			ppSet(bnf.whileStatement(BNF.WHILE));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.whileStatement(BNF.LPAREN));
+		}
+
+		criteria(info)
+		{
+			ppAppend(bnf.whileStatement(BNF.criteria));
+		}
+
+		< RPAREN >
+		{
+			ppSet(bnf.whileStatement(BNF.RPAREN));
+		}
+
+		statement(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void loopStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< LOOP >
+		{
+			ppSet(bnf.loopStatement(BNF.LOOP));
+		}
+
+		< ON >
+		{
+			ppSet(bnf.loopStatement(BNF.ON));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.loopStatement(BNF.LPAREN));
+		}
+
+		queryExpression(info)
+		{
+			ppAppend(bnf.loopStatement(BNF.queryExpression));
+		}
+
+		< RPAREN >
+		{
+			ppSet(bnf.loopStatement(BNF.RPAREN));
+		}
+
+		< AS >
+		{
+			ppSet(bnf.loopStatement(BNF.AS));
+		}
+
+		id()
+		{
+			ppAppend(bnf.loopStatement(BNF.id));
+		}
+
+		statement(info)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void ifStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< IF >
+		{
+			ppSet(bnf.ifStatement(BNF.IF));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.ifStatement(BNF.LPAREN));
+		}
+
+		criteria(info)
+		{
+			ppAppend(bnf.ifStatement(BNF.criteria));
+		}
+
+		< RPAREN >
+		{
+			ppSet(bnf.ifStatement(BNF.RPAREN));
+		}
+
+		statement(info)
+		{
+			ppAppend(bnf.ifStatement(BNF.statement));
+		}
+
+		[
+			LOOKAHEAD(1)
+			< ELSE >
+			{
+				ppSet(bnf.ifStatement(BNF.ELSE));
+			}
+
+			statement(info)
+		]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void declareStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< DECLARE >
+		{
+			ppSet(bnf.declareStatement(BNF.DECLARE));
+		}
+
+		(
+			parseDataType()
+			{
+				ppAppend(bnf.declareStatement(BNF.parseDataType));
+			}
+			|
+			< EXCEPTION >
+			{
+				ppSet(bnf.declareStatement(BNF.EXCEPTION));
+			}
+		)
+
+		id()
+		{
+			ppAppend(bnf.declareStatement(BNF.id));
+		}
+
+		[
+			< EQ >
+			{
+				ppSet(bnf.declareStatement(BNF.EQ));
+			}
+
+			assignStatementOperand(info)
+		]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void assignStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		id()
+		{
+			ppAppend(bnf.assignStatement(BNF.id));
+		}
+
+		< EQ >
+		{
+			ppSet(bnf.assignStatement(BNF.EQ));
+		}
+
+		(
+			assignStatementOperand(info)
+			|
+			(
+				storedProcedure(info)
+				{
+					ppAppend(bnf.assignStatement(BNF.storedProcedure));
+				}
+
+				[
+					(
+						< WITH >
+						{
+							ppSet(bnf.assignStatement(BNF.WITH));
+						}
+						|
+						< WITHOUT >
+						{
+							ppSet(bnf.assignStatement(BNF.WITHOUT));
+						}
+					)
+
+					< RETURN >
+					{
+						ppSet(null);
+					}
+			   ]
+
+			)
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void assignStatementOperand(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			LOOKAHEAD	(< INSERT > 	< INTO >)
+	   		insert(info)
+			|
+			update(info)
+			|
+			delete(info)
+			|
+			LOOKAHEAD(1)
+			expression(info)
+			|
+			queryExpression(info)
+			|
+			exception(info)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void sqlStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			LOOKAHEAD(2)
+			userCommand(info)
+			{
+   				ppAppend(bnf.sqlStatement(BNF.userCommand));
+   			}
+			|
+			dynamicCommand(info)
+			{
+   				ppAppend(bnf.sqlStatement(BNF.dynamicCommand));
+   			}
+		)
+
+	   	[
+		   	(
+		   		< WITH >
+				{
+   					ppSet(bnf.sqlStatement(BNF.WITH));
+   				}
+	   			|
+	   			< WITHOUT >
+				{
+   					ppSet(bnf.sqlStatement(BNF.WITHOUT));
+   				}
+   			)
+
+   			< RETURN >
+   			{
+				ppSet(null);
+			}
+	   	]
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void createProcedure(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< CREATE >
+		{
+			ppSet(bnf.createProcedure(BNF.CREATE));
+		}
+
+		[
+			< VIRTUAL >
+			{
+				ppSet(bnf.createProcedure(BNF.VIRTUAL));
+			}
+		]
+
+		< PROCEDURE >
+		{
+			ppSet(bnf.createProcedure(BNF.PROCEDURE));
+		}
+
+		statement(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+/*
+ * Top-Level function so includes try catch
+ */
+Command procedureBodyCommand(ParseInfo info) :
+{}
+{
+	try
+	{
+		[
+			LOOKAHEAD(2)
+			< CREATE >
+			{
+				ppSet(bnf.procedureBodyCommand(BNF.CREATE));
+			}
+
+			[
+				< VIRTUAL >
+				{
+   					ppSet(bnf.procedureBodyCommand(BNF.VIRTUAL));
+   				}
+   			]
+
+   			< PROCEDURE >
+			{
+				ppSet(bnf.procedureBodyCommand(BNF.PROCEDURE));
+			}
+		]
+
+		statement(info)
+
+	}
+	catch (ParseException ex)
+	{}
+
+	{
+		return null;
+	}
+}
+
+void dynamicCommand(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			< EXECUTE >
+			{
+				ppSet(bnf.dynamicCommand(BNF.EXECUTE));
+			}
+			|
+			< EXEC >
+			{
+				ppSet(bnf.dynamicCommand(BNF.EXEC));
+			}
+		)
+
+		[
+			(
+				< STRING >
+				{
+					ppSet(bnf.dynamicCommand(BNF.STRING));
+				}
+				|
+				< IMMEDIATE >
+				{
+					ppSet(bnf.dynamicCommand(BNF.IMMEDIATE));
+				}
+			)
+		]
+
+		expression(info)
+		{
+			ppAppend(bnf.dynamicCommand(BNF.expression));
+		}
+
+		[
+			< AS >
+			{
+				ppSet(bnf.dynamicCommand(BNF.AS));
+			}
+
+			createElementsWithTypes(info)
+			{
+   				ppSet(bnf.dynamicCommand(BNF.createElementsWithTypes));
+   			}
+
+			[
+				< INTO >
+				{
+					ppSet(bnf.dynamicCommand(BNF.INTO));
+				}
+
+				id()
+				{
+					ppSet(bnf.dynamicCommand(BNF.id));
+				}
+			]
+		]
+
+		[
+			< USING >
+			{
+				ppSet(bnf.dynamicCommand(BNF.USING));
+			}
+
+			setClauseList(info)
+			{
+				ppAppend(bnf.dynamicCommand(BNF.setClauseList));
+			}
+		]
+
+		[
+			< UPDATE >
+			{
+				ppSet(bnf.dynamicCommand(BNF.UPDATE));
+			}
+			(
+				intVal()
+				|
+				< STAR >
+				{
+					ppSet(null);
+				}
+			)
+		]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void setClauseList(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		id()
+		{
+			ppAppend(bnf.setClauseList(BNF.id));
+		}
+
+		< EQ >
+		{
+			ppSet(bnf.setClauseList(BNF.EQ));
+		}
+
+		expression(info)
+		{
+			ppAppend(bnf.setClauseList(BNF.expression));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.setClauseList(BNF.COMMA));
+			}
+
+			id()
+			{
+				ppAppend(bnf.setClauseList(BNF.COMMA, BNF.id));
+			}
+
+			< EQ >
+			{
+				ppSet(bnf.setClauseList(BNF.COMMA, BNF.EQ));
+			}
+
+			expression(info)
+			{
+				ppAppend(bnf.setClauseList(BNF.COMMA, BNF.expression));
+			}
+		)*
+
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void createElementsWithTypes(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		id()
+		{
+			ppAppend(bnf.createElementsWithTypes(BNF.id));
+		}
+
+		parseDataType()
+		{
+			ppAppend(bnf.createElementsWithTypes(BNF.parseDataType));
+		}
+
+		(
+			LOOKAHEAD(2)
+			< COMMA >
+			{
+				ppSet(bnf.createElementsWithTypes(BNF.COMMA));
+			}
+
+			id()
+			{
+				ppAppend(bnf.createElementsWithTypes(BNF.id));
+			}
+
+			parseDataType()
+			{
+				ppAppend(bnf.createElementsWithTypes(BNF.parseDataType));
+			}
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void callableStatement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< LBRACE >
+		{
+			ppSet(bnf.callableStatement(BNF.LBRACE));
+		}
+
+		[
+			< QMARK >
+			{
+				ppSet(bnf.callableStatement(BNF.QMARK));
+			}
+
+			< EQ >
+			{
+				ppSet(bnf.callableStatement(BNF.EQ));
+			}
+		]
+
+		< CALL >
+		{
+			ppSet(bnf.callableStatement(BNF.CALL));
+		}
+
+		id()
+		{
+			ppAppend(bnf.callableStatement(BNF.id));
+		}
+
+		[
+			< LPAREN >
+			{
+				ppSet(bnf.callableStatement(BNF.LPAREN));
+			}
+
+			(
+				LOOKAHEAD(2)
+				executeNamedParams(info)
+				{
+					ppAppend(bnf.callableStatement(BNF.executeNamedParams));
+				}
+				|
+				[
+					expressionList(info)
+					{
+						ppAppend(bnf.callableStatement(BNF.expressionList));
+					}
+				]
+			)
+
+			< RPAREN >
+			{
+				ppSet(bnf.callableStatement(BNF.RPAREN));
+			}
+		]
+		< RBRACE >
+		{
+			ppSet(bnf.callableStatement(BNF.RBRACE));
+		}
+
+		[ option(info) ]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void storedProcedure(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			(
+				< EXEC >
+				{
+					ppSet(bnf.storedProcedure(BNF.EXEC));
+				}
+				|
+				< EXECUTE >
+				{
+					ppSet(bnf.storedProcedure(BNF.EXECUTE));
+				}
+				|
+				< CALL >
+				{
+					ppSet(bnf.storedProcedure(BNF.CALL));
+				}
+			)
+
+			id()
+			{
+				ppAppend(bnf.storedProcedure(BNF.id));
+			}
+
+			< LPAREN >
+			{
+				ppSet(bnf.storedProcedure(BNF.LPAREN));
+			}
+
+			(
+				LOOKAHEAD(2)
+				executeNamedParams(info)
+				{
+					ppSet(bnf.storedProcedure(BNF.executeNamedParams));
+				}
+				|
+				[
+					expressionList(info)
+					{
+						ppAppend(bnf.storedProcedure(BNF.expressionList));
+					}
+				]
+			)
+
+			< RPAREN >
+			{
+				ppSet(bnf.storedProcedure(BNF.RPAREN));
+			}
+		)
+
+		[ option(info) ]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void executeNamedParams(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			id()
+			{
+				ppAppend(bnf.executeNamedParams(BNF.id));
+			}
+
+			< EQ >
+			{
+				ppSet(bnf.executeNamedParams(BNF.EQ));
+			}
+
+			[
+				< GT >
+				{
+					ppSet(bnf.executeNamedParams(BNF.GT));
+				}
+			]
+
+			expression(info)
+			{
+				ppAppend(bnf.executeNamedParams(BNF.expression));
+			}
+
+			(
+				< COMMA >
+				{
+					ppSet(bnf.executeNamedParams(BNF.COMMA));
+				}
+
+				id()
+				{
+					ppAppend(bnf.executeNamedParams(BNF.id));
+				}
+
+				< EQ >
+				{
+					ppSet(bnf.executeNamedParams(BNF.EQ));
+				}
+
+				[
+					< GT >
+					{
+   						ppSet(bnf.executeNamedParams(BNF.GT));
+   					}
+   				]
+
+   				expression(info)
+   				{
+					ppAppend(bnf.executeNamedParams(BNF.expression));
+				}
+   			)*
+   		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void insert(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			< INSERT >
+			{
+				ppSet(bnf.insert(BNF.INSERT));
+			}
+			|
+			< MERGE >
+			{
+				ppSet(bnf.insert(BNF.MERGE));
+			}
+		)
+
+		< INTO >
+		{
+			ppSet(bnf.insert(BNF.INTO));
+		}
+
+		id()
+		{
+			ppAppend(bnf.insert(BNF.id));
+		}
+
+		[
+			LOOKAHEAD	(< LPAREN > id())
+			columnList()
+			{
+				ppAppend(bnf.insert(BNF.columnList));
+			}
+		]
+
+		(
+			queryExpression(info)
+			{
+				ppAppend(bnf.insert(BNF.queryExpression));
+			}
+		)
+
+		[ option(info) ]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void expressionList(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		expression(info)
+		{
+			ppAppend(bnf.expressionList(BNF.expression));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.expressionList(BNF.COMMA));
+			}
+
+			expression(info)
+			{
+				ppAppend(bnf.expressionList(BNF.expression));
+			}
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void update(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< UPDATE >
+		{
+			ppSet(bnf.update(BNF.UPDATE));
+		}
+
+		id()
+		{
+			ppAppend(bnf.update(BNF.id));
+		}
+
+		< SET >
+		{
+			ppSet(bnf.update(BNF.SET));
+		}
+
+		setClauseList(info)
+		{
+   			ppAppend(bnf.update(BNF.setClauseList));
+   		}
+
+		[
+			where(info)
+			{
+				ppAppend(bnf.update(BNF.where));
+			}
+		]
+
+		[ option(info) ]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void delete(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< DELETE >
+		{
+			ppSet(bnf.delete(BNF.DELETE));
+		}
+
+		< FROM >
+		{
+			ppSet(bnf.delete(BNF.FROM));
+		}
+
+		id()
+		{
+			ppAppend(bnf.delete(BNF.id));
+		}
+
+		[
+			where(info)
+			{
+				ppAppend(bnf.delete(BNF.where));
+			}
+		]
+
+		[ option(info) ]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void queryExpression(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		[
+			< WITH >
+			{
+				ppSet(bnf.queryExpression(BNF.WITH));
+			}
+
+			withListElement(info)
+			{
+				ppAppend(bnf.queryExpression(BNF.withListElement));
+			}
+
+			(
+				< COMMA >
+				{
+					ppSet(bnf.queryExpression(BNF.COMMA));
+				}
+
+				withListElement(info)
+				{
+					ppAppend(bnf.queryExpression(BNF.withListElement));
+				}
+			)*
+		]
+
+		queryExpressionBody(info)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void withListElement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		id()
+		{
+			ppAppend(bnf.withListElement(BNF.id));
+		}
+
+		[ columnList() ]
+
+		< AS >
+		{
+			ppSet(bnf.withListElement(BNF.AS));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.withListElement(BNF.LPAREN));
+		}
+
+		queryExpression(info)
+		{
+   			ppAppend(bnf.withListElement(BNF.queryExpression));
+   		}
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void queryExpressionBody(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		queryTerm(info)
+		{
+			ppAppend(bnf.queryExpressionBody(BNF.queryTerm));
+		}
+
+		(
+			(
+				< UNION >
+				{
+					ppSet(bnf.queryExpressionBody(BNF.UNION));
+				}
+				|
+				< EXCEPT >
+				{
+					ppSet(bnf.queryExpressionBody(BNF.EXCEPT));
+				}
+			)
+
+			[
+				< ALL >
+				{
+					ppSet(bnf.queryExpressionBody(BNF.ALL));
+				}
+				|
+				< DISTINCT >
+				{
+					ppSet(bnf.queryExpressionBody(BNF.DISTINCT));
+				}
+			]
+
+			queryTerm(info)
+			{
+				ppAppend(bnf.queryExpressionBody(BNF.queryTerm));
+			}
+		)*
+
+		[
+			orderby(info)
+			{
+				ppAppend(bnf.queryExpressionBody(BNF.orderby));
+			}
+		]
+
+		[
+			limit(info)
+			{
+				ppAppend(bnf.queryExpressionBody(BNF.limit));
+			}
+		]
+
+		[
+			LOOKAHEAD(< OPTION >)
+			option(info)
+		]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void queryTerm(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		queryPrimary(info)
+		{
+			ppAppend(bnf.queryTerm(BNF.queryPrimary));
+		}
+
+		(
+			< INTERSECT >
+			{
+				ppSet(bnf.queryTerm(BNF.INTERSECT));
+			}
+
+			[
+				< ALL >
+				{
+					ppSet(bnf.queryTerm(BNF.ALL));
+				}
+				|
+				< DISTINCT >
+				{
+					ppSet(bnf.queryTerm(BNF.DISTINCT));
+				}
+			]
+
+			queryPrimary(info)
+			{
+				ppAppend(bnf.queryTerm(BNF.queryPrimary));
+			}
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void queryPrimary(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			query(info)
+			|
+			(
+				< VALUES >
+				{
+					ppSet(bnf.queryPrimary(BNF.VALUES));
+				}
+
+				< LPAREN >
+				{
+					ppSet(bnf.queryPrimary(BNF.VALUES, BNF.LPAREN));
+				}
+
+				expressionList(info)
+				{
+					ppAppend(bnf.queryPrimary(BNF.expressionList));
+				}
+
+				< RPAREN >
+				{
+					ppSet(bnf.queryPrimary(BNF.VALUES, BNF.RPAREN));
+				}
+
+				(
+					< COMMA >
+					{
+						ppSet(bnf.queryPrimary(BNF.COMMA));
+					}
+
+					{
+						requiresVersionAtLeast(Version.TEIID_8_6);
+					}
+					< LPAREN >
+					{
+						ppSet(bnf.queryPrimary(BNF.VALUES, BNF.LPAREN));
+					}
+
+					expressionList(info)
+					{
+						ppAppend(bnf.queryPrimary(BNF.expressionList));
+					}
+
+					< RPAREN >
+					{
+						ppSet(bnf.queryPrimary(BNF.VALUES, BNF.RPAREN));
+					}
+				)*
+			)
+			|
+			(
+				< TABLE >
+				{
+					ppSet(bnf.queryPrimary(BNF.TABLE));
+				}
+
+				id()
+			)
+			|
+			(
+				< LPAREN >
+				{
+					ppSet(bnf.queryPrimary(BNF.LPAREN));
+				}
+
+				queryExpressionBody(info)
+				{
+					ppAppend(bnf.queryPrimary(BNF.queryExpressionBody));
+				}
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+   			)
+   		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void query(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		select(info)
+		{
+			ppAppend(bnf.query(BNF.select));
+		}
+
+		[
+			into(info)
+			{
+				ppAppend(bnf.query(BNF.into));
+			}
+		]
+
+		from(info)
+		{
+			ppAppend(bnf.query(BNF.from));
+		}
+
+		[
+		   	where(info)
+			{
+				ppAppend(bnf.query(BNF.where));
+			}
+		]
+
+		[
+			groupBy(info)
+			{
+				ppAppend(bnf.query(BNF.groupBy));
+			}
+		]
+
+		[
+			having(info)
+			{
+				ppAppend(bnf.query(BNF.having));
+			}
+		]
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void into(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< INTO >
+		{
+			ppSet(bnf.into(BNF.INTO));
+		}
+
+		id()
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void select(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< SELECT >
+		{
+			ppSet(bnf.select(BNF.SELECT));
+		}
+
+		[
+			< ALL >
+			{
+				ppSet(bnf.select(BNF.ALL));
+			}
+			|
+			< DISTINCT >
+			{
+			   	ppSet(bnf.select(BNF.DISTINCT));
+			}
+		]
+
+		(
+			< STAR >
+			{
+				ppSet(null);
+			}
+			|
+			(
+				selectSymbol(info)
+				{
+					ppAppend(bnf.select(BNF.selectSymbol));
+				}
+
+				(
+					< COMMA >
+					{
+						ppSet(bnf.select(BNF.COMMA));
+					}
+
+					selectSymbol(info)
+					{
+						ppAppend(bnf.select(BNF.COMMA, BNF.selectSymbol));
+					}
+				)*
+			)
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void selectSymbol(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			selectExpression(info)
+			|
+			allInGroupSymbol()
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+Expression selectExpression(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			expression(info)
+			{
+				ppAppend(bnf.selectExpression(BNF.expression));
+			}
+
+			[
+				[
+					< AS >
+					{
+						ppSet(bnf.selectExpression(BNF.AS));
+					}
+				]
+
+				id()
+			]
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+
+	{
+		return null;
+	}
+}
+
+void derivedColumn(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			expression(info)
+			{
+				ppAppend(bnf.derivedColumn(BNF.expression));
+			}
+
+			[
+				< AS >
+				{
+					ppSet(bnf.derivedColumn(BNF.AS));
+				}
+
+				id()
+			]
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void allInGroupSymbol() :
+{}
+{
+//	try
+//	{
+		< ALL_IN_GROUP >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void orderedAgg(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			< XMLAGG >
+			{
+				ppSet(bnf.orderedAgg(BNF.XMLAGG));
+			}
+
+			< ARRAY_AGG >
+			{
+				ppSet(bnf.orderedAgg(BNF.ARRAY_AGG));
+			}
+
+			< JSONARRAY_AGG >
+			{
+				ppSet(bnf.orderedAgg(BNF.JSONARRAY_AGG));
+			}
+		)
+
+		< LPAREN >
+		{
+			ppSet(bnf.orderedAgg(BNF.LPAREN));
+		}
+
+   		expression(info)
+		{
+   			ppAppend(bnf.orderedAgg(BNF.expression));
+   		}
+
+		[
+			orderby(info)
+			{
+				ppAppend(bnf.orderedAgg(BNF.orderby));
+			}
+		]
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void textAgg(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< TEXTAGG >
+		{
+			ppSet(bnf.textAgg(BNF.TEXTAGG));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.textAgg(BNF.LPAREN));
+		}
+
+		[
+			< FOR >
+			{
+				ppSet(bnf.textAgg(BNF.FOR));
+			}
+		]
+
+		derivedColumn(info)
+		{
+   			ppAppend(bnf.textAgg(BNF.derivedColumn));
+   		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.textAgg(BNF.COMMA));
+			}
+
+			derivedColumn(info)
+			{
+				ppAppend(bnf.textAgg(BNF.derivedColumn));
+			}
+		)*
+
+		[
+			< DELIMITER >
+			{
+				ppSet(bnf.textAgg(BNF.DELIMITER));
+			}
+
+			charVal(info, "DELMITER")
+			{
+				ppAppend(bnf.textAgg(BNF.DELIMITER, BNF.charVal));
+			}
+		]
+
+		[
+			< QUOTE >
+			{
+				ppSet(bnf.textAgg(BNF.QUOTE));
+			}
+
+			charVal(info, "QUOTE")
+			{
+				ppAppend(bnf.textAgg(BNF.QUOTE, BNF.charVal));
+			}
+		]
+
+		[
+			< HEADER >
+			{
+				ppSet(bnf.textAgg(BNF.HEADER));
+			}
+		]
+
+		[
+			< ENCODING >
+			{
+				ppSet(bnf.textAgg(BNF.ENCODING));
+			}
+
+			id()
+			{
+				ppAppend(bnf.textAgg(BNF.id));
+			}
+		]
+
+		[
+			orderby(info)
+			{
+				ppAppend(bnf.textAgg(BNF.orderby));
+			}
+		]
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void aggregateSymbol(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			LOOKAHEAD(3)
+			(
+				< COUNT >
+				{
+					ppSet(bnf.aggregateSymbol(BNF.COUNT));
+				}
+				< LPAREN >
+				{
+					ppSet(bnf.aggregateSymbol(BNF.COUNT, BNF.LPAREN));
+				}
+				< STAR >
+				{
+					ppSet(bnf.aggregateSymbol(BNF.STAR));
+				}
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			(
+				(
+					< COUNT >
+					{
+   		 				ppSet(bnf.aggregateSymbol(BNF.COUNT));
+   		 			}
+   		 			|
+					< SUM >
+					{
+   		 				ppSet(bnf.aggregateSymbol(BNF.SUM));
+   	 				}
+   	 				|
+					< AVG >
+					{
+   	 					ppSet(bnf.aggregateSymbol(BNF.AVG));
+   	 				}
+   	 				|
+					< MIN >
+					{
+	   	 				ppSet(bnf.aggregateSymbol(BNF.MIN));
+	   	 			}
+   		 			|
+					< MAX >
+					{
+   	 					ppSet(bnf.aggregateSymbol(BNF.MAX));
+   	 				}
+   	 				|
+					< EVERY >
+					{
+   	 					ppSet(bnf.aggregateSymbol(BNF.EVERY));
+   	 				}
+					|
+					< STDDEV_POP >
+					{
+						ppSet(bnf.aggregateSymbol(BNF.STDDEV_POP));
+					}
+					|
+					< STDDEV_SAMP >
+					{
+						ppSet(bnf.aggregateSymbol(BNF.STDDEV_SAMP));
+					}
+					|
+					< VAR_SAMP >
+					{
+						ppSet(bnf.aggregateSymbol(BNF.VAR_SAMP));
+					}
+					|
+					< VAR_POP >
+					{
+						ppSet(bnf.aggregateSymbol(BNF.VAR_POP));
+					}
+					|
+					< SOME >
+					{
+						ppSet(bnf.aggregateSymbol(BNF.SOME));
+					}
+					|
+					< ANY >
+					{
+						ppSet(bnf.aggregateSymbol(BNF.ANY));
+					}
+				)
+
+				< LPAREN >
+				{
+					ppSet(bnf.aggregateSymbol(BNF.LPAREN));
+				}
+
+				[
+					< DISTINCT >
+					{
+   						ppSet(bnf.aggregateSymbol(BNF.DISTINCT));
+   					}
+					|
+					< ALL >
+					{
+   						ppSet(bnf.aggregateSymbol(BNF.ALL));
+   					}
+				]
+
+				expression(info)
+				{
+					ppAppend(bnf.aggregateSymbol(BNF.expression));
+				}
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void analyticAggregateSymbol(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			< ROW_NUMBER >
+			{
+				ppSet(bnf.analyticAggregateSymbol(BNF.ROW_NUMBER));
+			}
+			|
+			< RANK >
+			{
+				ppSet(bnf.analyticAggregateSymbol(BNF.RANK));
+			}
+			|
+			< DENSE_RANK >
+			{
+				ppSet(bnf.analyticAggregateSymbol(BNF.DENSE_RANK));
+			}
+		)
+
+		< LPAREN >
+		{
+			ppSet(bnf.analyticAggregateSymbol(BNF.LPAREN));
+		}
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void filterClause(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< FILTER >
+		{
+			ppSet(bnf.filterClause(BNF.FILTER));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.filterClause(BNF.LPAREN));
+		}
+
+		< WHERE >
+		{
+			ppSet(bnf.filterClause(BNF.WHERE));
+		}
+
+		booleanPrimary(info)
+		{
+			ppAppend(bnf.filterClause(BNF.booleanPrimary));
+		}
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void from(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< FROM >
+		{
+			ppSet(bnf.from(BNF.FROM));
+		}
+
+		(
+			tableReference(info)
+			{
+				ppAppend(bnf.from(BNF.tableReference));
+			}
+
+			(
+				< COMMA >
+				{
+					ppSet(bnf.from(BNF.COMMA));
+				}
+
+				tableReference(info)
+				{
+					ppAppend(bnf.from(BNF.tableReference));
+				}
+			)*
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void tableReference(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			(
+				< ESCAPEDJOIN >
+				{
+					ppSet(bnf.tableReference(BNF.ESCAPEDJOIN));
+				}
+
+				joinedTable(info)
+				{
+					ppAppend(bnf.tableReference(BNF.ESCAPEDJOIN, BNF.joinedTable));
+				}
+
+				< RBRACE >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			joinedTable(info)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void joinedTable(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		tablePrimary(info)
+		{
+			ppAppend(bnf.joinedTable(BNF.tablePrimary));
+		}
+
+		(
+			LOOKAHEAD(2)
+			(
+				crossJoin(info)
+				{
+					ppAppend(bnf.joinedTable(BNF.crossJoin));
+				}
+				|
+				qualifiedJoin(info)
+				{
+					ppAppend(bnf.joinedTable(BNF.qualifiedJoin));
+				}
+			)
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void crossJoin(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			(
+				< CROSS >
+				{
+					ppSet(bnf.crossJoin(BNF.CROSS));
+				}
+				|
+				< UNION >
+				{
+					ppSet(bnf.crossJoin(BNF.UNION));
+				}
+			)
+
+			< JOIN >
+			{
+				ppSet(bnf.crossJoin(BNF.JOIN));
+			}
+
+			tablePrimary(info)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void qualifiedJoin(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			[
+				(
+					< RIGHT >
+					{
+						ppSet(bnf.qualifiedJoin(BNF.RIGHT));
+					}
+
+					[
+						< OUTER >
+						{
+							ppSet(bnf.qualifiedJoin(BNF.OUTER));
+						}
+					]
+				)
+				|
+				(
+					< LEFT >
+					{
+						ppSet(bnf.qualifiedJoin(BNF.LEFT));
+					}
+
+					[
+						< OUTER >
+						{
+							ppSet(bnf.qualifiedJoin(BNF.OUTER));
+						}
+					]
+				)
+				|
+				(
+					< FULL >
+					{
+						ppSet(bnf.qualifiedJoin(BNF.FULL));
+					}
+
+					[
+						< OUTER >
+						{
+							ppSet(bnf.qualifiedJoin(BNF.OUTER));
+						}
+					]
+				)
+				|
+					< INNER >
+					{
+						ppSet(bnf.qualifiedJoin(BNF.INNER));
+					}
+			]
+
+			< JOIN >
+			{
+				ppSet(bnf.qualifiedJoin(BNF.JOIN));
+			}
+
+			tableReference(info)
+			{
+				ppAppend(bnf.qualifiedJoin(BNF.tableReference));
+			}
+
+			< ON >
+			{
+				ppSet(bnf.qualifiedJoin(BNF.ON));
+			}
+
+			criteria(info)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void tablePrimary(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			LOOKAHEAD(2)
+			textTable(info)
+			{
+				ppAppend(bnf.tablePrimary(BNF.textTable));
+			}
+			|
+			LOOKAHEAD(2)
+			arrayTable(info)
+			{
+				ppAppend(bnf.tablePrimary(BNF.arrayTable));
+			}
+			|
+			xmlTable(info)
+			{
+				ppAppend(bnf.tablePrimary(BNF.xmlTable));
+			}
+			|
+			LOOKAHEAD(2)
+			objectTable(info)
+			{
+				ppAppend(bnf.tablePrimary(BNF.objectTable));
+			}
+			|
+			unaryFromClause(info)
+			{
+				ppAppend(bnf.tablePrimary(BNF.unaryFromClause));
+			}
+			|
+			LOOKAHEAD(subqueryFromClause(info))
+			subqueryFromClause(info)
+			{
+   				ppAppend(bnf.tablePrimary(BNF.subqueryFromClause));
+   			}
+			|
+			(
+				< LPAREN >
+				{
+					ppSet(bnf.tablePrimary(BNF.LPAREN));
+				}
+
+				joinedTable(info)
+				{
+					ppAppend(bnf.tablePrimary(BNF.joinedTable));
+				}
+
+				< RPAREN >
+				{
+					ppSet(bnf.tablePrimary(BNF.RPAREN));
+				}
+			)
+		)
+
+		[
+			(
+				< MAKEDEP >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			(
+				< MAKENOTDEP >
+				{
+					ppSet(null);
+				}
+			)
+		]
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void xmlSerialize(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< XMLSERIALIZE >
+		{
+			ppSet(bnf.xmlSerialize(BNF.XMLSERIALIZE));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.xmlSerialize(BNF.LPAREN));
+		}
+
+		[
+			LOOKAHEAD(1)
+			(
+				< DOCUMENT >
+				{
+					ppSet(bnf.xmlSerialize(BNF.DOCUMENT));
+				}
+				|
+				< CONTENT >
+				{
+					ppSet(bnf.xmlSerialize(BNF.CONTENT));
+				}
+			)
+		]
+
+		expression(info)
+		{
+   			ppAppend(bnf.xmlSerialize(BNF.expression));
+   		}
+
+		[
+			< AS >
+			{
+				ppSet(bnf.xmlSerialize(BNF.AS));
+			}
+
+			(
+				< STRING >
+				{
+					ppSet(bnf.xmlSerialize(BNF.STRING));
+				}
+				|
+				< VARCHAR >
+				{
+					ppSet(bnf.xmlSerialize(BNF.VARCHAR));
+				}
+				|
+				< CLOB >
+				{
+					ppSet(bnf.xmlSerialize(BNF.CLOB));
+				}
+				|
+				< VARBINARY >
+				{
+					ppSet(bnf.xmlSerialize(BNF.VARBINARY));
+				}
+				|
+				< BLOB >
+				{
+					ppSet(bnf.xmlSerialize(BNF.BLOB));
+				}
+			)
+		]
+
+		[
+			< ENCODING >
+			{
+				ppSet(bnf.xmlSerialize(BNF.ENCODING));
+			}
+
+			id()
+			{
+				ppSet(bnf.xmlSerialize(BNF.id));
+			}
+		]
+
+		[
+			< VERSION >
+			{
+				ppSet(bnf.xmlSerialize(BNF.VERSION));
+			}
+
+			stringVal()
+			{
+				ppSet(bnf.xmlSerialize(BNF.stringVal));
+			}
+		]
+
+		[
+			(
+				< INCLUDING >
+				{
+					ppSet(bnf.xmlSerialize(BNF.INCLUDING));
+				}
+				|
+				< EXCLUDING >
+				{
+					ppSet(bnf.xmlSerialize(BNF.EXCLUDING));
+				}
+			)
+
+			< XMLDECLARATION >
+			{
+				ppSet(bnf.xmlSerialize(BNF.XMLDECLARATION));
+			}
+		]
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void arrayTable(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< ARRAYTABLE >
+		{
+			ppSet(bnf.arrayTable(BNF.ARRAYTABLE));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.arrayTable(BNF.LPAREN));
+		}
+
+		valueExpressionPrimary(info)
+		{
+			ppAppend(bnf.arrayTable(BNF.valueExpressionPrimary));
+		}
+
+		< COLUMNS >
+		{
+			ppSet(bnf.arrayTable(BNF.COLUMNS));
+		}
+
+		createElementsWithTypes(info)
+		{
+			ppAppend(bnf.arrayTable(BNF.createElementsWithTypes));
+		}
+
+		< RPAREN >
+		{
+			ppSet(bnf.arrayTable(BNF.RPAREN));
+		}
+
+		[
+			< AS >
+			{
+				ppSet(bnf.arrayTable(BNF.AS));
+			}
+		]
+
+		id()
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void textTable(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< TEXTTABLE >
+		{
+			ppSet(bnf.textTable(BNF.TEXTTABLE));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.textTable(BNF.LPAREN));
+		}
+
+		commonValueExpression(info)
+		{
+			ppAppend(bnf.textTable(BNF.commonValueExpression));
+		}
+
+		[
+			< SELECTOR >
+			{
+				ppSet(bnf.textTable(BNF.SELECTOR));
+			}
+
+			stringVal()
+			{
+				ppSet(bnf.textTable(BNF.stringVal));
+			}
+		]
+
+		< COLUMNS >
+		{
+			ppSet(bnf.textTable(BNF.COLUMNS));
+		}
+
+		textColumn(info)
+		{
+			ppAppend(bnf.textTable(BNF.textColumn));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.textTable(BNF.COMMA));
+			}
+
+			textColumn(info)
+			{
+				ppAppend(bnf.textTable(BNF.textColumn));
+			}
+		)*
+
+		[
+			< NO >
+			{
+				ppSet(bnf.textTable(BNF.NO));
+			}
+
+			< ROW >
+			{
+				ppSet(bnf.textTable(BNF.ROW));
+			}
+
+			< DELIMITER >
+			{
+				ppSet(bnf.textTable(BNF.NO, BNF.DELIMITER));
+			}
+		]
+
+		[
+			< DELIMITER >
+			{
+				ppSet(bnf.textTable(BNF.DELIMITER));
+			}
+
+			charVal(info, "DELMITER")
+			{
+				ppAppend(bnf.textTable(BNF.DELIMITER, BNF.charVal));
+			}
+		]
+
+		[
+			(
+				< ESCAPE >
+				{
+					ppSet(bnf.textTable(BNF.ESCAPE));
+				}
+
+				charVal(info, "ESCAPE")
+				{
+					ppAppend(bnf.textTable(BNF.ESCAPE, BNF.charVal));
+				}
+			)
+			|
+			(
+				< QUOTE >
+				{
+					ppSet(bnf.textTable(BNF.QUOTE));
+				}
+
+				charVal(info, "QUOTE")
+				{
+					ppAppend(bnf.textTable(BNF.QUOTE, BNF.charVal));
+				}
+			)
+		]
+
+		[
+			< HEADER >
+			{
+				ppSet(bnf.textTable(BNF.HEADER));
+			}
+
+			[
+				intVal()
+				{
+					ppAppend(bnf.textTable(BNF.intVal));
+				}
+			]
+		]
+
+		[
+			< SKIP_KEYWORD >
+			{
+				ppSet(bnf.textTable(BNF.SKIP_KEYWORD));
+			}
+
+			intVal()
+			{
+				ppAppend(bnf.textTable(BNF.intVal));
+			}
+		]
+
+		< RPAREN >
+		{
+			ppSet(bnf.textTable(BNF.RPAREN));
+		}
+
+		[
+			< AS >
+			{
+				ppSet(bnf.textTable(BNF.AS));
+			}
+		]
+
+		id()
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void textColumn(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		id()
+		{
+			ppSet(bnf.textColumn(BNF.id));
+		}
+
+		(
+			(
+				< FOR >
+				{
+					ppSet(bnf.textColumn(BNF.FOR));
+				}
+
+				< ORDINALITY >
+				{
+					ppSet(null);
+				}
+				{
+					requiresVersionAtLeast(Version.TEIID_8_7);
+				}
+			)
+			|
+			(
+				parseDataType()
+				[
+					< WIDTH >
+					{
+						ppSet(bnf.textColumn(BNF.WIDTH));
+					}
+
+					intVal()
+					{
+						ppAppend(bnf.textColumn(BNF.intVal));
+					}
+
+					[
+						LOOKAHEAD(2)
+						< NO >
+						{
+							ppSet(bnf.textColumn(BNF.NO));
+						}
+
+						< TRIM >
+						{
+							ppSet(bnf.textColumn(BNF.TRIM));
+						}
+					]
+				]
+
+				[
+					< SELECTOR >
+					{
+						ppSet(bnf.textColumn(BNF.SELECTOR));
+					}
+
+					stringVal()
+					{
+						ppAppend(bnf.textColumn(BNF.SELECTOR, BNF.stringVal));
+					}
+
+					intVal()
+					{
+						ppSet(null);
+					}
+				]
+			)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void xmlQuery(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< XMLQUERY >
+		{
+			ppSet(bnf.xmlQuery(BNF.XMLQUERY));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.xmlQuery(BNF.LPAREN));
+		}
+
+		[
+			xmlNamespaces(info)
+			{
+				ppAppend(bnf.xmlQuery(BNF.xmlNamespaces));
+			}
+
+			< COMMA >
+			{
+				ppSet(bnf.xmlQuery(BNF.COMMA));
+			}
+		]
+
+		stringVal()
+		{
+			ppAppend(bnf.xmlQuery(BNF.stringVal));
+		}
+
+		[
+			< PASSING >
+			{
+				ppSet(bnf.xmlQuery(BNF.PASSING));
+			}
+
+			derivedColumn(info)
+			{
+				ppAppend(bnf.xmlQuery(BNF.derivedColumn));
+			}
+
+			(
+				< COMMA >
+				{
+					ppSet(bnf.xmlQuery(BNF.COMMA));
+				}
+
+				derivedColumn(info)
+				{
+					ppAppend(bnf.xmlQuery(BNF.derivedColumn));
+				}
+			)*
+		]
+
+		[
+			(
+				< NULL >
+				{
+					ppSet(bnf.xmlQuery(BNF.NULL));
+				}
+				|
+				< EMPTY >
+				{
+					ppSet(bnf.xmlQuery(BNF.EMPTY));
+				}
+			)
+
+			< ON >
+			{
+				ppSet(bnf.xmlQuery(BNF.ON));
+			}
+
+			< EMPTY >
+			{
+				ppSet(bnf.xmlQuery(BNF.ON, BNF.EMPTY));
+			}
+		]
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void objectTable(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< OBJECTTABLE >
+		{
+			ppSet(bnf.objectTable(BNF.OBJECTTABLE));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.objectTable(BNF.LPAREN));
+		}
+
+		[
+			< LANGUAGE >
+			{
+				ppSet(bnf.objectTable(BNF.LANGUAGE));
+			}
+
+			stringVal()
+			{
+				ppAppend(bnf.objectTable(BNF.LANGUAGE, BNF.stringVal));
+			}
+		]
+
+		stringVal()
+		{
+			ppAppend(bnf.objectTable(BNF.stringVal));
+		}
+
+		[
+			< PASSING >
+			{
+				ppSet(bnf.objectTable(BNF.PASSING));
+			}
+
+			derivedColumn(info)
+			{
+				ppAppend(bnf.objectTable(BNF.derivedColumn));
+			}
+
+			(
+				< COMMA >
+				{
+					ppSet(bnf.objectTable(BNF.derivedColumn, BNF.COMMA));
+				}
+
+				derivedColumn(info)
+				{
+					ppAppend(bnf.objectTable(BNF.derivedColumn));
+				}
+			)*
+		]
+
+		< COLUMNS >
+		{
+			ppSet(bnf.objectTable(BNF.COLUMNS));
+		}
+
+		objectColumn(info)
+		{
+			ppAppend(bnf.objectTable(BNF.objectColumn));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.objectTable(BNF.objectColumn, BNF.COMMA));
+			}
+
+			objectColumn(info)
+			{
+				ppAppend(bnf.objectTable(BNF.objectColumn));
+			}
+		)*
+
+		< RPAREN >
+		{
+			ppSet(bnf.objectTable(BNF.RPAREN));
+		}
+
+		[
+			< AS >
+			{
+				ppSet(bnf.objectTable(BNF.AS));
+			}
+		]
+
+		id()
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void objectColumn(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		id()
+		{
+			ppSet(bnf.objectColumn(BNF.id));
+		}
+
+		parseDataType()
+		{
+			ppSet(bnf.objectColumn(BNF.parseDataType));
+		}
+
+		stringVal()
+		{
+			ppSet(bnf.objectColumn(BNF.stringVal));
+		}
+
+		[
+			< DEFAULT_KEYWORD >
+			{
+				ppSet(bnf.objectColumn(BNF.DEFAULT_KEYWORD));
+			}
+
+			expression(info)
+			{
+				ppAppend(bnf.objectColumn(BNF.expression));
+			}
+		]
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void xmlTable(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< XMLTABLE >
+		{
+			ppSet(bnf.xmlTable(BNF.XMLTABLE));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.xmlTable(BNF.LPAREN));
+		}
+
+		[
+			xmlNamespaces(info)
+			{
+				ppAppend(bnf.xmlTable(BNF.xmlNamespaces));
+			}
+
+			< COMMA >
+			{
+				ppSet(bnf.xmlTable(BNF.xmlNamespaces, BNF.COMMA));
+			}
+		]
+
+		stringVal()
+		{
+			ppSet(bnf.xmlTable(BNF.stringVal));
+		}
+		
+		[
+			< PASSING >
+			{
+				ppSet(bnf.xmlTable(BNF.PASSING));
+			}
+
+			derivedColumn(info)
+			{
+				ppAppend(bnf.xmlTable(BNF.derivedColumn));
+			}
+
+			(
+				< COMMA >
+				{
+					ppSet(bnf.xmlTable(BNF.COMMA));
+				}
+
+				derivedColumn(info)
+				{
+					ppAppend(bnf.xmlTable(BNF.derivedColumn));
+				}
+			)*
+		]
+
+		[
+			< COLUMNS >
+			{
+				ppSet(bnf.xmlTable(BNF.COLUMNS));
+			}
+
+			xmlColumn(info)
+			{
+				ppAppend(bnf.xmlTable(BNF.xmlColumn));
+			}
+
+			(
+				< COMMA >
+				{
+					ppSet(bnf.xmlTable(BNF.xmlColumn, BNF.COMMA));
+				}
+
+				xmlColumn(info)
+				{
+					ppAppend(bnf.xmlTable(BNF.xmlColumn));
+				}
+			)*
+		]
+
+		< RPAREN >
+		{
+			ppSet(bnf.xmlTable(BNF.RPAREN));
+		}
+
+		[
+			< AS >
+			{
+				ppSet(bnf.xmlTable(BNF.AS));
+			}
+		]
+
+		id()
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void xmlColumn(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		id()
+		{
+			ppSet(bnf.xmlColumn(BNF.id));
+		}
+
+		(
+			(
+				< FOR >
+				{
+					ppSet(bnf.xmlColumn(BNF.FOR));
+				}
+
+				< ORDINALITY >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			(
+				parseDataType()
+				{
+					ppSet(bnf.xmlColumn(BNF.parseDataType));
+				}
+
+				[
+					< DEFAULT_KEYWORD >
+					{
+						ppSet(bnf.xmlColumn(BNF.DEFAULT_KEYWORD));
+					}
+
+					expression(info)
+					{
+						ppAppend(bnf.xmlColumn(BNF.expression));
+					}
+				]
+
+				[
+					< PATH >
+					{
+						ppSet(bnf.xmlColumn(BNF.PATH));
+					}
+
+					stringVal()
+				]
+			)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void intVal() :
+{}
+{
+//	try
+//	{
+		[
+			(
+				< PLUS >
+				{
+					ppSet(bnf.intVal(BNF.PLUS));
+				}
+				|
+				< MINUS >
+				{
+					ppSet(bnf.intVal(BNF.MINUS));
+				}
+			)
+		]
+
+		< UNSIGNEDINTEGER >
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void subqueryFromClause(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		[
+			(
+				< TABLE >
+				{
+					ppSet(bnf.subqueryFromClause(BNF.TABLE));
+				}
+				|
+				< LATERAL >
+				{
+					ppSet(bnf.subqueryFromClause(BNF.LATERAL));
+				}
+			)
+		]
+
+		< LPAREN >
+		{
+			ppSet(bnf.subqueryFromClause(BNF.LPAREN));
+		}
+
+		(
+			queryExpression(info)
+			{
+				ppAppend(bnf.subqueryFromClause(BNF.queryExpression));
+			}
+			|
+			storedProcedure(info)
+			{
+				ppAppend(bnf.subqueryFromClause(BNF.storedProcedure));
+			}
+		)
+
+		< RPAREN >
+		{
+			ppSet(bnf.subqueryFromClause(BNF.RPAREN));
+		}
+
+		[
+			< AS >
+			{
+				ppSet(bnf.subqueryFromClause(BNF.AS));
+			}
+		]
+
+		id()
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void unaryFromClause(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			id()
+			{
+				ppAppend(bnf.unaryFromClause(BNF.id));
+			}
+
+			[
+				[
+					< AS >
+					{
+						ppSet(bnf.unaryFromClause(BNF.AS));
+					}
+				]
+
+				id()
+			]
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void where(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< WHERE >
+		{
+			ppSet(bnf.where(BNF.WHERE));
+		}
+
+		criteria(info)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+Criteria criteria(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		compoundCritOr(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+
+	{
+		return null;
+	}
+}
+
+void compoundCritOr(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		compoundCritAnd(info)
+		{
+			ppAppend(bnf.compoundCritOr(BNF.compoundCritAnd));
+		}
+
+		(
+			< OR >
+			{
+				ppSet(bnf.compoundCritOr(BNF.OR));
+			}
+
+			compoundCritAnd(info)
+			{
+				ppAppend(bnf.compoundCritOr(BNF.compoundCritAnd));
+			}
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void compoundCritAnd(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		notCrit(info)
+		{
+			ppAppend(bnf.compoundCritAnd(BNF.notCrit));
+		}
+
+		(
+			< AND >
+			{
+				ppSet(bnf.compoundCritAnd(BNF.AND));
+			}
+
+			notCrit(info)
+			{
+				ppAppend(bnf.compoundCritAnd(BNF.notCrit));
+			}
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void notCrit(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		[
+			< NOT >
+			{
+				ppSet(bnf.notCrit(BNF.NOT));
+			}
+		]
+
+		booleanPrimary(info)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void booleanPrimary(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			(
+				commonValueExpression(info)
+				{
+					ppAppend(bnf.booleanPrimary(BNF.commonValueExpression));
+				}
+
+				[
+					(
+						LOOKAHEAD(2)
+						betweenCrit(info)
+						|
+						LOOKAHEAD(2)
+						matchCrit(info)
+						|
+						LOOKAHEAD(2)
+						regexMatchCrit(info)
+						|
+						setCrit(info)
+						|
+						isNullCrit(info)
+						|
+						LOOKAHEAD(operator() (< ANY > | < SOME > | < ALL >) subquery(info))
+						subqueryCompareCriteria(info)
+						|
+						compareCrit(info)
+					)
+				]
+			)
+			|
+			existsCriteria(info)
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void operator() :
+{}
+{
+//	try
+//	{
+		(
+			< EQ >
+			|
+			< NE >
+			|
+			< NE2 >
+			|
+			< LT >
+			|
+			< LE >
+			|
+			< GT >
+			|
+			< GE >
+		)
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void compareCrit(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		operator()
+		{
+			ppAppend(bnf.compareCrit(BNF.operator));
+		}
+
+		commonValueExpression(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void subquery(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< LPAREN >
+		{
+			ppSet(bnf.subquery(BNF.LPAREN));
+		}
+
+		(
+			queryExpression(info)
+			{
+				ppAppend(bnf.subquery(BNF.queryExpression));
+			}
+			|
+			(
+				storedProcedure(info)
+				{
+					ppAppend(bnf.subquery(BNF.storedProcedure));
+				}
+			)
+		)
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void subqueryCompareCriteria(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		operator()
+		{
+			ppAppend(bnf.subqueryCompareCriteria(BNF.operator));
+		}
+		(
+			< ANY >
+			{
+				ppSet(bnf.subqueryCompareCriteria(BNF.ANY));
+			}
+			|
+			< SOME >
+			{
+				ppSet(bnf.subqueryCompareCriteria(BNF.SOME));
+			}
+			|
+			< ALL >
+			{
+				ppSet(bnf.subqueryCompareCriteria(BNF.ALL));
+			}
+		)
+
+		subquery(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void matchCrit(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		[
+			< NOT >
+			{
+				ppSet(bnf.matchCrit(BNF.NOT));
+			}
+		]
+
+		(
+			< LIKE >
+			{
+				ppSet(bnf.matchCrit(BNF.LIKE));
+			}
+			|
+			(
+				< SIMILAR >
+				{
+					ppSet(bnf.matchCrit(BNF.SIMILAR));
+				}
+
+				< TO >
+				{
+					ppSet(bnf.matchCrit(BNF.TO));
+				}
+			)
+		)
+
+		commonValueExpression(info)
+		{
+			ppAppend(bnf.matchCrit(BNF.commonValueExpression));
+		}
+
+		[
+			< ESCAPE >
+			{
+				ppSet(bnf.matchCrit(BNF.ESCAPE));
+			}
+
+			charVal(info, "LIKE/SIMILAR TO ESCAPE")
+			|
+			(
+				< LBRACE >
+				{
+					ppSet(bnf.matchCrit(BNF.LBRACE));
+				}
+
+				< ESCAPE >
+				{
+					ppSet(bnf.matchCrit(BNF.ESCAPE));
+				}
+
+				charVal(info, "LIKE/SIMILAR TO ESCAPE")
+				{
+					ppAppend(bnf.matchCrit(BNF.charVal));
+				}
+
+				< RBRACE >
+				{
+					ppSet(null);
+				}
+			)
+		]
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void regexMatchCrit(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		[
+			< NOT >
+			{
+				ppSet(bnf.regexMatchCrit(BNF.NOT));
+			}
+		]
+
+		< LIKE_REGEX >
+		{
+			ppSet(bnf.regexMatchCrit(BNF.LIKE_REGEX));
+		}
+
+		commonValueExpression(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void charVal(ParseInfo info, String type) :
+{}
+{
+//	try
+//	{
+		stringVal()
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void betweenCrit(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		[
+			< NOT >
+			{
+				ppSet(bnf.betweenCrit(BNF.NOT));
+			}
+		]
+
+		< BETWEEN >
+		{
+			ppSet(bnf.betweenCrit(BNF.BETWEEN));
+		}
+
+		commonValueExpression(info)
+		{
+			ppAppend(bnf.betweenCrit(BNF.commonValueExpression));
+		}
+
+		< AND >
+		{
+			ppSet(bnf.betweenCrit(BNF.AND));
+		}
+
+		commonValueExpression(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void isNullCrit(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< IS >
+		{
+			ppSet(bnf.isNullCrit(BNF.IS));
+		}
+
+		[
+			< NOT >
+			{
+				ppSet(bnf.isNullCrit(BNF.NOT));
+			}
+		]
+
+		< NULL >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void setCrit(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		[
+			< NOT >
+			{
+				ppSet(bnf.setCrit(BNF.NOT));
+			}
+		]
+
+		< IN >
+		{
+			ppSet(bnf.setCrit(BNF.IN));
+		}
+
+		(
+			LOOKAHEAD(subquery(info))
+			(
+				subquery(info)
+			)
+			|
+			(
+				< LPAREN >
+				{
+					ppSet(bnf.setCrit(BNF.LPAREN));
+				}
+
+				commonValueExpression(info)
+				{
+					ppAppend(bnf.setCrit(BNF.commonValueExpression));
+				}
+
+				(
+					< COMMA >
+					{
+						ppSet(bnf.setCrit(BNF.COMMA));
+					}
+
+					commonValueExpression(info)
+					{
+						ppAppend(bnf.setCrit(BNF.commonValueExpression));
+					}
+				)*
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void existsCriteria(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< EXISTS >
+		{
+			ppSet(bnf.existsCriteria(BNF.EXISTS));
+		}
+
+		subquery(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void groupBy(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< GROUP >
+		{
+			ppSet(bnf.groupBy(BNF.GROUP));
+		}
+
+		< BY >
+		{
+			ppSet(bnf.groupBy(BNF.BY));
+		}
+
+		(
+			< ROLLUP >
+			{
+				ppSet(bnf.groupBy(BNF.ROLLUP));
+			}
+
+			{
+				requiresVersionAtLeast(Version.TEIID_8_5);
+			}
+			< LPAREN >
+			{
+				ppSet(bnf.groupBy(BNF.LPAREN));
+			}
+
+			expressionList(info)
+			{
+				ppAppend(bnf.groupBy(BNF.expressionList));
+			}
+
+			< RPAREN >
+			{
+				ppSet(bnf.groupBy(BNF.RPAREN));
+			}
+			|
+			expressionList(info)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void having(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< HAVING >
+		{
+			ppSet(bnf.having(BNF.HAVING));
+		}
+
+		criteria(info)
+		{
+			ppAppend(bnf.having(BNF.criteria));
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void orderby(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< ORDER >
+		{
+			ppSet(bnf.orderby(BNF.ORDER));
+		}
+
+		< BY >
+		{
+			ppSet(bnf.orderby(BNF.BY));
+		}
+
+		sortSpecification(info)
+		{
+			ppAppend(bnf.orderby(BNF.sortSpecification));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.orderby(BNF.COMMA));
+			}
+
+			sortSpecification(info)
+			{
+				ppAppend(bnf.orderby(BNF.sortSpecification));
+			}
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void sortSpecification(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		sortKey(info)
+		{
+			ppAppend(bnf.sortSpecification(BNF.sortKey));
+		}
+
+		[
+			< ASC >
+			{
+				ppSet(bnf.sortSpecification(BNF.ASC));
+			}
+			|
+			< DESC >
+			{
+				ppSet(bnf.sortSpecification(BNF.DESC));
+			}
+		]
+
+		[
+			< NULLS >
+			{
+				ppSet(bnf.sortSpecification(BNF.NULLS));
+			}
+
+			(
+				< FIRST >
+				{
+					ppSet(null);
+				}
+				|
+				< LAST >
+				{
+					ppSet(null);
+				}
+			)
+		]
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void sortKey(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		expression(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void intParam(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		intVal()
+		|
+		unsignedValueExpressionPrimary(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void limit(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			(
+				< LIMIT >
+				{
+					ppSet(bnf.limit(BNF.LIMIT));
+				}
+
+				intParam(info)
+				{
+					ppAppend(bnf.limit(BNF.LIMIT, BNF.intParam));
+				}
+
+				[
+					< COMMA >
+					{
+						ppSet(bnf.limit(BNF.COMMA));
+					}
+
+					intParam(info)
+					{
+						ppSet(null);
+					}
+				]
+			)
+			|
+			(
+				< OFFSET >
+				{
+					ppSet(bnf.limit(BNF.OFFSET));
+				}
+
+				intParam(info)
+				{
+					ppAppend(bnf.limit(BNF.OFFSET, BNF.intParam));
+				}
+
+				(
+					< ROW >
+					{
+						ppSet(bnf.limit(BNF.ROW));
+					}
+					|
+					< ROWS >
+					{
+						ppSet(bnf.limit(BNF.ROWS));
+					}
+				)
+
+				[
+					fetchLimit(info)
+					{
+						ppSet(null);
+					}
+				]
+			)
+			|
+			(
+				fetchLimit(info)
+				{
+					ppSet(null);
+				}
+			)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void fetchLimit(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< FETCH >
+		{
+			ppSet(bnf.fetchLimit(BNF.FETCH));
+		}
+
+		(
+			< FIRST >
+			{
+				ppSet(bnf.fetchLimit(BNF.FIRST));
+			}
+			|
+			< NEXT >
+			{
+				ppSet(bnf.fetchLimit(BNF.NEXT));
+			}
+		)
+
+		[
+			intParam(info)
+			{
+				ppAppend(bnf.fetchLimit(BNF.intParam));
+			}
+		]
+
+		(
+			< ROW >
+			{
+				ppSet(bnf.fetchLimit(BNF.ROW));
+			}
+			|
+			< ROWS >
+			{
+				ppSet(bnf.fetchLimit(BNF.ROWS));
+			}
+		)
+
+		< ONLY >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void option(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< OPTION >
+		{
+			ppSet(bnf.option(BNF.OPTION));
+		}
+
+		(
+			< MAKEDEP >
+			{
+				ppSet(bnf.option(BNF.MAKEDEP));
+			}
+
+			id()
+			{
+				ppAppend(bnf.option(BNF.MAKEDEP, BNF.id));
+			}
+
+			(
+				< COMMA >
+				{
+					ppSet(bnf.option(BNF.MAKEDEP, BNF.COMMA));
+				}
+
+				id()
+				{
+					ppAppend(bnf.option(BNF.MAKEDEP, BNF.COMMA, BNF.id));
+				}
+			)*
+			|
+			< MAKENOTDEP >
+			{
+				ppSet(bnf.option(BNF.MAKENOTDEP));
+			}
+
+			id()
+			{
+				ppAppend(bnf.option(BNF.MAKENOTDEP, BNF.id));
+			}
+
+			(
+				< COMMA >
+				{
+					ppSet(bnf.option(BNF.MAKENOTDEP, BNF.COMMA));
+				}
+
+				id()
+				{
+					ppAppend(bnf.option(BNF.MAKENOTDEP, BNF.COMMA, BNF.id));
+				}
+			)*
+			|
+			< NOCACHE >
+			{
+				ppSet(bnf.option(BNF.NOCACHE));
+			}
+
+			[
+				id()
+				{
+					ppAppend(bnf.option(BNF.NOCACHE, BNF.id));
+				}
+
+				(
+					< COMMA >
+					{
+						ppSet(bnf.option(BNF.NOCACHE, BNF.COMMA));
+					}
+
+					id()
+					{
+						ppAppend(bnf.option(BNF.NOCACHE, BNF.COMMA, BNF.id));
+					}
+				)*
+			]
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+Expression expression(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		criteria(info)
+//	}
+//	catch (ParseException ex)
+//	{}
+
+	{
+		return null;
+	}
+}
+
+void commonValueExpression(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			plusExpression(info)
+			{
+				ppAppend(bnf.commonValueExpression(BNF.plusExpression));
+			}
+
+			(
+				< CONCAT_OP >
+				{
+					ppSet(bnf.commonValueExpression(BNF.CONCAT_OP));
+				}
+
+				plusExpression(info)
+				{
+					ppAppend(bnf.commonValueExpression(BNF.plusExpression));
+				}
+			)*
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void plusExpression(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			timesExpression(info)
+			{
+				ppAppend(bnf.plusExpression(BNF.timesExpression));
+			}
+
+			(
+				plusMinus()
+				{
+					ppAppend(bnf.plusExpression(BNF.plusMinus));
+				}
+				
+				timesExpression(info)
+				{
+					ppAppend(bnf.plusExpression(BNF.timesExpression));
+				}
+			)*
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void plusMinus() :
+{}
+{
+//	try
+//	{
+		(
+			< PLUS >
+			|
+			< MINUS >
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void timesExpression(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			valueExpressionPrimary(info)
+			{
+				ppAppend(bnf.timesExpression(BNF.valueExpressionPrimary));
+			}
+
+			(
+				timesOperator()
+				{
+					ppAppend(bnf.timesExpression(BNF.timesOperator));
+				}
+
+				valueExpressionPrimary(info)
+				{
+					ppAppend(bnf.timesExpression(BNF.valueExpressionPrimary));
+				}
+			)*
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void timesOperator() :
+{}
+{
+//	try
+//	{
+		(
+			< STAR >
+			|
+			< SLASH >
+		)
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void valueExpressionPrimary(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			nonNumericLiteral()
+			|
+			[
+				plusMinus()
+				{
+					ppAppend(bnf.valueExpressionPrimary(BNF.plusMinus));
+				}
+			]
+
+			(
+				unsignedNumericLiteral()
+				|
+				(
+					unsignedValueExpressionPrimary(info)
+					{
+						ppAppend(bnf.valueExpressionPrimary(BNF.unsignedValueExpressionPrimary));
+					}
+
+					(
+						< LSBRACE >
+						{
+							ppSet(bnf.valueExpressionPrimary(BNF.LSBRACE));
+						}
+
+						plusExpression(info)
+						{
+							ppAppend(bnf.valueExpressionPrimary(BNF.plusExpression));
+						}
+
+						< RSBRACE >
+						{
+							ppSet(bnf.valueExpressionPrimary(BNF.RSBRACE));
+						}
+					)*
+				)
+			)
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void parameterReference(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< QMARK >
+		{
+			ppSet(null);
+		}
+		|
+		(
+			< DOLLAR >
+			{
+				ppSet(bnf.parameterReference(BNF.DOLLAR));
+			}
+
+			intVal()
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void unescapedFunction(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			LOOKAHEAD(2)
+			(
+				(
+					textAgg(info)
+					{
+						ppAppend(bnf.unescapedFunction(BNF.textAgg));
+					}
+					|
+					aggregateSymbol(info)
+					{
+						ppAppend(bnf.unescapedFunction(BNF.aggregateSymbol));
+					}
+					|
+					orderedAgg(info)
+					{
+						ppAppend(bnf.unescapedFunction(BNF.orderedAgg));
+					}
+				)
+
+				[
+					filterClause(info)
+					{
+						ppAppend(bnf.unescapedFunction(BNF.filterClause));
+					}
+				]
+
+				[
+					windowSpecification(info)
+					{
+						ppAppend(bnf.unescapedFunction(BNF.windowSpecification));
+					}
+				]
+			)
+			|
+			LOOKAHEAD(2)
+			(
+				analyticAggregateSymbol(info)
+				{
+					ppAppend(bnf.unescapedFunction(BNF.analyticAggregateSymbol));
+				}
+
+				[
+					filterClause(info)
+					{
+						ppAppend(bnf.unescapedFunction(BNF.filterClause));
+					}
+				]
+
+				windowSpecification(info)
+				{
+					ppAppend(bnf.unescapedFunction(BNF.windowSpecification));
+				}
+			)
+			|
+			LOOKAHEAD(2)
+			(
+				function(info)
+				{
+					ppAppend(bnf.unescapedFunction(BNF.function));
+				}
+
+				[
+					windowSpecification(info)
+					{
+						ppAppend(bnf.unescapedFunction(BNF.windowSpecification));
+					}
+				]
+			)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void nestedExpression(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			< LPAREN >
+			{
+				ppSet(bnf.nestedExpression(BNF.LPAREN));
+			}
+
+			[
+				expression(info)
+				{
+					ppAppend(bnf.nestedExpression(BNF.expression));
+				}
+
+				(
+					LOOKAHEAD(2)
+					< COMMA >
+					{
+						ppSet(bnf.nestedExpression(BNF.LPAREN, BNF.expression, BNF.COMMA));
+					}
+
+					expression(info)
+					{
+						ppAppend(bnf.nestedExpression(BNF.expression));
+					}
+					{
+						requiresVersionAtLeast(Version.TEIID_8_5);
+					}
+				)*
+			]
+
+			[
+				< COMMA >
+				{
+					ppSet(bnf.nestedExpression(BNF.COMMA));
+				}
+				{
+					requiresVersionAtLeast(Version.TEIID_8_5);
+				}
+			]
+
+			< RPAREN >
+			{
+				ppSet(null);
+			}
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void unsignedValueExpressionPrimary(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			parameterReference(info)
+			{
+				ppAppend(bnf.unsignedValueExpressionPrimary(BNF.parameterReference));
+			}
+			|
+			(
+				< ESCAPEDFUNCTION >
+				{
+					ppSet(bnf.unsignedValueExpressionPrimary(BNF.ESCAPEDFUNCTION));
+				}
+
+				function(info)
+				{
+					ppAppend(bnf.unsignedValueExpressionPrimary(BNF.function));
+				}
+
+				< RBRACE >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			LOOKAHEAD(2)
+			unescapedFunction(info)
+			{
+				ppAppend(bnf.unsignedValueExpressionPrimary(BNF.unescapedFunction));
+			}
+			|
+			(
+				(
+					< ID >
+					{
+						ppSet(bnf.unsignedValueExpressionPrimary(BNF.ID));
+					}
+					|
+					nonReserved()
+				)
+			)
+			|
+			LOOKAHEAD(subquery(info))
+			subquery(info)
+			{
+				ppAppend(bnf.unsignedValueExpressionPrimary(BNF.subquery));
+			}
+			|
+			nestedExpression(info)
+			{
+				ppAppend(bnf.unsignedValueExpressionPrimary(BNF.nestedExpression));
+			}
+			|
+			LOOKAHEAD(2)
+			searchedCaseExpression(info)
+			{
+				ppAppend(bnf.unsignedValueExpressionPrimary(BNF.searchedCaseExpression));
+			}
+			|
+			caseExpression(info)
+			{
+				ppAppend(bnf.unsignedValueExpressionPrimary(BNF.caseExpression));
+			}
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void windowSpecification(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< OVER >
+		{
+			ppSet(bnf.windowSpecification(BNF.OVER));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.windowSpecification(BNF.LPAREN));
+		}
+
+		[
+			< PARTITION >
+			{
+				ppSet(bnf.windowSpecification(BNF.PARTITION));
+			}
+
+			< BY >
+			{
+				ppSet(bnf.windowSpecification(BNF.BY));
+			}
+
+			expressionList(info)
+			{
+				ppAppend(bnf.windowSpecification(BNF.expressionList));
+			}
+		]
+
+		[
+			orderby(info)
+			{
+				ppAppend(bnf.windowSpecification(BNF.orderby));
+			}
+		]
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void caseExpression(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< CASE >
+		{
+			ppSet(bnf.caseExpression(BNF.CASE));
+		}
+
+		expression(info)
+		{
+			ppAppend(bnf.caseExpression(BNF.CASE, BNF.expression));
+		}
+
+		(
+			< WHEN >
+			{
+				ppSet(bnf.caseExpression(BNF.WHEN));
+			}
+
+			expression(info)
+			{
+				ppAppend(bnf.caseExpression(BNF.WHEN, BNF.expression));
+			}
+
+			< THEN >
+			{
+				ppSet(bnf.caseExpression(BNF.THEN));
+			}
+
+			expression(info)
+			{
+				ppAppend(bnf.caseExpression(BNF.THEN, BNF.expression));
+			}
+		)+
+
+		[
+			< ELSE >
+			{
+				ppSet(bnf.caseExpression(BNF.ELSE));
+			}
+
+			expression(info)
+			{
+				ppAppend(bnf.caseExpression(BNF.ELSE, BNF.expression));
+			}
+		]
+
+		< END >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void searchedCaseExpression(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< CASE >
+		{
+			ppSet(bnf.searchedCaseExpression(BNF.CASE));
+		}
+
+		(
+			< WHEN >
+			{
+				ppSet(bnf.searchedCaseExpression(BNF.WHEN));
+			}
+
+			criteria(info)
+			{
+				ppAppend(bnf.searchedCaseExpression(BNF.criteria));
+			}
+
+			< THEN >
+			{
+				ppSet(bnf.searchedCaseExpression(BNF.THEN));
+			}
+
+			expression(info)
+			{
+				ppAppend(bnf.searchedCaseExpression(BNF.THEN, BNF.expression));
+			}
+		)+
+
+		[
+			< ELSE >
+			{
+				ppSet(bnf.searchedCaseExpression(BNF.ELSE));
+			}
+
+			expression(info)
+			{
+				ppAppend(bnf.searchedCaseExpression(BNF.ELSE, BNF.expression));
+			}
+		]
+
+		< END >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void function(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		(
+			(
+				< CONVERT >
+				{
+					ppSet(bnf.function(BNF.CONVERT));
+				}
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.CONVERT, BNF.LPAREN));
+				}
+
+				expression(info)
+				{
+					ppAppend(bnf.function(BNF.CONVERT, BNF.expression));
+				}
+
+				< COMMA >
+				{
+					ppSet(bnf.function(BNF.CONVERT, BNF.COMMA));
+				}
+
+				parseDataType()
+				{
+					ppAppend(bnf.function(BNF.parseDataType));
+				}
+				
+				< RPAREN >
+			)
+			|
+			(
+				< CAST >
+				{
+					ppSet(bnf.function(BNF.CAST));
+				}
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.CAST, BNF.LPAREN));
+				}
+
+				expression(info)
+				{
+					ppAppend(bnf.function(BNF.CAST, BNF.expression));
+				}
+
+				< AS >
+				{
+					ppSet(bnf.function(BNF.AS));
+				}
+
+				parseDataType()
+				{
+					ppAppend(bnf.function(BNF.parseDataType));
+				}
+				
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			LOOKAHEAD(2)
+			(
+				< SUBSTRING >
+				{
+					ppSet(bnf.function(BNF.SUBSTRING));
+				}
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.SUBSTRING, BNF.LPAREN));
+				}
+
+				expression(info)
+				{
+					ppAppend(bnf.function(BNF.SUBSTRING, BNF.expression));
+				}
+
+				(
+					(
+						< FROM >
+						{
+							ppSet(bnf.function(BNF.SUBSTRING, BNF.FROM));
+						}
+
+						expression(info)
+						{
+							ppAppend(bnf.function(BNF.SUBSTRING, BNF.FROM, BNF.expression));
+						}
+
+						[
+							< FOR >
+							{
+								ppSet(bnf.function(BNF.FOR));
+							}
+
+							expression(info)
+							{
+								ppAppend(bnf.function(BNF.FOR, BNF.expression));
+							}
+						]
+					)
+					|
+					(
+						< COMMA >
+						{
+							ppSet(bnf.function(BNF.SUBSTRING, BNF.COMMA));
+						}
+
+						expressionList(info)
+						{
+							ppAppend(bnf.function(BNF.SUBSTRING, BNF.COMMA, BNF.expressionList));
+						}
+					)
+				)
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			LOOKAHEAD(2)
+			(
+				< EXTRACT >
+				{
+					ppSet(bnf.function(BNF.EXTRACT));
+				}
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.EXTRACT, BNF.LPAREN));
+				}
+
+				(
+					< YEAR >
+					{
+						ppSet(bnf.function(BNF.YEAR));
+					}
+					|
+					< MONTH >
+					{
+						ppSet(bnf.function(BNF.MONTH));
+					}
+					|
+					< DAY >
+					{
+						ppSet(bnf.function(BNF.DAY));
+					}
+					|
+					< HOUR >
+					{
+						ppSet(bnf.function(BNF.HOUR));
+					}
+					|
+					< MINUTE >
+					{
+						ppSet(bnf.function(BNF.MINUTE));
+					}
+					|
+					< SECOND >
+					{
+						ppSet(bnf.function(BNF.SECOND));
+					}
+				)
+
+				< FROM >
+				{
+					ppSet(bnf.function(BNF.EXTRACT, BNF.FROM));
+				}
+
+				expression(info)
+				{
+					ppAppend(bnf.function(BNF.EXTRACT, BNF.FROM, BNF.expression));
+				}
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|   LOOKAHEAD(2)
+			(
+				< TRIM >
+				{
+					ppSet(bnf.function(BNF.TRIM));
+				}
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.TRIM, BNF.LPAREN));
+				}
+
+				[
+					LOOKAHEAD(2)
+					(
+						(
+							(
+								< LEADING >
+								{
+									ppSet(bnf.function(BNF.LEADING));
+								}
+								|
+								< TRAILING >
+								{
+									ppSet(bnf.function(BNF.TRAILING));
+								}
+								|
+								< BOTH >
+								{
+									ppSet(bnf.function(BNF.BOTH));
+								}
+							)
+
+							[
+								expression(info)
+								{
+									ppAppend(bnf.function(BNF.TRIM, BNF.LEADING, BNF.expression));
+								}
+							]
+						)
+						|
+						expression(info)
+						{
+							ppAppend(bnf.function(BNF.TRIM, BNF.expression));
+						}
+					)
+
+					< FROM >
+					{
+						ppSet(bnf.function(BNF.TRIM, BNF.FROM));
+					}
+				]
+
+				expression(info)
+				{
+					ppAppend(bnf.function(BNF.TRIM, BNF.LPAREN, BNF.expression));
+				}
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			LOOKAHEAD(2)
+			(
+				(
+					< TO_CHARS >
+					{
+						ppSet(bnf.function(BNF.TO_CHARS));
+					}
+					|
+					< TO_BYTES >
+					{
+						ppSet(bnf.function(BNF.TO_BYTES));
+					}
+				)
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.TO_BYTES, BNF.LPAREN));
+				}
+
+				expression(info)
+				{
+					ppAppend(bnf.function(BNF.TO_BYTES, BNF.expression));
+				}
+
+				< COMMA >
+				{
+					ppSet(bnf.function(BNF.TO_BYTES, BNF.COMMA));
+				}
+
+				stringVal()
+				{
+					ppAppend(bnf.function(BNF.stringVal));
+				}
+
+				[
+					< COMMA >
+					{
+						ppSet(bnf.function(BNF.TO_BYTES, BNF.stringVal, BNF.COMMA));
+					}
+
+					{
+						requiresVersionAtLeast(Version.TEIID_8_6);
+					}
+
+					expression(info)
+					{
+						ppAppend(bnf.function(BNF.TO_BYTES, BNF.stringVal, BNF.expression));
+					}
+				]
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			LOOKAHEAD(2)
+			(
+				(
+					< TIMESTAMPADD >
+					{
+						ppSet(bnf.function(BNF.TIMESTAMPADD));
+					}
+					|
+					< TIMESTAMPDIFF >
+					{
+						ppSet(bnf.function(BNF.TIMESTAMPDIFF));
+					}
+				)
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.TIMESTAMPADD, BNF.LPAREN));
+				}
+
+				intervalType()
+				{
+					ppAppend(bnf.function(BNF.intervalType));
+				}
+
+				< COMMA >
+				{
+					ppSet(bnf.function(BNF.intervalType, BNF.COMMA));
+				}
+
+				expression(info)
+				{
+					ppAppend(bnf.function(BNF.intervalType, BNF.expression));
+				}
+
+				< COMMA >
+				{
+					ppSet(bnf.function(BNF.intervalType, BNF.expression, BNF.COMMA));
+				}
+
+				expression(info)
+				{
+					ppAppend(bnf.function(BNF.intervalType, BNF.expression, BNF.COMMA, BNF.expression));
+				}
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			LOOKAHEAD(2)
+			queryString(info)
+			{
+				ppAppend(bnf.function(BNF.queryString));
+			}
+			|
+			(
+				(
+					< LEFT >
+					{
+						ppSet(bnf.function(BNF.LEFT));
+					}
+					|
+					< RIGHT >
+					{
+						ppSet(bnf.function(BNF.RIGHT));
+					}
+					|
+					< CHAR >
+					{
+						ppSet(bnf.function(BNF.CHAR));
+					}
+					|
+					< USER >
+					{
+						ppSet(bnf.function(BNF.USER));
+					}
+					|
+					< YEAR >
+					{
+						ppSet(bnf.function(BNF.YEAR));
+					}
+					|
+					< MONTH >
+					{
+						ppSet(bnf.function(BNF.MONTH));
+					}
+					|
+					< HOUR >
+					{
+						ppSet(bnf.function(BNF.HOUR));
+					}
+					|
+					< MINUTE >
+					{
+						ppSet(bnf.function(BNF.MINUTE));
+					}
+					|
+					< SECOND >
+					{
+						ppSet(bnf.function(BNF.SECOND));
+					}
+					|
+					< XMLCONCAT >
+					{
+						ppSet(bnf.function(BNF.XMLCONCAT));
+					}
+					|
+					< XMLCOMMENT >
+					{
+						ppSet(bnf.function(BNF.XMLCOMMENT));
+					}
+				)
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.queryString, BNF.LPAREN));
+				}
+
+				[
+					expressionList(info)
+					{
+						ppAppend(bnf.function(BNF.queryString, BNF.expressionList));
+					}
+				]
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			LOOKAHEAD	(< TRANSLATE >	| < INSERT > < LPAREN >)
+			(
+				(
+					< TRANSLATE >
+					{
+						ppSet(bnf.function(BNF.TRANSLATE));
+					}
+					|
+					< INSERT >
+					{
+						ppSet(bnf.function(BNF.INSERT));
+					}
+				)
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.TRANSLATE, BNF.LPAREN));
+				}
+
+				[
+					expressionList(info)
+					{
+						ppAppend(bnf.function(BNF.TRANSLATE, BNF.expressionList));
+					}
+				]
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			xmlParse(info)
+			{
+				ppAppend(bnf.function(BNF.xmlParse));
+			}
+			|
+			xmlElement(info)
+			{
+				ppAppend(bnf.function(BNF.xmlElement));
+			}
+			|
+			(
+				< XMLPI >
+				{
+					ppSet(bnf.function(BNF.XMLPI));
+				}
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.XMLPI, BNF.LPAREN));
+				}
+
+				(
+					[
+						LOOKAHEAD(1)
+						< NAME >
+						{
+							ppSet(bnf.function(BNF.NAME));
+						}
+					]
+
+					id()
+					{
+						ppSet(bnf.function(BNF.XMLPI, BNF.id));
+					}
+				)
+
+				[
+					< COMMA >
+					{
+						ppSet(bnf.function(BNF.XMLPI, BNF.COMMA));
+					}
+
+					expression(info)
+					{
+						ppAppend(bnf.function(BNF.XMLPI, BNF.expression));
+					}
+				]
+
+				< RPAREN >
+				{
+					ppSet(null);
+				}
+			)
+			|
+			xmlForest(info)
+			|
+			LOOKAHEAD(< JSONOBJECT >)
+			jsonObject(info)
+			{
+				ppAppend(bnf.function(BNF.jsonObject));
+			}
+			|
+			xmlSerialize(info)
+			{
+				ppAppend(bnf.function(BNF.xmlSerialize));
+			}
+			|
+			xmlQuery(info)
+			{
+				ppAppend(bnf.function(BNF.xmlQuery));
+			}
+			|
+			(
+				id()
+				{
+					ppSet(bnf.function(BNF.id));
+				}
+
+				< LPAREN >
+				{
+					ppSet(bnf.function(BNF.id, BNF.LPAREN));
+				}
+
+				[
+					< ALL >
+					{
+						ppSet(bnf.function(BNF.ALL));
+					}
+					|
+					< DISTINCT >
+					{
+						ppSet(bnf.function(BNF.DISTINCT));
+					}
+				]
+
+				[
+					expressionList(info)
+					{
+						ppAppend(bnf.function(BNF.id, BNF.expressionList));
+					}
+				]
+
+				[
+					orderby(info)
+					{
+						ppAppend(bnf.function(BNF.orderby));
+					}
+				]
+
+				< RPAREN >
+				{
+					ppSet(bnf.function(BNF.RPAREN));
+				}
+
+				[
+					filterClause(info)
+				]
+			)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void xmlParse(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< XMLPARSE >
+		{
+			ppSet(bnf.xmlParse(BNF.XMLPARSE));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.xmlParse(BNF.LPAREN));
+		}
+
+		(
+			< DOCUMENT >
+			{
+				ppSet(bnf.xmlParse(BNF.DOCUMENT));
+			}
+			|
+			< CONTENT >
+			{
+				ppSet(bnf.xmlParse(BNF.CONTENT));
+			}
+		)
+
+		expression(info)
+		{
+			ppAppend(bnf.xmlParse(BNF.expression));
+		}
+
+		[
+			< WELLFORMED >
+			{
+				ppSet(bnf.xmlParse(BNF.WELLFORMED));
+			}
+		]
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void queryString(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< QUERYSTRING >
+		{
+			ppSet(bnf.queryString(BNF.QUERYSTRING));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.queryString(BNF.LPAREN));
+		}
+
+		expression(info)
+		{
+			ppAppend(bnf.queryString(BNF.expression));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.queryString(BNF.COMMA));
+			}
+
+			derivedColumn(info)
+			{
+				ppAppend(bnf.queryString(BNF.derivedColumn));
+			}
+		)*
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void xmlElement(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< XMLELEMENT >
+		{
+			ppSet(bnf.xmlElement(BNF.XMLELEMENT));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.xmlElement(BNF.LPAREN));
+		}
+
+		(
+			[
+				LOOKAHEAD(1)
+				< NAME >
+				{
+					ppSet(bnf.xmlElement(BNF.NAME));
+				}
+			]
+
+			id()
+			{
+				ppAppend(bnf.xmlElement(BNF.id));
+			}
+		)
+
+		[
+			LOOKAHEAD(2)
+			< COMMA >
+			{
+				ppSet(bnf.xmlElement(BNF.NAME, BNF.COMMA));
+			}
+
+			xmlNamespaces(info)
+			{
+				ppAppend(bnf.xmlElement(BNF.xmlNamespaces));
+			}
+		]
+
+		[
+			LOOKAHEAD(2)
+			< COMMA >
+			{
+				ppSet(bnf.xmlElement(BNF.xmlNamespaces, BNF.COMMA));
+			}
+
+			xmlAttributes(info)
+			{
+				ppAppend(bnf.xmlElement(BNF.xmlAttributes));
+			}
+		]
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.xmlElement(BNF.xmlAttributes, BNF.COMMA));
+			}
+
+			expression(info)
+			{
+				ppAppend(bnf.xmlElement(BNF.expression));
+			}
+		)*
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void xmlAttributes(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< XMLATTRIBUTES >
+		{
+			ppSet(bnf.xmlAttributes(BNF.XMLATTRIBUTES));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.xmlAttributes(BNF.LPAREN));
+		}
+
+		derivedColumn(info)
+		{
+			ppAppend(bnf.xmlAttributes(BNF.derivedColumn));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.xmlAttributes(BNF.COMMA));
+			}
+
+			derivedColumn(info)
+			{
+				ppAppend(bnf.xmlAttributes(BNF.derivedColumn));
+			}
+		)*
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void jsonObject(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< JSONOBJECT >
+		{
+			ppSet(bnf.jsonObject(BNF.JSONOBJECT));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.jsonObject(BNF.LPAREN));
+		}
+
+		derivedColumnList(info)
+		{
+			ppAppend(bnf.jsonObject(BNF.derivedColumnList));
+		}
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void derivedColumnList(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		derivedColumn(info)
+		{
+			ppAppend(bnf.derivedColumnList(BNF.derivedColumn));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.derivedColumnList(BNF.COMMA));
+			}
+
+			derivedColumn(info)
+			{
+				ppAppend(bnf.derivedColumnList(BNF.derivedColumn));
+			}
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void xmlForest(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< XMLFOREST >
+		{
+			ppSet(bnf.xmlForest(BNF.XMLFOREST));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.xmlForest(BNF.LPAREN));
+		}
+
+		[
+			xmlNamespaces(info)
+			{
+				ppAppend(bnf.xmlForest(BNF.xmlNamespaces));
+			}
+
+			< COMMA >
+			{
+				ppSet(bnf.xmlForest(BNF.COMMA));
+			}
+		]
+
+		derivedColumnList(info)
+		{
+			ppAppend(bnf.xmlForest(BNF.derivedColumnList));
+		}
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void xmlNamespaces(ParseInfo info) :
+{}
+{
+//	try
+//	{
+		< XMLNAMESPACES >
+		{
+			ppSet(bnf.xmlNamespaces(BNF.XMLNAMESPACES));
+		}
+
+		< LPAREN >
+		{
+			ppSet(bnf.xmlNamespaces(BNF.LPAREN));
+		}
+
+		namespaceItem()
+		{
+			ppSet(bnf.xmlNamespaces(BNF.namespaceItem));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.xmlNamespaces(BNF.COMMA));
+			}
+			
+			namespaceItem()
+			{
+				ppSet(bnf.xmlNamespaces(BNF.namespaceItem));
+			}
+		)*
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void namespaceItem() :
+{}
+{
+//	try
+//	{
+		(
+			stringVal()
+			{
+				ppAppend(bnf.namespaceItem(BNF.stringVal));
+			}
+
+			< AS >
+			{
+				ppSet(bnf.namespaceItem(BNF.AS));
+			}
+
+			id()
+			{
+				ppAppend(bnf.namespaceItem(BNF.id));
+			}
+		)
+		|
+		(
+			< NO >
+			{
+				ppSet(bnf.namespaceItem(BNF.NO));
+			}
+
+			< DEFAULT_KEYWORD >
+			{
+				ppSet(null);
+			}
+		)
+		|
+		(
+			< DEFAULT_KEYWORD >
+			{
+				ppSet(bnf.namespaceItem(BNF.DEFAULT_KEYWORD));
+			}
+
+			stringVal()
+			{
+				ppAppend(bnf.namespaceItem(BNF.DEFAULT_KEYWORD, BNF.stringVal));
+			}
+		)
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void parseDataTypePrimary() :
+{}
+{
+//	try
+//	{
+		(
+			(
+				< STRING >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.STRING));
+				}
+
+				(
+					[
+						< LPAREN >
+						{
+							ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+						}
+
+						intVal()
+						{
+							ppAppend(bnf.parseDataTypePrimary(BNF.STRING, BNF.intVal));
+						}
+
+						< RPAREN >
+						{
+							ppSet(null);
+						}
+					]
+				)
+			)
+			|
+			(
+				< VARCHAR >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.VARCHAR));
+				}
+
+				(
+					[
+						< LPAREN >
+						{
+							ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+						}
+
+						intVal()
+						{
+							ppAppend(bnf.parseDataTypePrimary(BNF.VARCHAR, BNF.intVal));
+						}
+						
+						< RPAREN >
+						{
+							ppSet(null);
+						}
+					]
+				)
+			)
+			|
+			< BOOLEAN >
+			{
+				ppSet(null);
+			}
+			|
+			< BYTE >
+			{
+				ppSet(null);
+			}
+			|
+			< TINYINT >
+			{
+				ppSet(null);
+			}
+			|
+			< SHORT >
+			{
+				ppSet(null);
+			}
+			|
+			< SMALLINT >
+			{
+				ppSet(null);
+			}
+			|
+			(
+				< CHAR >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.CHAR));
+				}
+
+				(
+					[
+						< LPAREN >
+						{
+							ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+						}
+
+						intVal()
+						{
+							ppAppend(bnf.parseDataTypePrimary(BNF.CHAR, BNF.intVal));
+						}
+
+						< RPAREN >
+						{
+							ppSet(null);
+						}
+					]
+				)
+			)
+			|
+			< INTEGER >
+			{
+				ppSet(null);
+			}
+			|
+			< LONG >
+			{
+				ppSet(null);
+			}
+			|
+			< BIGINT >
+			{
+				ppSet(null);
+			}
+			|
+			(
+				< BIGINTEGER >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.BIGINTEGER));
+				}
+
+				[
+					< LPAREN >
+					{
+						ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+					}
+
+					intVal()
+					{
+						ppAppend(bnf.parseDataTypePrimary(BNF.BIGINTEGER, BNF.intVal));
+					}
+
+					< RPAREN >
+					{
+						ppSet(null);
+					}
+				]
+			)
+			|
+			< FLOAT >
+			{
+				ppSet(null);
+			}
+			|
+			< REAL >
+			{
+				ppSet(null);
+			}
+			|
+			< DOUBLE >
+			{
+				ppSet(null);
+			}
+			|
+			(
+				< BIGDECIMAL >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.BIGDECIMAL));
+				}
+
+				[
+					< LPAREN >
+					{
+						ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+					}
+
+					intVal()
+					{
+						ppAppend(bnf.parseDataTypePrimary(BNF.BIGDECIMAL, BNF.intVal));
+					}
+
+					[
+						< COMMA >
+						{
+							ppSet(bnf.parseDataTypePrimary(BNF.COMMA));
+						}
+
+						intVal()
+						{
+							ppAppend(bnf.parseDataTypePrimary(BNF.BIGDECIMAL, BNF.COMMA, BNF.intVal));
+						}
+					]
+
+					< RPAREN >
+					{
+						ppSet(null);
+					}
+				]
+			)
+			|
+			(
+				< DECIMAL >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.DECIMAL));
+				}
+
+				[
+					< LPAREN >
+					{
+						ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+					}
+
+					intVal()
+					{
+						ppAppend(bnf.parseDataTypePrimary(BNF.DECIMAL, BNF.intVal));
+					}
+
+					[
+						< COMMA >
+						{
+							ppSet(bnf.parseDataTypePrimary(BNF.COMMA));
+						}
+
+						intVal()
+						{
+							ppAppend(bnf.parseDataTypePrimary(BNF.DECIMAL, BNF.COMMA, BNF.intVal));
+						}
+					]
+
+					< RPAREN >
+					{
+						ppSet(null);
+					}
+				]
+			)
+			|
+			< DATE >
+			{
+				ppSet(null);
+			}
+			|
+			< TIME >
+			{
+				ppSet(null);
+			}
+			|
+			< TIMESTAMP >
+			{
+				ppSet(null);
+			}
+			|
+			(
+				< OBJECT >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.OBJECT));
+				}
+
+				(
+					[
+						< LPAREN >
+						{
+							ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+						}
+
+						intVal()
+						{
+							ppAppend(bnf.parseDataTypePrimary(BNF.OBJECT, BNF.intVal));
+						}
+
+						< RPAREN >
+						{
+							ppSet(null);
+						}
+					]
+				)
+			)
+			|
+			(
+				< BLOB >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.BLOB));
+				}
+
+				(
+					[
+						< LPAREN >
+						{
+							ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+						}
+
+						intVal()
+						{
+							ppAppend(bnf.parseDataTypePrimary(BNF.BLOB, BNF.intVal));
+						}
+
+						< RPAREN >
+						{
+							ppSet(null);
+						}
+					]
+				)
+			)
+			|
+			(
+				< CLOB >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.CLOB));
+				}
+
+				(
+					[
+						< LPAREN >
+						{
+							ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+						}
+
+						intVal()
+						{
+							ppAppend(bnf.parseDataTypePrimary(BNF.CLOB, BNF.intVal));
+						}
+
+						< RPAREN >
+						{
+							ppSet(null);
+						}
+					]
+				)
+			)
+			|
+			(
+				< VARBINARY >
+				{
+					ppSet(bnf.parseDataTypePrimary(BNF.VARBINARY));
+				}
+
+				(
+					[
+						< LPAREN >
+						{
+							ppSet(bnf.parseDataTypePrimary(BNF.LPAREN));
+						}
+
+						intVal()
+						{
+							ppAppend(bnf.parseDataTypePrimary(BNF.VARBINARY, BNF.intVal));
+						}
+
+						< RPAREN >
+						{
+							ppSet(null);
+						}
+					]
+				)
+			)
+			|
+			< XML >
+			{
+				ppSet(null);
+			}
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void parseDataType() :
+{}
+{
+//	try
+//	{
+		parseDataTypePrimary()
+		{
+			ppAppend(bnf.parseDataType(BNF.parseDataTypePrimary));
+		}
+
+		(
+			< LSBRACE >
+			{
+				ppSet(bnf.parseDataType(BNF.LSBRACE));
+			}
+
+			< RSBRACE >
+			{
+				ppSet(bnf.parseDataType(BNF.RSBRACE));
+			}
+
+			{
+				requiresVersionAtLeast(Version.TEIID_8_5);
+			}
+		)*
+
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void intervalType() :
+{}
+{
+//	try
+//	{
+		(
+			< SQL_TSI_FRAC_SECOND >
+			|
+			< SQL_TSI_SECOND >
+			|
+			< SQL_TSI_MINUTE >
+			|
+			< SQL_TSI_HOUR >
+			|
+			< SQL_TSI_DAY >
+			|
+			< SQL_TSI_WEEK >
+			|
+			< SQL_TSI_MONTH >
+			|
+			< SQL_TSI_QUARTER >
+			|
+			< SQL_TSI_YEAR >
+		)
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void nonNumericLiteral() :
+{}
+{
+//	try
+//	{
+		(
+			stringVal()
+			{
+				ppAppend(bnf.nonNumericLiteral(BNF.stringVal));
+			}
+			|
+			< BINARYSTRINGVAL >
+			{
+				ppSet(null);
+			}
+			|
+			< FALSE >
+			{
+				ppSet(null);
+			}
+			|
+			< TRUE >
+			{
+				ppSet(null);
+			}
+			|
+			< UNKNOWN >
+			{
+				ppSet(null);
+			}
+			|
+			< NULL >
+			{
+				ppSet(null);
+			}
+			|
+			(
+				< ESCAPEDTYPE >
+				{
+					ppSet(bnf.nonNumericLiteral(BNF.ESCAPEDTYPE));
+				}
+
+				stringVal()
+				{
+					ppAppend(bnf.nonNumericLiteral(BNF.ESCAPEDTYPE, BNF.stringVal));
+				}
+
+				< RBRACE >
+				{
+					ppSet(null);
+				}
+			)
+		)
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void unsignedNumericLiteral() :
+{}
+{
+//	try
+//	{
+		(
+			< UNSIGNEDINTEGER >
+			|
+			< FLOATVAL >
+			|
+			< DECIMALVAL >
+		)
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
+
+void columnList() :
+{}
+{
+//	try
+//	{
+		< LPAREN >
+		{
+			ppSet(bnf.columnList(BNF.LPAREN));
+		}
+
+		id()
+		{
+			ppAppend(bnf.columnList(BNF.id));
+		}
+
+		(
+			< COMMA >
+			{
+				ppSet(bnf.columnList(BNF.COMMA));
+			}
+
+			id()
+			{
+				ppAppend(bnf.columnList(BNF.id));
+			}
+		)*
+
+		< RPAREN >
+		{
+			ppSet(null);
+		}
+//	}
+//	catch (ParseException ex)
+//	{}
+}
