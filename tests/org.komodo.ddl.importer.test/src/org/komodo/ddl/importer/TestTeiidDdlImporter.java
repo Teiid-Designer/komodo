@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.komodo.relational.constants.RelationalConstants;
@@ -377,7 +376,6 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	expectedProps.putAll(TestUtil.RESULTSET_PROPERTY_DEFAULTS);
     	expectedProps.put("NAME", "getFiles"); //$NON-NLS-1$ //$NON-NLS-2$
     	expectedProps.put("NAMEINSOURCE", "getFiles"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("DESCRIPTION", "Returns files that match the given path and pattern as BLOBs"); //$NON-NLS-1$ //$NON-NLS-2$
     	// Compare object properties to expected
     	result = TestUtil.compareProperties(resultSet, expectedProps);
     	if(!result.equals("OK")) { //$NON-NLS-1$ 
