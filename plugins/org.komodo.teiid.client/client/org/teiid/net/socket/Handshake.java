@@ -28,10 +28,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
-
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.core.util.ApplicationInfo;
 import org.teiid.core.util.StringUtil;
 
@@ -58,18 +56,6 @@ public class Handshake implements Externalizable {
     private ITeiidVersion getTeiidVersion() {
         ITeiidVersion version = new TeiidVersion(getVersion());
         return version;
-    }
-
-    private AuthenticationType getAuthenticationType() {
-        if (authType == null) {
-            ITeiidVersion version = getTeiidVersion();
-            if (version.isGreaterThanOrEqualTo(Version.TEIID_8_7.get()))
-                authType = AuthenticationType.USERPASSWORD;
-
-            authType = AuthenticationType.CLEARTEXT;
-        }
-
-        return authType;
     }
 
     /** 
@@ -117,8 +103,12 @@ public class Handshake implements Externalizable {
     }
     
     public AuthenticationType getAuthType() {
-		return getAuthenticationType();
+		return authType;
 	}
+
+    public void setAuthType(AuthenticationType authType) {
+        this.authType = authType;
+    }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException,
@@ -126,7 +116,7 @@ public class Handshake implements Externalizable {
     	version = (String)in.readObject();
     	publicKey = (byte[])in.readObject();
     	try {
-    		authType = AuthenticationType.value(getTeiidVersion(), in.readByte());
+    	    authType = AuthenticationType.values()[in.readByte()];
     	} catch (EOFException e) {
     		
     	}
@@ -136,7 +126,7 @@ public class Handshake implements Externalizable {
     public void writeExternal(ObjectOutput out) throws IOException {
     	out.writeObject(version);
     	out.writeObject(publicKey);
-    	out.writeByte(authType.index(getTeiidVersion()));
+    	out.writeByte(authType.ordinal());
     }
     
 }
