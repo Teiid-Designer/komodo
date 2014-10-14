@@ -68,9 +68,10 @@ public class IntegrationTestTeiidInstance extends AbstractTeiidVersionTest {
 
         teiidJdbcInfo = Mockito.mock(ITeiidJdbcInfo.class);
         when(teiidJdbcInfo.getHostProvider()).thenReturn(teiidParent);
-        when(teiidParent.getPort()).thenReturn(ITeiidJdbcInfo.DEFAULT_PORT);
-        when(teiidParent.getUserName()).thenReturn(ITeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
-        when(teiidParent.getPassword()).thenReturn(ITeiidJdbcInfo.DEFAULT_JDBC_PASSWORD);
+        when(teiidJdbcInfo.getPort()).thenReturn(ITeiidJdbcInfo.DEFAULT_PORT);
+        when(teiidJdbcInfo.getUsername()).thenReturn(ITeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
+        when(teiidJdbcInfo.getPassword()).thenReturn(ITeiidJdbcInfo.DEFAULT_JDBC_PASSWORD);
+        when(teiidJdbcInfo.isSecure()).thenReturn(true);
 
         teiidInstance = new TeiidInstance(teiidParent, teiidJdbcInfo);
     }
