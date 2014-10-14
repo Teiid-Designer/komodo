@@ -111,3 +111,4 @@ Export-Package: javax.jcr,
  org.modeshape.sequencer.ddl.dialect.postgres,
  org.modeshape.sequencer.ddl.dialect.teiid,
  org.modeshape.sequencer.ddl.node
+Eclipse-BuddyPolicy: registered
