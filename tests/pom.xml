@@ -20,5 +20,7 @@
     <module>org.komodo.ddl.importer.test</module>
     <module>org.komodo.shell.test</module>
 
+    <module>org.komodo.modeshape.teiid.sql.sequencer.test</module>
+
   </modules>
 </project>
