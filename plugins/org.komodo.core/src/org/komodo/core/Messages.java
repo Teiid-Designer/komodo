@@ -37,16 +37,17 @@ public class Messages implements StringConstants {
 
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
-//    @SuppressWarnings( "javadoc" )
-//    public enum <INSERT NAME HERE> {
-//
-//        @Override
-//        public String toString() {
-//            return getEnumName(this) + DOT + name();
-//        }
-//    }
+    @SuppressWarnings( "javadoc" )
+    public enum KEngine {
 
-    @SuppressWarnings( "unused" )
+        No_Available_Repositories;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$
