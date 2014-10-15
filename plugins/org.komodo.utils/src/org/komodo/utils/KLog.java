@@ -63,7 +63,11 @@ public class KLog implements KLogger {
 
         @Override
         public void dispose() {
-            // Nothing to do
+            if (this.logger != null && logPathHandler != null)
+                logger.removeHandler(logPathHandler);
+
+            if (logPathHandler != null)
+                logPathHandler.close();
         }
 
         @Override
