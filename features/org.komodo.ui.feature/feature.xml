@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.komodo.ui.feature"
+      label="Komodo UI"
+      version="1.0.0.qualifier">
+
+   <description url="http://www.example.com/description">
+      %description
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.ui" version="3.106.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.core.runtime.compatibility" version="3.2.200" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.komodo.spi"/>
+      <import plugin="org.eclipse.core.resources" version="3.8.0" match="compatible"/>
+      <import plugin="org.eclipse.core.runtime" version="3.8.0" match="compatible"/>
+      <import plugin="org.eclipse.wst.server.core" version="1.4.0" match="compatible"/>
+      <import plugin="org.eclipse.datatools.connectivity" version="1.2.11" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jface.text" version="3.9.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor" version="3.9.0" match="greaterOrEqual"/>
+      <import plugin="org.komodo.utils"/>
+      <import plugin="org.komodo.modeshape.teiid.sql.sequencer"/>
+      <import plugin="org.eclipse.equinox.registry"/>
+      <import plugin="org.komodo.teiid.client" version="1.0.0" match="compatible"/>
+      <import feature="org.komodo.engine.feature" version="1.0.0.qualifier"/>
+      <import plugin="org.komodo.shell-api" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.komodo.shell.lib" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.komodo.relational" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.komodo.ddl.importer" version="1.0.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="org.komodo.eclipse.shell"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.komodo.eclipse.spi"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.komodo.eclipse.sql.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.komodo.eclipse.teiid.client"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.komodo.shell"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.komodo.shell-api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.komodo.shell.lib"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

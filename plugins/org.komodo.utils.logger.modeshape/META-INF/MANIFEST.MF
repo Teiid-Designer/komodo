@@ -9,4 +9,4 @@ Bundle-Localization: plugin
 Export-Package: org.komodo.logging
 Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
  org.komodo.modeshape.lib;bundle-version="1.0.0"
-Fragment-Host: org.komodo.utils;bundle-version="1.0.0.qualifier"
+Fragment-Host: org.komodo.utils;bundle-version="1.0.0"

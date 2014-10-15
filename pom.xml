@@ -17,16 +17,12 @@
   </properties>
 	<modules>
 		<module>target-platform</module>
+		<module>features</module>
 		<module>plugins</module>
 		<module>tests</module>
 		<module>integration-tests</module>
 
-    <!--
-		<module>features</module>
-		<module>test-aggregate</module>
 		<module>site</module>
-    -->
-
 		<module>build</module>
 
 	</modules>
