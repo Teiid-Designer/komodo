@@ -21,5 +21,23 @@
          </property>
       </product>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="*">
+         <view
+               id="org.eclipse.ui.console.ConsoleView"
+               minimized="false"
+               relationship="stack"
+               relative="org.eclipse.ui.views.TaskList">
+         </view>
+         <view
+               id="org.komodo.eclipse.sql.ui.editor"
+               minimized="false"
+               relationship="stack"
+               relative="org.eclipse.ui.console.ConsoleView">
+         </view>
+      </perspectiveExtension>
+   </extension>
 
 </fragment>
