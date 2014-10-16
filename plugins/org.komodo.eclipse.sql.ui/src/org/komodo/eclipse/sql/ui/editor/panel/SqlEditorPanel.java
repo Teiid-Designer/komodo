@@ -46,8 +46,6 @@ import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.komodo.eclipse.sql.ui.font.ScaledFontManager;
 import org.komodo.eclipse.sql.ui.font.TextFontManager;
 import org.komodo.eclipse.sql.ui.graphics.ColorManager;
-import org.komodo.modeshape.teiid.parser.QueryParser;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.ITeiidVersion;
@@ -111,10 +109,6 @@ public class SqlEditorPanel extends SashForm
     String currentMessage = EMPTY_STRING;
     private ICommand command;
 
-    private final QueryParser queryParser;
-
-    private final TeiidParser teiidParser;
-
     /**
      * Constructor.
      * 
@@ -122,10 +116,6 @@ public class SqlEditorPanel extends SashForm
      */
     public SqlEditorPanel( Composite parent) {
         super(parent, SWT.VERTICAL);
-
-        queryParser = new QueryParser(teiidVersion);
-        teiidParser = queryParser.getTeiidParser();
-
         init();
     }
 

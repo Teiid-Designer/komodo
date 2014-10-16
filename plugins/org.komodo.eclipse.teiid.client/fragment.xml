@@ -12,7 +12,7 @@
             jarList="TEIID_HOME/client/teiid-client.jar"
             name="%TEIID_DRIVER_TEMPLATE_NAME"
             parentCategory="org.teiid.datatools.connectivity.driver.teiidCategory"
-            valuesProvider="org.teiid.runtime.client.driver.provider.TeiidDriverValuesProvider">
+            valuesProvider="org.komodo.eclipse.runtime.client.driver.provider.TeiidDriverValuesProvider">
             <properties>
                 <property
                     generated="false"
@@ -65,7 +65,7 @@
       <definition
           allowsConnections="true"
           description="Definition of the Teiid Database"
-          file="src/org/teiid/runtime/client/database/teiidDB.xmi"
+          file="src/org/komodo/eclipse/runtime/client/database/teiidDB.xmi"
           product="Teiid"
           productDisplayString="%PRODUCT_DISPLAY_STRING"
           version="x.x.x"
@@ -76,14 +76,14 @@
    <extension
          point="org.eclipse.datatools.connectivity.sqm.core.catalog">
       <overrideLoader
-            provider="org.teiid.datatools.connectivity.sql.TeiidSchemaLoader"
+            provider="org.komodo.eclipse.runtime.client.sql.TeiidSchemaLoader"
             eclass="org.eclipse.datatools.modelbase.sql.schema.Schema"
             product="Teiid"
             version="x.x.x"/>
    </extension>
    <extension point="org.eclipse.datatools.connectivity.ui.driverUIContributor">
       <driverUIContributor
-            class="org.teiid.datatools.connectivity.ui.TeiidDriverUIContributor"
+            class="org.komodo.eclipse.runtime.client.driver.TeiidDriverUIContributor"
             driverTemplateID="org.teiid.runtime.client.driver.serverDriverTemplate"
             id="org.teiid.datatools.connectivity.ui.TeiidDriverUIContributor">
       </driverUIContributor>
@@ -101,7 +101,7 @@
    <extension
          point="org.eclipse.datatools.sqltools.editor.core.ui.dbUIConfigurations">
       <dbUIConfiguration
-            configurationClass="org.teiid.datatools.connectivity.ui.TeiidDBUIConfiguration"
+            configurationClass="org.komodo.eclipse.runtime.client.database.TeiidDBUIConfiguration"
             default="false"
             product="Teiid"
             version="x.x.x">
@@ -111,7 +111,7 @@
    <extension
          point="org.eclipse.datatools.sqltools.editor.core.dbConfigurations">
       <dbConfiguration
-            configurationClass="org.teiid.datatools.connectivity.ui.TeiidDBConfiguration"
+            configurationClass="org.komodo.eclipse.runtime.client.database.TeiidDBConfiguration"
             default="false"
             product="Teiid"
             supportsDebugging="false"

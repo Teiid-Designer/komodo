@@ -27,14 +27,12 @@ import org.komodo.eclipse.sql.ui.editor.panel.SqlEditorPanel;
 
 public class EditorView extends ViewPart {
 
-    private SqlEditorPanel editorPanel;
-
     public EditorView() {
     }
 
     @Override
     public void createPartControl(Composite parent) {
-        editorPanel = new SqlEditorPanel(parent);
+        new SqlEditorPanel(parent);
     }
 
     @Override

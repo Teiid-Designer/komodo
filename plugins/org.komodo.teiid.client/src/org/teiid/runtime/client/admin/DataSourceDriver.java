@@ -52,7 +52,7 @@ public class DataSourceDriver implements IDataSourceDriver {
 
     @Override
     public String toString() {
-        return "DataSourceDriver [name=" + this.name + ", className=" + this.className + "]";
+        return "DataSourceDriver [name=" + this.name + ", className=" + this.className + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
     @Override

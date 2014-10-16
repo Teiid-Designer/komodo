@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.teiid.runtime.client.driver.provider;
+package org.komodo.eclipse.runtime.client.driver.provider;
 
 import java.io.File;
 import org.eclipse.core.runtime.IPath;

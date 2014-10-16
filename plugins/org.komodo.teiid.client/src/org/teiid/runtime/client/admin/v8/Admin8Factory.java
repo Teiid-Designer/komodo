@@ -115,7 +115,7 @@ public class Admin8Factory {
 	    return instance;
 	}
 
-	private Admin8Factory() {};
+	private Admin8Factory() {}
 
     /**
      * Creates a ServerAdmin with the specified connection properties.
@@ -166,7 +166,7 @@ public class Admin8Factory {
         }
 
         @Override
-        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+        public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
             // Special case for anonymous authentication to avoid prompting user for their name.
             if (callbacks.length == 1 && callbacks[0] instanceof NameCallback) {
                 ((NameCallback)callbacks[0]).setName("anonymous CLI user"); //$NON-NLS-1$
@@ -230,7 +230,7 @@ public class Admin8Factory {
         /**
          * @return the teiidVersion
          */
-        public ITeiidVersion getTeiidVersion() throws AdminException {
+        public ITeiidVersion getTeiidVersion() {
             return teiidVersion;
         }
 
@@ -390,7 +390,7 @@ public class Admin8Factory {
 					new String[] { "subsystem", "resource-adapters", "resource-adapter", rarName},
 					null, new ResultCallback() {
 						@Override
-						void onSuccess(ModelNode outcome, ModelNode result) throws AdminException {
+						void onSuccess(ModelNode outcome, ModelNode result) {
 				    		List<ModelNode> properties = outcome.get("result").asList();
 				    		
 			        		for (ModelNode prop:properties) {
@@ -614,7 +614,7 @@ public class Admin8Factory {
 				this.dsProperties = props;
 			}
 			@Override
-			public void onSuccess(ModelNode outcome, ModelNode result) throws AdminProcessingException {
+			public void onSuccess(ModelNode outcome, ModelNode result) {
 	    		List<ModelNode> props = outcome.get("result").asList();
         		for (ModelNode prop:props) {
         			if (prop.getType().equals(ModelType.PROPERTY)) {
@@ -631,7 +631,7 @@ public class Admin8Factory {
         		}
 			}
 			@Override
-			public void onFailure(String msg) throws AdminProcessingException {
+			public void onFailure(String msg) {
 			}
 		}
 
@@ -690,7 +690,7 @@ public class Admin8Factory {
 			}
 
 			@Override
-			public void onFailure(String msg) throws AdminProcessingException {
+			public void onFailure(String msg) {
 			}
 		}
 
@@ -1014,7 +1014,7 @@ public class Admin8Factory {
 		private void getRAConnections(final HashMap<String, String> datasourceNames, final String rarName) throws AdminException {
 			cliCall("read-resource", new String[] {"subsystem", "resource-adapters", "resource-adapter", rarName}, null, new ResultCallback() {
 				@Override
-				public void onSuccess(ModelNode outcome, ModelNode result) throws AdminProcessingException {
+				public void onSuccess(ModelNode outcome, ModelNode result) {
 		        	if (result.hasDefined("connection-definitions")) {
 		        		List<ModelNode> connDefs = result.get("connection-definitions").asList();
 		        		for (ModelNode conn:connDefs) {
@@ -1026,7 +1026,7 @@ public class Admin8Factory {
 		        	}
 		        }
 				@Override
-				public void onFailure(String msg) throws AdminProcessingException {
+				public void onFailure(String msg) {
 					// no-op
 				}
 			});
@@ -1210,7 +1210,8 @@ public class Admin8Factory {
 	        return props;
 		}
 
-		@Deprecated
+		@SuppressWarnings( "deprecation" )
+        @Deprecated
         @Override
 	    public Collection<? extends PropertyDefinition> getTranslatorPropertyDefinitions(String translatorName) throws AdminException{
 			BuildPropertyDefinitions builder = new BuildPropertyDefinitions();
@@ -1257,7 +1258,7 @@ public class Admin8Factory {
 			private ArrayList<PropertyDefinition> propDefinitions = new ArrayList<PropertyDefinition>();
 
 			@Override
-			public void onSuccess(ModelNode outcome, ModelNode result) throws AdminProcessingException {
+			public void onSuccess(ModelNode outcome, ModelNode result) {
 				if (result.getType().equals(ModelType.LIST)) {
 					buildPropertyDefinitions(result.asList());
 				}
@@ -1739,7 +1740,9 @@ public class Admin8Factory {
 	        }
 		}
 
-		@Override
+		@SuppressWarnings( "deprecation" )
+        @Deprecated
+        @Override
 		public void assignToModel(String vdbName, int vdbVersion, String modelName, String sourceName, String translatorName,
 				String dsName) throws AdminException {
 	        final ModelNode request = buildRequest("teiid", "assign-datasource",

@@ -288,7 +288,7 @@ public class StyledTextEditor implements IMenuListener, KeyListener {
 
             // use the Eclipse text editor setting for history (NOT WORKING???)
             int limit = service.getInt("com.eclipse.ui.editors", //$NON-NLS-1$
-                                       "undoHistorySize",
+                                       "undoHistorySize", //$NON-NLS-1$
                                        20,
                                        null);
             this.historySize = limit;

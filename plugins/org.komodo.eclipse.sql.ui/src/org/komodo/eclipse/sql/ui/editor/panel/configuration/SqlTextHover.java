@@ -24,6 +24,8 @@ public class SqlTextHover implements ITextHover {
     /* (non-Javadoc)
      * Method declared on ITextHover
      */
+    @SuppressWarnings( "deprecation" )
+    @Deprecated
     @Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
         if (hoverRegion != null) {

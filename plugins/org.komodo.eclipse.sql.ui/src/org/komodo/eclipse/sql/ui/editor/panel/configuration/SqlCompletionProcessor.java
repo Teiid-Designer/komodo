@@ -40,15 +40,13 @@ public class SqlCompletionProcessor
 	protected Vector proposalList = new Vector();
 	protected IContextInformationValidator fValidator = new Validator();
 
-	private final SqlSyntax sqlSyntax;
-
     private final QueryParser queryParser;
 
     /**
      * @param teiidVersion
      */
     public SqlCompletionProcessor(ITeiidVersion teiidVersion) {
-        sqlSyntax = new SqlSyntax(teiidVersion);
+        new SqlSyntax(teiidVersion);
         queryParser = new QueryParser(teiidVersion);
     }
 

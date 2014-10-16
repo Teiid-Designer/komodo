@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import org.komodo.spi.runtime.ITeiidInstance;
 import org.komodo.spi.runtime.ITeiidVdb;
 import org.teiid.adminapi.Model;
@@ -32,6 +31,13 @@ public class TeiidVdb implements ITeiidVdb, Comparable<TeiidVdb> {
         this.vdb = vdb;
         this.teiidInstance = teiidInstance;
         isPreview = Boolean.parseBoolean(vdb.getProperties().getProperty(PREVIEW));
+    }
+
+    /**
+     * @return the teiidInstance
+     */
+    public ITeiidInstance getTeiidInstance() {
+        return this.teiidInstance;
     }
 
     /* (non-Javadoc)
