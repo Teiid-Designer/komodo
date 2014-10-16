@@ -8,4 +8,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Localization: plugin
 Export-Package: org.komodo.core
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.komodo.spi;bundle-version="1.0.0"
+Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
+ org.komodo.utils;bundle-version="1.0.0"
