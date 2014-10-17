@@ -43,11 +43,9 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>${project.basedir}/engine/org/teiid/query/parser</directory>
+                            <directory>${project.basedir}/gen/org/teiid/query</directory>
                             <includes>
-                                <include>**/v*/Teiid*Parser.java</include>
-                                <include>**/v*/Teiid*ParserConstants.java</include>
-                                <include>**/v*/Teiid*ParserTokenManager.java</include>
+                                <include>**/*.java</include>
                             </includes>
                         </fileset>
                     </filesets>
@@ -202,7 +200,7 @@
                 <configuration>
                     <sourceDirectory>${project.basedir}</sourceDirectory>
                     <includes>
-                        <include>engine/javacc/*Parser.jjt</include>
+                        <include>gen/javacc/*Parser.jjt</include>
                     </includes>
                     <isStatic>false</isStatic>
                     <errorReporting>true</errorReporting>
@@ -220,8 +218,8 @@
                     <grammarEncoding>UTF-8</grammarEncoding>
                     <keepLineColumn>true</keepLineColumn>
                     <nodeDefaultVoid>true</nodeDefaultVoid>
-                    <interimDirectory>${project.basedir}/engine</interimDirectory>
-                    <outputDirectory>${project.basedir}/engine</outputDirectory>
+                    <interimDirectory>${project.basedir}/gen</interimDirectory>
+                    <outputDirectory>${project.basedir}/gen</outputDirectory>
                 </configuration>
             </plugin>
             <plugin>

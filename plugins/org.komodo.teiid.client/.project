@@ -6,11 +6,16 @@
 	</projects>
 	<buildSpec>
 		<buildCommand>
+			<name>org.jboss.tools.modeshape.jcr.ui.cndBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
 			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
 			<arguments>
 				<dictionary>
 					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/ParsersAndLibs.launch</value>
+					<value>&lt;project&gt;/.externalToolBuilders/TeiidClientParsersAndLibs.launch</value>
 				</dictionary>
 			</arguments>
 		</buildCommand>
