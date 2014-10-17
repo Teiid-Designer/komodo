@@ -25,7 +25,7 @@ package org.komodo.modeshape.teiid.sql.proc;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
@@ -34,7 +34,7 @@ import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
 public class CreateProcedureCommand extends Command
     implements ICreateProcedureCommand<Block, GroupSymbol, Expression, LanguageVisitor> {
 
-    public CreateProcedureCommand(TeiidParser p, int id) {
+    public CreateProcedureCommand(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_UPDATE_PROCEDURE);
     }

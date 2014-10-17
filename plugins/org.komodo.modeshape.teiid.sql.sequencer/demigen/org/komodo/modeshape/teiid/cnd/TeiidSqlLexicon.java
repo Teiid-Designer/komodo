@@ -27,11 +27,11 @@ import java.util.Map;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.komodo.modeshape.teiid.sql.lang.*;
-import org.komodo.modeshape.teiid.sql.proc.*;
-import org.komodo.modeshape.teiid.sql.symbol.*;
 
 
+/**
+ * @generated using org.komodo.modeshape.teiid.generators.TeiidCndGenerator
+ */
 @SuppressWarnings( { "javadoc", "nls" })
 public class TeiidSqlLexicon implements StringConstants {
 
@@ -45,24 +45,6 @@ public class TeiidSqlLexicon implements StringConstants {
 	 * be added to the Sequencer's output node prior to sequencing.
 	 */
 	public static String TEIID_VERSION_PROPERTY = Namespace.PREFIX + COLON + "teiidVersion";
-
-	/**
-	 * tsql:targetedCommand
-	 */
-	public interface TargetedCommand {
-
-		String ID = Namespace.PREFIX + COLON + "targetedCommand";
-
-		/**
-		 * GROUP Reference
-		 */
-		String GROUP_REF_NAME = Namespace.PREFIX + COLON + "group";
-
-		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
-
-		boolean GROUP_REF_MULTIPLE = false;
-
-	}
 
 	/**
 	 * tsql:expressionStatement
@@ -106,6 +88,24 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> LABEL_PROP_TYPE =  String.class;
 
 		boolean LABEL_PROP_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:targetedCommand
+	 */
+	public interface TargetedCommand {
+
+		String ID = Namespace.PREFIX + COLON + "targetedCommand";
+
+		/**
+		 * GROUP Reference
+		 */
+		String GROUP_REF_NAME = Namespace.PREFIX + COLON + "group";
+
+		Class<?> GROUP_REF_TYPE =  GroupSymbol.class;
+
+		boolean GROUP_REF_MULTIPLE = false;
 
 	}
 
@@ -498,6 +498,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean NEGATED_PROP_MULTIPLE = false;
 
 		/**
+		 * ESCAPE_CHAR Property
+		 */
+		String ESCAPE_CHAR_PROP_NAME = Namespace.PREFIX + COLON + "escapeChar";
+
+		Class<?> ESCAPE_CHAR_PROP_TYPE =  String.class;
+
+		boolean ESCAPE_CHAR_PROP_MULTIPLE = false;
+
+		/**
 		 * MODE Property
 		 */
 		String MODE_PROP_NAME = Namespace.PREFIX + COLON + "mode";
@@ -507,15 +516,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean MODE_PROP_MULTIPLE = false;
 
 		String[] MODE_PROP_CONSTRAINTS = { "LIKE", "SIMILAR", "REGEX" };
-
-		/**
-		 * ESCAPE_CHAR Property
-		 */
-		String ESCAPE_CHAR_PROP_NAME = Namespace.PREFIX + COLON + "escapeChar";
-
-		Class<?> ESCAPE_CHAR_PROP_TYPE =  String.class;
-
-		boolean ESCAPE_CHAR_PROP_MULTIPLE = false;
 
 		/**
 		 * LEFT_EXPRESSION Reference
@@ -1340,15 +1340,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean HEADER_PROP_MULTIPLE = false;
 
 		/**
-		 * USING_ROW_DELIMITER Property
-		 */
-		String USING_ROW_DELIMITER_PROP_NAME = Namespace.PREFIX + COLON + "usingRowDelimiter";
-
-		Class<?> USING_ROW_DELIMITER_PROP_TYPE =  Boolean.class;
-
-		boolean USING_ROW_DELIMITER_PROP_MULTIPLE = false;
-
-		/**
 		 * QUOTE Property
 		 */
 		String QUOTE_PROP_NAME = Namespace.PREFIX + COLON + "quote";
@@ -1356,6 +1347,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> QUOTE_PROP_TYPE =  String.class;
 
 		boolean QUOTE_PROP_MULTIPLE = false;
+
+		/**
+		 * USING_ROW_DELIMITER Property
+		 */
+		String USING_ROW_DELIMITER_PROP_NAME = Namespace.PREFIX + COLON + "usingRowDelimiter";
+
+		Class<?> USING_ROW_DELIMITER_PROP_TYPE =  Boolean.class;
+
+		boolean USING_ROW_DELIMITER_PROP_MULTIPLE = false;
 
 		/**
 		 * SELECTOR Property
@@ -1860,15 +1860,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * SELECTOR Property
-		 */
-		String SELECTOR_PROP_NAME = Namespace.PREFIX + COLON + "selector";
-
-		Class<?> SELECTOR_PROP_TYPE =  String.class;
-
-		boolean SELECTOR_PROP_MULTIPLE = false;
-
-		/**
 		 * ORDINAL Property
 		 */
 		String ORDINAL_PROP_NAME = Namespace.PREFIX + COLON + "ordinal";
@@ -1880,6 +1871,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Version ORDINAL_PROP_SINCE_VERSION = Version.TEIID_8_7;
 
 		/**
+		 * SELECTOR Property
+		 */
+		String SELECTOR_PROP_NAME = Namespace.PREFIX + COLON + "selector";
+
+		Class<?> SELECTOR_PROP_TYPE =  String.class;
+
+		boolean SELECTOR_PROP_MULTIPLE = false;
+
+		/**
 		 * POSITION Property
 		 */
 		String POSITION_PROP_NAME = Namespace.PREFIX + COLON + "position";
@@ -1889,15 +1889,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean POSITION_PROP_MULTIPLE = false;
 
 		/**
-		 * NO_TRIM Property
-		 */
-		String NO_TRIM_PROP_NAME = Namespace.PREFIX + COLON + "noTrim";
-
-		Class<?> NO_TRIM_PROP_TYPE =  Boolean.class;
-
-		boolean NO_TRIM_PROP_MULTIPLE = false;
-
-		/**
 		 * WIDTH Property
 		 */
 		String WIDTH_PROP_NAME = Namespace.PREFIX + COLON + "width";
@@ -1905,6 +1896,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> WIDTH_PROP_TYPE =  Long.class;
 
 		boolean WIDTH_PROP_MULTIPLE = false;
+
+		/**
+		 * NO_TRIM Property
+		 */
+		String NO_TRIM_PROP_NAME = Namespace.PREFIX + COLON + "noTrim";
+
+		Class<?> NO_TRIM_PROP_TYPE =  Boolean.class;
+
+		boolean NO_TRIM_PROP_MULTIPLE = false;
 
 	}
 
@@ -2708,15 +2708,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * ERROR_CODE Reference
-		 */
-		String ERROR_CODE_REF_NAME = Namespace.PREFIX + COLON + "errorCode";
-
-		Class<?> ERROR_CODE_REF_TYPE =  Expression.class;
-
-		boolean ERROR_CODE_REF_MULTIPLE = false;
-
-		/**
 		 * MESSAGE Reference
 		 */
 		String MESSAGE_REF_NAME = Namespace.PREFIX + COLON + "message";
@@ -2724,6 +2715,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> MESSAGE_REF_TYPE =  Expression.class;
 
 		boolean MESSAGE_REF_MULTIPLE = false;
+
+		/**
+		 * ERROR_CODE Reference
+		 */
+		String ERROR_CODE_REF_NAME = Namespace.PREFIX + COLON + "errorCode";
+
+		Class<?> ERROR_CODE_REF_TYPE =  Expression.class;
+
+		boolean ERROR_CODE_REF_MULTIPLE = false;
 
 		/**
 		 * SQL_STATE Reference
@@ -2820,15 +2820,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean AGGREGATE_FUNCTION_PROP_MULTIPLE = false;
 
 		/**
-		 * NAME Property
-		 */
-		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
-
-		Class<?> NAME_PROP_TYPE =  String.class;
-
-		boolean NAME_PROP_MULTIPLE = false;
-
-		/**
 		 * DISTINCT Property
 		 */
 		String DISTINCT_PROP_NAME = Namespace.PREFIX + COLON + "distinct";
@@ -2836,6 +2827,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> DISTINCT_PROP_TYPE =  Boolean.class;
 
 		boolean DISTINCT_PROP_MULTIPLE = false;
+
+		/**
+		 * NAME Property
+		 */
+		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
+
+		Class<?> NAME_PROP_TYPE =  String.class;
+
+		boolean NAME_PROP_MULTIPLE = false;
 
 		/**
 		 * ORDER_BY Reference
@@ -2885,15 +2885,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean SHORT_NAME_PROP_MULTIPLE = false;
 
 		/**
-		 * NAME Property
-		 */
-		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
-
-		Class<?> NAME_PROP_TYPE =  String.class;
-
-		boolean NAME_PROP_MULTIPLE = false;
-
-		/**
 		 * OUTPUT_NAME Property
 		 */
 		String OUTPUT_NAME_PROP_NAME = Namespace.PREFIX + COLON + "outputName";
@@ -2901,6 +2892,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> OUTPUT_NAME_PROP_TYPE =  String.class;
 
 		boolean OUTPUT_NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * NAME Property
+		 */
+		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
+
+		Class<?> NAME_PROP_TYPE =  String.class;
+
+		boolean NAME_PROP_MULTIPLE = false;
 
 	}
 
@@ -3742,11 +3742,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	 * Enumeration of lexicon classes and their identifiers
 	 */
 	public enum LexTokens {
-		TARGETED_COMMAND (TargetedCommand.ID, TargetedCommand.class),
-
 		EXPRESSION_STATEMENT (ExpressionStatement.ID, ExpressionStatement.class),
 
 		LABELED (Labeled.ID, Labeled.class),
+
+		TARGETED_COMMAND (TargetedCommand.ID, TargetedCommand.class),
 
 		LANGUAGE_OBJECT (LanguageObject.ID, LanguageObject.class),
 
@@ -3989,9 +3989,9 @@ public class TeiidSqlLexicon implements StringConstants {
 	private static Map<String, LexTokens> astIndex = new HashMap<String, LexTokens>();
 
 	static {
-		astIndex.put(TargetedCommand.class.getSimpleName(), LexTokens.TARGETED_COMMAND);
 		astIndex.put(ExpressionStatement.class.getSimpleName(), LexTokens.EXPRESSION_STATEMENT);
 		astIndex.put(Labeled.class.getSimpleName(), LexTokens.LABELED);
+		astIndex.put(TargetedCommand.class.getSimpleName(), LexTokens.TARGETED_COMMAND);
 		astIndex.put(LanguageObject.class.getSimpleName(), LexTokens.LANGUAGE_OBJECT);
 		astIndex.put(Expression.class.getSimpleName(), LexTokens.EXPRESSION);
 		astIndex.put(PredicateCriteria.class.getSimpleName(), LexTokens.PREDICATE_CRITERIA);

@@ -25,7 +25,7 @@ package org.komodo.modeshape.teiid.sql.symbol;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.spi.query.sql.symbol.ISearchedCaseExpression;
@@ -33,7 +33,7 @@ import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class SearchedCaseExpression extends ASTNode implements Expression, ISearchedCaseExpression<LanguageVisitor> {
 
-    public SearchedCaseExpression(TeiidParser p, int id) {
+    public SearchedCaseExpression(ITeiidParser p, int id) {
         super(p, id);
     }
 

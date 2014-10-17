@@ -24,13 +24,13 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.spi.query.sql.lang.IExistsCriteria;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 public class ExistsCriteria extends Criteria implements PredicateCriteria, SubqueryContainer<QueryCommand>, IExistsCriteria<LanguageVisitor, QueryCommand> {
 
-    public ExistsCriteria(TeiidParser p, int id) {
+    public ExistsCriteria(ITeiidParser p, int id) {
         super(p, id);
 
         SubqueryHint subqueryHint = getTeiidParser().createASTNode(ASTNodes.SUBQUERY_HINT);

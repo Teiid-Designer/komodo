@@ -21,7 +21,7 @@
  */
 package org.komodo.modeshape.teiid.sql.lang;
 
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 
 /**
  *
@@ -33,7 +33,7 @@ public class NullNode extends ASTNode {
     /**
      * @param parser
      */
-    public NullNode(TeiidParser parser) {
+    public NullNode(ITeiidParser parser) {
         super(parser, VOID_ID);
     }
 

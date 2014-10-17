@@ -25,13 +25,13 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IQuery;
 
 public class Query extends QueryCommand implements IQuery<Select, From, Into, Criteria, GroupBy, OrderBy, Query, Expression, LanguageVisitor> {
 
-    public Query(TeiidParser p, int id) {
+    public Query(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_QUERY);
     }

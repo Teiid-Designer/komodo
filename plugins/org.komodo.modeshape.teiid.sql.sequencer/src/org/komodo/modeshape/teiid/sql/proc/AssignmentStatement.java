@@ -24,8 +24,7 @@ package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.QueryCommand;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
@@ -33,10 +32,11 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.ScalarSubquery;
 import org.komodo.spi.query.sql.proc.IAssignmentStatement;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 public class AssignmentStatement extends Statement implements ExpressionStatement, IAssignmentStatement<Expression, LanguageVisitor> {
 
-    public AssignmentStatement(TeiidParser p, int id) {
+    public AssignmentStatement(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_ASSIGNMENT);
     }

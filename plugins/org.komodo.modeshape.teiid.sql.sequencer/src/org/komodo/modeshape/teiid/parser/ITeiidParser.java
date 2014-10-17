@@ -36,7 +36,7 @@ import org.komodo.spi.type.IDataTypeManagerService;
 /**
  *
  */
-public interface TeiidParser {
+public interface ITeiidParser {
 
     /**
      * @return teiid version of this parser

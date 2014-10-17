@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.modeshape.teiid.scripts;
+package org.komodo.modeshape.teiid.generators.bnf;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -41,17 +41,17 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.komodo.modeshape.teiid.generators.GeneratorConstants;
+import org.komodo.modeshape.teiid.generators.bnf.clause.BracketClause;
+import org.komodo.modeshape.teiid.generators.bnf.clause.CaseStatement;
+import org.komodo.modeshape.teiid.generators.bnf.clause.ClauseStack;
+import org.komodo.modeshape.teiid.generators.bnf.clause.IClause;
+import org.komodo.modeshape.teiid.generators.bnf.clause.IGroupClause;
+import org.komodo.modeshape.teiid.generators.bnf.clause.OptionalClause;
+import org.komodo.modeshape.teiid.generators.bnf.clause.OrClause;
+import org.komodo.modeshape.teiid.generators.bnf.clause.TokenClause;
 import org.komodo.modeshape.teiid.parser.bnf.AbstractBNF;
 import org.komodo.modeshape.teiid.parser.bnf.BNFConstants;
-import org.komodo.modeshape.teiid.parser.bnf.clause.BracketClause;
-import org.komodo.modeshape.teiid.parser.bnf.clause.CaseStatement;
-import org.komodo.modeshape.teiid.parser.bnf.clause.ClauseStack;
-import org.komodo.modeshape.teiid.parser.bnf.clause.IClause;
-import org.komodo.modeshape.teiid.parser.bnf.clause.IGroupClause;
-import org.komodo.modeshape.teiid.parser.bnf.clause.OptionalClause;
-import org.komodo.modeshape.teiid.parser.bnf.clause.OrClause;
-import org.komodo.modeshape.teiid.parser.bnf.clause.TokenClause;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.utils.ArgCheck;
@@ -60,20 +60,16 @@ import org.komodo.utils.ArgCheck;
  *
  */
 @SuppressWarnings({"nls", "javadoc"})
-public class TeiidBNFGenerator implements StringConstants {
+public class TeiidBNFGenerator implements GeneratorConstants {
 
-    private static final String EXEC_HOME = DOT;
-
-    private static final String SRC_DIR = EXEC_HOME + File.separator + SRC;
-
-    private static final String JAVACC_DIR = SRC_DIR + File.separator + "javacc";
+    private static final String JAVACC_DIR = GEN_DIR + File.separator + "javacc";
     
-    private static final String BNF_DIR = SRC_DIR + File.separator +
-                                                                    convertPackageToDirPath(BNFConstants.class.getPackage());
+    private static final String BNF_DIR = DEMI_GEN_DIR + File.separator +
+                                                                    Utilities.convertPackageToDirPath(BNFConstants.class.getPackage());
 
     private static final String BNF_FILENAME = "BNF.java";
 
-    private static final String TEIID_SQL_JJT = "TeiidSyntaxParser.jjt";
+    private static final String TEIID_SQL_JJT = "TeiidCompletionParser.jjt";
 
     private static final Pattern METHOD_DEC_PATTERN = Pattern.compile("[A-Za-z]+ ([a-z][a-zA-Z]+)\\([a-zA-Z ]*\\) :");
 
@@ -84,29 +80,6 @@ public class TeiidBNFGenerator implements StringConstants {
     private static final Pattern CATCH_PATTERN = Pattern.compile("[\\s]*catch.*");
 
     private static final Pattern BRACE_PATTERN = Pattern.compile("[\\s]*[\\{\\}][\\s]*");
-
-    private static final String LICENSE = "" +
-    "/*" + NEW_LINE +
-    " * JBoss, Home of Professional Open Source." + NEW_LINE +
-    " * See the COPYRIGHT.txt file distributed with this work for information" + NEW_LINE +
-    " * regarding copyright ownership.  Some portions may be licensed" + NEW_LINE +
-    " * to Red Hat, Inc. under one or more contributor license agreements." + NEW_LINE +
-    " * " + NEW_LINE +
-    " * This library is free software; you can redistribute it and/or" + NEW_LINE +
-    " * modify it under the terms of the GNU Lesser General Public" + NEW_LINE +
-    " * License as published by the Free Software Foundation; either" + NEW_LINE +
-    " * version 2.1 of the License, or (at your option) any later version." + NEW_LINE +
-    " * " + NEW_LINE +
-    " * This library is distributed in the hope that it will be useful," + NEW_LINE +
-    " * but WITHOUT ANY WARRANTY; without even the implied warranty of" + NEW_LINE +
-    " * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU" + NEW_LINE +
-    " * Lesser General Public License for more details." + NEW_LINE +
-    " * " + NEW_LINE +
-    " * You should have received a copy of the GNU Lesser General Public" + NEW_LINE +
-    " * License along with this library; if not, write to the Free Software" + NEW_LINE +
-    " * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA" + NEW_LINE +
-    " * 02110-1301 USA." + NEW_LINE +
-    " */" + NEW_LINE;
 
     private class TokenModel {
 
@@ -376,10 +349,6 @@ public class TeiidBNFGenerator implements StringConstants {
     private final BufferedReader ccReader;
 
     private final BufferedWriter bnfWriter;
-
-    private static String convertPackageToDirPath(Package pkg) {
-        return pkg.getName().replaceAll(DOUBLE_BACK_SLASH + DOT, File.separator);
-    }
 
     /**
      * 

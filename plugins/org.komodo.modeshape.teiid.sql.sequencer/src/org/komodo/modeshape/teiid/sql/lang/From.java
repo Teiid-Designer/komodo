@@ -26,14 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IFrom;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 public class From extends ASTNode implements IFrom<FromClause, GroupSymbol, LanguageVisitor> {
 
-    public From(TeiidParser p, int id) {
+    public From(ITeiidParser p, int id) {
         super(p, id);
     }
 

@@ -25,17 +25,17 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.MultipleElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Symbol;
 import org.komodo.spi.query.sql.lang.ISelect;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 public class Select extends ASTNode implements ISelect<Expression, LanguageVisitor> {
 
-    public Select(TeiidParser p, int id) {
+    public Select(ITeiidParser p, int id) {
         super(p, id);
     }
 

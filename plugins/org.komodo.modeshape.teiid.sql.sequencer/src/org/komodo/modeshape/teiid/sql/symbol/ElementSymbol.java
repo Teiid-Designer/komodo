@@ -24,13 +24,13 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.spi.query.sql.symbol.IElementSymbol;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class ElementSymbol extends Symbol implements Expression, IElementSymbol<GroupSymbol, LanguageVisitor> {
 
-    public ElementSymbol(TeiidParser p, int id) {
+    public ElementSymbol(ITeiidParser p, int id) {
         super(p, id);
     }
 

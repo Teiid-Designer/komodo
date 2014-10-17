@@ -25,7 +25,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IGroupBy;
@@ -33,7 +33,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 public class GroupBy extends ASTNode implements IGroupBy<Expression, LanguageVisitor> {
 
-    public GroupBy(TeiidParser p, int id) {
+    public GroupBy(ITeiidParser p, int id) {
         super(p, id);
     }
 

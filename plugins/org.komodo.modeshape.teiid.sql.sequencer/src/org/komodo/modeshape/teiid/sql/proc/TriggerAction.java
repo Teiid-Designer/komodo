@@ -25,14 +25,14 @@ package org.komodo.modeshape.teiid.sql.proc;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.ITriggerAction;
 
 public class TriggerAction extends Command implements ITriggerAction<Expression, LanguageVisitor> {
 
-    public TriggerAction(TeiidParser p, int id) {
+    public TriggerAction(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_TRIGGER_ACTION);
     }

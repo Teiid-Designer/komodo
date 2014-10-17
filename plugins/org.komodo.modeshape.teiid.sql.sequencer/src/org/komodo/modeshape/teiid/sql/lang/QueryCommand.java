@@ -5,7 +5,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IQueryCommand;
 
@@ -19,7 +19,7 @@ public abstract class QueryCommand extends Command
      * @param p
      * @param id
      */
-    public QueryCommand(TeiidParser p, int id) {
+    public QueryCommand(ITeiidParser p, int id) {
         super(p, id);
     }
 

@@ -25,13 +25,13 @@ package org.komodo.modeshape.teiid.sql.lang;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.language.SortSpecification;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IOrderByItem;
 
 public class OrderByItem extends ASTNode implements IOrderByItem<Expression, LanguageVisitor> {
 
-    public OrderByItem(TeiidParser p, int id) {
+    public OrderByItem(ITeiidParser p, int id) {
         super(p, id);
     }
 

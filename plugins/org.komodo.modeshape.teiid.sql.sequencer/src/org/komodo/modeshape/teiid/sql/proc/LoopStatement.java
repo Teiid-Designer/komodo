@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Labeled;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryContainer;
@@ -32,7 +32,7 @@ import org.komodo.spi.query.sql.proc.ILoopStatement;
 
 public class LoopStatement extends Statement implements Labeled, SubqueryContainer<Command>, ILoopStatement<LanguageVisitor, Command> {
 
-    public LoopStatement(TeiidParser p, int id) {
+    public LoopStatement(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_LOOP);
     }

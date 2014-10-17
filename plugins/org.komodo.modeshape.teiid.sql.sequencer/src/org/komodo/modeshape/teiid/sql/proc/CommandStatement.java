@@ -24,14 +24,14 @@ package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryContainer;
 import org.komodo.spi.query.sql.proc.ICommandStatement;
 
 public class CommandStatement extends Statement implements SubqueryContainer<Command>, ICommandStatement<LanguageVisitor, Command> {
 
-    public CommandStatement(TeiidParser p, int id) {
+    public CommandStatement(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_COMMAND);
         setReturnable(true);

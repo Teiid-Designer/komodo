@@ -48,7 +48,7 @@ import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.utils.StringUtil;
 import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
 
-public abstract class AbstractTeiidParser implements TeiidParser {
+public abstract class AbstractTeiidParser implements ITeiidParser {
 
     public static class ParsingError implements StringConstants {
 

@@ -25,14 +25,14 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.Collection;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.ISubqueryFromClause;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 public class SubqueryFromClause extends FromClause implements SubqueryContainer<Command>, ISubqueryFromClause<LanguageVisitor, Command> {
 
-    public SubqueryFromClause(TeiidParser p, int id) {
+    public SubqueryFromClause(ITeiidParser p, int id) {
         super(p, id);
     }
 

@@ -24,12 +24,12 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
 public class GroupSymbol extends Symbol implements IGroupSymbol<LanguageVisitor> {
 
-    public GroupSymbol(TeiidParser p, int id) {
+    public GroupSymbol(ITeiidParser p, int id) {
         super(p, id);
     }
 

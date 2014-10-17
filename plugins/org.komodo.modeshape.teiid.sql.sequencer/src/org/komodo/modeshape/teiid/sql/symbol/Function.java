@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.symbol.Function.FunctionDescriptor;
 import org.komodo.spi.query.sql.symbol.IFunction;
@@ -53,7 +53,7 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
         
     }
     
-    public Function(TeiidParser p, int id) {
+    public Function(ITeiidParser p, int id) {
         super(p, id);
     }
 

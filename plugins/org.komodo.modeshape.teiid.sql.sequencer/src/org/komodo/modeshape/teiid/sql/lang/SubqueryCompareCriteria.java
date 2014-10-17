@@ -24,11 +24,11 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.ScalarSubquery;
 import org.komodo.spi.query.sql.lang.ISubqueryCompareCriteria;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 public class SubqueryCompareCriteria extends AbstractCompareCriteria implements SubqueryContainer<QueryCommand>, ISubqueryCompareCriteria<LanguageVisitor, QueryCommand> {
 
@@ -83,7 +83,7 @@ public class SubqueryCompareCriteria extends AbstractCompareCriteria implements 
         }
     }
 
-    public SubqueryCompareCriteria(TeiidParser p, int id) {
+    public SubqueryCompareCriteria(ITeiidParser p, int id) {
         super(p, id);
     }
 

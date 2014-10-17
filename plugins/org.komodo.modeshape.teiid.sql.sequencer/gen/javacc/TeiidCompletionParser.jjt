@@ -27,7 +27,7 @@ options
 	JAVA_UNICODE_ESCAPE = true;
 	MULTI = false;
 	NODE_DEFAULT_VOID = true;
-	NODE_PACKAGE = "org.komodo.modeshape.teiid.sql.syntax";
+	NODE_PACKAGE = "org.komodo.modeshape.teiid.sql.completion";
 	NODE_PREFIX = "";
 	NODE_SCOPE_HOOK = false;
 	NODE_USES_PARSER = true;
@@ -38,7 +38,7 @@ options
 	VISITOR = false;
 }
 
-PARSER_BEGIN(TeiidSyntaxParser)
+PARSER_BEGIN(TeiidCompletionParser)
 /*
 * JBoss, Home of Professional Open Source.
 * See the COPYRIGHT.txt file distributed with this work for information
@@ -60,7 +60,8 @@ PARSER_BEGIN(TeiidSyntaxParser)
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
 */
-package org.komodo.modeshape.teiid.parser.syntax;
+package org.komodo.modeshape.teiid.parser.completion;
+
 import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -80,7 +81,7 @@ import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.parser.bnf.BNF;
 
 @ SuppressWarnings({"nls", "unused", "javadoc"})
-public class TeiidSyntaxParser extends AbstractTeiidParser {
+public class TeiidCompletionParser extends AbstractTeiidParser {
 
 	private Set <String> expectedTokens = new HashSet<String>();
 
@@ -138,7 +139,7 @@ public class TeiidSyntaxParser extends AbstractTeiidParser {
 
 } // end class
 
-PARSER_END(TeiidSyntaxParser)
+PARSER_END(TeiidCompletionParser)
 
 TOKEN_MGR_DECLS :
 {

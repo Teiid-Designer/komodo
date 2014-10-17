@@ -11,23 +11,24 @@
 ==
 -->
 
-<project name="generate-libs" default="generate">
+<project name="generate-sources" default="generate">
 
 	<property name="GIT-HOME" location="../.." />
 
 	<import file="${GIT-HOME}/scripts/build-common.xml" />
 
-	<!-- Location of the generated parser class -->
-	<property name="parsers" value="v8/Teiid8Parser.java" />
+	<!-- Location of the generated parser classes -->
+	<property name="parsers" value="TeiidParser.java,
+		                                                   completion/TeiidCompletionParser.java" />
 
 	<!--
-	   Test for existence of the generated sql parser class
+	   Test for existence of the generated sql parser classes
 	-->
 	<target name="check-parsers" depends="init-ant-contrib">
 		<!-- correct any extra whitespace created from formatting -->
 		<removeWhitespace arg="${parsers}"/>
 
-		<filelist id="my.parsers" dir="org/komodo/modeshape/teiid/parser" files="${rwsResult}" />
+		<filelist id="my.parsers" dir="gen/org/komodo/modeshape/teiid/parser" files="${rwsResult}" />
 		<restrict id="missing.parsers">
 			<filelist refid="my.parsers" />
 			<not>
@@ -42,9 +43,9 @@
 	</target>
 
 	<!--
-	   Check whether the libraries have already been downloaded and whether the
-	   parser classes have beeen generated. If either is not present then the
-	   'should-generate' property be set to the 'true'
+	   Check whether the parsers have already been generated. 
+	   If either is not present then the 'should-generate' property 
+	   be set to the 'true'
 	-->
 	<target name="check-work" depends="check-parsers">
 		<condition property="should-generate" value="true">
@@ -73,10 +74,10 @@
 
 		<echo message="Removing generated files ..." />
 		<delete>
-			<fileset dir="src/org/komodo/modeshape/teiid/parser">
-				<include name="**/v*/Teiid*Parser.java"/>
-				<include name="**/v*/Teiid*ParserConstants.java"/>
-				<include name="**/v*/Teiid*ParserTokenManager.java"/>
+			<fileset dir="gen/org/komodo/modeshape/teiid">
+				<include name="**/parser/*.java"/>
+				<include name="**/parser/completion/*.java"/>
+				<include name="**/sql/lang/*.java"/>
 			</fileset>
 		</delete>
 	</target>

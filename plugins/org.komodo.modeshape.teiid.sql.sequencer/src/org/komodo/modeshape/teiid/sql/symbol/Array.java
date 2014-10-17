@@ -25,14 +25,14 @@ package org.komodo.modeshape.teiid.sql.symbol;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.komodo.utils.ArgCheck;
 
 public class Array extends ASTNode implements Expression {
 
-    public Array(TeiidParser p, int id) {
+    public Array(ITeiidParser p, int id) {
         super(p, id);
     }
 

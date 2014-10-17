@@ -23,13 +23,13 @@
 package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.IReturnStatement;
 
 public class ReturnStatement extends AssignmentStatement implements IReturnStatement<Expression, LanguageVisitor> {
 
-    public ReturnStatement(TeiidParser p, int id) {
+    public ReturnStatement(ITeiidParser p, int id) {
         super(p, id);
     }
 

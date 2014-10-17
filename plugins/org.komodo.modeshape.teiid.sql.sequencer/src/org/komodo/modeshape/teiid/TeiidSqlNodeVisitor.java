@@ -450,11 +450,6 @@ public class TeiidSqlNodeVisitor
         if (property == null)
             return null;
 
-        if (property != null)
-            System.out.println("<OUT>" + property.getName() + " : " + property.getType() + " - " + property.getPath());
-        else
-            System.out.println("<OUT> null");
-
         T value = propertyValue(property, dataTypeName);
         return value;
     }
@@ -2814,7 +2809,6 @@ public class TeiidSqlNodeVisitor
 
         append(NEW_LINE);
 
-        Iterator<Node> statements = references(node, Block.STATEMENTS_REF_NAME);
         appendStatements(node, Block.STATEMENTS_REF_NAME);
 
         String exceptionGroup = propertyString(node, Block.EXCEPTION_GROUP_PROP_NAME);

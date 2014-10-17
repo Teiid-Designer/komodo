@@ -24,14 +24,14 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ILimit;
 
 public class Limit extends ASTNode implements ILimit<LanguageVisitor>, TeiidSQLConstants.NonReserved {
 
-    public Limit(TeiidParser p, int id) {
+    public Limit(ITeiidParser p, int id) {
         super(p, id);
         setStrict(true);
     }

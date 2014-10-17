@@ -19,11 +19,9 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>${project.basedir}/src/org/komodo/modeshape/teiid/parser</directory>
+							<directory>${project.basedir}/gen/org/komodo/modeshape/teiid/</directory>
 							<includes>
-								<include>**/v*/Teiid*Parser.java</include>
-								<include>**/v*/Teiid*ParserConstants.java</include>
-								<include>**/v*/Teiid*ParserTokenManager.java</include>
+								<include name="**/*.java"/>
 							</includes>
 						</fileset>
 					</filesets>
@@ -44,7 +42,7 @@
 				<configuration>
 					<sourceDirectory>${project.basedir}</sourceDirectory>
 					<includes>
-						<include>src/javacc/*Parser.jjt</include>
+						<include>gen/javacc/*Parser.jjt</include>
 					</includes>
 					<!-- 
 					        These options should be an identical superset of the options
@@ -54,7 +52,7 @@
 					<errorReporting>true</errorReporting>
 					<grammarEncoding>UTF-8</grammarEncoding>
 					<ignoreCase>true</ignoreCase>
-					<interimDirectory>${project.basedir}/src</interimDirectory>
+					<interimDirectory>${project.basedir}/gen</interimDirectory>
 					<isStatic>false</isStatic>
 					<javaUnicodeEscape>true</javaUnicodeEscape>
 					<keepLineColumn>true</keepLineColumn>
@@ -66,7 +64,7 @@
 					<nodePrefix/>
 					<nodeScopeHook>false</nodeScopeHook>
 					<nodeUsesParser>true</nodeUsesParser>
-					<outputDirectory>${project.basedir}/src</outputDirectory>
+					<outputDirectory>${project.basedir}/gen</outputDirectory>
 					<unicodeInput>false</unicodeInput>
 					<visitor>false</visitor>
 				</configuration>

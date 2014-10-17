@@ -22,7 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 
 public abstract class ProcedureContainer extends Command {
@@ -31,7 +31,7 @@ public abstract class ProcedureContainer extends Command {
      * @param p
      * @param id
      */
-    public ProcedureContainer(TeiidParser p, int id) {
+    public ProcedureContainer(ITeiidParser p, int id) {
         super(p, id);
     }
 

@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IAlterView;
 
@@ -37,7 +37,7 @@ public class AlterView  extends Alter<QueryCommand> implements IAlterView<Expres
      * @param p
      * @param id
      */
-    public AlterView(TeiidParser p, int id) {
+    public AlterView(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_ALTER_VIEW);
     }

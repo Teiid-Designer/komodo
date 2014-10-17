@@ -4,7 +4,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 
 /**
@@ -16,7 +16,7 @@ public abstract class AbstractSetCriteria extends Criteria implements PredicateC
      * @param p
      * @param id
      */
-    public AbstractSetCriteria(TeiidParser p, int id) {
+    public AbstractSetCriteria(ITeiidParser p, int id) {
         super(p, id);
     }
 

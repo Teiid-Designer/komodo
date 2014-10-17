@@ -24,12 +24,12 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.spi.query.sql.symbol.IAliasSymbol;
 
 public class AliasSymbol extends Symbol implements Expression, IAliasSymbol<Expression, LanguageVisitor> {
 
-    public AliasSymbol(TeiidParser p, int id) {
+    public AliasSymbol(ITeiidParser p, int id) {
         super(p, id);
     }
 

@@ -5,11 +5,11 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.Collection;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IFromClause;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 /**
  * A FromClause is an interface for subparts held in a FROM clause.  One 
@@ -25,7 +25,7 @@ public abstract class FromClause extends ASTNode
      * @param p
      * @param id
      */
-    public FromClause(TeiidParser p, int id) {
+    public FromClause(ITeiidParser p, int id) {
         super(p, id);
     }
 

@@ -25,14 +25,14 @@ package org.komodo.modeshape.teiid.sql.symbol;
 import java.math.BigDecimal;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IConstant;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class Constant extends ASTNode implements Expression, IConstant<LanguageVisitor> {
 
-    public Constant(TeiidParser p, int id) {
+    public Constant(ITeiidParser p, int id) {
         super(p, id);
     }
 

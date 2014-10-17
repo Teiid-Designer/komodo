@@ -21,6 +21,10 @@
  */
 
 //------------------------------------------------------------------------------
+// @ g e n e r a t e d   u s i n g   o r g . k o m o d o . m o d e s h a p e . t e i i d . g e n e r a t o r s . T e i i d C n d G e n e r a t o r
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // N A M E S P A C E S
 //------------------------------------------------------------------------------
 <jcr='http://www.jcp.org/jcr/1.0'>
@@ -34,15 +38,15 @@
 //==================================================
 //  Derived from Language Object Interfaces
 //==================================================
-[tsql:targetedCommand] mixin
-	+ tsql:group (tsql:groupSymbol)
-
 [tsql:expressionStatement] mixin
 	- tsql:expectedTypeClass (string)
 	+ tsql:expression (tsql:expression)
 
 [tsql:labeled] mixin
 	- tsql:label (string)
+
+[tsql:targetedCommand] mixin
+	+ tsql:group (tsql:groupSymbol)
 
 [tsql:languageObject] mixin
 
@@ -103,8 +107,8 @@
 
 [tsql:matchCriteria]	>	tsql:criteria, tsql:predicateCriteria mixin
 	- tsql:negated (boolean)
-	- tsql:mode (string) < "LIKE", "SIMILAR", "REGEX"
 	- tsql:escapeChar (string)
+	- tsql:mode (string) < "LIKE", "SIMILAR", "REGEX"
 	+ tsql:leftExpression (tsql:expression)
 	+ tsql:rightExpression (tsql:expression)
 
@@ -213,8 +217,8 @@
 
 [tsql:textTable]	>	tsql:tableFunctionReference mixin
 	- tsql:header (long)
-	- tsql:usingRowDelimiter (boolean)
 	- tsql:quote (string)
+	- tsql:usingRowDelimiter (boolean)
 	- tsql:selector (string)
 	- tsql:escape (boolean)
 	- tsql:skip (long)
@@ -282,11 +286,11 @@
 	+ tsql:defaultExpression (tsql:expression)
 
 [tsql:textColumn]	>	tsql:projectedColumn mixin
-	- tsql:selector (string)
 	- tsql:ordinal (boolean)
+	- tsql:selector (string)
 	- tsql:position (long)
-	- tsql:noTrim (boolean)
 	- tsql:width (long)
+	- tsql:noTrim (boolean)
 
 [tsql:xmlColumn]	>	tsql:projectedColumn mixin
 	- tsql:ordinal (boolean)
@@ -394,8 +398,8 @@
 	+ tsql:condition (tsql:criteria)
 
 [tsql:exceptionExpression]	>	tsql:expression mixin
-	+ tsql:errorCode (tsql:expression)
 	+ tsql:message (tsql:expression)
+	+ tsql:errorCode (tsql:expression)
 	+ tsql:sqlState (tsql:expression)
 	+ tsql:parentExpression (tsql:expression)
 
@@ -408,16 +412,16 @@
 [tsql:aggregateSymbol]	>	tsql:function mixin
 	- tsql:windowed (boolean)
 	- tsql:aggregateFunction (string)
-	- tsql:name (string)
 	- tsql:distinct (boolean)
+	- tsql:name (string)
 	+ tsql:orderBy (tsql:orderBy)
 	+ tsql:args (tsql:expression) sns
 	+ tsql:condition (tsql:expression)
 
 [tsql:symbol]	>	tsql:languageObject mixin abstract
 	- tsql:shortName (string)
-	- tsql:name (string)
 	- tsql:outputName (string)
+	- tsql:name (string)
 
 [tsql:aliasSymbol]	>	tsql:symbol, tsql:expression mixin
 	+ tsql:symbol (tsql:expression)

@@ -24,14 +24,14 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLParse;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class XMLParse extends ASTNode implements Expression, IXMLParse<LanguageVisitor> {
 
-    public XMLParse(TeiidParser p, int id) {
+    public XMLParse(ITeiidParser p, int id) {
         super(p, id);
         setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.XML.name());
     }

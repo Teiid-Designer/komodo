@@ -40,7 +40,7 @@ options {
 	VISITOR = false;
 }
 
-PARSER_BEGIN(Teiid8Parser)
+PARSER_BEGIN(TeiidParser)
 
 /*
 * JBoss, Home of Professional Open Source.
@@ -63,7 +63,7 @@ PARSER_BEGIN(Teiid8Parser)
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
 */
-package org.komodo.modeshape.teiid.parser.v8;
+package org.komodo.modeshape.teiid.parser;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -100,7 +100,7 @@ import org.komodo.utils.StringUtil;
  * regenerated from the .jj file and your changes will be lost!</p>
  */
 @SuppressWarnings({"nls", "unused", "javadoc"})
-public class Teiid8Parser extends AbstractTeiidParser {
+public class TeiidParser extends AbstractTeiidParser {
 
 	private String getComment(Token t) {
 		Token optToken = t.specialToken;
@@ -163,14 +163,14 @@ public class Teiid8Parser extends AbstractTeiidParser {
 		return sourceHint;
 	}
 
-	private SourceHint getSourceHint(Teiid8Parser parser) throws ParseException {
+	private SourceHint getSourceHint() throws ParseException {
 			int index = 1;
 			//scan for the first keyword
 			Token t = null;
 			do {
-				t = parser.getToken(index++);
+				t = getToken(index++);
 			} while (t != null && t.kind == LPAREN);
-			t = parser.getToken(index);
+			t = getToken(index);
 			if (t == null) {
 				return null;
 			}
@@ -282,7 +282,7 @@ public class Teiid8Parser extends AbstractTeiidParser {
 
 } // end class
 
-PARSER_END(Teiid8Parser)
+PARSER_END(TeiidParser)
 
 TOKEN_MGR_DECLS : 
 {
@@ -1073,9 +1073,9 @@ Command userCommand(ParseInfo info) :
 	}
 	(command = queryExpression(info) |
 	command = storedProcedure(info, 1) |
-	{ if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(this); } command = insert(info) |
-	{ if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(this); } command = update(info) |
-	{ if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(this); } command = delete(info) |
+	{ if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(); } command = insert(info) |
+	{ if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(); } command = update(info) |
+	{ if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(); } command = delete(info) |
 	command = alter(info) |
 	command = createTrigger(info) |
 	{
@@ -1941,7 +1941,7 @@ StoredProcedure storedProcedure(ParseInfo info, int startIndex) :
 {
 	try {
 		{
-			if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(this);
+			if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint();
 		}
 
 		(
@@ -2235,7 +2235,7 @@ QueryCommand queryExpression(ParseInfo info) :
 		errorHandle(ex);
 	}
 
-	{ if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(this); }
+	{ if (versionAtLeast(Version.TEIID_8_4)) sourceHint = getSourceHint(); }
 
 	queryCommand = queryExpressionBody(info)
 	{

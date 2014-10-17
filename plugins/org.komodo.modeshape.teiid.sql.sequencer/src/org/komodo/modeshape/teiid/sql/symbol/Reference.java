@@ -24,14 +24,14 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IReference;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class Reference extends ASTNode implements Expression, IReference<LanguageVisitor> {
 
-    public Reference(TeiidParser p, int id) {
+    public Reference(ITeiidParser p, int id) {
         super(p, id);
     }
 

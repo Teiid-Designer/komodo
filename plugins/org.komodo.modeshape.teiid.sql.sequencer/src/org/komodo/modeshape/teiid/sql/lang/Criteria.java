@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.ICriteria;
@@ -43,7 +43,7 @@ public class Criteria extends ASTNode implements Expression, ICriteria<LanguageV
      * @param p
      * @param id
      */
-    public Criteria(TeiidParser p, int id) {
+    public Criteria(ITeiidParser p, int id) {
         super(p, id);
         assignTypeName(DataTypeName.BOOLEAN);
     }

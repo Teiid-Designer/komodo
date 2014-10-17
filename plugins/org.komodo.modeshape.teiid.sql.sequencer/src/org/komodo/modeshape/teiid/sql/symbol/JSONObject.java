@@ -25,14 +25,14 @@ package org.komodo.modeshape.teiid.sql.symbol;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IJSONObject;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class JSONObject extends ASTNode implements Expression, IJSONObject<LanguageVisitor> {
 
-    public JSONObject(TeiidParser p, int id) {
+    public JSONObject(ITeiidParser p, int id) {
         super(p, id);
         setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.CLOB.name());
     }

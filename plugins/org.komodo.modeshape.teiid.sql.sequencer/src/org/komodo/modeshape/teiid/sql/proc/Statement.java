@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.proc.IStatement;
 
@@ -130,7 +130,7 @@ public abstract class Statement extends ASTNode implements IStatement<LanguageVi
      * @param p
      * @param id
      */
-    public Statement(TeiidParser p, int id) {
+    public Statement(ITeiidParser p, int id) {
         super(p, id);
     }
 

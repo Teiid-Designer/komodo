@@ -27,15 +27,15 @@ import java.util.Collection;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IJoinPredicate;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 
 public class JoinPredicate extends FromClause implements IJoinPredicate<FromClause, LanguageVisitor> {
 
-    public JoinPredicate(TeiidParser p, int id) {
+    public JoinPredicate(ITeiidParser p, int id) {
         super(p, id);
         JoinType joinType = p.createASTNode(ASTNodes.JOIN_TYPE);
         joinType.setKind(JoinType.Types.JOIN_INNER);

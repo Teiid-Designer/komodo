@@ -24,19 +24,19 @@ package org.komodo.modeshape.teiid.sql.proc;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Labeled;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.Symbol;
 import org.komodo.spi.query.sql.ISQLConstants;
 import org.komodo.spi.query.sql.proc.IBlock;
+import org.komodo.spi.query.sql.symbol.ISymbol;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 public class Block extends Statement implements Labeled, IBlock<Statement, LanguageVisitor> {
 
-    public Block(TeiidParser p, int id) {
+    public Block(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_COMPOUND);
     }
@@ -88,7 +88,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
                         && variable.getGroupSymbol() != null && variable.getGroupSymbol().getName().equalsIgnoreCase(ISQLConstants.VARIABLES)) {
                     return;
                 }
-                String fullName = ISQLConstants.VARIABLES + Symbol.SEPARATOR + ISQLConstants.ROWCOUNT;
+                String fullName = ISQLConstants.VARIABLES + ISymbol.SEPARATOR + ISQLConstants.ROWCOUNT;
                 ElementSymbol es = getTeiidParser().createASTNode(ASTNodes.ELEMENT_SYMBOL);
                 es.setName(fullName);
                 stmt.setExpression(es);

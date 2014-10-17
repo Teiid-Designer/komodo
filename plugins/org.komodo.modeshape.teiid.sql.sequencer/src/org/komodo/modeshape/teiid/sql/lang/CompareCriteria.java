@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ICompareCriteria;
 
@@ -37,7 +37,7 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
      * @param p
      * @param id
      */
-    public CompareCriteria(TeiidParser p, int id) {
+    public CompareCriteria(ITeiidParser p, int id) {
         super(p, id);
     }
 

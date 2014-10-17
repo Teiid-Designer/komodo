@@ -24,14 +24,14 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IMatchCriteria;
 
 public class MatchCriteria extends Criteria
     implements PredicateCriteria, IMatchCriteria<Expression, LanguageVisitor> {
 
-    public MatchCriteria(TeiidParser p, int id) {
+    public MatchCriteria(ITeiidParser p, int id) {
         super(p, id);
         setMode(MatchMode.LIKE);
         setEscapeChar(NULL_ESCAPE_CHAR);

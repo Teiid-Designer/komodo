@@ -24,13 +24,13 @@ package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.spi.query.sql.proc.IIfStatement;
 
 public class IfStatement extends Statement implements IIfStatement<LanguageVisitor> {
 
-    public IfStatement(TeiidParser p, int id) {
+    public IfStatement(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_IF);
     }

@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.modeshape.teiid.scripts;
+package org.komodo.modeshape.teiid.generators;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,10 +39,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.komodo.modeshape.teiid.scripts.CTree.CNode;
-import org.komodo.modeshape.teiid.scripts.CTree.CTreeCallback;
-import org.komodo.modeshape.teiid.scripts.CTree.INode;
-import org.komodo.modeshape.teiid.scripts.CTree.Node;
+import org.komodo.modeshape.teiid.generators.CTree.CNode;
+import org.komodo.modeshape.teiid.generators.CTree.CTreeCallback;
+import org.komodo.modeshape.teiid.generators.CTree.INode;
+import org.komodo.modeshape.teiid.generators.CTree.Node;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
 import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
@@ -60,13 +60,10 @@ import org.modeshape.jcr.value.Reference;
  *
  */
 @SuppressWarnings( "nls" )
-public class TeiidCndGenerator implements StringConstants {
+public class TeiidCndGenerator implements GeneratorConstants {
 
-    private static final String EXEC_HOME = DOT;
-
-    private static final String SRC_DIR = EXEC_HOME + File.separator + SRC;
-    
-    private static final String GENERATOR_HOME_SRC_DIR = SRC_DIR + File.separator + convertPackageToDirPath(TeiidCndGenerator.class.getPackage());
+    private static final String GENERATOR_HOME_DIR = DEMI_GEN_DIR + File.separator +
+                                                            Utilities.convertPackageToDirPath(TeiidCndGenerator.class.getPackage());
 
     /**
      * @param args
@@ -77,12 +74,8 @@ public class TeiidCndGenerator implements StringConstants {
         ccf.generate();
     }
 
-    private static String convertPackageToDirPath(Package pkg) {
-        return pkg.getName().replaceAll(DOUBLE_BACK_SLASH + DOT, File.separator);
-    }
-
     private static File chooseTargetDirectory() {
-        File genDir = new File(GENERATOR_HOME_SRC_DIR);
+        File genDir = new File(GENERATOR_HOME_DIR);
         File cndDir = new File(genDir.getParentFile(), "cnd");
         cndDir.mkdirs();
         if (! cndDir.exists())
@@ -90,29 +83,6 @@ public class TeiidCndGenerator implements StringConstants {
 
         return cndDir;
     }
-
-    private static final String LICENSE = "" +
-    "/*" + NEW_LINE +
-    " * JBoss, Home of Professional Open Source." + NEW_LINE +
-    " * See the COPYRIGHT.txt file distributed with this work for information" + NEW_LINE +
-    " * regarding copyright ownership.  Some portions may be licensed" + NEW_LINE +
-    " * to Red Hat, Inc. under one or more contributor license agreements." + NEW_LINE +
-    " * " + NEW_LINE +
-    " * This library is free software; you can redistribute it and/or" + NEW_LINE +
-    " * modify it under the terms of the GNU Lesser General Public" + NEW_LINE +
-    " * License as published by the Free Software Foundation; either" + NEW_LINE +
-    " * version 2.1 of the License, or (at your option) any later version." + NEW_LINE +
-    " * " + NEW_LINE +
-    " * This library is distributed in the hope that it will be useful," + NEW_LINE +
-    " * but WITHOUT ANY WARRANTY; without even the implied warranty of" + NEW_LINE +
-    " * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU" + NEW_LINE +
-    " * Lesser General Public License for more details." + NEW_LINE +
-    " * " + NEW_LINE +
-    " * You should have received a copy of the GNU Lesser General Public" + NEW_LINE +
-    " * License along with this library; if not, write to the Free Software" + NEW_LINE +
-    " * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA" + NEW_LINE +
-    " * 02110-1301 USA." + NEW_LINE +
-    " */" + NEW_LINE;
 
     private static final Package[] SQL_PACKAGES = {
         ASTNode.class.getPackage(), // lang package
@@ -446,10 +416,10 @@ public class TeiidCndGenerator implements StringConstants {
      * @throws Exception
      */
     private void lexPackage() throws Exception {
-        File genDir = new File(GENERATOR_HOME_SRC_DIR);
+        File genDir = new File(GENERATOR_HOME_DIR);
         File cndDir = new File(genDir.getParentFile(), "cnd");
         String lexPackage = cndDir.getAbsolutePath();
-        lexPackage = lexPackage.substring(lexPackage.indexOf(SRC_DIR) + SRC_DIR.length() + 1);
+        lexPackage = lexPackage.substring(lexPackage.indexOf(DEMI_GEN_DIR) + DEMI_GEN_DIR.length() + 1);
         lexPackage = lexPackage.replaceAll(File.separator, DOT);
 
         lex("package " + lexPackage + SEMI_COLON);
@@ -461,9 +431,6 @@ public class TeiidCndGenerator implements StringConstants {
         lex("import " + ASTNode.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
         lex("import " + StringConstants.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
         lex("import " + Version.class.getCanonicalName() + SEMI_COLON + NEW_LINE);
-        for (Package sqlPkg : SQL_PACKAGES) {
-            lex("import " + sqlPkg.getName() + DOT + STAR + SEMI_COLON + NEW_LINE);
-        }
         lex(NEW_LINE);
         lex(NEW_LINE);
     }
@@ -474,6 +441,10 @@ public class TeiidCndGenerator implements StringConstants {
      * @throws Exception
      */
     private void lexClassDeclaration() throws Exception {
+        lex("/**" + NEW_LINE);
+        lex(" * @generated using " + getClass().getCanonicalName() + NEW_LINE);
+        lex(" */" + NEW_LINE);
+
         lex("@SuppressWarnings( { \"javadoc\", \"nls\" })" + NEW_LINE);
         lex(PUBLIC + SPACE + CLASS + SPACE + TEIID_SQL_LEXICON + " implements StringConstants" + SPACE + OPEN_BRACE);
         lex(NEW_LINE);
@@ -1553,7 +1524,7 @@ public class TeiidCndGenerator implements StringConstants {
         CTree tree = new CTree(ASTNode.class);
 
         for (Package sqlPkg : SQL_PACKAGES) {
-            File pkgDir = new File(SRC_DIR, convertPackageToDirPath(sqlPkg));
+            File pkgDir = new File(SRC_DIR, Utilities.convertPackageToDirPath(sqlPkg));
 
             if (! pkgDir.exists())
                 throw new RuntimeException("The package directory " + pkgDir + " does not exist!");
@@ -1619,6 +1590,8 @@ public class TeiidCndGenerator implements StringConstants {
             lexPackage();
             lexClassDeclaration();
 
+            cndSection1Comment("@generated using " + getClass().getCanonicalName());
+            cnd(NEW_LINE);
             writeNamespaces();
 
             lexTeiidVersionProperty();

@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
@@ -123,7 +123,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param parser
      * @param nodeTypeIndex
      */
-    public ASTNode(TeiidParser parser, int nodeTypeIndex) {
+    public ASTNode(ITeiidParser parser, int nodeTypeIndex) {
         super(parser, nodeTypeIndex);
 
         String lexiconType = TeiidSqlLexicon.getTypeId(getClass());

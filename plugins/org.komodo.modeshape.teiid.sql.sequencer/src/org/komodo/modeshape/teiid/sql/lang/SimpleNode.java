@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
@@ -36,14 +36,14 @@ public abstract class SimpleNode implements Node {
     private Node[] children;
     private int id;
     protected Object value;
-    private TeiidParser parser;
+    private ITeiidParser parser;
 
-    public SimpleNode(TeiidParser p, int i) {
+    public SimpleNode(ITeiidParser p, int i) {
         id = i;
         parser = p;
     }
 
-    public TeiidParser getTeiidParser() {
+    public ITeiidParser getTeiidParser() {
         return parser;
     }
 
@@ -156,7 +156,7 @@ public abstract class SimpleNode implements Node {
 
     @Override
     public String toString() {
-        return Teiid8ParserTreeConstants.jjtNodeName[id];
+        return TeiidParserTreeConstants.jjtNodeName[id];
     }
 
     public String toString(String prefix) {

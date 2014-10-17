@@ -22,7 +22,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 
 /**
  *
@@ -33,7 +33,7 @@ public class MakeDep extends ASTNode {
      * @param p
      * @param id
      */
-    public MakeDep(TeiidParser p, int id) {
+    public MakeDep(ITeiidParser p, int id) {
         super(p, id);
     }
 

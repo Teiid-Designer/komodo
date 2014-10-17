@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.QueryCommand;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryContainer;
@@ -33,7 +33,7 @@ import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 public class ScalarSubquery extends ASTNode implements Expression, SubqueryContainer<QueryCommand>, IScalarSubquery<LanguageVisitor, QueryCommand> {
 
-    public ScalarSubquery(TeiidParser p, int id) {
+    public ScalarSubquery(ITeiidParser p, int id) {
         super(p, id);
     }
 

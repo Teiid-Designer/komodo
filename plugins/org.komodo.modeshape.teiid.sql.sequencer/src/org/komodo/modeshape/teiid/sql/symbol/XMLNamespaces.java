@@ -26,14 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.NamespaceItem;
 import org.komodo.spi.query.sql.symbol.IXMLNamespaces;
 
 public class XMLNamespaces extends ASTNode implements IXMLNamespaces<LanguageVisitor> {
 
-    public XMLNamespaces(TeiidParser p, int id) {
+    public XMLNamespaces(ITeiidParser p, int id) {
         super(p, id);
     }
 

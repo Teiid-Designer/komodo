@@ -19,16 +19,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.modeshape.teiid.parser.bnf.clause;
+package org.komodo.modeshape.teiid.generators.bnf.clause;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.spi.constants.StringConstants;
 
 /**
  *
  */
-public class OrClause implements IClause, StringConstants {
+public class OrClause implements IClause {
 
     private IClause leftClause;
 

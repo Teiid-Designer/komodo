@@ -25,13 +25,13 @@ package org.komodo.modeshape.teiid.sql.symbol;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidParser;
+import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLAttributes;
 
 public class XMLAttributes extends ASTNode implements IXMLAttributes<LanguageVisitor> {
 
-    public XMLAttributes(TeiidParser p, int id) {
+    public XMLAttributes(ITeiidParser p, int id) {
         super(p, id);
     }
 

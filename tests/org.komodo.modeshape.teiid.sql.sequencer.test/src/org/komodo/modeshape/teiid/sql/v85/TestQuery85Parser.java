@@ -22,14 +22,14 @@
 package org.komodo.modeshape.teiid.sql.v85;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.modeshape.teiid.sql.lang.From;
 import org.komodo.modeshape.teiid.sql.lang.GroupBy;
 import org.komodo.modeshape.teiid.sql.lang.Query;
 import org.komodo.modeshape.teiid.sql.lang.Select;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.modeshape.teiid.sql.v84.TestQuery84Parser;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  *

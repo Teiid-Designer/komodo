@@ -23,14 +23,14 @@ package org.komodo.modeshape.teiid.parser.bnf;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.modeshape.teiid.parser.syntax.TeiidSyntaxParserConstants;
+import org.komodo.modeshape.teiid.parser.completion.TeiidCompletionParserConstants;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
  *
  */
-public abstract class AbstractBNF implements BNFConstants, TeiidSyntaxParserConstants {
+public abstract class AbstractBNF implements BNFConstants, TeiidCompletionParserConstants {
 
     private final ITeiidVersion version;
 
