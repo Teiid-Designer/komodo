@@ -40,6 +40,7 @@ public class Test87Validator extends Test86Validator {
         this(Version.TEIID_8_7.get());
     }
 
+    @Override
     @Test
     public void testTextTableFixedSelector() {
         helpValidate("SELECT * from texttable(null SELECTOR 'a' columns x string width 1) as x",

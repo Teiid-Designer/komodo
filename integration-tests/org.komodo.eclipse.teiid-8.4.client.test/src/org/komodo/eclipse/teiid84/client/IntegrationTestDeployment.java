@@ -63,7 +63,7 @@ import org.teiid.jdbc.TeiidDriver;
 import org.teiid.runtime.client.admin.AdminSpec;
 
 @RunWith(Arquillian.class)
-@SuppressWarnings({"javadoc", "nls"})
+@SuppressWarnings({"javadoc", "nls", "deprecation"})
 public class IntegrationTestDeployment extends AbstractTeiidVersionTest {
 
     private static final VersionID TEIID_VERSION_ID = ITeiidVersion.VersionID.TEIID_8_4;
@@ -208,7 +208,7 @@ public class IntegrationTestDeployment extends AbstractTeiidVersionTest {
 			// pass
 		}
 
-		VDB vdb2 = deployVdb("bqt2.vdb", "bqt", 2);
+		deployVdb("bqt2.vdb", "bqt", 2);
 		Model model = vdb.getModels().get(0);
 		admin.assignToModel("bqt", 2, model.getName(), "Source", "h2", "java:jboss/datasources/ExampleDS");
 
@@ -393,7 +393,8 @@ public class IntegrationTestDeployment extends AbstractTeiidVersionTest {
 		admin.deleteDataSource(deployedName);
 	}
 
-	private int assertMetadataLoadCount(boolean check, int expected) throws SQLException {				
+	@SuppressWarnings( "unused" )
+    private int assertMetadataLoadCount(boolean check, int expected) throws SQLException {				
 		Connection conn = TeiidDriver.getInstance().connect("jdbc:teiid:test.1@mm://localhost:31000;user=user;password=user", null);		
 		Statement stmt = conn.createStatement();
 		stmt.execute("SELECT execCount FROM Matadata");

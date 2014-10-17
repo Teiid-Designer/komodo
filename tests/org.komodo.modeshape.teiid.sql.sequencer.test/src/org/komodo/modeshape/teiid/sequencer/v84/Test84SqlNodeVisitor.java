@@ -37,7 +37,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 /**
  *
  */
-@SuppressWarnings( {"javadoc"} )
+@SuppressWarnings( {"javadoc", "nls"} )
 public class Test84SqlNodeVisitor extends Test8SqlNodeVisitor {
 
     protected Test84SqlNodeVisitor(ITeiidVersion teiidVersion) {

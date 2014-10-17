@@ -45,6 +45,7 @@ public class TestQuery85Parser extends TestQuery84Parser {
         this(Version.TEIID_8_5.get());
     }
 
+    @Override
     @Test
     public void testGroupByRollup() {
         GroupSymbol g = getFactory().newGroupSymbol("m.g"); //$NON-NLS-1$

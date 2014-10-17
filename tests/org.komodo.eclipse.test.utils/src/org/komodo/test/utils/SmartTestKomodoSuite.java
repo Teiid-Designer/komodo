@@ -23,7 +23,6 @@ package org.komodo.test.utils;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -31,11 +30,9 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
-
 import junit.framework.Test;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
@@ -62,12 +59,6 @@ public class SmartTestKomodoSuite extends TestSuite {
      * use, use {@link #getTestScratchPath} .
      */
     private static final String TEST_DATA_SCRATCH_PROPERTY = "test.data.scratch"; //$NON-NLS-1$
-
-    /**
-     * This property is obtained from the System properties to find the location of test source files. For the safest use, use
-     * {@link #getTestSourcePath} .
-     */
-    private static final String TEST_SOURCE_ROOT_PROPERTY = "test.source.root"; //$NON-NLS-1$
 
     static {
         String root = System.getProperty("plugins.root"); //$NON-NLS-1$
@@ -292,7 +283,6 @@ public class SmartTestKomodoSuite extends TestSuite {
                                                     String actual ) {
         BufferedReader eReader = new BufferedReader(new StringReader(expected));
         BufferedReader aReader = new BufferedReader(new StringReader(actual));
-        int line = 0;
         try {
             String aLine = aReader.readLine();
             String eLine = eReader.readLine();
@@ -301,7 +291,6 @@ public class SmartTestKomodoSuite extends TestSuite {
                 Assert.assertEquals(eLine, aLine);
                 aLine = aReader.readLine();
                 eLine = eReader.readLine();
-                line++;
             }
             if (eLine != null) {
                 Assert.fail("More lines expected; missing from=" + eLine); //$NON-NLS-1$
