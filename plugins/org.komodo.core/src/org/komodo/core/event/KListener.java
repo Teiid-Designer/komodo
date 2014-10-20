@@ -5,7 +5,8 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.core;
+package org.komodo.core.event;
+
 
 /**
  * A listener for Komodo-related events.

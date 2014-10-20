@@ -19,13 +19,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.repository;
-
-import org.komodo.spi.repository.IRepository;
+package org.komodo.spi.repository;
 
 /**
  *
  */
-public class DefaultRepository implements IRepository {
+public interface IRepositoryClient {
 
+    /**
+     * The client state.
+     */
+    public enum State {
+
+        /**
+         * The initial state.
+         */
+        NOT_STARTED,
+
+        /**
+         * Client has been successfully started.
+         */
+        STARTED,
+
+        /**
+         * Client has been successfully shutdown.
+         */
+        SHUTDOWN,
+
+        /**
+         * There was an error starting or shutting down the client.
+         */
+        ERROR
+
+    }
+
+    /**
+     * @return the engine state (never <code>null</code>)
+     */
+    public State getState();
 }

@@ -10,3 +10,4 @@ Export-Package: org.komodo.core
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
  org.komodo.utils;bundle-version="1.0.0"
+Import-Package: org.komodo.repository

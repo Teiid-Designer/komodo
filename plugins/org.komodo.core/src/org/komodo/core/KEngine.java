@@ -21,45 +21,23 @@
  */
 package org.komodo.core;
 
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
+import org.komodo.core.event.KEvent;
+import org.komodo.core.event.KListener;
+import org.komodo.repository.LocalRepository;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.IRepository;
+import org.komodo.spi.repository.IRepositoryClient;
+import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 
 /**
  * The Komodo engine. It is responsible for persisting and retriever user session data and Teiid artifacts.
  */
-public final class KEngine implements Iterable<IRepository>, StringConstants {
-
-    /**
-     * The engine state.
-     */
-    public enum State {
-
-        /**
-         * The initial state.
-         */
-        NOT_STARTED,
-
-        /**
-         * Engine has been successfully started.
-         */
-        STARTED,
-
-        /**
-         * Engine has been successfully shutdown.
-         */
-        SHUTDOWN,
-
-        /**
-         * There was an error starting or shutting down the engine.
-         */
-        ERROR
-
-    }
+public final class KEngine implements IRepositoryClient, StringConstants {
 
     private static KEngine _instance;
 
@@ -108,6 +86,7 @@ public final class KEngine implements Iterable<IRepository>, StringConstants {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
 
         if (this.repositories.add(repository)) {
+            repository.add(this);
             KLog.getLogger().debug(String.format("%s added repository '{0}'", PREFIX, repository.getId())); //$NON-NLS-1$
             notifyListeners(null); // TODO create event
         } else {
@@ -116,35 +95,20 @@ public final class KEngine implements Iterable<IRepository>, StringConstants {
         }
     }
 
-    /**
-     * @return the registered repositories (never <code>null</code> but can be empty)
-     *
-     * @throws KException if an error occurs
-     */
-    public IRepository[] getRepositories() throws KException {
-        return this.repositories.toArray(new IRepository[this.repositories.size()]);
-    }
-
-    /**
-     * @return the engine state (never <code>null</code>)
-     */
+    @Override
     public State getState() {
         return this.state;
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Iterable#iterator()
+     * @return the registered repositories (never <code>null</code> but can be empty)
      */
-    @Override
-    public Iterator<IRepository> iterator() {
-        final Set<IRepository> copy = new HashSet<IRepository>(this.repositories);
-        return copy.iterator();
+    public Set<IRepository> getRepositories() {
+        return Collections.unmodifiableSet(this.repositories);
     }
 
     private void notifyListeners(final KEvent event) throws KException {
-        assert (event != null);
+        ArgCheck.isNotNull(event);
 
         for (final KListener listener : this.listeners) {
             try {
@@ -154,6 +118,14 @@ public final class KEngine implements Iterable<IRepository>, StringConstants {
                 // TODO i18n this
                 KLog.getLogger().error(String.format("%s unregistered listener '{0}' because it threw and exception", PREFIX, listener.getId())); //$NON-NLS-1$
             }
+        }
+    }
+
+    private void notifyRepositories(final RepositoryClientEvent event) {
+        ArgCheck.isNotNull(event);
+
+        for (IRepository repository : getRepositories()) {
+            repository.notify(event);
         }
     }
 
@@ -181,6 +153,7 @@ public final class KEngine implements Iterable<IRepository>, StringConstants {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
 
         if (this.repositories.remove(repository)) {
+            repository.remove(this);
             KLog.getLogger().debug(String.format("%s removed repository '{0}'", PREFIX, repository.getId())); //$NON-NLS-1$
             notifyListeners(null); // TODO create event
         } else {
@@ -197,6 +170,7 @@ public final class KEngine implements Iterable<IRepository>, StringConstants {
             // TODO implement shutdown (write saved state, disconnect to repos, etc.)
             this.state = State.SHUTDOWN;
             KLog.getLogger().debug("Komodo engine successfully shutdown"); //$NON-NLS-1$
+            notifyRepositories(null); // TODO create event
             notifyListeners(null); // TODO create event
         } catch (final Exception e) {
             this.state = State.ERROR;
@@ -206,18 +180,36 @@ public final class KEngine implements Iterable<IRepository>, StringConstants {
     }
 
     /**
+     * Initialise the local repository
+     */
+    private void initLocalRespository() throws KException {
+        LocalRepository localRepository = LocalRepository.getInstance();
+        add(localRepository);
+    }
+
+    /**
      * @throws KException if there is an error starting the engine
      */
     public void start() throws KException {
         try {
-            // TODO implement start (add local repo, read any saved session state, connect to repos if auto-connect, etc.)
+            // Initialise the local repository
+            initLocalRespository();
+
+            // TODO implement start (read any saved session state, connect to repos if auto-connect, etc.)
             this.state = State.STARTED;
             KLog.getLogger().debug("Komodo engine successfully shutdown"); //$NON-NLS-1$
+
+            // Notify any registered repositories that this engine has started
+            notifyRepositories(RepositoryClientEvent.createStartedEvent(this));
+
+            // Notify any 3rd-party listeners that this engine has started
             notifyListeners(null); // TODO create event
+
         } catch (final Exception e) {
             this.state = State.ERROR;
             // TODO i18n this
             throw new KException("Error during KEngine startup", e); //$NON-NLS-1$
         }
     }
+
 }

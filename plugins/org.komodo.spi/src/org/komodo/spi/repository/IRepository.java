@@ -103,4 +103,24 @@ public interface IRepository {
      */
     boolean ping();
 
+    /**
+     * Add an {@link IRepositoryClient} to receive notifications from
+     *
+     * @param client
+     */
+    void add(IRepositoryClient client);
+
+    /**
+     * Remove an {@link IRepositoryClient} that we no longer wish to receive notifications from
+     *
+     * @param client
+     */
+    void remove(IRepositoryClient client);
+
+    /**
+     * Notify the repository of the given {@link RepositoryClientEvent}
+     *
+     * @param event
+     */
+    void notify(RepositoryClientEvent event);
 }
