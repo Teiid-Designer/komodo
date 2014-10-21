@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.core.RelationalObjectValidator;
 import org.komodo.relational.core.RelationalValidator;
@@ -38,10 +37,9 @@ import org.komodo.relational.extension.RelationalModelExtensionConstants;
 import org.komodo.spi.outcome.IOutcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.HashCodeUtils;
 import org.komodo.utils.ModelType;
-import org.komodo.utils.StringUtil;
-import org.komodo.utils.StringUtilities;
+import org.komodo.utils.StringUtils;
 
 
 /**
@@ -255,7 +253,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
      * @param name Sets name to the specified value.
      */
     public void setName( String name ) {
-    	if( StringUtilities.areDifferent(this.name, name) ) {
+    	if( StringUtils.areDifferent(this.name, name) ) {
     		this.name = name;
     		handleInfoChanged();
     	}
@@ -270,7 +268,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
      * @param nameInSource Sets nameInSource to the specified value.
      */
     public void setNameInSource( String nameInSource ) {
-    	if( StringUtilities.areDifferent(this.nameInSource, nameInSource) ) {
+    	if( StringUtils.areDifferent(this.nameInSource, nameInSource) ) {
     		this.nameInSource = nameInSource;
     		handleInfoChanged();
     	} 
@@ -285,7 +283,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
      * @param description Sets description to the specified value.
      */
     public void setDescription( String description ) {
-    	if( StringUtilities.areDifferent(this.description, description) ) {
+    	if( StringUtils.areDifferent(this.description, description) ) {
     		this.description = description;
     		handleInfoChanged();
     	} 
@@ -468,9 +466,9 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
         final RelationalObject other = (RelationalObject)object;
 
         // string properties
-        if (!StringUtil.valuesAreEqual(getName(), other.getName())
-                || !StringUtil.valuesAreEqual(getNameInSource(), other.getNameInSource())
-                || !StringUtil.valuesAreEqual(getDescription(), other.getDescription())) {
+        if (!StringUtils.valuesAreEqual(getName(), other.getName())
+                || !StringUtils.valuesAreEqual(getNameInSource(), other.getNameInSource())
+                || !StringUtils.valuesAreEqual(getDescription(), other.getDescription())) {
             return false;
         }
         
@@ -497,23 +495,23 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
      */
     @Override
     public int hashCode() {
-        int result = HashCodeUtil.hashCode(0, getType());
+        int result = HashCodeUtils.hashCode(0, getType());
 
-        result = HashCodeUtil.hashCode(result, getType());
-        result = HashCodeUtil.hashCode(result, getModelType());
-        result = HashCodeUtil.hashCode(result, getProcessType());
+        result = HashCodeUtils.hashCode(result, getType());
+        result = HashCodeUtils.hashCode(result, getModelType());
+        result = HashCodeUtils.hashCode(result, getProcessType());
         
         // string properties
-        if (!StringUtil.isEmpty(getName())) {
-            result = HashCodeUtil.hashCode(result, getName());
+        if (!StringUtils.isEmpty(getName())) {
+            result = HashCodeUtils.hashCode(result, getName());
         }
         
-        if (!StringUtil.isEmpty(getNameInSource())) {
-            result = HashCodeUtil.hashCode(result, getNameInSource());
+        if (!StringUtils.isEmpty(getNameInSource())) {
+            result = HashCodeUtils.hashCode(result, getNameInSource());
         }
 
         if (getDescription() != null && !getDescription().isEmpty()) {
-            result = HashCodeUtil.hashCode(result, getDescription());
+            result = HashCodeUtils.hashCode(result, getDescription());
         }
 
         if ((this.extensionProperties != null) && !this.extensionProperties.isEmpty()) {
@@ -521,8 +519,8 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
         	while(keyIter.hasNext()) {
         		String key = (String)keyIter.next();
         		String value = this.extensionProperties.getProperty(key);
-        		result = HashCodeUtil.hashCode(result, key);
-        		result = HashCodeUtil.hashCode(result, value);
+        		result = HashCodeUtils.hashCode(result, key);
+        		result = HashCodeUtils.hashCode(result, value);
         	}
         }
 

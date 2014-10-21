@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.HashCodeUtils;
 
 
 
@@ -235,15 +235,15 @@ public class Schema extends RelationalObject {
 
         List<Table> tables = getTables();
         for(Table table: tables) {
-            result = HashCodeUtil.hashCode(result, table);
+            result = HashCodeUtils.hashCode(result, table);
         }
         List<Procedure> procs = getProcedures();
         for(Procedure proc: procs) {
-            result = HashCodeUtil.hashCode(result, proc);
+            result = HashCodeUtils.hashCode(result, proc);
         }
         List<Index> indexes = getIndexes();
         for(Index index: indexes) {
-            result = HashCodeUtil.hashCode(result, index);
+            result = HashCodeUtils.hashCode(result, index);
         }
 
         return result;

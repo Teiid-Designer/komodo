@@ -21,8 +21,6 @@
  */
 package org.komodo.utils;
 
-import java.util.Collection;
-import java.util.Properties;
 
 /**
  * This class contains a set of static utility methods for checking method arguments. It contains many of the common checks that
@@ -32,12 +30,6 @@ import java.util.Properties;
  *
  */
 public class ArgCheck {
-
-    /**
-     * Can't construct - utility class
-     */
-    private ArgCheck() {
-    }
 
     /**
      * Check that the boolean condition is true; throw an IllegalArgumentException if not.
@@ -51,16 +43,16 @@ public class ArgCheck {
             throw new IllegalArgumentException(message);
         }
     }
-
-    /**
-     * Check that the value is non-negative (>=0).
-     * 
-     * @param value Value
-     * @throws IllegalArgumentException If value is negative (<0)
-     */
-    public static final void isNonNegative(int value) {
-        isNonNegative(value, null);
-    }
+//
+//    /**
+//     * Check that the value is non-negative (>=0).
+//     * 
+//     * @param value Value
+//     * @throws IllegalArgumentException If value is negative (<0)
+//     */
+//    public static final void isNonNegative(int value) {
+//        isNonNegative(value, null);
+//    }
 
     /**
      * Check that the value is non-negative (>=0).
@@ -75,40 +67,40 @@ public class ArgCheck {
             throw new IllegalArgumentException(msg);
         }
     }
-
-    /**
-     * Check that the value is positive (>0).
-     * 
-     * @param value Value
-     * @throws IllegalArgumentException If value is non-positive (<=0)
-     */
-    public static final void isPositive(int value) {
-        isPositive(value, null);
-    }
-
-    /**
-     * Check that the value is positive (>0).
-     * 
-     * @param value Value
-     * @param message Exception message if check fails
-     * @throws IllegalArgumentException If value is non-positive (<=0)
-     */
-    public static final void isPositive(int value, String message) {
-        if (value <= 0) {
-            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isPositiveInt);
-            throw new IllegalArgumentException(msg);
-        }
-    }
-
-    /**
-     * Check that the string is non-null and has length > 0
-     * 
-     * @param value Value
-     * @throws IllegalArgumentException If value is null or length == 0
-     */
-    public static final void isNotZeroLength(String value) {
-        isNotZeroLength(value, null);
-    }
+//
+//    /**
+//     * Check that the value is positive (>0).
+//     * 
+//     * @param value Value
+//     * @throws IllegalArgumentException If value is non-positive (<=0)
+//     */
+//    public static final void isPositive(int value) {
+//        isPositive(value, null);
+//    }
+//
+//    /**
+//     * Check that the value is positive (>0).
+//     * 
+//     * @param value Value
+//     * @param message Exception message if check fails
+//     * @throws IllegalArgumentException If value is non-positive (<=0)
+//     */
+//    public static final void isPositive(int value, String message) {
+//        if (value <= 0) {
+//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isPositiveInt);
+//            throw new IllegalArgumentException(msg);
+//        }
+//    }
+//
+//    /**
+//     * Check that the string is non-null and has length > 0
+//     * 
+//     * @param value Value
+//     * @throws IllegalArgumentException If value is null or length == 0
+//     */
+//    public static final void isNotZeroLength(String value) {
+//        isNotZeroLength(value, null);
+//    }
 
     /**
      * Check that the string is non-null and has length > 0
@@ -177,56 +169,56 @@ public class ArgCheck {
             throw new IllegalArgumentException(msg);
         }
     }
-
-    /**
-     * Check that the collection is not empty
-     * 
-     * @param collection Collection
-     * @throws IllegalArgumentException If collection is null or empty
-     */
-    public static final void isNotEmpty(Collection collection) {
-        isNotEmpty(collection, null);
-    }
-
-    /**
-     * Check that the collection is not empty
-     * 
-     * @param collection Collection
-     * @param message Exception message if check fails
-     * @throws IllegalArgumentException If collection is null or empty
-     */
-    public static final void isNotEmpty(Collection collection, String message) {
-        isNotNull(collection);
-        if (collection.isEmpty()) {
-            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isCollectionNotEmpty);
-            throw new IllegalArgumentException(msg);
-        }
-    }
-
-    /**
-     * Check that the properties is not empty
-     * 
-     * @param properties
-     * @throws IllegalArgumentException If properties is null or empty
-     */
-    public static final void isNotEmpty(Properties properties) {
-        isNotEmpty(properties, null);
-    }
-
-    /**
-     * Check that the properties is not empty
-     * 
-     * @param properties
-     * @param message Exception message if check fails
-     * @throws IllegalArgumentException If properties is null or empty
-     */
-    public static final void isNotEmpty(Properties properties, String message) {
-        isNotNull(properties);
-        if (properties.isEmpty()) {
-            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isPropertiesNotEmpty);
-            throw new IllegalArgumentException(msg);
-        }
-    }
+//
+//    /**
+//     * Check that the collection is not empty
+//     * 
+//     * @param collection Collection
+//     * @throws IllegalArgumentException If collection is null or empty
+//     */
+//    public static final void isNotEmpty(Collection collection) {
+//        isNotEmpty(collection, null);
+//    }
+//
+//    /**
+//     * Check that the collection is not empty
+//     * 
+//     * @param collection Collection
+//     * @param message Exception message if check fails
+//     * @throws IllegalArgumentException If collection is null or empty
+//     */
+//    public static final void isNotEmpty(Collection collection, String message) {
+//        isNotNull(collection);
+//        if (collection.isEmpty()) {
+//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isCollectionNotEmpty);
+//            throw new IllegalArgumentException(msg);
+//        }
+//    }
+//
+//    /**
+//     * Check that the properties is not empty
+//     * 
+//     * @param properties
+//     * @throws IllegalArgumentException If properties is null or empty
+//     */
+//    public static final void isNotEmpty(Properties properties) {
+//        isNotEmpty(properties, null);
+//    }
+//
+//    /**
+//     * Check that the properties is not empty
+//     * 
+//     * @param properties
+//     * @param message Exception message if check fails
+//     * @throws IllegalArgumentException If properties is null or empty
+//     */
+//    public static final void isNotEmpty(Properties properties, String message) {
+//        isNotNull(properties);
+//        if (properties.isEmpty()) {
+//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isPropertiesNotEmpty);
+//            throw new IllegalArgumentException(msg);
+//        }
+//    }
 
     /**
      * Check that the string is not empty
@@ -250,182 +242,189 @@ public class ArgCheck {
     public static final void isNotEmpty(String string, String message) {
         isNotZeroLength(string, message);
     }
+//
+//    /**
+//     * Check that the collection contains the value
+//     * 
+//     * @param collection Collection to check
+//     * @param value Value to check for, may be null
+//     * @throws IllegalArgumentException If collection is null or doesn't contain value
+//     */
+//    public static final void contains(Collection collection, Object value) {
+//        contains(collection, value, null);
+//    }
+//
+//    /**
+//     * Check that the collection contains the value
+//     * 
+//     * @param collection Collection to check
+//     * @param value Value to check for, may be null
+//     * @param message Exception message if check fails
+//     * @throws IllegalArgumentException If collection is null or doesn't contain value
+//     */
+//    public static final void contains(Collection collection, Object value, String message) {
+//        isNotNull(collection);
+//        if (!collection.contains(value)) {
+//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.contains);
+//            throw new IllegalArgumentException(msg);
+//        }
+//    }
+//
+//    /**
+//     * Check that two boolean values are equal
+//     * 
+//     * @param value1 the first boolean value
+//     * @param value2 the second boolean value
+//     * @throws IllegalArgumentException if booleans are not equal
+//     */
+//    public static final void isEqual(boolean value1, boolean value2) {
+//        isEqual(value1, value2, null);
+//    }
+//
+//    /**
+//     * Check that two boolean values are equal
+//     * 
+//     * @param value1 the first boolean value
+//     * @param value2 the second boolean value
+//     * @param message Exception message if check fails
+//     * @throws IllegalArgumentException if booleans are not equal
+//     */
+//    public static final void isEqual(boolean value1, boolean value2, String message) {
+//        if (value1 != value2) {
+//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
+//                new Boolean(value1), new Boolean(value2)});
+//            throw new IllegalArgumentException(msg);
+//        }
+//    }
+//
+//    /**
+//     * Checks if two booleans are NOT equal
+//     * 
+//     * @param value1 the first boolean value
+//     * @param value2 the second boolean value
+//     * @throws IllegalArgumentException if booleans are equal
+//     */
+//    public static final void isNotEqual(boolean value1, boolean value2) {
+//        isNotEqual(value1, value2, null);
+//    }
+//
+//    /**
+//     * Checks if two booleans are NOT equal
+//     * 
+//     * @param value1 the first boolean value
+//     * @param value2 the second boolean value
+//     * @param message Exception message if check fails
+//     * @throws IllegalArgumentException if booleans are equal
+//     */
+//    public static final void isNotEqual(boolean value1, boolean value2, String message) {
+//        if (value1 == value2) {
+//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isNotEqual, new Object[] {
+//                new Boolean(value1), new Boolean(value2)});
+//            throw new IllegalArgumentException(msg);
+//        }
+//    }
+//
+//    /**
+//     * Checks if two integer values are equal
+//     * 
+//     * @param value1 the first integer value
+//     * @param value2 the second integer value
+//     * @throws IllegalArgumentException if booleans are equal
+//     */
+//    public static final void isEqual(int value1, int value2) {
+//        isEqual(value1, value2, null);
+//    }
+//
+//    /**
+//     * Checks if two integer values are equal
+//     * 
+//     * @param value1 the first integer value
+//     * @param value2 the second integer value
+//     * @param message Exception message if check fails
+//     * @throws IllegalArgumentException if booleans are equal
+//     */
+//    public static final void isEqual(int value1, int value2, String message) {
+//        if (value1 != value2) {
+//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
+//                new Integer(value1), new Integer(value2)});
+//            throw new IllegalArgumentException(msg);
+//        }
+//    }
+//
+//    /**
+//     * Checks if two integer values are NOT equal
+//     * 
+//     * @param value1 the first integer value
+//     * @param value2 the second integer value
+//     * @throws IllegalArgumentException if booleans are equal
+//     */
+//    public static final void isNotEqual(int value1, int value2) {
+//        isNotEqual(value1, value2, null);
+//    }
+//
+//    /**
+//     * Checks if two integer values are NOT equal
+//     * 
+//     * @param value1 the first integer value
+//     * @param value2 the second integer value
+//     * @param message Exception message if check fails
+//     * @throws IllegalArgumentException if booleans are equal
+//     */
+//    public static final void isNotEqual(int value1, int value2, String message) {
+//        if (value1 == value2) {
+//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isNotEqual, new Object[] {
+//                new Integer(value1), new Integer(value2)});
+//            throw new IllegalArgumentException(msg);
+//        }
+//    }
+//
+//    /**
+//     * Compares with object1.equals(object2).
+//     * 
+//     * @param object1 the first object
+//     * @param object2 the second object
+//     * @throws IllegalArgumentException if booleans are equal
+//     */
+//    public static final void isEqual(Object object1, Object object2) {
+//        isEqual(object1, object2, null);
+//    }
+//
+//    /**
+//     * Compares with object1.equals(object2).
+//     * 
+//     * @param object1 the first object
+//     * @param object2 the second object
+//     * @param message Exception message if check fails
+//     * @throws IllegalArgumentException if booleans are equal
+//     */
+//    public static final void isEqual(Object object1, Object object2, String message) {
+//        if (object1 == null) {
+//            if (object2 != null) {
+//                final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
+//                    object1, object2});
+//                throw new IllegalArgumentException(msg);
+//            }
+//            // else both are null
+//        } else {
+//            if (object2 == null) {
+//                final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
+//                    object1, object2});
+//                throw new IllegalArgumentException(msg);
+//            }
+//            // else both are not null
+//            if (!object1.equals(object2)) {
+//                final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
+//                    object1, object2});
+//                throw new IllegalArgumentException(msg);
+//            }
+//        }
+//    }
+//
 
     /**
-     * Check that the collection contains the value
-     * 
-     * @param collection Collection to check
-     * @param value Value to check for, may be null
-     * @throws IllegalArgumentException If collection is null or doesn't contain value
+     * Can't construct - utility class
      */
-    public static final void contains(Collection collection, Object value) {
-        contains(collection, value, null);
-    }
-
-    /**
-     * Check that the collection contains the value
-     * 
-     * @param collection Collection to check
-     * @param value Value to check for, may be null
-     * @param message Exception message if check fails
-     * @throws IllegalArgumentException If collection is null or doesn't contain value
-     */
-    public static final void contains(Collection collection, Object value, String message) {
-        isNotNull(collection);
-        if (!collection.contains(value)) {
-            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.contains);
-            throw new IllegalArgumentException(msg);
-        }
-    }
-
-    /**
-     * Check that two boolean values are equal
-     * 
-     * @param value1 the first boolean value
-     * @param value2 the second boolean value
-     * @throws IllegalArgumentException if booleans are not equal
-     */
-    public static final void isEqual(boolean value1, boolean value2) {
-        isEqual(value1, value2, null);
-    }
-
-    /**
-     * Check that two boolean values are equal
-     * 
-     * @param value1 the first boolean value
-     * @param value2 the second boolean value
-     * @param message Exception message if check fails
-     * @throws IllegalArgumentException if booleans are not equal
-     */
-    public static final void isEqual(boolean value1, boolean value2, String message) {
-        if (value1 != value2) {
-            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
-                new Boolean(value1), new Boolean(value2)});
-            throw new IllegalArgumentException(msg);
-        }
-    }
-
-    /**
-     * Checks if two booleans are NOT equal
-     * 
-     * @param value1 the first boolean value
-     * @param value2 the second boolean value
-     * @throws IllegalArgumentException if booleans are equal
-     */
-    public static final void isNotEqual(boolean value1, boolean value2) {
-        isNotEqual(value1, value2, null);
-    }
-
-    /**
-     * Checks if two booleans are NOT equal
-     * 
-     * @param value1 the first boolean value
-     * @param value2 the second boolean value
-     * @param message Exception message if check fails
-     * @throws IllegalArgumentException if booleans are equal
-     */
-    public static final void isNotEqual(boolean value1, boolean value2, String message) {
-        if (value1 == value2) {
-            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isNotEqual, new Object[] {
-                new Boolean(value1), new Boolean(value2)});
-            throw new IllegalArgumentException(msg);
-        }
-    }
-
-    /**
-     * Checks if two integer values are equal
-     * 
-     * @param value1 the first integer value
-     * @param value2 the second integer value
-     * @throws IllegalArgumentException if booleans are equal
-     */
-    public static final void isEqual(int value1, int value2) {
-        isEqual(value1, value2, null);
-    }
-
-    /**
-     * Checks if two integer values are equal
-     * 
-     * @param value1 the first integer value
-     * @param value2 the second integer value
-     * @param message Exception message if check fails
-     * @throws IllegalArgumentException if booleans are equal
-     */
-    public static final void isEqual(int value1, int value2, String message) {
-        if (value1 != value2) {
-            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
-                new Integer(value1), new Integer(value2)});
-            throw new IllegalArgumentException(msg);
-        }
-    }
-
-    /**
-     * Checks if two integer values are NOT equal
-     * 
-     * @param value1 the first integer value
-     * @param value2 the second integer value
-     * @throws IllegalArgumentException if booleans are equal
-     */
-    public static final void isNotEqual(int value1, int value2) {
-        isNotEqual(value1, value2, null);
-    }
-
-    /**
-     * Checks if two integer values are NOT equal
-     * 
-     * @param value1 the first integer value
-     * @param value2 the second integer value
-     * @param message Exception message if check fails
-     * @throws IllegalArgumentException if booleans are equal
-     */
-    public static final void isNotEqual(int value1, int value2, String message) {
-        if (value1 == value2) {
-            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isNotEqual, new Object[] {
-                new Integer(value1), new Integer(value2)});
-            throw new IllegalArgumentException(msg);
-        }
-    }
-
-    /**
-     * Compares with object1.equals(object2).
-     * 
-     * @param object1 the first object
-     * @param object2 the second object
-     * @throws IllegalArgumentException if booleans are equal
-     */
-    public static final void isEqual(Object object1, Object object2) {
-        isEqual(object1, object2, null);
-    }
-
-    /**
-     * Compares with object1.equals(object2).
-     * 
-     * @param object1 the first object
-     * @param object2 the second object
-     * @param message Exception message if check fails
-     * @throws IllegalArgumentException if booleans are equal
-     */
-    public static final void isEqual(Object object1, Object object2, String message) {
-        if (object1 == null) {
-            if (object2 != null) {
-                final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
-                    object1, object2});
-                throw new IllegalArgumentException(msg);
-            }
-            // else both are null
-        } else {
-            if (object2 == null) {
-                final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
-                    object1, object2});
-                throw new IllegalArgumentException(msg);
-            }
-            // else both are not null
-            if (!object1.equals(object2)) {
-                final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isEqual, new Object[] {
-                    object1, object2});
-                throw new IllegalArgumentException(msg);
-            }
-        }
+    private ArgCheck() {
     }
 
 }

@@ -29,9 +29,7 @@ import org.komodo.modeshape.teiid.sql.symbol.AggregateSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.WindowFunction;
 
-/**
- *
- */
+@SuppressWarnings( {"javadoc"} )
 public class Test8Factory extends AbstractTestFactory {
 
     /**

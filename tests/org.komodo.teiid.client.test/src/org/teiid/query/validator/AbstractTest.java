@@ -28,9 +28,7 @@ import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.unittest.RealMetadataFactory;
 
-/**
- *
- */
+@SuppressWarnings( {"javadoc"} )
 public abstract class AbstractTest {
 
     private final ITeiidVersion teiidVersion;

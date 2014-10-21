@@ -239,7 +239,7 @@ public class StringNameValidator {
         String msg = null;
         boolean isDoubleQuoted = false;
         
-        if( !StringUtil.isDoubleQuoted(name) ) {
+        if( !StringUtils.isDoubleQuoted(name) ) {
         	msg = isValidInitialChar(c);
         } else if( length > 1 ) {
         	isDoubleQuoted = true;
@@ -280,7 +280,7 @@ public class StringNameValidator {
 	
 	protected String isValidCharInDoubleQuotes(char c, int index) {
 		if ( !Character.isLetter(c)) {
-			if (c != StringUtil.Constants.DOT_CHAR && 
+			if (c != StringUtils.Constants.DOT_CHAR && 
 				!Character.isDigit(c) && 
 				!isValidNonLetterOrDigit(c) ) {
 			    final Object[] params = new Object[] {new Character(c), new Integer(index+1), getValidNonLetterOrDigitMessageSuffix()};

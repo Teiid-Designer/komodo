@@ -1496,7 +1496,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
             queryResolver.resolveCommand(command, metadata);
             fail("exception expected"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
-
+            // successful test
         }
     }
 

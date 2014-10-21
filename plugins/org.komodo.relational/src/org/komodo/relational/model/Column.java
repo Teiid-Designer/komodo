@@ -28,8 +28,8 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
 import org.komodo.relational.core.DataType;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.HashCodeUtil;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.HashCodeUtils;
+import org.komodo.utils.StringUtils;
 
 
 
@@ -643,16 +643,16 @@ public class Column extends RelationalObject {
         final Column other = (Column)object;
 
         // string properties
-        if (!StringUtil.valuesAreEqualIgnoreCase(getCharacterSetName(), other.getCharacterSetName()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getCollationName(), other.getCollationName()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getDatatypeName(), other.getDatatypeName()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getDefaultValue(), other.getDefaultValue()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getFormat(), other.getFormat()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getMaximumValue(), other.getMaximumValue()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getMinimumValue(), other.getMinimumValue()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getNativeType(), other.getNativeType()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getNullable(), other.getNullable()) ||
-        		!StringUtil.valuesAreEqualIgnoreCase(getSearchability(), other.getSearchability())  ) {
+        if (!StringUtils.valuesAreEqualIgnoreCase(getCharacterSetName(), other.getCharacterSetName()) ||
+        		!StringUtils.valuesAreEqualIgnoreCase(getCollationName(), other.getCollationName()) ||
+        		!StringUtils.valuesAreEqualIgnoreCase(getDatatypeName(), other.getDatatypeName()) ||
+        		!StringUtils.valuesAreEqualIgnoreCase(getDefaultValue(), other.getDefaultValue()) ||
+        		!StringUtils.valuesAreEqualIgnoreCase(getFormat(), other.getFormat()) ||
+        		!StringUtils.valuesAreEqualIgnoreCase(getMaximumValue(), other.getMaximumValue()) ||
+        		!StringUtils.valuesAreEqualIgnoreCase(getMinimumValue(), other.getMinimumValue()) ||
+        		!StringUtils.valuesAreEqualIgnoreCase(getNativeType(), other.getNativeType()) ||
+        		!StringUtils.valuesAreEqualIgnoreCase(getNullable(), other.getNullable()) ||
+        		!StringUtils.valuesAreEqualIgnoreCase(getSearchability(), other.getSearchability())  ) {
         	return false;
         }
         
@@ -686,51 +686,51 @@ public class Column extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!StringUtil.isEmpty(getCharacterSetName())) {
-            result = HashCodeUtil.hashCode(result, getCharacterSetName());
+        if (!StringUtils.isEmpty(getCharacterSetName())) {
+            result = HashCodeUtils.hashCode(result, getCharacterSetName());
         }
-        if (!StringUtil.isEmpty(getCollationName())) {
-            result = HashCodeUtil.hashCode(result, getCollationName());
+        if (!StringUtils.isEmpty(getCollationName())) {
+            result = HashCodeUtils.hashCode(result, getCollationName());
         }
-        if (!StringUtil.isEmpty(getDatatypeName())) {
-            result = HashCodeUtil.hashCode(result, getDatatypeName());
+        if (!StringUtils.isEmpty(getDatatypeName())) {
+            result = HashCodeUtils.hashCode(result, getDatatypeName());
         }
-        if (!StringUtil.isEmpty(getDefaultValue())) {
-            result = HashCodeUtil.hashCode(result, getDefaultValue());
+        if (!StringUtils.isEmpty(getDefaultValue())) {
+            result = HashCodeUtils.hashCode(result, getDefaultValue());
         }
-        if (!StringUtil.isEmpty(getFormat())) {
-            result = HashCodeUtil.hashCode(result, getFormat());
+        if (!StringUtils.isEmpty(getFormat())) {
+            result = HashCodeUtils.hashCode(result, getFormat());
         }
-        if (!StringUtil.isEmpty(getMaximumValue())) {
-            result = HashCodeUtil.hashCode(result, getMaximumValue());
+        if (!StringUtils.isEmpty(getMaximumValue())) {
+            result = HashCodeUtils.hashCode(result, getMaximumValue());
         }
-        if (!StringUtil.isEmpty(getMinimumValue())) {
-            result = HashCodeUtil.hashCode(result, getMinimumValue());
+        if (!StringUtils.isEmpty(getMinimumValue())) {
+            result = HashCodeUtils.hashCode(result, getMinimumValue());
         }
-        if (!StringUtil.isEmpty(getNativeType())) {
-            result = HashCodeUtil.hashCode(result, getNativeType());
+        if (!StringUtils.isEmpty(getNativeType())) {
+            result = HashCodeUtils.hashCode(result, getNativeType());
         }
-        if (!StringUtil.isEmpty(getNullable())) {
-            result = HashCodeUtil.hashCode(result, getNullable());
+        if (!StringUtils.isEmpty(getNullable())) {
+            result = HashCodeUtils.hashCode(result, getNullable());
         }
-        if (!StringUtil.isEmpty(getSearchability())) {
-            result = HashCodeUtil.hashCode(result, getSearchability());
+        if (!StringUtils.isEmpty(getSearchability())) {
+            result = HashCodeUtils.hashCode(result, getSearchability());
         }
         
-        result = HashCodeUtil.hashCode(result, getDistinctValueCount());
-        result = HashCodeUtil.hashCode(result, getLength());
-        result = HashCodeUtil.hashCode(result, getCharacterOctetLength());
-        result = HashCodeUtil.hashCode(result, getNullValueCount());
-        result = HashCodeUtil.hashCode(result, getPrecision());
-        result = HashCodeUtil.hashCode(result, getRadix());
-        result = HashCodeUtil.hashCode(result, getScale());
-        result = HashCodeUtil.hashCode(result, isAutoIncremented());
-        result = HashCodeUtil.hashCode(result, isCaseSensitive());
-        result = HashCodeUtil.hashCode(result, isCurrency());
-        result = HashCodeUtil.hashCode(result, isLengthFixed());
-        result = HashCodeUtil.hashCode(result, isSelectable());
-        result = HashCodeUtil.hashCode(result, isSigned());
-        result = HashCodeUtil.hashCode(result, isUpdateable());
+        result = HashCodeUtils.hashCode(result, getDistinctValueCount());
+        result = HashCodeUtils.hashCode(result, getLength());
+        result = HashCodeUtils.hashCode(result, getCharacterOctetLength());
+        result = HashCodeUtils.hashCode(result, getNullValueCount());
+        result = HashCodeUtils.hashCode(result, getPrecision());
+        result = HashCodeUtils.hashCode(result, getRadix());
+        result = HashCodeUtils.hashCode(result, getScale());
+        result = HashCodeUtils.hashCode(result, isAutoIncremented());
+        result = HashCodeUtils.hashCode(result, isCaseSensitive());
+        result = HashCodeUtils.hashCode(result, isCurrency());
+        result = HashCodeUtils.hashCode(result, isLengthFixed());
+        result = HashCodeUtils.hashCode(result, isSelectable());
+        result = HashCodeUtils.hashCode(result, isSigned());
+        result = HashCodeUtils.hashCode(result, isUpdateable());
 
         return result;
     }    

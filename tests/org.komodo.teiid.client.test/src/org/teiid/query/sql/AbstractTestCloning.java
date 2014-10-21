@@ -31,10 +31,7 @@ import org.teiid.query.sql.lang.Select;
 import org.teiid.query.sql.proc.Statement;
 import org.teiid.query.sql.symbol.Expression;
 
-/**
- *
- */
-@SuppressWarnings( {"nls"} )
+@SuppressWarnings( {"nls", "javadoc"} )
 public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
 
     /**

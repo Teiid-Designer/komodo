@@ -28,7 +28,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 /**
  *
  */
-@SuppressWarnings( {"nls"} )
+@SuppressWarnings( {"nls", "javadoc"} )
 public class AbstractTeiidVersionTest {
 
     private final ITeiidVersion teiidVersion;

@@ -28,8 +28,8 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
 import org.komodo.relational.core.DataType;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.HashCodeUtil;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.HashCodeUtils;
+import org.komodo.utils.StringUtils;
 
 
 
@@ -325,11 +325,11 @@ public class Parameter extends RelationalObject {
         final Parameter other = (Parameter)object;
 
         // string properties
-        if (!StringUtil.valuesAreEqual(getDatatypeName(), other.getDatatypeName()) ||
-        		!StringUtil.valuesAreEqual(getDefaultValue(), other.getDefaultValue()) ||
-        		!StringUtil.valuesAreEqual(getDirection(), other.getDirection()) ||
-        		!StringUtil.valuesAreEqual(getNativeType(), other.getNativeType()) ||
-        		!StringUtil.valuesAreEqual(getNullable(), other.getNullable()) ) {
+        if (!StringUtils.valuesAreEqual(getDatatypeName(), other.getDatatypeName()) ||
+        		!StringUtils.valuesAreEqual(getDefaultValue(), other.getDefaultValue()) ||
+        		!StringUtils.valuesAreEqual(getDirection(), other.getDirection()) ||
+        		!StringUtils.valuesAreEqual(getNativeType(), other.getNativeType()) ||
+        		!StringUtils.valuesAreEqual(getNullable(), other.getNullable()) ) {
         	return false;
         }
         
@@ -353,26 +353,26 @@ public class Parameter extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!StringUtil.isEmpty(getDatatypeName())) {
-            result = HashCodeUtil.hashCode(result, getDatatype());
+        if (!StringUtils.isEmpty(getDatatypeName())) {
+            result = HashCodeUtils.hashCode(result, getDatatype());
         }
-        if (!StringUtil.isEmpty(getDefaultValue())) {
-            result = HashCodeUtil.hashCode(result, getDefaultValue());
+        if (!StringUtils.isEmpty(getDefaultValue())) {
+            result = HashCodeUtils.hashCode(result, getDefaultValue());
         }
-        if (!StringUtil.isEmpty(getDirection())) {
-            result = HashCodeUtil.hashCode(result, getDirection());
+        if (!StringUtils.isEmpty(getDirection())) {
+            result = HashCodeUtils.hashCode(result, getDirection());
         }
-        if (!StringUtil.isEmpty(getNativeType())) {
-            result = HashCodeUtil.hashCode(result, getNativeType());
+        if (!StringUtils.isEmpty(getNativeType())) {
+            result = HashCodeUtils.hashCode(result, getNativeType());
         }
-        if (!StringUtil.isEmpty(getNullable())) {
-            result = HashCodeUtil.hashCode(result, getNullable());
+        if (!StringUtils.isEmpty(getNullable())) {
+            result = HashCodeUtils.hashCode(result, getNullable());
         }
 
-        result = HashCodeUtil.hashCode(result, getLength());
-        result = HashCodeUtil.hashCode(result, getPrecision());
-        result = HashCodeUtil.hashCode(result, getRadix());
-        result = HashCodeUtil.hashCode(result, getScale());
+        result = HashCodeUtils.hashCode(result, getLength());
+        result = HashCodeUtils.hashCode(result, getPrecision());
+        result = HashCodeUtils.hashCode(result, getRadix());
+        result = HashCodeUtils.hashCode(result, getScale());
 
         return result;
     }    

@@ -91,7 +91,7 @@ import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator.Operator;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryCompareCriteria.PredicateQuantifier;
 import org.komodo.modeshape.teiid.sql.proc.*;
 import org.komodo.modeshape.teiid.sql.symbol.*;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.StringUtils;
 
 /** 
  * <p>The SQLParser is a JavaCC-generated parser that reads a SQL string and produces a 
@@ -5937,7 +5937,7 @@ ParsedDataType parseDataType() :
 
 	{
 		if (arraySuffixes > 0 && type != null) {
-			type.setType(type.getType() + StringUtil.join(Collections.nCopies(arraySuffixes, "[]"), ""));
+			type.setType(type.getType() + StringUtils.join(Collections.nCopies(arraySuffixes, "[]"), ""));
 		}
 		return type;
 	}
@@ -6016,11 +6016,11 @@ Constant nonNumericLiteral() :
 				<ESCAPEDTYPE>
 				{
 					String image = getToken(0).image; 
-					if (StringUtil.endsWithIgnoreCase(image, "b")) {
+					if (StringUtils.endsWithIgnoreCase(image, "b")) {
 						escapeType = DataTypeName.BOOLEAN;
-					} else if (StringUtil.endsWithIgnoreCase(image, "ts")) {
+					} else if (StringUtils.endsWithIgnoreCase(image, "ts")) {
 						escapeType = DataTypeName.TIMESTAMP;
-					} else if (StringUtil.endsWithIgnoreCase(image, "d")) {
+					} else if (StringUtils.endsWithIgnoreCase(image, "d")) {
 						escapeType = DataTypeName.DATE;
 					} else {
 						escapeType = DataTypeName.TIME;

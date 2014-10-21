@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.komodo.utils.HashCodeUtil;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.HashCodeUtils;
+import org.komodo.utils.StringUtils;
 
 /**
  * 
@@ -297,7 +297,7 @@ public class Index extends RelationalObject {
 
         
         // string properties
-        if (!StringUtil.valuesAreEqual(getFilterCondition(), other.getFilterCondition()) ) {
+        if (!StringUtils.valuesAreEqual(getFilterCondition(), other.getFilterCondition()) ) {
             return false;
         }
         
@@ -339,21 +339,21 @@ public class Index extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!StringUtil.isEmpty(getFilterCondition())) {
-            result = HashCodeUtil.hashCode(result, getFilterCondition());
+        if (!StringUtils.isEmpty(getFilterCondition())) {
+            result = HashCodeUtils.hashCode(result, getFilterCondition());
         }
         
-        result = HashCodeUtil.hashCode(result, isAutoUpdate());
-        result = HashCodeUtil.hashCode(result, isNullable());
-        result = HashCodeUtil.hashCode(result, isUnique());
+        result = HashCodeUtils.hashCode(result, isAutoUpdate());
+        result = HashCodeUtils.hashCode(result, isNullable());
+        result = HashCodeUtils.hashCode(result, isUnique());
        
         if(relationalTable!=null) {
-            result = HashCodeUtil.hashCode(result, relationalTable);
+            result = HashCodeUtils.hashCode(result, relationalTable);
         }
 
         List<Column> cols = getColumns();
         for(Column col: cols) {
-            result = HashCodeUtil.hashCode(result, col);
+            result = HashCodeUtils.hashCode(result, col);
         }
         
         return result;
