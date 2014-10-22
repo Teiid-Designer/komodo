@@ -14,8 +14,15 @@
 	<packaging>pom</packaging>
 
 	<build>
+		<!--
+				Commented out as no longer required since we can build
+				directly from JBT-IS using the target-platform config
+				specified in our parent pom. The komodo.target
+				will remain to serve as a platform easily available to
+				developers loading the TP into an eclipse IDE.
+		-->
 		<plugins>
-			<!-- Attach the komodo target to the configuration -->
+			<!--
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -39,6 +46,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			-->
 		</plugins>
 	</build>
 
@@ -62,14 +70,14 @@
 								<configuration>
 									<artifactItems>
 										<artifactItem>
-											<groupId>org.jboss.tools.integration-stack</groupId>
-											<artifactId>target-platform</artifactId>
-											<version>4.2.0.Alpha8</version>
-											<classifier>base</classifier>
-											<type>target</type>
+											<groupId>${k.tpc.groupId}</groupId>
+											<artifactId>${k.tpc.artifactId}</artifactId>
+											<version>${k.tpc.version}</version>
+											<type>${k.tpc.type}</type>
+											<classifier>${k.tpc.classifier}</classifier>
 											<overWrite>true</overWrite>
 											<outputDirectory>${basedir}</outputDirectory>
-											<destFileName>komodo.target</destFileName>
+											<destFileName>komodo-${k.tpc.version}.target</destFileName>
 										</artifactItem>
 									</artifactItems>
 								</configuration>
@@ -89,7 +97,7 @@
 								</goals>
 								<configuration>
 									<targetFiles>
-										<param>komodo.target</param>
+										<param>komodo-${k.tpc.version}.target</param>
 									</targetFiles>
 									<failOnError>true</failOnError>
 								</configuration>

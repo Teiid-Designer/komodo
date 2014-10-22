@@ -191,6 +191,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
+            // ignore
         }   
                       
         // Refresh VDBs list
@@ -715,11 +716,8 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
         refreshVDBs();
 
-        if (vdb == null) {
-
-        } else {
+        if (vdb != null)
             this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
-        }
     }
     
     @Override
@@ -732,11 +730,8 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
         refreshVDBs();
 
-        if (vdb == null) {
-
-        } else {
+        if (vdb != null)
             this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
-        }
     }
 
     /**
@@ -751,11 +746,8 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
         refreshVDBs();
 
-        if (vdb == null) {
-
-        } else {
+        if (vdb != null)
             this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
-        }
     }
     
     /**

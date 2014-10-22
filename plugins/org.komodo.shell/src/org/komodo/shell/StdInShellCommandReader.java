@@ -91,6 +91,7 @@ public class StdInShellCommandReader extends AbstractShellCommandReader {
 	 */
 	@Override
 	public void close() throws IOException {
+	    // Nothing to do
 	}
 
 	/**

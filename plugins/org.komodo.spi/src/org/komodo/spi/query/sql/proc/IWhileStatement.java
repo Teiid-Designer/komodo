@@ -27,5 +27,5 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
  *
  */
 public interface IWhileStatement<LV extends ILanguageVisitor> extends IStatement<LV> {
-
+    // No methods required
 }

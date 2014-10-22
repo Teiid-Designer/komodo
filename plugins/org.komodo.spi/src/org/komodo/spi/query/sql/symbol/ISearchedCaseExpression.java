@@ -29,5 +29,5 @@ import org.komodo.spi.query.sql.lang.IExpression;
  */
 public interface ISearchedCaseExpression<LV extends ILanguageVisitor>
     extends IExpression<LV> {
-
+    // No methods required
 }

@@ -28,5 +28,5 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
  */
 public interface IWithQueryCommand <LV extends ILanguageVisitor, C extends ICommand>
     extends ILanguageObject<LV>, ISubqueryContainer<C> {
-
+    // No methods required
 }

@@ -28,5 +28,5 @@ import org.komodo.spi.query.sql.lang.ILanguageObject;
  *
  */
 public interface IXMLNamespaces <LV extends ILanguageVisitor> extends ILanguageObject<LV> {
-
+    // No methods required
 }

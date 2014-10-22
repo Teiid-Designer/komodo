@@ -30,5 +30,5 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
  */
 @Since(Version.TEIID_8_0)
 public interface IObjectTable<LV extends ILanguageVisitor> extends ITableFunctionReference<LV>{
-
+    // No methods required
 }

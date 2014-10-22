@@ -29,5 +29,5 @@ import org.komodo.spi.query.sql.lang.IExpression;
  */
 public interface IRaiseStatement<LV extends ILanguageVisitor, E extends IExpression>
     extends IStatement<LV>, IExpressionStatement<E> {
-
+    // No methods required
 }
