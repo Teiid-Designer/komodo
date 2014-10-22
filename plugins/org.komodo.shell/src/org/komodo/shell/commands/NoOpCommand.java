@@ -41,6 +41,7 @@ public class NoOpCommand extends AbstractShellCommand {
 	 */
 	@Override
 	public void printUsage(int indent) {
+	    // Nothing to do
 	}
 
 	/**
@@ -48,6 +49,7 @@ public class NoOpCommand extends AbstractShellCommand {
 	 */
 	@Override
 	public void printHelp(int indent) {
+	    // Nothing to do
 	}
 
 	/**
@@ -63,6 +65,7 @@ public class NoOpCommand extends AbstractShellCommand {
 	 */
 	@Override
 	public void recordCommand(Arguments args) {
+	    // Nothing to do
 	}
 
 	/* (non-Javadoc)
@@ -70,6 +73,7 @@ public class NoOpCommand extends AbstractShellCommand {
 	 */
 	@Override
 	public void recordComment(String comment) {
+	    // Nothing to do
 	}
 
 }

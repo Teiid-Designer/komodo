@@ -27,5 +27,5 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
  *
  */
 public interface ITableFunctionReference<LV extends ILanguageVisitor> extends IFromClause<LV> {
-
+    // No methods required
 }

@@ -20,13 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
-
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 
@@ -63,6 +62,7 @@ public class HelpCommand extends BuiltInShellCommand {
 	 */
 	@Override
 	public void printUsage(int indent) {
+	    // Nothing to do
 	}
 
 	/**
@@ -72,6 +72,7 @@ public class HelpCommand extends BuiltInShellCommand {
 	 */
 	@Override
 	public void printHelp(int indent) {
+	    // Nothing to do
 	}
 
 	/**

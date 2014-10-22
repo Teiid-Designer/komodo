@@ -526,7 +526,9 @@ public abstract class TeiidSQLConstants {
                 if (!result.add((String)field.get(null))) {
                     throw new AssertionError("Duplicate value for " + field.getName());
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                // Exception should not be thrown
+            }
         }
         return Collections.unmodifiableSet(result);
     }

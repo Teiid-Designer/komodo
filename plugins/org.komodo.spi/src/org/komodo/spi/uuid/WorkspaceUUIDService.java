@@ -52,8 +52,9 @@ public class WorkspaceUUIDService {
     }
 
     /**
-     * File where 
-     * @param file
+     * Set the restore location
+     *
+     * @param file location for restoration
      */
     public void setRestoreLocation(File file) {
         restoreFile = file;
@@ -73,11 +74,13 @@ public class WorkspaceUUIDService {
                     reader = new BufferedReader(new FileReader(restoreFile));
                     workspaceUuid = UUID.fromString(reader.readLine());
                 } catch (final IOException error) {
+                    // ignored
                 } finally {
                     try {
                         if (reader != null)
                             reader.close();
                     } catch (final IOException ignored) {
+                        // ignored
                     }
                 }
             }
@@ -104,11 +107,13 @@ public class WorkspaceUUIDService {
             writer.write(workspaceUuid.toString());
         } 
         catch (Exception ex) {
+            // ignored
         }
         finally {
             try {
                 writer.close();
             } catch (final IOException ignored) {
+                // ignored
             }
         }
     }

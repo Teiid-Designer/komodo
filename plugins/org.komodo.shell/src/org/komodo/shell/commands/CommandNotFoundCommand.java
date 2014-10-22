@@ -41,31 +41,35 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
 	}
 
 	/**
-	 * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-	 */
-	@Override
-	public void printUsage(int indent) {
-	}
+     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
+     */
+    @Override
+    public void printUsage(int indent) {
+        // Nothing to do
+    }
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-	 */
-	@Override
-	public void printHelp(int indent) {
-	}
-	
+    /**
+     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
+     */
+    @Override
+    public void printHelp(int indent) {
+        // Nothing to do
+    }
+
     /**
      * @see org.komodo.shell.api.ShellCommand#recordCommand(Arguments)
      */
     @Override
     public void recordCommand(Arguments args) {
+        // Nothing to do
     }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#recordComment(String)
      */
     @Override
     public void recordComment(String str) {
+        // Nothing to do
     }
 
 	/**

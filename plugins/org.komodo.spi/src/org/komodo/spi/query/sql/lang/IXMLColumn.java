@@ -27,5 +27,5 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
  *
  */
 public interface IXMLColumn<LV extends ILanguageVisitor> extends IProjectedColumn<LV> {
-
+    // No methods required
 }

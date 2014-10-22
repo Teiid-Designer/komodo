@@ -1287,6 +1287,7 @@ public class BNF  extends AbstractBNF {
 				append(bnf, having(0));
 				break;
 			case BNF.having:
+				// No completions required
 				break;
 		}
 
@@ -2117,6 +2118,7 @@ public class BNF  extends AbstractBNF {
 				append(bnf, expression(0));
 				break;
 			case BNF.expression:
+				// No completions required
 				break;
 		}
 
@@ -2487,6 +2489,7 @@ public class BNF  extends AbstractBNF {
 				append(bnf, commonValueExpression(0));
 				break;
 			case BNF.ESCAPE:
+				// No completions required
 				break;
 			case BNF.LBRACE:
 				append(bnf, "ESCAPE");
@@ -2637,6 +2640,7 @@ public class BNF  extends AbstractBNF {
 				append(bnf, expressionList(0));
 				break;
 			case BNF.RPAREN:
+				// No completions required
 				break;
 		}
 
@@ -2655,6 +2659,7 @@ public class BNF  extends AbstractBNF {
 				append(bnf, criteria(0));
 				break;
 			case BNF.criteria:
+				// No completions required
 				break;
 		}
 
@@ -3004,6 +3009,7 @@ public class BNF  extends AbstractBNF {
 				append(bnf, windowSpecification(0));
 				break;
 			case BNF.windowSpecification:
+				// No completions required
 				break;
 		}
 
@@ -3050,21 +3056,28 @@ public class BNF  extends AbstractBNF {
 				append(bnf, caseExpression(0));
 				break;
 			case BNF.parameterReference:
+				// No completions required
 				break;
 			case BNF.ESCAPEDFUNCTION:
 				append(bnf, function(0));
 				break;
 			case BNF.unescapedFunction:
+				// No completions required
 				break;
 			case BNF.ID:
+				// No completions required
 				break;
 			case BNF.subquery:
+				// No completions required
 				break;
 			case BNF.nestedExpression:
+				// No completions required
 				break;
 			case BNF.searchedCaseExpression:
+				// No completions required
 				break;
 			case BNF.caseExpression:
+				// No completions required
 				break;
 			case BNF.function:
 				append(bnf, "}");
@@ -3217,6 +3230,7 @@ public class BNF  extends AbstractBNF {
 		} else if (index == BNF.TIMESTAMPDIFF) {
 			append(bnf, "(");
 		} else if (index == BNF.queryString) {
+			// No completions required
 		} else if (index == BNF.LEFT) {
 			append(bnf, "(");
 		} else if (index == BNF.RIGHT) {
@@ -3244,12 +3258,17 @@ public class BNF  extends AbstractBNF {
 		} else if (index == BNF.INSERT) {
 			append(bnf, "(");
 		} else if (index == BNF.xmlParse) {
+			// No completions required
 		} else if (index == BNF.xmlElement) {
+			// No completions required
 		} else if (index == BNF.XMLPI) {
 			append(bnf, "(");
 		} else if (index == BNF.jsonObject) {
+			// No completions required
 		} else if (index == BNF.xmlSerialize) {
+			// No completions required
 		} else if (index == BNF.xmlQuery) {
+			// No completions required
 		} else if (index == BNF.id) {
 			append(bnf, "(");
 		} else if (index == concat(BNF.CONVERT,BNF.LPAREN)) {
@@ -3644,7 +3663,9 @@ public class BNF  extends AbstractBNF {
 		} else if (index == BNF.AS) {
 			append(bnf, id(0));
 		} else if (index == concat(BNF.DEFAULT_KEYWORD,BNF.stringVal)) {
+			// No completions required
 		} else if (index == BNF.id) {
+			// No completions required
 		}
 
 		return array(bnf);
@@ -3785,6 +3806,7 @@ public class BNF  extends AbstractBNF {
 			append(bnf, "NULL");
 			append(bnf, "{ (D | T | TS | B )");
 		} else if (index == BNF.stringVal) {
+			// No completions required
 		} else if (index == BNF.ESCAPEDTYPE) {
 			append(bnf, stringVal(0));
 		} else if (index == concat(BNF.ESCAPEDTYPE,BNF.stringVal)) {

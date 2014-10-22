@@ -25,5 +25,5 @@ package org.komodo.spi.xml;
  *
  */
 public interface IMappingCommentNode extends IMappingNode {
-
+    // No methods required
 }

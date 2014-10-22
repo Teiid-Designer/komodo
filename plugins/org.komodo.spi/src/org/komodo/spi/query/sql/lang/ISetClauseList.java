@@ -27,5 +27,5 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
  *
  */
 public interface ISetClauseList <LV extends ILanguageVisitor> extends ILanguageObject<LV> {
-
+    // No methods required
 }

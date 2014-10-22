@@ -698,11 +698,24 @@ public class TeiidBNFGenerator implements GeneratorConstants {
             CaseStatement caseStmt = createCaseStatement(ppFunction, method);
 
             Collection<TokenClause> nextTokenClauses = nextTokenClauses(currClause);
+            
+
+            if (nextTokenClauses.isEmpty() && caseStmt != null) {
+                StringBuffer commentBuffer = new StringBuffer();
+                if (method.requiresSwitch())
+                    commentBuffer.append(TAB + TAB + TAB + TAB);
+                else
+                    commentBuffer.append(TAB + TAB + TAB);
+
+                commentBuffer.append("// No completions required" + NEW_LINE);
+                caseStmt.addStatement(commentBuffer.toString());
+            }
+                
             for (TokenClause nextTokenClause : nextTokenClauses) {
 
                 if (caseStmt != null) {
-                    StringBuffer appendStmt = new StringBuffer();
                     // append(bnf, nextClause.value)
+                    StringBuffer appendStmt = new StringBuffer();
                     if (method.requiresSwitch())
                         appendStmt.append(TAB + TAB + TAB + TAB);
                     else
