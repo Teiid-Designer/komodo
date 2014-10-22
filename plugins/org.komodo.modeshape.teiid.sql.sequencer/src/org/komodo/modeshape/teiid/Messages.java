@@ -1159,8 +1159,8 @@ public class Messages {
      * prepended to the message in the same way as the
      * teiid client.
      *
-     * @param key
-     * @param parameters
+     * @param key TEIID enum value
+     * @param parameters arguemnts to message
      *
      * @return error message associated with key
      */
@@ -1200,8 +1200,8 @@ public class Messages {
     /**
      * Get message string with parameters
      *
-     * @param key
-     * @param parameters
+     * @param key enum value
+     * @param parameters arguemnts to message
      *
      * @return i18n string
      */

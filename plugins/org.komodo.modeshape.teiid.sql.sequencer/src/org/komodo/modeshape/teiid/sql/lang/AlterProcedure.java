@@ -34,8 +34,8 @@ import org.komodo.spi.query.sql.lang.IAlterProcedure;
 public class AlterProcedure extends Alter<CreateProcedureCommand> implements IAlterProcedure<Expression, LanguageVisitor> {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public AlterProcedure(ITeiidParser p, int id) {
         super(p, id);

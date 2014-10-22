@@ -24,14 +24,21 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IDelete;
 
+/**
+ * Delete node for 'delete' keyword
+ */
 public class Delete extends ProcedureContainer implements TargetedCommand, IDelete<Criteria, GroupSymbol, Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public Delete(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_DELETE);

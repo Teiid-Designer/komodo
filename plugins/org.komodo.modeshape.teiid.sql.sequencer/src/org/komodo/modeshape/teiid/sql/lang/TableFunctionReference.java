@@ -37,8 +37,8 @@ import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 public abstract class TableFunctionReference extends FromClause implements ITableFunctionReference<LanguageVisitor> {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public TableFunctionReference(ITeiidParser p, int id) {
         super(p, id);

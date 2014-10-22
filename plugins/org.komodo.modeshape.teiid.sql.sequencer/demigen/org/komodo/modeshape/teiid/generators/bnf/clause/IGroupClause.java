@@ -26,8 +26,14 @@ package org.komodo.modeshape.teiid.generators.bnf.clause;
  */
 public interface IGroupClause extends IClause {
 
+    /**
+     * @return this group clause is open
+     */
     boolean isOpen();
 
+    /**
+     * @return this group clause is closed
+     */
     boolean isClosed();
 
     /**
@@ -37,6 +43,7 @@ public interface IGroupClause extends IClause {
 
     /**
      * close the group clause
+     * @param clauseClass
      */
     void closeClause(Class<? extends IClause> clauseClass);
 

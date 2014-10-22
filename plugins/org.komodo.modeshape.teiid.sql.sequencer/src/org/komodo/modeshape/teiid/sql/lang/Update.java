@@ -30,9 +30,16 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IUpdate;
 
+/**
+ *
+ */
 public class Update extends ProcedureContainer
     implements TargetedCommand, IUpdate<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public Update(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_UPDATE);

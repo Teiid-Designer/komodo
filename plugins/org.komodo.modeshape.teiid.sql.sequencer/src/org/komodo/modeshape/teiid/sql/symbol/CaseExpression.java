@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.ICaseExpression;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
+/**
+ *
+ */
 public class CaseExpression extends ASTNode implements Expression, ICaseExpression<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public CaseExpression(ITeiidParser p, int id) {
         super(p, id);
     }

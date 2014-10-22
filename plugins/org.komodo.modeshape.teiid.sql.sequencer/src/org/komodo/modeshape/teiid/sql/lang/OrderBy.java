@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IOrderBy;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class OrderBy extends ASTNode implements IOrderBy<Expression, OrderByItem, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public OrderBy(ITeiidParser p, int id) {
         super(p, id);
     }

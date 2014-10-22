@@ -31,8 +31,15 @@ import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.NamespaceItem;
 import org.komodo.spi.query.sql.symbol.IXMLNamespaces;
 
+/**
+ *
+ */
 public class XMLNamespaces extends ASTNode implements IXMLNamespaces<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public XMLNamespaces(ITeiidParser p, int id) {
         super(p, id);
     }

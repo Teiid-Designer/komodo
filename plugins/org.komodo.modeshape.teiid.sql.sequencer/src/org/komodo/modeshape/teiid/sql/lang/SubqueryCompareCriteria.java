@@ -30,6 +30,9 @@ import org.komodo.modeshape.teiid.sql.symbol.ScalarSubquery;
 import org.komodo.spi.query.sql.lang.ISubqueryCompareCriteria;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class SubqueryCompareCriteria extends AbstractCompareCriteria implements SubqueryContainer<QueryCommand>, ISubqueryCompareCriteria<LanguageVisitor, QueryCommand> {
 
     /**

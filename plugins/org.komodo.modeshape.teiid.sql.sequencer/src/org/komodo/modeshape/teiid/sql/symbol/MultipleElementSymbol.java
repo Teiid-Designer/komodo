@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IMultipleElementSymbol;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class MultipleElementSymbol extends ASTNode implements Expression, IMultipleElementSymbol<ElementSymbol, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public MultipleElementSymbol(ITeiidParser p, int id) {
         super(p, id);
     }

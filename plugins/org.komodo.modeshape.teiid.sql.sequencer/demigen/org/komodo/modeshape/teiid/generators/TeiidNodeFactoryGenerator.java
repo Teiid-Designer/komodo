@@ -72,7 +72,9 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
     private final BufferedWriter factoryWriter;
 
     /**
-     * @throws Exception
+     * Create new instance
+     *
+     * @throws Exception if generator fails
      */
     public TeiidNodeFactoryGenerator() throws Exception {
         File factoryFile = new File(FACTORY_DIR, FACTORY_FILENAME);
@@ -123,7 +125,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         StringBuffer buf = new StringBuffer();
 
         buf.append("/**" + NEW_LINE)
-            .append(" *" + NEW_LINE)
+            .append(" * Factory used to generate parser nodes" + NEW_LINE)
             .append(" */" + NEW_LINE)
             .append(PUBLIC + SPACE + CLASS + SPACE + "TeiidNodeFactory" + SPACE + OPEN_BRACE + NEW_LINE)
             .append(NEW_LINE);
@@ -133,7 +135,11 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
              .append(NEW_LINE);
 
         // static getInstance method
-        buf.append(NEW_LINE)
+        buf.append(TAB + "/**" + NEW_LINE)
+             .append(TAB + " * @return Singleton instance of this factory" + NEW_LINE)
+             .append(TAB + " *" + NEW_LINE)
+             .append(TAB + " * @generated" + NEW_LINE)
+             .append(TAB +" */" + NEW_LINE)
              .append(TAB + PUBLIC + SPACE + STATIC + SPACE + "TeiidNodeFactory getInstance() " + OPEN_BRACE + NEW_LINE)
              .append(TAB + TAB + "if (instance == null) instance = new TeiidNodeFactory();" + NEW_LINE)
              .append(TAB + TAB + "return instance;" + NEW_LINE)
@@ -143,10 +149,12 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         buf.append(TAB + "/**" + NEW_LINE)
              .append(TAB + " * Method used by the generated parsers for constructing nodes" + NEW_LINE)
              .append(TAB + " *" + NEW_LINE)
-             .append(TAB + " * @param teiidParser" + NEW_LINE)
-             .append(TAB + " * @param nodeType" + NEW_LINE)
+             .append(TAB + " * @param teiidParser parent parser" + NEW_LINE)
+             .append(TAB + " * @param nodeType type of node" + NEW_LINE)
              .append(TAB + " *" + NEW_LINE)
              .append(TAB + " * @return created language object" + NEW_LINE)
+             .append(TAB + " *" + NEW_LINE)
+             .append(TAB + " * @generated" + NEW_LINE)
              .append(TAB + " */" + NEW_LINE)
              .append(TAB + "public static LanguageObject jjtCreate(ITeiidParser teiidParser, int nodeType) " + OPEN_BRACE + NEW_LINE)
              .append(TAB + TAB + "return getInstance().create(teiidParser, nodeType);" + NEW_LINE)
@@ -156,10 +164,12 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         buf.append(TAB + "/**" + NEW_LINE)
             .append(TAB + " * Create a parser node for the node with the given common node name" + NEW_LINE)
             .append(TAB + " *" + NEW_LINE)
-            .append(TAB + " * @param teiidParser" + NEW_LINE)
-            .append(TAB + " * @param nodeType" + NEW_LINE)
+            .append(TAB + " * @param teiidParser parent parser" + NEW_LINE)
+            .append(TAB + " * @param nodeType type of node" + NEW_LINE)
             .append(TAB + " *" + NEW_LINE)
             .append(TAB + " * @return node applicable to the given parser" + NEW_LINE)
+            .append(TAB + " *" + NEW_LINE)
+            .append(TAB + " * @generated" + NEW_LINE)
             .append(TAB + " */" + NEW_LINE)
             .append(TAB + "public <T extends LanguageObject> T create(ITeiidParser teiidParser, ASTNodes nodeType) " + OPEN_BRACE + NEW_LINE)
             .append(NEW_LINE)
@@ -407,8 +417,8 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
      * Execute to auto-generate the factory methods based on the
      * TeiidnTreeParserConstants interfaces.
      *
-     * @param args
-     * @throws Exception
+     * @param args (not required)
+     * @throws Exception if generator fails
      */
     public static void main(String[] args) throws Exception {
         TeiidNodeFactoryGenerator factory = new TeiidNodeFactoryGenerator();

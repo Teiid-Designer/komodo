@@ -42,7 +42,8 @@ public class TokenClause implements IClause {
     private String minVersion;
 
     /**
-     * @param identifier
+     * @param identifier the keyword of this token
+     * @param isFunction true if this is a function, false if a literal
      */
     public TokenClause(String identifier, boolean isFunction) {
         this.identifier = identifier;
@@ -79,7 +80,7 @@ public class TokenClause implements IClause {
     }
 
     /**
-     * @param value
+     * @param value to set
      */
     public void setValue(String value) {
         this.value = value;
@@ -93,7 +94,7 @@ public class TokenClause implements IClause {
     }
 
     /**
-     * @param ppFunction
+     * @param ppFunction to set
      */
     public void setPPFunction(String ppFunction) {
         this.ppFunction = ppFunction;
@@ -117,6 +118,9 @@ public class TokenClause implements IClause {
         return Collections.singletonList(this);
     }
 
+    /**
+     * @return version statement if minVersion is set or empty string otherwise
+     */
     public String getVersionStatement() {
         if (minVersion == null)
             return EMPTY_STRING;
@@ -124,6 +128,9 @@ public class TokenClause implements IClause {
         return "if (versionAtLeast(" + minVersion +"))"; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
+    /**
+     * @return the append statement for this token clause
+     */
     public String getAppendStatement() {
         //
         // append(bnf, NonReserved.INSTEAD);
@@ -193,7 +200,7 @@ public class TokenClause implements IClause {
     }
 
     /**
-     * @param version
+     * @param version minimum version of this token
      */
     public void setMinimumVersion(String version) {
         this.minVersion = version;

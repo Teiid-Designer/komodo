@@ -29,9 +29,16 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class SubquerySetCriteria extends AbstractSetCriteria
     implements SubqueryContainer<QueryCommand>, ISubquerySetCriteria<Expression, LanguageVisitor, QueryCommand>{
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public SubquerySetCriteria(ITeiidParser p, int id) {
         super(p, id);
 

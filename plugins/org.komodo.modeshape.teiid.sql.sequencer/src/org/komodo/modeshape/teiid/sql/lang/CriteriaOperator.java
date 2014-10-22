@@ -88,7 +88,7 @@ public interface CriteriaOperator {
         }
 
         /**
-         * @param other
+         * @param other value to test against
          *
          * @return this operator's index is less than other's
          */
@@ -97,7 +97,7 @@ public interface CriteriaOperator {
         }
 
         /**
-         * @param other
+         * @param other value to test against
          *
          * @return this operator's index is greater than other's
          */
@@ -106,7 +106,7 @@ public interface CriteriaOperator {
         }
 
         /**
-         * @param index
+         * @param index value
          * @return {@link Operator} with the given quantifier index
          */
         public static Operator findOperator(int index) {
@@ -120,7 +120,7 @@ public interface CriteriaOperator {
 
         /**
          * @param version of the parser
-         * @param symbol
+         * @param symbol value
          *
          * @return the {@link Operator} for the given string representation
          */
@@ -148,7 +148,7 @@ public interface CriteriaOperator {
         }
 
         /**
-         * @param name
+         * @param name value
          * @return Operator for given name
          */
         public static Operator findOperator(String name) {

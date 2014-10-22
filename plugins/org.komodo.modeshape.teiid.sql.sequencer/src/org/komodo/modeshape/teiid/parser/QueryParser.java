@@ -57,7 +57,7 @@ public class QueryParser implements IQueryParser, StringConstants {
 	/**
 	 * Construct a QueryParser - this may be reused.
 	 *
-	 * @param teiidVersion
+	 * @param teiidVersion version of teiid
 	 */
 	public QueryParser(ITeiidVersion teiidVersion) {
 	    this.teiidVersion = teiidVersion;
@@ -91,7 +91,7 @@ public class QueryParser implements IQueryParser, StringConstants {
     }
 
     /**
-     * @param sql
+     * @param sql text to pass to the parser
      * @return the {@link ITeiidParser} initialised with the given sql
      */
     public ITeiidParser getTeiidParser(String sql) {
@@ -111,10 +111,10 @@ public class QueryParser implements IQueryParser, StringConstants {
 	 * Parses the given procedure sql string, returning the object
 	 * representation
 	 *
-	 * @param sql
-	 * @param update
+	 * @param sql text to pass to the parser
+	 * @param update if true then assumes an update procedure
 	 * @return command of sql
-	 * @throws Exception
+	 * @throws Exception if failure to parse correctly
 	 */
 	@Since(Version.TEIID_8_0)
 	public Command parseProcedure(String sql, boolean update) throws Exception {
@@ -149,7 +149,7 @@ public class QueryParser implements IQueryParser, StringConstants {
      * representation.
      *
      * @param sql SQL string instead of string litral
-	 * @param parseInfo
+	 * @param parseInfo parsing attribute model
      * @return SQL object representation
      * @throws Exception if parsing fails
      * @throws IllegalArgumentException if sql is null
@@ -162,7 +162,7 @@ public class QueryParser implements IQueryParser, StringConstants {
      * Takes a SQL string representing a Command and returns the object
      * representation.
      *
-     * @param sql
+     * @param sql SQL string
      * @return SQL object representation
      * @throws Exception if parsing fails
      * @throws IllegalArgumentException if sql is null
@@ -276,9 +276,9 @@ public class QueryParser implements IQueryParser, StringConstants {
     }
 
     /**
-     * @param sql
+     * @param sql SQL string
      * @return Expression representing sql
-     * @throws Exception
+     * @throws Exception if parsing fails
      */
     public Expression parseSelectExpression(String sql) throws Exception {
         if (sql == null) {
@@ -300,7 +300,11 @@ public class QueryParser implements IQueryParser, StringConstants {
     }
 
     /**
-     * @param sql
+     * Retrieves the next expected tokens to come after the given SQL.
+     * Uses the completion parser to get all the textual possibilities for the
+     * next SQL in the sequence.
+     *
+     * @param sql current SQL string (does not have to be complete) 
      * @return list of tokens expected to follow the given sql 
      */
     public Collection<String> getExpectedTokens(String sql) {

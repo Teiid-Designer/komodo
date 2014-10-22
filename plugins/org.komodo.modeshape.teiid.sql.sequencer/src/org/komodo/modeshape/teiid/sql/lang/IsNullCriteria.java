@@ -28,8 +28,15 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IIsNullCriteria;
 
+/**
+ *
+ */
 public class IsNullCriteria extends Criteria implements PredicateCriteria, IIsNullCriteria<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public IsNullCriteria(ITeiidParser p, int id) {
         super(p, id);
     }

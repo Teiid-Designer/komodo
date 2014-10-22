@@ -31,8 +31,15 @@ import org.komodo.spi.query.sql.symbol.ITextLine;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
+/**
+ *
+ */
 public class TextLine extends ASTNode implements Expression, ITextLine<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public TextLine(ITeiidParser p, int id) {
         super(p, id);
         if (isTeiidVersionOrGreater(Version.TEIID_8_5.get()))

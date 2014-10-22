@@ -27,8 +27,15 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.IReturnStatement;
 
+/**
+ *
+ */
 public class ReturnStatement extends AssignmentStatement implements IReturnStatement<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public ReturnStatement(ITeiidParser p, int id) {
         super(p, id);
     }

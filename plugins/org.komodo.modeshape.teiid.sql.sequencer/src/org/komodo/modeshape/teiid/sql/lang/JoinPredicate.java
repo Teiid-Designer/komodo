@@ -35,6 +35,10 @@ import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 public class JoinPredicate extends FromClause implements IJoinPredicate<FromClause, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public JoinPredicate(ITeiidParser p, int id) {
         super(p, id);
         JoinType joinType = p.createASTNode(ASTNodes.JOIN_TYPE);

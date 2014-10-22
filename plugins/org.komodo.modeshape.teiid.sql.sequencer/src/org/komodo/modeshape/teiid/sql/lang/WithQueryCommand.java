@@ -30,9 +30,16 @@ import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IWithQueryCommand;
 
+/**
+ *
+ */
 public class WithQueryCommand extends ASTNode
     implements SubqueryContainer<QueryCommand>, IWithQueryCommand<LanguageVisitor, QueryCommand> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public WithQueryCommand(ITeiidParser p, int id) {
         super(p, id);
     }

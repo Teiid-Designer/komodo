@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.lang.OrderBy;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
+/**
+ *
+ */
 public class AggregateSymbol extends Function implements IAggregateSymbol<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public AggregateSymbol(ITeiidParser p, int id) {
         super(p, id);
     }

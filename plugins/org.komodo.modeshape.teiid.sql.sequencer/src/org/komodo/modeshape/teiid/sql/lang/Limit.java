@@ -29,8 +29,15 @@ import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ILimit;
 
+/**
+ *
+ */
 public class Limit extends ASTNode implements ILimit<LanguageVisitor>, TeiidSQLConstants.NonReserved {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public Limit(ITeiidParser p, int id) {
         super(p, id);
         setStrict(true);

@@ -21,6 +21,9 @@
  ************************************************************************************/
 package org.komodo.modeshape.teiid.parser;
 
+/**
+ * Model for holding a data type value parsed from the sql text
+ */
 public class ParsedDataType {
 
     private String type;
@@ -31,10 +34,22 @@ public class ParsedDataType {
 
     private Integer precision;
 
+    /**
+     * Create a new instance
+     *
+     * @param type type of data
+     */
     public ParsedDataType(String type) {
         this.type = type;
     }
 
+    /**
+     * Create a new instance
+     *
+     * @param type type of data
+     * @param length length of data
+     * @param precision precision of data
+     */
     public ParsedDataType(String type, int length, boolean precision) {
         this.type = type;
 
@@ -45,6 +60,14 @@ public class ParsedDataType {
         }
     }
 
+    /**
+     * Create a new instance
+     *
+     * @param type type of data
+     * @param length length of data
+     * @param scale scale of data
+     * @param precision precision of data
+     */
     public ParsedDataType(String type, int length, int scale, boolean precision) {
         this.type = type;
         this.scale = scale;
