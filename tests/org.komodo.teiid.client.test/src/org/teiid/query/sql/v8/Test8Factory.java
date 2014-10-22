@@ -29,9 +29,7 @@ import org.teiid.query.sql.symbol.AggregateSymbol;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.WindowFunction;
 
-/**
- *
- */
+@SuppressWarnings( {"javadoc"} )
 public class Test8Factory extends AbstractTestFactory {
 
     /**

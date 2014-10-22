@@ -24,6 +24,7 @@
 package org.komodo.modeshape.teiid.sequencer;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Workspace;
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -121,7 +123,9 @@ public abstract class MultiUseAbstractTest {
             while(children.hasNext()) {
                 try {
                     children.nextNode().remove();
-                } catch (Exception ex) {}
+                } catch (Exception ex) {
+                    fail(ex.getLocalizedMessage());
+                }
             }
             session.save();
             session.logout();

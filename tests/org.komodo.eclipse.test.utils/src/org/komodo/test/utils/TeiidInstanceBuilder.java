@@ -28,9 +28,7 @@ import org.komodo.spi.runtime.ITeiidInstance;
 import org.komodo.spi.runtime.ITeiidJdbcInfo;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 
-/**
- *
- */
+@SuppressWarnings( {"javadoc"} )
 public class TeiidInstanceBuilder {
 
 	private ITeiidInstance teiidInstance;

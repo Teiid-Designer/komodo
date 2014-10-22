@@ -45,7 +45,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.StringUtils;
 import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
 
 public abstract class AbstractTeiidParser implements ITeiidParser {
@@ -274,7 +274,7 @@ public abstract class AbstractTeiidParser implements ITeiidParser {
     }
 
 	private String removeEscapeChars(String str, String tickChar) {
-        return StringUtil.replaceAll(str, tickChar + tickChar, tickChar);
+        return StringUtils.replaceAll(str, tickChar + tickChar, tickChar);
     }
 
 	protected String normalizeStringLiteral(String s) {

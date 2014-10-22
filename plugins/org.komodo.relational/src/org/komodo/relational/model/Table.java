@@ -27,12 +27,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import org.komodo.relational.core.DataType;
 import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.utils.HashCodeUtil;
-import org.komodo.utils.StringUtil;
-import org.komodo.utils.StringUtilities;
+import org.komodo.utils.HashCodeUtils;
+import org.komodo.utils.StringUtils;
 
 
 /**
@@ -202,7 +200,7 @@ public class Table extends RelationalObject {
      * @param newQuery sets nativeQuery to the specified value. may be null
      */
     public void setNativeQuery( String newQuery ) {
-    	if( StringUtilities.areDifferent(this.nativeQuery, newQuery) ) {
+    	if( StringUtils.areDifferent(this.nativeQuery, newQuery) ) {
     		this.nativeQuery = newQuery;
     		handleInfoChanged();
     	}
@@ -719,7 +717,7 @@ public class Table extends RelationalObject {
         final Table other = (Table)object;
 
         // string properties
-        if (!StringUtil.valuesAreEqual(getNativeQuery(), other.getNativeQuery())) {
+        if (!StringUtils.valuesAreEqual(getNativeQuery(), other.getNativeQuery())) {
             return false;
         }
         
@@ -821,43 +819,43 @@ public class Table extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!StringUtil.isEmpty(getNativeQuery())) {
-            result = HashCodeUtil.hashCode(result, getNativeQuery());
+        if (!StringUtils.isEmpty(getNativeQuery())) {
+            result = HashCodeUtils.hashCode(result, getNativeQuery());
         }
         
-        result = HashCodeUtil.hashCode(result, getCardinality());
-        result = HashCodeUtil.hashCode(result, getSupportsUpdate());
-        result = HashCodeUtil.hashCode(result, isMaterialized());
-        result = HashCodeUtil.hashCode(result, isSystem());
+        result = HashCodeUtils.hashCode(result, getCardinality());
+        result = HashCodeUtils.hashCode(result, getSupportsUpdate());
+        result = HashCodeUtils.hashCode(result, isMaterialized());
+        result = HashCodeUtils.hashCode(result, isSystem());
         
         if(materializedTable!=null) {
-            result = HashCodeUtil.hashCode(result, materializedTable);
+            result = HashCodeUtils.hashCode(result, materializedTable);
         }
         if(uniqueConstraint!=null) {
-            result = HashCodeUtil.hashCode(result, uniqueConstraint);
+            result = HashCodeUtils.hashCode(result, uniqueConstraint);
         }
         if(primaryKey!=null) {
-            result = HashCodeUtil.hashCode(result, primaryKey);
+            result = HashCodeUtils.hashCode(result, primaryKey);
         }
 
         List<Column> cols = getColumns();
         for(Column col: cols) {
-            result = HashCodeUtil.hashCode(result, col);
+            result = HashCodeUtils.hashCode(result, col);
         }
         
         List<ForeignKey> fks = getForeignKeys();
         for(ForeignKey fk: fks) {
-            result = HashCodeUtil.hashCode(result, fk);
+            result = HashCodeUtils.hashCode(result, fk);
         }
 
         List<Index> indexes = getIndexes();
         for(Index index: indexes) {
-            result = HashCodeUtil.hashCode(result, index);
+            result = HashCodeUtils.hashCode(result, index);
         }
 
         List<AccessPattern> aps = getAccessPatterns();
         for(AccessPattern ap: aps) {
-            result = HashCodeUtil.hashCode(result, ap);
+            result = HashCodeUtils.hashCode(result, ap);
         }
         
         return result;

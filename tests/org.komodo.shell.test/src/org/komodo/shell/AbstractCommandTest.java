@@ -55,6 +55,7 @@ public abstract class AbstractCommandTest {
 		try {
 			this.reader.close();
 		} catch (IOException e) {
+		    Assert.fail(e.getLocalizedMessage());
 		}
 		reader = null;
 		this.factory = null;

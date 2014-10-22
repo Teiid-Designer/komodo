@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
-import org.komodo.utils.HashCodeUtil;
+import org.komodo.utils.HashCodeUtils;
 
 
 
@@ -175,7 +175,7 @@ public class AccessPattern extends RelationalObject {
 
         List<Column> cols = getColumns();
         for(Column col: cols) {
-            result = HashCodeUtil.hashCode(result, col);
+            result = HashCodeUtils.hashCode(result, col);
         }
         
         return result;

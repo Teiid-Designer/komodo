@@ -26,8 +26,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 
-import org.komodo.utils.HashCodeUtil;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.HashCodeUtils;
+import org.komodo.utils.StringUtils;
 
 
 
@@ -339,10 +339,10 @@ public class ForeignKey extends RelationalObject {
         final ForeignKey other = (ForeignKey)object;
 
         // string properties
-        if (!StringUtil.valuesAreEqual(getForeignKeyMultiplicity(), other.getForeignKeyMultiplicity()) ||
-        		!StringUtil.valuesAreEqual(getPrimaryKeyMultiplicity(), other.getPrimaryKeyMultiplicity()) ||
-        		!StringUtil.valuesAreEqual(getUniqueKeyName(), other.getUniqueKeyName()) || 
-        		!StringUtil.valuesAreEqual(getUniqueKeyTableName(), other.getUniqueKeyTableName()) ) {
+        if (!StringUtils.valuesAreEqual(getForeignKeyMultiplicity(), other.getForeignKeyMultiplicity()) ||
+        		!StringUtils.valuesAreEqual(getPrimaryKeyMultiplicity(), other.getPrimaryKeyMultiplicity()) ||
+        		!StringUtils.valuesAreEqual(getUniqueKeyName(), other.getUniqueKeyName()) || 
+        		!StringUtils.valuesAreEqual(getUniqueKeyTableName(), other.getUniqueKeyTableName()) ) {
             return false;
         }
         
@@ -371,22 +371,22 @@ public class ForeignKey extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!StringUtil.isEmpty(getForeignKeyMultiplicity())) {
-            result = HashCodeUtil.hashCode(result, getForeignKeyMultiplicity());
+        if (!StringUtils.isEmpty(getForeignKeyMultiplicity())) {
+            result = HashCodeUtils.hashCode(result, getForeignKeyMultiplicity());
         }
-        if (!StringUtil.isEmpty(getPrimaryKeyMultiplicity())) {
-            result = HashCodeUtil.hashCode(result, getPrimaryKeyMultiplicity());
+        if (!StringUtils.isEmpty(getPrimaryKeyMultiplicity())) {
+            result = HashCodeUtils.hashCode(result, getPrimaryKeyMultiplicity());
         }
-        if (!StringUtil.isEmpty(getUniqueKeyName())) {
-            result = HashCodeUtil.hashCode(result, getUniqueKeyName());
+        if (!StringUtils.isEmpty(getUniqueKeyName())) {
+            result = HashCodeUtils.hashCode(result, getUniqueKeyName());
         }
-        if (!StringUtil.isEmpty(getUniqueKeyTableName())) {
-            result = HashCodeUtil.hashCode(result, getUniqueKeyTableName());
+        if (!StringUtils.isEmpty(getUniqueKeyTableName())) {
+            result = HashCodeUtils.hashCode(result, getUniqueKeyTableName());
         }
         
         Collection<Column> cols = getColumns();
         for(Column col: cols) {
-            result = HashCodeUtil.hashCode(result, col);
+            result = HashCodeUtils.hashCode(result, col);
         }
                 
         return result;

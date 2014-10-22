@@ -45,7 +45,7 @@ import java.util.RandomAccess;
  *
  *
  */
-public final class HashCodeUtil {
+public final class HashCodeUtils {
 
     // Prime number used in improving distribution: 1,000,003
     private static final int PRIME = 1000003;
@@ -155,5 +155,11 @@ public final class HashCodeUtil {
         return hc;
     }
 
+    /**
+     * Don't allow construction outside of this class.
+     */
+    private HashCodeUtils() {
+        // nothing to do
+    }
 
 }
