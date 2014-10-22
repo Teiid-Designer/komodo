@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
@@ -120,8 +120,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     private javax.jcr.Node sequencedNode;
 
     /**
-     * @param parser
-     * @param nodeTypeIndex
+     * @param parser teiid parser
+     * @param nodeTypeIndex node type id
      */
     public ASTNode(ITeiidParser parser, int nodeTypeIndex) {
         super(parser, nodeTypeIndex);
@@ -280,8 +280,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     /**
      * Add the value at the given property identifier
      *
-     * @param identifier
-     * @param value
+     * @param identifier property identifier
+     * @param value property value
      * @return this ASTNode
      */
     public ASTNode addProperty(String identifier, Object value) {
@@ -405,8 +405,6 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * removes the entire subgraph under this node.
      * 
      * @return the node that was the parent of this node, or null if this node had no parent
-     * @see #extractChild(ASTNode)
-     * @see #extractFromParent()
      */
     public ASTNode removeFromParent() {
         ASTNode result = this.parent;
@@ -459,8 +457,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     /**
      * Utility method to obtain a {@link ASTNode} child of a parent {@link ASTNode} with the given string identifier and node type.
      *
-     * @param identifier
-     * @param referenceTypeClass
+     * @param identifier identifier to find
+     * @param referenceTypeClass type class of applicable children
      * @return child matching identifier and reference type or null
      */
     public <T> T getChildforIdentifierAndRefType(String identifier, Class<T> referenceTypeClass) {
@@ -480,8 +478,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     /**
      * Utility method to obtain the children of a parent {@link ASTNode} with the given string identifier and node type.
      *
-     * @param identifier
-     * @param referenceTypeClass
+     * @param identifier identifier to find
+     * @param referenceTypeClass type class of applicable children
      * @return children matching identifier and reference type or empty list
      */
     public <T> List<T> getChildrenforIdentifierAndRefType(String identifier, Class<T> referenceTypeClass) {
@@ -518,8 +516,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     /**
      * Convenience method for appending a child LanguageObject
      *
-     * @param referenceName
-     * @param languageObject
+     * @param referenceName name for identifier
+     * @param languageObject child to add
      */
     public void addLastChild(String referenceName, LanguageObject languageObject) {
         if (languageObject == null)
@@ -534,8 +532,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * Adds the given language object as the singleton child at the given reference.
      * Note: this will remove any existing child set against this reference
      *
-     * @param referenceName
-     * @param languageObject
+     * @param referenceName name for identifier
+     * @param languageObject child to add
      */
     public void setChild(String referenceName, LanguageObject languageObject) {
         removeChildren(referenceName);
@@ -551,8 +549,8 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * Add the collection of language objects at the given reference
      * Note: this removes any existing children at this reference
      *
-     * @param referenceName
-     * @param languageObjects
+     * @param referenceName name for identifier
+     * @param languageObjects children to add
      */
     public void setChildren(String referenceName, Collection<? extends LanguageObject> languageObjects) {
         removeChildren(referenceName);
@@ -568,7 +566,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     /**
      * Remove the children with the given ast identifier
      *
-     * @param astIdentifier
+     * @param astIdentifier identifier of children to remove
      */
     public void removeChildren(String astIdentifier) {
         List<ASTNode> childrenWithIdentifier = this.childrenWithIdentifier(astIdentifier);

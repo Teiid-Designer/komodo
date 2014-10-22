@@ -35,8 +35,8 @@ import org.komodo.spi.query.sql.lang.ICommand;
 public abstract class Command extends ASTNode implements ICommand<Expression, LanguageVisitor> {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public Command(ITeiidParser p, int id) {
         super(p, id);

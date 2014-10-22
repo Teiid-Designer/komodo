@@ -34,8 +34,15 @@ import org.komodo.spi.query.sql.proc.IBlock;
 import org.komodo.spi.query.sql.symbol.ISymbol;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class Block extends Statement implements Labeled, IBlock<Statement, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public Block(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_COMPOUND);

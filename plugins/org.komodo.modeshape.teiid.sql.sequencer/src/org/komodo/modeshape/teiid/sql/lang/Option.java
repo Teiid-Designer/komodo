@@ -32,8 +32,15 @@ import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.query.sql.lang.IOption;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class Option extends ASTNode implements IOption<LanguageVisitor>, TeiidSQLConstants.Reserved {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public Option(ITeiidParser p, int id) {
         super(p, id);
     }

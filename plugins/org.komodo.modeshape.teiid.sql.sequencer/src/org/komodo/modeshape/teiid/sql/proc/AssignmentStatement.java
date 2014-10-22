@@ -34,8 +34,15 @@ import org.komodo.spi.query.sql.proc.IAssignmentStatement;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class AssignmentStatement extends Statement implements ExpressionStatement, IAssignmentStatement<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public AssignmentStatement(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_ASSIGNMENT);

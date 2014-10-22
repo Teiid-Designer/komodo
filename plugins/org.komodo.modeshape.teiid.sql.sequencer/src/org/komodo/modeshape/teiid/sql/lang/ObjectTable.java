@@ -29,8 +29,15 @@ import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.DerivedColumn;
 import org.komodo.spi.query.sql.lang.IObjectTable;
 
+/**
+ *
+ */
 public class ObjectTable extends TableFunctionReference implements IObjectTable<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public ObjectTable(ITeiidParser p, int id) {
         super(p, id);
     }

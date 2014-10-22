@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.ITriggerAction;
 
+/**
+ *
+ */
 public class TriggerAction extends Command implements ITriggerAction<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public TriggerAction(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_TRIGGER_ACTION);

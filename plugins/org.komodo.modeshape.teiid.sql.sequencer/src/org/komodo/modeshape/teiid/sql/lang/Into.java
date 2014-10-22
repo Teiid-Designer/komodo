@@ -28,8 +28,15 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IInto;
 
+/**
+ *
+ */
 public class Into extends ASTNode implements IInto<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public Into(ITeiidParser p, int id) {
         super(p, id);
     }

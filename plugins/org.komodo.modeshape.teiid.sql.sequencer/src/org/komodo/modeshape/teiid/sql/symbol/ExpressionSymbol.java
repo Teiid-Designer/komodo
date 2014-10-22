@@ -28,8 +28,15 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.spi.query.sql.symbol.IExpressionSymbol;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
+/**
+ *
+ */
 public class ExpressionSymbol extends Symbol implements Expression, IExpressionSymbol<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public ExpressionSymbol(ITeiidParser p, int id) {
         super(p, id);
     }

@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.ISubqueryFromClause;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class SubqueryFromClause extends FromClause implements SubqueryContainer<Command>, ISubqueryFromClause<LanguageVisitor, Command> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public SubqueryFromClause(ITeiidParser p, int id) {
         super(p, id);
     }

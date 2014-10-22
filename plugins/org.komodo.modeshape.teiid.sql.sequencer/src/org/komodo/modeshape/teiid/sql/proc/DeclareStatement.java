@@ -28,8 +28,15 @@ import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.IDeclareStatement;
 
+/**
+ *
+ */
 public class DeclareStatement extends AssignmentStatement implements IDeclareStatement<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public DeclareStatement(ITeiidParser p, int id) {
         super(p, id);
     }

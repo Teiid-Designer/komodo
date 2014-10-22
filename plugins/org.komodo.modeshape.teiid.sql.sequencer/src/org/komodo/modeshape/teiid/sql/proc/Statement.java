@@ -127,8 +127,8 @@ public abstract class Statement extends ASTNode implements IStatement<LanguageVi
     }
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public Statement(ITeiidParser p, int id) {
         super(p, id);

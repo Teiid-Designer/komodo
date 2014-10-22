@@ -60,9 +60,6 @@ public abstract class AbstractGroupClause implements IGroupClause {
         return clauseStack;
     }
 
-    /**
-     * @param clause
-     */
     @Override
     public void addClause(IClause clause) {
         if (clauseStack.isEmpty() && clause instanceof OrClause)

@@ -474,7 +474,7 @@ public class TeiidBNFGenerator implements GeneratorConstants {
             .append(AbstractBNF.class.getSimpleName() + SPACE + OPEN_BRACE + NEW_LINE)
             .append(NEW_LINE)
             .append(TAB + "/**" + NEW_LINE)
-            .append(TAB + " * @param version" + NEW_LINE)
+            .append(TAB + " * @param version of teiid" + NEW_LINE)
             .append(TAB + " */" + NEW_LINE)
             .append(TAB + PUBLIC + SPACE + "BNF" + OPEN_BRACKET)
             .append(ITeiidVersion.class.getSimpleName() + SPACE + "version" + CLOSE_BRACKET)
@@ -742,6 +742,15 @@ public class TeiidBNFGenerator implements GeneratorConstants {
         StringBuffer buf = new StringBuffer();
 
         // Append method declaration
+        buf.append(TAB + "/**" + NEW_LINE)
+             .append(TAB + "* Create completions for " + method.getName() + NEW_LINE)
+             .append(TAB + "*" + NEW_LINE)
+             .append(TAB + "* @param indices identifiers specified in the parser" + NEW_LINE)
+             .append(TAB + "* @return array of possible completion choices" + NEW_LINE)
+             .append(TAB + "*" + NEW_LINE)
+             .append(TAB + "* @generated" + NEW_LINE)
+             .append(TAB + "*/" + NEW_LINE);
+
         buf.append(TAB + PUBLIC + SPACE + String.class.getSimpleName())
             .append(OPEN_SQUARE_BRACKET + CLOSE_SQUARE_BRACKET + SPACE)
             .append(method.getName() + OPEN_BRACKET + "int... indices" + CLOSE_BRACKET + SPACE + OPEN_BRACE)

@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.OrderBy;
 import org.komodo.spi.query.sql.symbol.IWindowSpecification;
 
+/**
+ *
+ */
 public class WindowSpecification extends ASTNode implements IWindowSpecification<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public WindowSpecification(ITeiidParser p, int id) {
         super(p, id);
     }

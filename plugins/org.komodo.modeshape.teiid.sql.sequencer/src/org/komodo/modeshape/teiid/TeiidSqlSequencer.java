@@ -125,6 +125,14 @@ public class TeiidSqlSequencer extends Sequencer {
         return true;
     }
 
+    /**
+     * Converts the given {@link ASTNode} to a jcr {@link Node} and appends
+     * it to the given output node.
+     *
+     * @param rootNode ast node to be converted
+     * @param outputNode node to have results appended to
+     * @throws RepositoryException if conversion is invalid
+     */
     public void convertASTNode(final ASTNode rootNode, Node outputNode) throws RepositoryException {
         Queue<ASTNode> queue = new LinkedList<ASTNode>();
         queue.add(rootNode);

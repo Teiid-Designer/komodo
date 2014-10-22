@@ -28,9 +28,16 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IMatchCriteria;
 
+/**
+ *
+ */
 public class MatchCriteria extends Criteria
     implements PredicateCriteria, IMatchCriteria<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public MatchCriteria(ITeiidParser p, int id) {
         super(p, id);
         setMode(MatchMode.LIKE);

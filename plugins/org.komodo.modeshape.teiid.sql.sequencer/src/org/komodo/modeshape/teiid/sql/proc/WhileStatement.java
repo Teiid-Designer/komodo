@@ -29,8 +29,15 @@ import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.modeshape.teiid.sql.lang.Labeled;
 import org.komodo.spi.query.sql.proc.IWhileStatement;
 
+/**
+ *
+ */
 public class WhileStatement extends Statement implements Labeled, IWhileStatement<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public WhileStatement(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_WHILE);
