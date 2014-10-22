@@ -28,14 +28,16 @@ import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
- *
+ * Abstract implementation that {@link BNF} extends.
  */
 public abstract class AbstractBNF implements BNFConstants, TeiidCompletionParserConstants {
 
     private final ITeiidVersion version;
 
     /**
-     * 
+     * Create a new instance
+     *
+     * @param version teiid version
      */
     public AbstractBNF(ITeiidVersion version) {
         this.version = version;

@@ -53,8 +53,9 @@ public class CTree implements StringConstants {
     }
 
     /**
+     * Abstract Node representing a class or interface
      *
-     * @param <T>
+     * @param <T> type of children
      */
     public static abstract class Node<T extends Node> implements StringConstants {
 
@@ -67,8 +68,11 @@ public class CTree implements StringConstants {
         private final Map<Class<?>, T> children = new LinkedHashMap<Class<?>, T>();
 
         /**
-         * @param tree 
-         * @param klazz
+         * Create new instance
+         *
+         * @param tree parent tree of this node
+         * 
+         * @param klazz the class this node represents
          */
         public Node(CTree tree, Class<?> klazz) {
             this.tree = tree;
@@ -90,7 +94,7 @@ public class CTree implements StringConstants {
         }
 
         /**
-         * @param objClass
+         * @param objClass class to test
          * @return this or its children contain the given class
          */
         public boolean containsClass(Class<?> objClass) {
@@ -127,7 +131,7 @@ public class CTree implements StringConstants {
         }
 
         /**
-         * @param klazz
+         * @param klazz class of child to find
          * @return child node with class of klazz or null
          */
         public T getChild(Class<?> klazz) {
@@ -135,7 +139,7 @@ public class CTree implements StringConstants {
         }
 
         /**
-         * @param child
+         * @param child to add
          * @return child or the existing child
          */
         public T addChild(T child) {
@@ -194,8 +198,10 @@ public class CTree implements StringConstants {
         }
 
         /**
-         * @param callback
-         * @throws Exception
+         * Execute the given callback over the tree's nodes
+         *
+         * @param callback to execute
+         * @throws Exception caused by the callback
          */
         public void execute(CTreeCallback callback) throws Exception {
             callback.run(this);
@@ -212,15 +218,17 @@ public class CTree implements StringConstants {
     public static class INode extends Node<INode> {
 
         /**
-         * @param tree
-         * @param klazz
+         * Create a new interface node
+         *
+         * @param tree to add the node to
+         * @param klazz class of the interface node
          */
         public INode(CTree tree, Class<?> klazz) {
             super(tree, klazz);
         }
 
         /**
-         * @param iNode
+         * @param iNode node to test against
          * @return this node is an ancestor of the given node
          */
         public boolean isAssignable(INode iNode) {
@@ -244,8 +252,10 @@ public class CTree implements StringConstants {
         private List<INode> classInterfaces = new ArrayList<INode>();
 
         /**
-         * @param tree
-         * @param klazz
+         * Create a new class node
+         *
+         * @param tree to add this node to
+         * @param klazz class of this node
          */
         public CNode(CTree tree, Class<?> klazz) {
             super(tree, klazz);
@@ -270,7 +280,7 @@ public class CTree implements StringConstants {
         }
 
         /**
-         * @param iNode
+         * @param iNode to add to this node's class interfaces
          */
         public void addInterface(INode iNode) {
             classInterfaces.add(iNode);
@@ -314,7 +324,9 @@ public class CTree implements StringConstants {
     private Set<Class<?>> classes = new HashSet<Class<?>>();
 
     /**
-     * @param rootClass
+     * Create a new tree
+     *
+     * @param rootClass the root class of the tree
      */
     public CTree(Class<?> rootClass) {
         root = new CNode(this, rootClass);
@@ -338,7 +350,7 @@ public class CTree implements StringConstants {
     }
 
     /**
-     * @param klazz
+     * @param klazz klazz to test
      * @return whether klazz is root's klazz
      */
     public boolean isRootData(Class<?> klazz) {
@@ -367,7 +379,7 @@ public class CTree implements StringConstants {
 
 
     /**
-     * @param objClass
+     * @param objClass to test
      * @return whether class is part of this tree
      */
     public boolean containsClass(Class<?> objClass) {
@@ -387,7 +399,7 @@ public class CTree implements StringConstants {
     }
 
     /**
-     * @param objClass
+     * @param objClass to test
      * @return is the given class part of the SPI rather than a language object
      */
     public boolean isSPILanguageInterface(Class<?> objClass) {
@@ -471,7 +483,7 @@ public class CTree implements StringConstants {
     }
 
     /**
-     * @param objClass
+     * @param objClass added to this tree
      */
     public void add(Class<?> objClass) {
         if (objClass == null)
@@ -488,8 +500,8 @@ public class CTree implements StringConstants {
     /**
      * Perform a function callback on all nodes in this tree
      *
-     * @param callback
-     * @throws Exception
+     * @param callback to be executed
+     * @throws Exception thrown by the callback
      */
     public void execute(CTreeCallback callback) throws Exception {
         for (Node node : getInterfaceNodes()) {

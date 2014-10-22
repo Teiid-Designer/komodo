@@ -155,8 +155,9 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
 	 * @param obj the relational reference
 	 */
 	public void inject(RelationalObject obj) {
-		
+		// Nothing to do
 	}
+
 	/**
      * @return parent
      */

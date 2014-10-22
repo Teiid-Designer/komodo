@@ -33,8 +33,15 @@ import org.komodo.modeshape.teiid.sql.symbol.Symbol;
 import org.komodo.spi.query.sql.lang.ISelect;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class Select extends ASTNode implements ISelect<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public Select(ITeiidParser p, int id) {
         super(p, id);
     }

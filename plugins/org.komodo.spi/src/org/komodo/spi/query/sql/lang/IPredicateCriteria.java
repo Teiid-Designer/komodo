@@ -29,5 +29,5 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
  *
  */
 public interface IPredicateCriteria<LV extends ILanguageVisitor> extends ICriteria<LV> {
-
+    // No methods required
 }

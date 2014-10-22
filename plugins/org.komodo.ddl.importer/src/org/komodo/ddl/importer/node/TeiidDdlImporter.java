@@ -448,6 +448,7 @@ public class TeiidDdlImporter extends StandardImporter {
 			deferredMap.put(node, null);
 		} else if (is(node, TeiidDdlLexicon.AlterOptions.VIEW_STATEMENT)
 				|| is(node, TeiidDdlLexicon.AlterOptions.PROCEDURE_STATEMENT)) {
+		    deferredMap.put(node, null);
 		} else {
 			// -----------------------------------------------------------------------
 			// All other Non-Teiid DDL 
@@ -762,6 +763,7 @@ public class TeiidDdlImporter extends StandardImporter {
 		} else if( column.getDatatypeName().equalsIgnoreCase(DataTypes.VARBINARY) && nativeType.equalsIgnoreCase(DataTypes.BINARY ) ) {
 			column.setDatatypeName(DataTypes.OBJECT.toLowerCase());
 		} else if( column.getDatatypeName().equalsIgnoreCase(DataTypes.TIMESTAMP) && nativeType.equalsIgnoreCase(DataTypes.DATETIME ) ) {
+		    // TODO how should this be handled?
 		} else if( column.getDatatypeName().equalsIgnoreCase(DataTypes.DOUBLE) && nativeType.equalsIgnoreCase(DataTypes.FLOAT ) ) {
 			column.setDatatypeName(nativeType);
 			if( column.getPrecision() == 0 ) {

@@ -30,5 +30,5 @@ import org.komodo.spi.query.sql.lang.IExpression;
  */
 public interface ITriggerAction<E extends IExpression, LV extends ILanguageVisitor> 
     extends ICommand<E, LV> {
-
+    // No methods required
 }

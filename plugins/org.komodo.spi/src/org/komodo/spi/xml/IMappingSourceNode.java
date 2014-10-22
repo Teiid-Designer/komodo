@@ -25,5 +25,5 @@ package org.komodo.spi.xml;
  *
  */
 public interface IMappingSourceNode<N extends IMappingNode> extends IMappingBaseNode<N> {
-
+    // No methods required
 }

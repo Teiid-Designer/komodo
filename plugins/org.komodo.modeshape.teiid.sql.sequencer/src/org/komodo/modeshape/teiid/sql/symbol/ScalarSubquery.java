@@ -31,8 +31,15 @@ import org.komodo.modeshape.teiid.sql.lang.SubqueryContainer;
 import org.komodo.spi.query.sql.symbol.IScalarSubquery;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
+/**
+ *
+ */
 public class ScalarSubquery extends ASTNode implements Expression, SubqueryContainer<QueryCommand>, IScalarSubquery<LanguageVisitor, QueryCommand> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public ScalarSubquery(ITeiidParser p, int id) {
         super(p, id);
     }

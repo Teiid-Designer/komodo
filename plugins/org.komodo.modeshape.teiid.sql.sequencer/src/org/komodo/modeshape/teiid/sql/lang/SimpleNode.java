@@ -78,10 +78,12 @@ public abstract class SimpleNode implements Node {
 
     @Override
     public void jjtOpen() {
+        // Nothing to do
     }
 
     @Override
     public void jjtClose() {
+        // Nothing to do
     }
 
     @Override

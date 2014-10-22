@@ -24,8 +24,8 @@ package org.komodo.modeshape.teiid.sql.lang;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 
 /**
- *
+ * Tagging interface for predicate criteria objects
  */
 public interface PredicateCriteria extends Expression {
-
+    // No methods required
 }

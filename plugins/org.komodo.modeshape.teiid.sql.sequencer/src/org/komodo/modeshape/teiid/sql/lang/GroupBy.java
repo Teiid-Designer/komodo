@@ -24,15 +24,22 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IGroupBy;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
+/**
+ *
+ */
 public class GroupBy extends ASTNode implements IGroupBy<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public GroupBy(ITeiidParser p, int id) {
         super(p, id);
     }
@@ -54,12 +61,15 @@ public class GroupBy extends ASTNode implements IGroupBy<Expression, LanguageVis
     }
 
     /**
-     * @param expressions
+     * @param expressions value
      */
     public void setSymbols(List<Expression> expressions) {
         setChildren(TeiidSqlLexicon.GroupBy.SYMBOLS_REF_NAME, expressions);
     }
 
+    /**
+     * @return is roll up
+     */
     @Since(Version.TEIID_8_5)
     public boolean isRollup() {
         if (isLessThanTeiidVersion(TeiidSqlLexicon.GroupBy.ROLLUP_PROP_SINCE_VERSION.get()))
@@ -70,7 +80,7 @@ public class GroupBy extends ASTNode implements IGroupBy<Expression, LanguageVis
     }
 
     /**
-     * @param rollup
+     * @param rollup value
      */
     @Since(Version.TEIID_8_5)
     public void setRollup(boolean rollup) {

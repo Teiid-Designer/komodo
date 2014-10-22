@@ -23,13 +23,20 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
-import org.komodo.spi.query.sql.lang.IExistsCriteria;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
+import org.komodo.spi.query.sql.lang.IExistsCriteria;
 
+/**
+ * Criteria node for exists keyword
+ */
 public class ExistsCriteria extends Criteria implements PredicateCriteria, SubqueryContainer<QueryCommand>, IExistsCriteria<LanguageVisitor, QueryCommand> {
 
+    /**
+     * @param p parent parser
+     * @param id type id of node
+     */
     public ExistsCriteria(ITeiidParser p, int id) {
         super(p, id);
 
@@ -58,12 +65,15 @@ public class ExistsCriteria extends Criteria implements PredicateCriteria, Subqu
         setChild(TeiidSqlLexicon.SubqueryContainer.COMMAND_REF_NAME, command);
     }
 
+    /**
+     * @return subquery hint
+     */
     public SubqueryHint getSubqueryHint() {
         return getChildforIdentifierAndRefType(TeiidSqlLexicon.ExistsCriteria.SUBQUERY_HINT_REF_NAME, SubqueryHint.class);
     }
 
     /**
-     * @param hint
+     * @param hint value
      */
     public void setSubqueryHint(SubqueryHint hint) {
         setChild(TeiidSqlLexicon.ExistsCriteria.SUBQUERY_HINT_REF_NAME, hint);

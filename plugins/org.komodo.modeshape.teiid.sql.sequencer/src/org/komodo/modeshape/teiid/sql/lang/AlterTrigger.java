@@ -35,8 +35,8 @@ import org.komodo.spi.query.sql.lang.IAlterTrigger;
 public class AlterTrigger extends Alter<TriggerAction> implements IAlterTrigger<Expression, LanguageVisitor> {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public AlterTrigger(ITeiidParser p, int id) {
         super(p, id);

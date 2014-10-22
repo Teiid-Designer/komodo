@@ -25,5 +25,5 @@ package org.komodo.spi.query.sql.symbol;
  *
  */
 public interface IContextReference {
-
+    // No methods required
 }

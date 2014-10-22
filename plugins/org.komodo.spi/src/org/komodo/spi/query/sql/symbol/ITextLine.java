@@ -28,5 +28,5 @@ import org.komodo.spi.query.sql.lang.IExpression;
  *
  */
 public interface ITextLine<LV extends ILanguageVisitor> extends IExpression<LV> {
-
+    // No methods required
 }

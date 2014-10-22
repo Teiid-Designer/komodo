@@ -5,16 +5,28 @@
 	<parent>
 		<groupId>org.jboss.tools</groupId>
 		<artifactId>parent</artifactId>
-		<version>4.2.0.Beta3-SNAPSHOT</version>
+		<version>4.2.0.Final-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools</groupId>
 	<artifactId>komodo</artifactId>
 	<name>komodo</name>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-  <properties>
-    <tycho.scmUrl>scm:git:https://github.com/Teiid-Designer/komodo.git</tycho.scmUrl>
-  </properties>
+
+	<properties>
+		<jboss-tycho-version>${tychoVersion}</jboss-tycho-version>
+		<tycho.scmUrl>scm:git:https://github.com/Teiid-Designer/komodo.git</tycho.scmUrl>
+
+		<!-- Specify our own TP using the JBT-IS rather than using the definition in the parent pom -->
+		<no-target-platform>true</no-target-platform>
+
+		<k.tpc.groupId>org.jboss.tools.integration-stack</k.tpc.groupId>
+		<k.tpc.artifactId>target-platform</k.tpc.artifactId>
+		<k.tpc.version>4.2.0.Beta1b</k.tpc.version>
+		<k.tpc.type>target</k.tpc.type>
+		<k.tpc.classifier>base</k.tpc.classifier>
+	</properties>
+
 	<modules>
 		<module>target-platform</module>
 		<module>features</module>
@@ -24,11 +36,49 @@
 
 		<module>site</module>
 		<module>build</module>
-
 	</modules>
 
 	<build>
 		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<echo>basedir: ${basedir}</echo>
+								<echo>project.basedir: ${project.basedir}</echo>
+								<echo>project.baseUri: ${project.baseUri}</echo>
+								<echo>project.version: ${project.version}</echo>
+								<echo>project.groupId: ${project.groupId}</echo>
+								<echo>project.artifactId: ${project.artifactId}</echo>
+								<echo>project.name: ${project.name}</echo>
+								<echo>project.build.sourceDirectory: ${project.build.sourceDirectory}</echo>
+								<echo>project.build.scriptSourceDirectory: ${project.build.scriptSourceDirectory}</echo>
+								<echo>project.build.testSourceDirectory: ${project.build.testSourceDirectory}</echo>
+								<echo>project.build.outputDirectory: ${project.build.outputDirectory}</echo>
+								<echo>project.build.testOutputDirectory: ${project.build.testOutputDirectory}</echo>
+								<echo>project.build.directory: ${project.build.directory}</echo>
+								<echo>eclipse.tycho.version: ${tychoVersion}</echo>
+								<echo>eclipse.target.version: ${targetEclipseVersion}</echo>
+								<echo>not.using.jbt.parent.pom.tp: ${no-target-platform}</echo>
+								<echo>komodo.tp.group.id: ${k.tpc.groupId}</echo>
+								<echo>komodo.tp.artifact.id: ${k.tpc.artifactId}</echo>
+								<echo>komodo.tp.version: ${k.tpc.version}</echo>
+								<echo>komodo.tp.type: ${k.tpc.type}</echo>
+								<echo>komodo.tp.classifier: ${k.tpc.classifier}</echo>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -39,10 +89,11 @@
 					<ignoreTychoRepositories>true</ignoreTychoRepositories>
 					<target>
 						<artifact>
-							<groupId>org.jboss.tools.target-platforms</groupId>
-							<artifactId>komodo</artifactId>
-							<version>1.0.0-SNAPSHOT</version>
-							<classifier>komodo</classifier>
+							<groupId>${k.tpc.groupId}</groupId>
+							<artifactId>${k.tpc.artifactId}</artifactId>
+							<version>${k.tpc.version}</version>
+							<type>${k.tpc.type}</type>
+							<classifier>${k.tpc.classifier}</classifier>
 						</artifact>
 					</target>
 				</configuration>

@@ -66,8 +66,10 @@ public class TeiidCndGenerator implements GeneratorConstants {
                                                             Utilities.convertPackageToDirPath(TeiidCndGenerator.class.getPackage());
 
     /**
-     * @param args
-     * @throws Exception
+     * Execute the generator
+     *
+     * @param args (not required)
+     * @throws Exception if generator fails
      */
     public static void main(String[] args) throws Exception {
         TeiidCndGenerator ccf = new TeiidCndGenerator(chooseTargetDirectory());
@@ -301,8 +303,8 @@ public class TeiidCndGenerator implements GeneratorConstants {
     private final BufferedWriter lexiconWriter;
 
     /**
-     * @param targetDirectory
-     * @throws Exception
+     * @param targetDirectory directory where artefacts will be generated
+     * @throws Exception thrown due to problems
      */
     public TeiidCndGenerator(File targetDirectory) throws Exception {
         ArgCheck.isNotNull(targetDirectory);
@@ -1577,7 +1579,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
 
     /**
      * Generate the cnd and lexicon files
-     * @throws Exception
+     * @throws Exception if generation fails
      */
     public void generate() throws Exception {
         try {

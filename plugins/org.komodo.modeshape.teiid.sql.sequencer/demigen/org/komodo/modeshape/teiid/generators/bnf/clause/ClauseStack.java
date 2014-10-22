@@ -23,9 +23,11 @@ package org.komodo.modeshape.teiid.generators.bnf.clause;
 
 import java.util.Iterator;
 import java.util.Stack;
+import org.komodo.modeshape.teiid.generators.bnf.TeiidBNFGenerator;
 
 /**
- *
+ * Implementation of a stack for use with generating the BNF from the parser template
+ * @see TeiidBNFGenerator
  */
 public class ClauseStack extends Stack<IClause> {
 
@@ -33,10 +35,18 @@ public class ClauseStack extends Stack<IClause> {
 
     private final IClause parent;
 
+    /**
+     * Create new instance
+     *
+     * @param parent of this stack or the ROOT_CLAUSE
+     */
     public ClauseStack(IClause parent) {
         this.parent = parent;
     }
-    
+
+    /**
+     * @return the parent
+     */
     public IClause getParent() {
         return parent;
     }
@@ -109,7 +119,7 @@ public class ClauseStack extends Stack<IClause> {
      * Get the last clause in the sequence
      * (including checking group clauses for the last inner clause)
      *
-     * @param expectedType
+     * @param expectedType of the last clause
      * @return last clause in the sequence only if it matches the expected type or null
      */
     public <T extends IClause> T expectedLastClause(Class<T> expectedType) {
@@ -126,6 +136,10 @@ public class ClauseStack extends Stack<IClause> {
             return null;
     }
 
+    /**
+     * @param groupClass class of the {@link IGroupClause}
+     * @return most recently added {@link IGroupClause} that is still open
+     */
     public <T extends IGroupClause> T getLatestOpenGroupClause(Class<T> groupClass) {
         if (isEmpty())
             return null;
@@ -189,7 +203,7 @@ public class ClauseStack extends Stack<IClause> {
     }
 
     /**
-     * @param searchClause
+     * @param searchClause clause to find
      *
      * @return the next clause in the stack after the searchClause
      */
@@ -212,7 +226,7 @@ public class ClauseStack extends Stack<IClause> {
     }
 
     /**
-     * @param clause
+     * @param clause to test
      *
      * @return true if the clause is the last in the stack or all clauses after it are
      *                 optional, false otherwise

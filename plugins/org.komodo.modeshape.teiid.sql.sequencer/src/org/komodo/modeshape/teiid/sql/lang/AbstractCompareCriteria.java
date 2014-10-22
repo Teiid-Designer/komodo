@@ -33,8 +33,8 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 public abstract class AbstractCompareCriteria extends Criteria implements PredicateCriteria {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public AbstractCompareCriteria(ITeiidParser p, int id) {
         super(p, id);
@@ -67,7 +67,7 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
 
     /**
      * Sets the operator.
-     * @param operator
+     * @param operator value
      */
     public void setOperator(CriteriaOperator.Operator operator ) {
         if (operator.isLessThan(CriteriaOperator.Operator.EQ) || operator.isGreaterThan(CriteriaOperator.Operator.GE)) {

@@ -28,10 +28,13 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
  */
 public class NullNode extends ASTNode {
 
+    /**
+     * Id of null node
+     */
     public static int VOID_ID = -1;
 
     /**
-     * @param parser
+     * @param parser parent parser
      */
     public NullNode(ITeiidParser parser) {
         super(parser, VOID_ID);

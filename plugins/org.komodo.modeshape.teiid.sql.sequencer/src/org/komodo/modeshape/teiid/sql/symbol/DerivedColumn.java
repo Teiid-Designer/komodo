@@ -28,8 +28,15 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IDerivedColumn;
 
+/**
+ *
+ */
 public class DerivedColumn extends ASTNode implements IDerivedColumn<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public DerivedColumn(ITeiidParser p, int id) {
         super(p, id);
     }

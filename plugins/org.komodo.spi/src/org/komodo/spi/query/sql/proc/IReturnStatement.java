@@ -32,5 +32,5 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 @Since(Version.TEIID_8_0)
 public interface IReturnStatement<E extends IExpression, LV extends ILanguageVisitor>
     extends IAssignmentStatement<E, LV> {
-
+    // No methods required
 }

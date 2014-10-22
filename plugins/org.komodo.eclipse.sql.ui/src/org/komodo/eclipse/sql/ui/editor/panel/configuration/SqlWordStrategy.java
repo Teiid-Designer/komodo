@@ -23,6 +23,11 @@ public class SqlWordStrategy implements IFormattingStrategy {
 
     private SqlSyntax sqlSyntax;
 
+    /**
+     * Create new instance
+     *
+     * @param teiidVersion version of teiid client
+     */
     public SqlWordStrategy(ITeiidVersion teiidVersion) {
         sqlSyntax = new SqlSyntax(teiidVersion);
     }
@@ -32,6 +37,7 @@ public class SqlWordStrategy implements IFormattingStrategy {
 	 */
 	@Override
 	public void formatterStarts(String initialIndentation) {
+	    // Nothing to do
 	}
 
 	/**
@@ -81,6 +87,7 @@ public class SqlWordStrategy implements IFormattingStrategy {
      */
 	@Override
 	public void formatterStops() {
+	    // Nothing to do
 	}
 
 }

@@ -28,13 +28,17 @@ import org.komodo.modeshape.teiid.sql.proc.*;
 import org.komodo.modeshape.teiid.sql.symbol.*;
 
 /**
- *
+ * Factory used to generate parser nodes
  */
 public class TeiidNodeFactory {
 
 	private static TeiidNodeFactory instance;
 
-
+	/**
+	 * @return Singleton instance of this factory
+	 *
+	 * @generated
+	 */
 	public static TeiidNodeFactory getInstance() {
 		if (instance == null) instance = new TeiidNodeFactory();
 		return instance;
@@ -43,10 +47,12 @@ public class TeiidNodeFactory {
 	/**
 	 * Method used by the generated parsers for constructing nodes
 	 *
-	 * @param teiidParser
-	 * @param nodeType
+	 * @param teiidParser parent parser
+	 * @param nodeType type of node
 	 *
 	 * @return created language object
+	 *
+	 * @generated
 	 */
 	public static LanguageObject jjtCreate(ITeiidParser teiidParser, int nodeType) {
 		return getInstance().create(teiidParser, nodeType);
@@ -55,10 +61,12 @@ public class TeiidNodeFactory {
 	/**
 	 * Create a parser node for the node with the given common node name
 	 *
-	 * @param teiidParser
-	 * @param nodeType
+	 * @param teiidParser parent parser
+	 * @param nodeType type of node
 	 *
 	 * @return node applicable to the given parser
+	 *
+	 * @generated
 	 */
 	public <T extends LanguageObject> T create(ITeiidParser teiidParser, ASTNodes nodeType) {
 

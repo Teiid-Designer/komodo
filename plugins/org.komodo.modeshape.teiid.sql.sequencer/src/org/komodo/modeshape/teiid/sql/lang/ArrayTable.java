@@ -24,8 +24,8 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IArrayTable;
 
@@ -35,8 +35,8 @@ import org.komodo.spi.query.sql.lang.IArrayTable;
 public class ArrayTable extends TableFunctionReference implements IArrayTable<LanguageVisitor> {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public ArrayTable(ITeiidParser p, int id) {
         super(p, id);
@@ -52,7 +52,7 @@ public class ArrayTable extends TableFunctionReference implements IArrayTable<La
     }
 
     /**
-     * @param columns
+     * @param columns columns to set
      */
     public void setColumns(List<ProjectedColumn> columns) {
         setChildren(TeiidSqlLexicon.ArrayTable.COLUMNS_REF_NAME, columns);
@@ -66,7 +66,7 @@ public class ArrayTable extends TableFunctionReference implements IArrayTable<La
     }
 
     /**
-     * @param arrayValue
+     * @param arrayValue expression to set
      */
     public void setArrayValue(Expression arrayValue) {
         setChild(TeiidSqlLexicon.ArrayTable.ARRAY_VALUE_REF_NAME, arrayValue);

@@ -25,10 +25,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 import org.komodo.eclipse.sql.ui.editor.panel.SqlEditorPanel;
 
+/**
+ * View part implementation for housing the SQL Editor
+ */
 public class EditorView extends ViewPart {
-
-    public EditorView() {
-    }
 
     @Override
     public void createPartControl(Composite parent) {
@@ -37,6 +37,7 @@ public class EditorView extends ViewPart {
 
     @Override
     public void setFocus() {
+        // Nothing to do
     }
 
 }

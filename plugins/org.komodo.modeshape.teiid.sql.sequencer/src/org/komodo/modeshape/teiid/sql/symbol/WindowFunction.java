@@ -29,8 +29,15 @@ import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IWindowFunction;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
+/**
+ *
+ */
 public class WindowFunction extends ASTNode implements Expression, IWindowFunction<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public WindowFunction(ITeiidParser p, int id) {
         super(p, id);
     }

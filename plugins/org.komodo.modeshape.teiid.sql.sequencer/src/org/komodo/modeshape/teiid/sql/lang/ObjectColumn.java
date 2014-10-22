@@ -28,8 +28,15 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IObjectColumn;
 
+/**
+ *
+ */
 public class ObjectColumn extends ProjectedColumn implements IObjectColumn<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public ObjectColumn(ITeiidParser p, int id) {
         super(p, id);
     }

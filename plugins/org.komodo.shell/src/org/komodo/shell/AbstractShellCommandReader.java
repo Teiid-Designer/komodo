@@ -168,6 +168,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
      */
 	@Override
 	public void close() throws IOException {
+	    // Nothing to do
 	}
 
 	/**

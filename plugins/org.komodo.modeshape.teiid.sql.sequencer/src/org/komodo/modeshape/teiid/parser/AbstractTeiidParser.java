@@ -48,8 +48,17 @@ import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.utils.StringUtils;
 import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
 
+/**
+ * Abstract implemention of {@link ITeiidParser}.
+ * Generated parser implementations extend this class.
+ */
 public abstract class AbstractTeiidParser implements ITeiidParser {
 
+    /**
+     * A model to encapsulate a parsing error. Used to hold errors, allowing
+     * the parser to try and continue as much as possible before returning
+     * with the errors.
+     */
     public static class ParsingError implements StringConstants {
 
         private final String token;
@@ -60,6 +69,14 @@ public abstract class AbstractTeiidParser implements ITeiidParser {
 
         private final String message;
 
+        /**
+         * Create a new instance
+         *
+         * @param token the token where the error occurred
+         * @param line the text line where the error occurred
+         * @param column the text column where the error occurred
+         * @param message an additional message to convey with the error
+         */
         public ParsingError(String token, int line, int column, String message) {
             this.token = token;
             this.line = line;
@@ -133,7 +150,7 @@ public abstract class AbstractTeiidParser implements ITeiidParser {
     }
 
     /**
-     * @param teiidVersion
+     * @param teiidVersion version of teiid
      */
     @Override
     public void setVersion(ITeiidVersion teiidVersion) {

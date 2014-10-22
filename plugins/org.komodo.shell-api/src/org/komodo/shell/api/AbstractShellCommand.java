@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.shell.api.Messages.SHELLAPI;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
@@ -179,6 +178,8 @@ public abstract class AbstractShellCommand implements ShellCommand {
 				writer.write('\n');
 				writer.flush();
 			} catch (IOException e) {
+			    e.printStackTrace();
+			    System.out.println(msg);
 			}
 		} else {
 			System.out.println(msg);

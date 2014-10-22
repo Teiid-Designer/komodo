@@ -29,10 +29,19 @@ import org.komodo.spi.constants.StringConstants;
  */
 public interface IClause extends StringConstants {
 
+    /**
+     * Append statement prefix
+     */
     String BNF_APPEND_PREFIX = "append(bnf, "; //$NON-NLS-1$
 
+    /**
+     * A break statement used in switch/case
+     */
     String BREAK_STATEMENT = TAB + TAB + TAB + TAB + "break" + SEMI_COLON + NEW_LINE; //$NON-NLS-1$
 
+    /**
+     * The root clause. A placeholder clause since all stacks have a parent clause
+     */
     IClause ROOT_CLAUSE = new IClause() {
 
         @Override
@@ -99,7 +108,7 @@ public interface IClause extends StringConstants {
      *
      * @return latest group clause of type group class which is open
      */
-    public <T extends IGroupClause> T findLatestOpenGroupClause(Class<T> groupClass);
+    <T extends IGroupClause> T findLatestOpenGroupClause(Class<T> groupClass);
 
     /**
      * @return list of all possible append statements

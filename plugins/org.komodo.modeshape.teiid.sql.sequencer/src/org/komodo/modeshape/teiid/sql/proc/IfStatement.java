@@ -28,8 +28,15 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.spi.query.sql.proc.IIfStatement;
 
+/**
+ *
+ */
 public class IfStatement extends Statement implements IIfStatement<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public IfStatement(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_IF);

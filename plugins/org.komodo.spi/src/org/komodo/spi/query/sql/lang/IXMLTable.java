@@ -27,5 +27,5 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
  *
  */
 public interface IXMLTable<LV extends ILanguageVisitor> extends ITableFunctionReference<LV> {
-
+    // No methods required
 }

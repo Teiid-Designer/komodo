@@ -23,12 +23,19 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IJoinType;
 
+/**
+ *
+ */
 public class JoinType extends ASTNode implements IJoinType<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public JoinType(ITeiidParser p, int id) {
         super(p, id);
     }
@@ -42,7 +49,7 @@ public class JoinType extends ASTNode implements IJoinType<LanguageVisitor> {
     }
 
     /**
-     * @param kind
+     * @param kind value
      */
     public void setKind(Types kind) {
         setProperty(TeiidSqlLexicon.JoinType.KIND_PROP_NAME, kind.name());

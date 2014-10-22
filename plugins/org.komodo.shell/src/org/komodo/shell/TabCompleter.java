@@ -17,7 +17,6 @@ package org.komodo.shell;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.jboss.aesh.complete.CompleteOperation;
 import org.jboss.aesh.complete.Completion;
 import org.komodo.shell.api.Arguments;
@@ -86,7 +85,9 @@ public class TabCompleter implements Completion {
     		try {
     			command = factory.getCommand(commandName);
     		} catch (Exception e) {
+    		    // ignore
     		}
+
     		// In case it is a command then we print the tabCompletion
     		// specific of the command
     		if (command != null && !(command instanceof CommandNotFoundCommand)) {

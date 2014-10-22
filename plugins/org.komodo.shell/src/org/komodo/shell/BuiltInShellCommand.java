@@ -18,7 +18,6 @@ package org.komodo.shell;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import org.komodo.shell.api.AbstractShellCommand;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -95,11 +94,13 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 				recordingFileWriter.write(line+"\n"); //$NON-NLS-1$ 
 				recordingFileWriter.flush();
 			} catch (IOException ex) {
+			    // ignore
 			}
     	    finally {
     	        try {
     	        	recordingFileWriter.close();
     	        } catch (final IOException ignored) {
+    	            // ignore
     	        }
     	    }
     	}

@@ -54,6 +54,7 @@ public class ExitCommand extends BuiltInShellCommand {
 	 */
 	@Override
 	public void printHelp(int indent) {
+	    printUsage(indent);
 	}
 
 	/**

@@ -1,5 +1,12 @@
 package org.komodo.modeshape.teiid.parser.bnf;
 
+import org.komodo.modeshape.teiid.parser.completion.TeiidCompletionParser;
+
+/**
+ * Constant values representing unique BNF identifiers for use
+ * in the completion parser {@link TeiidCompletionParser}
+ */
+@SuppressWarnings( "javadoc" )
 public interface BNFConstants {
 
     int stringVal = 9001;

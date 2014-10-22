@@ -33,6 +33,7 @@ public class SqlTextHover implements ITextHover {
                 if (hoverRegion.getLength() > -1)
                     return textViewer.getDocument().get(hoverRegion.getOffset(), hoverRegion.getLength());
             } catch (BadLocationException x) {
+                // Nothing to do
             }
         }
         return "emptySelection"; //$NON-NLS-1$

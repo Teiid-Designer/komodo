@@ -198,9 +198,12 @@ public class Admin8Factory {
     }
 
 	private class ResultCallback {
-		@SuppressWarnings("unused")
+
+	    @SuppressWarnings("unused")
 		void onSuccess(ModelNode outcome, ModelNode result) throws AdminException {
+		    // Do nothing
 		}
+
 		void onFailure(String msg) throws AdminProcessingException {
 			throw new AdminProcessingException(msg);
 		}
@@ -630,9 +633,6 @@ public class Admin8Factory {
         			}
         		}
 			}
-			@Override
-			public void onFailure(String msg) {
-			}
 		}
 
 		private class ConnectionFactoryProperties extends ResultCallback {
@@ -687,10 +687,6 @@ public class Admin8Factory {
 						this.dsProperties.setProperty(p.getName(), p.getValue().asString());
 					}
         		}
-			}
-
-			@Override
-			public void onFailure(String msg) {
 			}
 		}
 
@@ -1025,10 +1021,6 @@ public class Admin8Factory {
 		        		}
 		        	}
 		        }
-				@Override
-				public void onFailure(String msg) {
-					// no-op
-				}
 			});
 		}
 

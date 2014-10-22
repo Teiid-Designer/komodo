@@ -32,5 +32,5 @@ import org.komodo.spi.query.sql.lang.ISubqueryContainer;
  */
 public interface IScalarSubquery<LV extends ILanguageVisitor, C extends ICommand>
     extends IExpression<LV>, ISubqueryContainer<C> {
-
+    // No methods required
 }

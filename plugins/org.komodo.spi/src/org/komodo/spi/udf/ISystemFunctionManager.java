@@ -25,5 +25,5 @@ package org.komodo.spi.udf;
  *
  */
 public interface ISystemFunctionManager {
-
+    // No methods required
 }

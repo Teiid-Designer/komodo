@@ -35,7 +35,6 @@ import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Workspace;
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -121,8 +120,12 @@ public abstract class MultiUseAbstractTest {
             Node rootNode = session.getRootNode();
             NodeIterator children = rootNode.getNodes();
             while(children.hasNext()) {
+                Node child = children.nextNode();
                 try {
-                    children.nextNode().remove();
+                    // Cannot legally remove system nodes and they are not created
+                    // by the tests anyway so leave them alone
+                    if (!child.isNodeType("mode:system"))
+                        child.remove();
                 } catch (Exception ex) {
                     fail(ex.getLocalizedMessage());
                 }

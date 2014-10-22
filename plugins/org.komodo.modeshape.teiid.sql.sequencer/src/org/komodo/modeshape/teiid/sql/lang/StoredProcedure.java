@@ -33,8 +33,15 @@ import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
 import org.komodo.spi.query.sql.lang.IStoredProcedure;
 
+/**
+ *
+ */
 public class StoredProcedure extends ProcedureContainer implements TargetedCommand, IStoredProcedure<SPParameter, Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public StoredProcedure(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_STORED_PROCEDURE);

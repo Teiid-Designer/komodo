@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.komodo.utils.ArgCheck;
 
+/**
+ *
+ */
 public class Array extends ASTNode implements Expression {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public Array(ITeiidParser p, int id) {
         super(p, id);
     }

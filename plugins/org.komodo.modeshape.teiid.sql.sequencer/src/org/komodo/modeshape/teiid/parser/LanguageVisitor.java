@@ -128,7 +128,6 @@ import org.komodo.spi.query.sql.lang.ICompareCriteria;
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.ICreate;
 import org.komodo.spi.query.sql.lang.IDelete;
-import org.komodo.spi.query.sql.lang.IDependentSetCriteria;
 import org.komodo.spi.query.sql.lang.IDrop;
 import org.komodo.spi.query.sql.lang.IDynamicCommand;
 import org.komodo.spi.query.sql.lang.IExistsCriteria;
@@ -867,9 +866,6 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
     @Override
     public void visit(IInto obj) {
         visit((Into) obj);
-    }
-
-    public void visit(IDependentSetCriteria obj) {
     }
 
     @Override
