@@ -34,7 +34,7 @@ public interface SortSpecification {
         LAST;
 
         /**
-         * @param name
+         * @param name string version of a NullOrdering enum value
          * @return value with given name
          */
         public static NullOrdering findNullOrdering(String name) {

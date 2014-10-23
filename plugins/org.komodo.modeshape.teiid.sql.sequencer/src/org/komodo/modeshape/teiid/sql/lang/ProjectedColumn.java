@@ -29,8 +29,15 @@ import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.spi.query.sql.lang.IProjectedColumn;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
+/**
+ *
+ */
 public class ProjectedColumn extends ASTNode implements IProjectedColumn<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public ProjectedColumn(ITeiidParser p, int id) {
         super(p, id);
     }

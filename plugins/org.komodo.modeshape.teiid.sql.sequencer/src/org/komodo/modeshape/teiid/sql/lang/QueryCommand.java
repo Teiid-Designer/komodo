@@ -16,8 +16,8 @@ public abstract class QueryCommand extends Command
     implements IQueryCommand<OrderBy, Query, Expression, LanguageVisitor> {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public QueryCommand(ITeiidParser p, int id) {
         super(p, id);

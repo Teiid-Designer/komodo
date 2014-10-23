@@ -33,6 +33,9 @@ import org.komodo.spi.query.sql.symbol.IFunction;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.komodo.spi.udf.IFunctionDescriptor;
 
+/**
+ *
+ */
 public class Function extends ASTNode implements Expression, IFunction<FunctionDescriptor, LanguageVisitor> {
 
     public static class FunctionDescriptor implements IFunctionDescriptor {

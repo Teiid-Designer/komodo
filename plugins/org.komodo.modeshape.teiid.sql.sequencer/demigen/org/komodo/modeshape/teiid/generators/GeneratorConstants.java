@@ -30,6 +30,9 @@ import org.komodo.spi.constants.StringConstants;
 @SuppressWarnings( "nls" )
 public interface GeneratorConstants extends StringConstants {
 
+    /**
+     * License statement for generated classes
+     */
     String LICENSE = EMPTY_STRING +
     "/*" + NEW_LINE +
     " * JBoss, Home of Professional Open Source." + NEW_LINE +
@@ -53,14 +56,29 @@ public interface GeneratorConstants extends StringConstants {
     " * 02110-1301 USA." + NEW_LINE +
     " */" + NEW_LINE;
 
+    /**
+     * Directory where the generator is executed from
+     */
     String EXEC_HOME = DOT;
 
+    /**
+     * Source directory relative to the home directory
+     */
     String SRC_DIR = EXEC_HOME + File.separator + SRC;
 
+    /**
+     * Gen directory relative to the home directory
+     */
     String GEN_DIR = EXEC_HOME + File.separator + "gen";
 
+    /**
+     * Demi Gen directory relative to the home directory
+     */
     String DEMI_GEN_DIR = EXEC_HOME + File.separator + "demigen";
-    
+
+    /**
+     * Utilities for use in the generators
+     */
     class Utilities {
 
         public static String convertPackageToDirPath(Package pkg) {

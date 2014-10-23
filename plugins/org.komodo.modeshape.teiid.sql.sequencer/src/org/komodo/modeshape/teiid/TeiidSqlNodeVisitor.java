@@ -174,7 +174,7 @@ import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
 public class TeiidSqlNodeVisitor
     implements ItemVisitor, TeiidSqlCallback, Reserved, NonReserved, Tokens {
 
-    public static final String UNDEFINED = "<undefined>"; //$NON-NLS-1$
+    private static final String UNDEFINED = "<undefined>"; //$NON-NLS-1$
 
     protected static final String BEGIN_HINT = "/*+"; //$NON-NLS-1$
 
@@ -263,10 +263,10 @@ public class TeiidSqlNodeVisitor
     }
 
     /**
-     * @param teiidVersion
-     * @param node
+     * @param teiidVersion version of teiid
+     * @param node node to be visited
      * @return SQL String representation of the given node
-     * @throws Exception
+     * @throws Exception if node causes a failure
      */
     public String getTeiidSql(ITeiidVersion teiidVersion, Node node) throws Exception {
         if (node == null)

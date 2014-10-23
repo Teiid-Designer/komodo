@@ -23,8 +23,8 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IBetweenCriteria;
 
@@ -35,8 +35,8 @@ import org.komodo.spi.query.sql.lang.IBetweenCriteria;
 public class BetweenCriteria extends Criteria implements PredicateCriteria, IBetweenCriteria<LanguageVisitor> {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public BetweenCriteria(ITeiidParser p, int id) {
         super(p, id);
@@ -66,7 +66,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
     }
 
     /**
-     * @param lowerExpression
+     * @param lowerExpression value
      */
     public void setLowerExpression(Expression lowerExpression) {
         setChild(TeiidSqlLexicon.BetweenCriteria.LOWER_EXPRESSION_REF_NAME, lowerExpression);
@@ -81,7 +81,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
     }
 
     /**
-     * @param upperExpression
+     * @param upperExpression value
      */
     public void setUpperExpression(Expression upperExpression) {
         setChild(TeiidSqlLexicon.BetweenCriteria.UPPER_EXPRESSION_REF_NAME, upperExpression);

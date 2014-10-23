@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLQuery;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
+/**
+ *
+ */
 public class XMLQuery extends ASTNode implements Expression, IXMLQuery<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public XMLQuery(ITeiidParser p, int id) {
         super(p, id);
         setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.XML.name());

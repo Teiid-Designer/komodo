@@ -29,8 +29,15 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLAttributes;
 
+/**
+ *
+ */
 public class XMLAttributes extends ASTNode implements IXMLAttributes<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public XMLAttributes(ITeiidParser p, int id) {
         super(p, id);
     }

@@ -29,8 +29,15 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.ITextColumn;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
+/**
+ *
+ */
 public class TextColumn extends ProjectedColumn implements ITextColumn<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public TextColumn(ITeiidParser p, int id) {
         super(p, id);
     }

@@ -65,7 +65,7 @@ public class ParseInfo implements Serializable {
     }
 
     /**
-     * @param ansiQuotedIdentifiers
+     * @param ansiQuotedIdentifiers value to set
      */
     public void setAnsiQuotedIdentifiers(boolean ansiQuotedIdentifiers) {
         this.ansiQuotedIdentifiers = ansiQuotedIdentifiers;

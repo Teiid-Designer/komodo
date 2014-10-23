@@ -28,8 +28,8 @@ import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 public abstract class ProcedureContainer extends Command {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public ProcedureContainer(ITeiidParser p, int id) {
         super(p, id);

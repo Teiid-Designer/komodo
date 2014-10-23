@@ -24,10 +24,11 @@ package org.komodo.modeshape.teiid.generators.bnf.clause;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.komodo.modeshape.teiid.generators.bnf.TeiidBNFGenerator;
 
 
 /**
- *
+ * A clause of text surrounded by brackets. Used in {@link TeiidBNFGenerator}
  */
 public class BracketClause extends AbstractGroupClause {
 

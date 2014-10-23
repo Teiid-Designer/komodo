@@ -30,8 +30,8 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 public class NamespaceItem extends ASTNode {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public NamespaceItem(ITeiidParser p, int id) {
         super(p, id);
@@ -61,7 +61,7 @@ public class NamespaceItem extends ASTNode {
     }
 
     /**
-    * @param prefix the prefix to set
+     * @param prefix the prefix to set
     */
     public void setPrefix(String prefix) {
         setProperty(TeiidSqlLexicon.NamespaceItem.PREFIX_PROP_NAME, prefix);

@@ -23,9 +23,10 @@ package org.komodo.modeshape.teiid.generators.bnf.clause;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.modeshape.teiid.generators.bnf.TeiidBNFGenerator;
 
 /**
- *
+ * Case Statement representation used in {@link TeiidBNFGenerator}
  */
 public class CaseStatement {
 
@@ -41,7 +42,7 @@ public class CaseStatement {
     }
 
     /**
-     * @param declaration
+     * @param declaration to be added
      */
     public void addDeclaration(String declaration) {
         this.declarations.add(declaration);
@@ -55,7 +56,7 @@ public class CaseStatement {
     }
 
     /**
-     * @param statement
+     * @param statement to be added
      */
     public void addStatement(String statement) {
         statements.add(statement);

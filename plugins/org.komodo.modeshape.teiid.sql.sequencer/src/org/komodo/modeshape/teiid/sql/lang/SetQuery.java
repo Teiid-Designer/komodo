@@ -31,9 +31,16 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ISetQuery;
 
+/**
+ *
+ */
 public class SetQuery extends QueryCommand
     implements ISetQuery<QueryCommand, OrderBy, Query, Expression, LanguageVisitor>{
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public SetQuery(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_QUERY);
