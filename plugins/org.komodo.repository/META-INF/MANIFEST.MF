@@ -8,5 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Localization: plugin
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
- org.komodo.modeshape.lib;bundle-version="1.0.0"
+ org.komodo.modeshape.lib;bundle-version="1.0.0",
+ org.komodo.modeshape.teiid.sql.sequencer;bundle-version="1.0.0",
+ org.komodo.utils
 Export-Package: org.komodo.repository

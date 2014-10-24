@@ -46,7 +46,7 @@ public final class ModelType implements Serializable {
     /**
      * Enumerator versions of the ModelType literals
      */
-    public static enum Type {
+    public enum Type {
         /**
          * Enum version of {@link ModelType} literal
          */
@@ -159,7 +159,7 @@ public final class ModelType implements Serializable {
         /**
          * @return array of the type names
          */
-        public static List<String> getNames() {
+        public static synchronized List<String> getNames() {
             if (nameCache == null) {
                 nameCache = new ArrayList<String>();
                 for (Type type : Type.values()) {

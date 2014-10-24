@@ -21,10 +21,19 @@
  */
 package org.komodo.repository;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import org.komodo.spi.repository.IRepository;
 import org.komodo.spi.repository.IRepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
+import org.komodo.utils.KLog;
+import org.modeshape.common.collection.Problem;
+import org.modeshape.common.collection.Problems;
+import org.modeshape.jcr.JcrRepository;
 import org.modeshape.jcr.ModeShapeEngine;
+import org.modeshape.jcr.RepositoryConfiguration;
 
 /**
  * A repository installed on the local machine, using the modeshape
@@ -32,16 +41,27 @@ import org.modeshape.jcr.ModeShapeEngine;
  */
 public class LocalRepository implements IRepository {
 
+    private static String LOCAL_REPOSITORY_CONFIG = "local-repository-config.json"; //$NON-NLS-1$
+
     private static LocalRepository instance;
 
-    private final static ModeShapeEngine engine = new ModeShapeEngine();
+    private final static ModeShapeEngine msEngine = new ModeShapeEngine();
 
+    private JcrRepository repository;
+
+    /**
+     * @return singleton instance
+     */
     public static LocalRepository getInstance() {
         if (instance == null)
             instance = new LocalRepository();
 
         return instance;
     }
+
+    private State state;
+
+    private List<IRepositoryClient> clients = new ArrayList<IRepositoryClient>();
 
     /**
      * Create instance
@@ -55,7 +75,7 @@ public class LocalRepository implements IRepository {
 
     @Override
     public State getState() {
-        return null;
+        return state;
     }
 
     @Override
@@ -70,17 +90,71 @@ public class LocalRepository implements IRepository {
 
     @Override
     public void add(IRepositoryClient client) {
+        clients .add(client);
     }
 
     @Override
     public void remove(IRepositoryClient client) {
+        clients.remove(client);
     }
 
+    private void startRepository() {
+        if (this.state == State.REACHABLE)
+            return;
+
+        try {
+            // start the ModeShape Engine
+            msEngine.start();
+         
+            // start the local repository
+            URL repoConfigPath = getClass().getResource(LOCAL_REPOSITORY_CONFIG);
+            final RepositoryConfiguration config = RepositoryConfiguration.read(repoConfigPath);
+            Problems problems = config.validate();
+            if (problems.hasProblems()) {
+
+                for (Problem problem : problems) {
+                    KLog.getLogger().error(
+                                           Messages.getString(
+                                                              Messages.LocalRepository.Configuration_Problem, problem.getMessageString()),
+                                                              problem.getThrowable());
+                }
+
+                // Catastrophic error if the configuration is not valid!
+                throw new RuntimeException(Messages.getString(Messages.LocalRepository.Configuration_Failure));
+            }
+
+            repository = msEngine.deploy(config);
+            problems = repository.getStartupProblems();
+            if (problems.hasErrors() || problems.hasWarnings()) {
+                Iterator<Problem> iterator = problems.iterator();
+                while(iterator.hasNext()) {
+                    Problem problem = iterator.next();
+                    switch (problem.getStatus()) {
+                        case ERROR:
+                            throw new RuntimeException(
+                                                       Messages.getString(
+                                                                          Messages.LocalRepository.Deployment_Failure, problem.getMessageString()),
+                                                                          problem.getThrowable());
+                        default:
+                            KLog.getLogger().warn(problem.getMessageString(), problem.getThrowable());
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            KLog.getLogger().error(
+                                   Messages.getString(
+                                                      Messages.LocalRepository.General_Exception), ex);
+            throw new RuntimeException(ex);
+        }
+        
+        this.state = State.REACHABLE;
+    }
+    
     @Override
     public void notify(RepositoryClientEvent event) {
         if (event.getType() == RepositoryClientEvent.EventType.STARTED) {
             // Start the modeshape engine if not already started
-            // TODO
+            startRepository();
         }
     }
 
