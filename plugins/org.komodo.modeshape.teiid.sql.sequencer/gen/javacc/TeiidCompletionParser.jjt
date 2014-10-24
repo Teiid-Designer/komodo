@@ -76,7 +76,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.modeshape.teiid.Messages;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.StringUtils;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.parser.bnf.BNF;
 

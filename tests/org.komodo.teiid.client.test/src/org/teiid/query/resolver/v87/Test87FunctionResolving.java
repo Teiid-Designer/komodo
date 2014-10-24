@@ -68,7 +68,7 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
             resolver.resolveLanguageObject(func, tm);
             fail();
         } catch (QueryResolverException e) {
-
+            // successful test
         }
 
         sql = "z.f()";

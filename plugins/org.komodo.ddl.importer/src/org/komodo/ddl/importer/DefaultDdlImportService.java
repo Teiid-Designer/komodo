@@ -38,7 +38,7 @@ import org.komodo.relational.compare.DifferenceGenerator;
 import org.komodo.relational.compare.DifferenceReport;
 import org.komodo.relational.model.Model;
 import org.komodo.utils.FileUtils;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.StringUtils;
 import org.modeshape.common.text.ParsingException;
 import org.modeshape.common.text.Position;
 import org.modeshape.sequencer.ddl.DdlParsers;
@@ -136,7 +136,7 @@ public class DefaultDdlImportService implements DdlImportService {
 	 */
 	private Model importDdl(String ddlString, String ddlFileName, ImportOptions importOptions, ImportMessages importMessages) {
 		Model relationalModel = null;
-		if(StringUtil.isEmpty(ddlString)) {
+		if(StringUtils.isEmpty(ddlString)) {
 			importMessages.addErrorMessage(Messages.getString(DDL_IMPORTER.errorEmptyDdlMsg));
 			return null;
 		}
@@ -145,7 +145,7 @@ public class DefaultDdlImportService implements DdlImportService {
         DdlParsers parsers = new DdlParsers();
         try {
         	// DDL Parser specified
-        	if(!StringUtil.isEmpty(importOptions.getParser())) {
+        	if(!StringUtils.isEmpty(importOptions.getParser())) {
         		rootNode = parsers.parseUsing(ddlString,importOptions.getParser());
         	// No DDL parser is specified - user DdlParsers which will score the best fit
         	} else {
@@ -159,7 +159,7 @@ public class DefaultDdlImportService implements DdlImportService {
         	importMessages.setParseErrorColNumber(position.getColumn());
         	importMessages.setParseErrorLineNumber(position.getLine());
         	importMessages.setParseErrorIndex(position.getIndexInContent());
-        	if(!StringUtil.isEmpty(importOptions.getParser())) {
+        	if(!StringUtils.isEmpty(importOptions.getParser())) {
         		importMessages.setParserId(importOptions.getParser());
         	} else if(rootNode!=null) {
                 String parserId = (String) rootNode.getProperty(StandardDdlLexicon.PARSER_ID);

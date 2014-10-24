@@ -26,18 +26,26 @@ import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
- *
+ * Teiid BNF implemented auto completion class based on Teiid Parser template
  */
 @SuppressWarnings({"static-access", "nls"})
 public class BNF  extends AbstractBNF {
 
 	/**
-	 * @param version
+	 * @param version of teiid
 	 */
 	public BNF(ITeiidVersion version) {
 		super(version);
 	}
 
+	/**
+	* Create completions for stringVal
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] stringVal(int... indices) {
 		List<String> bnf = newList();
 
@@ -45,6 +53,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for nonReserved
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] nonReserved(int... indices) {
 		List<String> bnf = newList();
 
@@ -126,6 +142,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for id
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] id(int... indices) {
 		List<String> bnf = newList();
 
@@ -134,6 +158,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for command
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] command(int... indices) {
 		List<String> bnf = newList();
 
@@ -158,6 +190,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for designerCommand
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] designerCommand(int... indices) {
 		List<String> bnf = newList();
 
@@ -182,6 +222,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for createTrigger
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] createTrigger(int... indices) {
 		List<String> bnf = newList();
 
@@ -227,6 +275,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for alter
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] alter(int... indices) {
 		List<String> bnf = newList();
 
@@ -280,6 +336,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for forEachRowTriggerAction
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] forEachRowTriggerAction(int... indices) {
 		List<String> bnf = newList();
 
@@ -316,6 +380,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for userCommand
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] userCommand(int... indices) {
 		List<String> bnf = newList();
 
@@ -330,6 +402,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for errorStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] errorStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -346,6 +426,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for raiseStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] raiseStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -366,6 +454,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for exceptionReference
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] exceptionReference(int... indices) {
 		List<String> bnf = newList();
 
@@ -374,6 +470,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for exception
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] exception(int... indices) {
 		List<String> bnf = newList();
 
@@ -401,6 +505,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for statement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] statement(int... indices) {
 		List<String> bnf = newList();
 
@@ -427,6 +539,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for delimitedStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] delimitedStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -467,6 +587,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for compoundStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] compoundStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -502,6 +630,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for branchingStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] branchingStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -526,6 +662,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for returnStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] returnStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -542,6 +686,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for whileStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] whileStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -567,6 +719,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for loopStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] loopStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -601,6 +761,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for ifStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] ifStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -632,6 +800,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for declareStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] declareStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -661,6 +837,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for assignStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] assignStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -691,6 +875,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for assignStatementOperand
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] assignStatementOperand(int... indices) {
 		List<String> bnf = newList();
 
@@ -703,6 +895,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for sqlStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] sqlStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -731,6 +931,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for createProcedure
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] createProcedure(int... indices) {
 		List<String> bnf = newList();
 
@@ -754,6 +962,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for procedureBodyCommand
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] procedureBodyCommand(int... indices) {
 		List<String> bnf = newList();
 
@@ -778,6 +994,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for dynamicCommand
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] dynamicCommand(int... indices) {
 		List<String> bnf = newList();
 
@@ -838,6 +1062,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for setClauseList
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] setClauseList(int... indices) {
 		List<String> bnf = newList();
 
@@ -863,6 +1095,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for createElementsWithTypes
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] createElementsWithTypes(int... indices) {
 		List<String> bnf = newList();
 
@@ -885,6 +1125,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for callableStatement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] callableStatement(int... indices) {
 		List<String> bnf = newList();
 
@@ -932,6 +1180,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for storedProcedure
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] storedProcedure(int... indices) {
 		List<String> bnf = newList();
 
@@ -973,6 +1229,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for executeNamedParams
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] executeNamedParams(int... indices) {
 		List<String> bnf = newList();
 
@@ -1002,6 +1266,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for insert
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] insert(int... indices) {
 		List<String> bnf = newList();
 
@@ -1035,6 +1307,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for expressionList
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] expressionList(int... indices) {
 		List<String> bnf = newList();
 
@@ -1054,6 +1334,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for update
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] update(int... indices) {
 		List<String> bnf = newList();
 
@@ -1083,6 +1371,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for delete
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] delete(int... indices) {
 		List<String> bnf = newList();
 
@@ -1109,6 +1405,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for queryExpression
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] queryExpression(int... indices) {
 		List<String> bnf = newList();
 
@@ -1133,6 +1437,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for withListElement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] withListElement(int... indices) {
 		List<String> bnf = newList();
 
@@ -1159,6 +1471,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for queryExpressionBody
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] queryExpressionBody(int... indices) {
 		List<String> bnf = newList();
 
@@ -1202,6 +1522,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for queryTerm
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] queryTerm(int... indices) {
 		List<String> bnf = newList();
 
@@ -1229,6 +1557,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for queryPrimary
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] queryPrimary(int... indices) {
 		List<String> bnf = newList();
 
@@ -1259,6 +1595,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for query
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] query(int... indices) {
 		List<String> bnf = newList();
 
@@ -1287,12 +1631,21 @@ public class BNF  extends AbstractBNF {
 				append(bnf, having(0));
 				break;
 			case BNF.having:
+				// No completions required
 				break;
 		}
 
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for into
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] into(int... indices) {
 		List<String> bnf = newList();
 
@@ -1309,6 +1662,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for select
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] select(int... indices) {
 		List<String> bnf = newList();
 
@@ -1337,6 +1698,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for selectSymbol
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] selectSymbol(int... indices) {
 		List<String> bnf = newList();
 
@@ -1345,6 +1714,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for selectExpression
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] selectExpression(int... indices) {
 		List<String> bnf = newList();
 
@@ -1365,6 +1742,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for derivedColumn
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] derivedColumn(int... indices) {
 		List<String> bnf = newList();
 
@@ -1384,6 +1769,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for allInGroupSymbol
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] allInGroupSymbol(int... indices) {
 		List<String> bnf = newList();
 
@@ -1391,6 +1784,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for orderedAgg
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] orderedAgg(int... indices) {
 		List<String> bnf = newList();
 
@@ -1423,6 +1824,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for textAgg
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] textAgg(int... indices) {
 		List<String> bnf = newList();
 
@@ -1473,6 +1882,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for aggregateSymbol
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] aggregateSymbol(int... indices) {
 		List<String> bnf = newList();
 
@@ -1534,6 +1951,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for analyticAggregateSymbol
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] analyticAggregateSymbol(int... indices) {
 		List<String> bnf = newList();
 
@@ -1561,6 +1986,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for filterClause
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] filterClause(int... indices) {
 		List<String> bnf = newList();
 
@@ -1586,6 +2019,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for from
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] from(int... indices) {
 		List<String> bnf = newList();
 
@@ -1608,6 +2049,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for tableReference
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] tableReference(int... indices) {
 		List<String> bnf = newList();
 
@@ -1624,6 +2073,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for joinedTable
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] joinedTable(int... indices) {
 		List<String> bnf = newList();
 
@@ -1649,6 +2106,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for crossJoin
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] crossJoin(int... indices) {
 		List<String> bnf = newList();
 
@@ -1672,6 +2137,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for qualifiedJoin
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] qualifiedJoin(int... indices) {
 		List<String> bnf = newList();
 
@@ -1716,6 +2189,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for tablePrimary
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] tablePrimary(int... indices) {
 		List<String> bnf = newList();
 
@@ -1769,6 +2250,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for xmlSerialize
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] xmlSerialize(int... indices) {
 		List<String> bnf = newList();
 
@@ -1872,6 +2361,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for arrayTable
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] arrayTable(int... indices) {
 		List<String> bnf = newList();
 
@@ -1907,6 +2404,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for textTable
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] textTable(int... indices) {
 		List<String> bnf = newList();
 
@@ -1983,6 +2488,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for textColumn
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] textColumn(int... indices) {
 		List<String> bnf = newList();
 
@@ -2012,6 +2525,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for xmlQuery
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] xmlQuery(int... indices) {
 		List<String> bnf = newList();
 
@@ -2054,6 +2575,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for objectTable
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] objectTable(int... indices) {
 		List<String> bnf = newList();
 
@@ -2096,6 +2625,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for objectColumn
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] objectColumn(int... indices) {
 		List<String> bnf = newList();
 
@@ -2117,12 +2654,21 @@ public class BNF  extends AbstractBNF {
 				append(bnf, expression(0));
 				break;
 			case BNF.expression:
+				// No completions required
 				break;
 		}
 
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for xmlTable
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] xmlTable(int... indices) {
 		List<String> bnf = newList();
 
@@ -2167,6 +2713,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for xmlColumn
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] xmlColumn(int... indices) {
 		List<String> bnf = newList();
 
@@ -2200,6 +2754,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for intVal
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] intVal(int... indices) {
 		List<String> bnf = newList();
 
@@ -2221,6 +2783,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for subqueryFromClause
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] subqueryFromClause(int... indices) {
 		List<String> bnf = newList();
 
@@ -2259,6 +2829,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for unaryFromClause
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] unaryFromClause(int... indices) {
 		List<String> bnf = newList();
 
@@ -2279,6 +2857,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for where
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] where(int... indices) {
 		List<String> bnf = newList();
 
@@ -2295,6 +2881,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for criteria
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] criteria(int... indices) {
 		List<String> bnf = newList();
 
@@ -2302,6 +2896,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for compoundCritOr
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] compoundCritOr(int... indices) {
 		List<String> bnf = newList();
 
@@ -2321,6 +2923,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for compoundCritAnd
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] compoundCritAnd(int... indices) {
 		List<String> bnf = newList();
 
@@ -2340,6 +2950,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for notCrit
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] notCrit(int... indices) {
 		List<String> bnf = newList();
 
@@ -2357,6 +2975,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for booleanPrimary
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] booleanPrimary(int... indices) {
 		List<String> bnf = newList();
 
@@ -2380,6 +3006,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for operator
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] operator(int... indices) {
 		List<String> bnf = newList();
 
@@ -2393,6 +3027,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for compareCrit
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] compareCrit(int... indices) {
 		List<String> bnf = newList();
 
@@ -2409,6 +3051,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for subquery
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] subquery(int... indices) {
 		List<String> bnf = newList();
 
@@ -2432,6 +3082,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for subqueryCompareCriteria
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] subqueryCompareCriteria(int... indices) {
 		List<String> bnf = newList();
 
@@ -2459,6 +3117,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for matchCrit
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] matchCrit(int... indices) {
 		List<String> bnf = newList();
 
@@ -2487,6 +3153,7 @@ public class BNF  extends AbstractBNF {
 				append(bnf, commonValueExpression(0));
 				break;
 			case BNF.ESCAPE:
+				// No completions required
 				break;
 			case BNF.LBRACE:
 				append(bnf, "ESCAPE");
@@ -2499,6 +3166,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for regexMatchCrit
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] regexMatchCrit(int... indices) {
 		List<String> bnf = newList();
 
@@ -2519,6 +3194,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for betweenCrit
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] betweenCrit(int... indices) {
 		List<String> bnf = newList();
 
@@ -2545,6 +3228,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for isNullCrit
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] isNullCrit(int... indices) {
 		List<String> bnf = newList();
 
@@ -2565,6 +3256,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for setCrit
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] setCrit(int... indices) {
 		List<String> bnf = newList();
 
@@ -2596,6 +3295,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for existsCriteria
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] existsCriteria(int... indices) {
 		List<String> bnf = newList();
 
@@ -2612,6 +3319,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for groupBy
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] groupBy(int... indices) {
 		List<String> bnf = newList();
 
@@ -2637,12 +3352,21 @@ public class BNF  extends AbstractBNF {
 				append(bnf, expressionList(0));
 				break;
 			case BNF.RPAREN:
+				// No completions required
 				break;
 		}
 
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for having
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] having(int... indices) {
 		List<String> bnf = newList();
 
@@ -2655,12 +3379,21 @@ public class BNF  extends AbstractBNF {
 				append(bnf, criteria(0));
 				break;
 			case BNF.criteria:
+				// No completions required
 				break;
 		}
 
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for orderby
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] orderby(int... indices) {
 		List<String> bnf = newList();
 
@@ -2686,6 +3419,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for sortSpecification
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] sortSpecification(int... indices) {
 		List<String> bnf = newList();
 
@@ -2714,6 +3455,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for sortKey
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] sortKey(int... indices) {
 		List<String> bnf = newList();
 
@@ -2721,6 +3470,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for intParam
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] intParam(int... indices) {
 		List<String> bnf = newList();
 
@@ -2729,6 +3486,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for limit
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] limit(int... indices) {
 		List<String> bnf = newList();
 
@@ -2757,6 +3522,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for fetchLimit
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] fetchLimit(int... indices) {
 		List<String> bnf = newList();
 
@@ -2794,6 +3567,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for option
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] option(int... indices) {
 		List<String> bnf = newList();
 
@@ -2840,6 +3621,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for expression
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] expression(int... indices) {
 		List<String> bnf = newList();
 
@@ -2847,6 +3636,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for commonValueExpression
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] commonValueExpression(int... indices) {
 		List<String> bnf = newList();
 
@@ -2866,6 +3663,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for plusExpression
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] plusExpression(int... indices) {
 		List<String> bnf = newList();
 
@@ -2885,6 +3690,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for plusMinus
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] plusMinus(int... indices) {
 		List<String> bnf = newList();
 
@@ -2893,6 +3706,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for timesExpression
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] timesExpression(int... indices) {
 		List<String> bnf = newList();
 
@@ -2912,6 +3733,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for timesOperator
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] timesOperator(int... indices) {
 		List<String> bnf = newList();
 
@@ -2920,6 +3749,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for valueExpressionPrimary
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] valueExpressionPrimary(int... indices) {
 		List<String> bnf = newList();
 
@@ -2952,6 +3789,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for parameterReference
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] parameterReference(int... indices) {
 		List<String> bnf = newList();
 
@@ -2969,6 +3814,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for unescapedFunction
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] unescapedFunction(int... indices) {
 		List<String> bnf = newList();
 
@@ -3004,12 +3857,21 @@ public class BNF  extends AbstractBNF {
 				append(bnf, windowSpecification(0));
 				break;
 			case BNF.windowSpecification:
+				// No completions required
 				break;
 		}
 
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for nestedExpression
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] nestedExpression(int... indices) {
 		List<String> bnf = newList();
 
@@ -3033,6 +3895,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for unsignedValueExpressionPrimary
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] unsignedValueExpressionPrimary(int... indices) {
 		List<String> bnf = newList();
 
@@ -3050,21 +3920,28 @@ public class BNF  extends AbstractBNF {
 				append(bnf, caseExpression(0));
 				break;
 			case BNF.parameterReference:
+				// No completions required
 				break;
 			case BNF.ESCAPEDFUNCTION:
 				append(bnf, function(0));
 				break;
 			case BNF.unescapedFunction:
+				// No completions required
 				break;
 			case BNF.ID:
+				// No completions required
 				break;
 			case BNF.subquery:
+				// No completions required
 				break;
 			case BNF.nestedExpression:
+				// No completions required
 				break;
 			case BNF.searchedCaseExpression:
+				// No completions required
 				break;
 			case BNF.caseExpression:
+				// No completions required
 				break;
 			case BNF.function:
 				append(bnf, "}");
@@ -3074,6 +3951,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for windowSpecification
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] windowSpecification(int... indices) {
 		List<String> bnf = newList();
 
@@ -3108,6 +3993,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for caseExpression
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] caseExpression(int... indices) {
 		List<String> bnf = newList();
 
@@ -3136,6 +4029,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for searchedCaseExpression
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] searchedCaseExpression(int... indices) {
 		List<String> bnf = newList();
 
@@ -3162,6 +4063,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for function
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] function(int... indices) {
 		List<String> bnf = newList();
 
@@ -3217,6 +4126,7 @@ public class BNF  extends AbstractBNF {
 		} else if (index == BNF.TIMESTAMPDIFF) {
 			append(bnf, "(");
 		} else if (index == BNF.queryString) {
+			// No completions required
 		} else if (index == BNF.LEFT) {
 			append(bnf, "(");
 		} else if (index == BNF.RIGHT) {
@@ -3244,12 +4154,17 @@ public class BNF  extends AbstractBNF {
 		} else if (index == BNF.INSERT) {
 			append(bnf, "(");
 		} else if (index == BNF.xmlParse) {
+			// No completions required
 		} else if (index == BNF.xmlElement) {
+			// No completions required
 		} else if (index == BNF.XMLPI) {
 			append(bnf, "(");
 		} else if (index == BNF.jsonObject) {
+			// No completions required
 		} else if (index == BNF.xmlSerialize) {
+			// No completions required
 		} else if (index == BNF.xmlQuery) {
+			// No completions required
 		} else if (index == BNF.id) {
 			append(bnf, "(");
 		} else if (index == concat(BNF.CONVERT,BNF.LPAREN)) {
@@ -3403,6 +4318,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for xmlParse
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] xmlParse(int... indices) {
 		List<String> bnf = newList();
 
@@ -3436,6 +4359,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for queryString
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] queryString(int... indices) {
 		List<String> bnf = newList();
 
@@ -3466,6 +4397,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for xmlElement
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] xmlElement(int... indices) {
 		List<String> bnf = newList();
 
@@ -3505,6 +4444,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for xmlAttributes
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] xmlAttributes(int... indices) {
 		List<String> bnf = newList();
 
@@ -3531,6 +4478,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for jsonObject
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] jsonObject(int... indices) {
 		List<String> bnf = newList();
 
@@ -3553,6 +4508,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for derivedColumnList
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] derivedColumnList(int... indices) {
 		List<String> bnf = newList();
 
@@ -3572,6 +4535,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for xmlForest
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] xmlForest(int... indices) {
 		List<String> bnf = newList();
 
@@ -3601,6 +4572,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for xmlNamespaces
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] xmlNamespaces(int... indices) {
 		List<String> bnf = newList();
 
@@ -3627,6 +4606,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for namespaceItem
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] namespaceItem(int... indices) {
 		List<String> bnf = newList();
 
@@ -3644,12 +4631,22 @@ public class BNF  extends AbstractBNF {
 		} else if (index == BNF.AS) {
 			append(bnf, id(0));
 		} else if (index == concat(BNF.DEFAULT_KEYWORD,BNF.stringVal)) {
+			// No completions required
 		} else if (index == BNF.id) {
+			// No completions required
 		}
 
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for parseDataTypePrimary
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] parseDataTypePrimary(int... indices) {
 		List<String> bnf = newList();
 
@@ -3735,6 +4732,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for parseDataType
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] parseDataType(int... indices) {
 		List<String> bnf = newList();
 
@@ -3757,6 +4762,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for intervalType
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] intervalType(int... indices) {
 		List<String> bnf = newList();
 
@@ -3772,6 +4785,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for nonNumericLiteral
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] nonNumericLiteral(int... indices) {
 		List<String> bnf = newList();
 
@@ -3785,6 +4806,7 @@ public class BNF  extends AbstractBNF {
 			append(bnf, "NULL");
 			append(bnf, "{ (D | T | TS | B )");
 		} else if (index == BNF.stringVal) {
+			// No completions required
 		} else if (index == BNF.ESCAPEDTYPE) {
 			append(bnf, stringVal(0));
 		} else if (index == concat(BNF.ESCAPEDTYPE,BNF.stringVal)) {
@@ -3794,6 +4816,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for unsignedNumericLiteral
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] unsignedNumericLiteral(int... indices) {
 		List<String> bnf = newList();
 
@@ -3803,6 +4833,14 @@ public class BNF  extends AbstractBNF {
 		return array(bnf);
 	}
 
+	/**
+	* Create completions for columnList
+	*
+	* @param indices identifiers specified in the parser
+	* @return array of possible completion choices
+	*
+	* @generated
+	*/
 	public String[] columnList(int... indices) {
 		List<String> bnf = newList();
 

@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.IExceptionExpression;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
+/**
+ *
+ */
 public class ExceptionExpression extends ASTNode implements Expression, IExceptionExpression<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public ExceptionExpression(ITeiidParser p, int id) {
         super(p, id);
         assignTypeName(DataTypeName.OBJECT);

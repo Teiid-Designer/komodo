@@ -99,6 +99,7 @@ public class SqlDoubleClickStrategy implements ITextDoubleClickStrategy {
 			return true;
 
 		} catch (BadLocationException x) {
+		    // Nothing to do
 		}
 
 		return false;

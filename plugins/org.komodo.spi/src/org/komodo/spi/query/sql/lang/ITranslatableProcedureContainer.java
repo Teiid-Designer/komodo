@@ -28,5 +28,5 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
  */
 public interface ITranslatableProcedureContainer<E extends IExpression, LV extends ILanguageVisitor>
     extends ILanguageObject<LV> {
-
+    // No methods required
 }

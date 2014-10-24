@@ -4,12 +4,12 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IFromClause;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 /**
  * A FromClause is an interface for subparts held in a FROM clause.  One 
@@ -22,8 +22,8 @@ public abstract class FromClause extends ASTNode
     implements IFromClause<LanguageVisitor>, TeiidSQLConstants.Reserved {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public FromClause(ITeiidParser p, int id) {
         super(p, id);
@@ -57,7 +57,7 @@ public abstract class FromClause extends ASTNode
     }
     
     /**
-     * @param makeInd
+     * @param makeInd value
      */
     public void setMakeInd(boolean makeInd) {
         setProperty(TeiidSqlLexicon.FromClause.MAKE_IND_PROP_NAME, makeInd);
@@ -72,7 +72,7 @@ public abstract class FromClause extends ASTNode
     }
 
     /**
-     * @param noUnnest
+     * @param noUnnest value
      */
     public void setNoUnnest(boolean noUnnest) {
         setProperty(TeiidSqlLexicon.FromClause.NO_UNNEST_PROP_NAME, noUnnest);
@@ -103,7 +103,7 @@ public abstract class FromClause extends ASTNode
     }
 
     /**
-     * @param makeDep
+     * @param makeDep value
      */
     public void setMakeDependency(MakeDep makeDep) {
         setChild(TeiidSqlLexicon.FromClause.MAKE_DEPENDENCY_REF_NAME, makeDep);
@@ -129,14 +129,14 @@ public abstract class FromClause extends ASTNode
     }
     
     /**
-     * @param preserve
+     * @param preserve value
      */
     public void setPreserve(boolean preserve) {
         setProperty(TeiidSqlLexicon.FromClause.PRESERVE_PROP_NAME, preserve);
     }
 
     /**
-     * @param groups
+     * @param groups value
      */
     public abstract void collectGroups(Collection<GroupSymbol> groups);
 

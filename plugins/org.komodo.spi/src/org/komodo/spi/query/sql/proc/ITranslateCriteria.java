@@ -31,5 +31,5 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
  */
 @Removed(Version.TEIID_8_0)
 public interface ITranslateCriteria<LV extends ILanguageVisitor> extends IPredicateCriteria<LV> {
-
+    // No methods required
 }

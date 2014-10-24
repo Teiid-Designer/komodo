@@ -25,9 +25,7 @@ import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.parser.QueryParser;
 import org.teiid.query.sql.lang.LanguageObject;
 
-/**
- * @param <T>
- */
+@SuppressWarnings( {"javadoc"} )
 public abstract class AbstractTest<T extends LanguageObject> {
 
     protected ITeiidVersion teiidVersion;

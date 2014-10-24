@@ -39,6 +39,7 @@ import org.teiid.query.sql.symbol.Symbol;
  * with respect to runtime metadata - also that they aren't resolved
  * to TemporaryMetadatID's.
  */
+@SuppressWarnings( {"javadoc"} )
 public class CheckNoTempMetadataIDsVisitor extends LanguageVisitor {
 
     private Collection<Symbol> symbolsWithTempMetadataIDs;

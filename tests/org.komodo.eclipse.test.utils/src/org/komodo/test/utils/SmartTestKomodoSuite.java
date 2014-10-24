@@ -44,6 +44,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 @Ignore
+@SuppressWarnings( {"javadoc"} )
 public class SmartTestKomodoSuite extends TestSuite {
 
     public static final String DEFAULT_TESTDATA_PATH = "testdata"; //$NON-NLS-1$

@@ -33,8 +33,8 @@ import org.komodo.spi.query.sql.lang.ISourceHint;
 public class SourceHint extends ASTNode implements ISourceHint {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public SourceHint(ITeiidParser p, int id) {
         super(p, id);

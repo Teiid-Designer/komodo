@@ -31,8 +31,15 @@ import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.spi.query.sql.symbol.ISearchedCaseExpression;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
+/**
+ *
+ */
 public class SearchedCaseExpression extends ASTNode implements Expression, ISearchedCaseExpression<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public SearchedCaseExpression(ITeiidParser p, int id) {
         super(p, id);
     }

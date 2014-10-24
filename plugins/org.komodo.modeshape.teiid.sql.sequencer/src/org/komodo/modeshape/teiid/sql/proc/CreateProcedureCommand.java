@@ -31,9 +31,16 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
 
+/**
+ *
+ */
 public class CreateProcedureCommand extends Command
     implements ICreateProcedureCommand<Block, GroupSymbol, Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public CreateProcedureCommand(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_UPDATE_PROCEDURE);

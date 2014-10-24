@@ -95,8 +95,8 @@ public class KomodoShell {
 
 	/**
 	 * Constructor.
-	 * @param inStream
-	 * @param outStream
+	 * @param inStream input stream
+	 * @param outStream output stream
 	 */
 	public KomodoShell(InputStream inStream, PrintStream outStream) {
 	    wsStatus = new WorkspaceStatusImpl(inStream, outStream);
@@ -121,6 +121,7 @@ public class KomodoShell {
 			try {
 				props.load(new FileInputStream(startupPropertiesFile));
 			} catch (Exception e) {
+			    // ignore
 			}
 			wsStatus.setProperties(props);
 		}
@@ -170,6 +171,7 @@ public class KomodoShell {
             shutdown  = true;
             this.reader.close();
         } catch (IOException e) {
+            // ignore
         }
         wsStatus.getOutputStream().println(msgIndentStr+Messages.getString(SHELL.DONE));
 	}

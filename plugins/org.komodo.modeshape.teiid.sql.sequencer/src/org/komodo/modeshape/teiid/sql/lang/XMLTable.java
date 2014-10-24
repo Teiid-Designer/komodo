@@ -30,8 +30,15 @@ import org.komodo.modeshape.teiid.sql.symbol.DerivedColumn;
 import org.komodo.modeshape.teiid.sql.symbol.XMLNamespaces;
 import org.komodo.spi.query.sql.lang.IXMLTable;
 
+/**
+ *
+ */
 public class XMLTable extends TableFunctionReference implements IXMLTable<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public XMLTable(ITeiidParser p, int id) {
         super(p, id);
     }

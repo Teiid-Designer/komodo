@@ -28,5 +28,5 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
  */
 public interface IDynamicCommand<E extends IExpression, LV extends ILanguageVisitor>
     extends ICommand<E, LV> {
-
+    // No methods required
 }

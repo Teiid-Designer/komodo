@@ -30,8 +30,8 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 public class MakeDep extends ASTNode {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public MakeDep(ITeiidParser p, int id) {
         super(p, id);

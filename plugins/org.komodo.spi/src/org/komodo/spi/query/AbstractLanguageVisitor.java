@@ -108,343 +108,427 @@ import org.komodo.spi.query.sql.symbol.IXMLQuery;
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
 
 /**
- *
+ * An implementation of a {@link ILanguageVisitor language object visitor} that does nothing.
  */
 public abstract class AbstractLanguageVisitor implements ILanguageVisitor {
 
     @Override
     public void visit(IBetweenCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ICaseExpression obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ICompareCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ICompoundCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ICreate obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IDelete obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IExistsCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IFrom obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IGroupBy obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IInsert obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IIsNullCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IJoinPredicate obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IJoinType obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ILimit obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IMatchCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(INotCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IOption obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IOrderBy obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IQuery obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ISearchedCaseExpression obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ISelect obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ISetCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ISetQuery obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IStoredProcedure obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ISubqueryCompareCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ISubqueryFromClause obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ISubquerySetCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IUnaryFromClause obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IUpdate obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IInto obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IDrop obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IAggregateSymbol obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IAliasSymbol obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IMultipleElementSymbol obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IConstant obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IElementSymbol obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IExpressionSymbol obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IFunction obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IGroupSymbol obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IReference obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IScalarSubquery obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IAssignmentStatement obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IBlock obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ICommandStatement obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ICreateProcedureCommand obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ICriteriaSelector obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IDeclareStatement obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IHasCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IIfStatement obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IRaiseStatement obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ITranslateCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IBranchingStatement obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IWhileStatement obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ILoopStatement obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IDynamicCommand obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IProcedureContainer obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ISetClauseList obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ISetClause obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IOrderByItem obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IXMLElement obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IXMLAttributes obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IXMLForest obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IXMLNamespaces obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ITextTable obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ITextLine obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IXMLTable obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IDerivedColumn obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IXMLSerialize obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IXMLQuery obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IQueryString obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IXMLParse obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IExpressionCriteria obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IWithQueryCommand obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(ITriggerAction obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IArrayTable obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IObjectTable objectTable) {
+        // nothing to do
     }
 
     @Override
     public void visit(IAlterView obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IAlterProcedure obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IAlterTrigger obj) {
+        // nothing to do
     }
 
     @Override
     public void visit(IWindowFunction windowFunction) {
+        // nothing to do
     }
 
     @Override
     public void visit(IArray array) {
+        // nothing to do
     }
 
     @Override
     public void visit(IExceptionExpression exceptionExpression) {
+        // nothing to do
     }
 
     @Override
     public void visit(IReturnStatement returnStatement) {
+        // nothing to do
     }
 
     @Override
     public void visit(IWindowSpecification windowSpecification) {
+        // nothing to do
     }
 }

@@ -131,7 +131,7 @@ public final class ModelType implements Serializable {
          * @return CamelCase version of name
          */
         public final String getCamelCaseName() {
-            return StringUtilities.toCamelCase(getName());
+            return StringUtils.toCamelCase(getName());
         }
 
         /**

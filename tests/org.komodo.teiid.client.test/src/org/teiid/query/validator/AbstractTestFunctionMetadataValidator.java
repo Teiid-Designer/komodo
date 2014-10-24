@@ -55,6 +55,7 @@ public abstract class AbstractTestFunctionMetadataValidator extends AbstractTest
 	        FunctionMetadataValidator.validateName(getTeiidVersion(), name);
 	     	fail("Expected exception but did not get one"); //$NON-NLS-1$
 	    } catch(Exception e) {
+	        // successful test
 	    }	    
 	}	
 
@@ -71,6 +72,7 @@ public abstract class AbstractTestFunctionMetadataValidator extends AbstractTest
 	        FunctionMetadataValidator.validateInvocationMethod(className, methodName, pushdown);
 	     	fail("Expected exception but did not get one"); //$NON-NLS-1$
 	    } catch(Exception e) {
+	        // successful test
 	    }	    
 	}	
 	

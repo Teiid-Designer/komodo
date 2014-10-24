@@ -18,9 +18,8 @@ package org.komodo.shell.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.shell.CompletionConstants;
-import org.komodo.utils.StringUtilities;
+import org.komodo.utils.StringUtils;
 
 
 /**
@@ -155,7 +154,7 @@ public class FileNameCompleter {
             if (file.getAbsolutePath().startsWith(translated)) {
                 // CharSequence name = file.getName() + (matches == 1 &&
                 // file.isDirectory() ? separator() : " ");
-                if (!StringUtilities.isEmpty(buffer)) {
+                if (!StringUtils.isBlank(buffer)) {
                     String toAdd = file.getAbsolutePath().substring(
                             file.getAbsolutePath().lastIndexOf(buffer));
                     if (file.isDirectory()) {

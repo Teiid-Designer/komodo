@@ -25,5 +25,5 @@ package org.komodo.spi.query.sql.lang;
  *
  */
 public interface ITargetedCommand {
-
+    // No methods required
 }

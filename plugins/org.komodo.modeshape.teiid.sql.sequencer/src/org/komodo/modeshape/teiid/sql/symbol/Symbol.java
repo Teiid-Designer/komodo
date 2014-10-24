@@ -34,7 +34,7 @@ import org.komodo.spi.query.sql.symbol.ISymbol;
 public abstract class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
 
     /**
-     * @param p
+     * @param p teiid parser
      * @param i
      */
     public Symbol(ITeiidParser p, int i) {

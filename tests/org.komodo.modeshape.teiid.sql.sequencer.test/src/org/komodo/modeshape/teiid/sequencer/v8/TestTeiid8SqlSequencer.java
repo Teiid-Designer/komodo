@@ -31,15 +31,10 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 @SuppressWarnings( {"javadoc"} )
 public class TestTeiid8SqlSequencer extends AbstractTestTeiidSqlSequencer {
 
-    /**
-     */
     public TestTeiid8SqlSequencer() {
         super(Version.TEIID_8_0.get());
     }
 
-    /**
-     * @param teiidVersion
-     */
     protected TestTeiid8SqlSequencer(ITeiidVersion teiidVersion) {
         super(teiidVersion);
     }

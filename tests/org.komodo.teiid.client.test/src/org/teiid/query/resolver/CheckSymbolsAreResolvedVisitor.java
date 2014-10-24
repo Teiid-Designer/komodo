@@ -40,6 +40,7 @@ import org.teiid.query.sql.symbol.SearchedCaseExpression;
  * Used to verify that all symbols in a LanguageObject were resolved
  * with respect to runtime metadata
  */
+@SuppressWarnings( {"javadoc"} )
 public class CheckSymbolsAreResolvedVisitor extends LanguageVisitor {
 
     private Collection<LanguageObject> unresolvedSymbols;

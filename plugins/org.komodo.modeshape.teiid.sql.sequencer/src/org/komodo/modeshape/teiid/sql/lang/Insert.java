@@ -34,8 +34,15 @@ import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.modeshape.teiid.sql.util.SymbolMap;
 import org.komodo.spi.query.sql.lang.IInsert;
 
+/**
+ *
+ */
 public class Insert extends ProcedureContainer implements TargetedCommand, IInsert<ElementSymbol, Expression, GroupSymbol, QueryCommand, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public Insert(ITeiidParser p, int id) {
         super(p, id);
         setType(TYPE_INSERT);

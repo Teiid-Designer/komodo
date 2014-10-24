@@ -34,8 +34,8 @@ import org.komodo.spi.query.sql.lang.IAlterView;
 public class AlterView  extends Alter<QueryCommand> implements IAlterView<Expression, LanguageVisitor> {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public AlterView(ITeiidParser p, int id) {
         super(p, id);

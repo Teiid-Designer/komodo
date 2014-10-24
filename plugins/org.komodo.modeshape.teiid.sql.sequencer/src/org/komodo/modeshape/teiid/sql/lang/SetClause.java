@@ -29,8 +29,15 @@ import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ISetClause;
 
+/**
+ *
+ */
 public class SetClause extends ASTNode implements ISetClause<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public SetClause(ITeiidParser p, int id) {
         super(p, id);
     }

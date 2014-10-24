@@ -25,11 +25,11 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.utils.KLog;
-import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 /**
 * Represents a StoredProcedure's parameter for encapsulation in the Query framework
@@ -56,8 +56,8 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
     public static final int RESULT_SET = ParameterInfo.RESULT_SET.index();
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public SPParameter(ITeiidParser p, int id) {
         super(p, id);
@@ -108,7 +108,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
     }
 
     /**
-     * @param parameterInfo
+     * @param parameterInfo value
      */
     @Override
     public void setParameterType(ParameterInfo parameterInfo) {

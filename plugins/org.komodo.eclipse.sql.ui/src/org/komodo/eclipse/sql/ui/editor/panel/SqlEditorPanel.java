@@ -17,8 +17,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.text.IUndoManager;
-import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -43,8 +41,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
-import org.komodo.eclipse.sql.ui.font.ScaledFontManager;
-import org.komodo.eclipse.sql.ui.font.TextFontManager;
 import org.komodo.eclipse.sql.ui.graphics.ColorManager;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.sql.lang.ICommand;
@@ -86,11 +82,6 @@ public class SqlEditorPanel extends SashForm
     boolean isCompleteRefresh = false;
     private boolean hasUserError = false;
     private boolean isEditable = true;
-    private TextFontManager tfmManager;
-
-    private int caretOffset = -1;
-    private int caretXPosition = 0;
-    private int caretYPosition = 0;
 
     /** The width of the vertical ruler. */
     private Object eventSource;
@@ -158,6 +149,7 @@ public class SqlEditorPanel extends SashForm
 
             @Override
             public void mouseUp( MouseEvent event ) {
+                // Nothing to do
             }
 
             @Override
@@ -260,6 +252,9 @@ public class SqlEditorPanel extends SashForm
         return sqlDocument.get();
     }
 
+    /**
+     * Clear the panel
+     */
     public void clear() {
         savedSql = EMPTY_STRING;
         panelSqlText = null;
@@ -269,7 +264,7 @@ public class SqlEditorPanel extends SashForm
     /**
      * Sets the SQL Statement on the Panel
      * 
-     * @param SQLString the SQL String to set on the panel
+     * @param sql the SQL String to set on the panel
      */
     public void setText( final String sql ) {
         this.eventSource = this;
@@ -278,7 +273,7 @@ public class SqlEditorPanel extends SashForm
         refreshWithDisplayComponent();
     }
 
-    public boolean threadIsNotDisplayThread() {
+    private boolean threadIsNotDisplayThread() {
         return (this.getDisplay() != null && Thread.currentThread() != this.getDisplay().getThread());
     }
 
@@ -418,7 +413,7 @@ public class SqlEditorPanel extends SashForm
         return command;
     }
 
-    public void showMessageArea( final boolean show ) {
+    private void showMessageArea( final boolean show ) {
         if (!isDisposed()) {
             if (show != messageShowing) {
                 if (threadIsNotDisplayThread()) {
@@ -447,14 +442,10 @@ public class SqlEditorPanel extends SashForm
         }
     }
 
-    public boolean isMessageAreaVisible() {
-        return messageShowing;
-    }
-
     /**
-     * Set the Text in the Message for a QueryDisplayComponent.
+     * Set the Text in the Message.
      * 
-     * @param displayComponent the QueryDisplayComponent
+     * @param messageText message to be set
      */
     public void setMessage( String messageText ) {
         currentMessage = messageText;
@@ -573,52 +564,9 @@ public class SqlEditorPanel extends SashForm
         return hasPendingChanges;
     }
 
-    public int getCaretOffset() {
-        return caretOffset;
-    }
-
-    public void setCaretOffset( int posn ) {
-        // Prevent setting caret outside of current text
-        if (posn < 0) {
-            posn = 0;
-        }
-        int textLength = getText().length();
-        if (posn > textLength) {
-            posn = textLength;
-        }
-        // set the caret offset
-        this.caretOffset = posn;
-        sqlTextViewer.getTextWidget().setCaretOffset(posn);
-        fireEditorInternalEvent(SqlEditorInternalEvent.CARET_CHANGED);
-    }
-
     void captureCaretInfo() {
-        caretOffset = sqlTextViewer.getTextWidget().getCaretOffset();
-        caretYPosition = sqlTextViewer.getTextWidget().getLineAtOffset(caretOffset);
-        caretXPosition = caretOffset - sqlTextViewer.getTextWidget().getOffsetAtLine(caretYPosition);
         fireEditorInternalEvent(SqlEditorInternalEvent.CARET_CHANGED);
-
         notifyCaretChanged();
-    }
-
-    public TextViewer getTextViewer() {
-        return sqlTextViewer;
-    }
-
-    public TextFontManager getFontManager() {
-
-        if (tfmManager == null) {
-            tfmManager = new TextFontManager(sqlTextViewer, new ScaledFontManager());
-        }
-        return tfmManager;
-    }
-
-    public IUndoManager getUndoManager() {
-        return this.textEditor.getUndoManager();
-    }
-
-    public static int getVerticalRulerWidth() {
-        return VERTICAL_RULER_WIDTH;
     }
 
     @Override
@@ -633,6 +581,7 @@ public class SqlEditorPanel extends SashForm
 
     @Override
     public void selectionChanged( SelectionChangedEvent e ) {
+        // Nothing to do
     }
 
     @Override
@@ -642,6 +591,7 @@ public class SqlEditorPanel extends SashForm
 
     @Override
     public void mouseDown( MouseEvent e ) {
+        // Nothing to do
     }
 
     @Override
@@ -651,6 +601,7 @@ public class SqlEditorPanel extends SashForm
 
     @Override
     public void keyPressed( KeyEvent e ) {
+        // Nothing to do
     }
 
     @Override
@@ -663,6 +614,7 @@ public class SqlEditorPanel extends SashForm
     class DocumentChangeListener implements IDocumentListener {
         @Override
         public void documentAboutToBeChanged( DocumentEvent event ) {
+            // Nothing to do
         }
 
         @Override
@@ -706,15 +658,7 @@ public class SqlEditorPanel extends SashForm
         }
     }
 
-    public int getCaretYPosition() {
-        return this.caretYPosition;
-    }
-
-    public int getCaretXPosition() {
-        return this.caretXPosition;
-    }
-
-    public void setHasPendingChanges() {
+    private void setHasPendingChanges() {
         hasPendingChanges = true;
         setMessage(QUERY_CHANGES_PENDING_MESSAGE);
         fireEditorInternalEvent(SqlEditorInternalEvent.TEXT_CHANGED);

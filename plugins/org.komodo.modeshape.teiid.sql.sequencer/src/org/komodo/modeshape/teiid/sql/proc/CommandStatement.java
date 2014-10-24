@@ -29,8 +29,15 @@ import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryContainer;
 import org.komodo.spi.query.sql.proc.ICommandStatement;
 
+/**
+ *
+ */
 public class CommandStatement extends Statement implements SubqueryContainer<Command>, ICommandStatement<LanguageVisitor, Command> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public CommandStatement(ITeiidParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_COMMAND);

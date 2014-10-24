@@ -23,8 +23,8 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ICompareCriteria;
 
@@ -34,8 +34,8 @@ import org.komodo.spi.query.sql.lang.ICompareCriteria;
 public class CompareCriteria extends AbstractCompareCriteria implements ICompareCriteria<Expression, LanguageVisitor> {
 
     /**
-     * @param p
-     * @param id
+     * @param p teiid parser
+     * @param id node type id
      */
     public CompareCriteria(ITeiidParser p, int id) {
         super(p, id);
@@ -63,7 +63,8 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
     /**
      * Set during planning to indicate that this criteria is no longer needed
      * to correctly process a join
-     * @param isOptional
+     *
+     * @param isOptional value
      */
     public void setOptional(Boolean isOptional) {
         setProperty(TeiidSqlLexicon.AbstractCompareCriteria.OPERATOR_PROP_NAME, isOptional);

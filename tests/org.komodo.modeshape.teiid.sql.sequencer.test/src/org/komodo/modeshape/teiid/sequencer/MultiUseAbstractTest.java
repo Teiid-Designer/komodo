@@ -24,6 +24,7 @@
 package org.komodo.modeshape.teiid.sequencer;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -119,9 +120,15 @@ public abstract class MultiUseAbstractTest {
             Node rootNode = session.getRootNode();
             NodeIterator children = rootNode.getNodes();
             while(children.hasNext()) {
+                Node child = children.nextNode();
                 try {
-                    children.nextNode().remove();
-                } catch (Exception ex) {}
+                    // Cannot legally remove system nodes and they are not created
+                    // by the tests anyway so leave them alone
+                    if (!child.isNodeType("mode:system"))
+                        child.remove();
+                } catch (Exception ex) {
+                    fail(ex.getLocalizedMessage());
+                }
             }
             session.save();
             session.logout();

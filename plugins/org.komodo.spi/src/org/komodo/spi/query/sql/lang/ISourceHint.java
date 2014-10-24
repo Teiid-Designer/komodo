@@ -25,5 +25,5 @@ package org.komodo.spi.query.sql.lang;
  *
  */
 public interface ISourceHint {
-
+    // No methods required
 }

@@ -467,14 +467,14 @@ public class TeiidBNFGenerator implements GeneratorConstants {
     private void writeClassDeclaration() throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append("/**" + NEW_LINE)
-            .append(" *" + NEW_LINE)
+            .append(" * Teiid BNF implemented auto completion class based on Teiid Parser template" + NEW_LINE)
             .append(" */" + NEW_LINE)
             .append("@SuppressWarnings({\"static-access\", \"nls\"})" + NEW_LINE)
             .append(PUBLIC + SPACE + CLASS + SPACE + "BNF" + SPACE + " extends ")
             .append(AbstractBNF.class.getSimpleName() + SPACE + OPEN_BRACE + NEW_LINE)
             .append(NEW_LINE)
             .append(TAB + "/**" + NEW_LINE)
-            .append(TAB + " * @param version" + NEW_LINE)
+            .append(TAB + " * @param version of teiid" + NEW_LINE)
             .append(TAB + " */" + NEW_LINE)
             .append(TAB + PUBLIC + SPACE + "BNF" + OPEN_BRACKET)
             .append(ITeiidVersion.class.getSimpleName() + SPACE + "version" + CLOSE_BRACKET)
@@ -698,11 +698,24 @@ public class TeiidBNFGenerator implements GeneratorConstants {
             CaseStatement caseStmt = createCaseStatement(ppFunction, method);
 
             Collection<TokenClause> nextTokenClauses = nextTokenClauses(currClause);
+            
+
+            if (nextTokenClauses.isEmpty() && caseStmt != null) {
+                StringBuffer commentBuffer = new StringBuffer();
+                if (method.requiresSwitch())
+                    commentBuffer.append(TAB + TAB + TAB + TAB);
+                else
+                    commentBuffer.append(TAB + TAB + TAB);
+
+                commentBuffer.append("// No completions required" + NEW_LINE);
+                caseStmt.addStatement(commentBuffer.toString());
+            }
+                
             for (TokenClause nextTokenClause : nextTokenClauses) {
 
                 if (caseStmt != null) {
-                    StringBuffer appendStmt = new StringBuffer();
                     // append(bnf, nextClause.value)
+                    StringBuffer appendStmt = new StringBuffer();
                     if (method.requiresSwitch())
                         appendStmt.append(TAB + TAB + TAB + TAB);
                     else
@@ -729,6 +742,15 @@ public class TeiidBNFGenerator implements GeneratorConstants {
         StringBuffer buf = new StringBuffer();
 
         // Append method declaration
+        buf.append(TAB + "/**" + NEW_LINE)
+             .append(TAB + "* Create completions for " + method.getName() + NEW_LINE)
+             .append(TAB + "*" + NEW_LINE)
+             .append(TAB + "* @param indices identifiers specified in the parser" + NEW_LINE)
+             .append(TAB + "* @return array of possible completion choices" + NEW_LINE)
+             .append(TAB + "*" + NEW_LINE)
+             .append(TAB + "* @generated" + NEW_LINE)
+             .append(TAB + "*/" + NEW_LINE);
+
         buf.append(TAB + PUBLIC + SPACE + String.class.getSimpleName())
             .append(OPEN_SQUARE_BRACKET + CLOSE_SQUARE_BRACKET + SPACE)
             .append(method.getName() + OPEN_BRACKET + "int... indices" + CLOSE_BRACKET + SPACE + OPEN_BRACE)

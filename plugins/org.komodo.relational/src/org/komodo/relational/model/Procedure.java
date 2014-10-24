@@ -26,12 +26,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import org.komodo.relational.core.DataType;
 import org.komodo.relational.core.RelationalStringNameValidator;
-import org.komodo.utils.HashCodeUtil;
-import org.komodo.utils.StringUtil;
-import org.komodo.utils.StringUtilities;
+import org.komodo.utils.HashCodeUtils;
+import org.komodo.utils.StringUtils;
 
 
 
@@ -381,7 +379,7 @@ public class Procedure extends RelationalObject {
      * @param javaClassName sets java class name to the specified value. may be null
      */
     public void setJavaClassName( String javaClassName ) {
-    	if( StringUtilities.areDifferent(this.javaClass, javaClassName) ) {
+    	if( StringUtils.areDifferent(this.javaClass, javaClassName) ) {
 	        this.javaClass = javaClassName;
     		 handleInfoChanged();
     	}
@@ -398,7 +396,7 @@ public class Procedure extends RelationalObject {
      * @param javaMethodName sets java method name to the specified value. may be null
      */
     public void setJavaMethodName( String javaMethodName ) {
-    	if( StringUtilities.areDifferent(this.javaMethod, javaMethodName) ) {
+    	if( StringUtils.areDifferent(this.javaMethod, javaMethodName) ) {
 	        this.javaMethod = javaMethodName;
     		 handleInfoChanged();
     	}
@@ -415,7 +413,7 @@ public class Procedure extends RelationalObject {
      * @param udfJarPath sets relative udf jar path. may be null
      */
     public void setUdfJarPath( String udfJarPath ) {
-    	if( StringUtilities.areDifferent(this.udfJarPath, udfJarPath) ) {
+    	if( StringUtils.areDifferent(this.udfJarPath, udfJarPath) ) {
 	        this.udfJarPath = udfJarPath;
     		 handleInfoChanged();
     	}
@@ -432,7 +430,7 @@ public class Procedure extends RelationalObject {
      * @param category sets user defined function category. may be null
      */
     public void setFunctionCategory( String category ) {
-    	if( StringUtilities.areDifferent(this.functionCategory, category) ) {
+    	if( StringUtils.areDifferent(this.functionCategory, category) ) {
 	        this.functionCategory = category;
     		 handleInfoChanged();
     	}
@@ -449,7 +447,7 @@ public class Procedure extends RelationalObject {
      * @param newQuery sets nativeQuery to the specified value. may be null
      */
     public void setNativeQuery( String newQuery ) {
-    	if( StringUtilities.areDifferent(this.nativeQuery, newQuery) ) {
+    	if( StringUtils.areDifferent(this.nativeQuery, newQuery) ) {
     		this.nativeQuery = newQuery;
     		handleInfoChanged();
     	}
@@ -748,12 +746,12 @@ public class Procedure extends RelationalObject {
         final Procedure other = (Procedure)object;
 
         // string properties
-        if (!StringUtil.valuesAreEqual(getNativeQuery(), other.getNativeQuery()) ||
-        		!StringUtil.valuesAreEqual(getFunctionCategory(), other.getFunctionCategory()) ||
-        		!StringUtil.valuesAreEqual(getJavaClassName(), other.getJavaClassName()) || 
-        		!StringUtil.valuesAreEqual(getJavaMethodName(), other.getJavaMethodName()) ||
-        		!StringUtil.valuesAreEqual(getUdfJarPath(), other.getUdfJarPath()) ||
-        		!StringUtil.valuesAreEqual(getUpdateCount(), other.getUpdateCount()) ) {
+        if (!StringUtils.valuesAreEqual(getNativeQuery(), other.getNativeQuery()) ||
+        		!StringUtils.valuesAreEqual(getFunctionCategory(), other.getFunctionCategory()) ||
+        		!StringUtils.valuesAreEqual(getJavaClassName(), other.getJavaClassName()) || 
+        		!StringUtils.valuesAreEqual(getJavaMethodName(), other.getJavaMethodName()) ||
+        		!StringUtils.valuesAreEqual(getUdfJarPath(), other.getUdfJarPath()) ||
+        		!StringUtils.valuesAreEqual(getUpdateCount(), other.getUpdateCount()) ) {
             return false;
         }
         
@@ -804,45 +802,45 @@ public class Procedure extends RelationalObject {
         int result = super.hashCode();
 
         // string properties
-        if (!StringUtil.isEmpty(getNativeQuery())) {
-            result = HashCodeUtil.hashCode(result, getNativeQuery());
+        if (!StringUtils.isEmpty(getNativeQuery())) {
+            result = HashCodeUtils.hashCode(result, getNativeQuery());
         }
-        if (!StringUtil.isEmpty(getFunctionCategory())) {
-            result = HashCodeUtil.hashCode(result, getFunctionCategory());
+        if (!StringUtils.isEmpty(getFunctionCategory())) {
+            result = HashCodeUtils.hashCode(result, getFunctionCategory());
         }
-        if (!StringUtil.isEmpty(getJavaClassName())) {
-            result = HashCodeUtil.hashCode(result, getJavaClassName());
+        if (!StringUtils.isEmpty(getJavaClassName())) {
+            result = HashCodeUtils.hashCode(result, getJavaClassName());
         }
-        if (!StringUtil.isEmpty(getJavaMethodName())) {
-            result = HashCodeUtil.hashCode(result, getJavaMethodName());
+        if (!StringUtils.isEmpty(getJavaMethodName())) {
+            result = HashCodeUtils.hashCode(result, getJavaMethodName());
         }
-        if (!StringUtil.isEmpty(getUdfJarPath())) {
-            result = HashCodeUtil.hashCode(result, getUdfJarPath());
+        if (!StringUtils.isEmpty(getUdfJarPath())) {
+            result = HashCodeUtils.hashCode(result, getUdfJarPath());
         }
-        if (!StringUtil.isEmpty(getUpdateCount())) {
-            result = HashCodeUtil.hashCode(result, getUpdateCount());
+        if (!StringUtils.isEmpty(getUpdateCount())) {
+            result = HashCodeUtils.hashCode(result, getUpdateCount());
         }
 
-		result = HashCodeUtil.hashCode(result, isAggregate());
-        result = HashCodeUtil.hashCode(result, isAllowsDistinct());
-        result = HashCodeUtil.hashCode(result, isAllowsOrderBy());
-        result = HashCodeUtil.hashCode(result, isAnalytic());
-		result = HashCodeUtil.hashCode(result, isDecomposable());
-        result = HashCodeUtil.hashCode(result, isDeterministic());
-        result = HashCodeUtil.hashCode(result, isFunction());
-        result = HashCodeUtil.hashCode(result, isNonPrepared());
-		result = HashCodeUtil.hashCode(result, isReturnsNullOnNull());
-        result = HashCodeUtil.hashCode(result, isSourceFunction());
-        result = HashCodeUtil.hashCode(result, isUseDistinctRows());
-        result = HashCodeUtil.hashCode(result, isVariableArguments());
+		result = HashCodeUtils.hashCode(result, isAggregate());
+        result = HashCodeUtils.hashCode(result, isAllowsDistinct());
+        result = HashCodeUtils.hashCode(result, isAllowsOrderBy());
+        result = HashCodeUtils.hashCode(result, isAnalytic());
+		result = HashCodeUtils.hashCode(result, isDecomposable());
+        result = HashCodeUtils.hashCode(result, isDeterministic());
+        result = HashCodeUtils.hashCode(result, isFunction());
+        result = HashCodeUtils.hashCode(result, isNonPrepared());
+		result = HashCodeUtils.hashCode(result, isReturnsNullOnNull());
+        result = HashCodeUtils.hashCode(result, isSourceFunction());
+        result = HashCodeUtils.hashCode(result, isUseDistinctRows());
+        result = HashCodeUtils.hashCode(result, isVariableArguments());
         
         if(resultSet!=null) {
-            result = HashCodeUtil.hashCode(result, resultSet);
+            result = HashCodeUtils.hashCode(result, resultSet);
         }
 
         List<Parameter> params = getParameters();
         for(Parameter param: params) {
-            result = HashCodeUtil.hashCode(result, param);
+            result = HashCodeUtils.hashCode(result, param);
         }
 
         return result;

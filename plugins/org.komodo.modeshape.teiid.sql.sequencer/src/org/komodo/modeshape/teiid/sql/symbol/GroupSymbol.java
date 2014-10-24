@@ -27,8 +27,15 @@ import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
+/**
+ *
+ */
 public class GroupSymbol extends Symbol implements IGroupSymbol<LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public GroupSymbol(ITeiidParser p, int id) {
         super(p, id);
     }

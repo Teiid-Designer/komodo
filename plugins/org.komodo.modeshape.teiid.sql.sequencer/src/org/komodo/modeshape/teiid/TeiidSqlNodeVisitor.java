@@ -163,7 +163,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.komodo.utils.KLog;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.StringUtils;
 import org.modeshape.common.collection.EmptyIterator;
 import org.modeshape.jcr.JcrSession;
 import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
@@ -174,7 +174,7 @@ import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
 public class TeiidSqlNodeVisitor
     implements ItemVisitor, TeiidSqlCallback, Reserved, NonReserved, Tokens {
 
-    public static final String UNDEFINED = "<undefined>"; //$NON-NLS-1$
+    private static final String UNDEFINED = "<undefined>"; //$NON-NLS-1$
 
     protected static final String BEGIN_HINT = "/*+"; //$NON-NLS-1$
 
@@ -263,10 +263,10 @@ public class TeiidSqlNodeVisitor
     }
 
     /**
-     * @param teiidVersion
-     * @param node
+     * @param teiidVersion version of teiid
+     * @param node node to be visited
      * @return SQL String representation of the given node
-     * @throws Exception
+     * @throws Exception if node causes a failure
      */
     public String getTeiidSql(ITeiidVersion teiidVersion, Node node) throws Exception {
         if (node == null)
@@ -707,7 +707,7 @@ public class TeiidSqlNodeVisitor
      * @return Escaped string literal value
      */
     protected String escapeStringValue(String str, String tick) {
-        return StringUtil.replaceAll(str, tick, tick + tick);
+        return StringUtils.replaceAll(str, tick, tick + tick);
     }
 
     protected String escapeSinglePart(String token) {
@@ -717,11 +717,11 @@ public class TeiidSqlNodeVisitor
 
         boolean escape = true;
         char start = token.charAt(0);
-        if (start == '#' || start == '@' || StringUtil.isLetter(start)) {
+        if (start == '#' || start == '@' || StringUtils.isLetter(start)) {
             escape = false;
             for (int i = 1; !escape && i < token.length(); i++) {
                 char c = token.charAt(i);
-                escape = !StringUtil.isLetterOrDigit(c) && c != '_';
+                escape = !StringUtils.isLetterOrDigit(c) && c != '_';
             }
         }
 

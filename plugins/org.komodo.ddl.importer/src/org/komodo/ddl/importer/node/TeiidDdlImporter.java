@@ -51,7 +51,7 @@ import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.ddl.TeiidDDLConstants;
 import org.komodo.utils.KomodoCoreRuntimeException;
-import org.komodo.utils.StringUtil;
+import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.DdlConstants;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants;
@@ -448,6 +448,7 @@ public class TeiidDdlImporter extends StandardImporter {
 			deferredMap.put(node, null);
 		} else if (is(node, TeiidDdlLexicon.AlterOptions.VIEW_STATEMENT)
 				|| is(node, TeiidDdlLexicon.AlterOptions.PROCEDURE_STATEMENT)) {
+		    deferredMap.put(node, null);
 		} else {
 			// -----------------------------------------------------------------------
 			// All other Non-Teiid DDL 
@@ -552,9 +553,9 @@ public class TeiidDdlImporter extends StandardImporter {
 			AstNode optionNode = nodeIter.next();
 			String optionName = optionNode.getName();
 			Object optionValue = optionNode.getProperty(StandardDdlLexicon.VALUE);
-			if(!StringUtil.isEmpty(optionName)) {
+			if(!StringUtils.isEmpty(optionName)) {
 				String optionValueStr = (String)optionValue;
-				if(!StringUtil.isEmpty(optionValueStr)) {
+				if(!StringUtils.isEmpty(optionValueStr)) {
 					if(optionName.equalsIgnoreCase(TeiidDDLConstants.ANNOTATION)) {
 						entity.setDescription(optionValueStr);
 						nodeIter.remove();
@@ -582,9 +583,9 @@ public class TeiidDdlImporter extends StandardImporter {
 			AstNode optionNode = nodeIter.next();
 			String optionName = optionNode.getName();
 			Object optionValue = optionNode.getProperty(StandardDdlLexicon.VALUE);
-			if(!StringUtil.isEmpty(optionName)) {
+			if(!StringUtils.isEmpty(optionName)) {
 				String optionValueStr = (String)optionValue;
-				if(!StringUtil.isEmpty(optionValueStr)) {
+				if(!StringUtils.isEmpty(optionValueStr)) {
 					if(optionName.equalsIgnoreCase(TeiidDDLConstants.CARDINALITY)) {
 						table.setCardinality(Integer.parseInt(optionValueStr));
 						nodeIter.remove();
@@ -616,10 +617,10 @@ public class TeiidDdlImporter extends StandardImporter {
 			AstNode optionNode = nodeIter.next();
 			String optionName = optionNode.getName();
 			Object optionValue = optionNode.getProperty(StandardDdlLexicon.VALUE);
-			if(!StringUtil.isEmpty(optionName)) {
+			if(!StringUtils.isEmpty(optionName)) {
 				String optionValueStr = (String)optionValue;
 				// If any function properties are present, the setFuntion boolean is also set
-				if(!StringUtil.isEmpty(optionValueStr)) {
+				if(!StringUtils.isEmpty(optionValueStr)) {
 					if(optionName.equalsIgnoreCase(TeiidDDLConstants.UPDATECOUNT)) {
 						procedure.setUpdateCount(optionValueStr);
 						nodeIter.remove();
@@ -705,9 +706,9 @@ public class TeiidDdlImporter extends StandardImporter {
 			AstNode optionNode = nodeIter.next();
 			String optionName = optionNode.getName();
 			Object optionValue = optionNode.getProperty(StandardDdlLexicon.VALUE);
-			if(!StringUtil.isEmpty(optionName)) {
+			if(!StringUtils.isEmpty(optionName)) {
 				String optionValueStr = (String)optionValue;
-				if(!StringUtil.isEmpty(optionValueStr)) {
+				if(!StringUtils.isEmpty(optionValueStr)) {
 					if(optionName.equalsIgnoreCase(TeiidDDLConstants.SELECTABLE)) {
 						column.setSelectable(isTrue(optionValueStr));
 						nodeIter.remove();
@@ -762,6 +763,7 @@ public class TeiidDdlImporter extends StandardImporter {
 		} else if( column.getDatatypeName().equalsIgnoreCase(DataTypes.VARBINARY) && nativeType.equalsIgnoreCase(DataTypes.BINARY ) ) {
 			column.setDatatypeName(DataTypes.OBJECT.toLowerCase());
 		} else if( column.getDatatypeName().equalsIgnoreCase(DataTypes.TIMESTAMP) && nativeType.equalsIgnoreCase(DataTypes.DATETIME ) ) {
+		    // TODO how should this be handled?
 		} else if( column.getDatatypeName().equalsIgnoreCase(DataTypes.DOUBLE) && nativeType.equalsIgnoreCase(DataTypes.FLOAT ) ) {
 			column.setDatatypeName(nativeType);
 			if( column.getPrecision() == 0 ) {
@@ -842,13 +844,13 @@ public class TeiidDdlImporter extends StandardImporter {
 
 			String optionName = optionNode.getName();
 			Object optionValue = optionNode.getProperty(StandardDdlLexicon.VALUE);
-			if(!StringUtil.isEmpty(optionName)) {
+			if(!StringUtils.isEmpty(optionName)) {
 				// Translate incoming Teiid-namespaced ExtProps into the equivalent Designer MED NS
 				if(isUriNamespaced(optionName) || isPrefixNamespaced(optionName)) {
 					optionName = translateNamespacedOptionName(optionName);
 				}
 				String optionValueStr = (String)optionValue;
-				if(!StringUtil.isEmpty(optionValueStr)) {
+				if(!StringUtils.isEmpty(optionValueStr)) {
 					relationalEntity.addExtensionProperty(optionName, optionValueStr);
 				}
 			}
@@ -903,7 +905,7 @@ public class TeiidDdlImporter extends StandardImporter {
 	 */
 	private String getExtensionPropertyNsPrefix(String propName) {
 		String namespace = null;
-		if(!StringUtil.isEmpty(propName) && isPrefixNamespaced(propName)) {
+		if(!StringUtils.isEmpty(propName) && isPrefixNamespaced(propName)) {
 			int index = propName.indexOf(':');
 			if(index!=-1) {
 				namespace = propName.substring(0,index);
@@ -956,7 +958,7 @@ public class TeiidDdlImporter extends StandardImporter {
 	 */
 	private boolean isPrefixNamespaced(String propName) {
 		boolean isPrefixNamespaced = false;
-		if(!StringUtil.isEmpty(propName) && !hasOpenCloseBraces(propName) && propName.indexOf(':') != -1) {
+		if(!StringUtils.isEmpty(propName) && !hasOpenCloseBraces(propName) && propName.indexOf(':') != -1) {
 			isPrefixNamespaced = true;
 		}
 		return isPrefixNamespaced;
@@ -969,7 +971,7 @@ public class TeiidDdlImporter extends StandardImporter {
 	 */
 	private boolean isUriNamespaced(String propName) {
 		boolean isUriNamespaced = false;
-		if(!StringUtil.isEmpty(propName) && hasOpenCloseBraces(propName)) {
+		if(!StringUtils.isEmpty(propName) && hasOpenCloseBraces(propName)) {
 			isUriNamespaced = true;
 		}
 		return isUriNamespaced;
@@ -982,7 +984,7 @@ public class TeiidDdlImporter extends StandardImporter {
 	 */
 	private boolean hasOpenCloseBraces(String propName) {
 		boolean hasBoth = false;
-		if( !StringUtil.isEmpty(propName) && propName.indexOf('{')!=-1 && propName.indexOf('}')!=-1 ) {
+		if( !StringUtils.isEmpty(propName) && propName.indexOf('{')!=-1 && propName.indexOf('}')!=-1 ) {
 			hasBoth = true;
 		}
 		return hasBoth;

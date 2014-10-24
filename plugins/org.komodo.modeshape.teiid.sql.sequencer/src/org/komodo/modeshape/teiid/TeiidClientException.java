@@ -80,7 +80,7 @@ public class TeiidClientException extends Exception {
     /**
      * Set the nested throwable
      *
-     * @param throwable
+     * @param throwable to set
      */
     public void setParseThrowable(Throwable throwable) {
 		this.throwable = throwable;

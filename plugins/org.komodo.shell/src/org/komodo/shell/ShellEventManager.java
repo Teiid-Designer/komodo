@@ -37,10 +37,12 @@ public class ShellEventManager implements EventManager {
 
     @Override
     public void permitListeners(boolean enable) {
+        // Nothing to do
     }
 
     @Override
     public void notifyListeners(ExecutionConfigurationEvent event) {
+        // Nothing to do
     }
 
     @Override

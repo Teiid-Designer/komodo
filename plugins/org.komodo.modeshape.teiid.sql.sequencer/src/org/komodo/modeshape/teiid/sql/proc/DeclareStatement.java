@@ -23,14 +23,20 @@
 package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
-import org.komodo.modeshape.teiid.sql.lang.Command;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.IDeclareStatement;
 
+/**
+ *
+ */
 public class DeclareStatement extends AssignmentStatement implements IDeclareStatement<Expression, LanguageVisitor> {
 
+    /**
+     * @param p teiid parser
+     * @param id node type id
+     */
     public DeclareStatement(ITeiidParser p, int id) {
         super(p, id);
     }
@@ -43,13 +49,6 @@ public class DeclareStatement extends AssignmentStatement implements IDeclareSta
 
     public void setVariableType(String type) {
         setProperty(TeiidSqlLexicon.DeclareStatement.VARIABLE_TYPE_PROP_NAME, type);
-    }
-
-    /**
-     * @param value
-     */
-    @Override
-    public void setCommand(Command value) {
     }
 
     @Override
