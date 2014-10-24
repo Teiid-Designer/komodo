@@ -26,7 +26,7 @@ import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
 /**
- *
+ * Teiid BNF implemented auto completion class based on Teiid Parser template
  */
 @SuppressWarnings({"static-access", "nls"})
 public class BNF  extends AbstractBNF {

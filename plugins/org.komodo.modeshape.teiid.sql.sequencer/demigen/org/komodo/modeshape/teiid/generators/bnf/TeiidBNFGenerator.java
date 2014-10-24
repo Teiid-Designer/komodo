@@ -467,7 +467,7 @@ public class TeiidBNFGenerator implements GeneratorConstants {
     private void writeClassDeclaration() throws Exception {
         StringBuffer buf = new StringBuffer();
         buf.append("/**" + NEW_LINE)
-            .append(" *" + NEW_LINE)
+            .append(" * Teiid BNF implemented auto completion class based on Teiid Parser template" + NEW_LINE)
             .append(" */" + NEW_LINE)
             .append("@SuppressWarnings({\"static-access\", \"nls\"})" + NEW_LINE)
             .append(PUBLIC + SPACE + CLASS + SPACE + "BNF" + SPACE + " extends ")
