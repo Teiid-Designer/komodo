@@ -10,7 +10,7 @@ tmp
 .metadata
 
 plugins/*/launch
-
+plugins/*/gen
 plugins/*/lib/*.jar
 plugins/*/libsrc/*.jar
 plugins/libs/*/lib/*.jar
@@ -21,3 +21,5 @@ tests/*/lib/jboss*
 
 integration-tests/*/lib/*.jar
 integration-tests/*/lib/jboss*
+
+target-platform/*.target
