@@ -19,7 +19,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.core;
+package org.komodo.repository;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
@@ -38,9 +38,13 @@ public class Messages implements StringConstants {
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
     @SuppressWarnings( "javadoc" )
-    public enum KEngine {
+    public enum LocalRepository {
 
-        No_Available_Repositories;
+        Configuration_Problem,
+        Configuration_Failure,
+        Deployment_Failure,
+        General_Exception,
+        EngineThread_Died;
 
         @Override
         public String toString() {
@@ -85,8 +89,8 @@ public class Messages implements StringConstants {
     /**
      * Get message string with parameters
      *
-     * @param key
-     * @param parameters
+     * @param key the key
+     * @param parameters additional parameters
      *
      * @return i18n string
      */

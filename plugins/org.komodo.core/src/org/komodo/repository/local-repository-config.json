@@ -1,0 +1,25 @@
+{
+    "name" : "Local Repository",
+    "jndiName" : "jcr/Local Repository",
+    "monitoring" : {
+        "enabled" : true
+    },
+    "workspaces" : {
+        "default" : "defaultWorkspace",
+        "allowCreation" : true
+    },
+    "sequencing" : {
+        "removeDerivedContentWithOriginal" : true,
+        "threadPool" : "modeshape-workers",
+        "sequencers" : {
+            "Teiid SQL Sequencer" : {
+            	"classname" : "org.komodo.modeshape.teiid.TeiidSqlSequencer",
+            	"pathExpressions" : [ "default://(*.tsql)/jcr:content[@jcr:data] => /tsql" ]
+           	},
+           	"DDL Sequencer" : {
+               	"classname" : "DdlSequencer",
+               	"pathExpressions" : [ "default://(*.ddl)/jcr:content[@jcr:data] => /ddl" ]
+            }
+        }
+    }
+}

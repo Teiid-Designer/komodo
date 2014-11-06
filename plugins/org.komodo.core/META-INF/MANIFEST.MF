@@ -6,6 +6,11 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Localization: plugin
-Export-Package: org.komodo.core
+Export-Package: org.komodo.core,
+ org.komodo.repository
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.komodo.spi;bundle-version="1.0.0"
+Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
+ org.komodo.utils;bundle-version="1.0.0",
+ org.komodo.modeshape.lib;bundle-version="1.0.0",
+ org.komodo.modeshape.teiid.sql.sequencer;bundle-version="1.0.0"
+Import-Package: org.komodo.repository
