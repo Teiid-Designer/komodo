@@ -21,21 +21,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.modeshape.teiid.sequencer;
+package org.komodo.modeshape;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
+import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.Property;
+import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.Value;
 import javax.jcr.Workspace;
 import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
@@ -44,25 +57,66 @@ import javax.jcr.observation.ObservationManager;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AliasSymbol;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Constant;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ElementSymbol;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ExpressionSymbol;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.GroupSymbol;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinPredicate;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinType;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.UnaryFromClause;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.query.sql.lang.IJoinType;
 import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.observation.Event;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
+import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
 
 /**
  * Class which serves as base for various sequencer unit tests. In addition to this, it uses the sequencing events fired by
  * ModeShape's {@link javax.jcr.observation.ObservationManager} to perform various assertions and therefore, acts as a test for
  * those as well.
  */
-@SuppressWarnings( "nls" )
+@SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractSequencerTest extends MultiUseAbstractTest implements Sequencing, StringConstants {
 
     private static final int DEFAULT_WAIT_TIME_SECONDS = 15;
+
+    public static enum SequenceType {
+        DDL("DDL Sequencer"),
+
+        TSQL("Teiid SQL Sequencer");
+
+        private String sequencerName;
+
+        private SequenceType(String sequencerName) {
+            this.sequencerName = sequencerName;
+        }
+
+        /**
+         * @return file extension for type
+         */
+        public String getExtension() {
+            return name().toLowerCase();
+        }
+
+        /**
+         * @return name of associated sequencer
+         */
+        public String getSequencerName() {
+            return sequencerName;
+        }
+    }
 
     protected Node rootNode;
 
@@ -92,6 +146,17 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
     private final ConcurrentHashMap<String, Event> sequencingEvents = new ConcurrentHashMap<String, Event>();
 
     private final KLog logger = KLog.getLogger();
+
+    /**
+     * @param teiidVersion
+     */
+    public AbstractSequencerTest(ITeiidVersion teiidVersion) {
+        TeiidVersionProvider.getInstance().setTeiidVersion(teiidVersion);
+    }
+
+    public ObservationManager getObservationManager() {
+        return observationManager;
+    }
 
     @Override
     @Before
@@ -132,7 +197,14 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         sequencingFailureLatches.clear();
     }
 
-    protected abstract ITeiidVersion getTeiidVersion();
+    protected ITeiidVersion getTeiidVersion() {
+        return TeiidVersionProvider.getInstance().getTeiidVersion();
+    }
+
+    protected IDataTypeManagerService getDataTypeService() {
+        ExecutionAdminFactory factory = new ExecutionAdminFactory();
+        return factory.getDataTypeManagerService(getTeiidVersion()); 
+    }
 
     /**
      * Creates a nt:file node, under the root node, at the given path and with the jcr:data property pointing at the filepath.
@@ -148,13 +220,37 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
             parent = parent.addNode(pathSegment);
         }
 
-        parent.setProperty(TeiidSqlLexicon.TEIID_VERSION_PROPERTY, getTeiidVersion().toString());
-        
         Node content = parent.addNode(JcrConstants.JCR_CONTENT);
         content.setProperty(JcrConstants.JCR_DATA,
                             session().getValueFactory().createBinary(new FileInputStream(file)));
         session().save();
         return parent;
+    }
+
+    protected Node prepareSequence(File textFile, String sequencerName) throws Exception {
+        String fileName = textFile.getName();
+        createNodeWithContentFromFile(fileName, textFile);
+
+        Node fileNode = session().getNode(FORWARD_SLASH + fileName);
+        assertNotNull(fileNode);
+
+        return fileNode;
+    }
+
+    private File wrapSQLText(String text, String extension) throws Exception {
+        File tmpFile = File.createTempFile(extension, DOT + extension);
+        tmpFile.deleteOnExit();
+        FileWriter fw = new FileWriter(tmpFile);
+        fw.write(text);
+        fw.close();
+        return tmpFile;
+    }
+
+    protected Node prepareSequence(String text, SequenceType sequenceType) throws Exception {
+        File textFile = wrapSQLText(text, sequenceType.getExtension());
+        Node fileNode = prepareSequence(textFile, sequenceType.getSequencerName());
+        assertNotNull(fileNode);
+        return fileNode;
     }
 
     /**
@@ -216,6 +312,229 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         }
         nodeSequencedLatches.remove(expectedPath);
         return sequencedNodes.remove(expectedPath);
+    }
+
+    protected void verifyProperty( Node node, String propertyName, String expectedValue ) throws RepositoryException {
+        Property property = node.getProperty(propertyName);
+        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
+        assertEquals(expectedValue, value.getString());
+    }
+
+    protected void verifyProperty( Node node, String propertyName, long expectedValue ) throws RepositoryException {
+        Property property = node.getProperty(propertyName);
+        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
+        assertEquals(expectedValue, value.getLong());
+    }
+
+    protected void verifyProperty( Node node, String propertyName, boolean expectedValue ) throws RepositoryException {
+        Property property = node.getProperty(propertyName);
+        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
+        assertEquals(expectedValue, value.getBoolean());
+    }
+
+    protected void verifyProperty( Node node, String propertyName, java.sql.Date expectedValue ) throws RepositoryException {
+        Property property = node.getProperty(propertyName);
+        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
+        assertEquals(expectedValue, java.sql.Date.valueOf(value.getString()));
+    }
+
+    protected void verifyProperty( Node node, String propertyName, java.sql.Time expectedValue ) throws RepositoryException {
+        Property property = node.getProperty(propertyName);
+        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
+        assertEquals(expectedValue, java.sql.Time.valueOf(value.getString()));
+    }
+
+    protected boolean verifyHasProperty( Node node, String propNameStr ) throws RepositoryException {
+        return node.hasProperty(propNameStr);
+    }
+
+    protected void verifyVersionType(Node node) throws RepositoryException {
+        verifyProperty(node, TeiidSqlLexicon.LanguageObject.TEIID_VERSION_PROP_NAME, getTeiidVersion().toString());
+    }
+
+    protected void verifyPrimaryType( Node node, String expectedValue ) throws RepositoryException {
+        verifyProperty(node, JCR_PRIMARY_TYPE, expectedValue);
+    }
+
+    protected void verifyMixinType( Node node, String expectedValue ) throws RepositoryException {
+        verifyProperty(node, JCR_MIXIN_TYPES, expectedValue);
+    }
+    
+    protected void verifyMixinTypes( Node node, String... expectedValues ) throws RepositoryException {
+        Value[] values = node.getProperty(JCR_MIXIN_TYPES).getValues();
+        Set<String> valuesSet = new TreeSet<String>();
+        for (Value value : values) {
+            valuesSet.add(value.getString());
+        }
+        List<String> expectedValuesList = new ArrayList<String>(Arrays.asList(expectedValues));
+        for (Iterator<String> expectedValuesIterator = expectedValuesList.iterator(); expectedValuesIterator.hasNext();) {
+            assertTrue(valuesSet.contains(expectedValuesIterator.next()));
+            expectedValuesIterator.remove();
+        }
+        assertTrue(expectedValuesList.isEmpty());
+    }
+
+    protected void verifyBaseProperties( Node node, String primaryType, String mixinType) throws RepositoryException {
+        verifyPrimaryType(node, primaryType);
+        verifyMixinType(node, mixinType);
+        verifyVersionType(node);
+    }
+
+    protected Node findNode( Node parent, String nodePath, String... mixinTypes ) throws Exception {
+        Node child = parent.getNode(nodePath);
+        assertNotNull(child);
+        verifyMixinTypes(child, mixinTypes);
+        return child;
+    }
+
+    private void traverse(String tabs, Node node, StringBuffer buffer) throws Exception {
+        buffer.append(tabs + node.getName() + NEW_LINE);
+
+        PropertyIterator propertyIterator = node.getProperties();
+        while(propertyIterator.hasNext()) {
+            Property property = propertyIterator.nextProperty();
+            buffer.append(tabs + TAB + "@" + property.toString() + NEW_LINE);
+        }
+
+        NodeIterator children = node.getNodes();
+        while(children.hasNext()) {
+            traverse(tabs + TAB, children.nextNode(), buffer);
+        }
+    }
+
+    protected void traverse(Node node) throws Exception {
+        StringBuffer buffer = new StringBuffer(NEW_LINE);
+        traverse(TAB, node, buffer);
+        KLog.getLogger().info(buffer.toString());
+    }
+
+    protected String enc(String input) {
+        return session().encode(input);
+    }
+
+    protected String deriveProcPrefix(boolean useNewLine) {
+        StringBuilder builder = new StringBuilder();
+        
+        if (getTeiidVersion().isLessThan(TeiidVersion.Version.TEIID_8_4.get())) {
+            builder.append("CREATE VIRTUAL PROCEDURE");
+            if (useNewLine)
+                builder.append(NEW_LINE);
+            else
+                builder.append(SPACE);
+        }
+
+        builder.append("BEGIN");
+
+        if (!useNewLine)
+            builder.append(SPACE);
+        
+        return builder.toString();
+    }
+
+    protected Node verify(Node parentNode, String relativePath, int index, String mixinType) throws Exception {
+        String indexExp = EMPTY_STRING;
+        if (index > -1)
+            indexExp = OPEN_SQUARE_BRACKET + index + CLOSE_SQUARE_BRACKET;
+
+        Node childNode = null;
+        if (parentNode.hasNode(relativePath)) {
+            childNode = parentNode.getNode(relativePath + indexExp);
+        } else
+            childNode = parentNode.getNode(enc(relativePath ) + indexExp);
+        assertNotNull(childNode);
+
+        verifyBaseProperties(childNode, JcrConstants.NT_UNSTRUCTURED, mixinType);
+        return childNode;
+    }
+
+    protected Node verify(Node parentNode, String relativePath, String mixinType) throws Exception {
+        return verify(parentNode, relativePath, -1, mixinType);
+    }
+
+    protected void verifyJoin(Node joinPredicate, IJoinType.Types joinType) throws Exception {
+        Node joinNode = verify(joinPredicate, JoinPredicate.JOIN_TYPE_REF_NAME, JoinType.ID);
+        verifyProperty(joinNode, TeiidSqlLexicon.JoinType.KIND_PROP_NAME, joinType.name());
+    }
+
+    protected void verifyUnaryFromClauseGroup(Node jpNode, String refName, int refIndex, String... gSymbolProps) throws Exception {
+        Node refNode = verify(jpNode, refName, refIndex, UnaryFromClause.ID);
+        Node groupNode = verify(refNode, UnaryFromClause.GROUP_REF_NAME, GroupSymbol.ID);
+
+        String name = gSymbolProps[0];
+        verifyProperty(groupNode, Symbol.NAME_PROP_NAME, name);
+
+        if (gSymbolProps.length > 1) {
+            String definition = gSymbolProps[1];
+            verifyProperty(groupNode, GroupSymbol.DEFINITION_PROP_NAME, definition);
+        }
+    }
+
+    protected void verifyUnaryFromClauseGroup(Node jpNode, String refName, String... gSymbolProps) throws Exception {
+        verifyUnaryFromClauseGroup(jpNode, refName, -1, gSymbolProps);
+    }
+
+    protected void verifyConstant(Node parentNode, String refName, int refIndex, String literal) throws Exception {
+        Node constantNode = verify(parentNode, refName, refIndex, Constant.ID);
+        verifyProperty(constantNode, Constant.VALUE_PROP_NAME, literal);
+    }
+
+    protected void verifyConstant(Node parentNode, String refName, String literal) throws Exception {
+        verifyConstant(parentNode, refName, -1, literal);
+    }
+
+    protected void verifyConstant(Node parentNode, String refName, int refIndex, int literal) throws Exception {
+        Node constantNode = verify(parentNode, refName, refIndex, Constant.ID);
+        verifyProperty(constantNode, Constant.VALUE_PROP_NAME, literal);
+    }
+
+    protected void verifyConstant(Node parentNode, String refName, int literal) throws Exception {
+        verifyConstant(parentNode, refName, -1, literal);
+    }
+
+    protected void verifyElementSymbol(Node parentNode, String refName, int refIndex, String elementSymbolName) throws Exception {
+        Node elementSymbolNode = verify(parentNode, refName, refIndex, ElementSymbol.ID);
+        verifyProperty(elementSymbolNode, Symbol.NAME_PROP_NAME, elementSymbolName);
+    }
+
+    protected void verifyElementSymbol(Node parentNode, String refName, String elementSymbolName) throws Exception {
+        verifyElementSymbol(parentNode, refName, -1, elementSymbolName);
+    }
+
+    protected Node verifyAliasSymbol(Node parentNode, String refName, int refIndex, String aliasName, String symbolId) throws Exception {
+        Node aliasNode = verify(parentNode, refName, refIndex, AliasSymbol.ID);
+        verifyProperty(aliasNode, Symbol.NAME_PROP_NAME, aliasName);
+        return verify(aliasNode, AliasSymbol.SYMBOL_REF_NAME, symbolId);
+    }
+
+    protected Node verifyAliasSymbol(Node parentNode, String refName, String aliasName, String symbolId) throws Exception {
+        return verifyAliasSymbol(parentNode, refName, -1, aliasName, symbolId);
+    }
+
+    protected void verifyAliasSymbolWithElementSymbol(Node parentNode, String refName, int refIndex, String aliasName, String elementSymbolName) throws Exception {
+        Node aliasNode = verify(parentNode, refName, refIndex, AliasSymbol.ID);
+        verifyProperty(aliasNode, Symbol.NAME_PROP_NAME, aliasName);
+        Node elementSymbolNode = verify(aliasNode, AliasSymbol.SYMBOL_REF_NAME, ElementSymbol.ID);
+        verifyProperty(elementSymbolNode, Symbol.NAME_PROP_NAME, elementSymbolName);
+    }
+
+    protected Node verifyExpressionSymbol(Node parentNode, String refName, int refIndex, String expSymbolExpressionId) throws Exception {
+        Node expSymbolNode = verify(parentNode, refName, refIndex, ExpressionSymbol.ID);
+
+        Property property = expSymbolNode.getProperty(Symbol.NAME_PROP_NAME);
+        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
+        assertTrue(value.toString().startsWith("expr"));
+
+        return verify(expSymbolNode, ExpressionSymbol.EXPRESSION_REF_NAME, expSymbolExpressionId);
+    }
+
+    protected Node verifyExpressionSymbol(Node parentNode, String refName, String expSymbolExpressionId) throws Exception {
+        return verifyExpressionSymbol(parentNode, refName, -1, expSymbolExpressionId);
+    }
+
+    protected void verifySql(String expectedSql, Node topNode) throws Exception {
+        TeiidSqlNodeVisitor visitor = new TeiidSqlNodeVisitor();
+        String actualSql = visitor.getTeiidSql(getTeiidVersion(), topNode);
+        assertEquals(expectedSql, actualSql);
     }
 
     protected void expectSequencingFailure( Node sequencedNode ) throws Exception {

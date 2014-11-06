@@ -21,10 +21,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.modeshape.teiid.sequencer;
+package org.komodo.modeshape;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -55,7 +57,7 @@ import org.modeshape.jcr.api.nodetype.NodeTypeManager;
 public abstract class MultiUseAbstractTest {
 
     /**
-     * 
+     * Configuration of the test repository
      */
     private static final String TEST_REPOSITORY_CONFIG = "test-repository-config.json";
 
@@ -135,8 +137,18 @@ public abstract class MultiUseAbstractTest {
         }
     }
 
+    private static File configureLogPath(KLog logger) throws IOException, Exception {
+        File newLogFile = File.createTempFile("TestKLog", ".log");
+        newLogFile.deleteOnExit();
+
+        logger.setLogPath(newLogFile.getAbsolutePath());
+        assertEquals(newLogFile.getAbsolutePath(), logger.getLogPath());
+        return newLogFile;
+    }
+
     @BeforeClass
     public static void beforeAll() throws Exception {
+        configureLogPath(KLog.getLogger());
         startRepository();
         clearRepository();
     }

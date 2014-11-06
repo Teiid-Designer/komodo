@@ -40,8 +40,7 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.QueryParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.common.annotation.NotThreadSafe;
 import org.modeshape.common.text.ParsingException;
@@ -59,24 +58,13 @@ import org.modeshape.jcr.api.sequencer.Sequencer;
 @NotThreadSafe
 public class TeiidSqlSequencer extends Sequencer {
 
-    private static ITeiidVersion DEFAULT_TEIID_VERSION = Version.TEIID_8_7.get();
-
     private static final KLog LOGGER = KLog.getLogger();
-
-    private ITeiidVersion teiidVersion = DEFAULT_TEIID_VERSION;
 
     /**
      * @return the teiidVersion
      */
     public ITeiidVersion getTeiidVersion() {
-        return this.teiidVersion;
-    }
-
-    /**
-     * @param teiidVersion the teiidVersion to set
-     */
-    public void setTeiidVersion(ITeiidVersion teiidVersion) {
-        this.teiidVersion = teiidVersion;
+        return TeiidVersionProvider.getInstance().getTeiidVersion();
     }
 
     /**
@@ -98,11 +86,6 @@ public class TeiidSqlSequencer extends Sequencer {
     public boolean execute(Property inputProperty, Node outputNode, Context context) throws Exception {
         Binary sqlContent = inputProperty.getBinary();
         CheckArg.isNotNull(sqlContent, "teiid sql content binary value"); //$NON-NLS-1$
-
-        if (outputNode.hasProperty(TeiidSqlLexicon.TEIID_VERSION_PROPERTY)) {
-            Property versionProp = outputNode.getProperty(TeiidSqlLexicon.TEIID_VERSION_PROPERTY);
-            setTeiidVersion(new TeiidVersion(versionProp.getString()));
-        }
 
         // Perform the parsing
         final ASTNode rootNode;
@@ -195,12 +178,17 @@ public class TeiidSqlSequencer extends Sequencer {
             sequenceNode = parentNode.addNode(jcrName, astNode.getPrimaryType());
         }
 
+        // Add the mixin types to the sequence node
         astNode.setSequencedNode(sequenceNode);
         for (String mixin : astNode.getMixins()) {
             sequenceNode.addMixin(mixin);
         }
         astNode.removeProperty(JcrConstants.JCR_MIXIN_TYPES);
         astNode.removeProperty(JcrConstants.JCR_PRIMARY_TYPE);
+
+        // Add the teiid version to the sequence node
+        sequenceNode.setProperty(TeiidSqlLexicon.LanguageObject.TEIID_VERSION_PROP_NAME, getTeiidVersion().toString());
+
         return sequenceNode;
     }
 
