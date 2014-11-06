@@ -23,10 +23,13 @@ package org.komodo.spi.repository;
 
 
 /**
- *
+ * Event sent by a repository client
  */
 public final class RepositoryClientEvent {
 
+    /**
+     * Event types describing the repository client
+     */
     public enum EventType {
         /**
          * Sent when an {@link IRepositoryClient} has just started
@@ -44,6 +47,8 @@ public final class RepositoryClientEvent {
     private final IRepositoryClient source;
 
     /**
+     * @param eventType type of this event
+     * @param source the source of this event
      * 
      */
     public RepositoryClientEvent(EventType eventType, IRepositoryClient source) {
@@ -66,11 +71,11 @@ public final class RepositoryClientEvent {
     }
 
     /**
-     * @param client
+     * @param source the source of the new event
      *
      * @return event representing the given client has started
      */
-    public static RepositoryClientEvent createStartedEvent(IRepositoryClient client) {
-        return new RepositoryClientEvent(EventType.STARTED, client);
+    public static RepositoryClientEvent createStartedEvent(IRepositoryClient source) {
+        return new RepositoryClientEvent(EventType.STARTED, source);
     }
 }

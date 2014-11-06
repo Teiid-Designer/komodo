@@ -43,7 +43,8 @@ public class Messages implements StringConstants {
         Configuration_Problem,
         Configuration_Failure,
         Deployment_Failure,
-        General_Exception;
+        General_Exception,
+        EngineThread_Died;
 
         @Override
         public String toString() {
@@ -88,8 +89,8 @@ public class Messages implements StringConstants {
     /**
      * Get message string with parameters
      *
-     * @param key
-     * @param parameters
+     * @param key the key
+     * @param parameters additional parameters
      *
      * @return i18n string
      */

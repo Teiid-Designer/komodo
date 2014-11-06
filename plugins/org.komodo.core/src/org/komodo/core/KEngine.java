@@ -59,8 +59,17 @@ public final class KEngine implements IRepositoryClient, StringConstants {
 
     private State state = State.NOT_STARTED;
 
+    private LocalRepository defaultRepository;
+
     private KEngine() {
         // Nothing to do
+    }
+
+    /**
+     * @return the defaultRepository
+     */
+    public IRepository getDefaultRepository() {
+        return this.defaultRepository;
     }
 
     /**
@@ -86,9 +95,14 @@ public final class KEngine implements IRepositoryClient, StringConstants {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
 
         if (this.repositories.add(repository)) {
-            repository.add(this);
+            repository.addClient(this);
             KLog.getLogger().debug(String.format("%s added repository '{0}'", PREFIX, repository.getId())); //$NON-NLS-1$
             notifyListeners(null); // TODO create event
+
+            // Notify this repository if it has started
+            if (State.STARTED == state)
+                repository.notify(RepositoryClientEvent.createStartedEvent(this));
+
         } else {
             // TODO i18n this
             throw new KException(String.format("Repository '%s' was not added", repository.getId())); //$NON-NLS-1$
@@ -153,7 +167,7 @@ public final class KEngine implements IRepositoryClient, StringConstants {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
 
         if (this.repositories.remove(repository)) {
-            repository.remove(this);
+            repository.removeClient(this);
             KLog.getLogger().debug(String.format("%s removed repository '{0}'", PREFIX, repository.getId())); //$NON-NLS-1$
             notifyListeners(null); // TODO create event
         } else {
@@ -182,9 +196,9 @@ public final class KEngine implements IRepositoryClient, StringConstants {
     /**
      * Initialise the local repository
      */
-    private void initLocalRespository() throws KException {
-        LocalRepository localRepository = LocalRepository.getInstance();
-        add(localRepository);
+    private void initDefaultRespository() throws KException {
+        defaultRepository = LocalRepository.getInstance();
+        add(defaultRepository);
     }
 
     /**
@@ -193,7 +207,7 @@ public final class KEngine implements IRepositoryClient, StringConstants {
     public void start() throws KException {
         try {
             // Initialise the local repository
-            initLocalRespository();
+            initDefaultRespository();
 
             // TODO implement start (read any saved session state, connect to repos if auto-connect, etc.)
             this.state = State.STARTED;

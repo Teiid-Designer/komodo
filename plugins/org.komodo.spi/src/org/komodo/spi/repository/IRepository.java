@@ -21,6 +21,8 @@
  */
 package org.komodo.spi.repository;
 
+import java.net.URL;
+
 /**
  * A repository is a data store containing artifacts
  * generated while modelling VDBs
@@ -81,6 +83,10 @@ public interface IRepository {
          */
         String getUrl();
 
+        /**
+         * @return the repository configuration location
+         */
+        URL getConfiguration();
     }
 
     /**
@@ -108,14 +114,24 @@ public interface IRepository {
      *
      * @param client
      */
-    void add(IRepositoryClient client);
+    void addClient(IRepositoryClient client);
 
     /**
      * Remove an {@link IRepositoryClient} that we no longer wish to receive notifications from
      *
      * @param client
      */
-    void remove(IRepositoryClient client);
+    void removeClient(IRepositoryClient client);
+
+    /**
+     * @param observer the observer to be added
+     */
+    void addObserver(IRepositoryObserver observer);
+
+    /**
+     * @param observer the observer to be removed
+     */
+    void removeObserver(IRepositoryObserver observer);
 
     /**
      * Notify the repository of the given {@link RepositoryClientEvent}

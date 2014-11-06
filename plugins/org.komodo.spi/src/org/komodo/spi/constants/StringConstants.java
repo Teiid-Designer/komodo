@@ -303,5 +303,10 @@ public interface StringConstants {
    * private
    */
   String PRIVATE = "private"; //$NON-NLS-1$
+
+  /**
+   * local repository name
+   */
+  String LOCAL_REPOSITORY = "local_repository"; //$NON-NLS-1$
 }
 

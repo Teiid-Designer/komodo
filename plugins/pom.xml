@@ -17,7 +17,6 @@
     <module>libs</module>
 
     <module>org.komodo.spi</module>
-    <module>org.komodo.repository</module>
     <module>org.komodo.core</module>
     <module>org.komodo.relational</module>
     <module>org.komodo.utils</module>
