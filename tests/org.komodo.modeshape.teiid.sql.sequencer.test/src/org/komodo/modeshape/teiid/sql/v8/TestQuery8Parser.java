@@ -23,7 +23,7 @@ package org.komodo.modeshape.teiid.sql.v8;
 
 import java.util.Arrays;
 import org.junit.Test;
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.AbstractTestQueryParser;
 import org.komodo.modeshape.teiid.sql.lang.CompareCriteria;
@@ -345,7 +345,7 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
         for (Version version : versions) {
             this.teiidVersion = version.get();
-            this.parser = new QueryParser(teiidVersion);
+            this.parser = new SQQueryParser(teiidVersion);
 
             /* CREATE VIRTUAL PROCEDURE is a required prefix for version 8.0 - 8.4 */
             helpException(sql, mainMsg + SPACE + buildProcedureVersionMsg());

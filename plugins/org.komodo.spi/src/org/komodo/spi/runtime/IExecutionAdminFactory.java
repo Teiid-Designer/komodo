@@ -22,7 +22,7 @@
 package org.komodo.spi.runtime;
 
 import java.sql.Driver;
-import org.komodo.spi.query.IQueryService;
+import org.komodo.spi.query.QueryService;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 
@@ -62,7 +62,7 @@ public interface IExecutionAdminFactory {
      * Get the query service
      * @param teiidVersion
      * 
-     * @return instance of {@link IQueryService}
+     * @return instance of {@link QueryService}
      */
-    IQueryService getQueryService(ITeiidVersion teiidVersion);
+    QueryService getQueryService(ITeiidVersion teiidVersion);
 }

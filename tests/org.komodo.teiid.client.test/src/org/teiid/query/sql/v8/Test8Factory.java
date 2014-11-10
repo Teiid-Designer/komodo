@@ -21,7 +21,7 @@
 */
 package org.teiid.query.sql.v8;
 
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.proc.RaiseStatement;
@@ -35,7 +35,7 @@ public class Test8Factory extends AbstractTestFactory {
     /**
      * @param parser
      */
-    public Test8Factory(QueryParser parser) {
+    public Test8Factory(TCQueryParser parser) {
         super(parser);
     }
 

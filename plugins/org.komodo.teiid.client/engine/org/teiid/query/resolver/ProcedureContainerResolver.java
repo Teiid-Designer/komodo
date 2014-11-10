@@ -42,7 +42,7 @@ import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataID.Type;
 import org.teiid.query.metadata.TempMetadataStore;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.resolver.util.ResolverUtil;
@@ -68,7 +68,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
     /**
      * @param queryResolver
      */
-    public ProcedureContainerResolver(QueryResolver queryResolver) {
+    public ProcedureContainerResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 
@@ -98,7 +98,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
             return null;
         }
         
-        QueryParser parser = getQueryResolver().getQueryParser();
+        TCQueryParser parser = getQueryResolver().getQueryParser();
         try {
             subCommand = parser.parseProcedure(plan, !(procCommand instanceof StoredProcedure));
         } catch(Exception e) {
@@ -258,7 +258,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 	 * @param inferProcedureResultSetColumns 
 	 * @throws Exception 
 	 */
-	public static void findChildCommandMetadata(QueryResolver queryResolver, Command currentCommand,
+	public static void findChildCommandMetadata(TCQueryResolver queryResolver, Command currentCommand,
 			GroupSymbol container, int type, IQueryMetadataInterface metadata, boolean inferProcedureResultSetColumns)
 			throws Exception {
 	    TeiidParser parser = queryResolver.getQueryParser().getTeiidParser();

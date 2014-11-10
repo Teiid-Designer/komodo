@@ -22,7 +22,7 @@
 package org.teiid.query.sql.v7;
 
 import java.util.List;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.lang.CompareCriteria;
@@ -47,7 +47,7 @@ public class Test7Factory extends AbstractTestFactory {
     /**
      * @param parser
      */
-    public Test7Factory(QueryParser parser) {
+    public Test7Factory(TCQueryParser parser) {
         super(parser);
     }
 

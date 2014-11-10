@@ -217,7 +217,7 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
     /*
      * Required if nodes are to be created by the visitor
      */
-    private final QueryParser parser;
+    private final SQQueryParser parser;
 
     private boolean abort = false;
 
@@ -251,7 +251,7 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
      */
     public LanguageVisitor(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
-        this.parser = new QueryParser(teiidVersion);
+        this.parser = new SQQueryParser(teiidVersion);
     }
 
     /**
@@ -284,7 +284,7 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
     /**
      * @return the parser
      */
-    public QueryParser getQueryParser() {
+    public SQQueryParser getQueryParser() {
         return this.parser;
     }
 

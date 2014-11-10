@@ -24,7 +24,7 @@ package org.teiid.runtime.client.query;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.komodo.spi.query.IQueryFactory;
+import org.komodo.spi.query.QueryFactory;
 import org.komodo.spi.query.metadata.IMetadataID;
 import org.komodo.spi.query.metadata.IQueryNode;
 import org.komodo.spi.query.metadata.IStoredProcedureInfo;
@@ -137,7 +137,7 @@ import org.teiid.query.sql.symbol.ScalarSubquery;
 /**
  *
  */
-public class SyntaxFactory implements IQueryFactory <Expression, 
+public class SyntaxFactory implements QueryFactory <Expression, 
                                                                                                  Expression,
                                                                                                  FromClause,
                                                                                                  ElementSymbol,

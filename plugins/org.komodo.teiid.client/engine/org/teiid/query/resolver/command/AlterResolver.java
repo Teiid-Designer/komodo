@@ -27,7 +27,7 @@ import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.metadata.Table.TriggerEvent;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.CommandResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.sql.lang.Alter;
 import org.teiid.query.sql.lang.AlterProcedure;
@@ -43,7 +43,7 @@ public class AlterResolver extends CommandResolver {
 	/**
      * @param queryResolver
      */
-    public AlterResolver(QueryResolver queryResolver) {
+    public AlterResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 

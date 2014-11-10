@@ -39,7 +39,7 @@ import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
 import org.teiid.query.mapping.relational.QueryNode;
 import org.teiid.query.metadata.TransformationMetadata;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.symbol.Expression;
@@ -87,7 +87,7 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
 		Table vm1g1 = getMetadataFactory().createUpdatableVirtualGroup(vGroup, md.getMetadataStore().getSchema("VM1"), vm1g1n1);
 
 		Command command = getQueryParser().parseCommand(sql);
-		QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+		TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
 		queryResolver.resolveCommand(command, md);
 
 		List<Expression> symbols = command.getProjectedSymbols();

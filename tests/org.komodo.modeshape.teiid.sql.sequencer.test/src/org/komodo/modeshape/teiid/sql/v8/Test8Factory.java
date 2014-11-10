@@ -21,7 +21,7 @@
 */
 package org.komodo.modeshape.teiid.sql.v8;
 
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.AbstractTestFactory;
 import org.komodo.modeshape.teiid.sql.proc.RaiseStatement;
@@ -35,7 +35,7 @@ public class Test8Factory extends AbstractTestFactory {
     /**
      * @param parser
      */
-    public Test8Factory(QueryParser parser) {
+    public Test8Factory(SQQueryParser parser) {
         super(parser);
     }
 

@@ -25,7 +25,7 @@ package org.teiid.query.mapping.xml;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.komodo.spi.query.IQueryFactory;
+import org.komodo.spi.query.QueryFactory;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidParser;

@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.lang.ArrayTable;
 import org.komodo.modeshape.teiid.sql.lang.BetweenCriteria;
@@ -121,9 +121,9 @@ import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 @SuppressWarnings( "javadoc" )
 public abstract class AbstractTestFactory {
 
-    private QueryParser parser;
+    private SQQueryParser parser;
 
-    public AbstractTestFactory(QueryParser parser) {
+    public AbstractTestFactory(SQQueryParser parser) {
         this.parser = parser;
     }
 

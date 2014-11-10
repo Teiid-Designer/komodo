@@ -76,7 +76,7 @@ import org.teiid.query.metadata.MetadataValidator;
 import org.teiid.query.metadata.SystemMetadata;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.optimizer.FakeFunctionMetadataSource;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.validator.ValidatorReport;
 
@@ -95,14 +95,14 @@ public class RealMetadataFactory {
 
     private final ITeiidVersion teiidVersion;
 
-    private final QueryParser parser;
+    private final TCQueryParser parser;
 
     private DataTypeManagerService dataTypeManager;
         
 	public RealMetadataFactory(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         SFM = new SystemFunctionManager(teiidVersion, getClass().getClassLoader());
-        parser = new QueryParser(teiidVersion);
+        parser = new TCQueryParser(teiidVersion);
 	}
 
 	public ITeiidVersion getTeiidVersion() {

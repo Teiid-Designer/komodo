@@ -37,18 +37,18 @@ import org.teiid.query.sql.lang.LanguageObject;
  */
 public abstract class CommandResolver {
 
-    private final QueryResolver queryResolver;
+    private final TCQueryResolver queryResolver;
 
     private DataTypeManagerService dataTypeManager;
 
     /**
      * @param queryResolver
      */
-    public CommandResolver(QueryResolver queryResolver) {
+    public CommandResolver(TCQueryResolver queryResolver) {
         this.queryResolver = queryResolver;
     }
 
-    protected QueryResolver getQueryResolver() {
+    protected TCQueryResolver getQueryResolver() {
         return this.queryResolver;
     }
 

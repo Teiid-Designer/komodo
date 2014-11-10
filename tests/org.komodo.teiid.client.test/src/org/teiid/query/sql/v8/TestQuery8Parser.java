@@ -26,7 +26,7 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.AbstractTestQueryParser;
 import org.teiid.query.sql.lang.CompareCriteria;
@@ -311,15 +311,15 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
         helpException(sql);
 
         this.teiidVersion = Version.TEIID_8_1.get();
-        this.parser = new QueryParser(teiidVersion);
+        this.parser = new TCQueryParser(teiidVersion);
         helpException(sql);
 
         this.teiidVersion = Version.TEIID_8_2.get();
-        this.parser = new QueryParser(teiidVersion);
+        this.parser = new TCQueryParser(teiidVersion);
         helpException(sql);
 
         this.teiidVersion = Version.TEIID_8_3.get();
-        this.parser = new QueryParser(teiidVersion);
+        this.parser = new TCQueryParser(teiidVersion);
         helpException(sql);
     }
 }

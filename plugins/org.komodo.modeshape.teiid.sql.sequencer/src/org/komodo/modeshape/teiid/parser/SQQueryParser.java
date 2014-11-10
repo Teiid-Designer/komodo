@@ -38,7 +38,7 @@ import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.query.IQueryParser;
+import org.komodo.spi.query.QueryParser;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 
@@ -48,7 +48,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
  * input stream.  Putting multiple queries into the same stream will result
  * in unpredictable and most likely incorrect behavior.</p>
  */
-public class QueryParser implements IQueryParser, StringConstants {
+public class SQQueryParser implements QueryParser, StringConstants {
 
 	private ITeiidParser teiidParser;
 
@@ -59,7 +59,7 @@ public class QueryParser implements IQueryParser, StringConstants {
 	 *
 	 * @param teiidVersion version of teiid
 	 */
-	public QueryParser(ITeiidVersion teiidVersion) {
+	public SQQueryParser(ITeiidVersion teiidVersion) {
 	    this.teiidVersion = teiidVersion;
 	    this.teiidParser = createTeiidParser(new StringReader("")); //$NON-NLS-1$
 	}

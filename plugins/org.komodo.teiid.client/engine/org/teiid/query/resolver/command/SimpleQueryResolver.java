@@ -47,7 +47,7 @@ import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.CommandResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.lang.ArrayTable;
@@ -102,7 +102,7 @@ public class SimpleQueryResolver extends CommandResolver {
     /**
      * @param queryResolver
      */
-    public SimpleQueryResolver(QueryResolver queryResolver) {
+    public SimpleQueryResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 

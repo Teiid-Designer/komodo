@@ -28,7 +28,7 @@ import java.util.HashSet;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.query.IQueryParser;
+import org.komodo.spi.query.QueryParser;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
@@ -48,7 +48,7 @@ import org.teiid.runtime.client.TeiidClientException;
  * input stream.  Putting multiple queries into the same stream will result
  * in unpredictable and most likely incorrect behavior.</p>
  */
-public class QueryParser implements IQueryParser {
+public class TCQueryParser implements QueryParser {
 
 	private TeiidParser teiidParser;
 
@@ -59,7 +59,7 @@ public class QueryParser implements IQueryParser {
 	 *
 	 * @param teiidVersion
 	 */
-	public QueryParser(ITeiidVersion teiidVersion) {
+	public TCQueryParser(ITeiidVersion teiidVersion) {
 	    this.teiidVersion = teiidVersion;
 	    this.teiidParser = createTeiidParser(new StringReader("")); //$NON-NLS-1$
 	}

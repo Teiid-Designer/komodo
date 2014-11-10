@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.komodo.modeshape.AbstractSequencerTest;
 import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
 import org.komodo.modeshape.teiid.TeiidSqlSequencer;
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.AbstractTestFactory;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
@@ -98,14 +98,14 @@ import org.modeshape.jcr.api.nodetype.NodeTypeManager;
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractTestSqlNodeVisitor extends AbstractSequencerTest {
 
-    protected QueryParser parser;
+    protected SQQueryParser parser;
 
     /**
      * @param teiidVersion 
      */
     public AbstractTestSqlNodeVisitor(ITeiidVersion teiidVersion) {
         super(teiidVersion);
-        this.parser = new QueryParser(teiidVersion);
+        this.parser = new SQQueryParser(teiidVersion);
     }
 
     protected abstract AbstractTestFactory getFactory();

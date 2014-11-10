@@ -28,7 +28,7 @@ import org.teiid.core.types.DataTypeManagerService;
 import org.komodo.spi.query.sql.lang.IJoinType.Types;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.ArrayTable;
 import org.teiid.query.sql.lang.BetweenCriteria;
@@ -121,9 +121,9 @@ import org.teiid.query.sql.symbol.XMLSerialize;
 @SuppressWarnings( "javadoc" )
 public abstract class AbstractTestFactory {
 
-    private QueryParser parser;
+    private TCQueryParser parser;
 
-    public AbstractTestFactory(QueryParser parser) {
+    public AbstractTestFactory(TCQueryParser parser) {
         this.parser = parser;
     }
 

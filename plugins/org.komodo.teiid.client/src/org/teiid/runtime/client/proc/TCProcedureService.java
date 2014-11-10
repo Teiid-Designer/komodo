@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.komodo.spi.query.IProcedureService;
+import org.komodo.spi.query.ProcedureService;
 import org.komodo.spi.query.proc.ITeiidColumnInfo;
 import org.komodo.spi.query.proc.ITeiidMetadataFileInfo;
 import org.komodo.spi.query.proc.ITeiidXmlColumnInfo;
@@ -43,14 +43,14 @@ import org.teiid.runtime.client.Messages;
 /**
  *
  */
-public class ProcedureService implements IProcedureService, ISQLConstants {
+public class TCProcedureService implements ProcedureService, ISQLConstants {
 
     private final ITeiidVersion teiidVersion;
 
     /**
      * @param teiidVersion
      */
-    public ProcedureService(ITeiidVersion teiidVersion) {
+    public TCProcedureService(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 

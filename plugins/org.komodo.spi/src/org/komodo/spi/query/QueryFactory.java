@@ -81,7 +81,7 @@ import org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type;
 /**
  *
  */
-public interface IQueryFactory<E extends IExpression, 
+public interface QueryFactory<E extends IExpression, 
                                                       SES extends IExpression /* SingleElementSymbol */,
                                                       F extends IFromClause,
                                                       ES extends IElementSymbol,

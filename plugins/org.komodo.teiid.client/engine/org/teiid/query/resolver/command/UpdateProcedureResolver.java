@@ -49,7 +49,7 @@ import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.CommandResolver;
 import org.teiid.query.resolver.ProcedureContainerResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.ProcedureReservedWords;
@@ -94,7 +94,7 @@ public class UpdateProcedureResolver extends CommandResolver {
     /**
      * @param queryResolver
      */
-    public UpdateProcedureResolver(QueryResolver queryResolver) {
+    public UpdateProcedureResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
 
         ElementSymbol es1 = create(ASTNodes.ELEMENT_SYMBOL);
@@ -167,7 +167,7 @@ public class UpdateProcedureResolver extends CommandResolver {
         // has criteria/translate criteria clauses
         Command transformCmd;
         try {
-            QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
             transformCmd = queryResolver.resolveView(virtualGroup,
                                                      metadata.getVirtualPlan(virtualGroup.getMetadataID()),
                                                      SQLConstants.Reserved.SELECT,

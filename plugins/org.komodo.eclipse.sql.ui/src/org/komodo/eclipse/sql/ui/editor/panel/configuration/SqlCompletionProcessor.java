@@ -22,7 +22,7 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationPresenter;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 
 /**
@@ -40,14 +40,14 @@ public class SqlCompletionProcessor
 	protected Vector proposalList = new Vector();
 	protected IContextInformationValidator fValidator = new Validator();
 
-    private final QueryParser queryParser;
+    private final SQQueryParser queryParser;
 
     /**
      * @param teiidVersion
      */
     public SqlCompletionProcessor(ITeiidVersion teiidVersion) {
         new SqlSyntax(teiidVersion);
-        queryParser = new QueryParser(teiidVersion);
+        queryParser = new SQQueryParser(teiidVersion);
     }
 
     /**

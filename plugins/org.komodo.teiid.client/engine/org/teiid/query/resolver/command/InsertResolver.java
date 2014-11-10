@@ -39,7 +39,7 @@ import org.teiid.language.SQLConstants;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.ProcedureContainerResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.VariableResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitor;
@@ -66,7 +66,7 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
     /**
      * @param queryResolver
      */
-    public InsertResolver(QueryResolver queryResolver) {
+    public InsertResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 

@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.komodo.spi.query.IQueryFactory;
-import org.komodo.spi.query.IQueryParser;
-import org.komodo.spi.query.IQueryResolver;
-import org.komodo.spi.query.IQueryService;
+import org.komodo.spi.query.QueryFactory;
+import org.komodo.spi.query.QueryParser;
+import org.komodo.spi.query.QueryResolver;
+import org.komodo.spi.query.QueryService;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.query.sql.ICommandCollectorVisitor;
 import org.komodo.spi.query.sql.IElementCollectorVisitor;
@@ -66,8 +66,8 @@ import org.teiid.query.function.FunctionLibrary;
 import org.teiid.query.function.FunctionTree;
 import org.teiid.query.function.SystemFunctionManager;
 import org.teiid.query.function.UDFSource;
-import org.teiid.query.parser.QueryParser;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.parser.TCQueryParser;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.ProcedureReservedWords;
@@ -86,17 +86,17 @@ import org.teiid.query.validator.ReferenceCollectorVisitor;
 import org.teiid.query.validator.UpdateValidator;
 import org.teiid.query.validator.UpdateValidator.UpdateType;
 import org.teiid.query.validator.Validator;
-import org.teiid.runtime.client.proc.ProcedureService;
+import org.teiid.runtime.client.proc.TCProcedureService;
 import org.teiid.runtime.client.xml.MappingDocumentFactory;
 
 /**
  *
  */
-public class QueryService implements IQueryService {
+public class TCQueryService implements QueryService {
 
     private final ITeiidVersion teiidVersion;
 
-    private QueryParser queryParser;
+    private TCQueryParser queryParser;
 
     private final SystemFunctionManager systemFunctionManager;
 
@@ -105,7 +105,7 @@ public class QueryService implements IQueryService {
     /**
      * @param teiidVersion
      */
-    public QueryService(ITeiidVersion teiidVersion) {
+    public TCQueryService(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         systemFunctionManager = new SystemFunctionManager(teiidVersion, getClass().getClassLoader());
     }
@@ -114,9 +114,9 @@ public class QueryService implements IQueryService {
      * @return a query parser applicable to the given teiid instance version
      */
     @Override
-    public IQueryParser getQueryParser() {
+    public QueryParser getQueryParser() {
         if (queryParser == null) {
-            queryParser = new QueryParser(teiidVersion);
+            queryParser = new TCQueryParser(teiidVersion);
         }
 
         return queryParser;
@@ -196,9 +196,9 @@ public class QueryService implements IQueryService {
     }
 
     @Override
-    public IQueryFactory createQueryFactory() {
+    public QueryFactory createQueryFactory() {
         if (factory == null)
-            factory = new SyntaxFactory(((QueryParser)getQueryParser()).getTeiidParser());
+            factory = new SyntaxFactory(((TCQueryParser)getQueryParser()).getTeiidParser());
 
         return factory;
     }
@@ -316,13 +316,13 @@ public class QueryService implements IQueryService {
     }
 
     @Override
-    public IQueryResolver getQueryResolver() {
+    public QueryResolver getQueryResolver() {
         getQueryParser();
-        return new QueryResolver((QueryParser)getQueryParser());
+        return new TCQueryResolver((TCQueryParser)getQueryParser());
     }
 
     @Override
-    public ProcedureService getProcedureService() {
-        return new ProcedureService(teiidVersion);
+    public TCProcedureService getProcedureService() {
+        return new TCProcedureService(teiidVersion);
     }
 }

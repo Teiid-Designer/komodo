@@ -49,7 +49,7 @@ import org.teiid.metadata.MetadataFactory;
 import org.teiid.metadata.MetadataStore;
 import org.teiid.metadata.Table;
 import org.teiid.query.function.SystemFunctionManager;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.validator.ValidatorReport;
 import org.teiid.runtime.client.Messages;
 
@@ -143,7 +143,7 @@ public class SystemMetadata {
 		vdb.setName("System");  //$NON-NLS-1$
 		vdb.setVersion(1);
 		Properties p = new Properties();
-		QueryParser parser = new QueryParser(teiidVersion);
+		TCQueryParser parser = new TCQueryParser(teiidVersion);
 		systemStore = loadSchema(vdb, p, resourceLocation, "SYS", parser).asMetadataStore(); //$NON-NLS-1$
 		systemStore.addDataTypes(dataTypes);
 		loadSchema(vdb, p, resourceLocation, "SYSADMIN", parser).mergeInto(systemStore); //$NON-NLS-1$
@@ -157,7 +157,7 @@ public class SystemMetadata {
 		}
 	}
 
-	private MetadataFactory loadSchema(VDBMetaData vdb, Properties p, String resourceLocation, String name, QueryParser parser) {
+	private MetadataFactory loadSchema(VDBMetaData vdb, Properties p, String resourceLocation, String name, TCQueryParser parser) {
 		ModelMetaData mmd = new ModelMetaData();
 		mmd.setName(name);
 		vdb.addModel(mmd);

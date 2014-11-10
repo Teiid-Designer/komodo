@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.IExecutionConfigurationListener;
@@ -63,7 +63,7 @@ public class SqlSyntax {
     }
     
     private void init() {
-        QueryParser queryParser = new QueryParser(teiidVersion);
+        SQQueryParser queryParser = new SQQueryParser(teiidVersion);
         IDataTypeManagerService dataTypeManagerService = queryParser.getTeiidParser().getDataTypeService(); 
 
         try {

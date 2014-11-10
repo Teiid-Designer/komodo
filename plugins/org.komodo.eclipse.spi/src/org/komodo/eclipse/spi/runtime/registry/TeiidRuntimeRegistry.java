@@ -32,7 +32,7 @@ import org.eclipse.osgi.util.NLS;
 import org.komodo.eclipse.spi.KEclipseSPIPlugin;
 import org.komodo.eclipse.spi.Messages;
 import org.komodo.eclipse.spi.registry.AbstractExtensionRegistry;
-import org.komodo.spi.query.IQueryService;
+import org.komodo.spi.query.QueryService;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.IExecutionAdminFactory;
 import org.komodo.spi.runtime.ITeiidInstance;
@@ -158,10 +158,10 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
      * 
      * @param teiidVersion
      * 
-     * @return instance of {@link IQueryService}
+     * @return instance of {@link QueryService}
      * @throws Exception 
      */
-    public IQueryService getQueryService(ITeiidVersion teiidVersion) throws Exception {
+    public QueryService getQueryService(ITeiidVersion teiidVersion) throws Exception {
         IExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
             throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));

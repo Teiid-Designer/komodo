@@ -34,7 +34,7 @@ import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.lang.BetweenCriteria;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.CompareCriteria;
@@ -1813,7 +1813,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
     @Test
     public void testUnionOrderBy() throws Exception {
         Command command = parser.parseCommand("select pm1.g1.e1 from pm1.g1 union select e2 from pm1.g2 order by e1");
-        QueryResolver queryResolver = new QueryResolver(parser);
+        TCQueryResolver queryResolver = new TCQueryResolver(parser);
         queryResolver.resolveCommand(command, metadataFactory.example1Cached());
         helpTest(command, "SELECT pm1.g1.e1 FROM pm1.g1 UNION SELECT e2 FROM pm1.g2 ORDER BY e1");
     }
@@ -1821,7 +1821,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
     @Test
     public void testUnionBranchOrderBy() throws Exception {
         Command command = parser.parseCommand("select pm1.g1.e1 from pm1.g1 union (select e2 from pm1.g2 order by e1)");
-        QueryResolver queryResolver = new QueryResolver(parser);
+        TCQueryResolver queryResolver = new TCQueryResolver(parser);
         queryResolver.resolveCommand(command, metadataFactory.example1Cached());
         helpTest(command, "SELECT pm1.g1.e1 FROM pm1.g1 UNION (SELECT e2 FROM pm1.g2 ORDER BY e1)");
     }
@@ -1829,7 +1829,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
     @Test
     public void testAliasedOrderBy() throws Exception {
         Command command = parser.parseCommand("select pm1.g1.e1 as a from pm1.g1 order by a");
-        QueryResolver queryResolver = new QueryResolver(parser);
+        TCQueryResolver queryResolver = new TCQueryResolver(parser);
         queryResolver.resolveCommand(command, metadataFactory.example1Cached());
         helpTest(command, "SELECT pm1.g1.e1 AS a FROM pm1.g1 ORDER BY a");
     }
@@ -1837,7 +1837,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
     @Test
     public void testNumberOrderBy() throws Exception {
         Command command = parser.parseCommand("select pm1.g1.e1 as a from pm1.g1 order by 1");
-        QueryResolver queryResolver = new QueryResolver(parser);
+        TCQueryResolver queryResolver = new TCQueryResolver(parser);
         queryResolver.resolveCommand(command, metadataFactory.example1Cached());
         helpTest(command, "SELECT pm1.g1.e1 AS a FROM pm1.g1 ORDER BY 1");
     }

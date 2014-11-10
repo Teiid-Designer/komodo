@@ -61,7 +61,7 @@ public abstract class AbstractTestAlterResolving extends AbstractTest {
     protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadataInterface);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -85,7 +85,7 @@ public abstract class AbstractTestAlterResolving extends AbstractTest {
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadata);
             fail("Expected exception for resolving " + sql); //$NON-NLS-1$
         } catch (QueryResolverException e) {

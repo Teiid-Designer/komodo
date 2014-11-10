@@ -28,7 +28,7 @@ import java.util.Set;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.ProcedureContainerResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Delete;
@@ -43,7 +43,7 @@ public class DeleteResolver extends ProcedureContainerResolver {
     /**
      * @param queryResolver
      */
-    public DeleteResolver(QueryResolver queryResolver) {
+    public DeleteResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 

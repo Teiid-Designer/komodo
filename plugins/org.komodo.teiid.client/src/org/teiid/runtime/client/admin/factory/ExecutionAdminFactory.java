@@ -24,7 +24,7 @@ package org.teiid.runtime.client.admin.factory;
 import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
-import org.komodo.spi.query.IQueryService;
+import org.komodo.spi.query.QueryService;
 import org.komodo.spi.runtime.IExecutionAdmin;
 import org.komodo.spi.runtime.IExecutionAdminFactory;
 import org.komodo.spi.runtime.ITeiidInstance;
@@ -33,7 +33,7 @@ import org.komodo.spi.type.IDataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.jdbc.TeiidDriver;
 import org.teiid.runtime.client.admin.ExecutionAdmin;
-import org.teiid.runtime.client.query.QueryService;
+import org.teiid.runtime.client.query.TCQueryService;
 
 /**
  *
@@ -42,7 +42,7 @@ public class ExecutionAdminFactory implements IExecutionAdminFactory {
 
     private final Map<ITeiidVersion, DataTypeManagerService> dataTypeManagerServiceCache = new HashMap<ITeiidVersion, DataTypeManagerService>();
     
-    private final Map<ITeiidVersion, QueryService> queryServiceCache = new HashMap<ITeiidVersion, QueryService>();
+    private final Map<ITeiidVersion, TCQueryService> queryServiceCache = new HashMap<ITeiidVersion, TCQueryService>();
 
     @Override
     public IExecutionAdmin createExecutionAdmin(ITeiidInstance teiidInstance) throws Exception {
@@ -68,10 +68,10 @@ public class ExecutionAdminFactory implements IExecutionAdminFactory {
     }
 
     @Override
-    public IQueryService getQueryService(ITeiidVersion teiidVersion) {
-        QueryService queryService = queryServiceCache.get(teiidVersion);
+    public QueryService getQueryService(ITeiidVersion teiidVersion) {
+        TCQueryService queryService = queryServiceCache.get(teiidVersion);
         if (queryService == null) {
-            queryService = new QueryService(teiidVersion);
+            queryService = new TCQueryService(teiidVersion);
             queryServiceCache.put(teiidVersion, queryService);
         }
 

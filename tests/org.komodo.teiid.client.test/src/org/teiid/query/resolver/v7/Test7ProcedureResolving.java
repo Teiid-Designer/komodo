@@ -31,7 +31,7 @@ import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.metadata.Table;
 import org.teiid.query.resolver.AbstractTestProcedureResolving;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.ProcedureReservedWords;
 import org.teiid.query.sql.lang.Command;
@@ -746,7 +746,7 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
         Command procCommand = getQueryParser().parseCommand(procedure);
         GroupSymbol virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
         virtualGroup.setMetadataID(metadata.getGroupID("vm1.g1")); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(procCommand, virtualGroup, ICommand.TYPE_UPDATE, metadata);
     }
 
@@ -784,7 +784,7 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
         GroupSymbol virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
         virtualGroup.setMetadataID(metadata.getGroupID("vm1.g1")); //$NON-NLS-1$
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(procCommand, virtualGroup, ICommand.TYPE_INSERT, metadata);
     }
 
@@ -803,7 +803,7 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
         GroupSymbol virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
         virtualGroup.setMetadataID(metadata.getGroupID("vm1.g1")); //$NON-NLS-1$
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(procCommand, virtualGroup, ICommand.TYPE_UPDATE, metadata);
     }
 

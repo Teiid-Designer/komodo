@@ -53,11 +53,11 @@ import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
 import org.teiid.query.function.metadata.FunctionMetadataValidator;
 import org.teiid.query.mapping.relational.QueryNode;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.report.ActivityReport;
 import org.teiid.query.report.ReportItem;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.lang.Command;
@@ -79,7 +79,7 @@ public class MetadataValidator {
 
     private final ITeiidVersion teiidVersion;
 
-    private final QueryParser queryParser;
+    private final TCQueryParser queryParser;
 
 	private Map<String, Datatype> typeMap;
 
@@ -91,7 +91,7 @@ public class MetadataValidator {
 	public MetadataValidator(ITeiidVersion teiidVersion, Map<String, Datatype> typeMap) {
 		this.teiidVersion = teiidVersion;
         this.typeMap = typeMap;
-		this.queryParser = new QueryParser(teiidVersion);
+		this.queryParser = new TCQueryParser(teiidVersion);
 	}
 
 	public MetadataValidator(ITeiidVersion teiidVersion) {
@@ -276,7 +276,7 @@ public class MetadataValidator {
     			Command command = queryParser.parseProcedure(p.getQueryPlan(), false);
                 GroupSymbol gs = createASTNode(ASTNodes.GROUP_SYMBOL);
     			gs.setName(p.getFullName());
-    			QueryResolver resolver = new QueryResolver(queryParser);
+    			TCQueryResolver resolver = new TCQueryResolver(queryParser);
     			resolver.resolveCommand(command, gs, ICommand.TYPE_STORED_PROCEDURE, metadata, false);
     			Validator validator = new Validator();
     			resolverReport =  validator.validate(command, metadata);
@@ -288,7 +288,7 @@ public class MetadataValidator {
     			ResolverUtil.resolveGroup(symbol, metadata);
     			if (t.isVirtual() && (t.getColumns() == null || t.getColumns().isEmpty())) {
     				QueryCommand command = (QueryCommand) queryParser.parseCommand(t.getSelectTransformation());
-    				QueryResolver resolver = new QueryResolver(queryParser);
+    				TCQueryResolver resolver = new TCQueryResolver(queryParser);
     				resolver.resolveCommand(command, metadata);
     				Validator validator = new Validator();
     				resolverReport =  validator.validate(command, metadata);
@@ -336,7 +336,7 @@ public class MetadataValidator {
     			}
     			
     			// this seems to parse, resolve and validate.
-    			QueryResolver resolver = new QueryResolver(queryParser);
+    			TCQueryResolver resolver = new TCQueryResolver(queryParser);
     			resolver.resolveView(symbol, new QueryNode(t.getSelectTransformation()), SQLConstants.Reserved.SELECT, metadata);
     		}
 			if(resolverReport != null && resolverReport.hasItems()) {

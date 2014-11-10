@@ -30,7 +30,7 @@ import org.komodo.spi.query.sql.lang.IExpression;
 /**
  *
  */
-public interface IQueryParser {
+public interface QueryParser {
 
     /**
      * Parse the given criteria string

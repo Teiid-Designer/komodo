@@ -21,7 +21,7 @@
 */
 package org.komodo.modeshape.teiid.sql;
 
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
@@ -31,14 +31,14 @@ public abstract class AbstractTest<T extends LanguageObject> {
 
     protected ITeiidVersion teiidVersion;
 
-    protected QueryParser parser;
+    protected SQQueryParser parser;
 
     /**
      * @param teiidVersion
      */
     public AbstractTest(ITeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
-        this.parser = new QueryParser(teiidVersion);
+        this.parser = new SQQueryParser(teiidVersion);
     }
 
     protected abstract AbstractTestFactory getFactory();

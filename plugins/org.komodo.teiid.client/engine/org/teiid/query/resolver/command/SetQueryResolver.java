@@ -30,7 +30,7 @@ import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.CommandResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.OrderBy;
@@ -46,7 +46,7 @@ public class SetQueryResolver extends CommandResolver {
     /**
      * @param queryResolver
      */
-    public SetQueryResolver(QueryResolver queryResolver) {
+    public SetQueryResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 

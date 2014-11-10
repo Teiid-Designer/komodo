@@ -29,7 +29,7 @@ import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.metadata.Table;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -282,7 +282,7 @@ public class Test8Validator extends AbstractTestValidator {
         IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
         Command command = getQueryParser().parseCommand(sql);
         GroupSymbol group = getFactory().newGroupSymbol("pm1.vsp36");
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, group, ICommand.TYPE_STORED_PROCEDURE, metadata, true);
 
         assertEquals(2, command.getResultSetColumns().size());

@@ -55,7 +55,7 @@ import org.teiid.query.mapping.relational.QueryNode;
 import org.teiid.query.mapping.xml.MappingDocument;
 import org.teiid.query.mapping.xml.MappingElement;
 import org.teiid.query.metadata.TransformationMetadata;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.lang.ProcedureContainer;
@@ -243,7 +243,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
         try {
             command = getQueryParser().parseCommand(sql);
-            QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
             queryResolver.resolveCommand(command, metadata);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -255,7 +255,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     private Command helpResolve(String sql, GroupSymbol container, int type, IQueryMetadataInterface metadata)
         throws Exception {
         Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, container, type, metadata, false);
         return command;
     }
@@ -313,7 +313,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         throws Exception {
         ProcedureContainer command = (ProcedureContainer)helpResolve(userUpdateStr, metadata);
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         Command proc = queryResolver.expandCommand(command, metadata);
 
         Validator validator = new Validator();
@@ -584,7 +584,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
         Command command = getQueryParser().parseCommand("INSERT INTO test.group (e0) VALUES (2)"); //$NON-NLS-1$
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {}, metadata);
@@ -596,7 +596,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         IQueryMetadataInterface metadata = exampleMetadata1();
 
         Command command = getQueryParser().parseCommand("INSERT INTO test.group (e1, e2) VALUES ('x', 'y')"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {"test.\"group\".e0"}, metadata); //$NON-NLS-1$
@@ -607,7 +607,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         IQueryMetadataInterface metadata = exampleMetadata();
 
         Command command = getQueryParser().parseCommand("INSERT INTO test.group2 (e0, e1, e2) VALUES (5, 'x', 'y')"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {"e2", "e0"}, metadata); //$NON-NLS-1$ //$NON-NLS-2$
@@ -619,7 +619,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
         Command command = getQueryParser().parseCommand("INSERT INTO test.group2 (e1) VALUES ('y')"); //$NON-NLS-1$
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {}, metadata);
@@ -645,7 +645,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         IQueryMetadataInterface metadata = exampleMetadata();
 
         Command command = getQueryParser().parseCommand("UPDATE test.group2 SET e0 = 5, e1 = 'x', e2 = 'y'"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {"e2", "e0"}, metadata); //$NON-NLS-1$ //$NON-NLS-2$
@@ -656,7 +656,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         IQueryMetadataInterface metadata = exampleMetadata();
 
         Command command = getQueryParser().parseCommand("UPDATE test.group2 SET e1 = 'x'"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {}, metadata);
@@ -1114,7 +1114,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         // Validate
@@ -1128,7 +1128,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         String sql = "SELECT lookup('pm1.g1', 'e1a', 'e2', e2) AS x, lookup('pm1.g1', 'e4', 'e3', e3) AS y FROM pm1.g1"; //$NON-NLS-1$
         Command command = getQueryParser().parseCommand(sql);
         try {
-            QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
             fail("Did not get exception"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -1138,7 +1138,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         sql = "SELECT lookup('pm1.g1a', 'e1', 'e2', e2) AS x, lookup('pm1.g1', 'e4', 'e3', e3) AS y FROM pm1.g1"; //$NON-NLS-1$
         command = getQueryParser().parseCommand(sql);
         try {
-            QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
             fail("Did not get exception"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -1151,7 +1151,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         IQueryMetadataInterface metadata = exampleMetadata2();
         String sql = "SELECT lookup('test.group', 'e2', 'e3', convert(e2, blob)) AS x FROM test.group"; //$NON-NLS-1$
         Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         ValidatorReport report = new Validator().validate(command, metadata);
@@ -1174,7 +1174,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Command command = getQueryParser().parseCommand(procSql);
 
         GroupSymbol group = getFactory().newGroupSymbol(procName);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, group, ICommand.TYPE_STORED_PROCEDURE, metadata, true);
 
         // Validate
@@ -1288,7 +1288,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         // Validate
@@ -1305,7 +1305,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         c.setUpdatable(false);
 
         Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         // Validate

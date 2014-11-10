@@ -55,14 +55,14 @@ import org.komodo.spi.xml.IMappingDocumentFactory;
 /**
  *
  */
-public interface IQueryService {
+public interface QueryService {
 
     /**
      * Get the query parser
      * 
-     * @return implementation of {@link IQueryParser}
+     * @return implementation of {@link QueryParser}
      */
-    IQueryParser getQueryParser();
+    QueryParser getQueryParser();
 
     /**
      * Is the given word a reserved part of the SQL syntax
@@ -128,7 +128,7 @@ public interface IQueryService {
      *
      * @return factory
      */
-    IQueryFactory createQueryFactory();
+    QueryFactory createQueryFactory();
     
     /**
      * Create an xml mapping document factory
@@ -316,15 +316,15 @@ public interface IQueryService {
     /**
      * Get the query resolver
      * 
-     * @return instance of {@link IQueryResolver}
+     * @return instance of {@link QueryResolver}
      */
-    IQueryResolver getQueryResolver();
+    QueryResolver getQueryResolver();
     
     /**
      * Get the procedure service
      * 
-     * @return instance of {@link IProcedureService}
+     * @return instance of {@link ProcedureService}
      */
-    IProcedureService getProcedureService();
+    ProcedureService getProcedureService();
 
 }

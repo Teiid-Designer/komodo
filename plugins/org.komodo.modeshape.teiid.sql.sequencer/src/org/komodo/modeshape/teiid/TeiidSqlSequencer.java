@@ -37,7 +37,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
@@ -70,10 +70,10 @@ public class TeiidSqlSequencer extends Sequencer {
     /**
      * Create a query parser for parsing the SQL string
      *
-     * @return instance of {@link QueryParser} for the provided teiid version
+     * @return instance of {@link SQQueryParser} for the provided teiid version
      */
-    protected QueryParser createParser() {
-        QueryParser queryParser = new QueryParser(getTeiidVersion());
+    protected SQQueryParser createParser() {
+        SQQueryParser queryParser = new SQQueryParser(getTeiidVersion());
         return queryParser;
     }
 
@@ -89,7 +89,7 @@ public class TeiidSqlSequencer extends Sequencer {
 
         // Perform the parsing
         final ASTNode rootNode;
-        QueryParser parser = createParser();
+        SQQueryParser parser = createParser();
         InputStream stream = sqlContent.getStream();
         try {
             String sql = IoUtil.read(stream);

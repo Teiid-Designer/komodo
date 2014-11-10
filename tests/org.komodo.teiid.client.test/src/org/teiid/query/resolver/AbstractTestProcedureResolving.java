@@ -50,7 +50,7 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
 
     protected Command resolveProcedure(String userUpdateStr, IQueryMetadataInterface metadata) throws Exception {
         ProcedureContainer userCommand = (ProcedureContainer)getQueryParser().parseCommand(userUpdateStr);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(userCommand, metadata);
         metadata = new TempMetadataAdapter(metadata, userCommand.getTemporaryMetadata());
         return queryResolver.expandCommand(userCommand, metadata);
@@ -59,7 +59,7 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
     protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {       
         // resolve
         try { 
-            QueryResolver resolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver resolver = new TCQueryResolver(getTeiidVersion());
             resolver.resolveCommand(command, queryMetadataInterface);
         } catch(Exception e) {
             throw new RuntimeException(e);

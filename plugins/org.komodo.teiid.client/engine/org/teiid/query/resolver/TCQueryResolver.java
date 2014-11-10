@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.komodo.spi.query.IQueryResolver;
+import org.komodo.spi.query.QueryResolver;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.query.metadata.IQueryNode;
 import org.komodo.spi.query.sql.lang.ICommand;
@@ -43,7 +43,7 @@ import org.teiid.query.mapping.relational.QueryNode;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.resolver.command.AlterResolver;
@@ -98,7 +98,7 @@ import org.teiid.runtime.client.TeiidClientException;
  * information. The resolver is also used in transforming the values in language
  * objects to their variable types defined in metadata.
  */
-public class QueryResolver implements IQueryResolver<Command, GroupSymbol, Expression> {
+public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expression> {
 
     private final String BINDING_GROUP = "INPUTS"; //$NON-NLS-1$
 	private final CommandResolver simpleQueryResolver;
@@ -116,12 +116,12 @@ public class QueryResolver implements IQueryResolver<Command, GroupSymbol, Expre
     /*
      * The parser that preceded the resolution
      */
-    private final QueryParser parser;
+    private final TCQueryParser parser;
 
     /**
      * @param parser
      */
-    public QueryResolver(QueryParser parser) {
+    public TCQueryResolver(TCQueryParser parser) {
         this.parser = parser;
 
         simpleQueryResolver = new SimpleQueryResolver(this);
@@ -140,14 +140,14 @@ public class QueryResolver implements IQueryResolver<Command, GroupSymbol, Expre
     /**
      * @param teiidVersion
      */
-    public QueryResolver(ITeiidVersion teiidVersion) {
-        this(new QueryParser(teiidVersion));
+    public TCQueryResolver(ITeiidVersion teiidVersion) {
+        this(new TCQueryParser(teiidVersion));
     }
 
     /**
      * @return the query parser
      */
-    public QueryParser getQueryParser() {
+    public TCQueryParser getQueryParser() {
         return parser;
     }
 

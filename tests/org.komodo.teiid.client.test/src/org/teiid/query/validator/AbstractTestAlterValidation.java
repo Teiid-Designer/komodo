@@ -32,7 +32,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.komodo.spi.query.metadata.IQueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.visitor.SQLStringVisitor;
@@ -52,7 +52,7 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
 
         try {
             command = getQueryParser().parseCommand(sql);
-            QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
             queryResolver.resolveCommand(command, metadata);
         } catch (Exception e) {
             throw new RuntimeException(e);

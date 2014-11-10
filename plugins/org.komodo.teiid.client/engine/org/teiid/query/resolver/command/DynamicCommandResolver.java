@@ -32,7 +32,7 @@ import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.CommandResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.ProcedureReservedWords;
@@ -52,7 +52,7 @@ public class DynamicCommandResolver extends CommandResolver {
     /**
      * @param queryResolver
      */
-    public DynamicCommandResolver(QueryResolver queryResolver) {
+    public DynamicCommandResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 

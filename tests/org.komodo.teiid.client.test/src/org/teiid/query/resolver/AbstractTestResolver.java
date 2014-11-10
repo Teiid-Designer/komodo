@@ -183,7 +183,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadataInterface);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -209,7 +209,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCriteria(criteria, metadata);
         } catch (Exception e) {
             e.printStackTrace();
@@ -231,7 +231,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         QueryNode qn = new QueryNode(sql);
         qn.setBindings(bindings);
         // resolve
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveWithBindingMetadata(command, metadata, qn, true);
 
         CheckSymbolsAreResolvedVisitor vis = new CheckSymbolsAreResolvedVisitor(getTeiidVersion());
@@ -253,7 +253,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadata);
             fail("Expected exception for resolving " + sql); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -323,7 +323,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Query query = (Query)helpParse(sql);
 
         // check whether it's xml
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         boolean actual = queryResolver.isXMLQuery(query, metadata);
         assertEquals("Wrong answer for isXMLQuery", isXML, actual); //$NON-NLS-1$
     }
@@ -365,7 +365,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Command userCommand = getQueryParser().parseCommand(userUpdateStr);
         assertTrue(userCommand instanceof ProcedureContainer);
 
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(userCommand, metadata);
         return queryResolver.expandCommand((ProcedureContainer) userCommand, metadata);
     }
@@ -952,7 +952,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
             Map externalMetadata = new HashMap();
             externalMetadata.put(sqGroup, sqParams);
 
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, metadata);
 
             fail("Expected exception on invalid variable pm1.sq2.in"); //$NON-NLS-1$
@@ -1301,7 +1301,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Query query = (Query)helpParse("SELECT * FROM docA"); //$NON-NLS-1$
 
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.isXMLQuery(query, metadata);
             fail("expected exception"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -1475,7 +1475,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testLookupFunctionVirtualGroup() throws Exception {
         String sql = "SELECT lookup('vm1.g1', 'e1', 'e2', e2)  FROM vm1.g1 "; //$NON-NLS-1$
         Query command = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().example1Cached());
     }
 
@@ -1483,7 +1483,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testLookupFunctionPhysicalGroup() throws Exception {
         String sql = "SELECT lookup('pm1.g1', 'e1', 'e2', e2)  FROM pm1.g1 "; //$NON-NLS-1$
         Query command = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().example1Cached());
     }
 
@@ -1492,7 +1492,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         String sql = "SELECT lookup('pm1.g1', 'e1', 'x', e2) AS x, lookup('pm1.g1', 'e4', 'e3', e3) AS y FROM pm1.g1"; //$NON-NLS-1$
         Command command = getQueryParser().parseCommand(sql);
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, metadata);
             fail("exception expected"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -1512,7 +1512,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
                                                                                                          new FakeFunctionMetadataSource()));
 
         Query command = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, metadata);
 
         command = (Query)helpParse("SELECT func('e1')  FROM vm1.g1 ");
@@ -1535,7 +1535,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCriteria(expected, getMetadataFactory().exampleBQTCached());
             queryResolver.resolveCriteria(actual, getMetadataFactory().exampleBQTCached());
         } catch (Exception e) {
@@ -1945,7 +1945,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Query command = (Query)getQueryParser().parseCommand("SELECT intkey FROM bqt1.smalla WHERE shortvalue = 5"); //$NON-NLS-1$
 
         // resolve
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().exampleBQTCached());
 
         // Check whether an implicit conversion was added on the correct side
@@ -1961,7 +1961,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Query command = (Query)getQueryParser().parseCommand("SELECT intkey FROM bqt1.smalla WHERE 5 = shortvalue"); //$NON-NLS-1$
 
         // resolve
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().exampleBQTCached());
 
         // Check whether an implicit conversion was added on the correct side
@@ -2030,7 +2030,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testImplConversionBetweenIntAndShort() throws Exception {
         Insert command = (Insert)getQueryParser().parseCommand("Insert into pm5.g3(e2) Values(100)"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, metadata);
         assertTrue(command.getValues().get(0).getType() == DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass());
     }
@@ -2211,7 +2211,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         String userSql = "SELECT null as x"; //$NON-NLS-1$
         Query query = (Query)helpParse(userSql);
 
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(query, getMetadataFactory().exampleBQTCached());
 
         // Check type of resolved null constant
@@ -2230,7 +2230,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         inputSetElements.add(inputSetElement);
         externalMetadata.put(inputSet, inputSetElements);
         Query command = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, metadata);
         Collection groups = GroupCollectorVisitor.getGroups(command, false);
         assertFalse(groups.contains(inputSet));
@@ -2261,7 +2261,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testUnionInSubquery() throws Exception {
         String sql = "SELECT StringKey FROM (SELECT BQT2.SmallB.StringKey FROM BQT2.SmallB union SELECT convert(BQT2.SmallB.FloatNum, string) FROM BQT2.SmallB) x"; //$NON-NLS-1$
         Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().exampleBQTCached());
     }
 
@@ -2488,7 +2488,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCriteria(criteria, metadata);
             fail("Exception expected"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -2725,7 +2725,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testCase6319() throws Exception {
         String sql = "select floatnum from bqt1.smalla group by floatnum having sum(floatnum) between 51.0 and 100.0 "; //$NON-NLS-1$
         Query query = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(query, getMetadataFactory().exampleBQTCached());
     }
 

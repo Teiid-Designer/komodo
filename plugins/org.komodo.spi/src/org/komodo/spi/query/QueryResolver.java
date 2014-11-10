@@ -31,7 +31,7 @@ import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 /**
  *
  */
-public interface IQueryResolver<C extends ICommand, GS extends IGroupSymbol, E extends IExpression> {
+public interface QueryResolver<C extends ICommand, GS extends IGroupSymbol, E extends IExpression> {
 
     /**
      * @param command

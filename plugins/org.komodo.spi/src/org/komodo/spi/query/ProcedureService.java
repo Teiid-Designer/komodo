@@ -32,7 +32,7 @@ import org.komodo.spi.query.proc.wsdl.IWsdlWrapperInfo;
 /**
  * Provides getters for sql syntax strings that differ between runtime client versions
  */
-public interface IProcedureService {
+public interface ProcedureService {
 
     /**
      * Prepare an SQL statement for the given file-based metdata

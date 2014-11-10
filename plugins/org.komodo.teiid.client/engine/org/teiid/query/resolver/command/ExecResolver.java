@@ -40,7 +40,7 @@ import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.ProcedureContainerResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.lang.Command;
@@ -65,7 +65,7 @@ public class ExecResolver extends ProcedureContainerResolver {
     /**
      * @param queryResolver
      */
-    public ExecResolver(QueryResolver queryResolver) {
+    public ExecResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 

@@ -67,7 +67,7 @@ import org.teiid.query.function.source.XMLSystemFunctions;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.ProcedureContainerResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.sql.ProcedureReservedWords;
 import org.teiid.query.sql.lang.Alter;
@@ -1827,7 +1827,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     @Override
     public void visit(AlterView obj) {
     	try {
-    	    QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+    	    TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
             queryResolver.validateProjectedSymbols(obj.getTarget(), getMetadata(), obj.getDefinition());
 			Validator.validate(obj.getDefinition(), getMetadata(), this);
 			validateAlterTarget(obj);
@@ -1854,7 +1854,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 	    		return;
 	    	}
 	    	Validator.validate(obj.getDefinition(), getMetadata(), this);
-	    	QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+	    	TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
 	    	IStoredProcedureInfo<ISPParameter, IQueryNode> info = getMetadata().getStoredProcedureInfoForProcedure(gs.getName());
 	    	for (ISPParameter param : info.getParameters()) {
 	    		if (param.getParameterType() == SPParameter.RESULT_SET) {
@@ -1899,7 +1899,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 			return;
 		}
 		try {
-		    QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+		    TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
             queryResolver.validateProjectedSymbols(createProc.getVirtualGroup(), createProc.getResultSetColumns(), symbols);
 		} catch (Exception e) {
 			handleValidationError(Messages.gs(Messages.TEIID.TEIID31121, createProc.getVirtualGroup(), obj, e.getMessage()), obj);
