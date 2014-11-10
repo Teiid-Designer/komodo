@@ -61,7 +61,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.IDataSourceDriver;
+import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
@@ -93,7 +93,7 @@ import org.teiid.adminapi.impl.VDBTranslatorMetaData;
 import org.teiid.core.util.ObjectConverterUtil;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.admin.AdminSpec;
-import org.teiid.runtime.client.admin.DataSourceDriver;
+import org.teiid.runtime.client.admin.TCDataSourceDriver;
 
 
 /**
@@ -1948,8 +1948,8 @@ public class Admin8Factory {
         }
 
         @Override
-        public Collection<IDataSourceDriver> getDataSourceDrivers() throws AdminException {
-            HashSet<IDataSourceDriver> dataSourceDrivers = new HashSet<IDataSourceDriver>();
+        public Collection<DataSourceDriver> getDataSourceDrivers() throws AdminException {
+            HashSet<DataSourceDriver> dataSourceDrivers = new HashSet<DataSourceDriver>();
 
             if (!this.domainMode) {
                 //'installed-driver-list' not available in the domain mode.
@@ -1957,9 +1957,9 @@ public class Admin8Factory {
                 try {
                     ModelNode outcome = this.connection.execute(request);
                     if (Util.isSuccess(outcome)) {
-                        List<IDataSourceDriver> drivers = getList(outcome, new MetadataMapper<IDataSourceDriver>() {
+                        List<DataSourceDriver> drivers = getList(outcome, new MetadataMapper<DataSourceDriver>() {
                             @Override
-                            public IDataSourceDriver unwrap(ModelNode node) {
+                            public DataSourceDriver unwrap(ModelNode node) {
                                 String driverName = null;
                                 String driverClassName = null;
                                 if (node.hasDefined("driver-name"))
@@ -1971,7 +1971,7 @@ public class Admin8Factory {
                                 if (driverName == null || driverClassName == null)
                                     return null;
 
-                                return new DataSourceDriver(driverName, driverClassName);
+                                return new TCDataSourceDriver(driverName, driverClassName);
                             }
 
                             @Override
@@ -1991,7 +1991,7 @@ public class Admin8Factory {
                 List<String> deployments = getChildNodeNames(null, "deployment");
                 for (String deployment:deployments) {
                     if (!deployment.contains("translator") && deployment.endsWith(".jar")) {
-                        dataSourceDrivers.add(new DataSourceDriver(deployment, deployment));
+                        dataSourceDrivers.add(new TCDataSourceDriver(deployment, deployment));
                     }
                 }
             }

@@ -21,12 +21,12 @@
  */
 package org.teiid.runtime.client.admin;
 
-import org.komodo.spi.runtime.IDataSourceDriver;
+import org.komodo.spi.runtime.DataSourceDriver;
 
 /**
  *
  */
-public class DataSourceDriver implements IDataSourceDriver {
+public class TCDataSourceDriver implements DataSourceDriver {
 
     private final String name;
 
@@ -35,7 +35,7 @@ public class DataSourceDriver implements IDataSourceDriver {
     /**
      * 
      */
-    public DataSourceDriver(String name, String className) {
+    public TCDataSourceDriver(String name, String className) {
         this.name = name;
         this.className = className;
     }
@@ -72,7 +72,7 @@ public class DataSourceDriver implements IDataSourceDriver {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        DataSourceDriver other = (DataSourceDriver)obj;
+        TCDataSourceDriver other = (TCDataSourceDriver)obj;
         if (this.className == null) {
             if (other.className != null)
                 return false;

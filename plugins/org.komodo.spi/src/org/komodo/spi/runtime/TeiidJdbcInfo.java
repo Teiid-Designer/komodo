@@ -24,29 +24,23 @@ package org.komodo.spi.runtime;
 /**
  *
  */
-public interface ITeiidAdminInfo extends ITeiidConnectionInfo {
+public interface TeiidJdbcInfo extends TeiidConnectionInfo {
 
     /**
-     * The default Teiid Admin persist password flag. Value is {@value} .
+     * The default Teiid JDBC port number. Value is {@value} .
      */
-    public static final boolean DEFAULT_PERSIST_PASSWORD = true;
-    /**
-     * The default Teiid Admin port number. Value is {@value} .
-     */
-    public static final int DEFAULT_PORT = 9999;
-    
+    public static final int DEFAULT_PORT = 31000;
     /**
      * The default Teiid Admin secure protocol flag. Value is {@value} .
      */
-    public static final boolean DEFAULT_SECURE = true;
-    
+    public static final boolean DEFAULT_SECURE = false;
     /**
      * The default username for the Teiid Instance
      */
-    public static final String DEFAULT_ADMIN_USERNAME = "admin"; //$NON-NLS-1$
+    public static final String DEFAULT_JDBC_USERNAME = "user"; //$NON-NLS-1$
     /**
      * The default password for the Teiid Instance
      */
-    public static final String DEFAULT_ADMIN_PASSWORD = "admin"; //$NON-NLS-1$
+    public static final String DEFAULT_JDBC_PASSWORD = "user"; //$NON-NLS-1$
 
 }

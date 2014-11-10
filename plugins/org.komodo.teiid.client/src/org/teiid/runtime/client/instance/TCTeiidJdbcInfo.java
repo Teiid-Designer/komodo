@@ -23,14 +23,14 @@ package org.teiid.runtime.client.instance;
 
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.HostProvider;
-import org.komodo.spi.runtime.IExecutionAdmin.ConnectivityType;
-import org.komodo.spi.runtime.ITeiidJdbcInfo;
+import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.utils.ArgCheck;
 
 /**
  * The <code>TeiidJdbcInfo</code> defines the properties needed to make a Teiid JDBC connection.
  */
-public class TeiidJdbcInfo implements ITeiidJdbcInfo, StringConstants {
+public class TCTeiidJdbcInfo implements TeiidJdbcInfo, StringConstants {
 
     private static final String VDB_PLACEHOLDER = "<vdbname>"; //$NON-NLS-1$
     private static final String JDBC_TEIID_PREFIX = "jdbc:teiid:"; //$NON-NLS-1$
@@ -69,7 +69,7 @@ public class TeiidJdbcInfo implements ITeiidJdbcInfo, StringConstants {
     /**
      * Create default teiid jdbc info
      */
-    public TeiidJdbcInfo() {
+    public TCTeiidJdbcInfo() {
         this(DEFAULT_PORT, DEFAULT_JDBC_USERNAME, DEFAULT_JDBC_PASSWORD, false);
         setHostProvider(HostProvider.DEFAULT_HOST_PROVIDER);
     }
@@ -80,7 +80,7 @@ public class TeiidJdbcInfo implements ITeiidJdbcInfo, StringConstants {
      * @param password the connection password (can be <code>null</code> or empty)
      * @param secure <code>true</code> if a secure connection should be used
      */
-    public TeiidJdbcInfo(int port, String username, String password, boolean secure) {
+    public TCTeiidJdbcInfo(int port, String username, String password, boolean secure) {
         this(VDB_PLACEHOLDER, port, username, password, secure);
     }
 
@@ -91,7 +91,7 @@ public class TeiidJdbcInfo implements ITeiidJdbcInfo, StringConstants {
      * @param password the connection password (can be <code>null</code> or empty)
      * @param secure <code>true</code> if a secure connection should be used
      */
-    private TeiidJdbcInfo(String vdbname, int port, String username, String password, boolean secure) {
+    private TCTeiidJdbcInfo(String vdbname, int port, String username, String password, boolean secure) {
         ArgCheck.isNotEmpty(vdbname, "vdbname"); //$NON-NLS-1$
         this.vdbname = vdbname;
         this.port = port;
@@ -105,7 +105,7 @@ public class TeiidJdbcInfo implements ITeiidJdbcInfo, StringConstants {
      * @param teiidJdbcInfo the connection properties whose values are being used to construct this object
      * @throws IllegalArgumentException if vdbname is empty or <code>null</code>
      */
-    public TeiidJdbcInfo(String vdbname, ITeiidJdbcInfo teiidJdbcInfo) {
+    public TCTeiidJdbcInfo(String vdbname, TeiidJdbcInfo teiidJdbcInfo) {
         this(vdbname, teiidJdbcInfo.getPort(), teiidJdbcInfo.getUsername(), teiidJdbcInfo.getPassword(), teiidJdbcInfo.isSecure());
         setHostProvider(teiidJdbcInfo.getHostProvider());
     }
@@ -161,8 +161,8 @@ public class TeiidJdbcInfo implements ITeiidJdbcInfo, StringConstants {
     }
 
     @Override
-    public ITeiidJdbcInfo clone() {
-        TeiidJdbcInfo cloned = new TeiidJdbcInfo(getPort(), getUsername(), getPassword(), isSecure());
+    public TeiidJdbcInfo clone() {
+        TCTeiidJdbcInfo cloned = new TCTeiidJdbcInfo(getPort(), getUsername(), getPassword(), isSecure());
         cloned.setHostProvider(getHostProvider());
         return cloned;
     }

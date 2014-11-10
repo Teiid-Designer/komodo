@@ -21,26 +21,17 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
+
 /**
+ * The <code>IExecutionConfigurationListener</code> interface defines the API for a teiid instance registry listener.
+ *
  *
  */
-public interface ITeiidJdbcInfo extends ITeiidConnectionInfo {
+public interface ExecutionConfigurationListener {
 
     /**
-     * The default Teiid JDBC port number. Value is {@value} .
+     * @param event the event being processed (never <code>null</code>)
      */
-    public static final int DEFAULT_PORT = 31000;
-    /**
-     * The default Teiid Admin secure protocol flag. Value is {@value} .
-     */
-    public static final boolean DEFAULT_SECURE = false;
-    /**
-     * The default username for the Teiid Instance
-     */
-    public static final String DEFAULT_JDBC_USERNAME = "user"; //$NON-NLS-1$
-    /**
-     * The default password for the Teiid Instance
-     */
-    public static final String DEFAULT_JDBC_PASSWORD = "user"; //$NON-NLS-1$
+    void configurationChanged( ExecutionConfigurationEvent event );
 
 }

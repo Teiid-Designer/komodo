@@ -28,7 +28,7 @@ import java.util.Properties;
  *
  *
  */
-public interface ITeiidTranslator {
+public interface TeiidTranslator {
 	
 	enum TranslatorPropertyType{IMPORT, OVERRIDE, EXTENSION_METADATA}
 
@@ -62,7 +62,7 @@ public interface ITeiidTranslator {
     /**
      * @return the execution teiidInstance (never <code>null</code>)
      */
-    ITeiidInstance getTeiidInstance();
+    TeiidInstance getTeiidInstance();
 
     /**
      * @return the string version of the default value for each property (empty string if no default)

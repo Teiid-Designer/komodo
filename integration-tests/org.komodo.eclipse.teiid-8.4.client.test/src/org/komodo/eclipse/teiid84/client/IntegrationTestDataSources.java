@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.komodo.eclipse.teiid84.client.util.AdminUtil;
-import org.komodo.spi.runtime.IDataSourceDriver;
+import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.ITeiidVersion.VersionID;
 import org.komodo.test.utils.AbstractTeiidVersionTest;
@@ -73,10 +73,10 @@ public class IntegrationTestDataSources extends AbstractTeiidVersionTest {
 
     @Test
     public void testDataSourceDrivers() throws Exception {
-        Collection<IDataSourceDriver> dataSourceDrivers = admin.getDataSourceDrivers();
+        Collection<DataSourceDriver> dataSourceDrivers = admin.getDataSourceDrivers();
         assertNotNull(dataSourceDrivers);
         assertFalse(dataSourceDrivers.isEmpty());
-        for (IDataSourceDriver driver : dataSourceDrivers) {
+        for (DataSourceDriver driver : dataSourceDrivers) {
             assertTrue(driver.getName().contains("teiid") || driver.getName().equals("h2"));
             assertTrue(driver.getClassName().contains("TeiidDriver") || driver.getClassName().contains("h2"));
         }

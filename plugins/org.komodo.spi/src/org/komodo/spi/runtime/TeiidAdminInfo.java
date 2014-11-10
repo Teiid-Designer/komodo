@@ -21,48 +21,32 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
-import java.sql.Driver;
-import org.komodo.spi.query.QueryService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
-
 /**
- * Factory for the creation of implementations of {@link IExecutionAdmin}
+ *
  */
-public interface IExecutionAdminFactory {
+public interface TeiidAdminInfo extends TeiidConnectionInfo {
 
     /**
-     * Create an {@link IExecutionAdmin} with the given {@link ITeiidInstance}
-     * 
-     * @param teiidInstance
-     * 
-     * @return instance of {@link IExecutionAdmin}
-     * 
-     * @throws Exception 
+     * The default Teiid Admin persist password flag. Value is {@value} .
      */
-    IExecutionAdmin createExecutionAdmin(ITeiidInstance teiidInstance) throws Exception;
-
+    public static final boolean DEFAULT_PERSIST_PASSWORD = true;
     /**
-     * Get the teiid data type manager service
-     * @param teiidVersion
-     *
-     * @return instance of {@link IDataTypeManagerService}
+     * The default Teiid Admin port number. Value is {@value} .
      */
-    IDataTypeManagerService getDataTypeManagerService(ITeiidVersion teiidVersion);
-
+    public static final int DEFAULT_PORT = 9999;
+    
     /**
-     * Get the {@link Driver} for the Teiid Instance
-     * @param teiidVersion
-     *
-     * @return the driver
+     * The default Teiid Admin secure protocol flag. Value is {@value} .
      */
-    Driver getTeiidDriver(ITeiidVersion teiidVersion);
-
+    public static final boolean DEFAULT_SECURE = true;
+    
     /**
-     * Get the query service
-     * @param teiidVersion
-     * 
-     * @return instance of {@link QueryService}
+     * The default username for the Teiid Instance
      */
-    QueryService getQueryService(ITeiidVersion teiidVersion);
+    public static final String DEFAULT_ADMIN_USERNAME = "admin"; //$NON-NLS-1$
+    /**
+     * The default password for the Teiid Instance
+     */
+    public static final String DEFAULT_ADMIN_PASSWORD = "admin"; //$NON-NLS-1$
+
 }

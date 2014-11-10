@@ -33,11 +33,11 @@ import org.komodo.spi.Messages.SPI;
  */
 public final class ExecutionConfigurationEvent {
 
-    public static ExecutionConfigurationEvent createAddDataSourceEvent( ITeiidDataSource dataSource ) {
+    public static ExecutionConfigurationEvent createAddDataSourceEvent( TeiidDataSource dataSource ) {
         return new ExecutionConfigurationEvent(EventType.ADD, TargetType.DATA_SOURCE, dataSource);
     }
 
-    public static ExecutionConfigurationEvent createAddTeiidEvent( ITeiidInstance teiidInstance ) {
+    public static ExecutionConfigurationEvent createAddTeiidEvent( TeiidInstance teiidInstance ) {
         return new ExecutionConfigurationEvent(EventType.ADD, TargetType.TINSTANCE, teiidInstance);
     }
 
@@ -45,24 +45,24 @@ public final class ExecutionConfigurationEvent {
         return new ExecutionConfigurationEvent(EventType.ADD, TargetType.VDB, vdbName);
     }
 
-    public static ExecutionConfigurationEvent createRemoveDataSourceEvent( ITeiidDataSource dataSource ) {
+    public static ExecutionConfigurationEvent createRemoveDataSourceEvent( TeiidDataSource dataSource ) {
         return new ExecutionConfigurationEvent(EventType.REMOVE, TargetType.DATA_SOURCE, dataSource);
     }
 
-    public static ExecutionConfigurationEvent createRemoveTeiidEvent( ITeiidInstance teiidInstance ) {
+    public static ExecutionConfigurationEvent createRemoveTeiidEvent( TeiidInstance teiidInstance ) {
         return new ExecutionConfigurationEvent(EventType.REMOVE, TargetType.TINSTANCE, teiidInstance);
     }
 
-    public static ExecutionConfigurationEvent createTeiidRefreshEvent( ITeiidInstance teiidInstance ) {
+    public static ExecutionConfigurationEvent createTeiidRefreshEvent( TeiidInstance teiidInstance ) {
         return new ExecutionConfigurationEvent(EventType.REFRESH, TargetType.TINSTANCE, teiidInstance);
     }
 
-    public static ExecutionConfigurationEvent createTeiidConnectedEvent( ITeiidInstance teiidInstance ) {
+    public static ExecutionConfigurationEvent createTeiidConnectedEvent( TeiidInstance teiidInstance ) {
         return new ExecutionConfigurationEvent(EventType.CONNECTED, TargetType.TINSTANCE, teiidInstance);
     }
 
-    public static ExecutionConfigurationEvent createSetDefaultTeiidEvent( ITeiidInstance oldDefaultInstance,
-                                                                           ITeiidInstance newDefaultInstance ) {
+    public static ExecutionConfigurationEvent createSetDefaultTeiidEvent( TeiidInstance oldDefaultInstance,
+                                                                           TeiidInstance newDefaultInstance ) {
         return new ExecutionConfigurationEvent(EventType.DEFAULT, TargetType.TINSTANCE, oldDefaultInstance, newDefaultInstance);
     }
 
@@ -70,12 +70,12 @@ public final class ExecutionConfigurationEvent {
         return new ExecutionConfigurationEvent(EventType.REMOVE, TargetType.VDB, vdbName);
     }
 
-    public static ExecutionConfigurationEvent createUpdateDataSourceEvent( ITeiidDataSource dataSource ) {
+    public static ExecutionConfigurationEvent createUpdateDataSourceEvent( TeiidDataSource dataSource ) {
         return new ExecutionConfigurationEvent(EventType.UPDATE, TargetType.DATA_SOURCE, dataSource);
     }
 
-    public static ExecutionConfigurationEvent createUpdateTeiidEvent( ITeiidInstance teiidInstance,
-                                                                       ITeiidInstance updatedInstance ) {
+    public static ExecutionConfigurationEvent createUpdateTeiidEvent( TeiidInstance teiidInstance,
+                                                                       TeiidInstance updatedInstance ) {
         return new ExecutionConfigurationEvent(EventType.UPDATE, TargetType.TINSTANCE, teiidInstance, updatedInstance);
     }
 
@@ -121,14 +121,14 @@ public final class ExecutionConfigurationEvent {
      * @return the connector involved in the event
      * @throws IllegalStateException if method is called for a teiid instance event
      */
-    public ITeiidDataSource getDataSource() {
+    public TeiidDataSource getDataSource() {
         if (this.targetType != TargetType.DATA_SOURCE) {
             throw new IllegalStateException(Messages.getString(Messages.SPI.invalidTargetTypeForGetDataSourceMethod, 
                                                            this.targetType,
                                                            TargetType.DATA_SOURCE));
         }
 
-        return (ITeiidDataSource)this.target;
+        return (TeiidDataSource)this.target;
     }
 
     /**
@@ -144,14 +144,14 @@ public final class ExecutionConfigurationEvent {
      * @return the teiid instance involved in the event (may be <code>null</code>)
      * @throws IllegalStateException if method is called for a connector event
      */
-    public ITeiidInstance getTeiidInstance() {
+    public TeiidInstance getTeiidInstance() {
         if (this.targetType != TargetType.TINSTANCE) {
             throw new IllegalStateException(Messages.getString(Messages.SPI.invalidTargetTypeForGetTeiidMethod,
                                                            this.targetType,
                                                            TargetType.TINSTANCE));
         }
 
-        return (ITeiidInstance)this.target;
+        return (TeiidInstance)this.target;
     }
 
     /**
@@ -165,14 +165,14 @@ public final class ExecutionConfigurationEvent {
      * @return the connector involved in the event
      * @throws IllegalStateException if method is called for a teiid instance event
      */
-    public ITeiidTranslator getTranslator() {
+    public TeiidTranslator getTranslator() {
         if (this.targetType != TargetType.TRANSLATOR) {
             throw new IllegalStateException(Messages.getString(Messages.SPI.invalidTargetTypeForGetTranslatorMethod,
                                                            this.targetType,
                                                            TargetType.TRANSLATOR));
         }
 
-        return (ITeiidTranslator)this.target;
+        return (TeiidTranslator)this.target;
     }
 
     /**
@@ -181,14 +181,14 @@ public final class ExecutionConfigurationEvent {
      * @return the updated teiid instance involved in the event (may be <code>null</code>)
      * @throws IllegalStateException if method is called for a connector event
      */
-    public ITeiidInstance getUpdatedInstance() {
+    public TeiidInstance getUpdatedInstance() {
         if (this.targetType != TargetType.TINSTANCE) {
             throw new IllegalStateException(Messages.getString(Messages.SPI.invalidTargetTypeForGetUpdatedTeiidMethod,
                                                            this.targetType,
                                                            TargetType.TINSTANCE));
         }
 
-        return (ITeiidInstance)this.updatedTarget;
+        return (TeiidInstance)this.updatedTarget;
     }
 
     public enum EventType {

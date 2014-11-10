@@ -27,7 +27,7 @@ import java.util.List;
 /**
  *
  */
-public interface ITeiidVdb {
+public interface TeiidVdb {
 
     /**
      * Extension of a vdb file

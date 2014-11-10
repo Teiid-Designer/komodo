@@ -21,17 +21,48 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
+import java.sql.Driver;
+import org.komodo.spi.query.QueryService;
+import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.type.IDataTypeManagerService;
 
 /**
- * The <code>IExecutionConfigurationListener</code> interface defines the API for a teiid instance registry listener.
- *
- *
+ * Factory for the creation of implementations of {@link ExecutionAdmin}
  */
-public interface IExecutionConfigurationListener {
+public interface ExecutionAdminFactory {
 
     /**
-     * @param event the event being processed (never <code>null</code>)
+     * Create an {@link ExecutionAdmin} with the given {@link TeiidInstance}
+     * 
+     * @param teiidInstance
+     * 
+     * @return instance of {@link ExecutionAdmin}
+     * 
+     * @throws Exception 
      */
-    void configurationChanged( ExecutionConfigurationEvent event );
+    ExecutionAdmin createExecutionAdmin(TeiidInstance teiidInstance) throws Exception;
 
+    /**
+     * Get the teiid data type manager service
+     * @param teiidVersion
+     *
+     * @return instance of {@link IDataTypeManagerService}
+     */
+    IDataTypeManagerService getDataTypeManagerService(ITeiidVersion teiidVersion);
+
+    /**
+     * Get the {@link Driver} for the Teiid Instance
+     * @param teiidVersion
+     *
+     * @return the driver
+     */
+    Driver getTeiidDriver(ITeiidVersion teiidVersion);
+
+    /**
+     * Get the query service
+     * @param teiidVersion
+     * 
+     * @return instance of {@link QueryService}
+     */
+    QueryService getQueryService(ITeiidVersion teiidVersion);
 }

@@ -80,7 +80,7 @@ import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.observation.Event;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
-import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
+import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
 /**
  * Class which serves as base for various sequencer unit tests. In addition to this, it uses the sequencing events fired by
@@ -202,7 +202,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
     }
 
     protected IDataTypeManagerService getDataTypeService() {
-        ExecutionAdminFactory factory = new ExecutionAdminFactory();
+        TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
         return factory.getDataTypeManagerService(getTeiidVersion()); 
     }
 

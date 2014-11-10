@@ -21,63 +21,25 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
+import org.komodo.spi.runtime.version.ITeiidVersion;
 
 /**
- * The parent teiid instance of a Teiid instance
+ *
  */
-public interface ITeiidParent extends HostProvider {
+public interface TeiidInstanceVersionListener {
 
     /**
-     * @return actual parent object
-     */
-    Object getParentObject();
-
-    /**
-     * @return unique id of this parent
-     */
-    String getId();
-
-    /**
-     * @return name of this parent
-     */
-    String getName();
-
-    /**
-     * @return the child teiid instance of this parent
-     */
-    ITeiidInstance getTeiidInstance();
-
-    /**
-     * Sets the child teiid instance of this parent
+     * Instance has been changed
      *
-     * @param teiidInstance
+     * @param instance
      */
-    void setTeiidInstance(ITeiidInstance teiidInstance);
+    void instanceChanged(TeiidInstance instance);
 
     /**
-     * @return port
+     * Version of Teiid Instance has been changed
+     * 
+     * @param version
      */
-    int getPort();
-
-    /**
-     * @return user name used for connections
-     */
-    String getUserName();
-
-    /**
-     * @return password used for connections
-     */
-    String getPassword();
-
-    /**
-     * @return whether connection has been secured
-     */
-    boolean isSecure();
-
-    /**
-     * @return event manager which will be notified of changes to the child {@link ITeiidInstance}
-     */
-    EventManager getEventManager();
-
-
+    void versionChanged(ITeiidVersion version);
+    
 }

@@ -33,7 +33,7 @@ import org.komodo.spi.outcome.Outcome;
 /**
  *
  */
-public interface IExecutionAdmin {
+public interface ExecutionAdmin {
 
     /**
      * VDB name for the ping test
@@ -89,16 +89,16 @@ public interface IExecutionAdmin {
      * @return the teiid data source object (can be <code>null</code>)
      * @throws Exception 
      */
-     ITeiidDataSource getDataSource(String name) throws Exception;
+     TeiidDataSource getDataSource(String name) throws Exception;
 
      /**
       * Returns all teiid data source object if any on this teiid instance
       * 
-      * @return collection of {@link ITeiidDataSource}
+      * @return collection of {@link TeiidDataSource}
       * 
       * @throws Exception
       */
-     Collection<ITeiidDataSource> getDataSources() throws Exception;
+     Collection<TeiidDataSource> getDataSources() throws Exception;
 
      /**
       * Get the type names of the data sources
@@ -120,7 +120,7 @@ public interface IExecutionAdmin {
      * @return true if data source is created. false if it already exists
      * @throws Exception if data source creation fails
      */
-     ITeiidDataSource getOrCreateDataSource(String displayName,
+     TeiidDataSource getOrCreateDataSource(String displayName,
                                                           String dsName,
                                                           String typeName,
                                                           Properties properties) throws Exception;
@@ -131,27 +131,27 @@ public interface IExecutionAdmin {
      * @throws Exception 
      *
      */
-     ITeiidTranslator getTranslator(String name) throws Exception;
+     TeiidTranslator getTranslator(String name) throws Exception;
 
     /**
      * 
      * @return collection of Teiid translators
      * @throws Exception 
      */
-     Collection<ITeiidTranslator> getTranslators() throws Exception;
+     Collection<TeiidTranslator> getTranslators() throws Exception;
 
     /**
      * @return an unmodifiable collection of VDBs deployed on the teiid instance
      * @throws Exception 
      */
-     Collection<ITeiidVdb> getVdbs() throws Exception;
+     Collection<TeiidVdb> getVdbs() throws Exception;
 
      /**
       * @param name 
-      * @return the {@link ITeiidVdb} with the given name
+      * @return the {@link TeiidVdb} with the given name
       * @throws Exception 
       */
-     ITeiidVdb getVdb(String name) throws Exception;
+     TeiidVdb getVdb(String name) throws Exception;
      
      /**
       * @param name 

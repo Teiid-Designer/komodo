@@ -27,8 +27,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import org.komodo.spi.runtime.ITeiidInstance;
-import org.komodo.spi.runtime.ITeiidTranslator;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.teiid.adminapi.AdminObject;
 import org.teiid.adminapi.PropertyDefinition;
@@ -41,10 +41,10 @@ import org.teiid.runtime.client.Messages;
  *
  *
  */
-public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTranslator {
+public class TCTeiidTranslator implements Comparable<TCTeiidTranslator>, TeiidTranslator {
 
     private final Translator translator;
-    private final ITeiidInstance teiidInstance;
+    private final TeiidInstance teiidInstance;
 
     private final Collection<TeiidPropertyDefinition> propDefs = new ArrayList<TeiidPropertyDefinition>();
     private final Collection<TeiidPropertyDefinition> importPropDefs = new ArrayList<TeiidPropertyDefinition>();
@@ -55,7 +55,7 @@ public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTrans
      * @param propDefs
      * @param teiidInstance
      */
-    public TeiidTranslator( Translator translator, Collection<? extends PropertyDefinition> propDefs, ITeiidInstance teiidInstance) {
+    public TCTeiidTranslator( Translator translator, Collection<? extends PropertyDefinition> propDefs, TeiidInstance teiidInstance) {
         ArgCheck.isNotNull(translator, "translator"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(propDefs, "propDefs"); //$NON-NLS-1$
         ArgCheck.isNotNull(teiidInstance, "teiidInstance"); //$NON-NLS-1$
@@ -89,11 +89,11 @@ public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTrans
      * @param extPropDefs
      * @param teiidInstance
      */
-    public TeiidTranslator( Translator translator, 
+    public TCTeiidTranslator( Translator translator, 
     						Collection<? extends PropertyDefinition> propDefs, 
     						Collection<? extends PropertyDefinition> importPropDefs,
     						Collection<? extends PropertyDefinition> extPropDefs,
-    						ITeiidInstance teiidInstance) {
+    						TeiidInstance teiidInstance) {
     	this(translator, propDefs, teiidInstance);
     	
         for (PropertyDefinition propDefn : importPropDefs) {
@@ -139,7 +139,7 @@ public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTrans
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     @Override
-    public int compareTo( TeiidTranslator translator ) {
+    public int compareTo( TCTeiidTranslator translator ) {
         ArgCheck.isNotNull(translator, "translator"); //$NON-NLS-1$
         return getName().compareTo(translator.getName());
     }
@@ -154,8 +154,8 @@ public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTrans
         if (obj == null) return false;
         if (obj.getClass() != getClass()) return false;
 
-        ITeiidTranslator other = (ITeiidTranslator)obj;
-        ITeiidInstance otherServer = other.getTeiidInstance();
+        TeiidTranslator other = (TeiidTranslator)obj;
+        TeiidInstance otherServer = other.getTeiidInstance();
 
         if (getName().equals(other.getName()) && (getTeiidInstance() == otherServer || getTeiidInstance().equals(otherServer)) ) return true;
 
@@ -247,7 +247,7 @@ public class TeiidTranslator implements Comparable<TeiidTranslator>, ITeiidTrans
      * @return the execution teiidInstance (never <code>null</code>)
      */
     @Override
-    public ITeiidInstance getTeiidInstance() {
+    public TeiidInstance getTeiidInstance() {
         return this.teiidInstance;
     }
     

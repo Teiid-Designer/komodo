@@ -25,28 +25,28 @@ import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
 import org.komodo.spi.query.QueryService;
-import org.komodo.spi.runtime.IExecutionAdmin;
-import org.komodo.spi.runtime.IExecutionAdminFactory;
-import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.ExecutionAdmin;
+import org.komodo.spi.runtime.ExecutionAdminFactory;
+import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.jdbc.TeiidDriver;
-import org.teiid.runtime.client.admin.ExecutionAdmin;
+import org.teiid.runtime.client.admin.TCExecutionAdmin;
 import org.teiid.runtime.client.query.TCQueryService;
 
 /**
  *
  */
-public class ExecutionAdminFactory implements IExecutionAdminFactory {
+public class TCExecutionAdminFactory implements ExecutionAdminFactory {
 
     private final Map<ITeiidVersion, DataTypeManagerService> dataTypeManagerServiceCache = new HashMap<ITeiidVersion, DataTypeManagerService>();
     
     private final Map<ITeiidVersion, TCQueryService> queryServiceCache = new HashMap<ITeiidVersion, TCQueryService>();
 
     @Override
-    public IExecutionAdmin createExecutionAdmin(ITeiidInstance teiidInstance) throws Exception {
-        return new ExecutionAdmin(teiidInstance);
+    public ExecutionAdmin createExecutionAdmin(TeiidInstance teiidInstance) throws Exception {
+        return new TCExecutionAdmin(teiidInstance);
     }
     
     @Override

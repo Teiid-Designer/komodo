@@ -166,7 +166,7 @@ import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.common.collection.EmptyIterator;
 import org.modeshape.jcr.JcrSession;
-import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
+import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
 /**
  *
@@ -255,7 +255,7 @@ public class TeiidSqlNodeVisitor
      */
     public IDataTypeManagerService getDataTypeManager() {
         if (dataTypeManager == null) {
-            ExecutionAdminFactory factory = new ExecutionAdminFactory();
+            TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
             return factory.getDataTypeManagerService(getTeiidVersion());
         }
 

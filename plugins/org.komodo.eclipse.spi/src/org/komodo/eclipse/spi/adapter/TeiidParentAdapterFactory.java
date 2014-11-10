@@ -23,10 +23,10 @@ package org.komodo.eclipse.spi.adapter;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.wst.server.core.IServer;
-import org.komodo.spi.runtime.ITeiidParent;
+import org.komodo.spi.runtime.TeiidParent;
 
 /**
- * Adapter factory that can adapt an {@link ITeiidParent} to an {@link IServer}
+ * Adapter factory that can adapt an {@link TeiidParent} to an {@link IServer}
  * 
  *
  */
@@ -40,8 +40,8 @@ public class TeiidParentAdapterFactory implements IAdapterFactory {
 		if (adaptableObject instanceof IServer)
 			return adaptableObject;
 
-		if (adaptableObject instanceof ITeiidParent) {
-			ITeiidParent teiidParent = (ITeiidParent) adaptableObject;
+		if (adaptableObject instanceof TeiidParent) {
+			TeiidParent teiidParent = (TeiidParent) adaptableObject;
 			Object parentObject = teiidParent.getParentObject();
 			return getAdapter(parentObject, adapterType);
 		}

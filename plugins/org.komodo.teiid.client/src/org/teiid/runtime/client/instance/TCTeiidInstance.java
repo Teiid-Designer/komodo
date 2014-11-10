@@ -35,44 +35,44 @@ import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.HostProvider;
-import org.komodo.spi.runtime.IExecutionAdmin;
-import org.komodo.spi.runtime.ITeiidAdminInfo;
-import org.komodo.spi.runtime.ITeiidDataSource;
-import org.komodo.spi.runtime.ITeiidInstance;
-import org.komodo.spi.runtime.ITeiidJdbcInfo;
-import org.komodo.spi.runtime.ITeiidParent;
-import org.komodo.spi.runtime.ITeiidTranslator;
-import org.komodo.spi.runtime.ITeiidVdb;
+import org.komodo.spi.runtime.ExecutionAdmin;
+import org.komodo.spi.runtime.TeiidAdminInfo;
+import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.TeiidParent;
+import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.teiid.runtime.client.Messages;
-import org.teiid.runtime.client.admin.ExecutionAdmin;
+import org.teiid.runtime.client.admin.TCExecutionAdmin;
 
 /**
  *
  */
-public class TeiidInstance implements ITeiidInstance, StringConstants {
+public class TCTeiidInstance implements TeiidInstance, StringConstants {
 
-    private ITeiidParent parent;
+    private TeiidParent parent;
 
-    private ITeiidAdminInfo adminInfo;
+    private TeiidAdminInfo adminInfo;
 
-    private ITeiidJdbcInfo jdbcInfo;
+    private TeiidJdbcInfo jdbcInfo;
 
     private TeiidVersionProbe probe;
 
     private ITeiidVersion version;
 
-    private IExecutionAdmin admin;
+    private ExecutionAdmin admin;
 
     private String customLabel;
 
     private String connectionError;
 
-    private class TeiidAdminInfo implements ITeiidAdminInfo {
+    private class TeiidAdminInfoImpl implements TeiidAdminInfo {
 
         @Override
         public HostProvider getHostProvider() {
@@ -149,16 +149,16 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
      *
      * @param parent
      */
-    public TeiidInstance(ITeiidParent parent, ITeiidJdbcInfo jdbcInfo) {
+    public TCTeiidInstance(TeiidParent parent, TeiidJdbcInfo jdbcInfo) {
         initParent(parent);
         this.jdbcInfo = jdbcInfo;
     }
 
-    private void initParent(ITeiidParent parent) {
+    private void initParent(TeiidParent parent) {
         ArgCheck.isNotNull(parent);
         this.parent = parent;
         parent.setTeiidInstance(this);
-        this.adminInfo = new TeiidAdminInfo();
+        this.adminInfo = new TeiidAdminInfoImpl();
     }
 
     private TeiidVersionProbe getProbe() {
@@ -169,17 +169,17 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
     }
 
     @Override
-    public ITeiidParent getParent() {
+    public TeiidParent getParent() {
         return parent;
     }
 
     @Override
-    public ITeiidAdminInfo getTeiidAdminInfo() {
+    public TeiidAdminInfo getTeiidAdminInfo() {
         return adminInfo;
     }
 
     @Override
-    public ITeiidJdbcInfo getTeiidJdbcInfo() {
+    public TeiidJdbcInfo getTeiidJdbcInfo() {
         return jdbcInfo;
     }
 
@@ -269,7 +269,7 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
                  * for the given host and the host should be up, otherwise admin will
                  * end up back as null anyway.
                  */
-                this.admin = new ExecutionAdmin(this);
+                this.admin = new TCExecutionAdmin(this);
 
                 if (admin != null) {
                     /*
@@ -370,13 +370,13 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
     }
 
     @Override
-    public ITeiidDataSource getDataSource(String name) throws Exception {
+    public TeiidDataSource getDataSource(String name) throws Exception {
         connect();
         return admin.getDataSource(name);
     }
 
     @Override
-    public Collection<ITeiidDataSource> getDataSources() throws Exception {
+    public Collection<TeiidDataSource> getDataSources() throws Exception {
         connect();
         return admin.getDataSources();
     }
@@ -388,7 +388,7 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
     }
 
     @Override
-    public ITeiidDataSource getOrCreateDataSource(String displayName, String dsName, String typeName, Properties properties) throws Exception {
+    public TeiidDataSource getOrCreateDataSource(String displayName, String dsName, String typeName, Properties properties) throws Exception {
         connect();
         ArgCheck.isNotNull(displayName, "displayName"); //$NON-NLS-1$
         ArgCheck.isNotNull(dsName, "dsName"); //$NON-NLS-1$
@@ -438,25 +438,25 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
     }
 
     @Override
-    public ITeiidTranslator getTranslator(String name) throws Exception {
+    public TeiidTranslator getTranslator(String name) throws Exception {
         connect();
         return admin.getTranslator(name);
     }
 
     @Override
-    public Collection<ITeiidTranslator> getTranslators() throws Exception {
+    public Collection<TeiidTranslator> getTranslators() throws Exception {
         connect();
         return admin.getTranslators();
     }
 
     @Override
-    public Collection<ITeiidVdb> getVdbs() throws Exception {
+    public Collection<TeiidVdb> getVdbs() throws Exception {
         connect();
         return admin.getVdbs();
     }
 
     @Override
-    public ITeiidVdb getVdb(String name) throws Exception {
+    public TeiidVdb getVdb(String name) throws Exception {
         connect();
         return admin.getVdb(name);
     }
@@ -582,7 +582,7 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
     }
 
     @Override
-    public void update(ITeiidInstance otherInstance) {
+    public void update(TeiidInstance otherInstance) {
         ArgCheck.isNotNull(otherInstance);
 
         disconnect();
@@ -592,7 +592,7 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
         setCustomLabel(otherInstance.getCustomLabel());
         initParent(otherInstance.getParent());
 
-        ITeiidJdbcInfo otherJdbcInfo = otherInstance.getTeiidJdbcInfo();
+        TeiidJdbcInfo otherJdbcInfo = otherInstance.getTeiidJdbcInfo();
         jdbcInfo.setHostProvider(otherJdbcInfo.getHostProvider());
         jdbcInfo.setPassword(otherJdbcInfo.getPassword());
         jdbcInfo.setUsername(otherJdbcInfo.getUsername());

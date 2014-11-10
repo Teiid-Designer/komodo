@@ -28,7 +28,7 @@ import org.komodo.spi.runtime.version.ITeiidVersion;
 /**
  *
  */
-public interface ITeiidInstanceManager extends EventManager {
+public interface TeiidInstanceManager extends EventManager {
 
     /**
      * State of the teiid instance manager
@@ -76,29 +76,29 @@ public interface ITeiidInstanceManager extends EventManager {
      * @param teiidInstance the teiid instance being added (never <code>null</code>)
      * @return a true if the instance was added to the registry
      */
-    boolean addTeiidInstance(ITeiidInstance teiidInstance);
+    boolean addTeiidInstance(TeiidInstance teiidInstance);
 
     /**
      * @return defaultInstance
      */
-    ITeiidInstance getDefaultTeiidInstance();
+    TeiidInstance getDefaultTeiidInstance();
 
     /**
      * @param id the id of the teiid instance being requested (never <code>null</code> )
      * @return the requested teiid instance or <code>null</code> if not found in the registry
      */
-    ITeiidInstance getTeiidInstance(String id);
+    TeiidInstance getTeiidInstance(String id);
 
     /**
      * @param teiidParent the parent of the requested Teiid Instance
      * @return the requested teiid parent or <code>null</code> if not found in the registry
      */
-    ITeiidInstance getTeiidInstance(ITeiidParent teiidParent);
+    TeiidInstance getTeiidInstance(TeiidParent teiidParent);
 
     /**
      * @return an unmodifiable collection of registered instances (never <code>null</code>)
      */
-    Collection<ITeiidInstance> getInstances();
+    Collection<TeiidInstance> getInstances();
 
     /**
      * @return the state
@@ -124,24 +124,24 @@ public interface ITeiidInstanceManager extends EventManager {
      * 
      * @return true if this teiid instance is the default, false otherwise.
      */
-    boolean isDefaultInstance(ITeiidInstance teiidInstance);
+    boolean isDefaultInstance(TeiidInstance teiidInstance);
 
     /**
      * @param teiidInstance the teiid instance being tested (never <code>null</code>)
      * @return <code>true</code> if the teiid instance has been registered
      */
-    boolean isRegistered(ITeiidInstance teiidInstance);
+    boolean isRegistered(TeiidInstance teiidInstance);
 
     /**
      * @param teiidInstance the instance being removed (never <code>null</code>)
      * @return a status indicating if the specified instance was removed from the registry (never <code>null</code>)
      */
-    boolean removeTeiidInstance(ITeiidInstance teiidInstance);
+    boolean removeTeiidInstance(TeiidInstance teiidInstance);
 
     /**
      * @param teiidInstance Sets default instance to the specified value. May be null.
      */
-    void setDefaultInstance(ITeiidInstance teiidInstance);
+    void setDefaultInstance(TeiidInstance teiidInstance);
 
     /**
      * Try and restore the manager's prior state
@@ -161,7 +161,7 @@ public interface ITeiidInstanceManager extends EventManager {
      * 
      * @param listener
      */
-    void addTeiidInstanceVersionListener(ITeiidInstanceVersionListener listener);
+    void addTeiidInstanceVersionListener(TeiidInstanceVersionListener listener);
 
     /**
      * Remove a listener no longer interested in listening
@@ -169,5 +169,5 @@ public interface ITeiidInstanceManager extends EventManager {
      * 
      * @param listener
      */
-    void removeTeiidInstanceVersionListener(ITeiidInstanceVersionListener listener);
+    void removeTeiidInstanceVersionListener(TeiidInstanceVersionListener listener);
 }

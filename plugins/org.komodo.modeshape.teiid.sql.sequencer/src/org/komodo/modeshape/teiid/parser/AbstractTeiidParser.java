@@ -46,7 +46,7 @@ import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.utils.StringUtils;
-import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
+import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
 /**
  * Abstract implemention of {@link ITeiidParser}.
@@ -179,7 +179,7 @@ public abstract class AbstractTeiidParser implements ITeiidParser {
 
     @Override
     public IDataTypeManagerService getDataTypeService() {
-        ExecutionAdminFactory factory = new ExecutionAdminFactory();
+        TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
         return factory.getDataTypeManagerService(getVersion());
     }
 

@@ -24,7 +24,7 @@ package org.komodo.spi.runtime;
 /**
  *
  */
-public interface IDataSourceDriver {
+public interface DataSourceDriver {
 
     /**
      * @return the name of this driver

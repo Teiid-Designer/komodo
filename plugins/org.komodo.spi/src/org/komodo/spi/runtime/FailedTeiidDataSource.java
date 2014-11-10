@@ -26,7 +26,7 @@ import java.util.Properties;
 /**
  *
  */
-public class FailedTeiidDataSource implements ITeiidDataSource {
+public class FailedTeiidDataSource implements TeiidDataSource {
 
 	String modelName;
 	String jndiName;

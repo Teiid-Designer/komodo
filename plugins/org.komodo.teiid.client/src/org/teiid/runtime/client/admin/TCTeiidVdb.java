@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.komodo.spi.runtime.ITeiidInstance;
-import org.komodo.spi.runtime.ITeiidVdb;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidVdb;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.VDB;
 import org.teiid.core.util.ArgCheck;
@@ -13,18 +13,18 @@ import org.teiid.core.util.ArgCheck;
 /**
  *
  */
-public class TeiidVdb implements ITeiidVdb, Comparable<TeiidVdb> {
+public class TCTeiidVdb implements TeiidVdb, Comparable<TCTeiidVdb> {
     
     private static final String PREVIEW = "preview"; //$NON-NLS-1$
     
     private final VDB vdb;
 
-    private final ITeiidInstance teiidInstance;
+    private final TeiidInstance teiidInstance;
 
     private final boolean isPreview;
 
-    public TeiidVdb( VDB vdb,
-                     ITeiidInstance teiidInstance ) {
+    public TCTeiidVdb( VDB vdb,
+                     TeiidInstance teiidInstance ) {
         ArgCheck.isNotNull(vdb, "vdb"); //$NON-NLS-1$
         ArgCheck.isNotNull(teiidInstance, "teiidInstance"); //$NON-NLS-1$
 
@@ -36,7 +36,7 @@ public class TeiidVdb implements ITeiidVdb, Comparable<TeiidVdb> {
     /**
      * @return the teiidInstance
      */
-    public ITeiidInstance getTeiidInstance() {
+    public TeiidInstance getTeiidInstance() {
         return this.teiidInstance;
     }
 
@@ -44,7 +44,7 @@ public class TeiidVdb implements ITeiidVdb, Comparable<TeiidVdb> {
      * @see org.teiid.designer.runtime.impl.ITeiidVdb#compareTo(org.teiid.designer.runtime.impl.TeiidVdb)
      */
     @Override
-	public int compareTo( TeiidVdb vdb ) {
+	public int compareTo( TCTeiidVdb vdb ) {
         ArgCheck.isNotNull(vdb, "vdb"); //$NON-NLS-1$
         return getName().compareTo(vdb.getName());
     }
@@ -57,7 +57,7 @@ public class TeiidVdb implements ITeiidVdb, Comparable<TeiidVdb> {
         if (obj == null) return false;
         if (obj.getClass() != getClass()) return false;
 
-        ITeiidVdb other = (ITeiidVdb)obj;
+        TeiidVdb other = (TeiidVdb)obj;
 
         if (getName().equals(other.getName())) return true;
 

@@ -26,7 +26,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import org.komodo.spi.runtime.ITeiidParent;
+import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.utils.KLog;
@@ -38,14 +38,14 @@ import org.teiid.runtime.client.admin.v8.Admin8Factory;
  */
 public class TeiidVersionProbe {
 
-    private final ITeiidParent parent;
+    private final TeiidParent parent;
 
     private ITeiidVersion teiidVersion;
 
     /**
      * @param parent
      */
-    public TeiidVersionProbe(ITeiidParent parent) {
+    public TeiidVersionProbe(TeiidParent parent) {
         this.parent = parent;
     }
 

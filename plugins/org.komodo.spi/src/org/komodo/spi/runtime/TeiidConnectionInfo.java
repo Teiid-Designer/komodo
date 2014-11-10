@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
-import org.komodo.spi.runtime.IExecutionAdmin.ConnectivityType;
+import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 
 
 /**
  *
  */
-public interface ITeiidConnectionInfo {
+public interface TeiidConnectionInfo {
 
     /**
      * Protocol address prefix for secure teiid instance connections

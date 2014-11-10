@@ -23,9 +23,9 @@ package org.teiid.runtime.client.admin.v8;
 
 import java.io.InputStream;
 import java.util.Collection;
-import org.komodo.spi.runtime.IDataSourceDriver;
-import org.komodo.spi.runtime.ITeiidAdminInfo;
-import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.TeiidAdminInfo;
+import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminComponentException;
@@ -54,8 +54,8 @@ public class Admin8Spec extends AdminSpec {
     }
 
     @Override
-    public Admin createAdmin(ITeiidInstance teiidInstance) throws AdminException {
-        ITeiidAdminInfo teiidAdminInfo = teiidInstance.getTeiidAdminInfo();
+    public Admin createAdmin(TeiidInstance teiidInstance) throws AdminException {
+        TeiidAdminInfo teiidAdminInfo = teiidInstance.getTeiidAdminInfo();
         char[] passwordArray = null;
         if (teiidAdminInfo.getPassword() != null) {
             passwordArray = teiidAdminInfo.getPassword().toCharArray();
@@ -98,7 +98,7 @@ public class Admin8Spec extends AdminSpec {
     }
 
     @Override
-    public Collection<IDataSourceDriver> getDataSourceDrivers(Admin admin) throws AdminException {
+    public Collection<DataSourceDriver> getDataSourceDrivers(Admin admin) throws AdminException {
         return admin.getDataSourceDrivers();
     }
 }

@@ -2,13 +2,13 @@ package org.teiid.runtime.client.admin;
 
 import java.util.Properties;
 
-import org.komodo.spi.runtime.ITeiidDataSource;
+import org.komodo.spi.runtime.TeiidDataSource;
 import org.teiid.core.util.ArgCheck;
 
 /**
  *
  */
-public class TeiidDataSource implements Comparable<TeiidDataSource>, ITeiidDataSource {
+public class TCTeiidDataSource implements Comparable<TCTeiidDataSource>, TeiidDataSource {
 
     private final String displayName;
     private final String dataSourceName;
@@ -18,13 +18,13 @@ public class TeiidDataSource implements Comparable<TeiidDataSource>, ITeiidDataS
 
     private boolean isPreview = false;
 
-    public TeiidDataSource( String displayName,
+    public TCTeiidDataSource( String displayName,
                             String dataSourceName,
                             String dataSourceType ) {
         this(displayName, dataSourceName, dataSourceType, new Properties());
     }
 
-    public TeiidDataSource( String displayName,
+    public TCTeiidDataSource( String displayName,
                             String dataSourceName,
                             String dataSourceType,
                             Properties properties) {
@@ -43,7 +43,7 @@ public class TeiidDataSource implements Comparable<TeiidDataSource>, ITeiidDataS
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     @Override
-    public int compareTo( TeiidDataSource dataSource ) {
+    public int compareTo( TCTeiidDataSource dataSource ) {
         ArgCheck.isNotNull(dataSource, "dataSource"); //$NON-NLS-1$
         return getName().compareTo(dataSource.getName());
     }
@@ -58,7 +58,7 @@ public class TeiidDataSource implements Comparable<TeiidDataSource>, ITeiidDataS
         if (obj == null) return false;
         if (obj.getClass() != getClass()) return false;
 
-        ITeiidDataSource other = (ITeiidDataSource)obj;
+        TeiidDataSource other = (TeiidDataSource)obj;
 
         if (getName().equals(other.getName())) return true;
 

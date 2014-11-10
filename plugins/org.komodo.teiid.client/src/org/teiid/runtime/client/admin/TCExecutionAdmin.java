@@ -42,15 +42,15 @@ import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
-import org.komodo.spi.runtime.IDataSourceDriver;
-import org.komodo.spi.runtime.IExecutionAdmin;
-import org.komodo.spi.runtime.ITeiidConnectionInfo;
-import org.komodo.spi.runtime.ITeiidDataSource;
-import org.komodo.spi.runtime.ITeiidInstance;
-import org.komodo.spi.runtime.ITeiidJdbcInfo;
-import org.komodo.spi.runtime.ITeiidTranslator;
-import org.komodo.spi.runtime.ITeiidTranslator.TranslatorPropertyType;
-import org.komodo.spi.runtime.ITeiidVdb;
+import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ExecutionAdmin;
+import org.komodo.spi.runtime.TeiidConnectionInfo;
+import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.spi.runtime.TeiidTranslator.TranslatorPropertyType;
+import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.TeiidExecutionException;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.version.ITeiidVersion;
@@ -71,19 +71,19 @@ import org.teiid.runtime.client.Messages;
  *
  *
  */
-public class ExecutionAdmin implements IExecutionAdmin {
+public class TCExecutionAdmin implements ExecutionAdmin {
 
     private static String DYNAMIC_VDB_SUFFIX = "-vdb.xml"; //$NON-NLS-1$
     private static int VDB_LOADING_TIMEOUT_SEC = 300;
 
     private final Admin admin;
-    protected Map<String, ITeiidTranslator> translatorByNameMap;
+    protected Map<String, TeiidTranslator> translatorByNameMap;
     protected Collection<String> dataSourceNames;
-    protected Map<String, ITeiidDataSource> dataSourceByNameMap;
+    protected Map<String, TeiidDataSource> dataSourceByNameMap;
     protected Set<String> dataSourceTypeNames;
-    private final ITeiidInstance teiidInstance;
+    private final TeiidInstance teiidInstance;
     private final AdminSpec adminSpec;
-    private Map<String, ITeiidVdb> teiidVdbs;
+    private Map<String, TeiidVdb> teiidVdbs;
     private final ModelConnectionMatcher connectionMatcher;
 
     private boolean loaded = false;
@@ -95,7 +95,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @param teiidInstance the teiid instancenstance this admin belongs to (never <code>null</code>)
      * @throws Exception if there is a problem connecting the teiid instancenstance
      */
-    ExecutionAdmin(Admin admin, ITeiidInstance teiidInstance) throws Exception {
+    TCExecutionAdmin(Admin admin, TeiidInstance teiidInstance) throws Exception {
         ArgCheck.isNotNull(admin, "admin"); //$NON-NLS-1$
         ArgCheck.isNotNull(teiidInstance, "server"); //$NON-NLS-1$
         
@@ -114,7 +114,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * 
      * @throws Exception if there is a problem connecting the teiid instance
      */
-    public ExecutionAdmin(ITeiidInstance teiidInstance) throws Exception {
+    public TCExecutionAdmin(TeiidInstance teiidInstance) throws Exception {
         ArgCheck.isNotNull(teiidInstance, "Teiid Instance"); //$NON-NLS-1$
 
         this.adminSpec = AdminSpec.getInstance(teiidInstance.getVersion());
@@ -151,7 +151,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
             if (!this.admin.getDataSourceNames().contains(dsName)) {
                 this.dataSourceNames.remove(dsName);
-                ITeiidDataSource tds = this.dataSourceByNameMap.get(dsName);
+                TeiidDataSource tds = this.dataSourceByNameMap.get(dsName);
 
                 if (tds != null) {
                     this.dataSourceByNameMap.remove(dsName);
@@ -213,20 +213,20 @@ public class ExecutionAdmin implements IExecutionAdmin {
     public void disconnect() {
     	// 
     	this.admin.close();
-        this.translatorByNameMap = new HashMap<String, ITeiidTranslator>();
+        this.translatorByNameMap = new HashMap<String, TeiidTranslator>();
         this.dataSourceNames = new ArrayList<String>();
-        this.dataSourceByNameMap = new HashMap<String, ITeiidDataSource>();
+        this.dataSourceByNameMap = new HashMap<String, TeiidDataSource>();
         this.dataSourceTypeNames = new HashSet<String>();
-        this.teiidVdbs = new HashMap<String, ITeiidVdb>();
+        this.teiidVdbs = new HashMap<String, TeiidVdb>();
     }
 
     @Override
-    public ITeiidDataSource getDataSource(String name) {
+    public TeiidDataSource getDataSource(String name) {
         return this.dataSourceByNameMap.get(name);
     }
     
     @Override
-	public Collection<ITeiidDataSource> getDataSources() {
+	public Collection<TeiidDataSource> getDataSources() {
         return this.dataSourceByNameMap.values();
     }
 
@@ -243,7 +243,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
     }
 
     @Override
-    public ITeiidDataSource getOrCreateDataSource( String displayName,
+    public TeiidDataSource getOrCreateDataSource( String displayName,
                                                   String dsName,
                                                   String typeName,
                                                   Properties properties ) throws Exception {
@@ -254,7 +254,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
         // Check if exists, return false
         if (dataSourceExists(dsName)) {
-            ITeiidDataSource tds = this.dataSourceByNameMap.get(dsName);
+            TeiidDataSource tds = this.dataSourceByNameMap.get(dsName);
             if (tds != null) {
                 return tds;
             }
@@ -291,11 +291,11 @@ public class ExecutionAdmin implements IExecutionAdmin {
         if (!this.dataSourceTypeNames.contains(typeName)) {
             if("connector-jdbc".equals(typeName)) {  //$NON-NLS-1$
                 throw new TeiidExecutionException(
-                		ITeiidDataSource.ERROR_CODES.JDBC_DRIVER_SOURCE_NOT_FOUND,
+                		TeiidDataSource.ERROR_CODES.JDBC_DRIVER_SOURCE_NOT_FOUND,
                 		Messages.getString(Messages.ExecutionAdmin.jdbcSourceForClassNameNotFound, connProfileDriverClass, getServer()));
             } else {
                 throw new TeiidExecutionException(
-                		ITeiidDataSource.ERROR_CODES.DATA_SOURCE_TYPE_DOES_NOT_EXIST_ON_TEIID,
+                		TeiidDataSource.ERROR_CODES.DATA_SOURCE_TYPE_DOES_NOT_EXIST_ON_TEIID,
                 		Messages.getString(Messages.ExecutionAdmin.dataSourceTypeDoesNotExist, typeName, getServer()));
             }
         }
@@ -307,7 +307,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
         // Check that local name list contains new dsName
         if (dataSourceExists(dsName)) {
             String nullStr = null;
-            ITeiidDataSource tds = new TeiidDataSource(nullStr, dsName, typeName, properties);
+            TeiidDataSource tds = new TCTeiidDataSource(nullStr, dsName, typeName, properties);
 
             this.dataSourceByNameMap.put(dsName, tds);
             this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createAddDataSourceEvent(tds));
@@ -317,7 +317,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
         // We shouldn't get here if data source was created
         throw new TeiidExecutionException(
-        		ITeiidDataSource.ERROR_CODES.DATA_SOURCE_COULD_NOT_BE_CREATED,
+        		TeiidDataSource.ERROR_CODES.DATA_SOURCE_COULD_NOT_BE_CREATED,
         		Messages.getString(Messages.ExecutionAdmin.errorCreatingDataSource, dsName, typeName));
     }
 
@@ -335,8 +335,8 @@ public class ExecutionAdmin implements IExecutionAdmin {
             return null;
 
         try {
-            Collection<IDataSourceDriver> dataSourceDrivers = adminSpec.getDataSourceDrivers(admin);
-            for (IDataSourceDriver driver : dataSourceDrivers) {
+            Collection<DataSourceDriver> dataSourceDrivers = adminSpec.getDataSourceDrivers(admin);
+            for (DataSourceDriver driver : dataSourceDrivers) {
                 String driverClassName = driver.getClassName();
                 String driverName = driver.getName();
 
@@ -425,18 +425,18 @@ public class ExecutionAdmin implements IExecutionAdmin {
     /**
      * @return the teiid instance who owns this admin object (never <code>null</code>)
      */
-    public ITeiidInstance getServer() {
+    public TeiidInstance getServer() {
         return this.teiidInstance;
     }
 
     @Override
-    public ITeiidTranslator getTranslator( String name ) {
+    public TeiidTranslator getTranslator( String name ) {
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
         return this.translatorByNameMap.get(name);
     }
 
     @Override
-    public Collection<ITeiidTranslator> getTranslators() {
+    public Collection<TeiidTranslator> getTranslators() {
         return Collections.unmodifiableCollection(translatorByNameMap.values());
     }
 
@@ -482,7 +482,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
     }
 
     @Override
-    public ITeiidVdb getVdb( String name ) {
+    public TeiidVdb getVdb( String name ) {
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
 
         return teiidVdbs.get(name);
@@ -534,19 +534,19 @@ public class ExecutionAdmin implements IExecutionAdmin {
     }
 
     @Override
-    public Collection<ITeiidVdb> getVdbs() {
+    public Collection<TeiidVdb> getVdbs() {
         return Collections.unmodifiableCollection(teiidVdbs.values());
     }
     
     private void init() throws Exception {
-        this.translatorByNameMap = new HashMap<String, ITeiidTranslator>();
+        this.translatorByNameMap = new HashMap<String, TeiidTranslator>();
         this.dataSourceNames = new ArrayList<String>();
-        this.dataSourceByNameMap = new HashMap<String, ITeiidDataSource>();
+        this.dataSourceByNameMap = new HashMap<String, TeiidDataSource>();
         this.dataSourceTypeNames = new HashSet<String>();
         refreshVDBs();
     }
 
-    private void internalSetPropertyValue( ITeiidTranslator translator,
+    private void internalSetPropertyValue( TeiidTranslator translator,
                                            String propName,
                                            String value,
                                            TranslatorPropertyType type,
@@ -594,8 +594,8 @@ public class ExecutionAdmin implements IExecutionAdmin {
         refreshDataSourceNames();
 
         this.dataSourceByNameMap.clear();
-        Collection<ITeiidDataSource> tdsList = connectionMatcher.findTeiidDataSources(this.dataSourceNames);
-        for (ITeiidDataSource ds : tdsList) {
+        Collection<TeiidDataSource> tdsList = connectionMatcher.findTeiidDataSources(this.dataSourceNames);
+        for (TeiidDataSource ds : tdsList) {
             // Get Properties for the source
             Properties dsProps = this.admin.getDataSource(ds.getName());
             // Transfer properties to the ITeiidDataSource
@@ -629,11 +629,11 @@ public class ExecutionAdmin implements IExecutionAdmin {
             if (translator.getName() != null) {
                 if( teiidInstance.getVersion().isLessThan(Version.TEIID_8_6.get())) {
                 	Collection<? extends PropertyDefinition> propDefs = this.admin.getTemplatePropertyDefinitions(translator.getName());
-                	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, teiidInstance));
+                	this.translatorByNameMap.put(translator.getName(), new TCTeiidTranslator(translator, propDefs, teiidInstance));
                 } else if( teiidInstance.getVersion().isLessThan(Version.TEIID_8_7.get())) {
                     @SuppressWarnings( "deprecation" )
                     Collection<? extends PropertyDefinition> propDefs = this.admin.getTranslatorPropertyDefinitions(translator.getName());
-                	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, teiidInstance));
+                	this.translatorByNameMap.put(translator.getName(), new TCTeiidTranslator(translator, propDefs, teiidInstance));
                 } else { // TEIID teiid instance VERSION 8.7 AND HIGHER
                 	Collection<? extends PropertyDefinition> propDefs  = 
                 			this.admin.getTranslatorPropertyDefinitions(translator.getName(), Admin.TranlatorPropertyType.OVERRIDE);
@@ -641,7 +641,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
                 			this.admin.getTranslatorPropertyDefinitions(translator.getName(), Admin.TranlatorPropertyType.IMPORT);
                 	Collection<? extends PropertyDefinition> extPropDefs  = 
                 			this.admin.getTranslatorPropertyDefinitions(translator.getName(), Admin.TranlatorPropertyType.EXTENSION_METADATA);
-                	this.translatorByNameMap.put(translator.getName(), new TeiidTranslator(translator, propDefs, importPropDefs, extPropDefs, teiidInstance));
+                	this.translatorByNameMap.put(translator.getName(), new TCTeiidTranslator(translator, propDefs, importPropDefs, extPropDefs, teiidInstance));
                 }
             }
         }
@@ -650,10 +650,10 @@ public class ExecutionAdmin implements IExecutionAdmin {
     protected void refreshVDBs() throws Exception {
         Collection<? extends VDB> vdbs = Collections.unmodifiableCollection(this.admin.getVDBs());
         
-        teiidVdbs = new HashMap<String, ITeiidVdb>();
+        teiidVdbs = new HashMap<String, TeiidVdb>();
 
         for (VDB vdb : vdbs) {
-            teiidVdbs.put(vdb.getName(), new TeiidVdb(vdb, teiidInstance));
+            teiidVdbs.put(vdb.getName(), new TCTeiidVdb(vdb, teiidInstance));
         }
     }
     
@@ -669,7 +669,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @throws Exception if there is a problem changing the properties
      *
      */
-    public void setProperties( ITeiidTranslator translator,
+    public void setProperties( TeiidTranslator translator,
                                Properties changedProperties,
                                TranslatorPropertyType type) throws Exception {
         ArgCheck.isNotNull(translator, "translator"); //$NON-NLS-1$
@@ -696,7 +696,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @throws Exception if there is a problem setting the property
      *
      */
-    public void setPropertyValue( ITeiidTranslator translator,
+    public void setPropertyValue( TeiidTranslator translator,
                                   String propName,
                                   String value,
                                   TranslatorPropertyType type) throws Exception {
@@ -708,7 +708,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
 
     @Override
     public void undeployVdb( String vdbName) throws Exception {
-        ITeiidVdb vdb = getVdb(vdbName);
+        TeiidVdb vdb = getVdb(vdbName);
         if(vdb!=null) {
         	adminSpec.undeploy(admin, appendVdbExtension(vdbName), vdb.getVersion());
         }
@@ -722,7 +722,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
     
     @Override
     public void undeployDynamicVdb( String vdbName) throws Exception {
-        ITeiidVdb vdb = getVdb(vdbName);
+        TeiidVdb vdb = getVdb(vdbName);
         if(vdb!=null) {
         	adminSpec.undeploy(admin, appendDynamicVdbSuffix(vdbName), vdb.getVersion());
         }
@@ -742,7 +742,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
      */
     public void undeployVdb( String vdbName, int vdbVersion ) throws Exception {
         adminSpec.undeploy(admin, appendVdbExtension(vdbName), vdbVersion);
-        ITeiidVdb vdb = getVdb(vdbName);
+        TeiidVdb vdb = getVdb(vdbName);
 
         refreshVDBs();
 
@@ -758,10 +758,10 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @return
      */
     private String appendVdbExtension(String vdbName) {
-        if (vdbName.endsWith(ITeiidVdb.VDB_EXTENSION))
+        if (vdbName.endsWith(TeiidVdb.VDB_EXTENSION))
             return vdbName;
         
-        return vdbName + ITeiidVdb.VDB_DOT_EXTENSION;
+        return vdbName + TeiidVdb.VDB_DOT_EXTENSION;
     }
     
     /**
@@ -771,10 +771,10 @@ public class ExecutionAdmin implements IExecutionAdmin {
      * @return
      */
     private String appendDynamicVdbSuffix(String vdbName) {
-        if (vdbName.endsWith(ITeiidVdb.DYNAMIC_VDB_SUFFIX))
+        if (vdbName.endsWith(TeiidVdb.DYNAMIC_VDB_SUFFIX))
             return vdbName;
         
-        return vdbName + ITeiidVdb.DYNAMIC_VDB_SUFFIX;
+        return vdbName + TeiidVdb.DYNAMIC_VDB_SUFFIX;
     }
     
     @Override
@@ -804,11 +804,11 @@ public class ExecutionAdmin implements IExecutionAdmin {
     
     private Outcome pingJdbc() {
         String host = teiidInstance.getHost();
-        ITeiidJdbcInfo teiidJdbcInfo = teiidInstance.getTeiidJdbcInfo();
+        TeiidJdbcInfo teiidJdbcInfo = teiidInstance.getTeiidJdbcInfo();
         
-        String protocol = ITeiidConnectionInfo.MM;
+        String protocol = TeiidConnectionInfo.MM;
         if (teiidJdbcInfo.isSecure())
-            protocol = ITeiidConnectionInfo.MMS;
+            protocol = TeiidConnectionInfo.MMS;
 
         Connection teiidJdbcConnection = null;
         String url = "jdbc:teiid:ping@" + protocol + host + ':' + teiidJdbcInfo.getPort(); //$NON-NLS-1$
@@ -900,7 +900,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
                 refreshVDBs();
 
                 // Get the teiid vdb
-                ITeiidVdb vdb = getVdb(vdbName);
+                TeiidVdb vdb = getVdb(vdbName);
                 // Stop waiting if any conditions have been met
                 if (vdb == null)
                     return;

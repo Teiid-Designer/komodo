@@ -27,7 +27,7 @@ import org.komodo.spi.runtime.version.ITeiidVersion;
  *
  *
  */
-public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
+public interface TeiidInstance extends ExecutionAdmin, HostProvider {
 
     /**
      * @return the version information of this instance
@@ -45,12 +45,12 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
     /**
      * @return TeiidAdminInfo
      */
-    ITeiidAdminInfo getTeiidAdminInfo();
+    TeiidAdminInfo getTeiidAdminInfo();
 
     /**
      * @return TeiidJdbcInfo
      */
-    ITeiidJdbcInfo getTeiidJdbcInfo();
+    TeiidJdbcInfo getTeiidJdbcInfo();
     
     /**
      * An appropriate name for this Teiid Instance
@@ -77,7 +77,7 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
     /**
      * @return the teiid instance parent
      */
-    ITeiidParent getParent();
+    TeiidParent getParent();
 
     /**
      * Get the parent instance name
@@ -133,6 +133,6 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
      * 
      * @param otherInstance
      */
-    void update(ITeiidInstance otherInstance);
+    void update(TeiidInstance otherInstance);
 
 }

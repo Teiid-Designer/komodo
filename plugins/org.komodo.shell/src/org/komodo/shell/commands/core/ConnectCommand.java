@@ -28,8 +28,8 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.IShellTeiidParent;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.ITeiidInstance;
-import org.komodo.spi.runtime.ITeiidJdbcInfo;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
 
 /**
  *
@@ -102,8 +102,8 @@ public class ConnectCommand extends BuiltInShellCommand implements StringConstan
 
         WorkspaceStatus wStatus = getWorkspaceStatus();
         IShellTeiidParent parent = wStatus.getTeiidParent();
-        ITeiidInstance instance = wStatus.getTeiidInstance();
-        ITeiidJdbcInfo jdbcInfo = instance.getTeiidJdbcInfo();
+        TeiidInstance instance = wStatus.getTeiidInstance();
+        TeiidJdbcInfo jdbcInfo = instance.getTeiidJdbcInfo();
 
         String host = argMap.get(ArgSwitch.HOST);
         String adminPortValue = argMap.get(ArgSwitch.ADMIN_PORT);

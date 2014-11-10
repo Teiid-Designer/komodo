@@ -26,7 +26,7 @@ import java.util.Properties;
 /**
  *
  */
-public interface ITeiidDataSource {
+public interface TeiidDataSource {
 	
 	public interface ERROR_CODES {
 		// Data Source issues

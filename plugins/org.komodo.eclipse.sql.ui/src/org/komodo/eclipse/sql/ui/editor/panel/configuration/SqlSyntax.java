@@ -16,7 +16,7 @@ import java.util.Set;
 import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
-import org.komodo.spi.runtime.IExecutionConfigurationListener;
+import org.komodo.spi.runtime.ExecutionConfigurationListener;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.utils.KLog;
@@ -32,7 +32,7 @@ public class SqlSyntax {
 
     private final ITeiidVersion teiidVersion;
 
-    IExecutionConfigurationListener configurationListener = new IExecutionConfigurationListener() {
+    ExecutionConfigurationListener configurationListener = new ExecutionConfigurationListener() {
         
         @Override
         public void configurationChanged(ExecutionConfigurationEvent event) {

@@ -23,7 +23,7 @@ package org.komodo.shell;
 
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
-import org.komodo.spi.runtime.IExecutionConfigurationListener;
+import org.komodo.spi.runtime.ExecutionConfigurationListener;
 
 /**
  *
@@ -31,7 +31,7 @@ import org.komodo.spi.runtime.IExecutionConfigurationListener;
 public class ShellEventManager implements EventManager {
 
     @Override
-    public boolean addListener(IExecutionConfigurationListener listener) {
+    public boolean addListener(ExecutionConfigurationListener listener) {
         return false;
     }
 
@@ -46,7 +46,7 @@ public class ShellEventManager implements EventManager {
     }
 
     @Override
-    public boolean removeListener(IExecutionConfigurationListener listener) {
+    public boolean removeListener(ExecutionConfigurationListener listener) {
         return false;
     }
 
