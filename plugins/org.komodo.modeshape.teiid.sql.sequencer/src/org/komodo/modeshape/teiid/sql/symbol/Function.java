@@ -25,20 +25,20 @@ package org.komodo.modeshape.teiid.sql.symbol;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
-import org.komodo.modeshape.teiid.sql.symbol.Function.FunctionDescriptor;
+import org.komodo.modeshape.teiid.sql.symbol.Function.SQFunctionDescriptor;
 import org.komodo.spi.query.sql.symbol.IFunction;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
-import org.komodo.spi.udf.IFunctionDescriptor;
+import org.komodo.spi.udf.FunctionDescriptor;
 
 /**
  *
  */
-public class Function extends ASTNode implements Expression, IFunction<FunctionDescriptor, LanguageVisitor> {
+public class Function extends ASTNode implements Expression, IFunction<SQFunctionDescriptor, LanguageVisitor> {
 
-    public static class FunctionDescriptor implements IFunctionDescriptor {
+    public static class SQFunctionDescriptor implements FunctionDescriptor {
 
         @Override
         public String getName() {
@@ -139,12 +139,12 @@ public class Function extends ASTNode implements Expression, IFunction<FunctionD
     }
 
     @Override
-    public FunctionDescriptor getFunctionDescriptor() {
+    public SQFunctionDescriptor getFunctionDescriptor() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setFunctionDescriptor(FunctionDescriptor fd) {
+    public void setFunctionDescriptor(SQFunctionDescriptor fd) {
         throw new UnsupportedOperationException();
     }
 

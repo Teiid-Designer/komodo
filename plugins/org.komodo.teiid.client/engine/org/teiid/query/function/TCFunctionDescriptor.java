@@ -29,8 +29,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.udf.IFunctionDescriptor;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionDescriptor;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.query.util.CommandContext;
 import org.teiid.core.CoreConstants;
 import org.teiid.core.types.ArrayImpl;
@@ -49,7 +49,7 @@ import org.teiid.runtime.client.TeiidClientException;
  * The FunctionDescriptor describes a particular function instance enough
  * to invoke the function.
  */
-public class FunctionDescriptor implements Serializable, Cloneable, IFunctionDescriptor {
+public class TCFunctionDescriptor implements Serializable, Cloneable, FunctionDescriptor {
 	private static final long serialVersionUID = 5374103983118037242L;
 
 	private static final boolean ALLOW_NAN_INFINITY = PropertiesUtils.getBooleanProperty(System.getProperties(), "org.teiid.allowNanInfinity", false); //$NON-NLS-1$
@@ -69,7 +69,7 @@ public class FunctionDescriptor implements Serializable, Cloneable, IFunctionDes
     // the real VM descriptor for execution.
     private transient Method invocationMethod;
 
-	FunctionDescriptor(TeiidVersion teiidVersion, FunctionMethod method, Class<?>[] types,
+	TCFunctionDescriptor(TeiidVersion teiidVersion, FunctionMethod method, Class<?>[] types,
 			Class<?> outputType, Method invocationMethod,
 			boolean requiresContext) {
 		this.teiidVersion = teiidVersion;
@@ -165,9 +165,9 @@ public class FunctionDescriptor implements Serializable, Cloneable, IFunctionDes
     }
 
     @Override
-	public FunctionDescriptor clone() {
+	public TCFunctionDescriptor clone() {
         try {
-            return (FunctionDescriptor) super.clone();
+            return (TCFunctionDescriptor) super.clone();
         } catch (CloneNotSupportedException e) {
              throw new RuntimeException(e);
         }
@@ -332,7 +332,7 @@ public class FunctionDescriptor implements Serializable, Cloneable, IFunctionDes
 		return this.getName().equalsIgnoreCase(name) && CoreConstants.SYSTEM_MODEL.equals(this.getSchema());
 	}
 	
-	public boolean isSystemFunction(IFunctionLibrary.FunctionName name) {
+	public boolean isSystemFunction(FunctionLibrary.FunctionName name) {
         return name.equalsIgnoreCase(getName()) && CoreConstants.SYSTEM_MODEL.equals(this.getSchema());
     }
 	

@@ -50,7 +50,7 @@ import net.sf.saxon.trans.XPathException;
 import org.komodo.spi.query.sql.lang.ICompareCriteria;
 import org.komodo.spi.query.sql.lang.IMatchCriteria.MatchMode;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.core.types.ArrayImpl;
 import org.teiid.core.types.BaseLob;
 import org.teiid.core.types.BlobType;
@@ -66,7 +66,7 @@ import org.teiid.core.types.basic.StringToSQLXMLTransform;
 import org.teiid.core.util.StringUtil;
 import org.teiid.language.SQLConstants;
 import org.teiid.metadata.FunctionMethod.PushDown;
-import org.teiid.query.function.FunctionDescriptor;
+import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.function.JSONFunctionMethods.JSONBuilder;
 import org.teiid.query.function.source.XMLSystemFunctions;
 import org.teiid.query.function.source.XMLSystemFunctions.XmlConcat;
@@ -1067,7 +1067,7 @@ public class Evaluator {
 			}
 			if (value instanceof Function) {
 				Function f = (Function)value;
-				if (IFunctionLibrary.FunctionName.JSONARRAY.equalsIgnoreCase(f.getName())) {
+				if (FunctionLibrary.FunctionName.JSONARRAY.equalsIgnoreCase(f.getName())) {
 					builder.startValue(name);
 					jsonArray(f, f.getArgs(), builder, this);
 					return;
@@ -1263,7 +1263,7 @@ public class Evaluator {
 		throws Exception {
 	
 	    // Get function based on resolved function info
-	    FunctionDescriptor fd = function.getFunctionDescriptor();
+	    TCFunctionDescriptor fd = function.getFunctionDescriptor();
 	    
 		// Evaluate args
 		Expression[] args = function.getArgs();
@@ -1292,7 +1292,7 @@ public class Evaluator {
 	    }
 	    
 	    // Check for special lookup function
-	    if(IFunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(function.getName())) {
+	    if(FunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(function.getName())) {
 	
 	        String codeTableName = (String) values[0];
 	        String returnElementName = (String) values[1];

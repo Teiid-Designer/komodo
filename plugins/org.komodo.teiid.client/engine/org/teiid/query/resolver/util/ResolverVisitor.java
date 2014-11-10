@@ -39,7 +39,7 @@ import org.komodo.spi.query.sql.IResolverVisitor;
 import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.UnresolvedSymbolDescription;
 import org.teiid.core.CoreConstants;
@@ -47,8 +47,8 @@ import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.core.util.StringUtil;
-import org.teiid.query.function.FunctionDescriptor;
-import org.teiid.query.function.FunctionLibrary;
+import org.teiid.query.function.TCFunctionDescriptor;
+import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.metadata.GroupInfo;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.LanguageVisitor;
@@ -358,7 +358,7 @@ public class ResolverVisitor extends LanguageVisitor
     @Override
     public void visit(Function obj) {
         try {
-            resolveFunction(obj, (FunctionLibrary) this.metadata.getFunctionLibrary());
+            resolveFunction(obj, (DefaultFunctionLibrary) this.metadata.getFunctionLibrary());
 			if (obj.isAggregate() && isTeiidVersionOrGreater(Version.TEIID_8_6)) {
             	hasUserDefinedAggregate = true;
             }
@@ -623,7 +623,7 @@ public class ResolverVisitor extends LanguageVisitor
 	/**
 	 * Resolve function such that all functions are resolved and type-safe.
 	 */
-	void resolveFunction(Function function, FunctionLibrary library)
+	void resolveFunction(Function function, DefaultFunctionLibrary library)
 	    throws Exception {
 	
 	    // Check whether this function is already resolved
@@ -646,7 +646,7 @@ public class ResolverVisitor extends LanguageVisitor
 	    }
 	
 	    //special case handling for convert of an untyped reference
-	    if (FunctionLibrary.isConvert(function) && hasArgWithoutType) {
+	    if (DefaultFunctionLibrary.isConvert(function) && hasArgWithoutType) {
 	        Constant constant = (Constant)function.getArg(1);
 	        Class<?> type = getDataTypeManager().getDataTypeClass((String)constant.getValue());
 	
@@ -656,7 +656,7 @@ public class ResolverVisitor extends LanguageVisitor
 	    }
 	
 	    // Attempt to get exact match of function for this signature
-	    List<FunctionDescriptor> fds = findWithImplicitConversions(library, function, args, types, hasArgWithoutType);
+	    List<TCFunctionDescriptor> fds = findWithImplicitConversions(library, function, args, types, hasArgWithoutType);
 	    
 	    // Function did not resolve - determine reason and throw exception
 	    if(fds.isEmpty()) {
@@ -674,7 +674,7 @@ public class ResolverVisitor extends LanguageVisitor
 	    if (fds.size() > 1) {
             throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID31150, function));
         }
-        FunctionDescriptor fd = fds.get(0);
+        TCFunctionDescriptor fd = fds.get(0);
 	    if (fd.getMethod().isVarArgs() 
 	    		&& fd.getTypes().length == types.length 
 	    		&& library.isVarArgArrayParam(fd.getMethod(), types, types.length - 1, fd.getTypes()[types.length - 1])) {
@@ -682,7 +682,7 @@ public class ResolverVisitor extends LanguageVisitor
 	    	fd.setCalledWithVarArgArrayParam(true);
 	    }
 	    
-	    if(fd.isSystemFunction(IFunctionLibrary.FunctionName.CONVERT) || fd.isSystemFunction(IFunctionLibrary.FunctionName.CAST)) {
+	    if(fd.isSystemFunction(FunctionLibrary.FunctionName.CONVERT) || fd.isSystemFunction(FunctionLibrary.FunctionName.CAST)) {
 	        String dataType = (String) ((Constant)args[1]).getValue();
 	        Class<?> dataTypeClass = getDataTypeManager().getDataTypeClass(dataType);
 	        fd = library.findTypedConversionFunction(args[0].getType(), dataTypeClass);
@@ -695,10 +695,10 @@ public class ResolverVisitor extends LanguageVisitor
 	
 	             throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30071, new Object[] {getDataTypeManager().getDataTypeName(srcTypeClass), dataType}));
 	        }
-	    } else if(fd.isSystemFunction(IFunctionLibrary.FunctionName.LOOKUP)) {
+	    } else if(fd.isSystemFunction(FunctionLibrary.FunctionName.LOOKUP)) {
 			ResolverUtil.ResolvedLookup lookup = ResolverUtil.resolveLookup(function, metadata);
 			fd = library.copyFunctionChangeReturnType(fd, lookup.getReturnElement().getType());
-	    } else if (fd.isSystemFunction(IFunctionLibrary.FunctionName.ARRAY_GET) && args[0].getType().isArray()) {
+	    } else if (fd.isSystemFunction(FunctionLibrary.FunctionName.ARRAY_GET) && args[0].getType().isArray()) {
 			if (args[0].getType().isArray()) {
 	    		//hack to use typed array values
 				fd = library.copyFunctionChangeReturnType(fd, args[0].getType().getComponentType());
@@ -733,10 +733,10 @@ public class ResolverVisitor extends LanguageVisitor
 	 * @throws Exception 
 	 *
 	 */
-	private List<FunctionDescriptor> findWithImplicitConversions(FunctionLibrary library, Function function, Expression[] args, Class<?>[] types, boolean hasArgWithoutType) throws Exception {
+	private List<TCFunctionDescriptor> findWithImplicitConversions(DefaultFunctionLibrary library, Function function, Expression[] args, Class<?>[] types, boolean hasArgWithoutType) throws Exception {
 	    
 	    // Try to find implicit conversion path to still perform this function
-	    FunctionDescriptor[] conversions;
+	    TCFunctionDescriptor[] conversions;
 		try {
 			conversions = library.determineNecessaryConversions(function.getName(), function.getType(), args, types, hasArgWithoutType);
 		} catch (Exception e) {

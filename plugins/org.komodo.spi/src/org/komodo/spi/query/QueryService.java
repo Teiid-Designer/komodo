@@ -46,7 +46,7 @@ import org.komodo.spi.query.sql.lang.ISubqueryContainer;
 import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 import org.komodo.spi.udf.FunctionMethodDescriptor;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.validator.IUpdateValidator;
 import org.komodo.spi.validator.IValidator;
 import org.komodo.spi.validator.IUpdateValidator.TransformUpdateType;
@@ -109,9 +109,9 @@ public interface QueryService {
     /**
      * Create a new default function library
      * 
-     * @return instance of {@link IFunctionLibrary}
+     * @return instance of {@link FunctionLibrary}
      */
-    IFunctionLibrary createFunctionLibrary();
+    FunctionLibrary createFunctionLibrary();
 
     /**
      * Create a new function library with custom functions
@@ -119,9 +119,9 @@ public interface QueryService {
      * 
      * @param functionMethodDescriptors
      * 
-     * @return instance of {@link IFunctionLibrary}
+     * @return instance of {@link FunctionLibrary}
      */
-    IFunctionLibrary createFunctionLibrary(List<FunctionMethodDescriptor> functionMethodDescriptors);
+    FunctionLibrary createFunctionLibrary(List<FunctionMethodDescriptor> functionMethodDescriptors);
 
     /**
      * Create a query language factory

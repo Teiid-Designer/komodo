@@ -30,7 +30,7 @@ import java.util.Set;
 import javax.script.ScriptEngine;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.xml.IMappingNode;
 
 /**
@@ -353,7 +353,7 @@ public class DelegatingQueryMetadataInterface implements QueryMetadataInterface 
     }
 
     @Override
-    public IFunctionLibrary getFunctionLibrary() {
+    public FunctionLibrary getFunctionLibrary() {
         return this.delegate.getFunctionLibrary();
     }
 

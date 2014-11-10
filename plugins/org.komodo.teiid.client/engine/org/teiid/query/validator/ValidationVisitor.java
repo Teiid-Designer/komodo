@@ -54,7 +54,7 @@ import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.api.exception.query.QueryValidatorException;
 import org.teiid.core.types.ArrayImpl;
 import org.teiid.core.types.DefaultDataTypeManager;
@@ -419,7 +419,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
     @Override
     public void visit(Function obj) {
-    	if(IFunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(obj.getName())) {
+    	if(FunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(obj.getName())) {
     		try {
 				ResolverUtil.ResolvedLookup resolvedLookup = ResolverUtil.resolveLookup(obj, getMetadata());
 				if(ValidationVisitor.isNonComparable(resolvedLookup.getKeyElement())) {
@@ -428,7 +428,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 			} catch (Exception e) {
 				handleException(e, obj);
 			}
-    	} else if (IFunctionLibrary.FunctionName.CONTEXT.equalsIgnoreCase(obj.getName())) {
+    	} else if (FunctionLibrary.FunctionName.CONTEXT.equalsIgnoreCase(obj.getName())) {
             if(!isXML) {
                 // can't use this pseudo-function in non-XML queries
                 handleValidationError(Messages.getString(Messages.ValidationVisitor.The_context_function_cannot_be_used_in_a_non_XML_command), obj);
@@ -440,13 +440,13 @@ public class ValidationVisitor extends AbstractValidationVisitor {
                 for (Iterator<Function> functions = FunctionCollectorVisitor.getFunctions(obj.getArg(1), false).iterator(); functions.hasNext();) {
                     Function function = functions.next();
                     
-                    if (IFunctionLibrary.FunctionName.CONTEXT.equalsIgnoreCase(function.getName())) {
+                    if (FunctionLibrary.FunctionName.CONTEXT.equalsIgnoreCase(function.getName())) {
                         handleValidationError(Messages.getString(Messages.ValidationVisitor.Context_function_nested), obj);
                     }
                 }
             }
-    	} else if (IFunctionLibrary.FunctionName.ROWLIMIT.equalsIgnoreCase(obj.getName()) ||
-    	            IFunctionLibrary.FunctionName.ROWLIMITEXCEPTION.equalsIgnoreCase(obj.getName())) {
+    	} else if (FunctionLibrary.FunctionName.ROWLIMIT.equalsIgnoreCase(obj.getName()) ||
+    	            FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.equalsIgnoreCase(obj.getName())) {
             if(isXML) {
                 if (!(obj.getArg(0) instanceof ElementSymbol)) {
                     // Arg must be an element symbol
@@ -474,7 +474,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
         	}
         } else if (obj.isAggregate()) {
         	handleValidationError(Messages.getString(Messages.ValidationVisitor.user_defined_aggregate_as_function, obj, obj.getName()), obj);
-        } else if (IFunctionLibrary.FunctionName.JSONARRAY.equalsIgnoreCase(obj.getName())) {
+        } else if (FunctionLibrary.FunctionName.JSONARRAY.equalsIgnoreCase(obj.getName())) {
         	Expression[] args = obj.getArgs();
         	for (Expression expression : args) {
         		validateJSONValue(obj, expression);
@@ -673,9 +673,9 @@ public class ValidationVisitor extends AbstractValidationVisitor {
         if (isXML) {
             // Collect all occurrances of rowlimit and rowlimitexception functions
             List<Function> rowLimitFunctions = new ArrayList<Function>();
-            FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, IFunctionLibrary.FunctionName.ROWLIMIT.text());
+            FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
             PreOrderNavigator.doVisit(obj, visitor); 
-            visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, IFunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
+            visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
             PreOrderNavigator.doVisit(obj, visitor);
             final int functionCount = rowLimitFunctions.size();
             if (functionCount > 0) {
@@ -1165,9 +1165,9 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     private void validateRowLimitFunctionNotInInvalidCriteria(Criteria obj) {
         // Collect all occurrances of rowlimit and rowlimitexception functions
         List<Function> rowLimitFunctions = new ArrayList<Function>();
-        FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, IFunctionLibrary.FunctionName.ROWLIMIT.text());
+        FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
         PreOrderNavigator.doVisit(obj, visitor);      
-        visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, IFunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
+        visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
         PreOrderNavigator.doVisit(obj, visitor); 
         if (rowLimitFunctions.size() > 0) {
             handleValidationError(Messages.getString(Messages.ValidationVisitor.rowlimit3), obj);
@@ -1313,9 +1313,9 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
         // Collect all occurrences of rowlimit function
         List rowLimitFunctions = new ArrayList();
-        FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, IFunctionLibrary.FunctionName.ROWLIMIT.text());
+        FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
         PreOrderNavigator.doVisit(obj, visitor);   
-        visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, IFunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
+        visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
         PreOrderNavigator.doVisit(obj, visitor);            
         final int functionCount = rowLimitFunctions.size();
         if (functionCount > 0) {
@@ -1324,8 +1324,8 @@ public class ValidationVisitor extends AbstractValidationVisitor {
             if (obj.getLeftExpression() instanceof Function) {
                 Function leftExpr = (Function)obj.getLeftExpression();
                 
-                if (IFunctionLibrary.FunctionName.ROWLIMIT.equalsIgnoreCase(leftExpr.getName()) ||
-                    IFunctionLibrary.FunctionName.ROWLIMITEXCEPTION.equalsIgnoreCase(leftExpr.getName())) {
+                if (FunctionLibrary.FunctionName.ROWLIMIT.equalsIgnoreCase(leftExpr.getName()) ||
+                    FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.equalsIgnoreCase(leftExpr.getName())) {
                     function = leftExpr;
                     expr = obj.getRightExpression();
                 }
@@ -1333,8 +1333,8 @@ public class ValidationVisitor extends AbstractValidationVisitor {
             if (function == null && obj.getRightExpression() instanceof Function) {
                 Function rightExpr = (Function)obj.getRightExpression();
                 
-                if (IFunctionLibrary.FunctionName.ROWLIMIT.equalsIgnoreCase(rightExpr.getName()) ||
-                IFunctionLibrary.FunctionName.ROWLIMITEXCEPTION.equalsIgnoreCase(rightExpr.getName())) {
+                if (FunctionLibrary.FunctionName.ROWLIMIT.equalsIgnoreCase(rightExpr.getName()) ||
+                FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.equalsIgnoreCase(rightExpr.getName())) {
                     function = rightExpr;
                     expr = obj.getLeftExpression();
                 }

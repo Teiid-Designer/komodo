@@ -33,7 +33,7 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.xml.IMappingNode;
 
 
@@ -772,7 +772,7 @@ public interface QueryMetadataInterface {
      * 
      * @return the function library
      */
-    IFunctionLibrary getFunctionLibrary();
+    FunctionLibrary getFunctionLibrary();
 
     /**
      * @param groupID

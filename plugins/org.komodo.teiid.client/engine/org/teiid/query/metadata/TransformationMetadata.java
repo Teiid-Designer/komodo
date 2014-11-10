@@ -73,7 +73,7 @@ import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.ProcedureParameter.Type;
 import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
-import org.teiid.query.function.FunctionLibrary;
+import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.function.FunctionTree;
 import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.mapping.xml.MappingDocument;
@@ -157,7 +157,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
     private final CompositeMetadataStore store;
     private DefaultDataTypeManager dataTypeManager;
     private Map<String, VDBResources.Resource> vdbEntries;
-    private FunctionLibrary functionLibrary;
+    private DefaultFunctionLibrary functionLibrary;
     private VDBMetaData vdbMetaData;
     private ScriptEngineManager scriptEngineManager;
     private Map<String, ScriptEngineFactory> scriptEngineFactories = Collections.synchronizedMap(new HashMap<String, ScriptEngineFactory>());
@@ -211,13 +211,13 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         	this.vdbEntries = vdbEntries;
         }
         if (functionTrees == null) {
-        	this.functionLibrary = new FunctionLibrary(teiidParser.getVersion(), systemFunctions);
+        	this.functionLibrary = new DefaultFunctionLibrary(teiidParser.getVersion(), systemFunctions);
         } else {
-            this.functionLibrary = new FunctionLibrary(teiidParser.getVersion(), systemFunctions, functionTrees.toArray(new FunctionTree[functionTrees.size()]));
+            this.functionLibrary = new DefaultFunctionLibrary(teiidParser.getVersion(), systemFunctions, functionTrees.toArray(new FunctionTree[functionTrees.size()]));
         }
     }
 
-    private TransformationMetadata(TeiidParser teiidParser, final CompositeMetadataStore store, FunctionLibrary functionLibrary) {
+    private TransformationMetadata(TeiidParser teiidParser, final CompositeMetadataStore store, DefaultFunctionLibrary functionLibrary) {
         super(teiidParser.getVersion());
         this.teiidParser = teiidParser;
         this.store = store;
@@ -1108,7 +1108,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 	}
 
 	@Override
-	public FunctionLibrary getFunctionLibrary() {
+	public DefaultFunctionLibrary getFunctionLibrary() {
 		return this.functionLibrary;
 	}
 	

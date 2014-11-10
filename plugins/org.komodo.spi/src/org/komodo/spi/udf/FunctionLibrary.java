@@ -26,7 +26,7 @@ import java.util.List;
 /**
  *
  */
-public interface IFunctionLibrary {
+public interface FunctionLibrary {
     
     public enum FunctionName {
         // Special type conversion functions
@@ -126,7 +126,7 @@ public interface IFunctionLibrary {
      * @return those functions in the given category
      */
     @Deprecated
-    <F extends IFunctionForm> List<F> getFunctionForms(String category);
+    <F extends FunctionForm> List<F> getFunctionForms(String category);
 
     /**
      * Find the function with the given name and number
@@ -138,7 +138,7 @@ public interface IFunctionLibrary {
      * @return function or null
      */
     @Deprecated
-    IFunctionForm findFunctionForm(String name, int length);
+    FunctionForm findFunctionForm(String name, int length);
 
     /**
      * Find whether library contains function with the
@@ -161,7 +161,7 @@ public interface IFunctionLibrary {
      * 
      * @return Descriptor if found, null if not found
      */
-    IFunctionDescriptor findFunction(FunctionName name, Class<?>[] types);
+    FunctionDescriptor findFunction(FunctionName name, Class<?>[] types);
     
     /**
      * Find a function descriptor given a name and the types of the arguments.
@@ -173,5 +173,5 @@ public interface IFunctionLibrary {
      * 
      * @return Descriptor if found, null if not found
      */
-    IFunctionDescriptor findFunction(String name, Class<?>[] types);
+    FunctionDescriptor findFunction(String name, Class<?>[] types);
 }

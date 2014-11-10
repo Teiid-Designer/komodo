@@ -179,7 +179,7 @@ public class FunctionTree {
      * @param source The function metadata source, which knows how to obtain the invocation class
      * @param method The function metadata for a particular method signature
      */
-    public FunctionDescriptor addFunction(String schema, FunctionMetadataSource source, FunctionMethod method, boolean system) {
+    public TCFunctionDescriptor addFunction(String schema, FunctionMetadataSource source, FunctionMethod method, boolean system) {
     	String categoryKey = method.getCategory();
     	if (categoryKey == null) {
     		method.setCategory(FunctionCategoryConstants.MISCELLANEOUS);
@@ -210,7 +210,7 @@ public class FunctionTree {
         	types = new Class<?>[0];
         }
 
-        FunctionDescriptor descriptor = createFunctionDescriptor(source, method, types, system);
+        TCFunctionDescriptor descriptor = createFunctionDescriptor(source, method, types, system);
         descriptor.setSchema(schema);
         // Store this path in the function tree
         // Look up function in function map
@@ -265,7 +265,7 @@ public class FunctionTree {
         return descriptor;
     }
 
-    private FunctionDescriptor createFunctionDescriptor(FunctionMetadataSource source, FunctionMethod method, Class<?>[] types, boolean system) {
+    private TCFunctionDescriptor createFunctionDescriptor(FunctionMetadataSource source, FunctionMethod method, Class<?>[] types, boolean system) {
         try {
             // Get return type
             FunctionParameter outputParam = method.getOutputParameter();
@@ -359,7 +359,7 @@ public class FunctionTree {
                 }
             }
 
-            FunctionDescriptor result = new FunctionDescriptor(teiidVersion, method, types, outputType, invocationMethod, requiresContext);
+            TCFunctionDescriptor result = new TCFunctionDescriptor(teiidVersion, method, types, outputType, invocationMethod, requiresContext);
             if (method.getAggregateAttributes() != null
                 && (method.getPushdown() == PushDown.CAN_PUSHDOWN || method.getPushdown() == PushDown.CANNOT_PUSHDOWN)) {
                 result.newInstance();
@@ -378,7 +378,7 @@ public class FunctionTree {
      * @param argTypes Types of each argument in the function
      * @return Descriptor which can be used to invoke the function
      */
-    FunctionDescriptor getFunction(String name, Class<?>[] argTypes) {
+    TCFunctionDescriptor getFunction(String name, Class<?>[] argTypes) {
         // Walk path in tree
         Map<Object, Object> node = treeRoot.get(name);
         if (node == null) {
@@ -401,7 +401,7 @@ public class FunctionTree {
         // Look for key at the end
         if(node.containsKey(DESCRIPTOR_KEY)) {
             // This is the end - return descriptor
-            return (FunctionDescriptor) node.get(DESCRIPTOR_KEY);
+            return (TCFunctionDescriptor) node.get(DESCRIPTOR_KEY);
         }
         // No descriptor at this location in tree
         return null;

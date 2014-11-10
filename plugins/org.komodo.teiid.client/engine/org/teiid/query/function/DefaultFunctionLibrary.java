@@ -35,7 +35,7 @@ import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.core.CoreConstants;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
@@ -55,7 +55,7 @@ import org.teiid.query.sql.symbol.Function;
  * functions are available, resolve function signatures, and invoke system
  * and user-defined functions.
  */
-public class FunctionLibrary implements IFunctionLibrary {
+public class DefaultFunctionLibrary implements FunctionLibrary {
 	
 	public static final String MVSTATUS = "mvstatus"; //$NON-NLS-1$
 
@@ -76,7 +76,7 @@ public class FunctionLibrary implements IFunctionLibrary {
 	 * @param systemFuncs 
 	 * @param userFuncs 
 	 */
-	public FunctionLibrary(TeiidVersion teiidVersion, FunctionTree systemFuncs, FunctionTree... userFuncs) {
+	public DefaultFunctionLibrary(TeiidVersion teiidVersion, FunctionTree systemFuncs, FunctionTree... userFuncs) {
         this.teiidVersion = teiidVersion;
         this.systemFunctions = systemFuncs;
        	this.userFunctions = userFuncs;
@@ -138,17 +138,17 @@ public class FunctionLibrary implements IFunctionLibrary {
 
     @SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
-    public List<FunctionForm> getFunctionForms(String category) {
+    public List<TCFunctionForm> getFunctionForms(String category) {
         Set<FunctionMethod> fMethods = systemFunctions.getFunctionsInCategory(category);
         for (FunctionTree tree: this.userFunctions) {
             fMethods.addAll(tree.getFunctionsInCategory(category));
         }
 
-        List<FunctionForm> forms = new ArrayList<FunctionForm>();
+        List<TCFunctionForm> forms = new ArrayList<TCFunctionForm>();
 
         if (fMethods != null) {
             for (FunctionMethod fMethod : fMethods) {
-                forms.add(new FunctionForm(fMethod));
+                forms.add(new TCFunctionForm(fMethod));
             }
         }
 
@@ -157,16 +157,16 @@ public class FunctionLibrary implements IFunctionLibrary {
 
     @SuppressWarnings("deprecation")
 	@Override
-    public FunctionForm findFunctionForm(String name, int numArgs) {
+    public TCFunctionForm findFunctionForm(String name, int numArgs) {
         List<FunctionMethod> functionMethods = systemFunctions.findFunctionMethods(name, numArgs);
         if (functionMethods.size() > 0) {
-            return new FunctionForm(functionMethods.get(0));
+            return new TCFunctionForm(functionMethods.get(0));
         }
         if(functionMethods.isEmpty() && this.userFunctions != null) {
             for (FunctionTree tree: this.userFunctions) {
                 functionMethods = tree.findFunctionMethods(name, numArgs);
                 if (functionMethods.size() > 0) {
-                    return new FunctionForm(functionMethods.get(0));
+                    return new TCFunctionForm(functionMethods.get(0));
                 }
             }
         }
@@ -192,7 +192,7 @@ public class FunctionLibrary implements IFunctionLibrary {
     }
 
     @Override
-    public FunctionDescriptor findFunction(FunctionName name, Class<?>[] types) {
+    public TCFunctionDescriptor findFunction(FunctionName name, Class<?>[] types) {
         return findFunction(name.text(), types);
     }
     
@@ -205,9 +205,9 @@ public class FunctionLibrary implements IFunctionLibrary {
      * @return Descriptor if found, null if not found
 	 */
     @Override
-	public FunctionDescriptor findFunction(String name, Class<?>[] types) {
+	public TCFunctionDescriptor findFunction(String name, Class<?>[] types) {
         // First look in system functions
-        FunctionDescriptor descriptor = systemFunctions.getFunction(name, types);
+        TCFunctionDescriptor descriptor = systemFunctions.getFunction(name, types);
 
         // If that fails, check the user defined functions
         if(descriptor == null && this.userFunctions != null) {
@@ -230,13 +230,13 @@ public class FunctionLibrary implements IFunctionLibrary {
      * @param types Array of classes representing the types
      * @return Descriptor if found, null if not found
      */
-    public List<FunctionDescriptor> findAllFunctions(String name, Class<?>[] types) {
+    public List<TCFunctionDescriptor> findAllFunctions(String name, Class<?>[] types) {
         // First look in system functions
-        FunctionDescriptor descriptor = systemFunctions.getFunction(name, types);
+        TCFunctionDescriptor descriptor = systemFunctions.getFunction(name, types);
 
         // If that fails, check the user defined functions
         if(descriptor == null && this.userFunctions != null) {
-            List<FunctionDescriptor> result = new LinkedList<FunctionDescriptor>();
+            List<TCFunctionDescriptor> result = new LinkedList<TCFunctionDescriptor>();
             for (FunctionTree tree: this.userFunctions) {
                 descriptor = tree.getFunction(name, types);
                 if (descriptor != null) {
@@ -273,11 +273,11 @@ public class FunctionLibrary implements IFunctionLibrary {
      * FunctionDescriptors.
 	 * @throws Exception
 	 */
-	public FunctionDescriptor[] determineNecessaryConversions(String name, Class<?> returnType, Expression[] args, Class<?>[] types, boolean hasUnknownType) throws Exception {
+	public TCFunctionDescriptor[] determineNecessaryConversions(String name, Class<?> returnType, Expression[] args, Class<?>[] types, boolean hasUnknownType) throws Exception {
 		// Check for no args - no conversion necessary
 		if(types.length == 0) {
 		    if (getTeiidVersion().isLessThan(Version.TEIID_8_0.get()))
-		        return new FunctionDescriptor[0];
+		        return new TCFunctionDescriptor[0];
 
 			return null;
 		}
@@ -423,9 +423,9 @@ public class FunctionLibrary implements IFunctionLibrary {
 		return getConverts(result, types);
 	}
 	
-	private FunctionDescriptor[] getConverts(FunctionMethod method, Class<?>[] types) {
+	private TCFunctionDescriptor[] getConverts(FunctionMethod method, Class<?>[] types) {
         final List<FunctionParameter> methodTypes = method.getInputParameters();
-        FunctionDescriptor[] result = new FunctionDescriptor[types.length];
+        TCFunctionDescriptor[] result = new TCFunctionDescriptor[types.length];
         for(int i = 0; i < types.length; i++) {
         	//treat all varags as the same type
             final String tmpTypeName = methodTypes.get(Math.min(i, methodTypes.size() - 1)).getType();
@@ -484,9 +484,9 @@ public class FunctionLibrary implements IFunctionLibrary {
      * @param targetType The target type class
      * @return A CONVERT function descriptor or null if not possible
      */
-    public FunctionDescriptor findTypedConversionFunction(Class<?> sourceType, Class<?> targetType) {
+    public TCFunctionDescriptor findTypedConversionFunction(Class<?> sourceType, Class<?> targetType) {
     	//TODO: should array to string be prohibited?    	
-        FunctionDescriptor fd = findFunction(FunctionName.CONVERT, new Class[] {sourceType, DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()});
+        TCFunctionDescriptor fd = findFunction(FunctionName.CONVERT, new Class[] {sourceType, DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()});
         if (fd != null) {
             return copyFunctionChangeReturnType(fd, targetType);
         }
@@ -499,10 +499,10 @@ public class FunctionLibrary implements IFunctionLibrary {
 	 * @param returnType The return type to apply to the copied FunctionDescriptor.
 	 * @return The copy of FunctionDescriptor.
 	 */
-    public FunctionDescriptor copyFunctionChangeReturnType(FunctionDescriptor fd, Class<?> returnType) {
+    public TCFunctionDescriptor copyFunctionChangeReturnType(TCFunctionDescriptor fd, Class<?> returnType) {
         if(fd != null) {
-        	FunctionDescriptor fdImpl = fd;
-            FunctionDescriptor copy = fdImpl.clone();
+        	TCFunctionDescriptor fdImpl = fd;
+            TCFunctionDescriptor copy = fdImpl.clone();
             copy.setReturnType(returnType);
             return copy;
         }

@@ -51,7 +51,7 @@ import org.komodo.spi.query.sql.symbol.ISymbol;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.FunctionMethodDescriptor;
 import org.komodo.spi.udf.FunctionParameterDescriptor;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.validator.IUpdateValidator;
 import org.komodo.spi.validator.IValidator;
 import org.komodo.spi.validator.IUpdateValidator.TransformUpdateType;
@@ -61,8 +61,8 @@ import org.teiid.language.SQLConstants;
 import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.FunctionMethod.Determinism;
 import org.teiid.metadata.FunctionParameter;
-import org.teiid.query.function.FunctionDescriptor;
-import org.teiid.query.function.FunctionLibrary;
+import org.teiid.query.function.TCFunctionDescriptor;
+import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.function.FunctionTree;
 import org.teiid.query.function.SystemFunctionManager;
 import org.teiid.query.function.UDFSource;
@@ -148,12 +148,12 @@ public class TCQueryService implements QueryService {
     }
 
     @Override
-    public IFunctionLibrary createFunctionLibrary() {
-        return new FunctionLibrary(teiidVersion, systemFunctionManager.getSystemFunctions(), new FunctionTree[0]);
+    public FunctionLibrary createFunctionLibrary() {
+        return new DefaultFunctionLibrary(teiidVersion, systemFunctionManager.getSystemFunctions(), new FunctionTree[0]);
     }
 
     @Override
-    public IFunctionLibrary createFunctionLibrary(List<FunctionMethodDescriptor> functionMethodDescriptors) {
+    public FunctionLibrary createFunctionLibrary(List<FunctionMethodDescriptor> functionMethodDescriptors) {
 
         // Dynamically return a function library for each call rather than cache it here.
         Map<String, FunctionTree> functionTrees = new HashMap<String, FunctionTree>();
@@ -187,11 +187,11 @@ public class TCQueryService implements QueryService {
                 functionTrees.put(descriptor.getSchema(), tree);
             }
 
-            FunctionDescriptor fd = tree.addFunction(descriptor.getSchema(), null, fMethod, false);
+            TCFunctionDescriptor fd = tree.addFunction(descriptor.getSchema(), null, fMethod, false);
             fd.setMetadataID(descriptor.getMetadataID());
         }
 
-        return new FunctionLibrary(teiidVersion, systemFunctionManager.getSystemFunctions(),
+        return new DefaultFunctionLibrary(teiidVersion, systemFunctionManager.getSystemFunctions(),
                                    functionTrees.values().toArray(new FunctionTree[0]));
     }
 

@@ -23,12 +23,12 @@ package org.komodo.spi.query.sql.symbol;
 
 import org.komodo.spi.query.sql.ILanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
-import org.komodo.spi.udf.IFunctionDescriptor;
+import org.komodo.spi.udf.FunctionDescriptor;
 
 /**
  *
  */
-public interface IFunction<F extends IFunctionDescriptor, LV extends ILanguageVisitor>
+public interface IFunction<F extends FunctionDescriptor, LV extends ILanguageVisitor>
     extends IExpression<LV> {
 
     /**

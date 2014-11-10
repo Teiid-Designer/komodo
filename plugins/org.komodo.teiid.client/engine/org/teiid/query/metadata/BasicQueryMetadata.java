@@ -33,7 +33,7 @@ import javax.script.ScriptEngine;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.xml.IMappingNode;
 import org.teiid.query.eval.TeiidScriptEngine;
 import org.teiid.query.mapping.relational.TCQueryNode;
@@ -542,7 +542,7 @@ public class BasicQueryMetadata implements QueryMetadataInterface {
 	}
 
 	@Override
-	public IFunctionLibrary getFunctionLibrary() {
+	public FunctionLibrary getFunctionLibrary() {
 		return null;
 	}
 	

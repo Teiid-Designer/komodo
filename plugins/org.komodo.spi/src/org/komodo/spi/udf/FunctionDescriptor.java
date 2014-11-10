@@ -25,7 +25,7 @@ package org.komodo.spi.udf;
 /**
  *
  */
-public interface IFunctionDescriptor {
+public interface FunctionDescriptor {
 
     /**
      * Get name of function descriptor

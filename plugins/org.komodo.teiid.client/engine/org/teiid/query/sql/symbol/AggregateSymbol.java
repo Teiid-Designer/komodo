@@ -25,7 +25,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.function.FunctionDescriptor;
+import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.Node;
 import org.teiid.query.sql.lang.OrderBy;
@@ -184,13 +184,13 @@ public interface AggregateSymbol extends Node, SingleElementSymbol, Expression, 
      * @return Descriptor or null if resolution has not yet occurred
      */
     @Since(Version.TEIID_8_0)
-    FunctionDescriptor getFunctionDescriptor();
+    TCFunctionDescriptor getFunctionDescriptor();
 
     /**
      * @param functionDescriptor
      */
     @Since(Version.TEIID_8_0)
-    void setFunctionDescriptor(FunctionDescriptor functionDescriptor);
+    void setFunctionDescriptor(TCFunctionDescriptor functionDescriptor);
 
     /**
      * Clone this aggregate symbol

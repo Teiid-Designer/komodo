@@ -8,7 +8,7 @@ import java.util.Map;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.function.FunctionDescriptor;
+import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.v7.Teiid7Parser;
 import org.teiid.query.sql.lang.OrderBy;
@@ -309,13 +309,13 @@ public class Aggregate7Symbol extends ExpressionSymbol implements AggregateSymbo
 
     @Override
     @Since(Version.TEIID_8_0)
-    public FunctionDescriptor getFunctionDescriptor() {
+    public TCFunctionDescriptor getFunctionDescriptor() {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @Since(Version.TEIID_8_0)
-    public void setFunctionDescriptor(FunctionDescriptor functionDescriptor) {
+    public void setFunctionDescriptor(TCFunctionDescriptor functionDescriptor) {
         throw new UnsupportedOperationException();
     }
 }

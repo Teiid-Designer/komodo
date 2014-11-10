@@ -49,8 +49,8 @@ import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.StringUtil;
 import org.teiid.metadata.ForeignKey;
-import org.teiid.query.function.FunctionDescriptor;
-import org.teiid.query.function.FunctionLibrary;
+import org.teiid.query.function.TCFunctionDescriptor;
+import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.metadata.GroupInfo;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
@@ -250,7 +250,7 @@ public class ResolverUtil {
         
         if(canImplicitlyConvert(sourceExpression.getTeiidVersion(), sourceTypeName, targetTypeName) 
                         || (sourceExpression instanceof Constant && convertConstant(sourceTypeName, targetTypeName, (Constant)sourceExpression) != null)) {
-            return getConversion(sourceExpression, sourceTypeName, targetTypeName, true, (FunctionLibrary) metadata.getFunctionLibrary());
+            return getConversion(sourceExpression, sourceTypeName, targetTypeName, true, (DefaultFunctionLibrary) metadata.getFunctionLibrary());
         }
 
         //Expression is wrong type and can't convert
@@ -304,11 +304,11 @@ public class ResolverUtil {
     public static Function getConversion(Expression sourceExpression,
                                             String sourceTypeName,
                                             String targetTypeName,
-                                            boolean implicit, FunctionLibrary library) {
+                                            boolean implicit, DefaultFunctionLibrary library) {
         DefaultDataTypeManager dataTypeManagerService = DefaultDataTypeManager.getInstance(sourceExpression.getTeiidVersion());
         Class<?> srcType = dataTypeManagerService.getDataTypeClass(sourceTypeName);
 
-        FunctionDescriptor fd = library.findTypedConversionFunction(srcType, dataTypeManagerService.getDataTypeClass(targetTypeName));
+        TCFunctionDescriptor fd = library.findTypedConversionFunction(srcType, dataTypeManagerService.getDataTypeClass(targetTypeName));
 
         Constant constant = sourceExpression.getTeiidParser().createASTNode(ASTNodes.CONSTANT);
         constant.setValue(targetTypeName);

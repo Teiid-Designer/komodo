@@ -65,7 +65,7 @@ import org.teiid.core.types.basic.NumberToShortTransform;
 import org.teiid.core.types.basic.ObjectToAnyTransform;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.core.util.PropertiesUtils;
-import org.teiid.query.function.FunctionLibrary;
+import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
@@ -88,7 +88,7 @@ public class DefaultDataTypeManager implements DataTypeManager {
      * The ordering of this list is important since it affects the iteration
      * of functionMethods when determining the most appropriate
      * typed function in
-     * {@link FunctionLibrary#determineNecessaryConversions(String, Class, org.teiid.query.sql.symbol.Expression[], Class[], boolean)}
+     * {@link DefaultFunctionLibrary#determineNecessaryConversions(String, Class, org.teiid.query.sql.symbol.Expression[], Class[], boolean)}
      * Since String and Object end up with the same score, its only because
      * String appears first in the list will it be chosen above Object.
      *

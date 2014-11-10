@@ -72,8 +72,8 @@ public class SystemFunctionManager {
     	return systemFunctionTree;
     }
     
-    public FunctionLibrary getSystemFunctionLibrary() {
-    	return new FunctionLibrary(getTeiidVersion(), getSystemFunctions());
+    public DefaultFunctionLibrary getSystemFunctionLibrary() {
+    	return new DefaultFunctionLibrary(getTeiidVersion(), getSystemFunctions());
     }
     
     public boolean isAllowEnvFunction() {

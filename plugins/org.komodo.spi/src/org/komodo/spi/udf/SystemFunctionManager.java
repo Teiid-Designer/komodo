@@ -21,47 +21,9 @@
  ************************************************************************************/
 package org.komodo.spi.udf;
 
-import java.util.List;
-
 /**
  *
  */
-public interface IFunctionForm {
-
-
-    /**
-     * Get the function name
-     * 
-     * @return name
-     */
-    String getName();
-    
-    /**
-     * Get the display name of the function
-     * 
-     * @return display name
-     */
-    String getDisplayString();
-
-    /**
-     * Get the function description
-     *  
-     * @return description
-     */
-    String getDescription();
-
-    /**
-     * Get the category this function belongs to
-     * 
-     * @return name of the owning category
-     */
-    String getCategory();
-
-    /**
-     * Get the arguments
-     * 
-     * @return list of the function's arguments
-     */
-    List<String> getArgNames();
-
+public interface SystemFunctionManager {
+    // No methods required
 }

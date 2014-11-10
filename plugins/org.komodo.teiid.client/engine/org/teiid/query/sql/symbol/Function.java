@@ -7,7 +7,7 @@ import java.util.Arrays;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.symbol.IFunction;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.function.FunctionDescriptor;
+import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidParser;
@@ -16,7 +16,7 @@ import org.teiid.query.sql.lang.SimpleNode;
 /**
  *
  */
-public class Function extends SimpleNode implements Expression, IFunction<FunctionDescriptor, LanguageVisitor> {
+public class Function extends SimpleNode implements Expression, IFunction<TCFunctionDescriptor, LanguageVisitor> {
 
     private Class<?> type;
 
@@ -26,7 +26,7 @@ public class Function extends SimpleNode implements Expression, IFunction<Functi
 
     private boolean implicit;
 
-    private FunctionDescriptor descriptor;
+    private TCFunctionDescriptor descriptor;
 
     @Since(Version.TEIID_8_5)
     private boolean eval = true;
@@ -125,7 +125,7 @@ public class Function extends SimpleNode implements Expression, IFunction<Functi
      * @return Descriptor or null if resolution has not yet occurred
      */
     @Override
-    public FunctionDescriptor getFunctionDescriptor() {
+    public TCFunctionDescriptor getFunctionDescriptor() {
         return this.descriptor;
     }
 
@@ -134,7 +134,7 @@ public class Function extends SimpleNode implements Expression, IFunction<Functi
      * @param fd Function descriptor
      */
     @Override
-    public void setFunctionDescriptor(FunctionDescriptor fd) {
+    public void setFunctionDescriptor(TCFunctionDescriptor fd) {
         this.descriptor = fd;
     }
 
@@ -144,7 +144,7 @@ public class Function extends SimpleNode implements Expression, IFunction<Functi
      * @param index Argument index to insert conversion function at
      * @param functionDescriptor Conversion function descriptor
      */
-    public void insertConversion(int index, FunctionDescriptor functionDescriptor) { 
+    public void insertConversion(int index, TCFunctionDescriptor functionDescriptor) { 
         // Get target type for conversion
         Class<?> t = functionDescriptor.getReturnType();
         String typeName = getTeiidParser().getDataTypeService().getDataTypeName(t);

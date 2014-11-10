@@ -48,7 +48,7 @@ import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.metadata.ColumnSet;
 import org.teiid.metadata.MetadataStore;
 import org.teiid.metadata.Procedure;
@@ -56,8 +56,8 @@ import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
 import org.teiid.metadata.Table.TriggerEvent;
-import org.teiid.query.function.FunctionDescriptor;
-import org.teiid.query.function.FunctionLibrary;
+import org.teiid.query.function.TCFunctionDescriptor;
+import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.function.FunctionTree;
 import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TempMetadataID;
@@ -1219,7 +1219,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Collection functions = FunctionCollectorVisitor.getFunctions(outerQuery, true);
         assertTrue(functions.size() == 1);
         Function function = (Function)functions.iterator().next();
-        assertTrue(function.getName().equals(IFunctionLibrary.FunctionName.CONVERT.text()));
+        assertTrue(function.getName().equals(FunctionLibrary.FunctionName.CONVERT.text()));
         Expression[] args = function.getArgs();
         assertSame(e2, args[0]);
         assertTrue(args[1] instanceof Constant);
@@ -1320,8 +1320,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
         String tgtTypeName = DefaultDataTypeManager.DefaultDataTypes.DATE.getId();
         Expression expression = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
 
-        FunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
-        FunctionDescriptor fd = library.findFunction(IFunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
+        DefaultFunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
+        TCFunctionDescriptor fd = library.findFunction(FunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
             DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()});
 
         Function conversion = getFactory().newFunction(fd.getName(),
@@ -1356,8 +1356,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
         String tgtTypeName = DefaultDataTypeManager.DefaultDataTypes.DATE.getId();
         Expression expression = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
 
-        FunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
-        FunctionDescriptor fd = library.findFunction(IFunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
+        DefaultFunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
+        TCFunctionDescriptor fd = library.findFunction(FunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
             DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()});
 
         Function conversion = getFactory().newFunction(fd.getName(),
@@ -1879,8 +1879,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
         //String sql = "select intkey from SmallA where user() = 'bqt2'";
 
         // Expected left expression
-        FunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
-        FunctionDescriptor fd = library.findFunction(IFunctionLibrary.FunctionName.USER, new Class[] {});
+        DefaultFunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
+        TCFunctionDescriptor fd = library.findFunction(FunctionLibrary.FunctionName.USER, new Class[] {});
         Function user = getFactory().newFunction(fd.getName(), new Expression[] {});
         user.setFunctionDescriptor(fd);
 

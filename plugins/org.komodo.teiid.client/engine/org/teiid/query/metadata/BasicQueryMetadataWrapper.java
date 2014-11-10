@@ -34,7 +34,7 @@ import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.metadata.QueryNode;
 import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.xml.IMappingNode;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -406,7 +406,7 @@ public class BasicQueryMetadataWrapper implements QueryMetadataInterface {
 	}
 
 	@Override
-	public IFunctionLibrary getFunctionLibrary() {
+	public FunctionLibrary getFunctionLibrary() {
 		return actualMetadata.getFunctionLibrary();
 	}
 	

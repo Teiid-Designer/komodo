@@ -25,10 +25,10 @@ package org.teiid.query.sql.visitor;
 import java.util.TreeSet;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.metadata.FunctionMethod.Determinism;
 import org.teiid.metadata.FunctionMethod.PushDown;
-import org.teiid.query.function.FunctionDescriptor;
+import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.ExistsCriteria;
@@ -74,11 +74,11 @@ public class EvaluatableVisitor extends LanguageVisitor {
 	private boolean hasCorrelatedReferences;
 
     public void visit(Function obj) {
-        FunctionDescriptor fd = obj.getFunctionDescriptor();
+        TCFunctionDescriptor fd = obj.getFunctionDescriptor();
         this.setDeterminismLevel(fd.getDeterministic());
         if (fd.getPushdown() == PushDown.MUST_PUSHDOWN || fd.getDeterministic() == Determinism.NONDETERMINISTIC) {
             evaluationNotPossible(EvaluationLevel.PUSH_DOWN);
-        } else if (IFunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(obj.getName())
+        } else if (FunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(obj.getName())
         		//TODO: if we had the context here we could plan better for non-prepared requests
         		|| fd.getDeterministic().compareTo(Determinism.COMMAND_DETERMINISTIC) <= 0) {
             evaluationNotPossible(EvaluationLevel.PROCESSING);

@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.komodo.spi.udf.IFunctionForm;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionForm;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.language.SQLConstants.Reserved;
 import org.teiid.metadata.FunctionMethod;
@@ -42,7 +42,7 @@ import org.teiid.metadata.FunctionParameter;
  * function name and the names of the arguments.
  */
 @Deprecated
-public class FunctionForm implements Serializable, Comparable<FunctionForm>, IFunctionForm {
+public class TCFunctionForm implements Serializable, Comparable<TCFunctionForm>, FunctionForm {
 	private static final long serialVersionUID = 2411783099304320334L;
 	
 	private String name;
@@ -59,7 +59,7 @@ public class FunctionForm implements Serializable, Comparable<FunctionForm>, IFu
      * many things, such as that function name, type, category are non-null.
      * @param method FunctionMethod to build form from
      */
-    public FunctionForm(FunctionMethod method) { 
+    public TCFunctionForm(FunctionMethod method) { 
         ArgCheck.isNotNull(method);
 
         // Get function stuff
@@ -174,11 +174,11 @@ public class FunctionForm implements Serializable, Comparable<FunctionForm>, IFu
     public String getDisplayString() { 
         StringBuffer str = new StringBuffer();
         
-        if(IFunctionLibrary.FunctionName.CAST.equalsIgnoreCase(name)) { 
+        if(FunctionLibrary.FunctionName.CAST.equalsIgnoreCase(name)) { 
 			str.append(name);
 			str.append("("); //$NON-NLS-1$
 			str.append(inputParamNames.get(0));
-			if(IFunctionLibrary.FunctionName.CONVERT.equalsIgnoreCase(name) || IFunctionLibrary.FunctionName.CAST.equalsIgnoreCase(name)) {
+			if(FunctionLibrary.FunctionName.CONVERT.equalsIgnoreCase(name) || FunctionLibrary.FunctionName.CAST.equalsIgnoreCase(name)) {
 				str.append(", "); //$NON-NLS-1$
 			} else {
 				str.append(" "); //$NON-NLS-1$
@@ -240,10 +240,10 @@ public class FunctionForm implements Serializable, Comparable<FunctionForm>, IFu
     public boolean equals(Object obj) { 
         if(obj == this) { 
             return true;
-        } else if(obj == null || !(obj instanceof FunctionForm)) { 
+        } else if(obj == null || !(obj instanceof TCFunctionForm)) { 
             return false;
         } else {
-            FunctionForm other = (FunctionForm) obj;
+            TCFunctionForm other = (TCFunctionForm) obj;
             return other.getName().equals(getName()) && 
                    other.getArgNames().equals(getArgNames());
         }
@@ -256,7 +256,7 @@ public class FunctionForm implements Serializable, Comparable<FunctionForm>, IFu
      * @return 1 if other > this, 0 if other == this, -1 if other < this
      */
     @Override
-    public int compareTo(FunctionForm other) {
+    public int compareTo(TCFunctionForm other) {
         int compare = this.getName().compareTo( other.getName() );
         if(compare != 0) { 
             return compare;

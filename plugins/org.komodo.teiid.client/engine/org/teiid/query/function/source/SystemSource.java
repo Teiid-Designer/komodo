@@ -33,7 +33,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.metadata.FunctionMethod;
@@ -771,7 +771,7 @@ public class SystemSource extends UDFSource implements FunctionCategoryConstants
 
 	private void addSpaceFunction() {
 		functions.add(
-			createSyntheticMethod(IFunctionLibrary.FunctionName.SPACE.text(), Messages.getString(Messages.SystemSource.Space_description), STRING, null, null, new FunctionParameter[] { //$NON-NLS-1$
+			createSyntheticMethod(FunctionLibrary.FunctionName.SPACE.text(), Messages.getString(Messages.SystemSource.Space_description), STRING, null, null, new FunctionParameter[] { //$NON-NLS-1$
 				new FunctionParameter("count", DefaultDataTypeManager.DefaultDataTypes.INTEGER, Messages.getString(Messages.SystemSource.Space_arg1))}, //$NON-NLS-1$ //$NON-NLS-2$ 
 				new FunctionParameter("result", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Space_result)) ) );                 //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -1004,7 +1004,7 @@ public class SystemSource extends UDFSource implements FunctionCategoryConstants
     
     private void addSessionIdFunction() {
         functions.add(
-            new FunctionMethod(IFunctionLibrary.FunctionName.SESSION_ID.text(), Messages.getString(Messages.SystemSource.session_id_description), MISCELLANEOUS, PushDown.CANNOT_PUSHDOWN, FUNCTION_CLASS, "session_id", null, //$NON-NLS-1$ //$NON-NLS-2$ 
+            new FunctionMethod(FunctionLibrary.FunctionName.SESSION_ID.text(), Messages.getString(Messages.SystemSource.session_id_description), MISCELLANEOUS, PushDown.CANNOT_PUSHDOWN, FUNCTION_CLASS, "session_id", null, //$NON-NLS-1$ //$NON-NLS-2$ 
                 new FunctionParameter("result", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.session_id_result)), true, Determinism.SESSION_DETERMINISTIC) );                     //$NON-NLS-1$ //$NON-NLS-2$
     }    
     
@@ -1058,12 +1058,12 @@ public class SystemSource extends UDFSource implements FunctionCategoryConstants
 					new FunctionParameter("format", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Formattimestamp_arg2)) }, //$NON-NLS-1$ //$NON-NLS-2$
 				new FunctionParameter("result", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Formattimestamp_result_description)) ) );       //$NON-NLS-1$ //$NON-NLS-2$
 		functions.add(
-				createSyntheticMethod(IFunctionLibrary.FunctionName.FORMATDATE.text(), Messages.getString(Messages.SystemSource.Formatdate_description),CONVERSION, null, null, new FunctionParameter[] {  //$NON-NLS-1$
+				createSyntheticMethod(FunctionLibrary.FunctionName.FORMATDATE.text(), Messages.getString(Messages.SystemSource.Formatdate_description),CONVERSION, null, null, new FunctionParameter[] {  //$NON-NLS-1$
 					new FunctionParameter("date", DefaultDataTypeManager.DefaultDataTypes.DATE, Messages.getString(Messages.SystemSource.Formatdate_arg1)), //$NON-NLS-1$ //$NON-NLS-2$
 					new FunctionParameter("format", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Formatdate_arg2)) }, //$NON-NLS-1$ //$NON-NLS-2$
 					new FunctionParameter("result", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Formatdate_result_description)) ) );       //$NON-NLS-1$ //$NON-NLS-2$
 		functions.add(
-				createSyntheticMethod(IFunctionLibrary.FunctionName.FORMATTIME.text(), Messages.getString(Messages.SystemSource.Formattime_description),CONVERSION, null, null, new FunctionParameter[] {  //$NON-NLS-1$
+				createSyntheticMethod(FunctionLibrary.FunctionName.FORMATTIME.text(), Messages.getString(Messages.SystemSource.Formattime_description),CONVERSION, null, null, new FunctionParameter[] {  //$NON-NLS-1$
 					new FunctionParameter("time", DefaultDataTypeManager.DefaultDataTypes.TIME, Messages.getString(Messages.SystemSource.Formattime_arg1)), //$NON-NLS-1$ //$NON-NLS-2$
 					new FunctionParameter("format", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Formattime_arg2)) }, //$NON-NLS-1$ //$NON-NLS-2$
 					new FunctionParameter("result", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Formattime_result_description)) ) );       //$NON-NLS-1$ //$NON-NLS-2$
@@ -1077,12 +1077,12 @@ public class SystemSource extends UDFSource implements FunctionCategoryConstants
 					new FunctionParameter("format", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Parsetimestamp_arg2)) }, //$NON-NLS-1$ //$NON-NLS-2$
 				new FunctionParameter("result", DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP, Messages.getString(Messages.SystemSource.Parsetimestamp_result_description)) ) );       //$NON-NLS-1$ //$NON-NLS-2$
 		functions.add(
-				createSyntheticMethod(IFunctionLibrary.FunctionName.PARSETIME.text(), Messages.getString(Messages.SystemSource.Parsetime_description),CONVERSION, null, null, new FunctionParameter[] {  //$NON-NLS-1$
+				createSyntheticMethod(FunctionLibrary.FunctionName.PARSETIME.text(), Messages.getString(Messages.SystemSource.Parsetime_description),CONVERSION, null, null, new FunctionParameter[] {  //$NON-NLS-1$
 					new FunctionParameter("time", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Parsetime_arg1)), //$NON-NLS-1$ //$NON-NLS-2$
 					new FunctionParameter("format", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Parsetime_arg2)) }, //$NON-NLS-1$ //$NON-NLS-2$
 					new FunctionParameter("result", DefaultDataTypeManager.DefaultDataTypes.TIME, Messages.getString(Messages.SystemSource.Parsetime_result_description)) ) );       //$NON-NLS-1$ //$NON-NLS-2$
 		functions.add(
-				createSyntheticMethod(IFunctionLibrary.FunctionName.PARSEDATE.text(), Messages.getString(Messages.SystemSource.Parsedate_description),CONVERSION, null, null, new FunctionParameter[] {  //$NON-NLS-1$
+				createSyntheticMethod(FunctionLibrary.FunctionName.PARSEDATE.text(), Messages.getString(Messages.SystemSource.Parsedate_description),CONVERSION, null, null, new FunctionParameter[] {  //$NON-NLS-1$
 					new FunctionParameter("date", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Parsedate_arg1)), //$NON-NLS-1$ //$NON-NLS-2$
 					new FunctionParameter("format", DefaultDataTypeManager.DefaultDataTypes.STRING, Messages.getString(Messages.SystemSource.Parsedate_arg2)) }, //$NON-NLS-1$ //$NON-NLS-2$
 					new FunctionParameter("result", DefaultDataTypeManager.DefaultDataTypes.DATE, Messages.getString(Messages.SystemSource.Parsedate_result_description)) ) );       //$NON-NLS-1$ //$NON-NLS-2$
@@ -1230,7 +1230,7 @@ public class SystemSource extends UDFSource implements FunctionCategoryConstants
     }
     
     private void addUnixTimeFunctions() {
-    	functions.add(new FunctionMethod(IFunctionLibrary.FunctionName.FROM_UNIXTIME.text(), Messages.getString(Messages.SystemSource.from_unixtime_description), DATETIME, PushDown.SYNTHETIC, null, null, //$NON-NLS-1$ 
+    	functions.add(new FunctionMethod(FunctionLibrary.FunctionName.FROM_UNIXTIME.text(), Messages.getString(Messages.SystemSource.from_unixtime_description), DATETIME, PushDown.SYNTHETIC, null, null, //$NON-NLS-1$ 
     			Arrays.asList(
     				new FunctionParameter("unix_timestamp", DefaultDataTypeManager.DefaultDataTypes.INTEGER, Messages.getString(Messages.SystemSource.from_unixtime_param1)) //$NON-NLS-1$ //$NON-NLS-2$
     			),
@@ -1239,7 +1239,7 @@ public class SystemSource extends UDFSource implements FunctionCategoryConstants
     
     private void addTypedNullIfFunction(String type) {
         functions.add(
-            new FunctionMethod(IFunctionLibrary.FunctionName.NULLIF.text(), Messages.getString(Messages.SystemSource.nullif_description), MISCELLANEOUS, PushDown.SYNTHETIC, null, null, //$NON-NLS-1$ 
+            new FunctionMethod(FunctionLibrary.FunctionName.NULLIF.text(), Messages.getString(Messages.SystemSource.nullif_description), MISCELLANEOUS, PushDown.SYNTHETIC, null, null, //$NON-NLS-1$ 
                 Arrays.asList( 
                     new FunctionParameter("op1", type, Messages.getString(Messages.SystemSource.nullif_param1)), //$NON-NLS-1$ //$NON-NLS-2$
                     new FunctionParameter("op2", type, Messages.getString(Messages.SystemSource.nullif_param1)) ), //$NON-NLS-1$ //$NON-NLS-2$
@@ -1248,7 +1248,7 @@ public class SystemSource extends UDFSource implements FunctionCategoryConstants
     
     private void addTypedCoalesceFunction(String type) {
         functions.add(
-            new FunctionMethod(IFunctionLibrary.FunctionName.COALESCE.text(), Messages.getString(Messages.SystemSource.coalesce_description), MISCELLANEOUS, PushDown.CAN_PUSHDOWN, FUNCTION_CLASS, "coalesce", //$NON-NLS-1$ //$NON-NLS-2$
+            new FunctionMethod(FunctionLibrary.FunctionName.COALESCE.text(), Messages.getString(Messages.SystemSource.coalesce_description), MISCELLANEOUS, PushDown.CAN_PUSHDOWN, FUNCTION_CLASS, "coalesce", //$NON-NLS-1$ //$NON-NLS-2$
                 Arrays.asList( 
                     new FunctionParameter("op1", type, Messages.getString(Messages.SystemSource.coalesce_param1)), //$NON-NLS-1$ //$NON-NLS-2$
                     new FunctionParameter("op2", type, Messages.getString(Messages.SystemSource.coalesce_param1)), //$NON-NLS-1$ //$NON-NLS-2$
