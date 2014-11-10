@@ -23,7 +23,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.Messages;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator.Operator;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 
@@ -36,7 +36,7 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * @param p teiid parser
      * @param id node type id
      */
-    public AbstractCompareCriteria(ITeiidParser p, int id) {
+    public AbstractCompareCriteria(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

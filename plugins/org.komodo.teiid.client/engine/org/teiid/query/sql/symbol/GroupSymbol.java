@@ -8,7 +8,7 @@ import org.komodo.spi.query.sql.symbol.ISymbol;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.runtime.client.Messages;
 
 /**
@@ -39,7 +39,7 @@ public class GroupSymbol extends Symbol implements IGroupSymbol<LanguageVisitor>
      * @param p
      * @param id
      */
-    public GroupSymbol(TeiidParser p, int id) {
+    public GroupSymbol(TeiidClientParser p, int id) {
         super(p, id);
     }
 

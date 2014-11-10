@@ -4,7 +4,7 @@ package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.ICommandStatement;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.SubqueryContainer;
 
@@ -23,7 +23,7 @@ public class CommandStatement extends Statement
      * @param p
      * @param id
      */
-    public CommandStatement(TeiidParser p, int id) {
+    public CommandStatement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

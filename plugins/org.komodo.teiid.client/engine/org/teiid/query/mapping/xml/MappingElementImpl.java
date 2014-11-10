@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.komodo.spi.xml.MappingElement;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 
 
@@ -44,16 +44,16 @@ public class MappingElementImpl extends MappingBaseNodeImpl
     
     Namespace namespace;
     
-    public MappingElementImpl(TeiidParser teiidParser, String name) {
+    public MappingElementImpl(TeiidClientParser teiidParser, String name) {
         this(teiidParser, name, MappingNodeConstants.NO_NAMESPACE);
     }
     
-    public MappingElementImpl(TeiidParser teiidParser, String name, String nameInSource) {
+    public MappingElementImpl(TeiidClientParser teiidParser, String name, String nameInSource) {
         this(teiidParser, name, MappingNodeConstants.NO_NAMESPACE);
         setNameInSource(nameInSource);
     }    
     
-    public MappingElementImpl(TeiidParser teiidParser, String name, Namespace namespace) {
+    public MappingElementImpl(TeiidClientParser teiidParser, String name, Namespace namespace) {
         super(teiidParser);
         setProperty(MappingNodeConstants.Properties.NAME, name);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.ELEMENT);

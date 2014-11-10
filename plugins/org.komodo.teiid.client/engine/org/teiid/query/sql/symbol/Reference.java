@@ -5,7 +5,7 @@ package org.teiid.query.sql.symbol;
 import org.komodo.spi.query.sql.symbol.IReference;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -40,7 +40,7 @@ public class Reference extends SimpleNode implements Expression, IReference<Lang
      * @param p
      * @param id
      */
-    public Reference(TeiidParser p, int id) {
+    public Reference(TeiidClientParser p, int id) {
         super(p, id);
     }
 

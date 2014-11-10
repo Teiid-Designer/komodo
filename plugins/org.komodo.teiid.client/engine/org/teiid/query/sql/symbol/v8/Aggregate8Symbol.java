@@ -9,7 +9,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.v8.Teiid8Parser;
+import org.teiid.query.parser.v8.Teiid8ClientParser;
 import org.teiid.query.sql.lang.OrderBy;
 import org.teiid.query.sql.symbol.AggregateSymbol;
 import org.teiid.query.sql.symbol.Expression;
@@ -89,7 +89,7 @@ public class Aggregate8Symbol extends Function implements AggregateSymbol {
      * @param p
      * @param id
      */
-    public Aggregate8Symbol(Teiid8Parser p, int id) {
+    public Aggregate8Symbol(Teiid8ClientParser p, int id) {
         super(p, id);
     }
 
@@ -301,7 +301,7 @@ public class Aggregate8Symbol extends Function implements AggregateSymbol {
 
     @Override
     public Aggregate8Symbol clone() {
-        Aggregate8Symbol clone = new Aggregate8Symbol((Teiid8Parser) this.parser, this.id);
+        Aggregate8Symbol clone = new Aggregate8Symbol((Teiid8ClientParser) this.parser, this.id);
 
         if(getAggregateFunction() != null)
             clone.setAggregateFunction(getAggregateFunction());

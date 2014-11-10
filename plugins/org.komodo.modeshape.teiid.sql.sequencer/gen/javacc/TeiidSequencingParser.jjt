@@ -40,7 +40,7 @@ options {
 	VISITOR = false;
 }
 
-PARSER_BEGIN(TeiidParser)
+PARSER_BEGIN(TeiidSequencingParser)
 
 /*
 * JBoss, Home of Professional Open Source.
@@ -80,7 +80,7 @@ import org.komodo.spi.query.sql.lang.IJoinType;
 import org.komodo.spi.query.sql.lang.ISetQuery;
 import org.komodo.modeshape.teiid.Messages;
 import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
-import org.komodo.modeshape.teiid.parser.AbstractTeiidParser;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.ParsedDataType;
 import org.komodo.modeshape.teiid.parser.ParseInfo;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory;
@@ -100,7 +100,7 @@ import org.komodo.utils.StringUtils;
  * regenerated from the .jj file and your changes will be lost!</p>
  */
 @SuppressWarnings({"nls", "unused", "javadoc"})
-public class TeiidParser extends AbstractTeiidParser {
+public class TeiidSequencingParser extends AbstractTeiidSeqParser {
 
 	private String getComment(Token t) {
 		Token optToken = t.specialToken;
@@ -282,7 +282,7 @@ public class TeiidParser extends AbstractTeiidParser {
 
 } // end class
 
-PARSER_END(TeiidParser)
+PARSER_END(TeiidSequencingParser)
 
 TOKEN_MGR_DECLS : 
 {

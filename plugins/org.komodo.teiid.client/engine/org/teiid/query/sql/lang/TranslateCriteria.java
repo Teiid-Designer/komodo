@@ -9,7 +9,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.proc.ITranslateCriteria;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
@@ -28,7 +28,7 @@ public class TranslateCriteria extends Criteria implements PredicateCriteria, IT
      * @param p
      * @param id
      */
-    public TranslateCriteria(TeiidParser p, int id) {
+    public TranslateCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

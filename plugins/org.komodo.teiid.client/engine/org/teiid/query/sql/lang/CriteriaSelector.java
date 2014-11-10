@@ -9,7 +9,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.proc.ICriteriaSelector;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 
 /**
@@ -28,7 +28,7 @@ public class CriteriaSelector extends SimpleNode implements CriteriaOperator, IC
      * @param p
      * @param id
      */
-    public CriteriaSelector(TeiidParser p, int id) {
+    public CriteriaSelector(TeiidClientParser p, int id) {
         super(p, id);
     }
 

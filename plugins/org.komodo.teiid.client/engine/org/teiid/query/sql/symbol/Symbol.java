@@ -26,7 +26,7 @@ import org.komodo.spi.query.sql.symbol.ISymbol;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.runtime.client.Messages;
 
@@ -84,7 +84,7 @@ public class Symbol extends SimpleNode implements ISymbol<LanguageVisitor> {
      * @param p
      * @param i
      */
-    public Symbol(TeiidParser p, int i) {
+    public Symbol(TeiidClientParser p, int i) {
         super(p, i);
     }
 

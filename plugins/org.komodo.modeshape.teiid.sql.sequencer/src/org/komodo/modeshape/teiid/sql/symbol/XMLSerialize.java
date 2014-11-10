@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
@@ -38,7 +38,7 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
      * @param p teiid parser
      * @param id node type id
      */
-    public XMLSerialize(ITeiidParser p, int id) {
+    public XMLSerialize(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

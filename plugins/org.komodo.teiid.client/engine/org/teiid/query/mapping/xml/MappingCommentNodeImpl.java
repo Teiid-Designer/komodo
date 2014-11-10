@@ -23,7 +23,7 @@
 package org.teiid.query.mapping.xml;
 
 import org.komodo.spi.xml.MappingCommentNode;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 
 
 /** 
@@ -31,7 +31,7 @@ import org.teiid.query.parser.TeiidParser;
  */
 public class MappingCommentNodeImpl extends MappingNodeImpl implements MappingCommentNode {
 
-    public MappingCommentNodeImpl(TeiidParser teiidParser, String comment) {
+    public MappingCommentNodeImpl(TeiidClientParser teiidParser, String comment) {
         super(teiidParser);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.COMMENT);
         if (comment != null) {

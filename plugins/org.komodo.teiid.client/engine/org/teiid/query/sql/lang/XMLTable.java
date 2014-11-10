@@ -10,7 +10,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.DerivedColumn;
 import org.teiid.query.sql.symbol.XMLNamespaces;
 import org.teiid.query.xquery.saxon.SaxonXQueryExpression;
@@ -36,7 +36,7 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
      * @param p
      * @param id
      */
-    public XMLTable(TeiidParser p, int id) {
+    public XMLTable(TeiidClientParser p, int id) {
         super(p, id);
     }
 

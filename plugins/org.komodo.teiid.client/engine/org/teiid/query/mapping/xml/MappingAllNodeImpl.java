@@ -23,7 +23,7 @@
 package org.teiid.query.mapping.xml;
 
 import org.komodo.spi.xml.MappingAllNode;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 
 
 /** 
@@ -31,7 +31,7 @@ import org.teiid.query.parser.TeiidParser;
  */
 public class MappingAllNodeImpl extends MappingBaseNodeImpl implements MappingAllNode<MappingNodeImpl> {
 
-    public MappingAllNodeImpl(TeiidParser teiidParser) {
+    public MappingAllNodeImpl(TeiidClientParser teiidParser) {
         super(teiidParser);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.ALL);
     }    

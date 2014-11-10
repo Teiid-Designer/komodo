@@ -7,7 +7,7 @@ import org.komodo.spi.query.sql.proc.IRaiseStatement;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -25,7 +25,7 @@ public class RaiseStatement extends Statement
      * @param p
      * @param id
      */
-    public RaiseStatement(TeiidParser p, int id) {
+    public RaiseStatement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

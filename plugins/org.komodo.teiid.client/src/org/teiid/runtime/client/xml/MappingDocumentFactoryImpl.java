@@ -43,26 +43,26 @@ import org.teiid.query.mapping.xml.MappingNodeConstants;
 import org.teiid.query.mapping.xml.MappingRecursiveElementImpl;
 import org.teiid.query.mapping.xml.MappingSequenceNodeImpl;
 import org.teiid.query.mapping.xml.Namespace;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
  */
 public class MappingDocumentFactoryImpl implements MappingDocumentFactory {
 
-    private final TeiidParser teiidParser;
+    private final TeiidClientParser teiidParser;
 
     /**
      * @param teiidParser
      */
-    public MappingDocumentFactoryImpl(TeiidParser teiidParser) {
+    public MappingDocumentFactoryImpl(TeiidClientParser teiidParser) {
         this.teiidParser = teiidParser;
     }
 
     /**
      * @return the queryFactory
      */
-    public TeiidParser getTeiidParser() {
+    public TeiidClientParser getTeiidParser() {
         return this.teiidParser;
     }
 

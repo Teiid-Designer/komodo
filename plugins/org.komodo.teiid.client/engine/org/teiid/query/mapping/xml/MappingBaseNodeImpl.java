@@ -30,7 +30,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.xml.MappingBaseNode;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.runtime.client.Messages;
 
 
@@ -44,7 +44,7 @@ public abstract class MappingBaseNodeImpl extends MappingNodeImpl implements Map
     // An ID on the recursive parent as to who the recursive child node is?  
     String recursionId;
     
-    protected MappingBaseNodeImpl(TeiidParser teiidParser) {
+    protected MappingBaseNodeImpl(TeiidClientParser teiidParser) {
         super(teiidParser);
     }
     

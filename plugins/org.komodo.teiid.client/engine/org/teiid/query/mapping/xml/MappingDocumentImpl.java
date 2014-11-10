@@ -31,7 +31,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.xml.MappingDocument;
 import org.teiid.core.util.ArgCheck;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.runtime.client.Messages;
 
 
@@ -46,11 +46,11 @@ public class MappingDocumentImpl extends MappingBaseNodeImpl implements MappingD
     String encoding;
     String name;
     
-    public MappingDocumentImpl(TeiidParser teiidParser, boolean formatted) {
+    public MappingDocumentImpl(TeiidClientParser teiidParser, boolean formatted) {
         this(teiidParser, MappingNodeConstants.Defaults.DEFAULT_DOCUMENT_ENCODING, formatted);
     }
             
-    public MappingDocumentImpl(TeiidParser teiidParser, String encoding, boolean formatted) {
+    public MappingDocumentImpl(TeiidClientParser teiidParser, String encoding, boolean formatted) {
         super(teiidParser);
         if (encoding == null) {
             encoding = MappingNodeConstants.Defaults.DEFAULT_DOCUMENT_ENCODING;

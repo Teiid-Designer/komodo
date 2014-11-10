@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.komodo.spi.xml.MappingChoiceNode;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.runtime.client.Messages;
 
 
@@ -40,11 +40,11 @@ import org.teiid.runtime.client.Messages;
 public class MappingChoiceNodeImpl extends MappingBaseNodeImpl
     implements MappingChoiceNode<MappingCriteriaNodeImpl, MappingNodeImpl> {
 
-    public MappingChoiceNodeImpl(TeiidParser teiidParser) {
+    public MappingChoiceNodeImpl(TeiidClientParser teiidParser) {
         this(teiidParser, false);
     }
     
-    public MappingChoiceNodeImpl(TeiidParser teiidParser, boolean exceptionOnDefault) {
+    public MappingChoiceNodeImpl(TeiidClientParser teiidParser, boolean exceptionOnDefault) {
         super(teiidParser);
         //setProperty(MappingNodeConstants.Properties.NAME, "{ChoiceNode}"); //$NON-NLS-1$
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.CHOICE);

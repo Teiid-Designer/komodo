@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IDelete;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
@@ -26,7 +26,7 @@ public class Delete extends ProcedureContainer
      * @param p
      * @param id
      */
-    public Delete(TeiidParser p, int id) {
+    public Delete(TeiidClientParser p, int id) {
         super(p, id);
     }
 

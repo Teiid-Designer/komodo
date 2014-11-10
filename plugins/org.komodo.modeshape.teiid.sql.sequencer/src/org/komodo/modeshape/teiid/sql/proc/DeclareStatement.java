@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.IDeclareStatement;
@@ -37,7 +37,7 @@ public class DeclareStatement extends AssignmentStatement implements IDeclareSta
      * @param p teiid parser
      * @param id node type id
      */
-    public DeclareStatement(ITeiidParser p, int id) {
+    public DeclareStatement(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

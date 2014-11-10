@@ -25,7 +25,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.Collection;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ISetCriteria;
 
@@ -38,7 +38,7 @@ public class SetCriteria extends AbstractSetCriteria implements ISetCriteria<Exp
      * @param p teiid parser
      * @param id node type id
      */
-    public SetCriteria(ITeiidParser p, int id) {
+    public SetCriteria(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

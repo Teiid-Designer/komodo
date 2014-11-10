@@ -299,7 +299,7 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
         return this.parser;
     }
 
-    protected TeiidParser getTeiidParser() {
+    protected TeiidClientParser getTeiidParser() {
         return parser.getTeiidParser();
     }
 

@@ -14,7 +14,7 @@ import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -50,7 +50,7 @@ public abstract class Command extends SimpleNode implements ICommand<Expression,
      * @param p
      * @param id
      */
-    public Command(TeiidParser p, int id) {
+    public Command(TeiidClientParser p, int id) {
         super(p, id);
     }
 

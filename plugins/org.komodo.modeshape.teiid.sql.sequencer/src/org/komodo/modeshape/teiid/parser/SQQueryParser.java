@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.komodo.modeshape.teiid.Messages;
 import org.komodo.modeshape.teiid.TeiidClientException;
-import org.komodo.modeshape.teiid.parser.AbstractTeiidParser.ParsingError;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidSeqParser.ParsingError;
 import org.komodo.modeshape.teiid.parser.completion.TeiidCompletionParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
@@ -39,8 +39,8 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.QueryParser;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  * <p>Converts a SQL-string to an object version of a query.  This
@@ -50,7 +50,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
  */
 public class SQQueryParser implements QueryParser, StringConstants {
 
-	private ITeiidParser teiidParser;
+	private TeiidSeqParser teiidParser;
 
     private final TeiidVersion teiidVersion;
     
@@ -64,16 +64,16 @@ public class SQQueryParser implements QueryParser, StringConstants {
 	    this.teiidParser = createTeiidParser(new StringReader("")); //$NON-NLS-1$
 	}
 
-	private ITeiidParser createTeiidParser(Reader sql) {
+	private TeiidSeqParser createTeiidParser(Reader sql) {
 	    if (sql == null)
 	        throw new IllegalArgumentException(Messages.gs(Messages.TEIID.TEIID30377));
 
 	    int major = Integer.parseInt(teiidVersion.getMajor());
 
-	    ITeiidParser teiidParser = null;
+	    TeiidSeqParser teiidParser = null;
 	    switch (major) {
 	        case 8:
-	            teiidParser = new TeiidParser(sql);
+	            teiidParser = new TeiidSequencingParser(sql);
 	            teiidParser.setVersion(teiidVersion);
 	            break;
 	        default:
@@ -86,19 +86,19 @@ public class SQQueryParser implements QueryParser, StringConstants {
     /**
      * @return the teiidParser
      */
-    public ITeiidParser getTeiidParser() {
+    public TeiidSeqParser getTeiidParser() {
         return this.teiidParser;
     }
 
     /**
      * @param sql text to pass to the parser
-     * @return the {@link ITeiidParser} initialised with the given sql
+     * @return the {@link TeiidSeqParser} initialised with the given sql
      */
-    public ITeiidParser getTeiidParser(String sql) {
+    public TeiidSeqParser getTeiidParser(String sql) {
         return getSqlParser(new StringReader(sql));
     }
 
-	private ITeiidParser getSqlParser(Reader sql) {
+	private TeiidSeqParser getSqlParser(Reader sql) {
 		if(teiidParser == null) {
 		    teiidParser = createTeiidParser(sql);
 		} else
@@ -179,7 +179,7 @@ public class SQQueryParser implements QueryParser, StringConstants {
         
     	Command result = null;
         try{
-            ITeiidParser teiidParser = getTeiidParser(sql);
+            TeiidSeqParser teiidParser = getTeiidParser(sql);
             if (designerCommands) {
                 result = teiidParser.designerCommand(parseInfo);
             } else {
@@ -194,7 +194,7 @@ public class SQQueryParser implements QueryParser, StringConstants {
 		return result;
 	}
 
-    private void analyzeErrors(ITeiidParser teiidParser) throws Exception {
+    private void analyzeErrors(TeiidSeqParser teiidParser) throws Exception {
         List<ParsingError> errors = teiidParser.getErrors();
         if (! errors.isEmpty()) {
             StringBuffer buf = new StringBuffer();
@@ -237,7 +237,7 @@ public class SQQueryParser implements QueryParser, StringConstants {
 
         Criteria result = null;
         try{
-            ITeiidParser teiidParser = getTeiidParser(sql);
+            TeiidSeqParser teiidParser = getTeiidParser(sql);
             result = teiidParser.criteria(dummyInfo);
             analyzeErrors(teiidParser);
         } catch(Exception e) {
@@ -265,7 +265,7 @@ public class SQQueryParser implements QueryParser, StringConstants {
 
         Expression result = null;
         try{
-            ITeiidParser teiidParser = getTeiidParser(sql);
+            TeiidSeqParser teiidParser = getTeiidParser(sql);
             result = teiidParser.expression(dummyInfo);
             analyzeErrors(teiidParser);
         } catch (Exception e) {
@@ -289,7 +289,7 @@ public class SQQueryParser implements QueryParser, StringConstants {
 
         Expression result = null;
         try {
-            ITeiidParser teiidParser = getTeiidParser(sql);
+            TeiidSeqParser teiidParser = getTeiidParser(sql);
             result = teiidParser.selectExpression(dummyInfo);
             analyzeErrors(teiidParser);
         } catch (Exception e) {

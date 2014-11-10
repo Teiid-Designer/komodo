@@ -11,7 +11,7 @@ import org.komodo.spi.query.sql.lang.IMatchCriteria;
 import org.teiid.core.util.LRUCache;
 import org.teiid.core.util.PropertiesUtils;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -44,7 +44,7 @@ public class MatchCriteria extends Criteria
      * @param p
      * @param id
      */
-    public MatchCriteria(TeiidParser p, int id) {
+    public MatchCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

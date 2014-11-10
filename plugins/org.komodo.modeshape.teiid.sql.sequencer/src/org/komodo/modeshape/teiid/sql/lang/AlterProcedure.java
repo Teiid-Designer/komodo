@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.proc.CreateProcedureCommand;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IAlterProcedure;
@@ -37,7 +37,7 @@ public class AlterProcedure extends Alter<CreateProcedureCommand> implements IAl
      * @param p teiid parser
      * @param id node type id
      */
-    public AlterProcedure(ITeiidParser p, int id) {
+    public AlterProcedure(TeiidSeqParser p, int id) {
         super(p, id);
         setType(TYPE_ALTER_PROC);
     }

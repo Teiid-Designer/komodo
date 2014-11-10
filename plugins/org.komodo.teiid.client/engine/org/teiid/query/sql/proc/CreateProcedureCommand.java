@@ -10,7 +10,7 @@ import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
@@ -40,7 +40,7 @@ public class CreateProcedureCommand extends Command
      * @param p
      * @param id
      */
-    public CreateProcedureCommand(TeiidParser p, int id) {
+    public CreateProcedureCommand(TeiidClientParser p, int id) {
         super(p, id);
     }
 

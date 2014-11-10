@@ -39,7 +39,7 @@ options {
     NODE_FACTORY = "TeiidNodeFactory";
 }
 
-PARSER_BEGIN(Teiid7Parser)
+PARSER_BEGIN(Teiid7ClientParser)
 
 /*
 * JBoss, Home of Professional Open Source.
@@ -76,7 +76,7 @@ import org.teiid.language.SortSpecification.NullOrdering;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.metadata.Table;
-import org.teiid.query.parser.AbstractTeiidParser;
+import org.teiid.query.parser.AbstractTeiidClientParser;
 import org.teiid.query.parser.ParsedDataType;
 import org.teiid.query.parser.ParseInfo;
 import org.teiid.query.parser.TeiidNodeFactory;
@@ -96,7 +96,7 @@ import org.teiid.core.util.StringUtil;
  * regenerated from the .jj file and your changes will be lost!</p>
  */
 @SuppressWarnings({"nls", "unused", "javadoc"})
-public class Teiid7Parser extends AbstractTeiidParser {
+public class Teiid7ClientParser extends AbstractTeiidClientParser {
 
     private String getComment(Token t) {
         Token optToken = t.specialToken;
@@ -214,7 +214,7 @@ public class Teiid7Parser extends AbstractTeiidParser {
 
 } // end class
 
-PARSER_END(Teiid7Parser)
+PARSER_END(Teiid7ClientParser)
 
 TOKEN_MGR_DECLS : 
 {

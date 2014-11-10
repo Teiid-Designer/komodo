@@ -4,7 +4,7 @@ package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.query.sql.symbol.IDerivedColumn;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -22,7 +22,7 @@ public class DerivedColumn extends SimpleNode implements IDerivedColumn<Language
      * @param p
      * @param id
      */
-    public DerivedColumn(TeiidParser p, int id) {
+    public DerivedColumn(TeiidClientParser p, int id) {
         super(p, id);
     }
 

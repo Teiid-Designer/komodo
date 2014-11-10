@@ -6,7 +6,7 @@ import net.sf.saxon.sxpath.XPathExpression;
 
 import org.komodo.spi.query.sql.lang.IXMLColumn;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -26,7 +26,7 @@ public class XMLColumn extends ProjectedColumn implements IXMLColumn<LanguageVis
      * @param p
      * @param id
      */
-    public XMLColumn(TeiidParser p, int id) {
+    public XMLColumn(TeiidClientParser p, int id) {
         super(p, id);
     }
 

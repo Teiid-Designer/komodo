@@ -23,7 +23,7 @@
 package org.teiid.query.mapping.xml;
 
 import org.komodo.spi.xml.MappingCriteriaNode;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Criteria;
 
 
@@ -36,14 +36,14 @@ public class MappingCriteriaNodeImpl extends MappingBaseNodeImpl implements Mapp
     boolean defalt;
     Criteria criteriaNode;
     
-    public MappingCriteriaNodeImpl(TeiidParser teiidParser, String criteria, boolean defalt) {
+    public MappingCriteriaNodeImpl(TeiidClientParser teiidParser, String criteria, boolean defalt) {
         super(teiidParser);
         setCriteria(criteria);
         setAsDefault(defalt);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.CRITERIA);
     }
          
-    public MappingCriteriaNodeImpl(TeiidParser teiidParser) {
+    public MappingCriteriaNodeImpl(TeiidClientParser teiidParser) {
         super(teiidParser);
         setAsDefault(true);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.CRITERIA);

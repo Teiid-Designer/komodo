@@ -8,7 +8,7 @@ import java.util.List;
 import org.komodo.spi.query.sql.lang.ISelect;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.ExpressionSymbol;
@@ -30,7 +30,7 @@ public class Select extends SimpleNode implements ISelect<Expression, LanguageVi
      * @param p
      * @param id
      */
-    public Select(TeiidParser p, int id) {
+    public Select(TeiidClientParser p, int id) {
         super(p, id);
     }
 

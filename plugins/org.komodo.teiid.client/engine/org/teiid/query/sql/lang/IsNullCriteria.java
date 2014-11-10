@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IIsNullCriteria;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -21,7 +21,7 @@ public class IsNullCriteria extends Criteria implements PredicateCriteria, IIsNu
      * @param p
      * @param id
      */
-    public IsNullCriteria(TeiidParser p, int id) {
+    public IsNullCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

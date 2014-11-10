@@ -39,7 +39,7 @@ options {
     NODE_DEFAULT_VOID = true;
 }
 
-PARSER_BEGIN(Teiid8Parser)
+PARSER_BEGIN(Teiid8ClientParser)
 
 /*
 * JBoss, Home of Professional Open Source.
@@ -84,7 +84,7 @@ import org.teiid.metadata.MetadataFactory;
 import org.teiid.metadata.Procedure;
 import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.Table;
-import org.teiid.query.parser.AbstractTeiidParser;
+import org.teiid.query.parser.AbstractTeiidClientParser;
 import org.teiid.query.parser.ParsedDataType;
 import org.teiid.query.parser.ParseInfo;
 import org.teiid.query.parser.TeiidNodeFactory;
@@ -105,7 +105,7 @@ import org.teiid.core.util.StringUtil;
  * regenerated from the .jj file and your changes will be lost!</p>
  */
 @SuppressWarnings({"nls", "unused", "javadoc"})
-public class Teiid8Parser extends AbstractTeiidParser {
+public class Teiid8ClientParser extends AbstractTeiidClientParser {
 
     private String getComment(Token t) {
         Token optToken = t.specialToken;
@@ -165,7 +165,7 @@ public class Teiid8Parser extends AbstractTeiidParser {
         return sourceHint;
     }
 
-    private SourceHint getSourceHint(Teiid8Parser parser) {
+    private SourceHint getSourceHint(Teiid8ClientParser parser) {
        int index = 1;
        //scan for the first keyword
        Token t = null;
@@ -237,7 +237,7 @@ public class Teiid8Parser extends AbstractTeiidParser {
 
 } // end class
 
-PARSER_END(Teiid8Parser)
+PARSER_END(Teiid8ClientParser)
 
 TOKEN_MGR_DECLS : 
 {

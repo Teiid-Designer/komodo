@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IProjectedColumn;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.symbol.ElementSymbol;
 
@@ -23,7 +23,7 @@ public class ProjectedColumn extends SimpleNode implements IProjectedColumn<Lang
      * @param p
      * @param id
      */
-    public ProjectedColumn(TeiidParser p, int id) {
+    public ProjectedColumn(TeiidClientParser p, int id) {
         super(p, id);
     }
 

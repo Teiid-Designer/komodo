@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IWindowSpecification;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.OrderBy;
 import org.teiid.query.sql.lang.SimpleNode;
 
@@ -23,7 +23,7 @@ public class WindowSpecification extends SimpleNode implements IWindowSpecificat
      * @param p
      * @param id
      */
-    public WindowSpecification(TeiidParser p, int id) {
+    public WindowSpecification(TeiidClientParser p, int id) {
         super(p, id);
     }
 

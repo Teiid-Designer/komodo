@@ -11,7 +11,7 @@ import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.ICriteria;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -23,7 +23,7 @@ public class Criteria extends SimpleNode implements Expression, ICriteria<Langua
      * @param p
      * @param id
      */
-    public Criteria(TeiidParser p, int id) {
+    public Criteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

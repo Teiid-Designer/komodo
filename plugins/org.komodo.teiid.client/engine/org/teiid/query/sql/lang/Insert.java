@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IInsert;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -37,7 +37,7 @@ public class Insert extends ProcedureContainer
      * @param p
      * @param id
      */
-    public Insert(TeiidParser p, int id) {
+    public Insert(TeiidClientParser p, int id) {
         super(p, id);
     }
 

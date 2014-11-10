@@ -25,7 +25,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.DerivedColumn;
 import org.komodo.modeshape.teiid.sql.symbol.XMLNamespaces;
 import org.komodo.spi.query.sql.lang.IXMLTable;
@@ -39,7 +39,7 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
      * @param p teiid parser
      * @param id node type id
      */
-    public XMLTable(ITeiidParser p, int id) {
+    public XMLTable(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

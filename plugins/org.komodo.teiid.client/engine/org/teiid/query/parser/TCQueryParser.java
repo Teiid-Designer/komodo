@@ -34,8 +34,8 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.MetadataFactory;
-import org.teiid.query.parser.v7.Teiid7Parser;
-import org.teiid.query.parser.v8.Teiid8Parser;
+import org.teiid.query.parser.v7.Teiid7ClientParser;
+import org.teiid.query.parser.v8.Teiid8ClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.symbol.Expression;
@@ -50,7 +50,7 @@ import org.teiid.runtime.client.TeiidClientException;
  */
 public class TCQueryParser implements QueryParser {
 
-	private TeiidParser teiidParser;
+	private TeiidClientParser teiidParser;
 
     private final TeiidVersion teiidVersion;
     
@@ -64,20 +64,20 @@ public class TCQueryParser implements QueryParser {
 	    this.teiidParser = createTeiidParser(new StringReader("")); //$NON-NLS-1$
 	}
 
-	private TeiidParser createTeiidParser(Reader sql) {
+	private TeiidClientParser createTeiidParser(Reader sql) {
 	    if (sql == null)
 	        throw new IllegalArgumentException(Messages.gs(Messages.TEIID.TEIID30377));
 
 	    int major = Integer.parseInt(teiidVersion.getMajor());
 
-	    TeiidParser teiidParser = null;
+	    TeiidClientParser teiidParser = null;
 	    switch (major) {
 	        case 7:
-	            teiidParser = new Teiid7Parser(sql);
+	            teiidParser = new Teiid7ClientParser(sql);
 	            teiidParser.setVersion(teiidVersion);
 	            break;
 	        case 8:
-	            teiidParser = new Teiid8Parser(sql);
+	            teiidParser = new Teiid8ClientParser(sql);
 	            teiidParser.setVersion(teiidVersion);
 	            break;
 	        default:
@@ -90,19 +90,19 @@ public class TCQueryParser implements QueryParser {
     /**
      * @return the teiidParser
      */
-    public TeiidParser getTeiidParser() {
+    public TeiidClientParser getTeiidParser() {
         return this.teiidParser;
     }
 
     /**
      * @param sql
-     * @return the {@link TeiidParser} initialised with the given sql
+     * @return the {@link TeiidClientParser} initialised with the given sql
      */
-    public TeiidParser getTeiidParser(String sql) {
+    public TeiidClientParser getTeiidParser(String sql) {
         return getSqlParser(new StringReader(sql));
     }
 
-	private TeiidParser getSqlParser(Reader sql) {
+	private TeiidClientParser getSqlParser(Reader sql) {
 		if(teiidParser == null) {
 		    teiidParser = createTeiidParser(sql);
 		} else
@@ -115,11 +115,11 @@ public class TCQueryParser implements QueryParser {
 	@Removed(Version.TEIID_8_0)
 	private Command parseUpdateProcedure(String sql) throws Exception {
         try{
-            TeiidParser teiidParser = getTeiidParser(sql);
-            if (!(teiidParser instanceof Teiid7Parser))
+            TeiidClientParser teiidParser = getTeiidParser(sql);
+            if (!(teiidParser instanceof Teiid7ClientParser))
                 throw new IllegalStateException();
 
-            Command result = ((Teiid7Parser) teiidParser).updateProcedure(new ParseInfo());
+            Command result = ((Teiid7ClientParser) teiidParser).updateProcedure(new ParseInfo());
             return result;
         } catch(Exception pe) {
             throw convertParserException(pe);

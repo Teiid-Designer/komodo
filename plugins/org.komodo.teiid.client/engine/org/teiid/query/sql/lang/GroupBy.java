@@ -9,7 +9,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IGroupBy;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -28,7 +28,7 @@ public class GroupBy extends SimpleNode implements IGroupBy<Expression, Language
      * @param p
      * @param id
      */
-    public GroupBy(TeiidParser p, int id) {
+    public GroupBy(TeiidClientParser p, int id) {
         super(p, id);
     }
 

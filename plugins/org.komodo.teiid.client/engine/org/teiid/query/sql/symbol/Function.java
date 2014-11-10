@@ -10,7 +10,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -35,7 +35,7 @@ public class Function extends SimpleNode implements Expression, IFunction<TCFunc
      * @param p
      * @param id
      */
-    public Function(TeiidParser p, int id) {
+    public Function(TeiidClientParser p, int id) {
         super(p, id);
     }
 

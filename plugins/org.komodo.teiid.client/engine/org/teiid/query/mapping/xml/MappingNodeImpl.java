@@ -34,7 +34,7 @@ import java.util.Map;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.xml.MappingNode;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.runtime.client.Messages;
 
@@ -60,19 +60,19 @@ public abstract class MappingNodeImpl implements Cloneable, Serializable, Mappin
     /**
      * Parser used for constructing ast nodes
      */
-    private final TeiidParser teiidParser;
+    private final TeiidClientParser teiidParser;
 
     /** 
      * @param teiidParser
      */
-    public MappingNodeImpl(TeiidParser teiidParser){
+    public MappingNodeImpl(TeiidClientParser teiidParser){
         this.teiidParser = teiidParser;
     }
 
     /**
      * @return the queryFactory
      */
-    protected TeiidParser getTeiidParser() {
+    protected TeiidClientParser getTeiidParser() {
         return this.teiidParser;
     }
 

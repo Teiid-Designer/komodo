@@ -23,7 +23,7 @@
 package org.teiid.query.mapping.xml;
 
 import org.komodo.spi.xml.MappingRecursiveElement;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Criteria;
 
 
@@ -37,13 +37,13 @@ public class MappingRecursiveElementImpl extends MappingElementImpl
     implements MappingRecursiveElement<MappingAttributeImpl, MappingNodeImpl> {
     Criteria criteriaNode;    
     
-    public MappingRecursiveElementImpl(TeiidParser teiidParser, String name, String mappingClass) {
+    public MappingRecursiveElementImpl(TeiidClientParser teiidParser, String name, String mappingClass) {
         super(teiidParser, name);
         setProperty(MappingNodeConstants.Properties.IS_RECURSIVE, Boolean.TRUE);
         setProperty(MappingNodeConstants.Properties.RECURSION_ROOT_MAPPING_CLASS, mappingClass);         
     }
     
-    public MappingRecursiveElementImpl(TeiidParser teiidParser, String name, Namespace namespace, String mappingClass) {
+    public MappingRecursiveElementImpl(TeiidClientParser teiidParser, String name, Namespace namespace, String mappingClass) {
         super(teiidParser, name, namespace);
         setProperty(MappingNodeConstants.Properties.IS_RECURSIVE, Boolean.TRUE);
         setProperty(MappingNodeConstants.Properties.RECURSION_ROOT_MAPPING_CLASS, mappingClass);         

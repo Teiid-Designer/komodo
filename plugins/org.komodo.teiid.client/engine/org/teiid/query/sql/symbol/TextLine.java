@@ -8,7 +8,7 @@ import org.komodo.spi.query.sql.symbol.ITextLine;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -34,7 +34,7 @@ public class TextLine extends SimpleNode implements Expression, ITextLine<Langua
      * @param p
      * @param id
      */
-    public TextLine(TeiidParser p, int id) {
+    public TextLine(TeiidClientParser p, int id) {
         super(p, id);
     }
 

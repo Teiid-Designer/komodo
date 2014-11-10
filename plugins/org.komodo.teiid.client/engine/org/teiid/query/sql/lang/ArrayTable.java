@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IArrayTable;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -23,7 +23,7 @@ public class ArrayTable extends TableFunctionReference implements IArrayTable<La
      * @param p
      * @param id
      */
-    public ArrayTable(TeiidParser p, int id) {
+    public ArrayTable(TeiidClientParser p, int id) {
         super(p, id);
     }
 

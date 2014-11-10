@@ -35,7 +35,7 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.runtime.client.Messages;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -62,19 +62,19 @@ public class MappingLoaderImpl {
     
     private HashMap unresolvedNamespaces = new HashMap();
 
-    private final TeiidParser teiidParser;
+    private final TeiidClientParser teiidParser;
     
     /**
      * @param teiidParser
      */
-    public MappingLoaderImpl(TeiidParser teiidParser) {
+    public MappingLoaderImpl(TeiidClientParser teiidParser) {
         this.teiidParser = teiidParser;
     }
 
     /**
      * @return the teiidParser
      */
-    public TeiidParser getTeiidParser() {
+    public TeiidClientParser getTeiidParser() {
         return this.teiidParser;
     }
 

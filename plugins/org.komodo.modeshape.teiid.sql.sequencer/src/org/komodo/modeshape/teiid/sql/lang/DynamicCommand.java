@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -42,7 +42,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
      * @param p teiid parser
      * @param id node type id
      */
-    public DynamicCommand(ITeiidParser p, int id) {
+    public DynamicCommand(TeiidSeqParser p, int id) {
         super(p, id);
         setType(TYPE_DYNAMIC);
     }

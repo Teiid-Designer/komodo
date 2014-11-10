@@ -7,7 +7,7 @@ import java.util.List;
 import org.komodo.spi.query.sql.symbol.IQueryString;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -23,7 +23,7 @@ public class QueryString extends SimpleNode implements Expression, IQueryString<
      * @param p
      * @param id
      */
-    public QueryString(TeiidParser p, int id) {
+    public QueryString(TeiidClientParser p, int id) {
         super(p, id);
     }
 

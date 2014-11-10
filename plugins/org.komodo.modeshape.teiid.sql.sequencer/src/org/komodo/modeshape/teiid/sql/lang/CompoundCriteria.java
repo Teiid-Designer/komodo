@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 
@@ -37,7 +37,7 @@ public class CompoundCriteria extends Criteria implements ICompoundCriteria<Crit
      * @param p teiid parser
      * @param id node type id
      */
-    public CompoundCriteria(ITeiidParser p, int id) {
+    public CompoundCriteria(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

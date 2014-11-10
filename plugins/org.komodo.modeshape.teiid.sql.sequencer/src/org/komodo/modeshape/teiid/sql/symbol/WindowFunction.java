@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IWindowFunction;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
@@ -38,7 +38,7 @@ public class WindowFunction extends ASTNode implements Expression, IWindowFuncti
      * @param p teiid parser
      * @param id node type id
      */
-    public WindowFunction(ITeiidParser p, int id) {
+    public WindowFunction(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

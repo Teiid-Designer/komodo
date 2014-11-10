@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.INotCriteria;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
@@ -18,7 +18,7 @@ public class NotCriteria extends Criteria implements INotCriteria<LanguageVisito
      * @param p
      * @param id
      */
-    public NotCriteria(TeiidParser p, int id) {
+    public NotCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

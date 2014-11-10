@@ -3,7 +3,7 @@
 package org.teiid.query.sql.symbol.v8;
 
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.v8.Teiid8Parser;
+import org.teiid.query.parser.v8.Teiid8ClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.query.sql.symbol.AggregateSymbol;
 import org.teiid.query.sql.symbol.WindowFunction;
@@ -22,7 +22,7 @@ public class Window8Function extends SimpleNode implements WindowFunction {
      * @param p
      * @param id
      */
-    public Window8Function(Teiid8Parser p, int id) {
+    public Window8Function(Teiid8ClientParser p, int id) {
         super(p, id);
     }
 
@@ -106,7 +106,7 @@ public class Window8Function extends SimpleNode implements WindowFunction {
 
     @Override
     public Window8Function clone() {
-        Window8Function clone = new Window8Function((Teiid8Parser) this.parser, this.id);
+        Window8Function clone = new Window8Function((Teiid8ClientParser) this.parser, this.id);
 
         if(getFunction() != null)
             clone.setFunction(getFunction().clone());

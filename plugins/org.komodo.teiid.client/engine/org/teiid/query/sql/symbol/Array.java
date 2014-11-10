@@ -26,7 +26,7 @@ import java.util.List;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -42,7 +42,7 @@ public class Array extends SimpleNode implements Expression {
      * @param p
      * @param id
      */
-    public Array(TeiidParser p, int id) {
+    public Array(TeiidClientParser p, int id) {
         super(p, id);
     }
 	

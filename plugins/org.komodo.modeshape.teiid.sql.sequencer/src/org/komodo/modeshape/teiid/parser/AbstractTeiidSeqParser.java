@@ -49,10 +49,10 @@ import org.komodo.utils.StringUtils;
 import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
 /**
- * Abstract implemention of {@link ITeiidParser}.
+ * Abstract implemention of {@link TeiidSeqParser}.
  * Generated parser implementations extend this class.
  */
-public abstract class AbstractTeiidParser implements ITeiidParser {
+public abstract class AbstractTeiidSeqParser implements TeiidSeqParser {
 
     /**
      * A model to encapsulate a parsing error. Used to hold errors, allowing

@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IJoinType;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
@@ -17,7 +17,7 @@ public class JoinType extends SimpleNode implements IJoinType<LanguageVisitor>{
      * @param p
      * @param id
      */
-    public JoinType(TeiidParser p, int id) {
+    public JoinType(TeiidClientParser p, int id) {
         super(p, id);
     }
 

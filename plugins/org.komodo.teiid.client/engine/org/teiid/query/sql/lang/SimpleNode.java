@@ -10,7 +10,7 @@ import java.util.List;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.visitor.SQLStringVisitor;
 
 /**
@@ -22,19 +22,19 @@ public class SimpleNode implements Node, LanguageObject {
     protected Node[] children;
     protected int id;
     protected Object value;
-    protected TeiidParser parser;
+    protected TeiidClientParser parser;
 
     /**
      * @param p
      * @param i
      */
-    public SimpleNode(TeiidParser p, int i) {
+    public SimpleNode(TeiidClientParser p, int i) {
         id = i;
         parser = p;
     }
 
     @Override
-    public TeiidParser getTeiidParser() {
+    public TeiidClientParser getTeiidParser() {
         return parser;
     }
 

@@ -7,7 +7,7 @@ import java.util.List;
 import org.komodo.spi.query.sql.symbol.IXMLElement;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -27,7 +27,7 @@ public class XMLElement extends SimpleNode implements Expression, IXMLElement<La
      * @param p
      * @param id
      */
-    public XMLElement(TeiidParser p, int id) {
+    public XMLElement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

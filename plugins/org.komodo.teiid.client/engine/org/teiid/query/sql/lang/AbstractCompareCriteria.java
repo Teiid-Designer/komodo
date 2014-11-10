@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.teiid.query.sql.lang;
 
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.runtime.client.Messages;
 
@@ -47,7 +47,7 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * @param p
      * @param id
      */
-    public AbstractCompareCriteria(TeiidParser p, int id) {
+    public AbstractCompareCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

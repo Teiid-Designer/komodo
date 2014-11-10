@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IAlterView;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -16,7 +16,7 @@ public class AlterView extends Alter<QueryCommand> implements IAlterView<Express
      * @param p
      * @param id
      */
-    public AlterView(TeiidParser p, int id) {
+    public AlterView(TeiidClientParser p, int id) {
         super(p, id);
     }
 

@@ -5,7 +5,7 @@ package org.teiid.query.sql.symbol;
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -31,7 +31,7 @@ public class XMLSerialize extends SimpleNode implements Expression, IXMLSerializ
      * @param p
      * @param id
      */
-    public XMLSerialize(TeiidParser p, int id) {
+    public XMLSerialize(TeiidClientParser p, int id) {
         super(p, id);
     }
 

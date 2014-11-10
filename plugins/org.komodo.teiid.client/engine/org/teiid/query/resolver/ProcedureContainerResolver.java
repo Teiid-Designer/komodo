@@ -44,7 +44,7 @@ import org.teiid.query.metadata.TempMetadataID.Type;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.ProcedureReservedWords;
@@ -120,7 +120,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
     protected abstract String getPlan(QueryMetadataInterface metadata,
                            GroupSymbol group) throws Exception;
         
-	private static void addChanging(TeiidParser parser, TempMetadataStore discoveredMetadata,
+	private static void addChanging(TeiidClientParser parser, TempMetadataStore discoveredMetadata,
 			GroupContext externalGroups, List<ElementSymbol> elements) {
 		List<ElementSymbol> changingElements = new ArrayList<ElementSymbol>(elements.size());
         for(int i=0; i<elements.size(); i++) {
@@ -221,11 +221,11 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
         }
     }
 
-    public static GroupSymbol addScalarGroup(TeiidParser teiidParser, String name, TempMetadataStore metadata, GroupContext externalGroups, List<? extends Expression> symbols) {
+    public static GroupSymbol addScalarGroup(TeiidClientParser teiidParser, String name, TempMetadataStore metadata, GroupContext externalGroups, List<? extends Expression> symbols) {
     	return addScalarGroup(teiidParser, name, metadata, externalGroups, symbols, true);
     }
     
-	public static GroupSymbol addScalarGroup(TeiidParser teiidParser, String name, TempMetadataStore metadata, GroupContext externalGroups, List<? extends Expression> symbols, boolean updatable) {
+	public static GroupSymbol addScalarGroup(TeiidClientParser teiidParser, String name, TempMetadataStore metadata, GroupContext externalGroups, List<? extends Expression> symbols, boolean updatable) {
 		boolean[] updateArray = new boolean[symbols.size()];
 		if (updatable) {
 			Arrays.fill(updateArray, true);
@@ -233,7 +233,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 		return addScalarGroup(teiidParser, name, metadata, externalGroups, symbols, updateArray);
 	}
 	
-	public static GroupSymbol addScalarGroup(TeiidParser teiidParser, String name, TempMetadataStore metadata, GroupContext externalGroups, List<? extends Expression> symbols, boolean[] updatable) {
+	public static GroupSymbol addScalarGroup(TeiidClientParser teiidParser, String name, TempMetadataStore metadata, GroupContext externalGroups, List<? extends Expression> symbols, boolean[] updatable) {
 	    GroupSymbol variables = teiidParser.createASTNode(ASTNodes.GROUP_SYMBOL);
 		variables.setName(name);
 	    externalGroups.addGroup(variables);
@@ -261,7 +261,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 	public static void findChildCommandMetadata(TCQueryResolver queryResolver, Command currentCommand,
 			GroupSymbol container, int type, QueryMetadataInterface metadata, boolean inferProcedureResultSetColumns)
 			throws Exception {
-	    TeiidParser parser = queryResolver.getQueryParser().getTeiidParser();
+	    TeiidClientParser parser = queryResolver.getQueryParser().getTeiidParser();
 		//find the childMetadata using a clean metadata store
 	    TempMetadataStore childMetadata = new TempMetadataStore();
 	    TempMetadataAdapter tma = new TempMetadataAdapter(metadata, childMetadata);
@@ -352,7 +352,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 	}
 
 	@Removed(Version.TEIID_8_0)
-    private static void createInputChangingMetadata(TeiidParser teiidParser, TempMetadataStore discoveredMetadata, QueryMetadataInterface metadata, GroupSymbol group, GroupContext externalGroups)
+    private static void createInputChangingMetadata(TeiidClientParser teiidParser, TempMetadataStore discoveredMetadata, QueryMetadataInterface metadata, GroupSymbol group, GroupContext externalGroups)
         throws Exception {
         //Look up elements for the virtual group
         List<ElementSymbol> elements = ResolverUtil.resolveElementsInGroup(group, metadata);

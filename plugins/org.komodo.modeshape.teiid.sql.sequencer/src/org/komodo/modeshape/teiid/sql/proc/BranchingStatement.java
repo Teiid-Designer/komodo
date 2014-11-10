@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.spi.query.sql.proc.IBranchingStatement;
 
 /**
@@ -67,7 +67,7 @@ public class BranchingStatement extends Statement implements IBranchingStatement
         }
     }
 
-    public BranchingStatement(ITeiidParser p, int id) {
+    public BranchingStatement(TeiidSeqParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_BREAK);
     }

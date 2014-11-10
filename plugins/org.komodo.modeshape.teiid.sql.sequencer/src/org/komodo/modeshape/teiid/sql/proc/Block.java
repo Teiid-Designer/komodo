@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.proc;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Labeled;
@@ -43,7 +43,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
      * @param p teiid parser
      * @param id node type id
      */
-    public Block(ITeiidParser p, int id) {
+    public Block(TeiidSeqParser p, int id) {
         super(p, id);
         setType(StatementType.TYPE_COMPOUND);
     }

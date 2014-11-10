@@ -23,7 +23,7 @@
 package org.teiid.query.mapping.xml;
 
 import org.komodo.spi.xml.MappingSequenceNode;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 
 
 /** 
@@ -31,7 +31,7 @@ import org.teiid.query.parser.TeiidParser;
  */
 public class MappingSequenceNodeImpl extends MappingBaseNodeImpl implements MappingSequenceNode<MappingNodeImpl> {
     
-    public MappingSequenceNodeImpl(TeiidParser teiidParser) {
+    public MappingSequenceNodeImpl(TeiidClientParser teiidParser) {
         super(teiidParser);
         //setProperty(MappingNodeConstants.Properties.NAME, "{SequenceNode}"); //$NON-NLS-1$
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.SEQUENCE);

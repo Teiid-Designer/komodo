@@ -5,7 +5,7 @@ package org.teiid.query.sql.symbol;
 import org.komodo.spi.query.sql.symbol.IAliasSymbol;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SingleElementSymbol;
 import org.teiid.runtime.client.Messages;
 
@@ -26,7 +26,7 @@ public class AliasSymbol extends Symbol
      * @param p
      * @param id
      */
-    public AliasSymbol(TeiidParser p, int id) {
+    public AliasSymbol(TeiidClientParser p, int id) {
         super(p, id);
     }
 

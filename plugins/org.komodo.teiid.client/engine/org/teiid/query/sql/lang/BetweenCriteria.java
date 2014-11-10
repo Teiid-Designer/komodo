@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IBetweenCriteria;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -25,7 +25,7 @@ public class BetweenCriteria extends Criteria implements PredicateCriteria, IBet
      * @param p
      * @param id
      */
-    public BetweenCriteria(TeiidParser p, int id) {
+    public BetweenCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

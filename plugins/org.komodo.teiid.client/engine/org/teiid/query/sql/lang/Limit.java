@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.ILimit;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -29,7 +29,7 @@ public class Limit extends SimpleNode implements ILimit<LanguageVisitor> {
      * @param p
      * @param id
      */
-    public Limit(TeiidParser p, int id) {
+    public Limit(TeiidClientParser p, int id) {
         super(p, id);
     }
 

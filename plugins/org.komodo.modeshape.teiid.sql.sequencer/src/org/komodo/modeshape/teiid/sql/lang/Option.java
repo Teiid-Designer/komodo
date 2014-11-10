@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.query.sql.lang.IOption;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
@@ -41,7 +41,7 @@ public class Option extends ASTNode implements IOption<LanguageVisitor>, TeiidSQ
      * @param p teiid parser
      * @param id node type id
      */
-    public Option(ITeiidParser p, int id) {
+    public Option(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

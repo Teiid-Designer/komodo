@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.spi.query.sql.lang.ISourceHint;
 
 /**
@@ -36,7 +36,7 @@ public class SourceHint extends ASTNode implements ISourceHint {
      * @param p teiid parser
      * @param id node type id
      */
-    public SourceHint(ITeiidParser p, int id) {
+    public SourceHint(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

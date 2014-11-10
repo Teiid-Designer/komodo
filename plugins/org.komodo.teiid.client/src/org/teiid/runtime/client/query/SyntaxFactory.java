@@ -80,7 +80,7 @@ import org.teiid.query.metadata.TCStoredProcedureInfo;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.TeiidNodeFactory;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.BetweenCriteria;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.CompareCriteria;
@@ -150,14 +150,14 @@ public class SyntaxFactory implements QueryFactory <Expression,
                                                                                                  GroupSymbol,
                                                                                                  JoinType> {
 
-    private TeiidParser teiidParser;
+    private TeiidClientParser teiidParser;
 
     private final TeiidNodeFactory nodeFactory = TeiidNodeFactory.getInstance();
 
     /**
      * @param teiidParser
      */
-    public SyntaxFactory(TeiidParser teiidParser) {
+    public SyntaxFactory(TeiidClientParser teiidParser) {
         this.teiidParser = teiidParser;
     }
 

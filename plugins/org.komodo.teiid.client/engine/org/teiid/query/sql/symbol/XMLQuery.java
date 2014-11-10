@@ -8,7 +8,7 @@ import java.util.List;
 import org.komodo.spi.query.sql.symbol.IXMLQuery;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.query.xquery.saxon.SaxonXQueryExpression;
 
@@ -31,7 +31,7 @@ public class XMLQuery extends SimpleNode implements Expression, IXMLQuery<Langua
      * @param p
      * @param id
      */
-    public XMLQuery(TeiidParser p, int id) {
+    public XMLQuery(TeiidClientParser p, int id) {
         super(p, id);
     }
 

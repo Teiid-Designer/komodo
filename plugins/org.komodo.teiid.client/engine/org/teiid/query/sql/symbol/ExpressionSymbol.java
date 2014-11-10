@@ -4,7 +4,7 @@ package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.query.sql.symbol.IExpressionSymbol;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SingleElementSymbol;
 
 /**
@@ -20,7 +20,7 @@ public class ExpressionSymbol extends Symbol
      * @param p
      * @param id
      */
-    public ExpressionSymbol(TeiidParser p, int id) {
+    public ExpressionSymbol(TeiidClientParser p, int id) {
         super(p, id);
     }
 

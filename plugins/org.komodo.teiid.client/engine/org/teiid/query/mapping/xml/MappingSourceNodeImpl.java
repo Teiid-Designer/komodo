@@ -28,7 +28,7 @@ import java.util.Map;
 import org.komodo.spi.query.QueryFactory;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
@@ -42,11 +42,11 @@ public class MappingSourceNodeImpl extends MappingBaseNodeImpl {
     private transient ResultSetInfo resultSetInfo;
     private Map symbolMap = new HashMap();
     
-    protected MappingSourceNodeImpl(TeiidParser teiidParser) {
+    protected MappingSourceNodeImpl(TeiidClientParser teiidParser) {
         super(teiidParser);
     }
     
-    public MappingSourceNodeImpl(TeiidParser teiidParser, String source) {
+    public MappingSourceNodeImpl(TeiidClientParser teiidParser, String source) {
         this(teiidParser);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.SOURCE);
         setSource(source);

@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import org.komodo.spi.query.sql.lang.IUnaryFromClause;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
 /**
@@ -22,7 +22,7 @@ public class UnaryFromClause extends FromClause implements IUnaryFromClause<Grou
      * @param p
      * @param id
      */
-    public UnaryFromClause(TeiidParser p, int id) {
+    public UnaryFromClause(TeiidClientParser p, int id) {
         super(p, id);
     }
 

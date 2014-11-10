@@ -4,7 +4,7 @@ package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IDeclareStatement;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -19,7 +19,7 @@ public class DeclareStatement extends AssignmentStatement implements IDeclareSta
      * @param p
      * @param id
      */
-    public DeclareStatement(TeiidParser p, int id) {
+    public DeclareStatement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

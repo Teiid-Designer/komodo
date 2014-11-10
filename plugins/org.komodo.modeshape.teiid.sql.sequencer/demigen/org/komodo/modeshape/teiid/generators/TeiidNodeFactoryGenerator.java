@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.komodo.modeshape.teiid.Messages;
-import org.komodo.modeshape.teiid.parser.AbstractTeiidParser;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidSeqParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.proc.Block;
 import org.komodo.modeshape.teiid.sql.symbol.Symbol;
@@ -56,10 +56,10 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
     private static final String PREFIX = "JJT"; //$NON-NLS-1$
     private static final String NON_NLS = "//$NON-NLS-1$"; //$NON-NLS-1$
     private static final String PACKAGE_NAME = "org.komodo.modeshape.teiid.sql.lang"; //$NON-NLS-1$
-    private static final String CONSTANT_CLASS_PREFIX = "Teiid"; //$NON-NLS-1$
-    private static final String CONSTANT_CLASS_POSTFIX = "ParserTreeConstants"; //$NON-NLS-1$
+    private static final String TEIID_CONSTANT_CLASS = "TeiidSequencingParserTreeConstants"; //$NON-NLS-1$
     private static final String NODENAME_FIELD = "jjtNodeName"; //$NON-NLS-1$
     private static final String VOID = "VOID"; //$NON-NLS-1$
+    private static final String TEIID_PARSER_CLASS = TeiidSeqParser.class.getSimpleName();
     
     /* Methods that should be excluded from creation */
     private static final String[] COMPONENT_METHOD_EXCLUSIONS = { };
@@ -98,7 +98,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         StringBuffer buf = new StringBuffer();
         String imp = "import";
 
-        Class<?>[] klazzes = { ITeiidParser.class,
+        Class<?>[] klazzes = { TeiidSeqParser.class,
                                              Messages.class
         };
 
@@ -156,7 +156,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
              .append(TAB + " *" + NEW_LINE)
              .append(TAB + " * @generated" + NEW_LINE)
              .append(TAB + " */" + NEW_LINE)
-             .append(TAB + "public static LanguageObject jjtCreate(ITeiidParser teiidParser, int nodeType) " + OPEN_BRACE + NEW_LINE)
+             .append(TAB + "public static LanguageObject jjtCreate(" + TEIID_PARSER_CLASS + " teiidParser, int nodeType) " + OPEN_BRACE + NEW_LINE)
              .append(TAB + TAB + "return getInstance().create(teiidParser, nodeType);" + NEW_LINE)
              .append(TAB + CLOSE_BRACE + NEW_LINE + NEW_LINE);
 
@@ -171,10 +171,10 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
             .append(TAB + " *" + NEW_LINE)
             .append(TAB + " * @generated" + NEW_LINE)
             .append(TAB + " */" + NEW_LINE)
-            .append(TAB + "public <T extends LanguageObject> T create(ITeiidParser teiidParser, ASTNodes nodeType) " + OPEN_BRACE + NEW_LINE)
+            .append(TAB + "public <T extends LanguageObject> T create(" + TEIID_PARSER_CLASS + " teiidParser, ASTNodes nodeType) " + OPEN_BRACE + NEW_LINE)
             .append(NEW_LINE)
-            .append(TAB + TAB + "for (int i = 0; i < TeiidParserTreeConstants.jjtNodeName.length; ++i) " + OPEN_BRACE + NEW_LINE)
-            .append(TAB + TAB + TAB + "String constantName = TeiidParserTreeConstants.jjtNodeName[i];" + NEW_LINE)
+            .append(TAB + TAB + "for (int i = 0; i < " + TEIID_CONSTANT_CLASS + ".jjtNodeName.length; ++i) " + OPEN_BRACE + NEW_LINE)
+            .append(TAB + TAB + TAB + "String constantName = " + TEIID_CONSTANT_CLASS + ".jjtNodeName[i];" + NEW_LINE)
             .append(TAB + TAB + TAB + TAB + "if (! constantName.equalsIgnoreCase(nodeType.getName()))" + NEW_LINE)
             .append(TAB + TAB + TAB + TAB + TAB +"continue;" + NEW_LINE)
             .append(NEW_LINE)
@@ -284,7 +284,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         buffer.append(TAB + " * @param nodeType" + NEW_LINE); //$NON-NLS-1$
         buffer.append(TAB + " * @return teiid parser node" + NEW_LINE); //$NON-NLS-1$ 
         buffer.append(TAB + " */" + NEW_LINE); //$NON-NLS-1$
-        buffer.append(TAB + "protected <T extends LanguageObject> T create(ITeiidParser teiidParser, int nodeType) {" + NEW_LINE); //$NON-NLS-1$ 
+        buffer.append(TAB + "protected <T extends LanguageObject> T create(" + TEIID_PARSER_CLASS + " teiidParser, int nodeType) {" + NEW_LINE); //$NON-NLS-1$ 
 
         return buffer.toString();
     }
@@ -307,7 +307,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         buffer.append(TAB + " * @param nodeType" + NEW_LINE); //$NON-NLS-1$
         buffer.append(TAB + " * @return" + NEW_LINE); //$NON-NLS-1$
         buffer.append(TAB + " */" + NEW_LINE); //$NON-NLS-1$
-        buffer.append(TAB + "private " + typeName + " create" + typeName + "(ITeiidParser teiidParser, int nodeType) {" + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        buffer.append(TAB + "private " + typeName + " create" + typeName + "(" + TEIID_PARSER_CLASS + " teiidParser, int nodeType) {" + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         buffer.append(TAB + TAB + "return new " + typeName + "(teiidParser, nodeType)" + SEMI_COLON + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$
         buffer.append(TAB + CLOSE_BRACE + NEW_LINE + NEW_LINE); 
 
@@ -323,7 +323,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
 
             astNodesEnum.add(createASTNodesEnumDeclaration());
 
-            String constantClassName = CONSTANT_CLASS_PREFIX + CONSTANT_CLASS_POSTFIX;
+            String constantClassName = TEIID_CONSTANT_CLASS;
             Class<?> constantClass = Class.forName(PACKAGE_NAME + DOT + constantClassName);
 
             /* Index node names against their camelcase equivalents */
@@ -380,7 +380,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
             write(LICENSE);
 
             // Write package
-            Package p = AbstractTeiidParser.class.getPackage();
+            Package p = AbstractTeiidSeqParser.class.getPackage();
             write("package " + p.getName() + SEMI_COLON + NEW_LINE + NEW_LINE);
 
             // Write imports

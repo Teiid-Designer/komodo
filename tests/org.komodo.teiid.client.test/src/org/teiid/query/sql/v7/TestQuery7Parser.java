@@ -22,16 +22,14 @@
 package org.teiid.query.sql.v7;
 
 import static org.junit.Assert.assertEquals;
-
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.junit.Test;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.v7.Teiid7Parser;
+import org.teiid.query.parser.v7.Teiid7ClientParser;
 import org.teiid.query.sql.AbstractTestQueryParser;
 import org.teiid.query.sql.lang.CompareCriteria;
 import org.teiid.query.sql.lang.Criteria;
@@ -84,7 +82,7 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     private void helpCriteriaSelectorTest(String selector, String expectedString, CriteriaSelector expectedSelector)
         throws Exception {
         // Don't use query parser as criteriaSelector is not part of the interface
-        Teiid7Parser teiid7Parser = new Teiid7Parser(new StringReader(selector));
+        Teiid7ClientParser teiid7Parser = new Teiid7ClientParser(new StringReader(selector));
         CriteriaSelector actualSelector = teiid7Parser.criteriaSelector();
         assertEquals("CriteriaSelector does not match: ", expectedSelector, actualSelector);
     }

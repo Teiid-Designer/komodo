@@ -4,7 +4,7 @@ package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.ILoopStatement;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Labeled;
 import org.teiid.query.sql.lang.Query;
@@ -28,7 +28,7 @@ public class LoopStatement extends Statement
      * @param p
      * @param id
      */
-    public LoopStatement(TeiidParser p, int id) {
+    public LoopStatement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

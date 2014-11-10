@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IDrop;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
@@ -23,7 +23,7 @@ public class Drop extends Command
      * @param p
      * @param id
      */
-    public Drop(TeiidParser p, int id) {
+    public Drop(TeiidClientParser p, int id) {
         super(p, id);
     }
 

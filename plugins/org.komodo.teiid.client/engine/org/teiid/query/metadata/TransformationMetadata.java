@@ -79,7 +79,7 @@ import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.mapping.xml.MappingDocumentImpl;
 import org.teiid.query.mapping.xml.MappingLoaderImpl;
 import org.teiid.query.mapping.xml.MappingNodeImpl;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.ObjectTable;
 import org.teiid.query.sql.lang.SPParameter;
 import org.teiid.runtime.client.Messages;
@@ -153,7 +153,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
     public static Properties EMPTY_PROPS = new Properties();
 
-    private final TeiidParser teiidParser;
+    private final TeiidClientParser teiidParser;
     private final CompositeMetadataStore store;
     private DefaultDataTypeManager dataTypeManager;
     private Map<String, VDBResources.Resource> vdbEntries;
@@ -184,7 +184,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
      * @param systemFunctions 
      * @param functionTrees
      */
-    public TransformationMetadata(TeiidParser teiidParser, VDBMetaData vdbMetadata, final CompositeMetadataStore store, Map<String, VDBResources.Resource> vdbEntries, FunctionTree systemFunctions, Collection<FunctionTree> functionTrees) {
+    public TransformationMetadata(TeiidClientParser teiidParser, VDBMetaData vdbMetadata, final CompositeMetadataStore store, Map<String, VDBResources.Resource> vdbEntries, FunctionTree systemFunctions, Collection<FunctionTree> functionTrees) {
         super(teiidParser.getVersion());
     	ArgCheck.isNotNull(store);
     	this.teiidParser = teiidParser;
@@ -217,7 +217,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         }
     }
 
-    private TransformationMetadata(TeiidParser teiidParser, final CompositeMetadataStore store, DefaultFunctionLibrary functionLibrary) {
+    private TransformationMetadata(TeiidClientParser teiidParser, final CompositeMetadataStore store, DefaultFunctionLibrary functionLibrary) {
         super(teiidParser.getVersion());
         this.teiidParser = teiidParser;
         this.store = store;
@@ -225,7 +225,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         this.functionLibrary = functionLibrary;
     }
 
-    public TeiidParser getTeiidParser() {
+    public TeiidClientParser getTeiidParser() {
         return teiidParser;
     }
 

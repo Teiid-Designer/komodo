@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.ISearchedCaseExpression;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.runtime.client.Messages;
@@ -35,7 +35,7 @@ public class SearchedCaseExpression extends SimpleNode
      * @param p
      * @param id
      */
-    public SearchedCaseExpression(TeiidParser p, int id) {
+    public SearchedCaseExpression(TeiidClientParser p, int id) {
         super(p, id);
     }
 

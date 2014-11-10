@@ -6,7 +6,7 @@ import org.komodo.spi.query.sql.symbol.IElementSymbol;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SingleElementSymbol;
 
 /**
@@ -31,7 +31,7 @@ public class ElementSymbol extends Symbol implements SingleElementSymbol, Expres
      * @param p
      * @param id
      */
-    public ElementSymbol(TeiidParser p, int id) {
+    public ElementSymbol(TeiidClientParser p, int id) {
         super(p, id);
     }
 

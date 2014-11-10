@@ -26,7 +26,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.xml.MappingAttribute;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 
 
@@ -40,16 +40,16 @@ public class MappingAttributeImpl extends MappingNodeImpl implements MappingAttr
     // namespace of the attribute
     Namespace namespace;
     
-    public MappingAttributeImpl(TeiidParser teiidParser, String name) {
+    public MappingAttributeImpl(TeiidClientParser teiidParser, String name) {
         this(teiidParser, name, MappingNodeConstants.NO_NAMESPACE);
     }
     
-    public MappingAttributeImpl(TeiidParser teiidParser, String name, String nameInSource) {
+    public MappingAttributeImpl(TeiidClientParser teiidParser, String name, String nameInSource) {
         this(teiidParser, name, MappingNodeConstants.NO_NAMESPACE);
         setNameInSource(nameInSource);
     }    
         
-    public MappingAttributeImpl(TeiidParser teiidParser, String name, Namespace namespace) {
+    public MappingAttributeImpl(TeiidClientParser teiidParser, String name, Namespace namespace) {
         super(teiidParser);
         setProperty(MappingNodeConstants.Properties.NAME, name);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.ATTRIBUTE);

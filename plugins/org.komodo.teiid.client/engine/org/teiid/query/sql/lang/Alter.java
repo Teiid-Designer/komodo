@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IAlter;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
@@ -24,7 +24,7 @@ public abstract class Alter<T extends Command> extends Command implements IAlter
      * @param p
      * @param id
      */
-    public Alter(TeiidParser p, int id) {
+    public Alter(TeiidClientParser p, int id) {
         super(p, id);
     }
 

@@ -4,7 +4,7 @@ package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IStatement;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -92,7 +92,7 @@ public abstract class Statement extends SimpleNode implements IStatement<Languag
      * @param p
      * @param id
      */
-    public Statement(TeiidParser p, int id) {
+    public Statement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

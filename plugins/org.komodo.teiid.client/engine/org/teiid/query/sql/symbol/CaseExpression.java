@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.ICaseExpression;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.runtime.client.Messages;
 
@@ -38,7 +38,7 @@ public class CaseExpression extends SimpleNode implements Expression, ICaseExpre
      * @param p
      * @param id
      */
-    public CaseExpression(TeiidParser p, int id) {
+    public CaseExpression(TeiidClientParser p, int id) {
         super(p, id);
     }
 

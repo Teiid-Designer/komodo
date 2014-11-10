@@ -14,7 +14,7 @@ import org.komodo.spi.query.sql.lang.IStoredProcedure;
 import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -57,7 +57,7 @@ public class StoredProcedure extends ProcedureContainer
      * @param p
      * @param id
      */
-    public StoredProcedure(TeiidParser p, int id) {
+    public StoredProcedure(TeiidClientParser p, int id) {
         super(p, id);
     }
 

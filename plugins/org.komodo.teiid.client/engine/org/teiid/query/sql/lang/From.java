@@ -8,7 +8,7 @@ import java.util.List;
 import org.komodo.spi.query.sql.lang.IFrom;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
 /**
@@ -23,7 +23,7 @@ public class From extends SimpleNode
      * @param p
      * @param id
      */
-    public From(TeiidParser p, int id) {
+    public From(TeiidClientParser p, int id) {
         super(p, id);
     }
 

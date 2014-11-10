@@ -45,7 +45,7 @@ import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.resolver.command.AlterResolver;
 import org.teiid.query.resolver.command.DeleteResolver;
 import org.teiid.query.resolver.command.DynamicCommandResolver;
@@ -154,7 +154,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
     /**
      * @return teiid parser
      */
-    public TeiidParser getTeiidParser() {
+    public TeiidClientParser getTeiidParser() {
         return parser.getTeiidParser();
     }
 
@@ -286,7 +286,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 			QueryMetadataInterface metadata, QueryNode queryNode, boolean replaceBindings)
 			throws Exception {
 		Map<ElementSymbol, ElementSymbol> symbolMap = null;
-		TeiidParser teiidParser = parser.getTeiidParser();
+		TeiidClientParser teiidParser = parser.getTeiidParser();
 
 		if (queryNode.getBindings() != null && queryNode.getBindings().size() > 0) {
 			symbolMap = new HashMap<ElementSymbol, ElementSymbol>();

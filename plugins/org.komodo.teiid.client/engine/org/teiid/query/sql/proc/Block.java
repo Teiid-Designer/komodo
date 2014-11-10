@@ -9,7 +9,7 @@ import org.komodo.spi.query.sql.ISQLConstants;
 import org.komodo.spi.query.sql.proc.IBlock;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Labeled;
 import org.teiid.query.sql.symbol.ElementSymbol;
@@ -34,7 +34,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
      * @param p
      * @param id
      */
-    public Block(TeiidParser p, int id) {
+    public Block(TeiidClientParser p, int id) {
         super(p, id);
     }
 

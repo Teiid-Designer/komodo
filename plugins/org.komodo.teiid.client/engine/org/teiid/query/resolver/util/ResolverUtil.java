@@ -56,7 +56,7 @@ import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.CompareCriteria;
 import org.teiid.query.sql.lang.Criteria;
@@ -312,7 +312,7 @@ public class ResolverUtil {
 
         Constant constant = sourceExpression.getTeiidParser().createASTNode(ASTNodes.CONSTANT);
         constant.setValue(targetTypeName);
-        TeiidParser teiidParser = sourceExpression.getTeiidParser();
+        TeiidClientParser teiidParser = sourceExpression.getTeiidParser();
         Function conversion = teiidParser.createASTNode(ASTNodes.FUNCTION);
         conversion.setName(fd.getName());
         conversion.setArgs(new Expression[] { sourceExpression, constant });
@@ -541,7 +541,7 @@ public class ResolverUtil {
      * @throws Exception if TransformationException is encountered
      *
      */
-    private static Constant getProperlyTypedConstant(Object defaultValue, Class<?> parameterType, TeiidParser teiidParser)
+    private static Constant getProperlyTypedConstant(Object defaultValue, Class<?> parameterType, TeiidClientParser teiidParser)
         throws QueryResolverException{
         try {
             Object newValue = DefaultDataTypeManager.getInstance(teiidParser.getVersion()).transformValue(defaultValue, parameterType);
@@ -581,7 +581,7 @@ public class ResolverUtil {
 
     		LinkedHashMap<Object, ElementSymbol> symbols = new LinkedHashMap<Object, ElementSymbol>(elementIDs.size());
 
-    		TeiidParser parser = group.getTeiidParser();
+    		TeiidClientParser parser = group.getTeiidParser();
             for (Object elementID : elementIDs) {
             	String elementName = metadata.getName(elementID);
             	String elementType = metadata.getElementType(elementID);
@@ -847,7 +847,7 @@ public class ResolverUtil {
 
 	public static ResolvedLookup resolveLookup(Function lookup, QueryMetadataInterface metadata) throws Exception {
 		Expression[] args = lookup.getArgs();
-		TeiidParser parser = lookup.getTeiidParser();
+		TeiidClientParser parser = lookup.getTeiidParser();
 
 		ResolvedLookup result = new ResolvedLookup();
 	    // Special code to handle setting return type of the lookup function to match the type of the return element

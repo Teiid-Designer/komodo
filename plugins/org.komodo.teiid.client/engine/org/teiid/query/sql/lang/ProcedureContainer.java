@@ -22,7 +22,7 @@
 
 package org.teiid.query.sql.lang;
 
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
 
@@ -33,7 +33,7 @@ public abstract class ProcedureContainer extends Command {
      * @param p
      * @param id
      */
-    public ProcedureContainer(TeiidParser p, int id) {
+    public ProcedureContainer(TeiidClientParser p, int id) {
         super(p, id);
     }
 

@@ -77,7 +77,7 @@ import org.teiid.query.metadata.SystemMetadata;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.optimizer.FakeFunctionMetadataSource;
 import org.teiid.query.parser.TCQueryParser;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.validator.ValidatorReport;
 
 @SuppressWarnings({"nls", "javadoc"})
@@ -109,7 +109,7 @@ public class RealMetadataFactory {
 	    return teiidVersion;
 	}
 
-	public TeiidParser getTeiidParser() {
+	public TeiidClientParser getTeiidParser() {
 	    return parser.getTeiidParser();
 	}
 

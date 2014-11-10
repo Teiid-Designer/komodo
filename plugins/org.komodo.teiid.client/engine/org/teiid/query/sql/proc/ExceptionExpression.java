@@ -24,7 +24,7 @@ package org.teiid.query.sql.proc;
 import org.komodo.spi.query.sql.proc.IExceptionExpression;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -37,7 +37,7 @@ public class ExceptionExpression extends SimpleNode implements Expression, IExce
      * @param teiidParser 
      * @param i
      */
-    public ExceptionExpression(TeiidParser teiidParser, int i) {
+    public ExceptionExpression(TeiidClientParser teiidParser, int i) {
         super(teiidParser, i);
     }
 

@@ -19,7 +19,7 @@ import org.teiid.core.util.PropertiesUtils;
 import org.teiid.query.function.FunctionMethods;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.runtime.client.Messages;
 
@@ -38,7 +38,7 @@ public class Constant extends SimpleNode implements Expression, IConstant<Langua
      * @param teiidParser
      * @return a null constant for the given teiid parser if one has not already been created
      */
-    public static Constant getNullConstant(TeiidParser teiidParser) {
+    public static Constant getNullConstant(TeiidClientParser teiidParser) {
         Constant constant = nullCache.get(teiidParser.getVersion());
         if (constant == null) {
             constant = teiidParser.createASTNode(ASTNodes.CONSTANT);
@@ -128,7 +128,7 @@ public class Constant extends SimpleNode implements Expression, IConstant<Langua
      * @param p
      * @param id
      */
-    public Constant(TeiidParser p, int id) {
+    public Constant(TeiidClientParser p, int id) {
         super(p, id);
     }
 

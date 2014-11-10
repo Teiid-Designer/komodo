@@ -71,7 +71,7 @@ import org.teiid.query.function.JSONFunctionMethods.JSONBuilder;
 import org.teiid.query.function.source.XMLSystemFunctions;
 import org.teiid.query.function.source.XMLSystemFunctions.XmlConcat;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.AbstractCompareCriteria;
 import org.teiid.query.sql.lang.AbstractSetCriteria;
 import org.teiid.query.sql.lang.CollectionValueIterator;
@@ -440,7 +440,7 @@ public class Evaluator {
 	private Boolean evaluate(AbstractSetCriteria criteria)
 		throws Exception {
 
-	    TeiidParser teiidParser = criteria.getTeiidParser();
+	    TeiidClientParser teiidParser = criteria.getTeiidParser();
 
 		// Evaluate expression
 		Object leftValue = null;

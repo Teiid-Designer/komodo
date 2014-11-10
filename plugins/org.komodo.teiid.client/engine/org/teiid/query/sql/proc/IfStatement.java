@@ -4,7 +4,7 @@ package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IIfStatement;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Criteria;
 
 /**
@@ -25,7 +25,7 @@ public class IfStatement extends Statement implements IIfStatement<LanguageVisit
      * @param p
      * @param id
      */
-    public IfStatement(TeiidParser p, int id) {
+    public IfStatement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

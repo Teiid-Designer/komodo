@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -59,7 +59,7 @@ public class SPParameter extends ASTNode implements ISPParameter<ElementSymbol> 
      * @param p teiid parser
      * @param id node type id
      */
-    public SPParameter(ITeiidParser p, int id) {
+    public SPParameter(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

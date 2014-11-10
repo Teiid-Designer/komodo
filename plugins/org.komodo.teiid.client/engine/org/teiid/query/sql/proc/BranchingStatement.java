@@ -4,7 +4,7 @@ package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IBranchingStatement;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
@@ -37,7 +37,7 @@ public class BranchingStatement extends Statement implements IBranchingStatement
      * @param p
      * @param id
      */
-    public BranchingStatement(TeiidParser p, int id) {
+    public BranchingStatement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

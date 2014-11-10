@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ITextTable;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -39,7 +39,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
      * @param p
      * @param id
      */
-    public TextTable(TeiidParser p, int id) {
+    public TextTable(TeiidClientParser p, int id) {
         super(p, id);
     }
 

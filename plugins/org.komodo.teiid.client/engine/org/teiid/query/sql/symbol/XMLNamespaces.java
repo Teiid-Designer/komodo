@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IXMLNamespaces;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.NamespaceItem;
 import org.teiid.query.sql.lang.SimpleNode;
 
@@ -22,7 +22,7 @@ public class XMLNamespaces extends SimpleNode implements IXMLNamespaces<Language
      * @param p
      * @param id
      */
-    public XMLNamespaces(TeiidParser p, int id) {
+    public XMLNamespaces(TeiidClientParser p, int id) {
         super(p, id);
     }
 

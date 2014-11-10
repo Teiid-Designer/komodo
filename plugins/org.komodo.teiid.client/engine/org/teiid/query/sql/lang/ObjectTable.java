@@ -12,7 +12,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IObjectTable;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.DerivedColumn;
 
 /**
@@ -42,7 +42,7 @@ public class ObjectTable extends TableFunctionReference implements IObjectTable<
      * @param p
      * @param id
      */
-    public ObjectTable(TeiidParser p, int id) {
+    public ObjectTable(TeiidClientParser p, int id) {
         super(p, id);
     }
 

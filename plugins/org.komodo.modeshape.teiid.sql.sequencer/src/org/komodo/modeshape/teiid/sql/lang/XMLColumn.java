@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IXMLColumn;
 
@@ -37,7 +37,7 @@ public class XMLColumn extends ProjectedColumn implements IXMLColumn<LanguageVis
      * @param p teiid parser
      * @param id node type id
      */
-    public XMLColumn(ITeiidParser p, int id) {
+    public XMLColumn(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

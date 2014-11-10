@@ -7,7 +7,7 @@ import java.util.List;
 import org.komodo.spi.query.sql.symbol.IXMLForest;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -23,7 +23,7 @@ public class XMLForest extends SimpleNode implements Expression, IXMLForest<Lang
      * @param p
      * @param id
      */
-    public XMLForest(TeiidParser p, int id) {
+    public XMLForest(TeiidClientParser p, int id) {
         super(p, id);
     }
 

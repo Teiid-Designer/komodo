@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.ISetClause;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -21,7 +21,7 @@ public class SetClause extends SimpleNode implements ISetClause<LanguageVisitor>
      * @param p
      * @param id
      */
-    public SetClause(TeiidParser p, int id) {
+    public SetClause(TeiidClientParser p, int id) {
         super(p, id);
     }
 

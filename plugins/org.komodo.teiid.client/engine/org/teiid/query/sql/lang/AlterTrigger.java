@@ -5,7 +5,7 @@ package org.teiid.query.sql.lang;
 import org.komodo.spi.query.sql.lang.IAlterTrigger;
 import org.teiid.metadata.Table.TriggerEvent;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.proc.TriggerAction;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -24,7 +24,7 @@ public class AlterTrigger extends Alter<TriggerAction> implements IAlterTrigger<
      * @param p
      * @param id
      */
-    public AlterTrigger(TeiidParser p, int id) {
+    public AlterTrigger(TeiidClientParser p, int id) {
         super(p, id);
     }
 

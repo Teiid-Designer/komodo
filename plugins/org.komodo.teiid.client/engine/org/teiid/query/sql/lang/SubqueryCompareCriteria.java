@@ -6,7 +6,7 @@ import org.komodo.spi.query.sql.lang.ISubqueryCompareCriteria;
 import org.teiid.language.SQLConstants;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.ScalarSubquery;
 
@@ -59,7 +59,7 @@ public class SubqueryCompareCriteria extends AbstractCompareCriteria
      * @param p
      * @param id
      */
-    public SubqueryCompareCriteria(TeiidParser p, int id) {
+    public SubqueryCompareCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

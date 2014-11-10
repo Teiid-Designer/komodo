@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.runtime.client.Messages;
@@ -68,7 +68,7 @@ public class SPParameter implements ISPParameter<ElementSymbol> {
 	private boolean varArg;
 	private ElementSymbol parameterSymbol;
 
-    private TeiidParser teiidParser;
+    private TeiidClientParser teiidParser;
 
     /**
      * Constructor used when constructing a parameter during execution.  In this case we
@@ -78,7 +78,7 @@ public class SPParameter implements ISPParameter<ElementSymbol> {
      * @param index the positional index of this parameter
      * @param expression
      */
-    public SPParameter(TeiidParser teiidParser, int index, Expression expression) {
+    public SPParameter(TeiidClientParser teiidParser, int index, Expression expression) {
         this.teiidParser = teiidParser;
         setIndex(index);
         setExpression(expression);
@@ -95,7 +95,7 @@ public class SPParameter implements ISPParameter<ElementSymbol> {
      * @param parameterType Type of parameter based on class constant - IN, OUT, etc
      * @param name Full name of parameter (including proc name)
      */
-    public SPParameter(TeiidParser teiidParser, int index, int parameterType, String name) {
+    public SPParameter(TeiidClientParser teiidParser, int index, int parameterType, String name) {
         this.teiidParser = teiidParser;
         setIndex(index);
         setParameterType(parameterType);

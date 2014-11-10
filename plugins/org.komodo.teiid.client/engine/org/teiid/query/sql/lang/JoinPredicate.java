@@ -10,7 +10,7 @@ import org.komodo.spi.query.sql.lang.IJoinPredicate;
 import org.komodo.spi.query.sql.lang.IJoinType.Types;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
 /**
@@ -31,7 +31,7 @@ public class JoinPredicate extends FromClause
      * @param p
      * @param id
      */
-    public JoinPredicate(TeiidParser p, int id) {
+    public JoinPredicate(TeiidClientParser p, int id) {
         super(p, id);
         joinType = p.createASTNode(ASTNodes.JOIN_TYPE);
         joinType.setKind(Types.JOIN_INNER);

@@ -24,7 +24,7 @@ package org.teiid.query.validator;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCQueryParser;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.unittest.RealMetadataFactory;
 
@@ -66,7 +66,7 @@ public abstract class AbstractTest {
     /**
      * @return the teiid parser
      */
-    public TeiidParser getTeiidParser() {
+    public TeiidClientParser getTeiidParser() {
         return getQueryParser().getTeiidParser();
     }
 

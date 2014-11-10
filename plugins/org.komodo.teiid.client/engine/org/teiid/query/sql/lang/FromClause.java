@@ -8,7 +8,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IFromClause;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Option.MakeDep;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
@@ -48,7 +48,7 @@ public abstract class FromClause extends SimpleNode implements IFromClause<Langu
      * @param p
      * @param id
      */
-    public FromClause(TeiidParser p, int id) {
+    public FromClause(TeiidClientParser p, int id) {
         super(p, id);
     }
 

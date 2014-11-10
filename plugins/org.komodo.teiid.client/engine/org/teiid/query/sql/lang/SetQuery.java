@@ -12,7 +12,7 @@ import org.komodo.spi.query.sql.lang.ISetQuery;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.sql.symbol.AliasSymbol;
 import org.teiid.query.sql.symbol.Expression;
@@ -41,7 +41,7 @@ public class SetQuery extends QueryCommand
      * @param p
      * @param id
      */
-    public SetQuery(TeiidParser p, int id) {
+    public SetQuery(TeiidClientParser p, int id) {
         super(p, id);
     }
 
@@ -185,7 +185,7 @@ public class SetQuery extends QueryCommand
                 }
 
                 if (originalSymbol instanceof Symbol) {
-                    TeiidParser teiidParser = originalSymbol.getTeiidParser();
+                    TeiidClientParser teiidParser = originalSymbol.getTeiidParser();
                     AliasSymbol aliasSymbol = teiidParser.createASTNode(ASTNodes.ALIAS_SYMBOL);
                     aliasSymbol.setName(Symbol.getShortName(originalSymbol));
                     aliasSymbol.setSymbol(symbol);

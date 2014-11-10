@@ -7,7 +7,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.language.SortSpecification;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Constant;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.ExpressionSymbol;
@@ -31,7 +31,7 @@ public class OrderByItem extends SimpleNode
      * @param p
      * @param id
      */
-    public OrderByItem(TeiidParser p, int id) {
+    public OrderByItem(TeiidClientParser p, int id) {
         super(p, id);
     }
 

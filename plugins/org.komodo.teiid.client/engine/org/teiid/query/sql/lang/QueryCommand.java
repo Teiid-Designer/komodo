@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IQueryCommand;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -27,7 +27,7 @@ public abstract class QueryCommand extends Command
      * @param p
      * @param id
      */
-    public QueryCommand(TeiidParser p, int id) {
+    public QueryCommand(TeiidClientParser p, int id) {
         super(p, id);
     }
 

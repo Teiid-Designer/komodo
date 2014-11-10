@@ -22,7 +22,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 
 /**
  *
@@ -33,7 +33,7 @@ public class NamespaceItem extends ASTNode {
      * @param p teiid parser
      * @param id node type id
      */
-    public NamespaceItem(ITeiidParser p, int id) {
+    public NamespaceItem(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

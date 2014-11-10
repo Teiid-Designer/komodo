@@ -7,7 +7,7 @@ import java.util.Collection;
 import org.komodo.spi.query.sql.lang.ISubqueryFromClause;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
 /**
@@ -26,7 +26,7 @@ public class SubqueryFromClause extends FromClause
      * @param p
      * @param id
      */
-    public SubqueryFromClause(TeiidParser p, int id) {
+    public SubqueryFromClause(TeiidClientParser p, int id) {
         super(p, id);
     }
 

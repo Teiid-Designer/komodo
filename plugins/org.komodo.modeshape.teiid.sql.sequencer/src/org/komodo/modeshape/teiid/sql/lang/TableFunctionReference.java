@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.ITableFunctionReference;
@@ -40,7 +40,7 @@ public abstract class TableFunctionReference extends FromClause implements ITabl
      * @param p teiid parser
      * @param id node type id
      */
-    public TableFunctionReference(ITeiidParser p, int id) {
+    public TableFunctionReference(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

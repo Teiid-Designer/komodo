@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import org.komodo.spi.query.sql.lang.ISetCriteria;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -23,7 +23,7 @@ public class SetCriteria extends AbstractSetCriteria implements ISetCriteria<Exp
      * @param p
      * @param id
      */
-    public SetCriteria(TeiidParser p, int id) {
+    public SetCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

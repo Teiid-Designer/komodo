@@ -4,7 +4,7 @@ package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IWhileStatement;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.lang.Labeled;
 
@@ -24,7 +24,7 @@ public class WhileStatement extends Statement implements Labeled, IWhileStatemen
      * @param p
      * @param id
      */
-    public WhileStatement(TeiidParser p, int id) {
+    public WhileStatement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

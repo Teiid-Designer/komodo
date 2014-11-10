@@ -65,7 +65,7 @@ package org.komodo.modeshape.teiid.parser.completion;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
-import org.komodo.modeshape.teiid.parser.AbstractTeiidParser;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.ParseInfo;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
@@ -81,7 +81,7 @@ import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.parser.bnf.BNF;
 
 @ SuppressWarnings({"nls", "unused", "javadoc"})
-public class TeiidCompletionParser extends AbstractTeiidParser {
+public class TeiidCompletionParser extends AbstractTeiidSeqParser {
 
 	private Set <String> expectedTokens = new HashSet<String>();
 

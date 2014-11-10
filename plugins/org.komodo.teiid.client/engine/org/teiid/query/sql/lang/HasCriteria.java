@@ -6,7 +6,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.proc.IHasCriteria;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
@@ -22,7 +22,7 @@ public class HasCriteria extends Criteria implements PredicateCriteria, IHasCrit
      * @param p
      * @param id
      */
-    public HasCriteria(TeiidParser p, int id) {
+    public HasCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

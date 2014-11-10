@@ -25,7 +25,7 @@ package org.komodo.modeshape.teiid.sql.symbol;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.ITextLine;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -40,7 +40,7 @@ public class TextLine extends ASTNode implements Expression, ITextLine<LanguageV
      * @param p teiid parser
      * @param id node type id
      */
-    public TextLine(ITeiidParser p, int id) {
+    public TextLine(TeiidSeqParser p, int id) {
         super(p, id);
         if (isTeiidVersionOrGreater(Version.TEIID_8_5.get()))
             setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.STRING_ARRAY.name());

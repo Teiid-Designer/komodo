@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IWithQueryCommand;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
@@ -26,7 +26,7 @@ public class WithQueryCommand extends SimpleNode
      * @param p
      * @param id
      */
-    public WithQueryCommand(TeiidParser p, int id) {
+    public WithQueryCommand(TeiidClientParser p, int id) {
         super(p, id);
     }
 

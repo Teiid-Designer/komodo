@@ -11,7 +11,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.language.SQLConstants.Reserved;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.visitor.SQLStringVisitor;
 
 /**
@@ -112,7 +112,7 @@ public class Option extends SimpleNode implements IOption<LanguageVisitor> {
      * @param p
      * @param id
      */
-    public Option(TeiidParser p, int id) {
+    public Option(TeiidClientParser p, int id) {
         super(p, id);
     }
 

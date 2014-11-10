@@ -8,7 +8,7 @@ import java.util.List;
 import org.komodo.spi.query.sql.lang.IOrderBy;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.runtime.client.Messages;
 
@@ -24,7 +24,7 @@ public class OrderBy extends SimpleNode
      * @param p
      * @param id
      */
-    public OrderBy(TeiidParser p, int id) {
+    public OrderBy(TeiidClientParser p, int id) {
         super(p, id);
     }
 

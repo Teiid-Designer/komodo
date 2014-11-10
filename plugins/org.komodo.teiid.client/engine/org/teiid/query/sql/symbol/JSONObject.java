@@ -7,7 +7,7 @@ import java.util.List;
 import org.komodo.spi.query.sql.symbol.IJSONObject;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -21,7 +21,7 @@ public class JSONObject extends SimpleNode implements Expression, IJSONObject<La
      * @param p
      * @param id
      */
-    public JSONObject(TeiidParser p, int id) {
+    public JSONObject(TeiidClientParser p, int id) {
         super(p, id);
     }
 

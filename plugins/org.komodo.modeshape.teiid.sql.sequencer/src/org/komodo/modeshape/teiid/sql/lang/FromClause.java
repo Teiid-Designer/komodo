@@ -4,7 +4,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
@@ -25,7 +25,7 @@ public abstract class FromClause extends ASTNode
      * @param p teiid parser
      * @param id node type id
      */
-    public FromClause(ITeiidParser p, int id) {
+    public FromClause(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

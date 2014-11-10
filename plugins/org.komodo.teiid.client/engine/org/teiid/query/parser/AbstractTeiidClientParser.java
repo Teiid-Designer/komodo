@@ -67,7 +67,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
-public abstract class AbstractTeiidParser implements TeiidParser {
+public abstract class AbstractTeiidClientParser implements TeiidClientParser {
 
     protected Pattern udtPattern = Pattern.compile("(\\w+)\\s*\\(\\s*(\\d+),\\s*(\\d+),\\s*(\\d+)\\)"); //$NON-NLS-1$
     

@@ -3,7 +3,7 @@
 package org.teiid.query.sql.lang.v8;
 
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.v8.Teiid8Parser;
+import org.teiid.query.parser.v8.Teiid8ClientParser;
 import org.teiid.query.sql.lang.AlterProcedure;
 import org.teiid.query.sql.proc.CreateProcedureCommand;
 
@@ -16,7 +16,7 @@ public class Alter8Procedure extends AlterProcedure<CreateProcedureCommand> {
      * @param p
      * @param id
      */
-    public Alter8Procedure(Teiid8Parser p, int id) {
+    public Alter8Procedure(Teiid8ClientParser p, int id) {
         super(p, id);
     }
 
@@ -33,7 +33,7 @@ public class Alter8Procedure extends AlterProcedure<CreateProcedureCommand> {
 
     @Override
     public Alter8Procedure clone() {
-        Alter8Procedure clone = new Alter8Procedure((Teiid8Parser) this.parser, this.id);
+        Alter8Procedure clone = new Alter8Procedure((Teiid8ClientParser) this.parser, this.id);
 
         if(getDefinition() != null)
             clone.setDefinition(getDefinition().clone());

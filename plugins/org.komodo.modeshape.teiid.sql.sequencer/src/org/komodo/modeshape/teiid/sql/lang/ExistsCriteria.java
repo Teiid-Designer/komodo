@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.spi.query.sql.lang.IExistsCriteria;
@@ -37,7 +37,7 @@ public class ExistsCriteria extends Criteria implements PredicateCriteria, Subqu
      * @param p parent parser
      * @param id type id of node
      */
-    public ExistsCriteria(ITeiidParser p, int id) {
+    public ExistsCriteria(TeiidSeqParser p, int id) {
         super(p, id);
 
         SubqueryHint subqueryHint = getTeiidParser().createASTNode(ASTNodes.SUBQUERY_HINT);

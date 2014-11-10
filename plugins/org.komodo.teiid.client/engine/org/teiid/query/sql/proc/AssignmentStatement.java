@@ -5,7 +5,7 @@ package org.teiid.query.sql.proc;
 import org.komodo.spi.query.sql.proc.IAssignmentStatement;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Query;
 import org.teiid.query.sql.lang.QueryCommand;
@@ -27,7 +27,7 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
      * @param p
      * @param id
      */
-    public AssignmentStatement(TeiidParser p, int id) {
+    public AssignmentStatement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

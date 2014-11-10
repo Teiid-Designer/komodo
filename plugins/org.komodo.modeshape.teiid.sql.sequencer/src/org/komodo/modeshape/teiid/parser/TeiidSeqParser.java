@@ -19,26 +19,24 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.teiid.query.parser;
+package org.komodo.modeshape.teiid.parser;
 
 import java.io.Reader;
-
-import org.komodo.spi.annotation.Since;
+import java.util.List;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidSeqParser.ParsingError;
+import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
+import org.komodo.modeshape.teiid.sql.lang.Command;
+import org.komodo.modeshape.teiid.sql.lang.Criteria;
+import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
+import org.komodo.modeshape.teiid.sql.proc.Statement;
+import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.metadata.MetadataFactory;
-import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.proc.Statement;
-import org.teiid.query.sql.symbol.Expression;
+import org.komodo.spi.type.DataTypeManager;
 
 /**
  *
  */
-public interface TeiidParser {
+public interface TeiidSeqParser {
 
     /**
      * @return teiid version of this parser
@@ -53,14 +51,14 @@ public interface TeiidParser {
     /**
      * @return dataTypeManagerService
      */
-    DefaultDataTypeManager getDataTypeService();
+    DataTypeManager getDataTypeService();
 
     /**
-     * Reinitialise the parser against the new sql reader
+     * Reset the parser against the new sql reader
      *
      * @param sql
      */
-    void ReInit(Reader sql);
+    void reset(Reader sql);
 
     /**
      * @param nodeType
@@ -138,14 +136,11 @@ public interface TeiidParser {
      * @return command
      * @throws Exception 
      */
-    @Since(Version.TEIID_8_0)
     Command procedureBodyCommand(ParseInfo parseInfo) throws Exception;
 
     /**
-     * @param factory
-     * @throws Exception 
+     * @return any errors accumulated while parsing
      */
-    @Since(Version.TEIID_8_0)
-    void parseMetadata(MetadataFactory factory) throws Exception;
+    List<ParsingError> getErrors();
 
 }

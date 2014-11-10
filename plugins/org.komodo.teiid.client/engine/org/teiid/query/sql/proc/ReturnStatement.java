@@ -6,7 +6,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.proc.IReturnStatement;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -19,7 +19,7 @@ public class ReturnStatement extends AssignmentStatement implements IReturnState
      * @param p
      * @param id
      */
-    public ReturnStatement(TeiidParser p, int id) {
+    public ReturnStatement(TeiidClientParser p, int id) {
         super(p, id);
     }
 

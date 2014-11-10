@@ -25,7 +25,7 @@ package org.komodo.modeshape.teiid.sql.symbol;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLForest;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
@@ -39,7 +39,7 @@ public class XMLForest extends ASTNode implements Expression, IXMLForest<Languag
      * @param p teiid parser
      * @param id node type id
      */
-    public XMLForest(ITeiidParser p, int id) {
+    public XMLForest(TeiidSeqParser p, int id) {
         super(p, id);
         setProperty(TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, DataTypeName.XML.name());
     }

@@ -5,7 +5,7 @@ package org.teiid.query.sql.symbol;
 import org.komodo.spi.query.sql.symbol.IXMLParse;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
@@ -23,7 +23,7 @@ public class XMLParse extends SimpleNode implements Expression, IXMLParse<Langua
      * @param p
      * @param id
      */
-    public XMLParse(TeiidParser p, int id) {
+    public XMLParse(TeiidClientParser p, int id) {
         super(p, id);
     }
 

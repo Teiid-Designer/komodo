@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
@@ -21,7 +21,7 @@ implements SubqueryContainer<QueryCommand>, ISubquerySetCriteria<Expression, Lan
      * @param p
      * @param id
      */
-    public SubquerySetCriteria(TeiidParser p, int id) {
+    public SubquerySetCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 

@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ISetClauseList;
 import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -23,7 +23,7 @@ public class SetClauseList extends SimpleNode implements ISetClauseList<Language
      * @param p
      * @param id
      */
-    public SetClauseList(TeiidParser p, int id) {
+    public SetClauseList(TeiidClientParser p, int id) {
         super(p, id);
     }
 

@@ -26,7 +26,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
 
@@ -56,7 +56,7 @@ public abstract class CommandResolver {
         return getQueryResolver().getTeiidVersion();
     }
 
-    protected TeiidParser getTeiidParser() {
+    protected TeiidClientParser getTeiidParser() {
         return this.queryResolver.getQueryParser().getTeiidParser();
     }
 
