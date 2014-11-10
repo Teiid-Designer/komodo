@@ -69,7 +69,7 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
 
     public ValidatorReport helpRunValidator(Command command, String[] expectedStringArray, QueryMetadataInterface metadata) {
         try {
-            ValidatorReport report = new Validator().validate(command, metadata);
+            ValidatorReport report = new DefaultValidator().validate(command, metadata);
 
             examineReport(command, expectedStringArray, report);
             return report;

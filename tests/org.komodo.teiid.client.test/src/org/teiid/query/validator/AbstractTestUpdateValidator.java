@@ -45,8 +45,8 @@ import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.symbol.Symbol;
-import org.teiid.query.validator.UpdateValidator.UpdateInfo;
-import org.teiid.query.validator.UpdateValidator.UpdateType;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateType;
 
 @SuppressWarnings({"javadoc", "nls"})
 public abstract class AbstractTestUpdateValidator extends AbstractTest {
@@ -58,16 +58,16 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
         super(teiidVersion);
     }
 
-    private UpdateValidator helpTest(String sql, TransformationMetadata md, boolean shouldFail) {
+    private DefaultUpdateValidator helpTest(String sql, TransformationMetadata md, boolean shouldFail) {
 		return helpTest(sql, md, shouldFail, shouldFail, shouldFail);
 	}
 	
-	private UpdateValidator helpTest(String sql, TransformationMetadata md, boolean failInsert, boolean failUpdate, boolean failDelete) { 	
+	private DefaultUpdateValidator helpTest(String sql, TransformationMetadata md, boolean failInsert, boolean failUpdate, boolean failDelete) { 	
 		try {
 			String vGroup = "gx";
 			Command command = createView(sql, md, vGroup);
 			
-			UpdateValidator uv = new UpdateValidator(md, UpdateType.INHERENT, UpdateType.INHERENT, UpdateType.INHERENT);
+			DefaultUpdateValidator uv = new DefaultUpdateValidator(md, UpdateType.INHERENT, UpdateType.INHERENT, UpdateType.INHERENT);
 			GroupSymbol gs = getFactory().newGroupSymbol(vGroup);
 			ResolverUtil.resolveGroup(gs, md);
 			uv.validate(command, ResolverUtil.resolveElementsInGroup(gs, md));

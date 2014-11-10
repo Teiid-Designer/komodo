@@ -70,7 +70,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.symbol.Symbol;
 import org.teiid.query.sql.visitor.EvaluatableVisitor;
 import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
-import org.teiid.query.validator.Validator;
+import org.teiid.query.validator.DefaultValidator;
 import org.teiid.query.validator.ValidatorFailure;
 import org.teiid.query.validator.ValidatorReport;
 import org.teiid.runtime.client.Messages;
@@ -278,7 +278,7 @@ public class MetadataValidator {
     			gs.setName(p.getFullName());
     			TCQueryResolver resolver = new TCQueryResolver(queryParser);
     			resolver.resolveCommand(command, gs, ICommand.TYPE_STORED_PROCEDURE, metadata, false);
-    			Validator validator = new Validator();
+    			DefaultValidator validator = new DefaultValidator();
     			resolverReport =  validator.validate(command, metadata);
     		} else if (record instanceof Table) {
     			Table t = (Table)record;
@@ -290,7 +290,7 @@ public class MetadataValidator {
     				QueryCommand command = (QueryCommand) queryParser.parseCommand(t.getSelectTransformation());
     				TCQueryResolver resolver = new TCQueryResolver(queryParser);
     				resolver.resolveCommand(command, metadata);
-    				Validator validator = new Validator();
+    				DefaultValidator validator = new DefaultValidator();
     				resolverReport =  validator.validate(command, metadata);
     				if(!resolverReport.hasItems()) {
     					List<Expression> symbols = command.getProjectedSymbols();

@@ -58,7 +58,7 @@ import org.teiid.query.sql.proc.TriggerAction;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.validator.UpdateValidator.UpdateInfo;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 

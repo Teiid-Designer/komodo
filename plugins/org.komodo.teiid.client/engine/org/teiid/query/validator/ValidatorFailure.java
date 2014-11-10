@@ -25,7 +25,7 @@ package org.teiid.query.validator;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.komodo.spi.outcome.Outcome;
-import org.komodo.spi.validator.IValidator.IValidatorFailure;
+import org.komodo.spi.validator.Validator.IValidatorFailure;
 import org.teiid.query.report.ReportItem;
 import org.teiid.query.sql.lang.LanguageObject;
 

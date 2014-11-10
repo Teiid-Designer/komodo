@@ -21,53 +21,57 @@
  ************************************************************************************/
 package org.komodo.spi.validator;
 
-import java.util.Collection;
-import org.komodo.spi.outcome.Outcome;
-import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.ILanguageVisitor;
-import org.komodo.spi.query.sql.lang.ILanguageObject;
+import java.util.List;
+
+import org.komodo.spi.query.sql.lang.ICommand;
+import org.komodo.spi.query.sql.symbol.IElementSymbol;
+import org.komodo.spi.validator.Validator.IValidatorReport;
 
 /**
  *
- * @param <L> 
  */
-public interface IValidator<L extends ILanguageObject<? extends ILanguageVisitor>> {
-    
+public interface UpdateValidator<C extends ICommand, ES extends IElementSymbol> {
+
     /**
-     *
+     * Update type enumerator
      */
-    public interface IValidatorReport {
-
+    public enum TransformUpdateType {
         /**
-         * @return
+         * The default handling should be used
          */
-        boolean hasItems();
-
+        INHERENT, 
         /**
-         * @return
+         * An instead of trigger (TriggerAction) has been defined
          */
-        Collection<? extends IValidatorFailure> getItems();
-        
-    }
-
-    public interface IValidatorFailure {
-
-        /**
-         * @return
-         */
-        Outcome.Level getOutcome();
-        
+        INSTEAD_OF
     }
     
     /**
-     * Validate the given command
+     * Validate the command
      * 
-     * @param languageObject
-     * @param queryMetadata
-     * 
-     * @return report of validation
+     * @param command
+     * @param elemSymbols
      * @throws Exception 
      */
-    IValidatorReport validate(L languageObject, QueryMetadataInterface queryMetadata) throws Exception;
+    void validate(C command, List<ES> elemSymbols) throws Exception;
 
+    /**
+     * @return insert report
+     */
+    IValidatorReport getInsertReport();
+
+    /**
+     * @return update report
+     */
+    IValidatorReport getUpdateReport();
+
+    /**
+     * @return delete report
+     */
+    IValidatorReport getDeleteReport();
+
+    /**
+     * @return report
+     */
+    IValidatorReport getReport();
 }

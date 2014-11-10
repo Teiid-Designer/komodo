@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.komodo.spi.query.metadata.QueryNode;
 import org.teiid.query.sql.lang.Command;
-import org.teiid.query.validator.UpdateValidator.UpdateInfo;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
 
 
 /**

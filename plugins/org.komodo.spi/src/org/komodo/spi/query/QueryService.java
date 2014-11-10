@@ -47,9 +47,9 @@ import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 import org.komodo.spi.udf.FunctionMethodDescriptor;
 import org.komodo.spi.udf.FunctionLibrary;
-import org.komodo.spi.validator.IUpdateValidator;
-import org.komodo.spi.validator.IValidator;
-import org.komodo.spi.validator.IUpdateValidator.TransformUpdateType;
+import org.komodo.spi.validator.UpdateValidator;
+import org.komodo.spi.validator.Validator;
+import org.komodo.spi.validator.UpdateValidator.TransformUpdateType;
 import org.komodo.spi.xml.IMappingDocumentFactory;
 
 /**
@@ -281,9 +281,9 @@ public interface QueryService {
     /**
      * Get the validator
      * 
-     * @return instance of {@link IValidator}
+     * @return instance of {@link Validator}
      */
-    IValidator getValidator();
+    Validator getValidator();
 
     /**
      * Get the update validator
@@ -293,9 +293,9 @@ public interface QueryService {
      * @param updateType 
      * @param deleteType
      * 
-     * @return instance of {@link IUpdateValidator}
+     * @return instance of {@link UpdateValidator}
      */
-    IUpdateValidator getUpdateValidator(QueryMetadataInterface metadata, TransformUpdateType insertType, TransformUpdateType updateType, TransformUpdateType deleteType);
+    UpdateValidator getUpdateValidator(QueryMetadataInterface metadata, TransformUpdateType insertType, TransformUpdateType updateType, TransformUpdateType deleteType);
 
     /**
      * Resolve the given group

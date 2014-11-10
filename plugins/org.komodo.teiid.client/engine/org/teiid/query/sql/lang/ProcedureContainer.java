@@ -24,7 +24,7 @@ package org.teiid.query.sql.lang;
 
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.validator.UpdateValidator.UpdateInfo;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
 
 
 public abstract class ProcedureContainer extends Command {

@@ -80,11 +80,11 @@ import org.teiid.query.sql.symbol.Symbol;
 import org.teiid.query.sql.visitor.ExpressionMappingVisitor;
 import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
 import org.teiid.query.validator.AbstractValidationVisitor;
-import org.teiid.query.validator.UpdateValidator;
-import org.teiid.query.validator.UpdateValidator.UpdateInfo;
-import org.teiid.query.validator.UpdateValidator.UpdateType;
+import org.teiid.query.validator.DefaultUpdateValidator;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateType;
 import org.teiid.query.validator.ValidationVisitor;
-import org.teiid.query.validator.Validator;
+import org.teiid.query.validator.DefaultValidator;
 import org.teiid.query.validator.ValidatorFailure;
 import org.teiid.query.validator.ValidatorReport;
 import org.teiid.runtime.client.Messages;
@@ -557,7 +557,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
         throws Exception {
 
         // Validate with visitor
-        ValidatorReport report = Validator.validate(command, metadata, visitor);
+        ValidatorReport report = DefaultValidator.validate(command, metadata, visitor);
         if (report.hasItems()) {
             ValidatorFailure firstFailure = report.getItems().iterator().next();
             throw new TeiidClientException(firstFailure.getMessage());
@@ -606,7 +606,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 					virtualGroup = group;
 				}
 	            List<ElementSymbol> elements = ResolverUtil.resolveElementsInGroup(virtualGroup, qmi);
-	    		UpdateValidator validator = new UpdateValidator(qmi, determineType(insertPlan), determineType(updatePlan), determineType(deletePlan));
+	    		DefaultUpdateValidator validator = new DefaultUpdateValidator(qmi, determineType(insertPlan), determineType(updatePlan), determineType(deletePlan));
 				validator.validate(result, elements);
 	    		UpdateInfo info = validator.getUpdateInfo();
 	    		cachedNode.setUpdateInfo(info);

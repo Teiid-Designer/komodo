@@ -52,9 +52,9 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.FunctionMethodDescriptor;
 import org.komodo.spi.udf.FunctionParameterDescriptor;
 import org.komodo.spi.udf.FunctionLibrary;
-import org.komodo.spi.validator.IUpdateValidator;
-import org.komodo.spi.validator.IValidator;
-import org.komodo.spi.validator.IUpdateValidator.TransformUpdateType;
+import org.komodo.spi.validator.UpdateValidator;
+import org.komodo.spi.validator.Validator;
+import org.komodo.spi.validator.UpdateValidator.TransformUpdateType;
 import org.komodo.spi.xml.IMappingDocumentFactory;
 import org.teiid.core.types.JDBCSQLTypeInfo;
 import org.teiid.language.SQLConstants;
@@ -83,9 +83,9 @@ import org.teiid.query.sql.visitor.SQLStringVisitor;
 import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
 import org.teiid.query.validator.PredicateCollectorVisitor;
 import org.teiid.query.validator.ReferenceCollectorVisitor;
-import org.teiid.query.validator.UpdateValidator;
-import org.teiid.query.validator.UpdateValidator.UpdateType;
-import org.teiid.query.validator.Validator;
+import org.teiid.query.validator.DefaultUpdateValidator;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateType;
+import org.teiid.query.validator.DefaultValidator;
 import org.teiid.runtime.client.proc.TCProcedureService;
 import org.teiid.runtime.client.xml.MappingDocumentFactory;
 
@@ -291,18 +291,18 @@ public class TCQueryService implements QueryService {
     }
 
     @Override
-    public IValidator getValidator() {
-        return new Validator();
+    public Validator getValidator() {
+        return new DefaultValidator();
     }
 
     @Override
-    public IUpdateValidator getUpdateValidator(QueryMetadataInterface metadata, TransformUpdateType tInsertType, TransformUpdateType tUpdateType, TransformUpdateType tDeleteType) {
+    public UpdateValidator getUpdateValidator(QueryMetadataInterface metadata, TransformUpdateType tInsertType, TransformUpdateType tUpdateType, TransformUpdateType tDeleteType) {
 
         UpdateType insertType = UpdateType.valueOf(tInsertType.name());
         UpdateType updateType = UpdateType.valueOf(tUpdateType.name());
         UpdateType deleteType = UpdateType.valueOf(tDeleteType.name());
 
-        return new UpdateValidator(metadata, insertType, updateType, deleteType);
+        return new DefaultUpdateValidator(metadata, insertType, updateType, deleteType);
     }
 
     @Override

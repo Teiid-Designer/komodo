@@ -162,7 +162,7 @@ import org.teiid.query.sql.visitor.GroupCollectorVisitor;
 import org.teiid.query.sql.visitor.GroupsUsedByElementsVisitor;
 import org.teiid.query.sql.visitor.SQLStringVisitor;
 import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
-import org.teiid.query.validator.UpdateValidator.UpdateInfo;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
 import org.teiid.query.xquery.saxon.SaxonXQueryExpression;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -1829,7 +1829,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     	try {
     	    TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
             queryResolver.validateProjectedSymbols(obj.getTarget(), getMetadata(), obj.getDefinition());
-			Validator.validate(obj.getDefinition(), getMetadata(), this);
+			DefaultValidator.validate(obj.getDefinition(), getMetadata(), this);
 			validateAlterTarget(obj);
 		} catch (QueryValidatorException e) {
             handleValidationError(e.getMessage(), obj.getDefinition());
@@ -1853,7 +1853,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 	    		handleValidationError(Messages.getString(Messages.ValidationVisitor.not_a_procedure, gs), gs);
 	    		return;
 	    	}
-	    	Validator.validate(obj.getDefinition(), getMetadata(), this);
+	    	DefaultValidator.validate(obj.getDefinition(), getMetadata(), this);
 	    	TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
 	    	StoredProcedureInfo<ISPParameter, QueryNode> info = getMetadata().getStoredProcedureInfoForProcedure(gs.getName());
 	    	for (ISPParameter param : info.getParameters()) {
@@ -1938,7 +1938,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     	validateGroupSupportsUpdate(obj.getTarget());
 		try {
 			if (obj.getDefinition() != null) {
-				Validator.validate(obj.getDefinition(), getMetadata(), this);
+				DefaultValidator.validate(obj.getDefinition(), getMetadata(), this);
 			}			
 		} catch (Exception e) {
 			handleException(e);

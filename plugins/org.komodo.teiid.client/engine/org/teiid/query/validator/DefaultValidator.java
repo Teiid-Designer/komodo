@@ -25,7 +25,7 @@ package org.teiid.query.validator;
 import java.util.Iterator;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.validator.IValidator;
+import org.komodo.spi.validator.Validator;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.sql.lang.Command;
@@ -34,7 +34,7 @@ import org.teiid.query.sql.navigator.PreOrderNavigator;
 import org.teiid.query.sql.visitor.CommandCollectorVisitor;
 
 
-public class Validator implements IValidator<LanguageObject> {
+public class DefaultValidator implements Validator<LanguageObject> {
 
     @Override
     public ValidatorReport validate(LanguageObject object, QueryMetadataInterface metadata) throws Exception {

@@ -268,7 +268,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     public ValidatorReport helpRunValidator(Command command, String[] expectedStringArray, QueryMetadataInterface metadata) {
         try {
-            ValidatorReport report = new Validator().validate(command, metadata);
+            ValidatorReport report = new DefaultValidator().validate(command, metadata);
 
             examineReport(command, expectedStringArray, report);
             return report;
@@ -316,7 +316,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         Command proc = queryResolver.expandCommand(command, metadata);
 
-        Validator validator = new Validator();
+        DefaultValidator validator = new DefaultValidator();
         ValidatorReport report = validator.validate(proc, metadata);
         if (report.hasItems()) {
             throw new Exception(report.getFailureMessage());
@@ -1118,7 +1118,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         queryResolver.resolveCommand(command, metadata);
 
         // Validate
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         assertEquals(0, report.getItems().size());
     }
 
@@ -1154,7 +1154,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         assertEquals("Expressions of type OBJECT, CLOB, BLOB, or XML cannot be used as LOOKUP key columns: test.\"group\".e3.", report.toString()); //$NON-NLS-1$
     }
 
@@ -1165,7 +1165,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Command command = helpResolve(sql, metadata);
         sql = "SELECT SUM(DISTINCT lookup('pm1.g1', 'e3', 'e2', e2)) FROM pm1.g1"; //$NON-NLS-1$
         command = helpResolve(sql, metadata);
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         assertEquals("The aggregate function SUM cannot be used with non-numeric expressions: SUM(DISTINCT lookup('pm1.g1', 'e3', 'e2', e2))", report.toString()); //$NON-NLS-1$
     }
 
@@ -1178,7 +1178,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         queryResolver.resolveCommand(command, group, ICommand.TYPE_STORED_PROCEDURE, metadata, true);
 
         // Validate
-        return new Validator().validate(command, metadata);
+        return new DefaultValidator().validate(command, metadata);
     }
 
     @Test
@@ -1292,7 +1292,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         queryResolver.resolveCommand(command, metadata);
 
         // Validate
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         // Validate
         assertEquals(0, report.getItems().size());
     }
@@ -1309,7 +1309,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         queryResolver.resolveCommand(command, metadata);
 
         // Validate
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         // Validate
         assertEquals(0, report.getItems().size());
     }
@@ -1412,7 +1412,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     public void testInsertIntoVirtualWithQuery() throws Exception {
         QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
         Command command = helpResolve("insert into vm1.g1 select 1, 2, true, 3", metadata); //$NON-NLS-1$
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         assertTrue(report.getItems().isEmpty());
     }
 

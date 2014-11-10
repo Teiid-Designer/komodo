@@ -33,7 +33,7 @@ import java.util.Set;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
-import org.komodo.spi.validator.IUpdateValidator;
+import org.komodo.spi.validator.UpdateValidator;
 import org.teiid.query.optimizer.relational.PartitionAnalyzer;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.sql.lang.Command;
@@ -55,7 +55,7 @@ import org.teiid.runtime.client.TeiidClientException;
  * this <code>Query</code> and verifies if the virtual group definition will allows it to be
  * updated.</p>
  */
-public class UpdateValidator implements IUpdateValidator<Command, ElementSymbol> {
+public class DefaultUpdateValidator implements UpdateValidator<Command, ElementSymbol> {
 	
 	public enum UpdateType {
 		/**
@@ -271,7 +271,7 @@ public class UpdateValidator implements IUpdateValidator<Command, ElementSymbol>
 	private ValidatorReport updateReport = new ValidatorReport();
 	private ValidatorReport deleteReport = new ValidatorReport();
 	
-	public UpdateValidator(QueryMetadataInterface qmi, UpdateType insertType, UpdateType updateType, UpdateType deleteType) {
+	public DefaultUpdateValidator(QueryMetadataInterface qmi, UpdateType insertType, UpdateType updateType, UpdateType deleteType) {
 		this.metadata = qmi;
 		this.updateInfo.deleteType = deleteType;
 		this.updateInfo.insertType = insertType;
