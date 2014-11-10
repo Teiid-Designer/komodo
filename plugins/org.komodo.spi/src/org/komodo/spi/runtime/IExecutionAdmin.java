@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  *
@@ -211,11 +211,11 @@ public interface IExecutionAdmin {
      * Ping the admin client to determine whether if is still connected
      * @param connectivityType
      *
-     * @return {@link IOutcome} describing state of ping
+     * @return {@link Outcome} describing state of ping
      * 
      * @throws Exception 
      */
-     IOutcome ping(ConnectivityType connectivityType) throws Exception;
+     Outcome ping(ConnectivityType connectivityType) throws Exception;
      
      /**
       * Get the location of the the admin driver class. Implementations have historically

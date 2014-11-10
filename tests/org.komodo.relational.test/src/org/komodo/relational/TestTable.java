@@ -29,7 +29,7 @@ import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.relational.model.Table;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  * Test Class to test Table
@@ -345,9 +345,9 @@ public class TestTable {
     public void testValidateDefaultCreate() {
     	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	
-    	IOutcome outcome = table.validate();
+    	Outcome outcome = table.validate();
     	
-    	assertEquals(IOutcome.Level.WARNING, outcome.getLevel());
+    	assertEquals(Outcome.Level.WARNING, outcome.getLevel());
     	assertEquals("No columns defined for table", outcome.getMessage()); //$NON-NLS-1$
     }
 
@@ -359,9 +359,9 @@ public class TestTable {
     	Table table = RelationalObjectFactory.INSTANCE.createTable(TABLE_NAME);
     	table.createColumn();
     	
-    	IOutcome outcome = table.validate();
+    	Outcome outcome = table.validate();
     	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    	assertEquals(Outcome.Level.OK, outcome.getLevel());
     }
 
     /**
@@ -372,9 +372,9 @@ public class TestTable {
     	Table table = RelationalObjectFactory.INSTANCE.createTable("Crap ?"); //$NON-NLS-1$
     	table.createColumn();
     	
-    	IOutcome outcome = table.validate();
+    	Outcome outcome = table.validate();
     	
-    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
+    	assertEquals(Outcome.Level.ERROR, outcome.getLevel());
     	
     	if(!outcome.getMessage().startsWith("The name is invalid.")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$

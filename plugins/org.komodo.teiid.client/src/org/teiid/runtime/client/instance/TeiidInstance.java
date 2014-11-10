@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
@@ -332,7 +332,7 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
     }
 
     @Override
-    public IOutcome ping(ConnectivityType connectivityType) {
+    public Outcome ping(ConnectivityType connectivityType) {
         try {
             boolean testCausesConnect = false;
 
@@ -341,7 +341,7 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
                 testCausesConnect = true;
             }
 
-            IOutcome outcome = admin.ping(connectivityType);
+            Outcome outcome = admin.ping(connectivityType);
 
             // Only disconnect if this test ping caused
             // the connect
@@ -412,7 +412,7 @@ public class TeiidInstance implements ITeiidInstance, StringConstants {
     }
 
     @Override
-    public IOutcome createVdbDataSource(String vdbName, String displayName, String jndiName) {
+    public Outcome createVdbDataSource(String vdbName, String displayName, String jndiName) {
         Properties props = new Properties();
         String username = this.jdbcInfo.getUsername();
         String password = this.jdbcInfo.getPassword();

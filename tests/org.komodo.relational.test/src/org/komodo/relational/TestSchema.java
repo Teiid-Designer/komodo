@@ -21,7 +21,7 @@ import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.Table;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  * Test Class to test Table
@@ -86,9 +86,9 @@ public class TestSchema {
     public void testValidateDefaultSchema() {
     	Schema schema = RelationalObjectFactory.INSTANCE.createSchema(SCHEMA_NAME);
     	
-    	IOutcome outcome = schema.validate();
+    	Outcome outcome = schema.validate();
     	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    	assertEquals(Outcome.Level.OK, outcome.getLevel());
 //    	assertEquals("No columns defined for table", outcome.getMessage()); //$NON-NLS-1$
     }
         

@@ -22,7 +22,7 @@ import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.RelationalObjectFactory;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  * Test Class to test Table
@@ -87,9 +87,9 @@ public class TestAccessPattern {
     public void testValidateDefaultAP() {
     	AccessPattern ap = RelationalObjectFactory.INSTANCE.createAccessPattern(AP_NAME);
     	
-    	IOutcome outcome = ap.validate();
+    	Outcome outcome = ap.validate();
     	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    	assertEquals(Outcome.Level.OK, outcome.getLevel());
     }
         
 }

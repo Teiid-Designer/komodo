@@ -22,7 +22,7 @@ import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.RelationalObjectFactory;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  * Test Class to test Table
@@ -87,9 +87,9 @@ public class TestPrimaryKey {
     public void testValidateDefaultPK() {
     	PrimaryKey pk = RelationalObjectFactory.INSTANCE.createPrimaryKey(PK_NAME);
     	
-    	IOutcome outcome = pk.validate();
+    	Outcome outcome = pk.validate();
     	
-    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
+    	assertEquals(Outcome.Level.ERROR, outcome.getLevel());
     	if(!outcome.getMessage().startsWith("No columns defined for primary key")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}

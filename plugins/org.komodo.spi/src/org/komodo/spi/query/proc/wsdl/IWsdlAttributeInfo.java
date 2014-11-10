@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.proc.wsdl;
 
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  *
@@ -57,6 +57,6 @@ public interface IWsdlAttributeInfo {
      * 
      * @return outcome the <code>IOutcome</code> representing the validity of the data in this info object
      */
-    IOutcome getOutcome();
+    Outcome getOutcome();
 
 }

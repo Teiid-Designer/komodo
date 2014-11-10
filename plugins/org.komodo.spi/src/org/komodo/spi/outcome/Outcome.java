@@ -6,17 +6,17 @@ import java.util.List;
 /**
  * The return state of a process or function
  */
-public interface IOutcome {
+public interface Outcome {
 
     public enum Level {
         OK, INFO, WARNING, ERROR;
     }
 
-    List<IOutcome> getOutcomes();
+    List<Outcome> getOutcomes();
     
-    void addOutcome(IOutcome outcome);
+    void addOutcome(Outcome outcome);
     
-    void addOutcomes(List<IOutcome> outcomes);
+    void addOutcomes(List<Outcome> outcomes);
     
     /**
      * @return

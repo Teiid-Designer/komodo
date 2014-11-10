@@ -22,7 +22,7 @@
 package org.komodo.spi.query.proc;
 
 import java.util.List;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.sql.ISQLConstants;
 
 /**
@@ -105,7 +105,7 @@ public interface ITeiidXmlFileInfo<T extends ITeiidXmlColumnInfo> extends ITeiid
      * 
      * @return whether this XML is parsed successfully
      */
-    IOutcome getParsingStatus();
+    Outcome getParsingStatus();
 
     /**
      * Get the Xml file's namespace
@@ -119,6 +119,6 @@ public interface ITeiidXmlFileInfo<T extends ITeiidXmlColumnInfo> extends ITeiid
      * 
      * @return whether parsing was successful
      */
-    IOutcome parseXmlFile();
+    Outcome parseXmlFile();
 
 }

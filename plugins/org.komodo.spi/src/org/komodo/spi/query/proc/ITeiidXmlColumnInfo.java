@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.proc;
 
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  *
@@ -97,6 +97,6 @@ public interface ITeiidXmlColumnInfo {
      * 
      * @return outcome the <code>IOutcome</code> representing the validity of the data in this info object
      */
-    IOutcome getOutcome();
+    Outcome getOutcome();
 
 }

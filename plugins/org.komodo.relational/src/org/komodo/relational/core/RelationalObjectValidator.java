@@ -27,8 +27,8 @@ import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.relational.model.View;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.outcome.IOutcome.Level;
+import org.komodo.spi.outcome.Outcome;
+import org.komodo.spi.outcome.Outcome.Level;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.utils.StringNameValidator;
 
@@ -65,8 +65,8 @@ public class RelationalObjectValidator implements RelationalValidator {
 	 * @see org.komodo.relational.core.RelationalValidator#validate(org.komodo.relational.model.RelationalObject)
 	 */
     @Override
-	public IOutcome validate(RelationalObject relationalObj) {
-		IOutcome multiOutcome = OutcomeFactory.getInstance().createOK("Object Validation Successful"); //$NON-NLS-1$
+	public Outcome validate(RelationalObject relationalObj) {
+		Outcome multiOutcome = OutcomeFactory.getInstance().createOK("Object Validation Successful"); //$NON-NLS-1$
     	
     	// --------------------------------------------------
     	// Name Validation - done for all Relational Objects
@@ -124,28 +124,28 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalTable the table
      * @return the validation status
      */
-	private IOutcome validateTable(Table relationalTable, IOutcome multiOutcome) {
+	private Outcome validateTable(Table relationalTable, Outcome multiOutcome) {
 		if( relationalTable.isMaterialized() && relationalTable.getMaterializedTable() == null ) {
 			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
 					Messages.getString(RELATIONAL.validate_error_materializedTableHasNoTableDefined) ));
 		}
 		
 		if( relationalTable.getPrimaryKey() != null) {
-			IOutcome outcome = validate(relationalTable.getPrimaryKey());
+			Outcome outcome = validate(relationalTable.getPrimaryKey());
 			if(!outcome.isOK()) {
 				multiOutcome.addOutcome(outcome);
 			}
 		}
 		
 		if( relationalTable.getUniqueContraint() != null ) {
-			IOutcome outcome = validate(relationalTable.getUniqueContraint());
+			Outcome outcome = validate(relationalTable.getUniqueContraint());
 			if(!outcome.isOK()) {
 				multiOutcome.addOutcome(outcome);
 			}
 		}
 		
 		for( ForeignKey fk : relationalTable.getForeignKeys() ) {
-			IOutcome outcome = validate(fk);
+			Outcome outcome = validate(fk);
 			if(!outcome.isOK()) {
 				multiOutcome.addOutcome(outcome);
 			}
@@ -153,7 +153,7 @@ public class RelationalObjectValidator implements RelationalValidator {
 		
 		// Check Column Status values
 		for( Column col : relationalTable.getColumns() ) {
-			IOutcome outcome = validate(col);
+			Outcome outcome = validate(col);
 			if(!outcome.isOK()) {
 				multiOutcome.addOutcome(outcome);
 			}
@@ -190,8 +190,8 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalColumn the column
      * @return the validation status
      */
-	private IOutcome validateColumn(Column relationalColumn, IOutcome multiOutcome) {
-		IOutcome outcome = this.dataTypeValidator.validate(relationalColumn.getDatatype());
+	private Outcome validateColumn(Column relationalColumn, Outcome multiOutcome) {
+		Outcome outcome = this.dataTypeValidator.validate(relationalColumn.getDatatype());
 		if(!outcome.isOK()) {
 			multiOutcome.addOutcome(outcome);
 		}
@@ -203,7 +203,7 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalAP the access pattern
      * @return the validation status
      */
-	private IOutcome validateAccessPattern(AccessPattern relationalAP, IOutcome multiOutcome) {
+	private Outcome validateAccessPattern(AccessPattern relationalAP, Outcome multiOutcome) {
 		return multiOutcome;
 	}
 	
@@ -212,7 +212,7 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalFK the foreign key
      * @return the validation status
      */
-	private IOutcome validateForeignKey(ForeignKey relationalFK, IOutcome multiOutcome) {
+	private Outcome validateForeignKey(ForeignKey relationalFK, Outcome multiOutcome) {
 		
 		if( relationalFK.getColumns().isEmpty() ) {
 			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
@@ -237,7 +237,7 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalPK the Primary Key
      * @return the validation status
      */
-	private IOutcome validatePrimaryKey(PrimaryKey relationalPK, IOutcome multiOutcome) {
+	private Outcome validatePrimaryKey(PrimaryKey relationalPK, Outcome multiOutcome) {
     	
 		if( relationalPK.getColumns().isEmpty() ) {
 			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(
@@ -252,11 +252,11 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalIndex the Index
      * @return the validation status
      */
-	private IOutcome validateIndex(Index relationalIndex, IOutcome multiOutcome) {
+	private Outcome validateIndex(Index relationalIndex, Outcome multiOutcome) {
     	
 		// Check Column Status values
 		for( Column col : relationalIndex.getColumns() ) {
-			IOutcome outcome = validate(col);
+			Outcome outcome = validate(col);
 			if(!outcome.isOK()) {
 				multiOutcome.addOutcome(outcome);
 			}
@@ -288,7 +288,7 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalModel the model
      * @return the validation status
      */
-	private IOutcome validateModel(Model relationalModel, IOutcome multiOutcome) {
+	private Outcome validateModel(Model relationalModel, Outcome multiOutcome) {
 		return multiOutcome;
 	}
 	
@@ -297,7 +297,7 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalParmeter the Parameter
      * @return the validation status
      */
-	private IOutcome validateParameter(Parameter relationalParmeter, IOutcome multiOutcome) {
+	private Outcome validateParameter(Parameter relationalParmeter, Outcome multiOutcome) {
     	
 		// Parameter directions check
 		Procedure parentProcedure = (Procedure)relationalParmeter.getParent();
@@ -309,7 +309,7 @@ public class RelationalObjectValidator implements RelationalValidator {
 			}
 		}
 		
-		IOutcome outcome = this.dataTypeValidator.validate(relationalParmeter.getDatatype());
+		Outcome outcome = this.dataTypeValidator.validate(relationalParmeter.getDatatype());
 		if(!outcome.isOK()) {
 			multiOutcome.addOutcome(outcome);
 		}
@@ -321,14 +321,14 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalProcedure the Procedure
      * @return the validation status
      */
-	private IOutcome validateProcedure(Procedure relationalProcedure, IOutcome multiOutcome) {
+	private Outcome validateProcedure(Procedure relationalProcedure, Outcome multiOutcome) {
     	
     	List<Parameter> params = relationalProcedure.getParameters();
     	
     	if(!params.isEmpty()) {
     		// Validate Parameters
     		for( Parameter param : params ) {
-    			IOutcome outcome = validate(param);
+    			Outcome outcome = validate(param);
     			if(!outcome.isOK()) {
     				multiOutcome.addOutcome(outcome);
     			}
@@ -408,11 +408,11 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalProcedureResultSet the ProcedureResultSet
      * @return the validation status
      */
-	private IOutcome validateProcedureResultSet(ProcedureResultSet relationalProcedureResultSet, IOutcome multiOutcome) {
+	private Outcome validateProcedureResultSet(ProcedureResultSet relationalProcedureResultSet, Outcome multiOutcome) {
     	
 		// Check Column Status values
 		for( Column col : relationalProcedureResultSet.getColumns() ) {
-			IOutcome outcome = validate(col);
+			Outcome outcome = validate(col);
 			if(!outcome.isOK()) {
 				multiOutcome.addOutcome(outcome);
 			}
@@ -449,7 +449,7 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalSchema the Schema
      * @return the validation status
      */
-	private IOutcome validateSchema(Schema relationalSchema, IOutcome multiOutcome) {
+	private Outcome validateSchema(Schema relationalSchema, Outcome multiOutcome) {
 		return multiOutcome;
 	}
 	
@@ -458,11 +458,11 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalView the View
      * @return the validation status
      */
-	private IOutcome validateView(View relationalView, IOutcome multiOutcome) {
+	private Outcome validateView(View relationalView, Outcome multiOutcome) {
     	
 		// Check Column Status values
 		for( Column col : relationalView.getColumns() ) {
-			IOutcome outcome = validate(col);
+			Outcome outcome = validate(col);
 			if(!outcome.isOK()) {
 				multiOutcome.addOutcome(outcome);
 			}
@@ -499,7 +499,7 @@ public class RelationalObjectValidator implements RelationalValidator {
      * @param relationalUC the UniqueConstraint
      * @return the validation status
      */
-	private IOutcome validateUniqueConstraint(UniqueConstraint relationalUC, IOutcome multiOutcome) {
+	private Outcome validateUniqueConstraint(UniqueConstraint relationalUC, Outcome multiOutcome) {
     	
 		if( relationalUC.getColumns().isEmpty() ) {
 			multiOutcome.addOutcome(OutcomeFactory.getInstance().createError(

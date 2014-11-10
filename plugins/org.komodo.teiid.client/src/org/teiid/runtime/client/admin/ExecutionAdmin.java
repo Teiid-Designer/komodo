@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
@@ -778,7 +778,7 @@ public class ExecutionAdmin implements IExecutionAdmin {
     }
     
     @Override
-    public IOutcome ping(ConnectivityType connectivityType) {
+    public Outcome ping(ConnectivityType connectivityType) {
         String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, teiidInstance.getTeiidAdminInfo().getUsername());
         try {
             if (this.admin == null)
@@ -797,12 +797,12 @@ public class ExecutionAdmin implements IExecutionAdmin {
         }
     }
     
-    private IOutcome pingAdmin() throws Exception {
+    private Outcome pingAdmin() throws Exception {
         admin.getSessions();
         return OutcomeFactory.getInstance().createOK();
     }
     
-    private IOutcome pingJdbc() {
+    private Outcome pingJdbc() {
         String host = teiidInstance.getHost();
         ITeiidJdbcInfo teiidJdbcInfo = teiidInstance.getTeiidJdbcInfo();
         

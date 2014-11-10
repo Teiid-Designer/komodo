@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 /**
  *
@@ -126,7 +126,7 @@ public interface ITeiidInstance extends IExecutionAdmin, HostProvider {
      * 
      * @return IState as to whether it succeeded
      */
-    IOutcome createVdbDataSource(String vdbName, String displayName, String jndiName);
+    Outcome createVdbDataSource(String vdbName, String displayName, String jndiName);
 
     /**
      * Update this instance with the properties of the given instance
