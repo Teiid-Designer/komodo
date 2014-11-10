@@ -22,13 +22,39 @@
 package org.komodo.spi.repository;
 
 /**
- * An observer for listening to events from an implementation of {@link IRepository}
+ *
  */
-public interface IRepositoryObserver {
+public interface RepositoryClient {
 
     /**
-     * Repository state changed
+     * The client state.
      */
-    void stateChanged(); 
+    public enum State {
 
+        /**
+         * The initial state.
+         */
+        NOT_STARTED,
+
+        /**
+         * Client has been successfully started.
+         */
+        STARTED,
+
+        /**
+         * Client has been successfully shutdown.
+         */
+        SHUTDOWN,
+
+        /**
+         * There was an error starting or shutting down the client.
+         */
+        ERROR
+
+    }
+
+    /**
+     * @return the engine state (never <code>null</code>)
+     */
+    public State getState();
 }

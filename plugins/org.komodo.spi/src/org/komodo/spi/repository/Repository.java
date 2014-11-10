@@ -27,7 +27,7 @@ import java.net.URL;
  * A repository is a data store containing artifacts
  * generated while modelling VDBs
  */
-public interface IRepository {
+public interface Repository {
 
     /**
      * The repository state.
@@ -110,28 +110,28 @@ public interface IRepository {
     boolean ping();
 
     /**
-     * Add an {@link IRepositoryClient} to receive notifications from
+     * Add an {@link RepositoryClient} to receive notifications from
      *
      * @param client
      */
-    void addClient(IRepositoryClient client);
+    void addClient(RepositoryClient client);
 
     /**
-     * Remove an {@link IRepositoryClient} that we no longer wish to receive notifications from
+     * Remove an {@link RepositoryClient} that we no longer wish to receive notifications from
      *
      * @param client
      */
-    void removeClient(IRepositoryClient client);
+    void removeClient(RepositoryClient client);
 
     /**
      * @param observer the observer to be added
      */
-    void addObserver(IRepositoryObserver observer);
+    void addObserver(RepositoryObserver observer);
 
     /**
      * @param observer the observer to be removed
      */
-    void removeObserver(IRepositoryObserver observer);
+    void removeObserver(RepositoryObserver observer);
 
     /**
      * Notify the repository of the given {@link RepositoryClientEvent}
