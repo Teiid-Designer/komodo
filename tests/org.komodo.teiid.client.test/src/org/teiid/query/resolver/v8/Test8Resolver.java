@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestResolver;
@@ -121,7 +121,7 @@ public class Test8Resolver extends AbstractTestResolver {
         helpCheckParameter(param2,
                            SPParameter.IN,
                            1,
-                           "pm1.sq2.in", DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), getFactory().newConstant("abc")); //$NON-NLS-1$ //$NON-NLS-2$
+                           "pm1.sq2.in", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), getFactory().newConstant("abc")); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     /**
@@ -145,13 +145,13 @@ public class Test8Resolver extends AbstractTestResolver {
         helpCheckParameter(param1,
                            SPParameter.IN,
                            1,
-                           "pm1.sq3a.in", DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), getFactory().newConstant("abc")); //$NON-NLS-1$ //$NON-NLS-2$
+                           "pm1.sq3a.in", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), getFactory().newConstant("abc")); //$NON-NLS-1$ //$NON-NLS-2$
 
         SPParameter param2 = proc.getParameter(2);
         helpCheckParameter(param2,
                            SPParameter.IN,
                            2,
-                           "pm1.sq3a.in2", DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(), getFactory().newConstant(new Integer(123))); //$NON-NLS-1$
+                           "pm1.sq3a.in2", DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), getFactory().newConstant(new Integer(123))); //$NON-NLS-1$
     }
 
     @Test

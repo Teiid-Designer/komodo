@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ICreate;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.Table;
@@ -198,7 +198,7 @@ public class Create extends Command
             for (int i = 0; i < this.columns.size(); i++) {
                 Column c = this.columns.get(i);
                 Column o = other.columns.get(i);
-                DataTypeManagerService dataTypeManager = getTeiidParser().getDataTypeService();
+                DefaultDataTypeManager dataTypeManager = getTeiidParser().getDataTypeService();
                 if (!c.getName().equalsIgnoreCase(o.getName()) 
                     || dataTypeManager.getDataTypeClass(c.getRuntimeType().toLowerCase()) != dataTypeManager.getDataTypeClass(o.getRuntimeType().toLowerCase())
                     || c.isAutoIncremented() != o.isAutoIncremented()

@@ -23,7 +23,7 @@
 package org.teiid.core.types.basic;
 
 import java.math.BigInteger;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -34,7 +34,7 @@ public class StringToBigIntegerTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public StringToBigIntegerTransform(DataTypeManagerService dataTypeManager) {
+    public StringToBigIntegerTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 

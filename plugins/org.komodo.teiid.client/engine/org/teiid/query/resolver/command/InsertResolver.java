@@ -33,7 +33,7 @@ import java.util.Set;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.language.SQLConstants;
 import org.teiid.query.metadata.TempMetadataAdapter;
@@ -270,7 +270,7 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
             ElementSymbol next = varIter.next();
 			ElementSymbol varSymbol = next.clone();
             varSymbol.getGroupSymbol().setName(ProcedureReservedWords.CHANGING);
-            varSymbol.setType(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass());
+            varSymbol.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
             
             Constant constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
             constant.setValue(Boolean.TRUE);
@@ -290,7 +290,7 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
         	ElementSymbol next = defaultIter.next();
  			ElementSymbol varSymbol = next.clone();
             varSymbol.getGroupSymbol().setName(ProcedureReservedWords.CHANGING);
-            varSymbol.setType(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass());
+            varSymbol.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
             
             Constant constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
             constant.setValue(Boolean.FALSE);

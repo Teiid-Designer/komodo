@@ -36,8 +36,8 @@ import java.util.Properties;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.VDBMetaData;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.runtime.version.TeiidVersion;
@@ -97,7 +97,7 @@ public class RealMetadataFactory {
 
     private final TCQueryParser parser;
 
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
         
 	public RealMetadataFactory(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
@@ -113,9 +113,9 @@ public class RealMetadataFactory {
 	    return parser.getTeiidParser();
 	}
 
-	public DataTypeManagerService getDataTypeManager() {
+	public DefaultDataTypeManager getDataTypeManager() {
 	    if (dataTypeManager == null) 
-	        dataTypeManager = DataTypeManagerService.getInstance(getTeiidVersion());
+	        dataTypeManager = DefaultDataTypeManager.getInstance(getTeiidVersion());
 
 	    return dataTypeManager;
 	}
@@ -172,15 +172,15 @@ public class RealMetadataFactory {
         Table library = createPhysicalGroup("LOB_TESTING_ONE", lob); //$NON-NLS-1$
         
         // add direct query procedure
-        ColumnSet<Procedure> nativeProcResults = createResultSet("bqt1.nativers", new String[] {"tuple"}, new String[] { DataTypeManagerService.DefaultDataTypes.OBJECT.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter nativeparam = createParameter("param", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        ProcedureParameter vardic = createParameter("varag", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.OBJECT.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> nativeProcResults = createResultSet("bqt1.nativers", new String[] {"tuple"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter nativeparam = createParameter("param", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter vardic = createParameter("varag", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()); //$NON-NLS-1$
         vardic.setVarArg(true);
         Procedure nativeProc = createStoredProcedure("native", bqt1, Arrays.asList(nativeparam,vardic));  //$NON-NLS-1$ //$NON-NLS-2$
         nativeProc.setResultSet(nativeProcResults);        
         
         createElements( library, new String[] { "CLOB_COLUMN", "BLOB_COLUMN", "KEY_EMULATOR" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        		new String[] { DataTypeManagerService.DefaultDataTypes.CLOB.getId(), DataTypeManagerService.DefaultDataTypes.BLOB.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); 
+        		new String[] { DefaultDataTypeManager.DefaultDataTypes.CLOB.getId(), DefaultDataTypeManager.DefaultDataTypes.BLOB.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); 
 
         // Create virtual groups
         TCQueryNode vqtn1 = new TCQueryNode("SELECT * FROM BQT1.SmallA"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -241,15 +241,15 @@ public class RealMetadataFactory {
              "CharValue", "ShortValue",  //$NON-NLS-1$ //$NON-NLS-2$
              "BigIntegerValue", "BigDecimalValue",  //$NON-NLS-1$ //$NON-NLS-2$
              "ObjectValue" }; //$NON-NLS-1$
-         String[] elemTypes = new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), 
-                             DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), 
-                             DataTypeManagerService.DefaultDataTypes.FLOAT.getId(), DataTypeManagerService.DefaultDataTypes.LONG.getId(), 
-                             DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.BYTE.getId(), 
-                             DataTypeManagerService.DefaultDataTypes.DATE.getId(), DataTypeManagerService.DefaultDataTypes.TIME.getId(), 
-                             DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), 
-                             DataTypeManagerService.DefaultDataTypes.CHAR.getId(), DataTypeManagerService.DefaultDataTypes.SHORT.getId(), 
-                             DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getId(), 
-                             DataTypeManagerService.DefaultDataTypes.OBJECT.getId() };
+         String[] elemTypes = new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), 
+                             DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), 
+                             DefaultDataTypeManager.DefaultDataTypes.FLOAT.getId(), DefaultDataTypeManager.DefaultDataTypes.LONG.getId(), 
+                             DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.BYTE.getId(), 
+                             DefaultDataTypeManager.DefaultDataTypes.DATE.getId(), DefaultDataTypeManager.DefaultDataTypes.TIME.getId(), 
+                             DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), 
+                             DefaultDataTypeManager.DefaultDataTypes.CHAR.getId(), DefaultDataTypeManager.DefaultDataTypes.SHORT.getId(), 
+                             DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId(), 
+                             DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId() };
         
         List<Column> bqt1SmallAe = createElements(bqt1SmallA, elemNames, elemTypes);
         bqt1SmallAe.get(1).setNativeType("char"); //$NON-NLS-1$
@@ -264,14 +264,14 @@ public class RealMetadataFactory {
         createElements(bqt3SmallB, elemNames, elemTypes);
         createElements(bqt3MediumA, elemNames, elemTypes);
         createElements(bqt3MediumB, elemNames, elemTypes);
-        createElements(lobTable, new String[] {"ClobValue"}, new String[] {DataTypeManagerService.DefaultDataTypes.CLOB.getId()}); //$NON-NLS-1$
+        createElements(lobTable, new String[] {"ClobValue"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.CLOB.getId()}); //$NON-NLS-1$
         
         // Create virtual elements
         createElements(vqtg1, elemNames, elemTypes);        
-        createElements(vqtg2, new String[] {"a12345"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId()});  //$NON-NLS-1$
-        createElements(vqtg15355, new String[] {"StringKey", "BigIntegerValue"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getId()});         //$NON-NLS-1$ //$NON-NLS-2$
-        createElements(vqtg15355a, new String[] {"StringKey", "StringNum", "BigIntegerValue"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getId()});         //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        createElements(vqtg15355b, new String[] {"IntKey", "BigIntegerValue"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getId()});         //$NON-NLS-1$ //$NON-NLS-2$
+        createElements(vqtg2, new String[] {"a12345"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});  //$NON-NLS-1$
+        createElements(vqtg15355, new String[] {"StringKey", "BigIntegerValue"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId()});         //$NON-NLS-1$ //$NON-NLS-2$
+        createElements(vqtg15355a, new String[] {"StringKey", "StringNum", "BigIntegerValue"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId()});         //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        createElements(vqtg15355b, new String[] {"IntKey", "BigIntegerValue"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId()});         //$NON-NLS-1$ //$NON-NLS-2$
         createElements(vqtg2589, elemNames, elemTypes);        
         createElements(vqtg2589a, elemNames, elemTypes);        
         createElements(vqtg2589b, elemNames, elemTypes);        
@@ -284,94 +284,94 @@ public class RealMetadataFactory {
         createElements(bvqtg1, elemNames, elemTypes);        
         createElements(bvqt2g1, elemNames, elemTypes);        
         
-        ProcedureParameter rsp1 = createParameter("ret", ISPParameter.ParameterInfo.RETURN_VALUE, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
-        ProcedureParameter rsp2 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter rsp1 = createParameter("ret", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rsp2 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         createVirtualProcedure("v_spTest9", bvqt, Arrays.asList(rsp1, rsp2), new TCQueryNode("ret = call pm4.spTest9(inkey);")); //$NON-NLS-1$ //$NON-NLS-2$
 
      // Add stored procedure
         Schema pm1 = createPhysicalModel("pm1", metadataStore); //$NON-NLS-1$
-        ProcedureParameter rs1p1 = createParameter("intkey", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());         //$NON-NLS-1$
-        ColumnSet<Procedure> rs1 = createResultSet("rs1", new String[] { "IntKey", "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs1p1 = createParameter("intkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());         //$NON-NLS-1$
+        ColumnSet<Procedure> rs1 = createResultSet("rs1", new String[] { "IntKey", "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure spTest5 = createStoredProcedure("spTest5", pm1, Arrays.asList(rs1p1)); //$NON-NLS-1$ //$NON-NLS-2$
         spTest5.setResultSet(rs1);
 
         Schema pm2 = createPhysicalModel("pm2", metadataStore); //$NON-NLS-1$
-        ProcedureParameter rs2p1 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter rs2p2 = createParameter("outkey", ISPParameter.ParameterInfo.OUT, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
-        ColumnSet<Procedure> rs2 = createResultSet("rs2", new String[] { "IntKey", "StringKey"}, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() , DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs2p1 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter rs2p2 = createParameter("outkey", ISPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
+        ColumnSet<Procedure> rs2 = createResultSet("rs2", new String[] { "IntKey", "StringKey"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() , DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure spTest8 = createStoredProcedure("spTest8", pm2, Arrays.asList(rs2p1, rs2p2)); //$NON-NLS-1$ //$NON-NLS-2$
         spTest8.setResultSet(rs2);
         
-        ProcedureParameter rs2p2a = createParameter("outkey", ISPParameter.ParameterInfo.OUT, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
-        ColumnSet<Procedure> rs2a = createResultSet("rs2", new String[] { "IntKey", "StringKey"}, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() , DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs2p2a = createParameter("outkey", ISPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
+        ColumnSet<Procedure> rs2a = createResultSet("rs2", new String[] { "IntKey", "StringKey"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() , DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure spTest8a = createStoredProcedure("spTest8a", pm2, Arrays.asList(rs2p2a)); //$NON-NLS-1$ //$NON-NLS-2$
         spTest8a.setResultSet(rs2a);
         
         Schema pm4 = createPhysicalModel("pm4", metadataStore); //$NON-NLS-1$
-        ProcedureParameter rs4p1 = createParameter("ret", ISPParameter.ParameterInfo.RETURN_VALUE, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
-        ProcedureParameter rs4p2 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter rs4p1 = createParameter("ret", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs4p2 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         createStoredProcedure("spTest9", pm4, Arrays.asList(rs4p1, rs4p2)); //$NON-NLS-1$ //$NON-NLS-2$
         
         Schema pm3 = createPhysicalModel("pm3", metadataStore); //$NON-NLS-1$
-        ProcedureParameter rs3p1 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter rs3p2 = createParameter("outkey", ISPParameter.ParameterInfo.INOUT, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
-        ColumnSet<Procedure> rs3 = createResultSet("rs3", new String[] { "IntKey", "StringKey"}, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() , DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs3p1 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter rs3p2 = createParameter("outkey", ISPParameter.ParameterInfo.INOUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
+        ColumnSet<Procedure> rs3 = createResultSet("rs3", new String[] { "IntKey", "StringKey"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() , DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure spTest11 = createStoredProcedure("spTest11", pm3, Arrays.asList(rs3p1, rs3p2)); //$NON-NLS-1$ //$NON-NLS-2$
         spTest11.setResultSet(rs3);
         
         //add virtual stored procedures 
         Schema mmspTest1 = createVirtualModel("mmspTest1", metadataStore); //$NON-NLS-1$
-        ColumnSet<Procedure> vsprs1 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> vsprs1 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode vspqn1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; LOOP ON (SELECT intkey FROM bqt1.smallA) AS intKeyCursor BEGIN x= intKeyCursor.intkey - 1; END SELECT stringkey FROM bqt1.smalla where intkey=x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp1 = createVirtualProcedure("MMSP1", mmspTest1, null, vspqn1); //$NON-NLS-1$
         vsp1.setResultSet(vsprs1);
 
-        ColumnSet<Procedure> vsprs2 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> vsprs2 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode vspqn2 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; LOOP ON (SELECT intkey FROM bqt1.smallA) AS intKeyCursor1 BEGIN LOOP ON (SELECT intkey FROM bqt1.smallB) AS intKeyCursor2 BEGIN x= intKeyCursor1.intkey - intKeyCursor2.intkey; END END SELECT stringkey FROM bqt1.smalla where intkey=x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp2 = createVirtualProcedure("MMSP2", mmspTest1, null, vspqn2); //$NON-NLS-1$
         vsp2.setResultSet(vsprs2);
 
-        ColumnSet<Procedure> vsprs3 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> vsprs3 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode vspqn3 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; LOOP ON (SELECT intkey FROM bqt1.smallA) AS intKeyCursor BEGIN x= intKeyCursor.intkey - 1; if(x = 25) BEGIN BREAK; END ELSE BEGIN CONTINUE; END END SELECT stringkey FROM bqt1.smalla where intkey=x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp3 = createVirtualProcedure("MMSP3", mmspTest1, null, vspqn3); //$NON-NLS-1$
         vsp3.setResultSet(vsprs3);
 
-        ColumnSet<Procedure> vsprs4 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> vsprs4 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode vspqn4 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x=0; WHILE(x < 50) BEGIN x= x + 1; if(x = 25) BEGIN BREAK; END ELSE BEGIN CONTINUE; END END SELECT stringkey FROM bqt1.smalla where intkey=x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp4 = createVirtualProcedure("MMSP4", mmspTest1, null, vspqn4); //$NON-NLS-1$
         vsp4.setResultSet(vsprs4);
         
-        ColumnSet<Procedure> vsprs5 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp5p1 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> vsprs5 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter vsp5p1 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         TCQueryNode vspqn5 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT 0; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp5 = createVirtualProcedure("MMSP5", mmspTest1, Arrays.asList(vsp5p1), vspqn5); //$NON-NLS-1$
         vsp5.setResultSet(vsprs5);
 
-        ColumnSet<Procedure> vsprs6 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp6p1 = createParameter("p1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> vsprs6 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter vsp6p1 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         TCQueryNode vspqn6 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT p1 as StringKey; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp6 = createVirtualProcedure("MMSP6", mmspTest1, Arrays.asList(vsp6p1), vspqn6); //$NON-NLS-1$
         vsp6.setResultSet(vsprs6);
         
-        createStoredProcedure("spRetOut", pm4, Arrays.asList(createParameter("ret", ISPParameter.ParameterInfo.RETURN_VALUE, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()),
-        		createParameter("x", ISPParameter.ParameterInfo.OUT, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()))); //$NON-NLS-1$ //$NON-NLS-2$
+        createStoredProcedure("spRetOut", pm4, Arrays.asList(createParameter("ret", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()),
+        		createParameter("x", ISPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()))); //$NON-NLS-1$ //$NON-NLS-2$
         
-        ColumnSet<Procedure> vsprs7 = createResultSet("TEIIDSP7.vsprs1", new String[] { "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp7p1 = createParameter("p1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> vsprs7 = createResultSet("TEIIDSP7.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter vsp7p1 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn7 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN declare integer x; x = exec spTest9(p1); declare integer y; exec spTest11(inkey=>x, outkey=>y) without return; select convert(x, string) || y; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp7 = createVirtualProcedure("TEIIDSP7", mmspTest1, Arrays.asList(vsp7p1), vspqn7); //$NON-NLS-1$
         vsp7.setResultSet(vsprs7);
         
-        ProcedureParameter vsp8p1 = createParameter("r", ISPParameter.ParameterInfo.RETURN_VALUE, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter vsp8p2 = createParameter("p1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp8p1 = createParameter("r", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp8p2 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn8 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN r = p1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         createVirtualProcedure("TEIIDSP8", mmspTest1, Arrays.asList(vsp8p1, vsp8p2), vspqn8); //$NON-NLS-1$
 
-        ColumnSet<Procedure> vsprs9 = createResultSet("TEIIDSP9.vsprs1", new String[] { "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp9p1 = createParameter("r", ISPParameter.ParameterInfo.RETURN_VALUE, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> vsprs9 = createResultSet("TEIIDSP9.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter vsp9p1 = createParameter("r", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vsp9p1.setNullType(NullType.No_Nulls);
-        ProcedureParameter vsp9p2 = createParameter("p1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter vsp9p3 = createParameter("p2", ISPParameter.ParameterInfo.OUT, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp9p2 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp9p3 = createParameter("p2", ISPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn9 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN if (p1 = 1) begin\n r = 1; end\n p2 = 10; select 'hello'; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp9 = createVirtualProcedure("TEIIDSP9", mmspTest1, Arrays.asList(vsp9p1, vsp9p2, vsp9p3), vspqn9); //$NON-NLS-1$
         vsp9.setResultSet(vsprs9);
@@ -381,8 +381,8 @@ public class RealMetadataFactory {
         
         // this is for the source added function
         bqt1.addFunction(new FunctionMethod("reverse", "reverse", "misc", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-                new FunctionParameter[] {new FunctionParameter("columnName", DataTypeManagerService.DefaultDataTypes.STRING.getId(), "")}, //$NON-NLS-1$ //$NON-NLS-2$
-                new FunctionParameter("result", DataTypeManagerService.DefaultDataTypes.STRING.getId(), "") ) ); //$NON-NLS-1$ //$NON-NLS-2$    		
+                new FunctionParameter[] {new FunctionParameter("columnName", DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), "")}, //$NON-NLS-1$ //$NON-NLS-2$
+                new FunctionParameter("result", DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), "") ) ); //$NON-NLS-1$ //$NON-NLS-2$    		
         
     	 return metadataStore;
     }
@@ -437,55 +437,55 @@ public class RealMetadataFactory {
         Table physTable = createPhysicalGroup("info", physModel); //$NON-NLS-1$
         createElements(physTable,
                                       new String[] { "e1", "e2", "e3"}, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         Table physGroup = createPhysicalGroup("MatTable", physModel); //$NON-NLS-1$
         createElements(physGroup,
                                       new String[] { "e1" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         Table physGroupStage = createPhysicalGroup("MatStage", physModel); //$NON-NLS-1$
         createElements(physGroupStage,
                                       new String[] { "e1" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         Table physGroup1 = createPhysicalGroup("MatTable1", physModel); //$NON-NLS-1$
         createElements(physGroup1,
                                       new String[] { "e1" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         Table physGroupStage1 = createPhysicalGroup("MatStage1", physModel); //$NON-NLS-1$
         createElements(physGroupStage,
                                       new String[] { "e1" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         Table physGroup_virtSrc = createPhysicalGroup("MatSrc", physModel_virtSrc); //$NON-NLS-1$
         createElements(physGroup_virtSrc,
                                       new String[] { "x" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 
         if (getTeiidVersion().isGreaterThanOrEqualTo(Version.TEIID_8_5.get())) {
             Table status = createPhysicalGroup("Status", physModel_virtSrc); //$NON-NLS-1$
             createElements(status,
                                       new String[] { "VDBName", "VDBVersion", "SchemaName", "Name", "TargetSchemaName", "TargetName", "Valid", "LoadState", "Cardinality", "OnErrorAction", "Updated" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                               DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                               DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId()});
         }
 
         TCQueryNode virtTrans = new TCQueryNode("SELECT x as e1 FROM MatSrc.MatSrc");         //$NON-NLS-1$ //$NON-NLS-2$
         Table virtGroup = createVirtualGroup("MatView", virtModel, virtTrans); //$NON-NLS-1$
         createElements(virtGroup,
                                       new String[] { "e1" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
        
         virtGroup.setMaterialized(true);
         virtGroup.setMaterializedTable(physGroup);
@@ -496,7 +496,7 @@ public class RealMetadataFactory {
             TCQueryNode virtTransManaged = new TCQueryNode("SELECT x as e1 FROM MatSrc.MatSrc"); //$NON-NLS-1$ //$NON-NLS-2$
             Table virtGroupManaged = createVirtualGroup("ManagedMatView", virtModel, virtTransManaged); //$NON-NLS-1$
             createElements(virtGroupManaged, new String[] {"e1"}, //$NON-NLS-1$
-                           new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                           new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 
             virtGroupManaged.setMaterialized(true);
             virtGroupManaged.setMaterializedTable(physGroup);
@@ -511,13 +511,13 @@ public class RealMetadataFactory {
         Table vGroup = createVirtualGroup("VGroup", virtModel, vTrans); //$NON-NLS-1$
         createElements(vGroup,
                                       new String[] { "e1" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         TCQueryNode virtTrans1 = new TCQueryNode("SELECT e1 FROM MatView.MatView where e1 = 1");         //$NON-NLS-1$ //$NON-NLS-2$
         Table virtGroup1 = createVirtualGroup("MatView1", virtModel, virtTrans1); //$NON-NLS-1$
         createElements(virtGroup1,
                                       new String[] { "e1" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         virtGroup1.setMaterializedTable(physGroup1);
         virtGroup1.setMaterializedStageTable(physGroupStage1);
@@ -527,7 +527,7 @@ public class RealMetadataFactory {
         vGroup2.setMaterialized(true);
         createElements(vGroup2,
                                       new String[] { "x" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 
         if (getTeiidVersion().isGreaterThanOrEqualTo(Version.TEIID_8_5.get())) {
             TCQueryNode vTrans2a = new TCQueryNode("SELECT x FROM matsrc"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -541,7 +541,7 @@ public class RealMetadataFactory {
             vGroup2a.getFunctionBasedIndexes().add(fbi);
             vGroup2.setMaterialized(true);
             createElements(vGroup2a, new String[] {"x"}, //$NON-NLS-1$
-                           new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                           new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         }
     
         //covering index
@@ -550,7 +550,7 @@ public class RealMetadataFactory {
         vGroup3.setMaterialized(true);
         List<Column> vElements3 = createElements(vGroup3,
                                       new String[] { "x", "y" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         createKey(KeyRecord.Type.Primary, "pk", vGroup3, vElements3.subList(0, 1));
         createKey(KeyRecord.Type.Index, "idx", vGroup3, vElements3.subList(1, 2));
@@ -560,7 +560,7 @@ public class RealMetadataFactory {
         vGroup4.setMaterialized(true);
         createElements(vGroup4,
                                       new String[] { "x" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         //non-covering index
         TCQueryNode vTrans5 = new TCQueryNode("SELECT x, 'z' || substring(x, 2) as y, 1 as z FROM matsrc");         //$NON-NLS-1$ //$NON-NLS-2$
@@ -568,7 +568,7 @@ public class RealMetadataFactory {
         vGroup5.setMaterialized(true);
         List<Column> vElements5 = createElements(vGroup5,
                                       new String[] { "x", "y", "z" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
         
         createKey(KeyRecord.Type.Primary, "pk", vGroup5, vElements5.subList(0, 1));
         createKey(KeyRecord.Type.Index, "idx", vGroup5, vElements5.subList(1, 2));
@@ -579,7 +579,7 @@ public class RealMetadataFactory {
         vGroup6.setMaterialized(true);
         List<Column> vElements6 = createElements(vGroup6,
                                       new String[] { "x", "y" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         
         createKey(KeyRecord.Type.Index, "idx", vGroup6, vElements6.subList(1, 2));
         
@@ -589,13 +589,13 @@ public class RealMetadataFactory {
         vGroup7.setMaterialized(true);
         List<Column> vElements7 = createElements(vGroup7,
                                       new String[] { "x", "y", "z" }, //$NON-NLS-1$
-                                      new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+                                      new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
         
         createKey(KeyRecord.Type.Primary, "pk", vGroup7, vElements7.subList(1, 2));
         
         Schema sp = createVirtualModel("sp", metadataStore); //$NON-NLS-1$
-        ColumnSet<Procedure> rs = createResultSet("sp1.vsprs1", new String[] { "StringKey" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter param = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> rs = createResultSet("sp1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter param = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         param.setNullType(NullType.Nullable);
         TCQueryNode sp1qn = new TCQueryNode("/*+ cache */ CREATE VIRTUAL PROCEDURE BEGIN SELECT x as StringKey from matsrc where x = param1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp5 = createVirtualProcedure("sp1", sp, Arrays.asList(param), sp1qn); //$NON-NLS-1$
@@ -643,61 +643,61 @@ public class RealMetadataFactory {
 		// Create physical elements
 		createElements(pm1g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm1g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm1g3, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         List<Column> pm1g4e = createElements(pm1g4,
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         pm1g4e.get(1).setSelectable(false);
         pm1g4e.get(3).setSelectable(false);
         List<Column> pm1g5e = createElements(pm1g5,
             new String[] { "e1" }, //$NON-NLS-1$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         pm1g5e.get(0).setSelectable(false);
         createElements(pm1g6,
             new String[] { "in", "in3" }, //$NON-NLS-1$ //$NON-NLS-2$ 
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(pm1table, 
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g3, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm3g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.DATE.getId(), DataTypeManagerService.DefaultDataTypes.TIME.getId(), DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.DATE.getId(), DefaultDataTypeManager.DefaultDataTypes.TIME.getId(), DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId() });
 		createElements(pm3g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.DATE.getId(), DataTypeManagerService.DefaultDataTypes.TIME.getId(), DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.DATE.getId(), DefaultDataTypeManager.DefaultDataTypes.TIME.getId(), DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId() });
         List<Column> pm4g1e = createElements(pm4g1, 
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         List<Column> pm4g2e = createElements(pm4g2, 
             new String[] { "e1", "e2", "e3", "e4", "e5", "e6" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         List<Column> pm5g1e = createElements(pm5g1,
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         List<Column> pm5g2e = createElements(pm5g2,
 			new String[] { "e1", "e2", "e3", "e4", "e5", "e6" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
 		createElements(pm5g3,
 	        new String[] { "e1", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.SHORT.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.SHORT.getId() });
         createElements(pm6g1,
             new String[] { "e1", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         
 
         // Create access patterns - pm4
@@ -731,7 +731,7 @@ public class RealMetadataFactory {
         // Create temp elements - the element "node1" is purposely named to be ambiguous with a document node named "node1"
         createElements(tm1g1, 
             new String[] { "e1", "e2", "e3", "e4", "node1"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
             
 		// Create virtual groups
 		TCQueryNode vm1g1n1 = new TCQueryNode("SELECT * FROM pm1.g1"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -868,130 +868,130 @@ public class RealMetadataFactory {
 		// Create virtual elements
 		createElements(vm1g39, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(vm1g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(vm2g1, 
     		new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g1_defect10711, 
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g1_defect12081, 
             new String[] { "e1", "e1Upper" }, //$NON-NLS-1$ //$NON-NLS-2$ 
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g1c, 
             new String[] { "e5", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g2a, 
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(vm1g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(vm1g4,
 			new String[] { "e1" }, //$NON-NLS-1$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g5,
             new String[] { "expr", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         createElements(vm1g6,
             new String[] { "e", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         createElements(vm1g7,
             new String[] { "e", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         createElements(vm1g8,
             new String[] { "e", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         createElements(vm1g9,
             new String[] { "e1", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         createElements(vm1g10,
             new String[] { "e1", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         createElements(vm1g11,
             new String[] { "e1", "e2", "e3", "e4", "e5", "e6"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         createElements(vm1g12,
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.DATE.getId(), DataTypeManagerService.DefaultDataTypes.TIME.getId(), DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.DATE.getId(), DefaultDataTypeManager.DefaultDataTypes.TIME.getId(), DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId() });
         createElements(vm1g13,
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.DATE.getId(), DataTypeManagerService.DefaultDataTypes.TIME.getId(), DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.DATE.getId(), DefaultDataTypeManager.DefaultDataTypes.TIME.getId(), DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId() });
         createElements(vm1g14,
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.DATE.getId(), DataTypeManagerService.DefaultDataTypes.TIME.getId(), DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.DATE.getId(), DefaultDataTypeManager.DefaultDataTypes.TIME.getId(), DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId() });
         createElements(vm1g15,
             new String[] { "e1", "x" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g16,
             new String[] { "e", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.DATE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.DATE.getId() });
         createElements(vm1g17,
             new String[] { "e1", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.DATE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.DATE.getId() });
         createElements(vm1g18,
             new String[] { "x" }, //$NON-NLS-1$
-            new String[] { DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g19,
             new String[] { "e1" }, //$NON-NLS-1$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g20,
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g21,
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g22,
             new String[] { "e1", "e2", "e3", "e4", "e5" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g23,
             new String[] { "e1", "e2", "e3", "e4", "e5" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g24,
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g25,
             new String[] { "e1", "e2", "e3", "e4", "e5" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g26,
             new String[] { "e1", "e2", "e3", "e4", "e5" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g27,
             new String[] { "x", "e1"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g28,
             new String[] { "a", "x"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g29,
             new String[] { "x", "expr"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g30,
             new String[] { "x", "y"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g31,
             new String[] { "x", "y"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g32,
             new String[] { "x", "y"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         createElements(vm1g33,
             new String[] { "e2"}, //$NON-NLS-1$  
-            new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         createElements(vm1g34,
             new String[] { "e1_", "e2_"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
         createElements(vm1g36,
              new String[] { "ve1", "ve2" }, //$NON-NLS-1$ //$NON-NLS-2$
-             new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+             new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
         List<Column> vm1g37e = createElements(vm1g37,
               new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-              new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+              new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         createElements(vm1g38,
               new String[] { "e1", "e2" }, //$NON-NLS-1$ //$NON-NLS-2$
-              new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+              new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
 
         //Create access patterns on vm1.g37
         elements = new ArrayList<Column>(1);
@@ -1015,44 +1015,44 @@ public class RealMetadataFactory {
         Table vm1mc1 = createVirtualGroup("mc1", xmltest, mc1n1); //$NON-NLS-1$
         createElements(vm1mc1,
             new String[] { "e1" }, //$NON-NLS-1$
-            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 
         //XML STUFF =============================================
 
         // Procedures and stored queries
-        ColumnSet<Procedure> rs1 = createResultSet("pm1.rs1", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ColumnSet<Procedure> rs1 = createResultSet("pm1.rs1", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         TCQueryNode sq1n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq1 = createVirtualProcedure("sq1", pm1, null, sq1n1); //$NON-NLS-1$
         sq1.setResultSet(rs1);
         
-        ColumnSet<Procedure> rs2 = createResultSet("ret", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs2p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs2 = createResultSet("ret", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs2p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq2n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sq2.in; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq2 = createVirtualProcedure("sq2", pm1, Arrays.asList(rs2p2), sq2n1);  //$NON-NLS-1$
         sq2.setResultSet(rs2);
 
-        ColumnSet<Procedure> rs5 = createResultSet("pm1.r5", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs5p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs5p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs5 = createResultSet("pm1.r5", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs5p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq3n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sq3.in UNION ALL SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sq3.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq3 = createVirtualProcedure("sq3", pm1, Arrays.asList(rs5p2, rs5p3), sq3n1);  //$NON-NLS-1$
         sq3.setResultSet(rs5);
 
         //For defect 8211 - this stored query has two input params, no return param, and
         //the input params are PURPOSELY numbered with indices "1" and "3" - see defect 8211
-        ColumnSet<Procedure> rs5a = createResultSet("pm1.r5a", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs5p1a = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs5p2a = createParameter("in2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs5a = createResultSet("pm1.r5a", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs5p1a = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p2a = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq3n1a = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sq3a.in UNION ALL SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sq3a.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq3a = createVirtualProcedure("sq3a", pm1, Arrays.asList(rs5p1a, rs5p2a), sq3n1a);  //$NON-NLS-1$
         sq3a.setResultSet(rs5a);
         //Case 3281 - create procedures with optional parameter(s)
         
         //make "in2" parameter optional, make "in3" required but with a default value
-        ColumnSet<Procedure> rs5b = createResultSet("pm1.r5b", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs5p2b = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs5p3b = createParameter("in2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
-        ProcedureParameter rs5p4b = createParameter("in3", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs5b = createResultSet("pm1.r5b", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs5p2b = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p3b = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p4b = createParameter("in3", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         rs5p3b.setNullType(NullType.Nullable);
         rs5p4b.setDefaultValue("YYZ"); //$NON-NLS-1$
         TCQueryNode sq3n1b = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sq3b.in UNION ALL SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sq3b.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1062,47 +1062,47 @@ public class RealMetadataFactory {
         //Make parameters of all different types, all with appropriate default values
         //Make some parameters required, some optional
         //Also, fully-qualify the param names
-        ColumnSet<Procedure> rsDefaults = createResultSet("pm1.rDefaults", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rsDefaultsParameterString = createParameter("inString", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rsDefaults = createResultSet("pm1.rDefaults", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rsDefaultsParameterString = createParameter("inString", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         //rsDefaultsParameterString.setNullType(NullType.Nullable);
         rsDefaultsParameterString.setDefaultValue(new String("x")); //$NON-NLS-1$
-        ProcedureParameter rsParameterBigDecimal = createParameter("inBigDecimal", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterBigDecimal = createParameter("inBigDecimal", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId());  //$NON-NLS-1$
         rsParameterBigDecimal.setNullType(NullType.Nullable);
         rsParameterBigDecimal.setDefaultValue(new String("13.0")); //$NON-NLS-1$
-        ProcedureParameter rsParameterBigInteger = createParameter("inBigInteger", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterBigInteger = createParameter("inBigInteger", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId());  //$NON-NLS-1$
         rsParameterBigInteger.setNullType(NullType.Nullable);
         rsParameterBigInteger.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterBoolean = createParameter("inBoolean", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterBoolean = createParameter("inBoolean", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId());  //$NON-NLS-1$
         rsParameterBoolean.setNullType(NullType.Nullable);
         rsParameterBoolean.setDefaultValue(new String("True")); //$NON-NLS-1$
-        ProcedureParameter rsParameterByte = createParameter("inByte", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.BYTE.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterByte = createParameter("inByte", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BYTE.getId());  //$NON-NLS-1$
         rsParameterByte.setNullType(NullType.Nullable);
         rsParameterByte.setDefaultValue(new String("1")); //$NON-NLS-1$
-        ProcedureParameter rsParameterChar = createParameter("inChar", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.CHAR.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterChar = createParameter("inChar", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.CHAR.getId());  //$NON-NLS-1$
         rsParameterChar.setNullType(NullType.Nullable);
         rsParameterChar.setDefaultValue(new String("q")); //$NON-NLS-1$
-        ProcedureParameter rsParameterDate = createParameter("inDate", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.DATE.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterDate = createParameter("inDate", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.DATE.getId());  //$NON-NLS-1$
         rsParameterDate.setNullType(NullType.Nullable);
         rsParameterDate.setDefaultValue(new String("2003-03-20")); //$NON-NLS-1$
-        ProcedureParameter rsParameterDouble = createParameter("inDouble", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.DOUBLE.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterDouble = createParameter("inDouble", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId());  //$NON-NLS-1$
         rsParameterDouble.setNullType(NullType.Nullable);
         rsParameterDouble.setDefaultValue(new String("13.0")); //$NON-NLS-1$
-        ProcedureParameter rsParameterFloat = createParameter("inFloat", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.FLOAT.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterFloat = createParameter("inFloat", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.FLOAT.getId());  //$NON-NLS-1$
         rsParameterFloat.setNullType(NullType.Nullable);
         rsParameterFloat.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterInteger = createParameter("inInteger", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterInteger = createParameter("inInteger", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         rsParameterInteger.setNullType(NullType.Nullable);
         rsParameterInteger.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterLong = createParameter("inLong", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.LONG.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterLong = createParameter("inLong", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.LONG.getId());  //$NON-NLS-1$
         rsParameterLong.setNullType(NullType.Nullable);
         rsParameterLong.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterShort = createParameter("inShort", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.SHORT.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterShort = createParameter("inShort", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.SHORT.getId());  //$NON-NLS-1$
         rsParameterShort.setNullType(NullType.Nullable);
         rsParameterShort.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterTimestamp = createParameter("inTimestamp", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterTimestamp = createParameter("inTimestamp", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId());  //$NON-NLS-1$
         rsParameterTimestamp.setNullType(NullType.Nullable);
         rsParameterTimestamp.setDefaultValue(new String("2003-03-20 21:26:00.000000")); //$NON-NLS-1$
-        ProcedureParameter rsParameterTime = createParameter("inTime", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.TIME.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterTime = createParameter("inTime", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.TIME.getId());  //$NON-NLS-1$
         rsParameterTime.setNullType(NullType.Nullable);
         rsParameterTime.setDefaultValue(new String("21:26:00")); //$NON-NLS-1$
         TCQueryNode sqDefaultsNode = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sqDefaults.inString UNION ALL SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sqDefaults.inInteger; END"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1126,8 +1126,8 @@ public class RealMetadataFactory {
                                                           ), sqDefaultsNode);  
         sqDefaults.setResultSet(rsDefaults);
         
-        createResultSet("pm1.rBadDefault", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter paramBadDefaultIn = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        createResultSet("pm1.rBadDefault", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter paramBadDefaultIn = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         paramBadDefaultIn.setNullType(NullType.Nullable);
         paramBadDefaultIn.setDefaultValue("Clearly Not An Integer"); //$NON-NLS-1$
         TCQueryNode sqnBadDefault = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sqBadDefault.in; END"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1135,97 +1135,97 @@ public class RealMetadataFactory {
         
         //end case 3281
         
-        ColumnSet<Procedure> nativeProcResults = createResultSet("pm1.nativers", new String[] {"tuple"}, new String[] { DataTypeManagerService.DefaultDataTypes.OBJECT.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter nativeparam = createParameter("param", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        ProcedureParameter vardic = createParameter("varag", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.OBJECT.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> nativeProcResults = createResultSet("pm1.nativers", new String[] {"tuple"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter nativeparam = createParameter("param", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter vardic = createParameter("varag", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()); //$NON-NLS-1$
         vardic.setVarArg(true);
         Procedure nativeProc = createStoredProcedure("native", pm1, Arrays.asList(nativeparam,vardic));  //$NON-NLS-1$ //$NON-NLS-2$
         nativeProc.setResultSet(nativeProcResults);
         
-        ColumnSet<Procedure> rs3 = createResultSet("pm1.rs3", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ColumnSet<Procedure> rs3 = createResultSet("pm1.rs3", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure sp1 = createStoredProcedure("sp1", pm1, null);  //$NON-NLS-1$ //$NON-NLS-2$
         sp1.setResultSet(rs3);
 
-        ColumnSet<Procedure> rs4 = createResultSet("pm1.rs4", new String[] { "e1"}, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> rs4 = createResultSet("pm1.rs4", new String[] { "e1"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode sqsp1n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sp1()) as x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sqsp1 = createVirtualProcedure("sqsp1", pm1, null, sqsp1n1);  //$NON-NLS-1$
         sqsp1.setResultSet(rs4);
 
-        ColumnSet<Procedure> rs6 = createResultSet("pm1.rs6", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ColumnSet<Procedure> rs6 = createResultSet("pm1.rs6", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         TCQueryNode sq4n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN EXEC pm1.sq1(); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq4 = createVirtualProcedure("sq4", pm1, null, sq4n1);  //$NON-NLS-1$
         sq4.setResultSet(rs6);
 
-        ColumnSet<Procedure> rs7 = createResultSet("pm1.rs7", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs7p2 = createParameter("in1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs7 = createResultSet("pm1.rs7", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs7p2 = createParameter("in1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq5n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN EXEC pm1.sq2(pm1.sq5.in1); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq5 = createVirtualProcedure("sq5", pm1, Arrays.asList( rs7p2 ), sq5n1);  //$NON-NLS-1$
         sq5.setResultSet(rs7);
 
-        ColumnSet<Procedure> rs8 = createResultSet("pm1.rs8", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ColumnSet<Procedure> rs8 = createResultSet("pm1.rs8", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         TCQueryNode sq6n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN EXEC pm1.sq2(\'1\'); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq6 = createVirtualProcedure("sq6", pm1, null, sq6n1);  //$NON-NLS-1$
         sq6.setResultSet(rs8);
 
-        ColumnSet<Procedure> rs9 = createResultSet("pm1.rs9", new String[] { "e1" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> rs9 = createResultSet("pm1.rs9", new String[] { "e1" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode sq7n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sq1()) as x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq7 = createVirtualProcedure("sq7", pm1, null, sq7n1);  //$NON-NLS-1$
         sq7.setResultSet(rs9);
 
-        ColumnSet<Procedure> rs10 = createResultSet("pm1.rs10", new String[] { "e1"}, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs10p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs10 = createResultSet("pm1.rs10", new String[] { "e1"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter rs10p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq8n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sq1()) as x WHERE x.e1=pm1.sq8.in; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq8 = createVirtualProcedure("sq8", pm1, Arrays.asList( rs10p2 ), sq8n1);  //$NON-NLS-1$
         sq8.setResultSet(rs10);
 
-        ColumnSet<Procedure> rs11 = createResultSet("pm1.rs11", new String[] { "e1"}, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs11p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs11 = createResultSet("pm1.rs11", new String[] { "e1"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter rs11p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq9n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sq2(pm1.sq9.in)) as x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq9 = createVirtualProcedure("sq9", pm1, Arrays.asList( rs11p2 ), sq9n1);  //$NON-NLS-1$
         sq9.setResultSet(rs11);
 
-        ColumnSet<Procedure> rs12 = createResultSet("pm1.rs12", new String[] { "e1"}, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()}); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs12p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs12p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs12 = createResultSet("pm1.rs12", new String[] { "e1"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()}); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter rs12p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs12p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq10n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sq2(pm1.sq10.in)) as x where e2=pm1.sq10.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq10 = createVirtualProcedure("sq10", pm1, Arrays.asList( rs12p2,  rs12p3), sq10n1);  //$NON-NLS-1$
         sq10.setResultSet(rs12);
 
-        ColumnSet<Procedure> rs13 = createResultSet("pm1.rs13", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs13p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs13 = createResultSet("pm1.rs13", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs13p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         Procedure sp2 = createStoredProcedure("sp2", pm1, Arrays.asList( rs13p2 ));  //$NON-NLS-1$ //$NON-NLS-2$
         sp2.setResultSet(rs13);
 
-        ColumnSet<Procedure> rs14 = createResultSet("pm1.rs14", new String[] { "e1"}, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId()}); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs14p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs14p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs14 = createResultSet("pm1.rs14", new String[] { "e1"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()}); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter rs14p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs14p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq11n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sp2(?)) as x where e2=pm1.sq11.in; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq11 = createVirtualProcedure("sq11", pm1, Arrays.asList( rs14p2,  rs14p3), sq11n1);  //$NON-NLS-1$
         sq11.setResultSet(rs14);
 
-        ColumnSet<Procedure> rs15 = createResultSet("pm1.rs15", new String[] { "count" }, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs15p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs15p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs15 = createResultSet("pm1.rs15", new String[] { "count" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter rs15p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs15p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq12n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN INSERT INTO pm1.g1 ( e1, e2 ) VALUES( pm1.sq12.in, pm1.sq12.in2 ); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq12 = createVirtualProcedure("sq12", pm1, Arrays.asList( rs15p2, rs15p3 ), sq12n1);  //$NON-NLS-1$
         sq12.setResultSet(rs15);
 
-        ColumnSet<Procedure> rs16 = createResultSet("pm1.rs16", new String[] { "count" }, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs16p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs16 = createResultSet("pm1.rs16", new String[] { "count" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter rs16p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq13n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN INSERT INTO pm1.g1 ( e1, e2 ) VALUES( pm1.sq13.in, 2 ); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq13 = createVirtualProcedure("sq13", pm1, Arrays.asList( rs16p2 ), sq13n1);  //$NON-NLS-1$
         sq13.setResultSet(rs16);
 
-        ColumnSet<Procedure> rs17 = createResultSet("pm1.rs17", new String[] { "count" }, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs17p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs17p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs17 = createResultSet("pm1.rs17", new String[] { "count" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter rs17p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs17p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq14n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN UPDATE pm1.g1 SET e1 = pm1.sq14.in WHERE e2 = pm1.sq14.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq14 = createVirtualProcedure("sq14", pm1, Arrays.asList( rs17p2, rs17p3 ), sq14n1);  //$NON-NLS-1$
         sq14.setResultSet(rs17);
 
-        ColumnSet<Procedure> rs18 = createResultSet("pm1.rs17", new String[] { "count" }, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs18p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs18p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs18 = createResultSet("pm1.rs17", new String[] { "count" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter rs18p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs18p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq15n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DELETE FROM pm1.g1 WHERE e1 = pm1.sq15.in AND e2 = pm1.sq15.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq15 = createVirtualProcedure("sq15", pm1, Arrays.asList( rs18p2, rs18p3 ), sq15n1);  //$NON-NLS-1$
         sq15.setResultSet(rs18);
@@ -1233,26 +1233,26 @@ public class RealMetadataFactory {
 		TCQueryNode sq16n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN INSERT INTO pm1.g1 ( e1, e2 ) VALUES( 1, 2 ); END"); //$NON-NLS-1$ //$NON-NLS-2$
 		createVirtualProcedure("sq16", pm1, null, sq16n1);  //$NON-NLS-1$
 
-        ColumnSet<Procedure> rs19 = createResultSet("pm1.rs19", new String[] { "xml" }, new String[] { DataTypeManagerService.DefaultDataTypes.XML.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> rs19 = createResultSet("pm1.rs19", new String[] { "xml" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.XML.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode sq17n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT * FROM xmltest.doc1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq17 = createVirtualProcedure("sq17", pm1, null, sq17n1);  //$NON-NLS-1$
         sq17.setResultSet(rs19);
 
         createStoredProcedure("sp3", pm1, null);  //$NON-NLS-1$ //$NON-NLS-2$
 
-		ColumnSet<Procedure> rs20 = createResultSet("pm1.rs20", new String[] { "xml" }, new String[] { DataTypeManagerService.DefaultDataTypes.XML.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+		ColumnSet<Procedure> rs20 = createResultSet("pm1.rs20", new String[] { "xml" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.XML.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode sq18n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT * FROM xmltest.doc1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq18 = createVirtualProcedure("sq18", pm1, null, sq18n1); //$NON-NLS-1$
         sq18.setResultSet(rs20);
 
-        ColumnSet<Procedure> rs21 = createResultSet("pm1.rs21", new String[] { "xml" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter sq19p2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> rs21 = createResultSet("pm1.rs21", new String[] { "xml" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter sq19p2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         TCQueryNode sq19n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT * FROM xmltest.doc4 WHERE root.node1 = param1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq19 = createVirtualProcedure("sq19", pm1, Arrays.asList( sq19p2 ), sq19n1); //$NON-NLS-1$
         sq19.setResultSet(rs21);
 
-        ColumnSet<Procedure> rs22 = createResultSet("pm1.rs13", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs22p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> rs22 = createResultSet("pm1.rs13", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs22p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId());  //$NON-NLS-1$
         Procedure sp4 = createStoredProcedure("sp4", pm1, Arrays.asList( rs22p2 ));  //$NON-NLS-1$ //$NON-NLS-2$
         sp4.setResultSet(rs22);
         
@@ -1285,22 +1285,22 @@ public class RealMetadataFactory {
         Procedure vsp6 = createVirtualProcedure("vsp6", pm1, null, vspqn6); //$NON-NLS-1$
         vsp6.setResultSet(vsprs1());
         
-        ProcedureParameter vspp2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn7 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x=0; WHILE (x < 12) BEGIN x=x+pm1.vsp7.param1; END SELECT e1 FROM pm1.g1 WHERE x=e2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp7 = createVirtualProcedure("vsp7", pm1, Arrays.asList( vspp2 ), vspqn7); //$NON-NLS-1$
         vsp7.setResultSet(vsprs1());
 
-        ProcedureParameter vspp8 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp8 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn8 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x=0; WHILE (x < 12) BEGIN x=x+pm1.vsp8.param1; END SELECT e1 FROM pm1.g1 WHERE e2 >= param1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp8 = createVirtualProcedure("vsp8", pm1, Arrays.asList( vspp8 ), vspqn8); //$NON-NLS-1$
         vsp8.setResultSet(vsprs1());
         
-        ProcedureParameter vspp9 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp9 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn9 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x=0; WHILE (x < param1) BEGIN x=x+pm1.vsp9.param1; END SELECT e1 FROM pm1.g1 WHERE e2 >= param1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp9 = createVirtualProcedure("vsp9", pm1, Arrays.asList( vspp9 ), vspqn9); //$NON-NLS-1$
         vsp9.setResultSet(vsprs1());
         
-        ProcedureParameter vspp3 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp3 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn10 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; LOOP ON (SELECT e2 FROM pm1.g1 WHERE e2=param1) AS mycursor BEGIN x=mycursor.e2; END END"); //$NON-NLS-1$ //$NON-NLS-2$
         createVirtualProcedure("vsp10", pm1, Arrays.asList( vspp3 ), vspqn10); //$NON-NLS-1$
 
@@ -1349,17 +1349,17 @@ public class RealMetadataFactory {
         Procedure vsp20 = createVirtualProcedure("vsp20", pm1, null, vspqn20); //$NON-NLS-1$
         vsp20.setResultSet(vsprs1());
 
-        ProcedureParameter vspp21 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp21 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn21 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 INTO #temptable FROM pm1.g1; INSERT INTO #temptable(#temptable.e1, e2) VALUES( 'Fourth', param1); SELECT e1, e2 FROM #temptable; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp21 = createVirtualProcedure("vsp21", pm1, Arrays.asList( vspp21 ), vspqn21); //$NON-NLS-1$
         vsp21.setResultSet(vspp4());
 
-        ProcedureParameter vspp22 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp22 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn22 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 INTO #temptable FROM pm1.g1 where e2 > param1; SELECT e1, e2 FROM #temptable; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp22 = createVirtualProcedure("vsp22", pm1, Arrays.asList( vspp22 ), vspqn22); //$NON-NLS-1$
         vsp22.setResultSet(vspp4());
 
-        ProcedureParameter vspp23 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp23 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn23 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; SELECT e1, e2 INTO #temptable FROM pm1.g1 where e2 > param1; x = SELECT e1 FROM #temptable WHERE e2=15; SELECT x, 15; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp23 = createVirtualProcedure("vsp23", pm1, Arrays.asList( vspp23 ), vspqn23); //$NON-NLS-1$
         vsp23.setResultSet(vspp4());
@@ -1384,15 +1384,15 @@ public class RealMetadataFactory {
         Procedure vsp29 = createVirtualProcedure("vsp29", pm1, null, vspqn29); //$NON-NLS-1$
         vsp29.setResultSet(vsprs1());
 
-        ColumnSet<Procedure> vsprs30 = createResultSet("pm1.vsprs30", new String[] { "e1" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> vsprs30 = createResultSet("pm1.vsprs30", new String[] { "e1" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode vspqn30 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM pm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp30 = createVirtualProcedure("vsp30", pm1, null, vspqn30); //$NON-NLS-1$
         vsp30.setResultSet(vsprs30);
 
-        ColumnSet<Procedure> vsprs31 = createResultSet("pm1.vsprs31", new String[] { "e1" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp31p2 = createParameter("p1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> vsprs31 = createResultSet("pm1.vsprs31", new String[] { "e1" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter vsp31p2 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn31 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM pm1.g1 WHERE e2 = pm1.vsp31.p1; END"); //$NON-NLS-1$ //$NON-NLS-2$
-        Procedure vsp31 = createVirtualProcedure("vsp31", pm1, Arrays.asList(createParameter("p1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId())), vspqn31); //$NON-NLS-1$
+        Procedure vsp31 = createVirtualProcedure("vsp31", pm1, Arrays.asList(createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId())), vspqn31); //$NON-NLS-1$
         vsp31.setResultSet(vsprs31);
 
         TCQueryNode vspqn38 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer VARIABLES.y; VARIABLES.y=5; EXEC pm1.vsp7(VARIABLES.y); END"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1426,7 +1426,7 @@ public class RealMetadataFactory {
         Procedure vsp33 = createVirtualProcedure("vsp33", pm1, null, vspqn33); //$NON-NLS-1$
         vsp33.setResultSet(vsprs1());
 
-        ColumnSet<Procedure> vsprs35 = createResultSet("pm1.vsprs31", new String[] { "e1" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> vsprs35 = createResultSet("pm1.vsprs31", new String[] { "e1" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
         TCQueryNode vspqn35 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer VARIABLES.ID; VARIABLES.ID = pm1.vsp35.p1; SELECT e1 FROM pm1.g1 WHERE e2 = VARIABLES.ID; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp35 = createVirtualProcedure("vsp35", pm1, Arrays.asList(vsp31p2), vspqn35); //$NON-NLS-1$
         vsp35.setResultSet(vsprs35);
@@ -1441,10 +1441,10 @@ public class RealMetadataFactory {
         
         // Virtual group w/ procedure in transformation, optional params, named parameter syntax
         TCQueryNode vspqn47 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN IF (pm1.vsp47.param1 IS NOT NULL) BEGIN SELECT 'FOO' as e1, pm1.vsp47.param1 as e2; END ELSE BEGIN SELECT pm1.vsp47.param2 as e1, 2112 as e2; END END"); //$NON-NLS-1$ //$NON-NLS-2$
-        ColumnSet<Procedure> vsprs47 = createResultSet("pm1.vsprs47", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter vspp47_2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> vsprs47 = createResultSet("pm1.vsprs47", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter vspp47_2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vspp47_2.setNullType(NullType.Nullable);
-        ProcedureParameter vspp47_3 = createParameter("param2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp47_3 = createParameter("param2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vspp47_3.setNullType(NullType.Nullable);
         Procedure vsp47 = createVirtualProcedure("vsp47", pm1, Arrays.asList( vspp47_2, vspp47_3 ), vspqn47); //$NON-NLS-1$
         vsp47.setResultSet(vsprs47);
@@ -1452,12 +1452,12 @@ public class RealMetadataFactory {
         TCQueryNode vgvpn7 = new TCQueryNode("SELECT P.e2 as ve3, P.e1 as ve4 FROM (EXEC pm1.vsp47(param1=vm1.vgvp7.ve1, param2=vm1.vgvp7.ve2)) as P"); //$NON-NLS-1$ //$NON-NLS-2$
 //        QueryNode vgvpn7 = new QueryNode("vm1.vgvp7", "SELECT P.e2 as ve1, P.e1 as ve2 FROM (EXEC pm1.vsp47(vm1.vgvp7.ve1, vm1.vgvp7.ve2)) as P"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vgvp7 = createVirtualGroup("vgvp7", vm1, vgvpn7); //$NON-NLS-1$
-        Column vgvp7e1 = createElement("ve1", vgvp7, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column vgvp7e1 = createElement("ve1", vgvp7, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vgvp7e1.setSelectable(false);
-        Column vgvp7e2 = createElement("ve2", vgvp7, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vgvp7e2 = createElement("ve2", vgvp7, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vgvp7e2.setSelectable(false);
-        createElement("ve3", vgvp7, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        createElement("ve4", vgvp7, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        createElement("ve3", vgvp7, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        createElement("ve4", vgvp7, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         
         //invalid
         TCQueryNode vspqn32 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; LOOP ON (SELECT e2 FROM pm1.g1) AS #mycursor BEGIN IF(#mycursor.e2 > 10) BEGIN CONTINUE; END x=#mycursor.e2; END SELECT e1 FROM pm1.g1 WHERE x=e2; END"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1466,86 +1466,86 @@ public class RealMetadataFactory {
 
         //virtual group with procedure in transformation
         TCQueryNode vspqn26 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e2 >= pm1.vsp26.param1 and e1 = pm1.vsp26.param2; END"); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vspp26_1 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter vspp26_2 = createParameter("param2", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        ColumnSet<Procedure> vsprs3 = createResultSet("pm1.vsprs3", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter vspp26_1 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp26_2 = createParameter("param2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> vsprs3 = createResultSet("pm1.vsprs3", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure vsp26 = createVirtualProcedure("vsp26", pm1, Arrays.asList( vspp26_1, vspp26_2 ), vspqn26); //$NON-NLS-1$
         vsp26.setResultSet(vsprs3);
         
 		TCQueryNode vgvpn1 = new TCQueryNode("SELECT P.e1 as ve3 FROM (EXEC pm1.vsp26(vm1.vgvp1.ve1, vm1.vgvp1.ve2)) as P"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vgvp1 = createVirtualGroup("vgvp1", vm1, vgvpn1); //$NON-NLS-1$
-		Column vgvp1e1 = createElement("ve1", vgvp1, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+		Column vgvp1e1 = createElement("ve1", vgvp1, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vgvp1e1.setSelectable(false);
-        Column vgvp1e2 = createElement("ve2", vgvp1, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vgvp1e2 = createElement("ve2", vgvp1, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vgvp1e2.setSelectable(false);
-        createElement("ve3", vgvp1, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        createElement("ve3", vgvp1, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
       
 		TCQueryNode vgvpn2 = new TCQueryNode("SELECT P.e1 as ve3 FROM (EXEC pm1.vsp26(vm1.vgvp2.ve1, vm1.vgvp2.ve2)) as P where P.e1='a'"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vgvp2 = createVirtualGroup("vgvp2", vm1, vgvpn2); //$NON-NLS-1$
-		Column vgvp2e1 = createElement("ve1", vgvp2, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+		Column vgvp2e1 = createElement("ve1", vgvp2, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vgvp2e1.setSelectable(false);
-        Column vgvp2e2 = createElement("ve2", vgvp2, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vgvp2e2 = createElement("ve2", vgvp2, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vgvp2e2.setSelectable(false);
-        createElement("ve3", vgvp2, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        createElement("ve3", vgvp2, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
    
 		TCQueryNode vgvpn3 = new TCQueryNode("SELECT P.e1 as ve3 FROM (EXEC pm1.vsp26(vm1.vgvp3.ve1, vm1.vgvp3.ve2)) as P, pm1.g2 where P.e1=g2.e1"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vgvp3 = createVirtualGroup("vgvp3", vm1, vgvpn3); //$NON-NLS-1$
-		Column vgvp3e1 = createElement("ve1", vgvp3, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+		Column vgvp3e1 = createElement("ve1", vgvp3, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vgvp3e1.setSelectable(false);
-        Column vgvp3e2 = createElement("ve2", vgvp3, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vgvp3e2 = createElement("ve2", vgvp3, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vgvp3e2.setSelectable(false);
-        createElement("ve3", vgvp3, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        createElement("ve3", vgvp3, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
 
 		TCQueryNode vgvpn4 = new TCQueryNode("SELECT P.e1 as ve3 FROM (EXEC pm1.vsp26(vm1.vgvp4.ve1, vm1.vgvp4.ve2)) as P, vm1.g1 where P.e1=g1.e1"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vgvp4 = createVirtualGroup("vgvp4", vm1, vgvpn4); //$NON-NLS-1$
-		Column vgvp4e1 = createElement("ve1", vgvp4, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+		Column vgvp4e1 = createElement("ve1", vgvp4, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vgvp4e1.setSelectable(false);
-        Column vgvp4e2 = createElement("ve2", vgvp4, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vgvp4e2 = createElement("ve2", vgvp4, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vgvp4e2.setSelectable(false);
-        createElement("ve3", vgvp4, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        createElement("ve3", vgvp4, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         
 		TCQueryNode vgvpn5 = new TCQueryNode("SELECT * FROM vm1.vgvp4 where vm1.vgvp4.ve1=vm1.vgvp5.ve1 and  vm1.vgvp4.ve2=vm1.vgvp5.ve2"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vgvp5 = createVirtualGroup("vgvp5", vm1, vgvpn5); //$NON-NLS-1$
-		Column vgvp5e1 = createElement("ve1", vgvp5, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+		Column vgvp5e1 = createElement("ve1", vgvp5, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vgvp5e1.setSelectable(false);
-        Column vgvp5e2 = createElement("ve2", vgvp5, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vgvp5e2 = createElement("ve2", vgvp5, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vgvp5e2.setSelectable(false);
-        createElement("ve3", vgvp5, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        createElement("ve3", vgvp5, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
 
 		TCQueryNode vgvpn6 = new TCQueryNode("SELECT P.e1 as ve3, P.e2 as ve4 FROM (EXEC pm1.vsp26(vm1.vgvp6.ve1, vm1.vgvp6.ve2)) as P"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vgvp6 = createVirtualGroup("vgvp6", vm1, vgvpn6); //$NON-NLS-1$
-		Column vgvp6e1 = createElement("ve1", vgvp6, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+		Column vgvp6e1 = createElement("ve1", vgvp6, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vgvp6e1.setSelectable(false);
-        Column vgvp6e2 = createElement("ve2", vgvp6, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vgvp6e2 = createElement("ve2", vgvp6, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vgvp6e2.setSelectable(false);
-        createElement("ve3", vgvp6, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        createElement("ve4", vgvp6, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        createElement("ve3", vgvp6, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        createElement("ve4", vgvp6, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
 
         //virtual group with two elements. One selectable, one not.
         TCQueryNode vm1g35n1 = new TCQueryNode("SELECT e1, e2 FROM pm1.g1");         //$NON-NLS-1$ //$NON-NLS-2$
         Table vm1g35 = createVirtualGroup("g35", vm1, vm1g35n1); //$NON-NLS-1$
-        Column vm1g35e1 = createElement("e1", vm1g35, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vm1g35e1 = createElement("e1", vm1g35, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vm1g35e1.setSelectable(false);
-        createElement("e2", vm1g35, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        createElement("e2", vm1g35, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
 		
-        ColumnSet<Procedure> vsprs36 = createResultSet("pm1.vsprs36", new String[] { "x" }, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp36p2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> vsprs36 = createResultSet("pm1.vsprs36", new String[] { "x" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter vsp36p2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn36 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x = pm1.vsp36.param1 * 2; SELECT x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp36 = createVirtualProcedure("vsp36", pm1, Arrays.asList( vsp36p2 ), vspqn36); //$NON-NLS-1$
         vsp36.setResultSet(vsprs36);
 
-        ColumnSet<Procedure> vsprs42 = createResultSet("pm1.vsprs42", new String[] { "x" }, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp42p2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> vsprs42 = createResultSet("pm1.vsprs42", new String[] { "x" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
+        ProcedureParameter vsp42p2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn42 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN IF (pm1.vsp42.param1 > 0) SELECT 1 AS x; ELSE SELECT 0 AS x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp42 = createVirtualProcedure("vsp42", pm1, Arrays.asList( vsp42p2 ), vspqn42); //$NON-NLS-1$
         vsp42.setResultSet(vsprs42);
 
-        ProcedureParameter vspp44 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp44 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn44 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT pm1.vsp44.param1 INTO #temptable; SELECT e1 from pm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$    
         Procedure vsp44 = createVirtualProcedure("vsp44", pm1, Arrays.asList( vspp44 ), vspqn44); //$NON-NLS-1$
         vsp44.setResultSet(vsprs1());
 
-        ProcedureParameter vspp43 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp43 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn43 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN exec pm1.vsp44(pm1.vsp43.param1); END"); //$NON-NLS-1$ //$NON-NLS-2$    
         Procedure vsp43 = createVirtualProcedure("vsp43", pm1, Arrays.asList( vspp43 ), vspqn43); //$NON-NLS-1$
         vsp43.setResultSet(vsprs1());
@@ -1554,45 +1554,45 @@ public class RealMetadataFactory {
         Procedure vsp46 = createVirtualProcedure("vsp46", pm1, null, vspqn46); //$NON-NLS-1$
         vsp46.setResultSet(vsprs1());
         
-        ColumnSet<Procedure> vsp48rs = createResultSet("pm1vsp48.rs", new String[] { "e1" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
-        ProcedureParameter vsp48p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> vsp48rs = createResultSet("pm1vsp48.rs", new String[] { "e1" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
+        ProcedureParameter vsp48p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode vspqn48 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; SELECT e1 FROM (EXEC pm1.sq2(pm1.vsp48.in)) as e; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp48 = createVirtualProcedure("vsp48", pm1, Arrays.asList( vsp48p2 ), vspqn48); //$NON-NLS-1$
         vsp48.setResultSet(vsp48rs);
         
-        ColumnSet<Procedure> vsp49rs = createResultSet("pm1vsp49.rs", new String[] { "e1", "e2" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+        ColumnSet<Procedure> vsp49rs = createResultSet("pm1vsp49.rs", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
         TCQueryNode vspqn49 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; x = 'b'; EXEC pm1.sq2(x); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp49 = createVirtualProcedure("vsp49", pm1, null, vspqn49); //$NON-NLS-1$
         vsp49.setResultSet(vsp49rs);
 
-        ColumnSet<Procedure> vsp50rs = createResultSet("pm1vsp50.rs", new String[] { "e1" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
+        ColumnSet<Procedure> vsp50rs = createResultSet("pm1vsp50.rs", new String[] { "e1" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
         TCQueryNode vspqn50 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; x = 'b'; SELECT e1 FROM (EXEC pm1.sq2(x)) as e; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp50 = createVirtualProcedure("vsp50", pm1, null, vspqn50); //$NON-NLS-1$
         vsp50.setResultSet(vsp50rs);
         
-        ColumnSet<Procedure> vsp51rs = createResultSet("pm1vsp51.rs", new String[] { "result" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
+        ColumnSet<Procedure> vsp51rs = createResultSet("pm1vsp51.rs", new String[] { "result" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
         TCQueryNode vspqn51 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; x = 'b'; LOOP ON (SELECT e1 FROM (EXEC pm1.sq2(x)) as e) AS c BEGIN x = x || 'b'; END SELECT x AS result; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp51 = createVirtualProcedure("vsp51", pm1, null, vspqn51); //$NON-NLS-1$
         vsp51.setResultSet(vsp51rs);
         
-        ColumnSet<Procedure> vsp52rs = createResultSet("pm1vsp52.rs", new String[] { "result" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
+        ColumnSet<Procedure> vsp52rs = createResultSet("pm1vsp52.rs", new String[] { "result" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
         TCQueryNode vspqn52 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; x = 'c'; x = SELECT e1 FROM (EXEC pm1.sq2(x)) as e; SELECT x AS result; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp52 = createVirtualProcedure("vsp52", pm1, null, vspqn52); //$NON-NLS-1$
         vsp52.setResultSet(vsp52rs);
 
-        ColumnSet<Procedure> vsp53rs = createResultSet("pm1vsp53.rs", new String[] { "result" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
-        ProcedureParameter vsp53p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> vsp53rs = createResultSet("pm1vsp53.rs", new String[] { "result" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
+        ProcedureParameter vsp53p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode vspqn53 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; x = 'b'; LOOP ON (SELECT e1 FROM (EXEC pm1.sq2(pm1.vsp53.in)) as e) AS c BEGIN x = x || 'b'; END SELECT x AS result; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp53 = createVirtualProcedure("vsp53", pm1, Arrays.asList( vsp53p2 ), vspqn53); //$NON-NLS-1$
         vsp53.setResultSet(vsp53rs);
 
-        ColumnSet<Procedure> vsp54rs = createResultSet("pm1vsp54.rs", new String[] { "result" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
-        ProcedureParameter vsp54p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ColumnSet<Procedure> vsp54rs = createResultSet("pm1vsp54.rs", new String[] { "result" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
+        ProcedureParameter vsp54p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode vspqn54 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; x = 'c'; x = SELECT e1 FROM (EXEC pm1.sq2(pm1.vsp54.in)) as e; SELECT x AS result; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp54 = createVirtualProcedure("vsp54", pm1, Arrays.asList( vsp54p2 ), vspqn54); //$NON-NLS-1$
         vsp54.setResultSet(vsp54rs);
         
-        ProcedureParameter vspp55 = createParameter("param1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp55 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn55 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN select e1, param1 as a from vm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp55 = createVirtualProcedure("vsp55", pm1, Arrays.asList( vspp55 ), vspqn55); //$NON-NLS-1$
         vsp55.setResultSet(vspp4());
@@ -1605,7 +1605,7 @@ public class RealMetadataFactory {
         Procedure vsp57 = createVirtualProcedure("vsp57", pm1, null, vspqn57); //$NON-NLS-1$
         vsp57.setResultSet(vsprs1());
         
-        ProcedureParameter vspp58 = createParameter("inp", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp58 = createParameter("inp", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn58 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT vsp58.inp; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp58 = createVirtualProcedure("vsp58", pm1, Arrays.asList( vspp58 ), vspqn58); //$NON-NLS-1$
         vsp58.setResultSet(vsprs1());
@@ -1638,11 +1638,11 @@ public class RealMetadataFactory {
 	}
 
 	private ColumnSet<Procedure> vspp4() {
-		return createResultSet("pm1.vsprs2", new String[] { "e1", "const" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+		return createResultSet("pm1.vsprs2", new String[] { "e1", "const" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
 	}
 
 	private ColumnSet<Procedure> vsprs1() {
-		return createResultSet("pm1.vsprs1", new String[] { "e1" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+		return createResultSet("pm1.vsprs1", new String[] { "e1" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	}
     
 	/**
@@ -1821,7 +1821,7 @@ public class RealMetadataFactory {
         column.setName(name);
         group.addColumn(column);
         column.setRuntimeType(type);
-        if(type.equals(DataTypeManagerService.DefaultDataTypes.STRING.getId())) {  
+        if(type.equals(DefaultDataTypeManager.DefaultDataTypes.STRING.getId())) {  
             column.setSearchType(SearchType.Searchable);        
         } else if (getDataTypeManager().isNonComparable(type)){
         	column.setSearchType(SearchType.Unsearchable);
@@ -2118,10 +2118,10 @@ public class RealMetadataFactory {
 	    Table t = createPhysicalGroup("t", phys); //$NON-NLS-1$
 	    createElements(t, 
 	                                new String[] { "ID", "Name", "source_bits" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	                                new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+	                                new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
 	
 	    Schema virt = createVirtualModel("virt", store); //$NON-NLS-1$
-	    ColumnSet<Procedure> rs = createResultSet("rs", new String[] { "ID", "Name", "source_bits" }, new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	    ColumnSet<Procedure> rs = createResultSet("rs", new String[] { "ID", "Name", "source_bits" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	    TCQueryNode qn = new TCQueryNode("CREATE VIRTUAL PROCEDURE " //$NON-NLS-1$
 		  + "BEGIN " //$NON-NLS-1$
 		  + "        DECLARE integer VARIABLES.BITS;" //$NON-NLS-1$
@@ -2176,28 +2176,28 @@ public class RealMetadataFactory {
 		// Create physical elements
 		createElements(pm1g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm1g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm1g3, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g3, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g4, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g5, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });			
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });			
 	
 		// Create the facade from the store
 		return createTransformationMetadata(metadataStore, "example3");
@@ -2219,16 +2219,16 @@ public class RealMetadataFactory {
 		// Create physical group elements
 		createElements(pm1g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm1g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 	
 		// Create virtual groups
 		TCQueryNode vm1g1n1 = new TCQueryNode("SELECT * FROM pm1.g1"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -2246,19 +2246,19 @@ public class RealMetadataFactory {
 		// Create virtual elements
 		createElementsWithDefaults(vm1g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() },
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() },
 			new String[] { "xyz", "123", "true", "123.456"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		createElementsWithDefaults(vm1g2, 
 			new String[] { "e1", "e2", "e3" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId() },
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId() },
 			new String[] { "abc", "456", "false"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		createElementsWithDefaults(vm1g3,
 			new String[] { "x", "y", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() , DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() },
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() , DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() },
 			new String[] { "mno", "789", "true", "789.012"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		createElementsWithDefaults(vm1g4, 
 				new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() },
+				new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() },
 				new String[] { "xyz", "123", "true", "123.456"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	
 		setInsteadOfTriggerDefinition(vm1g1, event, procedure);
@@ -2300,16 +2300,16 @@ public class RealMetadataFactory {
 	    // Create physical group elements
 	    createElements(pm1g1, 
 	        new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 	    createElements(pm1g2, 
 	        new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 	    createElements(pm2g1, 
 	        new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 	    createElements(pm2g2, 
 	        new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 	
 	    // Create virtual groups
 	    TCQueryNode vm1g1n1 = new TCQueryNode("SELECT * FROM vm1.g2"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -2321,11 +2321,11 @@ public class RealMetadataFactory {
 	    // Create virtual elements
 	    createElementsWithDefaults(vm1g1, 
 	        new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() },
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() },
 	        new String[] { "xyz", "123", "true", "123.456"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	    createElementsWithDefaults(vm1g2, 
 	        new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() },
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() },
 	        new String[] { "abc", "456", "false", null}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	
 	    setInsteadOfTriggerDefinition(vm1g1, procedureType, procedure1);
@@ -2348,19 +2348,19 @@ public class RealMetadataFactory {
 	    Table db2Table = createPhysicalGroup("DB2_TABLE", db2Model); //$NON-NLS-1$
 	    createElements(db2Table, 
 	        new String[] { "PRODUCT", "REGION", "SALES"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId()});
 	
 	    Table salesTable = createPhysicalGroup("SALES", db2Model); //$NON-NLS-1$
 	    salesTable.setCardinality(1000000);
 	    createElements(salesTable, 
 	        new String[] { "CITY", "MONTH", "SALES"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId()});
 	
 	    Table geographyTable2 = createPhysicalGroup("GEOGRAPHY2", db2Model); //$NON-NLS-1$
 	    geographyTable2.setCardinality(1000);
 	    List<Column> geographyElem2 = createElements(geographyTable2, 
 	        new String[] { "CITY", "REGION"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	    List<Column> geoPkElem2 = new ArrayList<Column>();
 	    geoPkElem2.add(geographyElem2.get(0));
 	    createKey(KeyRecord.Type.Primary, "db2model.GEOGRAPHY2.GEOGRAPHY_PK", geographyTable2, geoPkElem2); //$NON-NLS-1$
@@ -2368,7 +2368,7 @@ public class RealMetadataFactory {
 	    Table db2Table2 = createPhysicalGroup("DB2TABLE", db2Model); //$NON-NLS-1$
 	    createElements(db2Table2, 
 	        new String[] { "c0", "c1", "c2"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
 	
 	    // Create oracle tables 
 	    Schema oraModel = createPhysicalModel("oraclemodel", metadataStore); //$NON-NLS-1$
@@ -2376,13 +2376,13 @@ public class RealMetadataFactory {
 	    Table oraTable = createPhysicalGroup("Oracle_table", oraModel); //$NON-NLS-1$
 	    createElements(oraTable, 
 	        new String[] { "COSTS", "REGION", "YEAR"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	    Table geographyTable = createPhysicalGroup("GEOGRAPHY", oraModel); //$NON-NLS-1$
 	    geographyTable.setCardinality(1000);
 	    List<Column> geographyElem = createElements(geographyTable, 
 	        new String[] { "CITY", "REGION"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	    List<Column> geoPkElem = new ArrayList<Column>();
 	    geoPkElem.add(geographyElem.get(0));
 	    createKey(KeyRecord.Type.Primary, "oraclemodel.GEOGRAPHY.GEOGRAPHY_PK", geographyTable, geoPkElem); //$NON-NLS-1$
@@ -2390,7 +2390,7 @@ public class RealMetadataFactory {
 	    Table oraTable2 = createPhysicalGroup("OraTable", oraModel); //$NON-NLS-1$
 	    createElements(oraTable2, 
 	        new String[] { "b0", "b1", "b2"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	    // Create sql server tables 
 	    Schema msModel = createPhysicalModel("msmodel", metadataStore); //$NON-NLS-1$
@@ -2399,7 +2399,7 @@ public class RealMetadataFactory {
 	    timeTable.setCardinality(120);
 	    List<Column> timeElem = createElements(timeTable, 
 	        new String[] { "MONTH", "YEAR"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	    List<Column> timePkElem = new ArrayList<Column>();
 	    timePkElem.add(timeElem.get(0));
 	    createKey(KeyRecord.Type.Primary, "msmodel.TIME.TIME_PK", timeTable, timePkElem); //$NON-NLS-1$
@@ -2409,13 +2409,13 @@ public class RealMetadataFactory {
 	    Table logicalTable1 = createVirtualGroup("logicalTable1", virtModel, n1); //$NON-NLS-1$
 	    createElements(logicalTable1, 
 	        new String[] { "c0", "c1", "c2"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.LONG.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.LONG.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
 	
 	    TCQueryNode n2 = new TCQueryNode("select sum(c0) as c0, c1, c2 from db2Table group by c1, c2"); //$NON-NLS-1$ //$NON-NLS-2$
 	    Table logicalTable2 = createVirtualGroup("logicalTable2", virtModel, n2); //$NON-NLS-1$
 	    createElements(logicalTable2, 
 	        new String[] { "b0", "b1", "b2"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.LONG.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.LONG.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
 	    
 	    return metadataStore;
 	}
@@ -2437,25 +2437,25 @@ public class RealMetadataFactory {
 	    orders.setCardinality(1000000);
 	    createElements(orders, 
 	        new String[] { "O_OrderID", "O_ProductID", "O_DealerID", "O_Amount", "O_Date"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getId(), DataTypeManagerService.DefaultDataTypes.DATE.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId(), DefaultDataTypeManager.DefaultDataTypes.DATE.getId() });
 	
 	    Table products = createPhysicalGroup("product", model); //$NON-NLS-1$
 	    products.setCardinality(1000);
 	    createElements(products, 
 	        new String[] { "P_ProductID", "P_Overhead", "P_DivID"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
 	
 	    Table divisions = createPhysicalGroup("division", model); //$NON-NLS-1$
 	    divisions.setCardinality(100);
 	    createElements(divisions, 
 	        new String[] { "V_DIVID", "V_SectorID"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
 	
 	    Table dealers = createPhysicalGroup("dealer", model); //$NON-NLS-1$
 	    dealers.setCardinality(1000);
 	    createElements(dealers, 
 	        new String[] { "D_DealerID", "D_State", "D_Address"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	}
 
 	/** 
@@ -2471,34 +2471,34 @@ public class RealMetadataFactory {
 	    Table physGroup = createPhysicalGroup("Phys", physModel); //$NON-NLS-1$
 	    createElements(physGroup,
 	                                  new String[] { "a", "b" }, //$NON-NLS-1$ //$NON-NLS-2$ 
-	                                  new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+	                                  new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	    Table physGroup1 = createPhysicalGroup("Phys1", physModel); //$NON-NLS-1$
 	    createElements(physGroup1,
 	                                  new String[] { "a", "b" }, //$NON-NLS-1$ //$NON-NLS-2$ 
-	                                  new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+	                                  new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	    
 	    Table physGroup2 = createPhysicalGroup("Phys2", physModel); //$NON-NLS-1$
 	    createElements(physGroup2,
 	                                  new String[] { "a", "b" }, //$NON-NLS-1$ //$NON-NLS-2$ 
-	                                  new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+	                                  new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	    
 	    TCQueryNode virtTrans = new TCQueryNode("SELECT * FROM MultiModel.Phys");         //$NON-NLS-1$ //$NON-NLS-2$
 	    Table virtGroup = createVirtualGroup("view", virtModel, virtTrans); //$NON-NLS-1$
 	    createElements(virtGroup,
 	                                       new String[] { "a", "b" }, //$NON-NLS-1$ //$NON-NLS-2$ 
-	                                       new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+	                                       new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	    
-	    ColumnSet<Procedure> rs2 = createResultSet("Virt.rs1", new String[] { "a", "b" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	    ProcedureParameter rs2p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+	    ColumnSet<Procedure> rs2 = createResultSet("Virt.rs1", new String[] { "a", "b" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	    ProcedureParameter rs2p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
 	    rs2p2.setNullType(org.teiid.metadata.BaseColumn.NullType.Nullable);
 	    TCQueryNode sq2n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN\n" //$NON-NLS-1$ //$NON-NLS-2$
 	                                    + "execute string 'SELECT a, b FROM MultiModel.Phys where SOURCE_NAME = Virt.sq1.in'; END"); //$NON-NLS-1$ 
 	    Procedure sq1 = createVirtualProcedure("sq1", virtModel, Arrays.asList(rs2p2), sq2n1);  //$NON-NLS-1$
 	    sq1.setResultSet(rs2);
 	
-	    ColumnSet<Procedure> rs3 = createResultSet("MultiModel.rs1", new String[] { "a", "b" }, new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	    ProcedureParameter rs3p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-	    ProcedureParameter rs3p3 = createParameter("source_name", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+	    ColumnSet<Procedure> rs3 = createResultSet("MultiModel.rs1", new String[] { "a", "b" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	    ProcedureParameter rs3p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+	    ProcedureParameter rs3p3 = createParameter("source_name", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
 	    rs3p3.setNullType(org.teiid.metadata.BaseColumn.NullType.Nullable);
 	    Procedure sq2 = createStoredProcedure("proc", physModel, Arrays.asList(rs3p2, rs3p3));
 	    sq2.setResultSet(rs3);
@@ -2534,24 +2534,24 @@ public class RealMetadataFactory {
 	    // Create physical elements
 	    createElements(items, 
 	        new String[] { "itemNum", "itemName", "itemQuantity", "itemStatus" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	
 	    //many-to-many join table
 	    createElements(item_supplier, 
 	        new String[] { "itemNum", "supplierNum" }, //$NON-NLS-1$ //$NON-NLS-2$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	
 	    createElements(suppliers, 
 	        new String[] { "supplierNum", "supplierName", "supplierZipCode" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	
 	    createElements(orders, 
 	        new String[] { "orderNum", "itemFK", "supplierFK", "orderDate", "orderQty", "orderStatus" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ 
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	    createElements(employees, 
 	        new String[] { "employeeNum", "supplierNumFK", "specializesInItemNum", "supervisorNum", "firstName", "lastName" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	    // Create mapping classes - items doc
 	    TCQueryNode rsQuery = new TCQueryNode("SELECT itemNum, itemName, itemQuantity, itemStatus FROM stock.items"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -2574,19 +2574,19 @@ public class RealMetadataFactory {
 	    // Create mapping classes elements - items doc
 	    createElements(rsItems, 
 	        new String[] { "itemNum", "itemName", "itemQuantity", "itemStatus" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });        
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });        
 	
 	    createElements(rsSuppliers, 
 	        new String[] { "supplierNum", "supplierName", "supplierZipCode", "itemNum" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	
 	    createElements(rsOrders, 
 	        new String[] { "orderNum", "orderDate", "orderQty", "orderStatus", "itemFK", "supplierFK" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	    createElements(rsEmployees, 
 	        new String[] { "employeeNum", "firstName", "lastName", "supervisorNum", "specializesInItemNum", "supplierNumFK" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	    // MAPPING DOC ======================================================================
 	    MappingDocument doc = new MappingDocument(getTeiidParser(), false);
@@ -2665,15 +2665,15 @@ public class RealMetadataFactory {
 	    // Create mapping classes elements - items doc
 	    createElements(rsPlayers, 
 	        new String[] { "employeeNum", "firstName", "lastName", "supervisorNum" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	    createElements(rsManagers, 
 	         new String[] { "employeeNum", "firstName", "lastName", "supervisorNum" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	         new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	         new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	    createElements(rsOwners, 
 	       new String[] { "employeeNum", "firstName", "lastName", "supervisorNum" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	       new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+	       new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	
 	    
@@ -2751,37 +2751,37 @@ public class RealMetadataFactory {
 		// Create physical elements
 		List<Column> pm1g1e = createElements(pm1g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm1g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		List<Column> pm1g3e = createElements(pm1g3, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		List<Column> pm2g1e = createElements(pm2g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm2g3, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		List<Column> pm3g1e = createElements(pm3g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(pm3g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		List<Column> pm3g3e = createElements(pm3g3, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		List<Column> pm4g1e = createElements(pm4g1, 
 	        new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	        new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		List<Column> pm4g2e = createElements(pm4g2, 
 	            new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	            new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+	            new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 	
 		// Add key metadata
 		createKey(KeyRecord.Type.Primary, "pm1.g1.key1", pm1g1, pm1g1e.subList(0, 1)); //e1 //$NON-NLS-1$
@@ -2818,18 +2818,18 @@ public class RealMetadataFactory {
 	    Table vm1g4 = createVirtualGroup("g4", vm1, vm1g4n1); //$NON-NLS-1$
 	    createElements(vm1g4,
 	              new String[] { "ve1", "ve2" }, //$NON-NLS-1$ //$NON-NLS-2$
-	              new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+	              new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	
 		// Create virtual elements
 		createElements(vm1g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(vm1g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		createElements(vm1g3,
 			new String[] { "e1", "e2","x", "y" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId() });
+			new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() });
 			
 		return createTransformationMetadata(metadataStore, "example4");
 	}

@@ -25,7 +25,7 @@ package org.teiid.query.resolver;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.symbol.ElementSymbol;
@@ -47,27 +47,27 @@ public abstract class AbstractTestFunctionResolving extends AbstractTest {
     public void testResolvesClosestType() throws Exception {
         ElementSymbol e1 = getFactory().newElementSymbol("pm1.g1.e1"); //$NON-NLS-1$
         //dummy resolve to a byte
-        e1.setType(DataTypeManagerService.DefaultDataTypes.BYTE.getTypeClass());
+        e1.setType(DefaultDataTypeManager.DefaultDataTypes.BYTE.getTypeClass());
         e1.setMetadataID(new Object());
         Function function = getFactory().newFunction("abs", new Expression[] {e1}); //$NON-NLS-1$
 
         ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
         visitor.resolveLanguageObject(function, getMetadataFactory().example1Cached());
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(), function.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), function.getType());
     }
 
     @Test
     public void testResolveConvertReference() throws Exception {
         Function function = getFactory().newFunction(
                                          "convert", new Expression[] { //$NON-NLS-1$
-                                             getFactory().newReference(0), getFactory().newConstant(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId())});
+                                             getFactory().newReference(0), getFactory().newConstant(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId())});
 
         ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
         visitor.resolveLanguageObject(function, getMetadataFactory().example1Cached());
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass(), function.getType());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass(), function.getArgs()[0].getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass(), function.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass(), function.getArgs()[0].getType());
     }
 
     @Test
@@ -114,7 +114,7 @@ public abstract class AbstractTestFunctionResolving extends AbstractTest {
 
     private Function helpResolveFunction(String sql) throws Exception {
         Function func = (Function)getExpression(sql);
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), func.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), func.getType());
         return func;
     }
 
@@ -134,20 +134,20 @@ public abstract class AbstractTestFunctionResolving extends AbstractTest {
     public void testLookupTypeConversion() throws Exception {
         String sql = "lookup('pm1.g1', 'e2', 'e1', 1)"; //$NON-NLS-1$
         Function f = (Function)getExpression(sql);
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), f.getArg(3).getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), f.getArg(3).getType());
     }
 
     @Test
     public void testXMLSerialize() throws Exception {
         String sql = "xmlserialize(DOCUMENT '<a/>' as clob)"; //$NON-NLS-1$
         XMLSerialize xs = (XMLSerialize)getExpression(sql);
-        assertEquals(DataTypeManagerService.DefaultDataTypes.CLOB.getTypeClass(), xs.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.CLOB.getTypeClass(), xs.getType());
     }
 
     @Test( expected = QueryResolverException.class )
     public void testXMLSerialize_1() throws Exception {
         String sql = "xmlserialize(DOCUMENT 1 as clob)"; //$NON-NLS-1$
         XMLSerialize xs = (XMLSerialize)getExpression(sql);
-        assertEquals(DataTypeManagerService.DefaultDataTypes.CLOB.getTypeClass(), xs.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.CLOB.getTypeClass(), xs.getType());
     }
 }

@@ -28,7 +28,7 @@ import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.modeshape.teiid.sql.lang.OrderBy;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
 /**
  *

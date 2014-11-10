@@ -5,7 +5,7 @@ package org.teiid.query.sql.symbol;
 import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IXMLForest;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.SimpleNode;
@@ -29,7 +29,7 @@ public class XMLForest extends SimpleNode implements Expression, IXMLForest<Lang
 
     @Override
     public Class<?> getType() {
-        return DataTypeManagerService.DefaultDataTypes.XML.getTypeClass();
+        return DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass();
     }
 
     /**

@@ -42,11 +42,11 @@ import java.util.TimeZone;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.client.BatchSerializer;
 import org.teiid.client.ResizingArrayList;
-import org.teiid.core.types.BinaryType;
+import org.teiid.core.types.BinaryTypeImpl;
 import org.teiid.core.types.BlobType;
 import org.teiid.core.types.ClobType;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.types.XMLType;
 import org.teiid.runtime.client.Messages;
 
@@ -69,37 +69,37 @@ public class Batch1Serializer extends BatchSerializer{
     public Batch1Serializer(TeiidVersion teiidVersion) {
         super(teiidVersion);
 
-        serializers.put(DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getId(),   new BigDecimalColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getId(),   new BigIntegerColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(),       new BooleanColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.BYTE.getId(),          new ByteColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.CHAR.getId(),          new CharColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.DATE.getId(),          new DateColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(),        new DoubleColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.FLOAT.getId(),         new FloatColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),       new IntColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.LONG.getId(),          new LongColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.SHORT.getId(),         new ShortColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.TIME.getId(),          new TimeColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId(),     new TimestampColumnSerializer());
-        serializers.put(DataTypeManagerService.DefaultDataTypes.VARBINARY.getId(),     new BinaryColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId(),   new BigDecimalColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId(),   new BigIntegerColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(),       new BooleanColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.BYTE.getId(),          new ByteColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.CHAR.getId(),          new CharColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.DATE.getId(),          new DateColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(),        new DoubleColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.FLOAT.getId(),         new FloatColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),       new IntColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.LONG.getId(),          new LongColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.SHORT.getId(),         new ShortColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.TIME.getId(),          new TimeColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId(),     new TimestampColumnSerializer());
+        serializers.put(DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getId(),     new BinaryColumnSerializer());
 
-        version1serializers.put(DataTypeManagerService.DefaultDataTypes.DATE.getId(),          new DateColumnSerializer1());
-    	version1serializers.put(DataTypeManagerService.DefaultDataTypes.TIME.getId(),          new TimeColumnSerializer1());
-    	version1serializers.put(DataTypeManagerService.DefaultDataTypes.STRING.getId(),     	new StringColumnSerializer1());
-    	version1serializers.put(DataTypeManagerService.DefaultDataTypes.CLOB.getId(),     		new ClobColumnSerializer1());
-    	version1serializers.put(DataTypeManagerService.DefaultDataTypes.BLOB.getId(),     		new BlobColumnSerializer1());
-    	version1serializers.put(DataTypeManagerService.DefaultDataTypes.XML.getId(),     		new XmlColumnSerializer1());
-    	version1serializers.put(DataTypeManagerService.DefaultDataTypes.NULL.getId(),     		new NullColumnSerializer1());
-    	version1serializers.put(DataTypeManagerService.DefaultDataTypes.OBJECT.getId(),     	new ObjectColumnSerializer1(DataTypeManagerService.DefaultDataTypes.VARBINARY.ordinal()));
-    	version1serializers.put(DataTypeManagerService.DefaultDataTypes.VARBINARY.getId(),     new BinaryColumnSerializer1());
+        version1serializers.put(DefaultDataTypeManager.DefaultDataTypes.DATE.getId(),          new DateColumnSerializer1());
+    	version1serializers.put(DefaultDataTypeManager.DefaultDataTypes.TIME.getId(),          new TimeColumnSerializer1());
+    	version1serializers.put(DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),     	new StringColumnSerializer1());
+    	version1serializers.put(DefaultDataTypeManager.DefaultDataTypes.CLOB.getId(),     		new ClobColumnSerializer1());
+    	version1serializers.put(DefaultDataTypeManager.DefaultDataTypes.BLOB.getId(),     		new BlobColumnSerializer1());
+    	version1serializers.put(DefaultDataTypeManager.DefaultDataTypes.XML.getId(),     		new XmlColumnSerializer1());
+    	version1serializers.put(DefaultDataTypeManager.DefaultDataTypes.NULL.getId(),     		new NullColumnSerializer1());
+    	version1serializers.put(DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId(),     	new ObjectColumnSerializer1(DefaultDataTypeManager.DefaultDataTypes.VARBINARY.ordinal()));
+    	version1serializers.put(DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getId(),     new BinaryColumnSerializer1());
     }
     
     private class BinaryColumnSerializer1 extends ColumnSerializer {
 		@Override
 		protected void writeObject(ObjectOutput out, Object obj)
 				throws IOException {
-			byte[] bytes = ((BinaryType)obj).getBytes();
+			byte[] bytes = ((BinaryTypeImpl)obj).getBytes();
 			out.writeInt(bytes.length); //in theory this could be a short, but we're not strictly enforcing the length
 			out.write(bytes);
 		}
@@ -110,7 +110,7 @@ public class Batch1Serializer extends BatchSerializer{
 			int length = in.readInt();
 			byte[] bytes = new byte[length];
 			in.readFully(bytes);
-			return new BinaryType(bytes);
+			return new BinaryTypeImpl(bytes);
 		}
 	}
     
@@ -119,7 +119,7 @@ public class Batch1Serializer extends BatchSerializer{
 		protected void writeObject(ObjectOutput out, Object obj)
 				throws IOException {
 			//uses object serialization for compatibility with legacy clients
-			super.writeObject(out, ((BinaryType)obj).getBytesDirect());
+			super.writeObject(out, ((BinaryTypeImpl)obj).getBytesDirect());
 		}
 		
 		@Override
@@ -127,7 +127,7 @@ public class Batch1Serializer extends BatchSerializer{
 				ClassNotFoundException {
 			//won't actually be used
 			byte[] bytes = (byte[])super.readObject(in);
-			return new BinaryType(bytes);
+			return new BinaryTypeImpl(bytes);
 		}
 	}
 
@@ -145,14 +145,14 @@ public class Batch1Serializer extends BatchSerializer{
 		    DefaultDataTypes dataType =  getDataTypeManager().getDataType(obj.getClass());
             int code = dataType.ordinal();
     		out.writeByte((byte)code);
-    		if (code == DataTypeManagerService.DefaultDataTypes.BOOLEAN.ordinal()) {
+    		if (code == DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.ordinal()) {
     			if (Boolean.TRUE.equals(obj)) {
     				out.write((byte)1);
     			} else {
     				out.write((byte)0);
     			}
-    		} else if (code <= highestKnownCode && code != DataTypeManagerService.DefaultDataTypes.OBJECT.ordinal()) {
-    		    dataType = DataTypeManagerService.DefaultDataTypes.valueOf(getTeiidVersion(), code);
+    		} else if (code <= highestKnownCode && code != DefaultDataTypeManager.DefaultDataTypes.OBJECT.ordinal()) {
+    		    dataType = DefaultDataTypeManager.DefaultDataTypes.valueOf(getTeiidVersion(), code);
     			ColumnSerializer s = getSerializer(dataType.getId(), (byte)1);
     			s.writeObject(out, obj);
     		} else {
@@ -164,14 +164,14 @@ public class Batch1Serializer extends BatchSerializer{
     	protected Object readObject(ObjectInput in) throws IOException,
     			ClassNotFoundException {
     		int code = in.readByte();
-    		if (code == DataTypeManagerService.DefaultDataTypes.BOOLEAN.ordinal()) {
+    		if (code == DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.ordinal()) {
     			if (in.readByte() == (byte)0) {
     				return Boolean.FALSE;
     			}
     			return Boolean.TRUE;
     		}
-    		if (code != DataTypeManagerService.DefaultDataTypes.OBJECT.ordinal()) {
-    		    DefaultDataTypes dataType = DataTypeManagerService.DefaultDataTypes.valueOf(getTeiidVersion(), code);
+    		if (code != DefaultDataTypeManager.DefaultDataTypes.OBJECT.ordinal()) {
+    		    DefaultDataTypes dataType = DefaultDataTypeManager.DefaultDataTypes.valueOf(getTeiidVersion(), code);
     			ColumnSerializer s = getSerializer(dataType.getId(), (byte)1);
     			return s.readObject(in);
     		}
@@ -601,10 +601,10 @@ public class Batch1Serializer extends BatchSerializer{
     private ColumnSerializer getSerializer(String type, byte version) {
     	ColumnSerializer cs = null;
     	if (version == 1) {
-    		cs = version1serializers.get((type == null) ? DataTypeManagerService.DefaultDataTypes.OBJECT : type);
+    		cs = version1serializers.get((type == null) ? DefaultDataTypeManager.DefaultDataTypes.OBJECT : type);
     	}
     	if (cs == null) {
-    		cs = serializers.get((type == null) ? DataTypeManagerService.DefaultDataTypes.OBJECT : type);
+    		cs = serializers.get((type == null) ? DefaultDataTypeManager.DefaultDataTypes.OBJECT : type);
     	}
         if (cs == null) {
         	return defaultSerializer;

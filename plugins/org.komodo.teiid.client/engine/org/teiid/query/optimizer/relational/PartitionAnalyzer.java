@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.sql.lang.CompareCriteria;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.lang.Query;
@@ -150,7 +150,7 @@ public class PartitionAnalyzer {
 		Map<ElementSymbol, Set<Constant>> result = new HashMap<ElementSymbol, Set<Constant>>();
 		for (int i = 0; i < projected.size(); i++) {
 			Expression ex = SymbolMap.getExpression(projected.get(i));
-			if (DataTypeManagerService.getInstance(ex.getTeiidVersion()).isNonComparable(ex.getType())) {
+			if (DefaultDataTypeManager.getInstance(ex.getTeiidVersion()).isNonComparable(ex.getType())) {
 				continue;
 			}
 			if (ex instanceof Constant) {

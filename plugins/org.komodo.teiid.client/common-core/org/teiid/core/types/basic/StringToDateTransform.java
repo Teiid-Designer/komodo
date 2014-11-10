@@ -24,7 +24,7 @@ package org.teiid.core.types.basic;
 
 import java.sql.Date;
 import java.util.regex.Pattern;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -46,7 +46,7 @@ public class StringToDateTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public StringToDateTransform(DataTypeManagerService dataTypeManager) {
+    public StringToDateTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 

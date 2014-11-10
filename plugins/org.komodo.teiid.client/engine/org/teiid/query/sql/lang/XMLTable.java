@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IXMLTable;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidParser;
@@ -97,7 +97,7 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
             usingDefaultColumn = true;
             XMLColumn xmlColumn = parser.createASTNode(ASTNodes.XML_COLUMN);
             xmlColumn.setName("OBJECT_VALUE"); //$NON-NLS-1$
-            xmlColumn.setType(DataTypeManagerService.DefaultDataTypes.XML.getId());
+            xmlColumn.setType(DefaultDataTypeManager.DefaultDataTypes.XML.getId());
             xmlColumn.setPath("."); //$NON-NLS-1$
             columns.add(xmlColumn);
         }

@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.metadata.TransformationMetadata;
@@ -59,7 +59,7 @@ public class Test85ProcedureResolving extends Test8ProcedureResolving {
         String sql = "call proc ()"; //$NON-NLS-1$
         StoredProcedure sp = (StoredProcedure)helpResolve(sql, tm);
         assertEquals("EXEC proc()", sp.toString());
-        Array expected = getFactory().newArray(DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass(),
+        Array expected = getFactory().newArray(DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass(),
                                            new ArrayList<Expression>(0));
         expected.setImplicit(true);
         assertEquals(expected,
@@ -70,9 +70,9 @@ public class Test85ProcedureResolving extends Test8ProcedureResolving {
         assertEquals("EXEC proc(1, (2, 3))", sp.toString());
         ArrayList<Expression> expressions = new ArrayList<Expression>();
         expressions.add(getFactory().newConstant(1));
-        expressions.add(getFactory().newArray(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        expressions.add(getFactory().newArray(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                                               Arrays.asList((Expression)getFactory().newConstant(2), getFactory().newConstant(3))));
-        Array expected2 = getFactory().newArray(DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass(), expressions);
+        Array expected2 = getFactory().newArray(DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass(), expressions);
         expected2.setImplicit(true);
         assertEquals(expected2,
                      sp.getParameter(1).getExpression());

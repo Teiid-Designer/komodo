@@ -80,12 +80,12 @@ import net.sf.saxon.value.TimeValue;
 import org.teiid.common.buffer.FileStore;
 import org.teiid.common.buffer.FileStoreInputStreamFactory;
 import org.teiid.common.buffer.impl.MemoryStorageManager;
-import org.teiid.core.types.BinaryType;
+import org.teiid.core.types.BinaryTypeImpl;
 import org.teiid.core.types.BlobImpl;
 import org.teiid.core.types.BlobType;
 import org.teiid.core.types.ClobImpl;
 import org.teiid.core.types.ClobType;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.InputStreamFactory;
 import org.teiid.core.types.SQLXMLImpl;
 import org.teiid.core.types.StandardXMLTranslator;
@@ -1075,14 +1075,14 @@ public class XMLSystemFunctions {
 			value = new XMLType(new StAXSQLXML(sourceProvider, encoding));
 			value.setType(Type.DOCUMENT);
 		}
-		if (xs.getType() == DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()) {
-			return DataTypeManagerService.getInstance(xs.getTeiidVersion()).transformValue(value, xs.getType());
+		if (xs.getType() == DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()) {
+			return DefaultDataTypeManager.getInstance(xs.getTeiidVersion()).transformValue(value, xs.getType());
 		}
-		if (xs.getType() == DataTypeManagerService.DefaultDataTypes.CLOB.getTypeClass()) {
+		if (xs.getType() == DefaultDataTypeManager.DefaultDataTypes.CLOB.getTypeClass()) {
 			InputStreamFactory isf = Evaluator.getInputStreamFactory(value);
 			return new ClobType(new ClobImpl(isf, -1));
 		}
-		if (xs.getType() == DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass()) {
+		if (xs.getType() == DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass()) {
 			try {
 				InputStream is = null;
 				if (!Charset.forName(value.getEncoding()).equals(encoding)) {
@@ -1090,8 +1090,8 @@ public class XMLSystemFunctions {
 				} else {
 					is = value.getBinaryStream();					
 				}
-				byte[] bytes = ObjectConverterUtil.convertToByteArray(is, DataTypeManagerService.MAX_LOB_MEMORY_BYTES);
-				return new BinaryType(bytes);
+				byte[] bytes = ObjectConverterUtil.convertToByteArray(is, DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES);
+				return new BinaryTypeImpl(bytes);
 			} catch (SQLException e) {
 				throw new TeiidClientException(e, Messages.gs(Messages.TEIID.TEIID10080, "XML", "VARBINARY")); //$NON-NLS-1$ //$NON-NLS-2$ 
 		    } catch (IOException e) {

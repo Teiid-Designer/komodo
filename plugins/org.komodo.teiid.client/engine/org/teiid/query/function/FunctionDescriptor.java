@@ -34,8 +34,8 @@ import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.query.util.CommandContext;
 import org.teiid.core.CoreConstants;
 import org.teiid.core.types.ArrayImpl;
-import org.teiid.core.types.BinaryType;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.BinaryTypeImpl;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.PropertiesUtils;
 import org.teiid.metadata.AbstractMetadataRecord;
 import org.teiid.metadata.FunctionMethod;
@@ -227,8 +227,8 @@ public class FunctionDescriptor implements Serializable, Cloneable, IFunctionDes
         	if (hasWrappedArgs) {
         		for (int i = 0; i < values.length; i++) {
         			Object val = values[i];
-        			if (val != null && types[i] == DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass()) {
-            			values[i] = ((BinaryType)val).getBytesDirect();
+        			if (val != null && types[i] == DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass()) {
+            			values[i] = ((BinaryTypeImpl)val).getBytesDirect();
         			}
         		}
         	}
@@ -238,11 +238,11 @@ public class FunctionDescriptor implements Serializable, Cloneable, IFunctionDes
         			if (av != null) {
         				Object[] vals = av.getValues();
         				values[values.length - 1] = vals;
-	    				if (hasWrappedArgs && types[types.length - 1] == DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass()) {
+	    				if (hasWrappedArgs && types[types.length - 1] == DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass()) {
 	    					vals = Arrays.copyOf(vals, vals.length);
 	        				for (int i = 0; i < vals.length; i++) {
 	        					if (vals[i] != null) {
-	        						vals[i] = ((BinaryType)vals[i]).getBytesDirect();
+	        						vals[i] = ((BinaryTypeImpl)vals[i]).getBytesDirect();
 	        					}
 	        				}
 	        				values[values.length - 1] = vals;
@@ -305,16 +305,16 @@ public class FunctionDescriptor implements Serializable, Cloneable, IFunctionDes
 		    	}
 		    }
 		}
-		DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
-		result = dataTypeManager.convertToRuntimeType(result, expectedType != DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass());
+		DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
+		result = dataTypeManager.convertToRuntimeType(result, expectedType != DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass());
 		if (expectedType.isArray() && result instanceof ArrayImpl) {
 			return result;
 		}
 		result = dataTypeManager.transformValue(result, expectedType);
 		if (result instanceof String) {
 			String s = (String)result;
-			if (s.length() > DataTypeManagerService.MAX_STRING_LENGTH) {
-				return s.substring(0, DataTypeManagerService.MAX_STRING_LENGTH);
+			if (s.length() > DefaultDataTypeManager.MAX_STRING_LENGTH) {
+				return s.substring(0, DefaultDataTypeManager.MAX_STRING_LENGTH);
 			}
 		}
 		return result;

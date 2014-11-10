@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.language.SQLConstants;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
@@ -111,7 +111,7 @@ public class UpdateResolver extends ProcedureContainerResolver implements Variab
         for (Entry<ElementSymbol, Expression> entry : changing.entrySet()) {
         	ElementSymbol leftSymbol = entry.getKey().clone();
             leftSymbol.getGroupSymbol().setName(ProcedureReservedWords.CHANGING);
-            leftSymbol.setType(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass());
+            leftSymbol.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
             
             Constant constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
             constant.setValue(Boolean.TRUE);
@@ -131,7 +131,7 @@ public class UpdateResolver extends ProcedureContainerResolver implements Variab
         while(defaultIter.hasNext()) {
             ElementSymbol varSymbol = defaultIter.next().clone();
             varSymbol.getGroupSymbol().setName(ProcedureReservedWords.CHANGING);
-            varSymbol.setType(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass());
+            varSymbol.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
             
             Constant constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
             constant.setValue(Boolean.FALSE);

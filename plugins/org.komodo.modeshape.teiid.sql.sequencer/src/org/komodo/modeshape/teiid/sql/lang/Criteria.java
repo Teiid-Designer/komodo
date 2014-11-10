@@ -32,7 +32,7 @@ import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.ICriteria;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
 /**
  *

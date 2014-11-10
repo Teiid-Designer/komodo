@@ -22,7 +22,7 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -32,7 +32,7 @@ public class StringToShortTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public StringToShortTransform(DataTypeManagerService dataTypeManager) {
+    public StringToShortTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 

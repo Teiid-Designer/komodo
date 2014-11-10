@@ -33,7 +33,7 @@ import java.util.Properties;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.metadata.QueryNode;
 import org.komodo.spi.xml.IMappingNode;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.Procedure;
@@ -287,7 +287,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
 		if(elementID instanceof TempMetadataID) { 
             TempMetadataID tempID = (TempMetadataID)elementID;
             if (tempID.getType() != null) {
-                return DataTypeManagerService.getInstance(getTeiidVersion()).getDataTypeName( tempID.getType() );
+                return DefaultDataTypeManager.getInstance(getTeiidVersion()).getDataTypeName( tempID.getType() );
             } 
             throw new AssertionError("No type set for element " + elementID); //$NON-NLS-1$
         }
@@ -705,7 +705,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
             Object origElementID = id.getOriginalMetadataID();
             if (origElementID == null) {
                 String type = getElementType(elementID);
-                if(DataTypeManagerService.DefaultDataTypes.STRING.getId().equals(type)) {
+                if(DefaultDataTypeManager.DefaultDataTypes.STRING.getId().equals(type)) {
                     return 255;
                 }
                 return 10;

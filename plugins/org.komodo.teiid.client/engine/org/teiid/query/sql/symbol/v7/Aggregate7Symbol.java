@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.function.FunctionDescriptor;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.v7.Teiid7Parser;
@@ -32,19 +32,19 @@ public class Aggregate7Symbol extends ExpressionSymbol implements AggregateSymbo
 
     private boolean isWindowed;
 
-    private static final Class<?> COUNT_TYPE = DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass();
+    private static final Class<?> COUNT_TYPE = DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass();
     private static final Map<Class<?>, Class<?>> SUM_TYPES;
     private static final Map<Class<?>, Class<?>> AVG_TYPES;
 
     static {
-        Class<?> byteClass = DataTypeManagerService.DefaultDataTypes.BYTE.getTypeClass();
-        Class<?> longClass = DataTypeManagerService.DefaultDataTypes.LONG.getTypeClass();
-        Class<?> shortClass = DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass();
-        Class<?> integerClass = DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass();
-        Class<?> doubleClass = DataTypeManagerService.DefaultDataTypes.DOUBLE.getTypeClass();
-        Class<?> bigDecimalClass = DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
-        Class<?> bigIntegerClass = DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getTypeClass();
-        Class<?> floatClass = DataTypeManagerService.DefaultDataTypes.FLOAT.getTypeClass();
+        Class<?> byteClass = DefaultDataTypeManager.DefaultDataTypes.BYTE.getTypeClass();
+        Class<?> longClass = DefaultDataTypeManager.DefaultDataTypes.LONG.getTypeClass();
+        Class<?> shortClass = DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass();
+        Class<?> integerClass = DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass();
+        Class<?> doubleClass = DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getTypeClass();
+        Class<?> bigDecimalClass = DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
+        Class<?> bigIntegerClass = DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getTypeClass();
+        Class<?> floatClass = DefaultDataTypeManager.DefaultDataTypes.FLOAT.getTypeClass();
 
         SUM_TYPES = new HashMap<Class<?>, Class<?>>();        
         SUM_TYPES.put(byteClass, longClass);
@@ -120,23 +120,23 @@ public class Aggregate7Symbol extends ExpressionSymbol implements AggregateSymbo
             expressionType = this.getExpression().getType();
             return AVG_TYPES.get(expressionType);
         case ARRAY_AGG:
-            return DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass();
+            return DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass();
         case TEXTAGG:
-            return DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass();
+            return DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass();
         default:
             break;
         }
 
         if (isBoolean()) {
-            return DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+            return DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
         }
 
         if (isEnhancedNumeric()) {
-            return DataTypeManagerService.DefaultDataTypes.DOUBLE.getTypeClass();
+            return DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getTypeClass();
         }
 
         if (isAnalytical()) {
-            return DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass();
+            return DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass();
         }
 
         return this.getExpression().getType();

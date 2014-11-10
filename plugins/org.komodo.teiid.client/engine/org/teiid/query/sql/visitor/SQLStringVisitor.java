@@ -37,7 +37,7 @@ import org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.ArrayImpl;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 import org.teiid.language.SQLConstants;
 import org.teiid.language.SQLConstants.NonReserved;
@@ -179,18 +179,18 @@ public class SQLStringVisitor extends LanguageVisitor
     @Since(Version.TEIID_8_0)
     private static final HashSet<String> LENGTH_DATATYPES = new HashSet<String>(
         Arrays.asList(
-            DataTypeManagerService.DefaultDataTypes.CHAR.getId(),
-            DataTypeManagerService.DefaultDataTypes.CLOB.getId(),
-            DataTypeManagerService.DefaultDataTypes.BLOB.getId(),
-            DataTypeManagerService.DefaultDataTypes.OBJECT.getId(),
-            DataTypeManagerService.DefaultDataTypes.XML.getId(),
-            DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-            DataTypeManagerService.DefaultDataTypes.VARBINARY.getId(),
-            DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getId()));
+            DefaultDataTypeManager.DefaultDataTypes.CHAR.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.CLOB.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.BLOB.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.XML.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId()));
 
     @Since(Version.TEIID_8_0)
     private static final HashSet<String> PRECISION_DATATYPES = new HashSet<String>(
-        Arrays.asList(DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getId()));
+        Arrays.asList(DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId()));
 
     /**
      * Undefined
@@ -1870,7 +1870,7 @@ public class SQLStringVisitor extends LanguageVisitor
         if (obj.isMultiValued()) {
             constantParts = new String[] {"?"}; //$NON-NLS-1$
         } else if (obj.getValue() == null) {
-            if (type.equals(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass())) {
+            if (type.equals(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass())) {
                 constantParts = new String[] {UNKNOWN};
             } else {
                 constantParts = new String[] {"null"}; //$NON-NLS-1$
@@ -1878,13 +1878,13 @@ public class SQLStringVisitor extends LanguageVisitor
         } else {
             if (Number.class.isAssignableFrom(type)) {
                 constantParts = new String[] {obj.getValue().toString()};
-            } else if (type.equals(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass())) {
+            } else if (type.equals(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass())) {
                 constantParts = new String[] {obj.getValue().equals(Boolean.TRUE) ? TRUE : FALSE};
-            } else if (type.equals(DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getTypeClass())) {
+            } else if (type.equals(DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getTypeClass())) {
                 constantParts = new String[] {"{ts'", obj.getValue().toString(), "'}"}; //$NON-NLS-1$ //$NON-NLS-2$
-            } else if (type.equals(DataTypeManagerService.DefaultDataTypes.TIME.getTypeClass())) {
+            } else if (type.equals(DefaultDataTypeManager.DefaultDataTypes.TIME.getTypeClass())) {
                 constantParts = new String[] {"{t'", obj.getValue().toString(), "'}"}; //$NON-NLS-1$ //$NON-NLS-2$
-            } else if (type.equals(DataTypeManagerService.DefaultDataTypes.DATE.getTypeClass())) {
+            } else if (type.equals(DefaultDataTypeManager.DefaultDataTypes.DATE.getTypeClass())) {
                 constantParts = new String[] {"{d'", obj.getValue().toString(), "'}"}; //$NON-NLS-1$ //$NON-NLS-2$
             }
             if (constantParts == null) {
@@ -1904,7 +1904,7 @@ public class SQLStringVisitor extends LanguageVisitor
         if (multiValued) {
             constantParts = new String[] {"?"}; //$NON-NLS-1$
         } else if (value == null) {
-            if (type.equals(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass())) {
+            if (type.equals(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass())) {
                 constantParts = new String[] {UNKNOWN};
             } else {
                 constantParts = new String[] {"null"}; //$NON-NLS-1$
@@ -1926,19 +1926,19 @@ public class SQLStringVisitor extends LanguageVisitor
 			}
             if (Number.class.isAssignableFrom(type)) {
                 constantParts = new String[] {value.toString()};
-            } else if (type.equals(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass())) {
+            } else if (type.equals(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass())) {
                 constantParts = new String[] {value.equals(Boolean.TRUE) ? TRUE : FALSE};
-            } else if (type.equals(DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getTypeClass())) {
+            } else if (type.equals(DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getTypeClass())) {
                 constantParts = new String[] {"{ts'", value.toString(), "'}"}; //$NON-NLS-1$ //$NON-NLS-2$
-            } else if (type.equals(DataTypeManagerService.DefaultDataTypes.TIME.getTypeClass())) {
+            } else if (type.equals(DefaultDataTypeManager.DefaultDataTypes.TIME.getTypeClass())) {
                 constantParts = new String[] {"{t'", value.toString(), "'}"}; //$NON-NLS-1$ //$NON-NLS-2$
-            } else if (type.equals(DataTypeManagerService.DefaultDataTypes.DATE.getTypeClass())) {
+            } else if (type.equals(DefaultDataTypeManager.DefaultDataTypes.DATE.getTypeClass())) {
                 constantParts = new String[] {"{d'", value.toString(), "'}"}; //$NON-NLS-1$ //$NON-NLS-2$
-            } else if (type.equals(DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass())) {
+            } else if (type.equals(DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass())) {
                 constantParts = new String[] {"X'", value.toString(), "'"}; //$NON-NLS-1$ //$NON-NLS-2$
             }
             if (constantParts == null) {
-                if (isTeiid8OrGreater() && DataTypeManagerService.DefaultDataTypes.isLOB(type)) {
+                if (isTeiid8OrGreater() && DefaultDataTypeManager.DefaultDataTypes.isLOB(type)) {
                     constantParts = new String[] {"?"}; //$NON-NLS-1$
                 } else {
                     String strValue = value.toString();

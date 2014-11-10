@@ -38,8 +38,8 @@ import java.util.TreeMap;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.UserDefinedAggregate;
 import org.teiid.core.CoreConstants;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.ReflectionHelper;
 import org.teiid.metadata.AbstractMetadataRecord;
 import org.teiid.metadata.FunctionMethod;
@@ -79,7 +79,7 @@ public class FunctionTree {
     private Map<String, Map<Object, Object>> treeRoot = new TreeMap<String, Map<Object, Object>>(String.CASE_INSENSITIVE_ORDER);
     private boolean validateClass;
 
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
 
     /**
      * Construct a new tree with the given source of function metadata.
@@ -112,9 +112,9 @@ public class FunctionTree {
         }
     }
 
-    public DataTypeManagerService getDataTypeManager() {
+    public DefaultDataTypeManager getDataTypeManager() {
         if (dataTypeManager == null)
-            dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+            dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
 
         return dataTypeManager;
     }
@@ -277,7 +277,7 @@ public class FunctionTree {
             boolean hasWrappedArg = false;
             if (!system) {
                 for (int i = 0; i < types.length; i++) {
-                    if (types[i] == DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass()) {
+                    if (types[i] == DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass()) {
                         hasWrappedArg = true;
                         inputTypes.set(i, byte[].class);
                     }
@@ -389,7 +389,7 @@ public class FunctionTree {
         	if (nextNode == null) {
         		if (argTypes[i].isArray()) {
         			//array types are not yet considered in the function typing logic
-        			nextNode = (Map<Object, Object>) node.get(DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass());
+        			nextNode = (Map<Object, Object>) node.get(DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass());
         		}
         		if (nextNode == null) {
         			return null;

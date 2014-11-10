@@ -27,7 +27,7 @@ import java.util.Collections;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 
 
@@ -80,7 +80,7 @@ public abstract class BaseColumn extends AbstractMetadataRecord {
     }
     
     public Class<?> getJavaType() {
-        return DataTypeManagerService.getInstance(teiidVersion).getDataTypeClass(runtimeType);
+        return DefaultDataTypeManager.getInstance(teiidVersion).getDataTypeClass(runtimeType);
     }
 
     public int getLength() {

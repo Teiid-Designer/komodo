@@ -9,7 +9,7 @@ import java.util.List;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IQuery;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidParser;
@@ -259,7 +259,7 @@ public class Query extends QueryCommand
             selectList = new ArrayList<Expression>(1);
             ElementSymbol xmlElement = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
             xmlElement.setName("xml"); //$NON-NLS-1$
-            xmlElement.setType(DataTypeManagerService.DefaultDataTypes.XML.getTypeClass());
+            xmlElement.setType(DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass());
             selectList.add(xmlElement);
         }
         return selectList;

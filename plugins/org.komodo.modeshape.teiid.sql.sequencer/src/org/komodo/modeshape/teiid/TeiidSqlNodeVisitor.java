@@ -160,8 +160,8 @@ import org.komodo.spi.query.sql.symbol.ISymbol;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.type.IDataTypeManagerService;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.common.collection.EmptyIterator;
@@ -220,7 +220,7 @@ public class TeiidSqlNodeVisitor
 
     private TeiidVersion teiidVersion;
 
-    private IDataTypeManagerService dataTypeManager;
+    private DataTypeManager dataTypeManager;
 
     /**
      * @return the session
@@ -253,7 +253,7 @@ public class TeiidSqlNodeVisitor
     /**
      * @return data type manager service
      */
-    public IDataTypeManagerService getDataTypeManager() {
+    public DataTypeManager getDataTypeManager() {
         if (dataTypeManager == null) {
             TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
             return factory.getDataTypeManagerService(getTeiidVersion());

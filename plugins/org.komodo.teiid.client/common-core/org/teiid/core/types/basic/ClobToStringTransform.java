@@ -26,15 +26,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.SQLException;
 import org.teiid.core.types.ClobType;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
 
 public class ClobToStringTransform extends AnyToStringTransform {
 
-	public ClobToStringTransform(DataTypeManagerService dataTypeManager) {
+	public ClobToStringTransform(DefaultDataTypeManager dataTypeManager) {
 		super(dataTypeManager, DefaultDataTypes.CLOB.getTypeClass());
 	}
 	
@@ -54,7 +54,7 @@ public class ClobToStringTransform extends AnyToStringTransform {
             StringBuffer contents = new StringBuffer();
             
             int chr = reader.read();
-            while (chr != -1 && contents.length() < DataTypeManagerService.MAX_STRING_LENGTH) {
+            while (chr != -1 && contents.length() < DefaultDataTypeManager.MAX_STRING_LENGTH) {
                 contents.append((char)chr);
                 chr = reader.read();
             }

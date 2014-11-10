@@ -24,7 +24,7 @@ package org.komodo.spi.type;
 /**
  *
  */
-public interface IBinaryType extends Comparable<IBinaryType> {
+public interface BinaryType extends Comparable<BinaryType> {
 
     /**
      * 

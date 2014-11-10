@@ -26,7 +26,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -92,8 +92,8 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
         Function func = (Function) getQueryParser().parseExpression(sql);
         ResolverVisitor resolver = new ResolverVisitor(getTeiidVersion());
         resolver.resolveLanguageObject(func, tm);
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), func.getArgs()[0].getType());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), func.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), func.getArgs()[0].getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), func.getType());
 
         sql = "func1(('1',))";
 

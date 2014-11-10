@@ -45,8 +45,8 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.UnresolvedSymbolDescription;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.StringUtil;
 import org.teiid.metadata.ForeignKey;
 import org.teiid.query.function.FunctionDescriptor;
@@ -161,7 +161,7 @@ public class ResolverUtil {
 			if (string == null) {
 				return null;
 			}
-			if (DataTypeManagerService.DefaultDataTypes.NULL.getId().equals(string) || !types.add(string)) {
+			if (DefaultDataTypeManager.DefaultDataTypes.NULL.getId().equals(string) || !types.add(string)) {
 				continue;
 			}
 			if (first) {
@@ -170,13 +170,13 @@ public class ResolverUtil {
 		        // conversions as well as the original type in the working list of
 		        // conversions.
 		        commonConversions.add(string);
-		        DataTypeManagerService.getInstance(teiidVersion).getImplicitConversions(string, commonConversions);
+		        DefaultDataTypeManager.getInstance(teiidVersion).getImplicitConversions(string, commonConversions);
 		        first = false;
 			} else {
 				if (conversions == null) {
 					conversions = new HashSet<String>();
 				}
-				DataTypeManagerService.getInstance(teiidVersion).getImplicitConversions(string, conversions);
+				DefaultDataTypeManager.getInstance(teiidVersion).getImplicitConversions(string, conversions);
 	            conversions.add(string);
 	            // Equivalent to set intersection
 	            commonConversions.retainAll(conversions);
@@ -189,7 +189,7 @@ public class ResolverUtil {
             return types.iterator().next();
         }
         if (types.isEmpty()) {
-        	return DataTypeManagerService.DefaultDataTypes.NULL.getId();
+        	return DefaultDataTypeManager.DefaultDataTypes.NULL.getId();
         }
         for (String string : types) {
             if (commonConversions.contains(string)) {
@@ -215,7 +215,7 @@ public class ResolverUtil {
      */
     public static boolean canImplicitlyConvert(TeiidVersion teiidVersion, String fromType, String toType) {
         if (fromType.equals(toType)) return true;
-        return DataTypeManagerService.getInstance(teiidVersion).isImplicitConversion(fromType, toType);
+        return DefaultDataTypeManager.getInstance(teiidVersion).isImplicitConversion(fromType, toType);
     }
 
     /**
@@ -229,7 +229,7 @@ public class ResolverUtil {
      */
     public static Expression convertExpression(Expression sourceExpression, String targetTypeName, QueryMetadataInterface metadata) throws Exception {
         return convertExpression(sourceExpression,
-                                 DataTypeManagerService.getInstance(sourceExpression.getTeiidVersion()).getDataTypeName(sourceExpression.getType()),
+                                 DefaultDataTypeManager.getInstance(sourceExpression.getTeiidVersion()).getDataTypeName(sourceExpression.getType()),
                                  targetTypeName, metadata);
     }
 
@@ -260,18 +260,18 @@ public class ResolverUtil {
     public static Constant convertConstant(String sourceTypeName,
                                            String targetTypeName,
                                            Constant constant) {
-        if (!DataTypeManagerService.getInstance(constant.getTeiidVersion()).isTransformable(sourceTypeName, targetTypeName)) {
+        if (!DefaultDataTypeManager.getInstance(constant.getTeiidVersion()).isTransformable(sourceTypeName, targetTypeName)) {
         	return null;
         }
 
         try {
 	        //try to get the converted constant, if this fails then it is not in a valid format
 	        Constant result = getProperlyTypedConstant(constant.getValue(),
-	                                                   DataTypeManagerService.getInstance(constant.getTeiidVersion()).getDataTypeClass(targetTypeName),
+	                                                   DefaultDataTypeManager.getInstance(constant.getTeiidVersion()).getDataTypeClass(targetTypeName),
 	                                                   constant.getTeiidParser());
 
-	        if (DataTypeManagerService.DefaultDataTypes.STRING.getId().equals(sourceTypeName)) {
-	        	if (DataTypeManagerService.DefaultDataTypes.CHAR.getId().equals(targetTypeName)) {
+	        if (DefaultDataTypeManager.DefaultDataTypes.STRING.getId().equals(sourceTypeName)) {
+	        	if (DefaultDataTypeManager.DefaultDataTypes.CHAR.getId().equals(targetTypeName)) {
 	        		String value = (String)constant.getValue();
 	        		if (value != null && value.length() != 1) {
 	        			return null;
@@ -281,7 +281,7 @@ public class ResolverUtil {
 	        }
 	        
 	        //for non-strings, ensure that the conversion is consistent
-	        if (!DataTypeManagerService.getInstance(constant.getTeiidVersion()).isTransformable(targetTypeName, sourceTypeName)) {
+	        if (!DefaultDataTypeManager.getInstance(constant.getTeiidVersion()).isTransformable(targetTypeName, sourceTypeName)) {
 	        	return null;
 	        }
         
@@ -305,7 +305,7 @@ public class ResolverUtil {
                                             String sourceTypeName,
                                             String targetTypeName,
                                             boolean implicit, FunctionLibrary library) {
-        DataTypeManagerService dataTypeManagerService = DataTypeManagerService.getInstance(sourceExpression.getTeiidVersion());
+        DefaultDataTypeManager dataTypeManagerService = DefaultDataTypeManager.getInstance(sourceExpression.getTeiidVersion());
         Class<?> srcType = dataTypeManagerService.getDataTypeClass(sourceTypeName);
 
         FunctionDescriptor fd = library.findTypedConversionFunction(srcType, dataTypeManagerService.getDataTypeClass(targetTypeName));
@@ -326,7 +326,7 @@ public class ResolverUtil {
     }
 
     public static void setDesiredType(List<DerivedColumn> passing, LanguageObject obj) throws Exception {
-    	setDesiredType(passing, obj, DataTypeManagerService.DefaultDataTypes.XML.getTypeClass());
+    	setDesiredType(passing, obj, DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass());
     }
     
     public static void setDesiredType(List<DerivedColumn> passing, LanguageObject obj, Class<?> type) throws Exception {
@@ -544,7 +544,7 @@ public class ResolverUtil {
     private static Constant getProperlyTypedConstant(Object defaultValue, Class<?> parameterType, TeiidParser teiidParser)
         throws QueryResolverException{
         try {
-            Object newValue = DataTypeManagerService.getInstance(teiidParser.getVersion()).transformValue(defaultValue, parameterType);
+            Object newValue = DefaultDataTypeManager.getInstance(teiidParser.getVersion()).transformValue(defaultValue, parameterType);
             Constant constant = teiidParser.createASTNode(ASTNodes.CONSTANT);
             constant.setValue(newValue);
             constant.setType(parameterType);
@@ -585,7 +585,7 @@ public class ResolverUtil {
             for (Object elementID : elementIDs) {
             	String elementName = metadata.getName(elementID);
             	String elementType = metadata.getElementType(elementID);
-            	Class<?> elementTypeClass = DataTypeManagerService.getInstance(group.getTeiidVersion()).getDataTypeClass(elementType);
+            	Class<?> elementTypeClass = DefaultDataTypeManager.getInstance(group.getTeiidVersion()).getDataTypeClass(elementType);
 
                 // Form an element symbol from the ID
             	ElementSymbol element = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
@@ -651,9 +651,9 @@ public class ResolverUtil {
 
     public static void resolveLimit(Limit limit) throws Exception {
         if (limit.getOffset() != null) {
-            setDesiredType(limit.getOffset(), DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(), limit);
+            setDesiredType(limit.getOffset(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), limit);
         }
-        setDesiredType(limit.getRowLimit(), DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(), limit);
+        setDesiredType(limit.getRowLimit(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), limit);
     }
     
     public static void resolveImplicitTempGroup(TempMetadataAdapter metadata, GroupSymbol symbol, List symbols) 
@@ -702,13 +702,13 @@ public class ResolverUtil {
         for (int i = 0; i < symbols.size(); i++) {
             Expression selectSymbol = (Expression) symbols.get(i);
             
-            setTypeIfNull(selectSymbol, DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+            setTypeIfNull(selectSymbol, DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
         }
     }
 
 	public static void setTypeIfNull(Expression symbol,
 			Class<?> replacement) {
-		if(!DataTypeManagerService.DefaultDataTypes.NULL.getTypeClass().equals(symbol.getType()) && symbol.getType() != null) {
+		if(!DefaultDataTypeManager.DefaultDataTypes.NULL.getTypeClass().equals(symbol.getType()) && symbol.getType() != null) {
             return;
         }
 		symbol = SymbolMap.getExpression(symbol);
@@ -828,14 +828,14 @@ public class ResolverUtil {
 		if(exprType == null) {
 	         throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30075, expression));
 		}
-		String exprTypeName = DataTypeManagerService.getInstance(expression.getTeiidVersion()).getDataTypeName(exprType);
+		String exprTypeName = DefaultDataTypeManager.getInstance(expression.getTeiidVersion()).getDataTypeName(exprType);
 	
 		Collection<Expression> projectedSymbols = crit.getCommand().getProjectedSymbols();
 		if (projectedSymbols.size() != 1){
 	         throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30093, crit.getCommand()));
 		}
 		Class<?> subqueryType = projectedSymbols.iterator().next().getType();
-		String subqueryTypeName = DataTypeManagerService.getInstance(expression.getTeiidVersion()).getDataTypeName(subqueryType);
+		String subqueryTypeName = DefaultDataTypeManager.getInstance(expression.getTeiidVersion()).getDataTypeName(subqueryType);
 		Expression result = null;
 	    try {
 	        result = convertExpression(expression, exprTypeName, subqueryTypeName, metadata);
@@ -889,7 +889,7 @@ public class ResolverUtil {
              throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30099, keyElementName));
         }
 		result.setKeyElement(keyElement);
-		args[3] = convertExpression(args[3], DataTypeManagerService.getInstance(lookup.getTeiidVersion()).getDataTypeName(keyElement.getType()), metadata);
+		args[3] = convertExpression(args[3], DefaultDataTypeManager.getInstance(lookup.getTeiidVersion()).getDataTypeName(keyElement.getType()), metadata);
 		return result;
 	}
 

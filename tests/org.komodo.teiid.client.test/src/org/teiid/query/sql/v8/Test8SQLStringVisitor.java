@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.language.SQLConstants.NonReserved;
@@ -225,7 +225,7 @@ public class Test8SQLStringVisitor extends AbstractTestSQLStringVisitor {
         expr.add(getFactory().newElementSymbol("e1"));
         expr.add(getFactory().newConstant(1));
         Array array = getFactory().newArray(
-                                            DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+                                            DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                                             expr);
         helpTest(array, "(e1, 1)");
     }

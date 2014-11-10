@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -298,14 +298,14 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
 
         StoredProcedure sp = (StoredProcedure)helpResolve(sql, tm);
 
-        assertEquals(getFactory().newConstant(null, DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()),
+        assertEquals(getFactory().newConstant(null, DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()),
                      sp.getParameter(2).getExpression());
 
         sql = "call proc (1, 'a')"; //$NON-NLS-1$
 
         sp = (StoredProcedure)helpResolve(sql, tm);
 
-        assertEquals(getFactory().newConstant("a", DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()),
+        assertEquals(getFactory().newConstant("a", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()),
                      sp.getParameter(2).getExpression());
     }
 
@@ -322,7 +322,7 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
 
         StoredProcedure sp = (StoredProcedure)helpResolve(sql, tm);
 
-        assertEquals(getFactory().newConstant("a", DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()),
+        assertEquals(getFactory().newConstant("a", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()),
                      sp.getParameter(2).getExpression());
     }
 
@@ -335,7 +335,7 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
         StoredProcedure sp = (StoredProcedure)helpResolve(sql, tm);
         assertEquals("EXEC proc(1, 2, 3)", sp.toString());
         assertEquals(getFactory().newConstant(1), sp.getParameter(1).getExpression());
-        Array expectedArray = getFactory().newArray(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        Array expectedArray = getFactory().newArray(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                                                     Arrays.asList((Expression)getFactory().newConstant(2),
                                                                   getFactory().newConstant(3)));
         expectedArray.setImplicit(true);
@@ -356,7 +356,7 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
         String sql = "call proc ()"; //$NON-NLS-1$
         StoredProcedure sp = (StoredProcedure)helpResolve(sql, tm);
         assertEquals("EXEC proc()", sp.toString());
-        Array expected = getFactory().newArray(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        Array expected = getFactory().newArray(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                                            new ArrayList<Expression>(0));
         expected.setImplicit(true);
         assertEquals(expected,

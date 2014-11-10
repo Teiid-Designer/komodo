@@ -73,7 +73,7 @@ import org.komodo.spi.query.sql.lang.IJoinType;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.DataTypeManager;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrSession;
@@ -201,7 +201,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         return TeiidVersionProvider.getInstance().getTeiidVersion();
     }
 
-    protected IDataTypeManagerService getDataTypeService() {
+    protected DataTypeManager getDataTypeService() {
         TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
         return factory.getDataTypeManagerService(getTeiidVersion()); 
     }

@@ -3,7 +3,7 @@
 package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.SimpleNode;
@@ -109,7 +109,7 @@ public class XMLSerialize extends SimpleNode implements Expression, IXMLSerializ
     public Class<?> getType() {
         if (type == null) {
             if (typeString == null) {
-                type = DataTypeManagerService.DefaultDataTypes.CLOB.getClass();
+                type = DefaultDataTypeManager.DefaultDataTypes.CLOB.getClass();
             } else {
                 type = parser.getDataTypeService().getDataTypeClass(typeString);
             }

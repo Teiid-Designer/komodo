@@ -23,7 +23,7 @@
 package org.teiid.core.types.basic;
 
 import java.sql.Timestamp;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 
@@ -32,7 +32,7 @@ public class DateToTimestampTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public DateToTimestampTransform(DataTypeManagerService dataTypeManager) {
+    public DateToTimestampTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 

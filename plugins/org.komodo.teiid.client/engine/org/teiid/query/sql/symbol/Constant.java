@@ -13,8 +13,8 @@ import java.util.Map;
 import org.komodo.spi.query.sql.symbol.IConstant;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.core.types.ClobType;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.PropertiesUtils;
 import org.teiid.query.function.FunctionMethods;
 import org.teiid.query.parser.LanguageVisitor;
@@ -28,7 +28,7 @@ import org.teiid.runtime.client.Messages;
  */
 public class Constant extends SimpleNode implements Expression, IConstant<LanguageVisitor> {
 
-    private Class<?> type = DataTypeManagerService.DefaultDataTypes.NULL.getTypeClass();
+    private Class<?> type = DefaultDataTypeManager.DefaultDataTypes.NULL.getTypeClass();
 
     private boolean multiValued;
 
@@ -168,7 +168,7 @@ public class Constant extends SimpleNode implements Expression, IConstant<Langua
     public void setValue(Object value) {
         jjtSetValue(value);
         if (this.value == null) {
-            this.type = DataTypeManagerService.DefaultDataTypes.NULL.getClass();
+            this.type = DefaultDataTypeManager.DefaultDataTypes.NULL.getClass();
         } else { 
             this.type = this.value.getClass();
 
@@ -182,9 +182,9 @@ public class Constant extends SimpleNode implements Expression, IConstant<Langua
                 //array of a runtime-type
                 this.type = originalType;
             } else if (originalType.isArray() && !originalType.getComponentType().isPrimitive()) {
-                this.type = DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeArrayClass();
+                this.type = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeArrayClass();
             } else {
-                this.type = DataTypeManagerService.DefaultDataTypes.OBJECT.getClass();
+                this.type = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getClass();
             }
         }
     }

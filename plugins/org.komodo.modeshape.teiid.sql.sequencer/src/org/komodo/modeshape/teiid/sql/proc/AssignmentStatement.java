@@ -31,7 +31,7 @@ import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.ScalarSubquery;
 import org.komodo.spi.query.sql.proc.IAssignmentStatement;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 /**

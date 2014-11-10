@@ -44,7 +44,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.runtime.version.TeiidVersion;
@@ -877,7 +877,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testCriteria1() {
         ElementSymbol es = getFactory().newElementSymbol("pm1.g1.e1"); //$NON-NLS-1$
-        es.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        es.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
         GroupSymbol gs = getFactory().newGroupSymbol("pm1.g1"); //$NON-NLS-1$
         es.setGroupSymbol(gs);
 
@@ -930,11 +930,11 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         ElementSymbol elem1 = elements.get(0);
         assertEquals("Did not get expected element", "x.e1", elem1.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-        assertEquals("Did not get expected type", DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), elem1.getType()); //$NON-NLS-1$
+        assertEquals("Did not get expected type", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), elem1.getType()); //$NON-NLS-1$
 
         ElementSymbol elem2 = elements.get(1);
         assertEquals("Did not get expected element", "x.e2", elem2.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-        assertEquals("Did not get expected type", DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(), elem2.getType()); //$NON-NLS-1$
+        assertEquals("Did not get expected type", DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), elem2.getType()); //$NON-NLS-1$
     }
 
     @Test
@@ -947,7 +947,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
             GroupSymbol sqGroup = getFactory().newGroupSymbol("pm1.sq5"); //$NON-NLS-1$
             ArrayList sqParams = new ArrayList();
             ElementSymbol in = getFactory().newElementSymbol("pm1.sq5.in1"); //$NON-NLS-1$
-            in.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+            in.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
             sqParams.add(in);
             Map externalMetadata = new HashMap();
             externalMetadata.put(sqGroup, sqParams);
@@ -1313,16 +1313,16 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testStringConversion1() {
         // Expected left expression
         ElementSymbol e1 = getFactory().newElementSymbol("pm3.g1.e2"); //$NON-NLS-1$
-        e1.setType(DataTypeManagerService.DefaultDataTypes.DATE.getTypeClass());
+        e1.setType(DefaultDataTypeManager.DefaultDataTypes.DATE.getTypeClass());
 
         // Expected right expression
-        Class srcType = DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass();
-        String tgtTypeName = DataTypeManagerService.DefaultDataTypes.DATE.getId();
+        Class srcType = DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass();
+        String tgtTypeName = DefaultDataTypeManager.DefaultDataTypes.DATE.getId();
         Expression expression = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
 
         FunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
         FunctionDescriptor fd = library.findFunction(IFunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
-            DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()});
+            DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()});
 
         Function conversion = getFactory().newFunction(fd.getName(),
                                                        new Expression[] {expression, getFactory().newConstant(tgtTypeName)});
@@ -1349,16 +1349,16 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testStringConversion2() {
         // Expected left expression
         ElementSymbol e1 = getFactory().newElementSymbol("pm3.g1.e2"); //$NON-NLS-1$
-        e1.setType(DataTypeManagerService.DefaultDataTypes.DATE.getTypeClass());
+        e1.setType(DefaultDataTypeManager.DefaultDataTypes.DATE.getTypeClass());
 
         // Expected right expression
-        Class srcType = DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass();
-        String tgtTypeName = DataTypeManagerService.DefaultDataTypes.DATE.getId();
+        Class srcType = DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass();
+        String tgtTypeName = DefaultDataTypeManager.DefaultDataTypes.DATE.getId();
         Expression expression = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
 
         FunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
         FunctionDescriptor fd = library.findFunction(IFunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
-            DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()});
+            DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()});
 
         Function conversion = getFactory().newFunction(fd.getName(),
                                                        new Expression[] {expression, getFactory().newConstant(tgtTypeName)});
@@ -1386,7 +1386,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testStringConversion3() {
         // Expected left expression
         ElementSymbol e1 = getFactory().newElementSymbol("pm3.g1.e1"); //$NON-NLS-1$
-        e1.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        e1.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
 
         // Expected right expression
         Constant e2 = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
@@ -1410,11 +1410,11 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testDateToTimestampConversion_defect9747() {
         // Expected left expression
         ElementSymbol e1 = getFactory().newElementSymbol("pm3.g1.e4"); //$NON-NLS-1$
-        e1.setType(DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getTypeClass());
+        e1.setType(DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getTypeClass());
 
         // Expected right expression
-        Constant e2 = getFactory().newConstant(TimestampUtil.createDate(96, 0, 31), DataTypeManagerService.DefaultDataTypes.DATE.getTypeClass());
-        Function f1 = getFactory().newFunction("convert", new Expression[] {e2, getFactory().newConstant(DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId())}); //$NON-NLS-1$
+        Constant e2 = getFactory().newConstant(TimestampUtil.createDate(96, 0, 31), DefaultDataTypeManager.DefaultDataTypes.DATE.getTypeClass());
+        Function f1 = getFactory().newFunction("convert", new Expression[] {e2, getFactory().newConstant(DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId())}); //$NON-NLS-1$
         f1.makeImplicit();
 
         // Expected criteria
@@ -1951,7 +1951,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         // Check whether an implicit conversion was added on the correct side
         CompareCriteria crit = (CompareCriteria)command.getCriteria();
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass(), crit.getRightExpression().getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass(), crit.getRightExpression().getType());
         assertEquals("Sql is incorrect after resolving", "SELECT intkey FROM bqt1.smalla WHERE shortvalue = 5", command.toString()); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
@@ -1967,7 +1967,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         // Check whether an implicit conversion was added on the correct side
         CompareCriteria crit = (CompareCriteria)command.getCriteria();
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass(), crit.getLeftExpression().getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass(), crit.getLeftExpression().getType());
         assertEquals("Sql is incorrect after resolving", "SELECT intkey FROM bqt1.smalla WHERE 5 = shortvalue", command.toString()); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
@@ -2032,7 +2032,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Insert command = (Insert)getQueryParser().parseCommand("Insert into pm5.g3(e2) Values(100)"); //$NON-NLS-1$
         TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, metadata);
-        assertTrue(command.getValues().get(0).getType() == DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass());
+        assertTrue(command.getValues().get(0).getType() == DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass());
     }
 
     public TransformationMetadata example_12968() {
@@ -2045,11 +2045,11 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Table pm2g1 = getMetadataFactory().createPhysicalGroup("mySchema.myTable2", pm2); //$NON-NLS-1$
 
         getMetadataFactory().createElements(pm1g1, new String[] {"myColumn", "myColumn2"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-                                       new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                           DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+                                       new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                           DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
         getMetadataFactory().createElements(pm2g1, new String[] {"myColumn", "myColumn2"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-                                       new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                           DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+                                       new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                           DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
 
         return getMetadataFactory().createTransformationMetadata(metadataStore, "12968");
     }
@@ -2096,7 +2096,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testNestedUnionQueryWithNull() throws Exception {
         SetQuery command = (SetQuery)helpResolve("SELECT e2, e3 FROM pm1.g1 UNION (SELECT null, e3 FROM pm1.g2 UNION SELECT null, e3 from pm1.g1)"); //$NON-NLS-1$
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                      command.getProjectedSymbols().get(0).getType());
     }
 
@@ -2104,12 +2104,12 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testUnionQueryClone() throws Exception {
         SetQuery command = (SetQuery)helpResolve("SELECT e2, e3 FROM pm1.g1 UNION SELECT e3, e2 from pm1.g1"); //$NON-NLS-1$
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                      command.getProjectedSymbols().get(1).getType());
 
         command = command.clone();
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                      command.getProjectedSymbols().get(1).getType());
     }
 
@@ -2217,7 +2217,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         // Check type of resolved null constant
         Expression symbol = query.getSelect().getSymbols().get(0);
         assertNotNull(symbol.getType());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), symbol.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), symbol.getType());
     }
 
     @Test
@@ -2291,7 +2291,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         List projectedSymbols = c.getProjectedSymbols();
         for (int i = 0; i < projectedSymbols.size(); i++) {
             ElementSymbol symbol = (ElementSymbol)projectedSymbols.get(i);
-            assertTrue(!symbol.getType().equals(DataTypeManagerService.DefaultDataTypes.NULL));
+            assertTrue(!symbol.getType().equals(DefaultDataTypeManager.DefaultDataTypes.NULL));
         }
     }
 
@@ -2302,7 +2302,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         List projectedSymbols = c.getProjectedSymbols();
         for (int i = 0; i < projectedSymbols.size(); i++) {
             ElementSymbol symbol = (ElementSymbol)projectedSymbols.get(i);
-            assertTrue(!symbol.getType().equals(DataTypeManagerService.DefaultDataTypes.NULL));
+            assertTrue(!symbol.getType().equals(DefaultDataTypeManager.DefaultDataTypes.NULL));
         }
     }
 
@@ -2581,8 +2581,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         Schema pm1 = getMetadataFactory().createPhysicalModel("pm1", metadataStore);
 
-        ColumnSet<Procedure> rs2 = getMetadataFactory().createResultSet("rs2", new String[] {"in", "e2"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs2p2 = getMetadataFactory().createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> rs2 = getMetadataFactory().createResultSet("rs2", new String[] {"in", "e2"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs2p2 = getMetadataFactory().createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         Procedure sq2 = getMetadataFactory().createStoredProcedure("sq2", pm1, Arrays.asList(rs2p2)); //$NON-NLS-1$
         sq2.setResultSet(rs2);
 
@@ -2645,7 +2645,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         TempMetadataID id = store.getTempElementID("#temp.x"); //$NON-NLS-1$
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), id.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), id.getType());
     }
 
     @Test
@@ -2658,7 +2658,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         TempMetadataID id = store.getTempElementID("#temp.x"); //$NON-NLS-1$
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), id.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), id.getType());
     }
 
     @Test
@@ -2793,7 +2793,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testReferenceInSelect() {
         String sql = "select ?, e1 from pm1.g1"; //$NON-NLS-1$
         Query command = (Query)helpResolve(sql, getMetadataFactory().example1Cached());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(),
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(),
                      command.getProjectedSymbols().get(0).getType());
     }
 
@@ -2802,7 +2802,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         String sql = "select convert(?, integer), e1 from pm1.g1"; //$NON-NLS-1$
 
         Query command = (Query)helpResolve(sql, getMetadataFactory().example1Cached());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                      command.getProjectedSymbols().get(0).getType());
     }
 
@@ -2811,7 +2811,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         String sql = "select convert(null, xml) from pm1.g1 union all select 1"; //$NON-NLS-1$
 
         SetQuery query = (SetQuery)helpResolve(sql, getMetadataFactory().example1Cached());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass(),
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass(),
                      query.getProjectedSymbols().get(0).getType());
     }
 
@@ -3080,7 +3080,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testTrim() {
         Query query = (Query)helpResolve("select trim(e1) from pm1.g1");
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), query.getProjectedSymbols().get(0).getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), query.getProjectedSymbols().get(0).getType());
     }
 
     @Test
@@ -3097,7 +3097,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testXmlQueryWithParam() {
         Query q = (Query)helpResolve("select xmlquery('/a' passing ?)");
         XMLQuery ex = (XMLQuery)SymbolMap.getExpression(q.getSelect().getSymbols().get(0));
-        assertEquals(DataTypeManagerService.DefaultDataTypes.XML.getTypeClass(), ex.getPassing().get(0).getExpression().getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass(), ex.getPassing().get(0).getExpression().getType());
     }
 
     @Test

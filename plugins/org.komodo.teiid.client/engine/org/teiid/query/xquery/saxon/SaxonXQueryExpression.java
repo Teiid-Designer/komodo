@@ -68,7 +68,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.SQLXMLImpl;
 import org.teiid.core.types.XMLTranslator;
 import org.teiid.core.types.XMLType;
@@ -421,7 +421,7 @@ public class SaxonXQueryExpression {
 	}
 
 	private void addReturnedArcs(XMLColumn xmlColumn, PathMapNode subNode) {
-		if (xmlColumn.getSymbol().getType() == DataTypeManagerService.DefaultDataTypes.XML.getTypeClass()) {
+		if (xmlColumn.getSymbol().getType() == DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass()) {
 			subNode.createArc(new AxisExpression(Axis.DESCENDANT_OR_SELF, AnyNodeTest.getInstance()));
 		} else {
 			//this may not always be needed, but it doesn't harm anything

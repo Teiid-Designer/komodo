@@ -54,16 +54,16 @@ public final class ArrayImpl implements Comparable<ArrayImpl>, Externalizable, A
 	private final static NullException ex = new NullException();
 
 	private final TeiidVersion teiidVersion;
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
 	
 	public ArrayImpl(TeiidVersion teiidVersion, Object... values) {
 		this.teiidVersion = teiidVersion;
         this.values = values;
 	}
 
-	private DataTypeManagerService getDataTypeManager() {
+	private DefaultDataTypeManager getDataTypeManager() {
 	    if (dataTypeManager == null)
-	        dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+	        dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
 
 	    return dataTypeManager;
 	}

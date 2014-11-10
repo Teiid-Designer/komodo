@@ -7,7 +7,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 /**
  *
  */
-public interface IDataTypeManagerService {
+public interface DataTypeManager {
 
     /**
      * Enumerator of data type names supported by the
@@ -277,7 +277,7 @@ public interface IDataTypeManagerService {
      *
      * @return Wrapped binary type of the given bytes
      */
-    IBinaryType createBinaryType(byte[] bytes);
+    BinaryType createBinaryType(byte[] bytes);
 
     /**
      * Transform the given value into the given data type

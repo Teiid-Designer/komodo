@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.v8.Teiid8Parser;
 import org.teiid.query.sql.lang.OrderBy;
@@ -41,19 +41,19 @@ public class Aggregate8Symbol extends Function implements AggregateSymbol {
         }
     }
 
-    private static final Class<?> COUNT_TYPE = DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass();
+    private static final Class<?> COUNT_TYPE = DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass();
     private static final Map<Class<?>, Class<?>> SUM_TYPES;
     private static final Map<Class<?>, Class<?>> AVG_TYPES;
 
     static {
-        Class<?> byteClass = DataTypeManagerService.DefaultDataTypes.BYTE.getTypeClass();
-        Class<?> longClass = DataTypeManagerService.DefaultDataTypes.LONG.getTypeClass();
-        Class<?> shortClass = DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass();
-        Class<?> integerClass = DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass();
-        Class<?> doubleClass = DataTypeManagerService.DefaultDataTypes.DOUBLE.getTypeClass();
-        Class<?> bigDecimalClass = DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
-        Class<?> bigIntegerClass = DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getTypeClass();
-        Class<?> floatClass = DataTypeManagerService.DefaultDataTypes.FLOAT.getTypeClass();
+        Class<?> byteClass = DefaultDataTypeManager.DefaultDataTypes.BYTE.getTypeClass();
+        Class<?> longClass = DefaultDataTypeManager.DefaultDataTypes.LONG.getTypeClass();
+        Class<?> shortClass = DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass();
+        Class<?> integerClass = DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass();
+        Class<?> doubleClass = DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getTypeClass();
+        Class<?> bigDecimalClass = DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
+        Class<?> bigIntegerClass = DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getTypeClass();
+        Class<?> floatClass = DefaultDataTypeManager.DefaultDataTypes.FLOAT.getTypeClass();
 
         SUM_TYPES = new HashMap<Class<?>, Class<?>>();        
         SUM_TYPES.put(byteClass, longClass);
@@ -66,7 +66,7 @@ public class Aggregate8Symbol extends Function implements AggregateSymbol {
         SUM_TYPES.put(bigDecimalClass, bigDecimalClass);
         
         AVG_TYPES = new HashMap<Class<?>, Class<?>>();
-        DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(Version.TEIID_8_0.get());
+        DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(Version.TEIID_8_0.get());
         if(dataTypeManager.isDecimalAsDouble()) {
             AVG_TYPES.put(byteClass, doubleClass);
             AVG_TYPES.put(shortClass, doubleClass);
@@ -154,14 +154,14 @@ public class Aggregate8Symbol extends Function implements AggregateSymbol {
                 DefaultDataTypes dataType = getTeiidParser().getDataTypeService().getDataType(this.getArg(0).getType());
                 return dataType.getTypeArrayClass();
             case TEXTAGG:
-                return DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass();
+                return DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass();
             case USER_DEFINED:
                 if (this.getFunctionDescriptor() == null) {
                     return null;
                 }
                 return this.getFunctionDescriptor().getReturnType();
             case JSONARRAY_AGG:
-                return DataTypeManagerService.DefaultDataTypes.CLOB.getTypeClass();
+                return DefaultDataTypeManager.DefaultDataTypes.CLOB.getTypeClass();
             case STRING_AGG:
                 return super.getType();
             default:
@@ -169,15 +169,15 @@ public class Aggregate8Symbol extends Function implements AggregateSymbol {
         }
 
         if (isBoolean()) {
-            return DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+            return DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
         }
 
         if (isEnhancedNumeric()) {
-            return DataTypeManagerService.DefaultDataTypes.DOUBLE.getTypeClass();
+            return DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getTypeClass();
         }
 
         if (isAnalytical()) {
-            return DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass();
+            return DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass();
         }
 
         if (this.getArgs().length == 0) {

@@ -24,7 +24,7 @@ package org.teiid.query.sql;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.query.sql.lang.IJoinType.Types;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
@@ -293,7 +293,7 @@ public abstract class AbstractTestFactory {
     }
 
     public ElementSymbol newElementSymbol(String shortName, GroupSymbol gs) {
-        return newElementSymbol(shortName, gs, DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        return newElementSymbol(shortName, gs, DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
     }
 
     public ElementSymbol newElementSymbol(String shortName, GroupSymbol gs, Class<?> typeClass) {

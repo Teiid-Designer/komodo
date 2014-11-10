@@ -34,7 +34,7 @@ import java.util.List;
 import org.junit.Test;
 import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.language.SQLConstants.NonReserved;
 import org.teiid.language.SQLConstants.Reserved;
 import org.teiid.language.SortSpecification;
@@ -1442,7 +1442,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
     @Test
     public void testBooleanLiteralTrue() {
         Boolean expected = Boolean.TRUE;
-        Class<?> expectedType = DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+        Class<?> expectedType = DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
         String sql = "SELECT {b'true'}";
         String expectedSql = "SELECT TRUE";
 
@@ -1453,7 +1453,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
     @Test
     public void testBooleanLiteralTrue2() {
         Boolean expected = Boolean.TRUE;
-        Class<?> expectedType = DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+        Class<?> expectedType = DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
         String sql = "SELECT TRUE";
         String expectedSql = "SELECT TRUE";
 
@@ -1464,7 +1464,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
     @Test
     public void testBooleanLiteralFalse() {
         Boolean expected = Boolean.FALSE;
-        Class<?> expectedType = DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+        Class<?> expectedType = DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
         String sql = "SELECT {b'false'}";
         String expectedSql = "SELECT FALSE";
 
@@ -1475,7 +1475,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
     @Test
     public void testBooleanLiteralFalse2() {
         Boolean expected = Boolean.FALSE;
-        Class<?> expectedType = DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+        Class<?> expectedType = DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
         String sql = "SELECT {b'false'}";
         String expectedSql = "SELECT FALSE";
 
@@ -1485,7 +1485,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
     @Test
     public void testBooleanLiteralUnknown() {
         Boolean expected = null;
-        Class<?> expectedType = DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+        Class<?> expectedType = DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
         String sql = "SELECT {b'unknown'}";
         String expectedSql = "SELECT UNKNOWN";
 
@@ -1495,7 +1495,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
     @Test
     public void testBooleanLiteralUnknown2() {
         Boolean expected = null;
-        Class<?> expectedType = DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+        Class<?> expectedType = DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
         String sql = "SELECT UNKNOWN";
         String expectedSql = "SELECT UNKNOWN";
 
@@ -2779,7 +2779,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         List symbols = new ArrayList();
 
         ElementSymbol a1 = getFactory().newElementSymbol("a1");
-        a1.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        a1.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
         symbols.add(a1);
 
         DynamicCommand sqlCmd = getFactory().newDynamicCommand();
@@ -2804,11 +2804,11 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         List<ElementSymbol> symbols = new ArrayList<ElementSymbol>();
 
         ElementSymbol a1 = getFactory().newElementSymbol("a1");
-        a1.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        a1.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
         symbols.add(a1);
 
         ElementSymbol a2 = getFactory().newElementSymbol("a2");
-        a2.setType(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass());
+        a2.setType(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass());
         symbols.add(a2);
 
         DynamicCommand sqlCmd = getFactory().newDynamicCommand();
@@ -4462,7 +4462,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
         Query query = getFactory().newQuery();
         query.setSelect(getFactory().newSelect(Arrays.asList(getFactory().newMultipleElementSymbol())));
         ArrayTable tt = getFactory().newArrayTable();
-        tt.setArrayValue(getFactory().newConstant(null, DataTypeManagerService.DefaultDataTypes.NULL.getTypeClass()));
+        tt.setArrayValue(getFactory().newConstant(null, DefaultDataTypeManager.DefaultDataTypes.NULL.getTypeClass()));
         List<ProjectedColumn> columns = new ArrayList<ProjectedColumn>();
         columns.add(getFactory().newProjectedColumn("x", "string"));
         columns.add(getFactory().newProjectedColumn("y", "date"));

@@ -39,7 +39,7 @@ import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.DataTypeManager;
 
 /**
  *
@@ -126,10 +126,10 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<TeiidVersion
      * 
      * @param teiidVersion
      * 
-     * @return instance of {@link IDataTypeManagerService}
+     * @return instance of {@link DataTypeManager}
      * @throws Exception 
      */
-    public IDataTypeManagerService getDataTypeManagerService(TeiidVersion teiidVersion) throws Exception {
+    public DataTypeManager getDataTypeManagerService(TeiidVersion teiidVersion) throws Exception {
         ExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
             throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));

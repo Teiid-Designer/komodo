@@ -26,7 +26,7 @@ import java.io.Reader;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.metadata.MetadataFactory;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.Command;
@@ -53,7 +53,7 @@ public interface TeiidParser {
     /**
      * @return dataTypeManagerService
      */
-    DataTypeManagerService getDataTypeService();
+    DefaultDataTypeManager getDataTypeService();
 
     /**
      * Reinitialise the parser against the new sql reader

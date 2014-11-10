@@ -23,7 +23,7 @@
 package org.teiid.metadata;
 
 import java.io.Serializable;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.query.function.metadata.FunctionMetadataValidator;
 
 /**
@@ -32,7 +32,7 @@ import org.teiid.query.function.metadata.FunctionMetadataValidator;
  * verified by this class.  Validation of this object can be done with the 
  * {@link FunctionMetadataValidator}.  The type string used in the function
  * parameter should be one of the standard type names defined in 
- * {@link org.teiid.core.types.DataTypeManagerService.DefaultDataTypes}.
+ * {@link org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes}.
  */
 public class FunctionParameter implements Serializable {
 	private static final long serialVersionUID = -4696050948395485266L;

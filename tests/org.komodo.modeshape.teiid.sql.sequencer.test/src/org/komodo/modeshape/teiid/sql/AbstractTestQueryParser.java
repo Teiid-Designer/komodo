@@ -112,7 +112,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
 /**
  *

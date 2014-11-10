@@ -34,7 +34,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 import org.teiid.language.SQLConstants;
 import org.teiid.metadata.AbstractMetadataRecord;
@@ -115,8 +115,8 @@ public abstract class AbstractTeiidParser implements TeiidParser {
     }
 
     @Override
-    public DataTypeManagerService getDataTypeService() {
-        return DataTypeManagerService.getInstance(getVersion());
+    public DefaultDataTypeManager getDataTypeService() {
+        return DefaultDataTypeManager.getInstance(getVersion());
     }
 
     @Override

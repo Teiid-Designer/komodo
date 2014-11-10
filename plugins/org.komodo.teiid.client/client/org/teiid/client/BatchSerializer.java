@@ -32,7 +32,7 @@ import org.teiid.client.batch.Batch0Serializer;
 import org.teiid.client.batch.Batch1Serializer;
 import org.teiid.client.batch.Batch2Serializer;
 import org.teiid.client.batch.Batch3Serializer;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 
 /**
  *
@@ -62,8 +62,8 @@ public abstract class BatchSerializer {
         return this.teiidVersion;
     }
 
-    protected DataTypeManagerService getDataTypeManager() {
-        return DataTypeManagerService.getInstance(getTeiidVersion());
+    protected DefaultDataTypeManager getDataTypeManager() {
+        return DefaultDataTypeManager.getInstance(getTeiidVersion());
     }
 
     /**

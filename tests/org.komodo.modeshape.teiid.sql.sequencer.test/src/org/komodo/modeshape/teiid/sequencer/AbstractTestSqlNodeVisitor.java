@@ -88,8 +88,8 @@ import org.komodo.spi.query.sql.lang.IOrderBy;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.modeshape.jcr.api.nodetype.NodeTypeManager;
 
 /**
@@ -1701,7 +1701,7 @@ public abstract class AbstractTestSqlNodeVisitor extends AbstractSequencerTest {
 
         ElementSymbol a1 = getFactory().newElementSymbol("a1");
         
-        IDataTypeManagerService dataTypeManager = parser.getTeiidParser().getDataTypeService();
+        DataTypeManager dataTypeManager = parser.getTeiidParser().getDataTypeService();
         Class<?> typeClass = dataTypeManager.getDefaultDataClass(DataTypeName.STRING);
         a1.setType(typeClass);
         symbols.add(a1);

@@ -36,7 +36,7 @@ import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.language.SQLConstants;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
@@ -126,7 +126,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
         for(int i=0; i<elements.size(); i++) {
             ElementSymbol virtualElmnt = elements.get(i);
             ElementSymbol changeElement = virtualElmnt.clone();
-            changeElement.setType(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass());
+            changeElement.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
             changingElements.add(changeElement);
         }
 

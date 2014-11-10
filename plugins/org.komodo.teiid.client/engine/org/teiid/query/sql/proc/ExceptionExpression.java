@@ -22,7 +22,7 @@
 package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IExceptionExpression;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.SimpleNode;
@@ -48,7 +48,7 @@ public class ExceptionExpression extends SimpleNode implements Expression, IExce
     
     @Override
     public Class<?> getType() {
-        return DataTypeManagerService.DefaultDataTypes.OBJECT.getClass();
+        return DefaultDataTypeManager.DefaultDataTypes.OBJECT.getClass();
     }
 
     /**

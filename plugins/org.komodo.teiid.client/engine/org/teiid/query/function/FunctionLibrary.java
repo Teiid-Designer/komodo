@@ -37,7 +37,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.core.CoreConstants;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 import org.teiid.metadata.AggregateAttributes;
 import org.teiid.metadata.FunctionMethod;
@@ -67,7 +67,7 @@ public class FunctionLibrary implements IFunctionLibrary {
 
     private final TeiidVersion teiidVersion;
 
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
 
 	/**
 	 * Construct the function library.  This should be called only once by the
@@ -89,9 +89,9 @@ public class FunctionLibrary implements IFunctionLibrary {
         return this.teiidVersion;
     }
 
-    public DataTypeManagerService getDataTypeManager() {
+    public DefaultDataTypeManager getDataTypeManager() {
         if (dataTypeManager == null)
-            dataTypeManager = DataTypeManagerService.getInstance(getTeiidVersion());
+            dataTypeManager = DefaultDataTypeManager.getInstance(getTeiidVersion());
 
         return dataTypeManager;
     }
@@ -325,7 +325,7 @@ public class FunctionLibrary implements IFunctionLibrary {
                 		continue;
                 	}
                     //treat the array as object type until proper type handling is added
-                	sourceType = DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass();
+                	sourceType = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass();
                 }
 				try {
 					Transform t = getConvertFunctionDescriptor(sourceType, targetType);
@@ -433,7 +433,7 @@ public class FunctionLibrary implements IFunctionLibrary {
 
             Class<?> sourceType = types[i];
             if (sourceType == null) {
-                result[i] = findTypedConversionFunction(DataTypeManagerService.DefaultDataTypes.NULL.getTypeClass(), targetType);
+                result[i] = findTypedConversionFunction(DefaultDataTypeManager.DefaultDataTypes.NULL.getTypeClass(), targetType);
             } else if (sourceType != targetType){
             	if (isVarArgArrayParam(method, types, i, targetType)) {
             		//vararg array parameter
@@ -486,7 +486,7 @@ public class FunctionLibrary implements IFunctionLibrary {
      */
     public FunctionDescriptor findTypedConversionFunction(Class<?> sourceType, Class<?> targetType) {
     	//TODO: should array to string be prohibited?    	
-        FunctionDescriptor fd = findFunction(FunctionName.CONVERT, new Class[] {sourceType, DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()});
+        FunctionDescriptor fd = findFunction(FunctionName.CONVERT, new Class[] {sourceType, DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()});
         if (fd != null) {
             return copyFunctionChangeReturnType(fd, targetType);
         }
@@ -550,53 +550,53 @@ public class FunctionLibrary implements IFunctionLibrary {
                 }
                 aa.setAllowsDistinct(false);
                 aa.setAnalytic(true);
-                returnType = DataTypeManagerService.DefaultDataTypes.INTEGER.getId();
+                returnType = DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId();
                 argTypes = new String[] {};
                 break;
             case ANY:
             case SOME:
             case EVERY:
-                returnType = DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId();
-                argTypes = new String[] {DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId()};
+                returnType = DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId();
+                argTypes = new String[] {DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId()};
                 break;
             case COUNT:
-                returnType = DataTypeManagerService.DefaultDataTypes.INTEGER.getId();
-                argTypes = new String[] {DataTypeManagerService.DefaultDataTypes.OBJECT.getId()};
+                returnType = DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId();
+                argTypes = new String[] {DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()};
                 break;
             case MAX:
             case MIN:
             case AVG:
             case SUM:
-                returnType = DataTypeManagerService.DefaultDataTypes.OBJECT.getId();
-                argTypes = new String[] {DataTypeManagerService.DefaultDataTypes.OBJECT.getId()};
+                returnType = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId();
+                argTypes = new String[] {DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()};
                 break;
             case STDDEV_POP:
             case STDDEV_SAMP:
             case VAR_POP:
             case VAR_SAMP:
-                returnType = DataTypeManagerService.DefaultDataTypes.DOUBLE.getId();
-                argTypes = new String[] {DataTypeManagerService.DefaultDataTypes.DOUBLE.getId()};
+                returnType = DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId();
+                argTypes = new String[] {DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId()};
                 break;
             case STRING_AGG:
-                returnType = DataTypeManagerService.DefaultDataTypes.OBJECT.getId();
-                argTypes = new String[] {DataTypeManagerService.DefaultDataTypes.OBJECT.getId()};
+                returnType = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId();
+                argTypes = new String[] {DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()};
                 aa.setAllowsOrderBy(true);
                 break;
             case ARRAY_AGG:
-                returnType = DataTypeManagerService.DefaultDataTypes.OBJECT.getId();
-                argTypes = new String[] {getDataTypeManager().getDataTypeName(DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeArrayClass())};
+                returnType = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId();
+                argTypes = new String[] {getDataTypeManager().getDataTypeName(DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeArrayClass())};
                 aa.setAllowsOrderBy(true);
                 aa.setAllowsDistinct(false);
                 break;
             case JSONARRAY_AGG:
-                returnType = DataTypeManagerService.DefaultDataTypes.CLOB.getId();
-                argTypes = new String[] {DataTypeManagerService.DefaultDataTypes.OBJECT.getId()};
+                returnType = DefaultDataTypeManager.DefaultDataTypes.CLOB.getId();
+                argTypes = new String[] {DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()};
                 aa.setAllowsOrderBy(true);
                 aa.setAllowsDistinct(false);
                 break;
             case XMLAGG:
-                returnType = DataTypeManagerService.DefaultDataTypes.XML.getId();
-                argTypes = new String[] {DataTypeManagerService.DefaultDataTypes.XML.getId()};
+                returnType = DefaultDataTypeManager.DefaultDataTypes.XML.getId();
+                argTypes = new String[] {DefaultDataTypeManager.DefaultDataTypes.XML.getId()};
                 aa.setAllowsOrderBy(true);
                 aa.setAllowsDistinct(false);
                 break;

@@ -25,7 +25,7 @@ package org.teiid.query.resolver.v7;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -83,7 +83,7 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
 
         Insert insert = (Insert)cs.getCommand();
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass(), insert.getValues().get(1).getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass(), insert.getValues().get(1).getType());
     }
 
     @Test

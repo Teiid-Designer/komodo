@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.ICriteria;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.symbol.Expression;
@@ -29,7 +29,7 @@ public class Criteria extends SimpleNode implements Expression, ICriteria<Langua
 
     @Override
     public Class<?> getType() {
-        return DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+        return DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
     }
 
     /**

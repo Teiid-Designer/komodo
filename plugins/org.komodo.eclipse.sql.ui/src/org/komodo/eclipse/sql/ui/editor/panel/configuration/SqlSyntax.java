@@ -18,7 +18,7 @@ import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.ExecutionConfigurationListener;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.DataTypeManager;
 import org.komodo.utils.KLog;
 
 /**
@@ -64,7 +64,7 @@ public class SqlSyntax {
     
     private void init() {
         SQQueryParser queryParser = new SQQueryParser(teiidVersion);
-        IDataTypeManagerService dataTypeManagerService = queryParser.getTeiidParser().getDataTypeService(); 
+        DataTypeManager dataTypeManagerService = queryParser.getTeiidParser().getDataTypeService(); 
 
         try {
 			// RESERVED WORDS List

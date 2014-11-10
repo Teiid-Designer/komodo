@@ -55,7 +55,7 @@ import org.teiid.core.types.ArrayImpl;
 import org.teiid.core.types.BaseLob;
 import org.teiid.core.types.BlobType;
 import org.teiid.core.types.ClobType;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.InputStreamFactory;
 import org.teiid.core.types.SQLXMLImpl;
 import org.teiid.core.types.Sequencable;
@@ -979,12 +979,12 @@ public class Evaluator {
         }
         String doubleQuote = quoteStr + quoteStr;
         ArrayList<String> result = new ArrayList<String>();
-        DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(textLine.getTeiidVersion());
+        DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(textLine.getTeiidVersion());
         for (Iterator<T> iterator = values.iterator(); iterator.hasNext();) {
             T t = iterator.next();
             String text = (String)dataTypeManager.transformValue(
                                                                                       valueExtractor.getValue(t),
-                                                                                      DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+                                                                                      DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
             if (text == null) {
                 continue;
             }

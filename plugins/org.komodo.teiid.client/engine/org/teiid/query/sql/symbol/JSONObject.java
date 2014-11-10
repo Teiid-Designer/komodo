@@ -5,7 +5,7 @@ package org.teiid.query.sql.symbol;
 import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IJSONObject;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.SimpleNode;
@@ -27,7 +27,7 @@ public class JSONObject extends SimpleNode implements Expression, IJSONObject<La
 
     @Override
     public Class<?> getType() {
-        return DataTypeManagerService.DefaultDataTypes.CLOB.getTypeClass();
+        return DefaultDataTypeManager.DefaultDataTypes.CLOB.getTypeClass();
     }
 
     /**

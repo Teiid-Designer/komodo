@@ -116,7 +116,7 @@ import org.komodo.spi.query.sql.symbol.IXMLQuery;
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.AlterProcedure;
 import org.teiid.query.sql.lang.AlterTrigger;
@@ -228,7 +228,7 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
      */
     private final TCQueryParser parser;
 
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
 
     private boolean abort = false;
 
@@ -303,9 +303,9 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
         return parser.getTeiidParser();
     }
 
-    protected DataTypeManagerService getDataTypeManager() {
+    protected DefaultDataTypeManager getDataTypeManager() {
         if (dataTypeManager == null)
-            dataTypeManager = DataTypeManagerService.getInstance(getTeiidVersion());
+            dataTypeManager = DefaultDataTypeManager.getInstance(getTeiidVersion());
 
         return dataTypeManager;
     }

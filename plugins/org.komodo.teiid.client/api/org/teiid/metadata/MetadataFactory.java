@@ -38,7 +38,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.impl.DataPolicyMetadata.PermissionMetaData;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 import org.teiid.metadata.FunctionMethod.PushDown;
 import org.teiid.metadata.MetadataStore.Grant;
@@ -234,7 +234,7 @@ public class MetadataFactory implements Serializable {
     private Datatype setColumnType(String type,
             BaseColumn column) {
 		int arrayDimensions = 0;
-		while (DataTypeManagerService.isArrayType(type)) {
+		while (DefaultDataTypeManager.isArrayType(type)) {
 			arrayDimensions++;
 			type = type.substring(0, type.length()-2);
 		}
@@ -535,7 +535,7 @@ public class MetadataFactory implements Serializable {
     }
 
     public static FunctionMethod createFunctionFromMethod(TeiidVersion teiidVersion, String name, Method method) {
-        DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+        DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
         String returnType = dataTypeManager.getDataTypeName(method.getReturnType());
         Class<?>[] params = method.getParameterTypes();
         String[] paramTypes = new String[params.length];

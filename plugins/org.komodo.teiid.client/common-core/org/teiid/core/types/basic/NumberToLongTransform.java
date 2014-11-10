@@ -22,7 +22,7 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 public class NumberToLongTransform extends Transform {
@@ -31,7 +31,7 @@ public class NumberToLongTransform extends Transform {
 	private boolean isNarrowing;
 	private boolean isLossy;
 	
-	public NumberToLongTransform(DataTypeManagerService dataTypeManager, Class<?> sourceType, boolean isNarrowing, boolean isLossy) {
+	public NumberToLongTransform(DefaultDataTypeManager dataTypeManager, Class<?> sourceType, boolean isNarrowing, boolean isLossy) {
 	    super(dataTypeManager);
 		this.sourceType = sourceType;
 		this.isNarrowing = isNarrowing;
@@ -63,7 +63,7 @@ public class NumberToLongTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.LONG.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.LONG.getTypeClass();
 	}
 	
 	@Override

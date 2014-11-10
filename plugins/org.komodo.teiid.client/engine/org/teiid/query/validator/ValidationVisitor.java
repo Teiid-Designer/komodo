@@ -57,7 +57,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.api.exception.query.QueryValidatorException;
 import org.teiid.core.types.ArrayImpl;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.language.SQLConstants;
 import org.teiid.metadata.AggregateAttributes;
 import org.teiid.metadata.Table;
@@ -199,14 +199,14 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 	// update procedure being validated
 	private ICreateProcedureCommand<Block, GroupSymbol, Expression, LanguageVisitor> createProc;
 
-	private final DataTypeManagerService dataTypeManager;
+	private final DefaultDataTypeManager dataTypeManager;
 
 	/**
      * @param teiidVersion
      */
     public ValidationVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
-        dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+        dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
     }
 
 	@Override
@@ -381,7 +381,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
         	} catch (IllegalArgumentException e) {
         		handleValidationError(Messages.getString(Messages.ValidationVisitor.invalid_encoding, obj.getEncoding()), obj);
         	}
-			if ((obj.getType() != DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass() && obj.getType() != DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass())) {
+			if ((obj.getType() != DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass() && obj.getType() != DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass())) {
 				handleValidationError(Messages.getString(Messages.ValidationVisitor.encoding_for_binary), obj);
 			}
 		}
@@ -834,7 +834,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
      * @return whether symbol type is non-comparable
      */
     public static boolean isNonComparable(Expression symbol) {
-        DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(symbol.getTeiidVersion());
+        DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(symbol.getTeiidVersion());
         return dataTypeManager.isNonComparable(dataTypeManager.getDataTypeName(symbol.getType()));
     }
 
@@ -1478,10 +1478,10 @@ public class ValidationVisitor extends AbstractValidationVisitor {
         IAggregateSymbol.Type aggregateFunction = obj.getAggregateFunction();
         if((aggregateFunction == IAggregateSymbol.Type.SUM || aggregateFunction == IAggregateSymbol.Type.AVG) && obj.getType() == null) {
             handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0041, new Object[] {aggregateFunction, obj}), obj);
-        } else if (obj.getType() != DataTypeManagerService.DefaultDataTypes.NULL.getTypeClass()) {
-        	if (aggregateFunction == IAggregateSymbol.Type.XMLAGG && aggExp.getType() != DataTypeManagerService.DefaultDataTypes.XML.getTypeClass()) {
+        } else if (obj.getType() != DefaultDataTypeManager.DefaultDataTypes.NULL.getTypeClass()) {
+        	if (aggregateFunction == IAggregateSymbol.Type.XMLAGG && aggExp.getType() != DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass()) {
         		handleValidationError(Messages.getString(Messages.ValidationVisitor.non_xml, new Object[] {aggregateFunction, obj}), obj);
-        	} else if (obj.isBoolean() && aggExp.getType() != DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass()) {
+        	} else if (obj.isBoolean() && aggExp.getType() != DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass()) {
         		handleValidationError(Messages.getString(Messages.ValidationVisitor.non_boolean, new Object[] {aggregateFunction, obj}), obj);
         	} else if (aggregateFunction == IAggregateSymbol.Type.JSONARRAY_AGG) {
 				validateJSONValue(obj, aggExp);
@@ -1523,10 +1523,10 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
 	@Since(Version.TEIID_8_0)
 	private void validateJSONValue(LanguageObject obj, Expression expr) {
-		if (expr.getType() != DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()
+		if (expr.getType() != DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()
 		    && !dataTypeManager.isTransformable(
 		                                               expr.getType(),
-		                                               DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass())) {
+		                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass())) {
 			handleValidationError(Messages.getString(Messages.ValidationVisitor.invalid_json_value, expr, obj), obj);
 		}
 	}
@@ -1603,7 +1603,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
      * @param parent
      */
     public void validateXMLContentTypes(Expression expression, LanguageObject parent) {
-		if (expression.getType() == DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass() || expression.getType() == DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass()) {
+		if (expression.getType() == DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass() || expression.getType() == DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass()) {
 			handleValidationError(Messages.getString(Messages.ValidationVisitor.xml_content_type, expression), parent);
 		}
     }
@@ -1684,7 +1684,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     	for (DerivedColumn dc : passing) {
     		if (dc.getAlias() == null) {
     			Class<?> type = dc.getExpression().getType();
-    			if (type != DataTypeManagerService.DefaultDataTypes.XML.getTypeClass()) {
+    			if (type != DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass()) {
     				handleValidationError(Messages.getString(Messages.ValidationVisitor.context_item_type), obj);
     			}
     			if (context && !hadError) {
@@ -1797,9 +1797,9 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     
     @Override
     public void visit(XMLParse obj) {
-    	if (obj.getExpression().getType() != DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass() && 
-    			obj.getExpression().getType() != DataTypeManagerService.DefaultDataTypes.CLOB.getTypeClass() &&
-    			obj.getExpression().getType() != DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass()) {
+    	if (obj.getExpression().getType() != DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass() && 
+    			obj.getExpression().getType() != DefaultDataTypeManager.DefaultDataTypes.CLOB.getTypeClass() &&
+    			obj.getExpression().getType() != DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass()) {
     		handleValidationError(Messages.getString(Messages.ValidationVisitor.xmlparse_type), obj);
     	}
     }

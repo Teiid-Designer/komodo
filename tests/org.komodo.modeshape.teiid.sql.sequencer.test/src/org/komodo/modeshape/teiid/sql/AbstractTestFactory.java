@@ -112,8 +112,8 @@ import org.komodo.modeshape.teiid.sql.symbol.XMLSerialize;
 import org.komodo.spi.query.sql.lang.IJoinType.Types;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
-import org.komodo.spi.type.IDataTypeManagerService;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
 /**
  *
@@ -127,7 +127,7 @@ public abstract class AbstractTestFactory {
         this.parser = parser;
     }
 
-    public IDataTypeManagerService getDataTypeService() {
+    public DataTypeManager getDataTypeService() {
         return parser.getTeiidParser().getDataTypeService();
     }
 

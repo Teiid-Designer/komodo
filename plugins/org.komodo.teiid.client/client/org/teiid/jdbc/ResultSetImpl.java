@@ -60,7 +60,7 @@ import org.teiid.client.lob.LobChunkInputStream;
 import org.teiid.client.lob.StreamingLobChunckProducer;
 import org.teiid.client.plan.PlanNode;
 import org.teiid.client.util.ResultsFuture;
-import org.teiid.core.types.BinaryType;
+import org.teiid.core.types.BinaryTypeImpl;
 import org.teiid.core.types.BlobImpl;
 import org.teiid.core.types.BlobType;
 import org.teiid.core.types.ClobImpl;
@@ -354,8 +354,8 @@ public class ResultSetImpl extends WrapperImpl implements TeiidResultSet, BatchF
         	String val = (String)currentValue;
         	currentValue = val.substring(0, Math.min(maxFieldSize/2, val.length()));
         }
-        else if (currentValue instanceof BinaryType) {
-        	BinaryType val = (BinaryType)currentValue;
+        else if (currentValue instanceof BinaryTypeImpl) {
+        	BinaryTypeImpl val = (BinaryTypeImpl)currentValue;
         	currentValue = val.getBytesDirect();
         }
         return currentValue;

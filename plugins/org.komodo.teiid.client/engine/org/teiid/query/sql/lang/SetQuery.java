@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ISetQuery;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidParser;
@@ -179,7 +179,7 @@ public class SetQuery extends QueryCommand
             if (symbol.getType() != type) {
                 symbol = SymbolMap.getExpression(originalSymbol);
                 try {
-                    symbol = ResolverUtil.convertExpression(symbol, DataTypeManagerService.getInstance(symbol.getTeiidVersion()).getDataTypeName(type), metadata);
+                    symbol = ResolverUtil.convertExpression(symbol, DefaultDataTypeManager.getInstance(symbol.getTeiidVersion()).getDataTypeName(type), metadata);
                 } catch (Exception err) {
                      throw new RuntimeException(err);
                 }

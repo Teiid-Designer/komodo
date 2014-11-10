@@ -43,8 +43,8 @@ import java.sql.Time;
 import java.sql.Timestamp;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.core.types.BinaryType;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.BinaryTypeImpl;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.ReaderInputStream;
 import org.teiid.runtime.client.Messages;
 
@@ -59,8 +59,8 @@ final class DataTypeTransformer {
     // Prevent instantiation
     private DataTypeTransformer() {}
 
-    private static DataTypeManagerService getDataTypeManager(TeiidVersion teiidVersion) {
-        DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+    private static DefaultDataTypeManager getDataTypeManager(TeiidVersion teiidVersion) {
+        DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
         return dataTypeManager;
     }
 
@@ -92,8 +92,8 @@ final class DataTypeTransformer {
                 return targetType.cast(blob.getBytes(1, (int)length));
             } else if (value instanceof String) {
             	return targetType.cast(((String)value).getBytes());
-            } else if (value instanceof BinaryType) {
-            	return targetType.cast(((BinaryType)value).getBytesDirect());
+            } else if (value instanceof BinaryTypeImpl) {
+            	return targetType.cast(((BinaryTypeImpl)value).getBytesDirect());
             }
     	} else if (targetType == String.class) {
     		if (value instanceof SQLXML) {
@@ -109,7 +109,7 @@ final class DataTypeTransformer {
         	}
     	}
     	try {
-    		DataTypeManagerService dataTypeManager = getDataTypeManager(teiidVersion);
+    		DefaultDataTypeManager dataTypeManager = getDataTypeManager(teiidVersion);
             return (T)dataTypeManager.transformValue(dataTypeManager.convertToRuntimeType(value, true), runtimeType);
     	} catch (Exception e) {
     		String valueStr = value.toString();
@@ -125,15 +125,15 @@ final class DataTypeTransformer {
 		Class<?> runtimeType = type;
 		if (!getDataTypeManager(teiidVersion).getAllDataTypeClasses().contains(type)) {
 			if (type == Clob.class) {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.CLOB.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.CLOB.getTypeClass();
 			} else if (type == Blob.class) {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass();
 			} else if (type == SQLXML.class) {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.XML.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass();
 			} else if (type == byte[].class) {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass();
 			} else {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass();
 			}
 		}
 		return runtimeType;

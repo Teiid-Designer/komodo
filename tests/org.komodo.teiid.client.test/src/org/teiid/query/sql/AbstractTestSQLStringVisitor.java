@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.query.sql.lang.IOrderBy;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
@@ -1634,7 +1634,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
         List<ElementSymbol> symbols = new ArrayList<ElementSymbol>();
 
         ElementSymbol a1 = getFactory().newElementSymbol("a1");
-        a1.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        a1.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
         symbols.add(a1);
 
         DynamicCommand obj = getFactory().newDynamicCommand();

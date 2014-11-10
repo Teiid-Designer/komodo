@@ -36,7 +36,7 @@ import java.util.Set;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.ISPParameter;
@@ -78,43 +78,43 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Schema modelObj = getMetadataFactory().createPhysicalModel("test", metadataStore); //$NON-NLS-1$
         Schema vModelObj2 = getMetadataFactory().createVirtualModel("vTest", metadataStore); //$NON-NLS-1$
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
-        Column elemObj0 = getMetadataFactory().createElement("e0", groupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column elemObj0 = getMetadataFactory().createElement("e0", groupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         elemObj0.setNullType(NullType.No_Nulls);
-        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elemObj1.setSelectable(false);
-        Column elemObj2 = getMetadataFactory().createElement("e2", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj2 = getMetadataFactory().createElement("e2", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elemObj2.setSearchType(SearchType.Like_Only);
-        Column elemObj3 = getMetadataFactory().createElement("e3", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj3 = getMetadataFactory().createElement("e3", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elemObj3.setSearchType(SearchType.All_Except_Like);
 
         Table group2Obj = getMetadataFactory().createPhysicalGroup("group2", modelObj); //$NON-NLS-1$
-        Column elemObj2_0 = getMetadataFactory().createElement("e0", group2Obj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column elemObj2_0 = getMetadataFactory().createElement("e0", group2Obj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         elemObj2_0.setUpdatable(false);
-        getMetadataFactory().createElement("e1", group2Obj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        Column elemObj2_2 = getMetadataFactory().createElement("e2", group2Obj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e1", group2Obj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj2_2 = getMetadataFactory().createElement("e2", group2Obj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elemObj2_2.setUpdatable(false);
 
         Table group3Obj = getMetadataFactory().createPhysicalGroup("group3", modelObj); //$NON-NLS-1$
         group3Obj.setSupportsUpdate(false);
-        getMetadataFactory().createElement("e0", group3Obj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e1", group3Obj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e2", group3Obj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e0", group3Obj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e1", group3Obj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e2", group3Obj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
 
         // Create virtual group & elements.
         TCQueryNode vNode = new TCQueryNode("SELECT * FROM test.group WHERE e2 = 'x'"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vGroup = getMetadataFactory().createVirtualGroup("vGroup", vModelObj2, vNode); //$NON-NLS-1$
         getMetadataFactory().createElements(vGroup, new String[] {"e0", "e1", "e2", "e3"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-                                           new String[] {DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                               DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                           new String[] {DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 
         TCQueryNode vNode2 = new TCQueryNode("SELECT * FROM test.group"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vGroup2 = getMetadataFactory().createVirtualGroup("vMap", vModelObj2, vNode2); //$NON-NLS-1$
         List<Column> vGroupE2 = getMetadataFactory().createElements(vGroup2, new String[] {"e0", "e1", "e2", "e3"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-                                                                   new String[] {DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-                                                                       DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                                       DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                                       DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                                                   new String[] {DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+                                                                       DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                                       DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                                       DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         vGroupE2.get(0).setNullType(NullType.No_Nulls);
         vGroupE2.get(1).setSelectable(false);
         vGroupE2.get(2).setSearchType(SearchType.Like_Only);
@@ -137,11 +137,11 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
 		if (getTeiidVersion().isLessThan(Version.TEIID_8_0.get())) {
 		    getMetadataFactory().createElements(doc1, new String[] { "a0", "a0.a1", "a0.a1.a2", "a0.a1.b2", "a0.a1.c2" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		                                        new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+		                                        new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 		}
 
         return getMetadataFactory().createTransformationMetadata(metadataStore, "example");
@@ -153,10 +153,10 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Schema modelObj = getMetadataFactory().createPhysicalModel("test", metadataStore); //$NON-NLS-1$
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
 
-        Column elemObj0 = getMetadataFactory().createElement("e0", groupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        Column elemObj2 = getMetadataFactory().createElement("e2", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e3", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj0 = getMetadataFactory().createElement("e0", groupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj2 = getMetadataFactory().createElement("e2", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e3", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
 
         elemObj0.setNullType(NullType.No_Nulls);
 
@@ -180,9 +180,9 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
 
         getMetadataFactory().createElements(groupObj, new String[] {"e0", "e1", "e2", "e3", "e4", "e5" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-        }, new String[] {DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-            DataTypeManagerService.DefaultDataTypes.OBJECT.getId(), DataTypeManagerService.DefaultDataTypes.BLOB.getId(),
-            DataTypeManagerService.DefaultDataTypes.CLOB.getId(), DataTypeManagerService.DefaultDataTypes.XML.getId(),});
+        }, new String[] {DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId(), DefaultDataTypeManager.DefaultDataTypes.BLOB.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.CLOB.getId(), DefaultDataTypeManager.DefaultDataTypes.XML.getId(),});
 
         return getMetadataFactory().createTransformationMetadata(metadataStore, "example2");
     }
@@ -193,8 +193,8 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Schema modelObj = getMetadataFactory().createPhysicalModel("test", metadataStore); //$NON-NLS-1$
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
 
-        getMetadataFactory().createElement("e0", groupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e0", groupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
 
         elemObj1.setNullType(NullType.No_Nulls);
         elemObj1.setDefaultValue(Boolean.FALSE.toString());
@@ -209,15 +209,15 @@ public abstract class AbstractTestValidator extends AbstractTest {
         // Create metadata objects 
         Schema modelObj = getMetadataFactory().createPhysicalModel("test", metadataStore); //$NON-NLS-1$
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
-        getMetadataFactory().createElement("e0", groupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e1", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e2", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e0", groupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e1", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e2", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         Schema vModelObj = getMetadataFactory().createVirtualModel("vTest", metadataStore); //$NON-NLS-1$
         TCQueryNode vNode = new TCQueryNode("SELECT * FROM test.group"); //$NON-NLS-1$ //$NON-NLS-2$ 
         Table vGroupObj = getMetadataFactory().createVirtualGroup("vGroup", vModelObj, vNode); //$NON-NLS-1$
-        Column vElemObj0 = getMetadataFactory().createElement("e0", vGroupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        Column vElemObj1 = getMetadataFactory().createElement("e1", vGroupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e2", vGroupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vElemObj0 = getMetadataFactory().createElement("e0", vGroupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column vElemObj1 = getMetadataFactory().createElement("e1", vGroupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e2", vGroupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         List<Column> elements = new ArrayList<Column>(2);
         elements.add(vElemObj0);
         elements.add(vElemObj1);
@@ -225,9 +225,9 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
         TCQueryNode vNode2 = new TCQueryNode("SELECT * FROM vTest.vGroup"); //$NON-NLS-1$ //$NON-NLS-2$ 
         Table vGroupObj2 = getMetadataFactory().createVirtualGroup("vGroup2", vModelObj, vNode2); //$NON-NLS-1$
-        Column vElemObj20 = getMetadataFactory().createElement("e0", vGroupObj2, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        Column vElemObj21 = getMetadataFactory().createElement("e1", vGroupObj2, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e2", vGroupObj2, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vElemObj20 = getMetadataFactory().createElement("e0", vGroupObj2, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column vElemObj21 = getMetadataFactory().createElement("e1", vGroupObj2, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e2", vGroupObj2, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elements = new ArrayList<Column>(2);
         elements.add(vElemObj20);
         elements.add(vElemObj21);
@@ -1364,14 +1364,14 @@ public abstract class AbstractTestValidator extends AbstractTest {
     private TransformationMetadata helpCreateCase4237VirtualProcedureMetadata() {
         MetadataStore metadataStore = new MetadataStore();
         Schema physicalModel = getMetadataFactory().createPhysicalModel("pm1", metadataStore); //$NON-NLS-1$
-        ColumnSet<Procedure> resultSet = getMetadataFactory().createResultSet("pm1.rs", new String[] {"e1", "e2"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter inParam = getMetadataFactory().createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> resultSet = getMetadataFactory().createResultSet("pm1.rs", new String[] {"e1", "e2"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter inParam = getMetadataFactory().createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         Procedure storedProcedure = getMetadataFactory().createStoredProcedure("sp", physicalModel, Arrays.asList(inParam)); //$NON-NLS-1$ //$NON-NLS-2$
         storedProcedure.setResultSet(resultSet);
 
         Schema virtualModel = getMetadataFactory().createVirtualModel("vm1", metadataStore); //$NON-NLS-1$
-        ColumnSet<Procedure> virtualResultSet = getMetadataFactory().createResultSet("vm1.rs", new String[] {"e1", "e2"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter virtualInParam = getMetadataFactory().createParameter("in1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> virtualResultSet = getMetadataFactory().createResultSet("vm1.rs", new String[] {"e1", "e2"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter virtualInParam = getMetadataFactory().createParameter("in1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         TCQueryNode queryNode = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN EXEC pm1.sp(vm1.sp.in1); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure virtualStoredProcedure = getMetadataFactory().createVirtualProcedure("sp", virtualModel, Arrays.asList(virtualInParam), queryNode); //$NON-NLS-1$
         virtualStoredProcedure.setResultSet(virtualResultSet);

@@ -29,7 +29,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.FunctionMethod.PushDown;
 import org.teiid.metadata.FunctionParameter;
@@ -171,7 +171,7 @@ public class FunctionMetadataValidator {
     public static final void validateType(TeiidVersion teiidVersion, String type) throws Exception {
         validateIsNotNull(type, "Type"); //$NON-NLS-1$
 
-        if(DataTypeManagerService.getInstance(teiidVersion).getDataTypeClass(type) == null) {
+        if(DefaultDataTypeManager.getInstance(teiidVersion).getDataTypeClass(type) == null) {
              throw new Exception(Messages.gs(Messages.TEIID.TEIID30428, type));
         }
     }
@@ -186,7 +186,7 @@ public class FunctionMetadataValidator {
      */
     public static final void validateDescription(String description) throws Exception {
 		if(description != null) {
-        	validateLength(description, DataTypeManagerService.MAX_STRING_LENGTH, "Description"); //$NON-NLS-1$
+        	validateLength(description, DefaultDataTypeManager.MAX_STRING_LENGTH, "Description"); //$NON-NLS-1$
 		}
     }
 

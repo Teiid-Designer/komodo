@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.ITextLine;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.SimpleNode;
@@ -121,7 +121,7 @@ public class TextLine extends SimpleNode implements Expression, ITextLine<Langua
         if (isTeiidVersionOrGreater(Version.TEIID_8_5))
             return String[].class;
 
-        return DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass();
+        return DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass();
     }
 
     @Override

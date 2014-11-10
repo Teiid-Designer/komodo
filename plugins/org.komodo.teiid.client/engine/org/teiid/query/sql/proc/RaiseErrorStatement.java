@@ -5,7 +5,7 @@ package org.teiid.query.sql.proc;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.proc.IRaiseStatement;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.symbol.Expression;
@@ -51,7 +51,7 @@ public class RaiseErrorStatement extends Statement implements ExpressionStatemen
 
     @Override
     public Class<?> getExpectedType() {
-        return DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass();
+        return DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass();
     }
 
     @Override

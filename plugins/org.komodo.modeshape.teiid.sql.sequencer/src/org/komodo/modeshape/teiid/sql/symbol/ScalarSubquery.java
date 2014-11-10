@@ -29,7 +29,7 @@ import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.QueryCommand;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryContainer;
 import org.komodo.spi.query.sql.symbol.IScalarSubquery;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
 /**
  *

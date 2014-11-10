@@ -35,7 +35,7 @@ import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.ModelMetaData.Message.Severity;
 import org.teiid.adminapi.impl.VDBMetaData;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.language.SQLConstants;
 import org.teiid.metadata.AbstractMetadataRecord;
 import org.teiid.metadata.Column;
@@ -353,7 +353,7 @@ public class MetadataValidator {
 		if (type == null) {
 			throw new Exception(Messages.gs(Messages.TEIID.TEIID31086, name, table.getFullName()));
 		}
-		Column column = mf.addColumn(name, DataTypeManagerService.getInstance(teiidVersion).getDataTypeName(type), table);
+		Column column = mf.addColumn(name, DefaultDataTypeManager.getInstance(teiidVersion).getDataTypeName(type), table);
 		column.setUpdatable(table.supportsUpdate());
 		return column;		
 	}

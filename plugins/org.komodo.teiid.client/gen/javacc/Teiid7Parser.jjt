@@ -86,7 +86,7 @@ import org.teiid.query.sql.lang.CriteriaOperator.Operator;
 import org.teiid.query.sql.lang.SubqueryCompareCriteria.PredicateQuantifier;
 import org.teiid.query.sql.proc.*;
 import org.teiid.query.sql.symbol.*;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 
 /** 
@@ -3567,7 +3567,7 @@ Expression intParam(ParseInfo info) :
      if (val == null) {
        return reference(info.incrementReferenceCount());
      } 
-     return constant(val, DataTypeManagerService.DefaultDataTypes.INTEGER);
+     return constant(val, DefaultDataTypeManager.DefaultDataTypes.INTEGER);
    }
 }
 
@@ -3613,7 +3613,7 @@ Expression fetchLimit(ParseInfo info) :
     <FETCH> nonReserved("FIRST", "NEXT") [limit = intParam(info)] (<ROW>|<ROWS>) <ONLY>
     {
       if (limit == null) {
-        return constant(1, DataTypeManagerService.DefaultDataTypes.INTEGER); 
+        return constant(1, DefaultDataTypeManager.DefaultDataTypes.INTEGER); 
       }
       return limit;
     }
@@ -4532,27 +4532,27 @@ Constant literal() :
 {
     Token t = null;
     String strVal = null;
-    DataTypeManagerService.DefaultDataTypes escapeType = null;
+    DefaultDataTypeManager.DefaultDataTypes escapeType = null;
     Constant constant = null;
 }
 {
 	(	
 		strVal=stringVal()	{ 
-			constant = constant(strVal, DataTypeManagerService.DefaultDataTypes.STRING);
+			constant = constant(strVal, DefaultDataTypeManager.DefaultDataTypes.STRING);
 		} |
 		
 		t=<INTEGERVAL> 	{ 
 			try { 
 				// First try as integer - this should nearly always work
-				constant = constant(Integer.valueOf(t.image), DataTypeManagerService.DefaultDataTypes.INTEGER); 				
+				constant = constant(Integer.valueOf(t.image), DefaultDataTypeManager.DefaultDataTypes.INTEGER); 				
 			} catch(NumberFormatException e1) { 
 				try { 
 					// Second try as a long
-					constant = constant(Long.valueOf(t.image), DataTypeManagerService.DefaultDataTypes.LONG);
+					constant = constant(Long.valueOf(t.image), DefaultDataTypeManager.DefaultDataTypes.LONG);
 				} catch(NumberFormatException e2) {
 					try {
 						// Third try as a biginteger
-						constant = constant(new BigInteger(t.image), DataTypeManagerService.DefaultDataTypes.BIG_INTEGER);
+						constant = constant(new BigInteger(t.image), DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER);
 					} catch(NumberFormatException e3) {
 						Object[] params = new Object[] { t.image };
 						throw new ParseException(Messages.getString(Messages.TeiidParser.Integer_parse, params));
@@ -4563,22 +4563,22 @@ Constant literal() :
 		
 		t=<FLOATVAL>	{ 
 			try { 
-				constant = constant(Double.valueOf(t.image), DataTypeManagerService.DefaultDataTypes.DOUBLE); 
+				constant = constant(Double.valueOf(t.image), DefaultDataTypeManager.DefaultDataTypes.DOUBLE); 
 			} catch(NumberFormatException e) {
 				Object[] params = new Object[] { t.image };
 				throw new ParseException(Messages.getString(Messages.TeiidParser.Float_parse, params));
 			}
 		}   |
 		
-		t=<FALSE>    { constant = constant(Boolean.FALSE, DataTypeManagerService.DefaultDataTypes.BOOLEAN); } |
-		t=<TRUE>     { constant = constant(Boolean.TRUE, DataTypeManagerService.DefaultDataTypes.BOOLEAN); }  |
-        t=<UNKNOWN>  { constant = constant(null, DataTypeManagerService.DefaultDataTypes.BOOLEAN); }       |
+		t=<FALSE>    { constant = constant(Boolean.FALSE, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN); } |
+		t=<TRUE>     { constant = constant(Boolean.TRUE, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN); }  |
+        t=<UNKNOWN>  { constant = constant(null, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN); }       |
         t=<NULL>     { constant = constant(null); }          |
         
-        ( (<BOOLEANTYPE>   { escapeType=DataTypeManagerService.DefaultDataTypes.BOOLEAN; } |
-          <TIMESTAMPTYPE> { escapeType=DataTypeManagerService.DefaultDataTypes.TIMESTAMP; } | 
-          <DATETYPE>      { escapeType=DataTypeManagerService.DefaultDataTypes.DATE; } |
-          <TIMETYPE>      { escapeType=DataTypeManagerService.DefaultDataTypes.TIME; }) strVal=stringVal() { 
+        ( (<BOOLEANTYPE>   { escapeType=DefaultDataTypeManager.DefaultDataTypes.BOOLEAN; } |
+          <TIMESTAMPTYPE> { escapeType=DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP; } | 
+          <DATETYPE>      { escapeType=DefaultDataTypeManager.DefaultDataTypes.DATE; } |
+          <TIMETYPE>      { escapeType=DefaultDataTypeManager.DefaultDataTypes.TIME; }) strVal=stringVal() { 
 	        	try {
 	        		constant = constant(getDataTypeService().transformValue(strVal, escapeType), escapeType);
 	        	} catch (Exception e) {
@@ -4651,8 +4651,8 @@ Constant constant(Object... args) #Constant :
          */
         for (Object arg : args) {
             if (arg instanceof Class) {
-                jjtThis.setType((Class) arg);            } else if (arg instanceof DataTypeManagerService.DefaultDataTypes) {
-                DataTypeManagerService.DefaultDataTypes dataType = (DataTypeManagerService.DefaultDataTypes) arg;                jjtThis.setType(dataType.getTypeClass());
+                jjtThis.setType((Class) arg);            } else if (arg instanceof DefaultDataTypeManager.DefaultDataTypes) {
+                DefaultDataTypeManager.DefaultDataTypes dataType = (DefaultDataTypeManager.DefaultDataTypes) arg;                jjtThis.setType(dataType.getTypeClass());
             } else {                jjtThis.setValue(arg);
             }
         }

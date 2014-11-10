@@ -94,8 +94,8 @@ import org.teiid.query.sql.lang.CriteriaOperator.Operator;
 import org.teiid.query.sql.lang.SubqueryCompareCriteria.PredicateQuantifier;
 import org.teiid.query.sql.proc.*;
 import org.teiid.query.sql.symbol.*;
-import org.teiid.core.types.BinaryType;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.BinaryTypeImpl;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 
 /** 
@@ -3919,7 +3919,7 @@ Expression intParam(ParseInfo info) :
 {
    val = intVal()
    {
-     return constant(val, DataTypeManagerService.DefaultDataTypes.INTEGER);
+     return constant(val, DefaultDataTypeManager.DefaultDataTypes.INTEGER);
    }
    |
    ex = unsignedValueExpressionPrimary(info)
@@ -3974,7 +3974,7 @@ Expression fetchLimit(ParseInfo info) :
     <FETCH> (<FIRST> | <NEXT>) [limit = intParam(info)] (<ROW>|<ROWS>) <ONLY>
     {
       if (limit == null) {
-        return constant(1, DataTypeManagerService.DefaultDataTypes.INTEGER); 
+        return constant(1, DefaultDataTypeManager.DefaultDataTypes.INTEGER); 
       }
       return limit;
     }
@@ -5099,30 +5099,30 @@ Constant nonNumericLiteral() :
 {
     Token t = null;
     String strVal = "";
-    DataTypeManagerService.DefaultDataTypes escapeType = null;
+    DefaultDataTypeManager.DefaultDataTypes escapeType = null;
     Constant constant = null;
 }
 {
 	(	
 		strVal=stringVal()	{ 
-			constant = constant(strVal, DataTypeManagerService.DefaultDataTypes.STRING);
+			constant = constant(strVal, DefaultDataTypeManager.DefaultDataTypes.STRING);
 		} |
-		t=<BINARYSTRINGVAL> { constant = constant(new BinaryType(javax.xml.bind.DatatypeConverter.parseHexBinary(t.image.substring(2, t.image.length() - 1))), DataTypeManagerService.DefaultDataTypes.VARBINARY); } |
-		t=<FALSE>    { constant = constant(Boolean.FALSE, DataTypeManagerService.DefaultDataTypes.BOOLEAN); } |
-		t=<TRUE>     { constant = constant(Boolean.TRUE, DataTypeManagerService.DefaultDataTypes.BOOLEAN); }  |
-        t=<UNKNOWN>  { constant = constant(null, DataTypeManagerService.DefaultDataTypes.BOOLEAN); }       |
+		t=<BINARYSTRINGVAL> { constant = constant(new BinaryTypeImpl(javax.xml.bind.DatatypeConverter.parseHexBinary(t.image.substring(2, t.image.length() - 1))), DefaultDataTypeManager.DefaultDataTypes.VARBINARY); } |
+		t=<FALSE>    { constant = constant(Boolean.FALSE, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN); } |
+		t=<TRUE>     { constant = constant(Boolean.TRUE, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN); }  |
+        t=<UNKNOWN>  { constant = constant(null, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN); }       |
         t=<NULL>     { constant = constant(null); }          |
         
         ( <ESCAPEDTYPE> { 
             String image = getToken(0).image; 
         	if (StringUtil.endsWithIgnoreCase(image, "b")) {
-        		escapeType=DataTypeManagerService.DefaultDataTypes.BOOLEAN;
+        		escapeType=DefaultDataTypeManager.DefaultDataTypes.BOOLEAN;
         	} else if (StringUtil.endsWithIgnoreCase(image, "ts")) {
-        		escapeType=DataTypeManagerService.DefaultDataTypes.TIMESTAMP;
+        		escapeType=DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP;
         	} else if (StringUtil.endsWithIgnoreCase(image, "d")) {
-        		escapeType=DataTypeManagerService.DefaultDataTypes.DATE;
+        		escapeType=DefaultDataTypeManager.DefaultDataTypes.DATE;
         	} else {
-        		escapeType=DataTypeManagerService.DefaultDataTypes.TIME;
+        		escapeType=DefaultDataTypeManager.DefaultDataTypes.TIME;
         	}
 		  } strVal=stringVal() { 
 	        	try {
@@ -5152,15 +5152,15 @@ Constant unsignedNumericLiteral(String strVal) :
 			try { 
 			    strVal = prependSign(strVal, t.image);
 				// First try as integer - this should nearly always work
-				return constant(Integer.valueOf(strVal), DataTypeManagerService.DefaultDataTypes.INTEGER); 				
+				return constant(Integer.valueOf(strVal), DefaultDataTypeManager.DefaultDataTypes.INTEGER); 				
 			} catch(NumberFormatException e1) { 
 				try { 
 					// Second try as a long
-					return constant(Long.valueOf(strVal), DataTypeManagerService.DefaultDataTypes.LONG);
+					return constant(Long.valueOf(strVal), DefaultDataTypeManager.DefaultDataTypes.LONG);
 				} catch(NumberFormatException e2) {
 					try {
 						// Third try as a biginteger
-						return constant(new BigInteger(strVal), DataTypeManagerService.DefaultDataTypes.BIG_INTEGER);
+						return constant(new BigInteger(strVal), DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER);
 					} catch(NumberFormatException e3) {
 						Object[] params = new Object[] { strVal };
 						throw new ParseException(Messages.getString(Messages.TeiidParser.Integer_parse, params));
@@ -5170,7 +5170,7 @@ Constant unsignedNumericLiteral(String strVal) :
 		}	| t=<FLOATVAL>	{ 
 		    strVal = prependSign(strVal, t.image);
 			try { 
-				return constant(Double.valueOf(strVal), DataTypeManagerService.DefaultDataTypes.DOUBLE); 
+				return constant(Double.valueOf(strVal), DefaultDataTypeManager.DefaultDataTypes.DOUBLE); 
 			} catch(NumberFormatException e) {
 				Object[] params = new Object[] { strVal };
 				throw new ParseException(Messages.getString(Messages.TeiidParser.Float_parse, params));
@@ -5179,9 +5179,9 @@ Constant unsignedNumericLiteral(String strVal) :
      		strVal = prependSign(strVal, t.image);
 			try { 
 			    if (getDataTypeService().isDecimalAsDouble()) {
-			    	return constant(Double.valueOf(strVal), DataTypeManagerService.DefaultDataTypes.DOUBLE);
+			    	return constant(Double.valueOf(strVal), DefaultDataTypeManager.DefaultDataTypes.DOUBLE);
 				} else {
-			    	return constant(new java.math.BigDecimal(strVal), DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL); 
+			    	return constant(new java.math.BigDecimal(strVal), DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL); 
 				}
 			} catch(NumberFormatException e) {
 				Object[] params = new Object[] { t.image };
@@ -5884,8 +5884,8 @@ Constant constant(Object... args) #Constant :
         for (Object arg : args) {
             if (arg instanceof Class) {
                 jjtThis.setType((Class) arg);
-            } else if (arg instanceof DataTypeManagerService.DefaultDataTypes) {
-                DataTypeManagerService.DefaultDataTypes dataType = (DataTypeManagerService.DefaultDataTypes) arg;
+            } else if (arg instanceof DefaultDataTypeManager.DefaultDataTypes) {
+                DefaultDataTypeManager.DefaultDataTypes dataType = (DefaultDataTypeManager.DefaultDataTypes) arg;
                 jjtThis.setType(dataType.getTypeClass());
             } else {
                 jjtThis.setValue(arg);

@@ -27,7 +27,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.TimeZone;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 
 
 /**
@@ -73,10 +73,10 @@ public class TimestampWithTimezone {
 	}
 
     public static Object create(java.util.Date date, TimeZone initial, Calendar target, Class<?> type) {
-        if (type.equals(DataTypeManagerService.DefaultDataTypes.TIME.getTypeClass())) {
+        if (type.equals(DefaultDataTypeManager.DefaultDataTypes.TIME.getTypeClass())) {
             return type.cast(createTime(date, initial, target));
         }
-        if (type.equals(DataTypeManagerService.DefaultDataTypes.DATE.getTypeClass())) {
+        if (type.equals(DefaultDataTypeManager.DefaultDataTypes.DATE.getTypeClass())) {
             return type.cast(createDate(date, initial, target));
         }
         return type.cast(createTimestamp(date, initial, target));

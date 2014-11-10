@@ -45,8 +45,8 @@ import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.type.IBinaryType;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.BinaryType;
+import org.komodo.spi.type.DataTypeManager;
 import org.teiid.core.types.basic.AnyToObjectTransform;
 import org.teiid.core.types.basic.AnyToStringTransform;
 import org.teiid.core.types.basic.BooleanToNumberTransform;
@@ -72,7 +72,7 @@ import org.teiid.runtime.client.TeiidClientException;
 /**
  *
  */
-public class DataTypeManagerService implements IDataTypeManagerService {
+public class DefaultDataTypeManager implements DataTypeManager {
 
     public static final int MAX_STRING_LENGTH = PropertiesUtils.getIntProperty(System.getProperties(), "org.teiid.maxStringLength", 4000); //$NON-NLS-1$
 
@@ -135,7 +135,7 @@ public class DataTypeManagerService implements IDataTypeManagerService {
         XML ("xml", DataTypeName.XML, XMLType.class), //$NON-NLS-1$
 
         @Since(Version.TEIID_8_0)
-        VARBINARY ("varbinary", DataTypeName.VARBINARY, BinaryType.class); //$NON-NLS-1$
+        VARBINARY ("varbinary", DataTypeName.VARBINARY, BinaryTypeImpl.class); //$NON-NLS-1$
 
         private static Map<TeiidVersion, List<DefaultDataTypes>> valueCache = new HashMap<TeiidVersion, List<DefaultDataTypes>>();
 
@@ -297,7 +297,7 @@ public class DataTypeManagerService implements IDataTypeManagerService {
      */
     private static Map<DefaultDataTypes, Map<DefaultDataTypes, Transform>> transforms = new HashMap<DefaultDataTypes, Map<DefaultDataTypes, Transform>>(128);
 
-    private static Map<TeiidVersion, DataTypeManagerService> instances = new HashMap<TeiidVersion, DataTypeManagerService>();
+    private static Map<TeiidVersion, DefaultDataTypeManager> instances = new HashMap<TeiidVersion, DefaultDataTypeManager>();
 
     private final TeiidVersion teiidVersion;
 
@@ -305,10 +305,10 @@ public class DataTypeManagerService implements IDataTypeManagerService {
      * @param teiidVersion 
      * @return the singleton instance
      */
-    public static DataTypeManagerService getInstance(TeiidVersion teiidVersion) {
-        DataTypeManagerService instance = instances.get(teiidVersion);
+    public static DefaultDataTypeManager getInstance(TeiidVersion teiidVersion) {
+        DefaultDataTypeManager instance = instances.get(teiidVersion);
         if (instance == null) {
-            instance = new DataTypeManagerService(teiidVersion);
+            instance = new DefaultDataTypeManager(teiidVersion);
             instances.put(teiidVersion, instance);
         }
 
@@ -326,7 +326,7 @@ public class DataTypeManagerService implements IDataTypeManagerService {
     /**
      * @param teiidVersion
      */
-    private DataTypeManagerService(TeiidVersion teiidVersion) {
+    private DefaultDataTypeManager(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         loadBasicTransforms();
     }
@@ -336,14 +336,14 @@ public class DataTypeManagerService implements IDataTypeManagerService {
      * set is always installed but may be overridden.
      */
     private void loadBasicTransforms() {
-        Class<?> byteClass = DataTypeManagerService.DefaultDataTypes.BYTE.getTypeClass();
-        Class<?> longClass = DataTypeManagerService.DefaultDataTypes.LONG.getTypeClass();
-        Class<?> shortClass = DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass();
-        Class<?> integerClass = DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass();
-        Class<?> doubleClass = DataTypeManagerService.DefaultDataTypes.DOUBLE.getTypeClass();
-        Class<?> bigDecimalClass = DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
-        Class<?> bigIntegerClass = DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getTypeClass();
-        Class<?> floatClass = DataTypeManagerService.DefaultDataTypes.FLOAT.getTypeClass();
+        Class<?> byteClass = DefaultDataTypeManager.DefaultDataTypes.BYTE.getTypeClass();
+        Class<?> longClass = DefaultDataTypeManager.DefaultDataTypes.LONG.getTypeClass();
+        Class<?> shortClass = DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass();
+        Class<?> integerClass = DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass();
+        Class<?> doubleClass = DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getTypeClass();
+        Class<?> bigDecimalClass = DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
+        Class<?> bigIntegerClass = DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getTypeClass();
+        Class<?> floatClass = DefaultDataTypeManager.DefaultDataTypes.FLOAT.getTypeClass();
 
         addTransform(new BooleanToNumberTransform(this, Byte.valueOf((byte)1), Byte.valueOf((byte)0)));
         addTransform(new BooleanToNumberTransform(this, Short.valueOf((short)1), Short.valueOf((short)0)));
@@ -1020,7 +1020,7 @@ public class DataTypeManagerService implements IDataTypeManagerService {
                 return new ClobType(ClobImpl.createClob((char[])value));
             }
             if (c == byte[].class) {
-                return new BinaryType((byte[])value);
+                return new BinaryTypeImpl((byte[])value);
             }
             if (java.util.Date.class.isAssignableFrom(c)) {
                 return new Timestamp(((java.util.Date)value).getTime());                
@@ -1048,8 +1048,8 @@ public class DataTypeManagerService implements IDataTypeManagerService {
     }
 
     @Override
-    public IBinaryType createBinaryType(byte[] bytes) {
-        return new BinaryType(bytes);
+    public BinaryType createBinaryType(byte[] bytes) {
+        return new BinaryTypeImpl(bytes);
     }
 
     @Override

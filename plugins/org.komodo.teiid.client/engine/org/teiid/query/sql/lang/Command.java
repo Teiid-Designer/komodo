@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
@@ -131,7 +131,7 @@ public abstract class Command extends SimpleNode implements ICommand<Expression,
         if (updateCommandSymbol == null ) {
             ElementSymbol symbol = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
             symbol.setName("Count"); //$NON-NLS-1$
-            symbol.setType(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass());
+            symbol.setType(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass());
             updateCommandSymbol = Arrays.asList((Expression)symbol);
         }
         return updateCommandSymbol;

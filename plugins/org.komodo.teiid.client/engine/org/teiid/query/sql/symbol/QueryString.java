@@ -5,7 +5,7 @@ package org.teiid.query.sql.symbol;
 import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IQueryString;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.SimpleNode;

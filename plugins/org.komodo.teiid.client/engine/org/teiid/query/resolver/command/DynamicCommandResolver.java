@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
@@ -87,7 +87,7 @@ public class DynamicCommandResolver extends CommandResolver {
         ResolverVisitor visitor = new ResolverVisitor(getTeiidParser().getVersion());
         visitor.resolveLanguageObject(dynamicCmd, groups, dynamicCmd.getExternalGroupContexts(), metadata);
         String sqlType = getDataTypeManager().getDataTypeName(dynamicCmd.getSql().getType());
-        String targetType = DataTypeManagerService.DefaultDataTypes.STRING.getId();
+        String targetType = DefaultDataTypeManager.DefaultDataTypes.STRING.getId();
         
         if (!targetType.equals(sqlType) && !getDataTypeManager().isImplicitConversion(sqlType, targetType)) {
              throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30100, sqlType));

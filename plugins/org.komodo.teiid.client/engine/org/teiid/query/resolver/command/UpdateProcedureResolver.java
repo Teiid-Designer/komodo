@@ -39,7 +39,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.UnresolvedSymbolDescription;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.language.SQLConstants;
 import org.teiid.language.SQLConstants.NonReserved;
 import org.teiid.query.metadata.TempMetadataAdapter;
@@ -89,7 +89,7 @@ public class UpdateProcedureResolver extends CommandResolver {
 
     private final List<ElementSymbol> exceptionGroup;
 
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
 
     /**
      * @param queryResolver
@@ -99,15 +99,15 @@ public class UpdateProcedureResolver extends CommandResolver {
 
         ElementSymbol es1 = create(ASTNodes.ELEMENT_SYMBOL);
         es1.setName("STATE"); //$NON-NLS-1$
-        es1.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        es1.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
 
         ElementSymbol es2 = create(ASTNodes.ELEMENT_SYMBOL);
         es2.setName("ERRORCODE"); //$NON-NLS-1$
-        es2.setType(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass());
+        es2.setType(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass());
 
         ElementSymbol es3 = create(ASTNodes.ELEMENT_SYMBOL);
         es3.setName("TEIIDCODE"); //$NON-NLS-1$
-        es3.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        es3.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
 
         ElementSymbol es4 = create(ASTNodes.ELEMENT_SYMBOL);
         es4.setName(NonReserved.EXCEPTION);
@@ -123,9 +123,9 @@ public class UpdateProcedureResolver extends CommandResolver {
     /**
      * @return the dataTypeManager
      */
-    public DataTypeManagerService getDataTypeManager() {
+    public DefaultDataTypeManager getDataTypeManager() {
         if (dataTypeManager == null)
-            dataTypeManager = DataTypeManagerService.getInstance(getTeiidVersion());
+            dataTypeManager = DefaultDataTypeManager.getInstance(getTeiidVersion());
 
         return this.dataTypeManager;
     }
@@ -203,14 +203,14 @@ public class UpdateProcedureResolver extends CommandResolver {
             String countVar = ProcedureReservedWords.VARIABLES + Symbol.SEPARATOR + ProcedureReservedWords.ROWS_UPDATED;
             ElementSymbol updateCount = create(ASTNodes.ELEMENT_SYMBOL);
             updateCount.setName(countVar);
-            updateCount.setType(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass());
+            updateCount.setType(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass());
             symbols.add(updateCount);
         }
 
         String countVar = ProcedureReservedWords.VARIABLES + Symbol.SEPARATOR + ProcedureReservedWords.ROWCOUNT;
         ElementSymbol updateCount = create(ASTNodes.ELEMENT_SYMBOL);
         updateCount.setName(countVar);
-        updateCount.setType(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass());
+        updateCount.setType(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass());
         symbols.add(updateCount);
 
         ProcedureContainerResolver.addScalarGroup(getTeiidParser(),
@@ -232,7 +232,7 @@ public class UpdateProcedureResolver extends CommandResolver {
         String countVar = ProcedureReservedWords.VARIABLES + Symbol.SEPARATOR + ProcedureReservedWords.ROWCOUNT;
         ElementSymbol updateCount = create(ASTNodes.ELEMENT_SYMBOL);
         updateCount.setName(countVar);
-        updateCount.setType(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass());
+        updateCount.setType(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass());
         symbols.add(updateCount);
 
         ProcedureContainerResolver.addScalarGroup(getTeiidParser(),

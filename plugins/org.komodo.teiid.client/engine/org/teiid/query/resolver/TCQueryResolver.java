@@ -38,7 +38,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.QueryValidatorException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
@@ -632,7 +632,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 		if (symbols.size() != projectedSymbols.size()) {
 			 throw new QueryValidatorException(Messages.gs(Messages.TEIID.TEIID30066, virtualGroup, symbols.size(), projectedSymbols.size()));
 		}
-		DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(getTeiidVersion());
+		DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(getTeiidVersion());
 		for (int i = 0; i < projectedSymbols.size(); i++) {
 			Expression projectedSymbol = projectedSymbols.get(i);
 			

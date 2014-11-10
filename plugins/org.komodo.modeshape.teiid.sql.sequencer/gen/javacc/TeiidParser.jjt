@@ -72,9 +72,9 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.type.IDataTypeManagerService;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
-import org.komodo.spi.type.IBinaryType;
+import org.komodo.spi.type.DataTypeManager;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
+import org.komodo.spi.type.BinaryType;
 import org.komodo.spi.query.sql.lang.IMatchCriteria.MatchMode;
 import org.komodo.spi.query.sql.lang.IJoinType;
 import org.komodo.spi.query.sql.lang.ISetQuery;
@@ -6000,7 +6000,7 @@ Constant nonNumericLiteral() :
 			t=<BINARYSTRINGVAL>
 			{
 				byte[] bytes = javax.xml.bind.DatatypeConverter.parseHexBinary(t.image.substring(2, t.image.length() - 1));
-				IBinaryType binary = getDataTypeService().createBinaryType(bytes);
+				BinaryType binary = getDataTypeService().createBinaryType(bytes);
 				constant = constant(binary, DataTypeName.VARBINARY);
 			}
 			|

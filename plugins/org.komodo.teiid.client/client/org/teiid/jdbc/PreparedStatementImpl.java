@@ -59,7 +59,7 @@ import org.teiid.client.util.ResultsFuture;
 import org.teiid.core.types.ArrayImpl;
 import org.teiid.core.types.BlobImpl;
 import org.teiid.core.types.ClobImpl;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.types.InputStreamFactory;
 import org.teiid.core.types.JDBCSQLTypeInfo;
 import org.teiid.core.types.Streamable;

@@ -39,7 +39,7 @@ import org.teiid.core.types.BlobType;
 import org.teiid.core.types.ClobImpl;
 import org.teiid.core.types.ClobType;
 import org.teiid.core.types.ClobType.Type;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.InputStreamFactory;
 import org.teiid.core.types.Streamable;
 import org.teiid.core.util.ObjectConverterUtil;
@@ -165,8 +165,8 @@ public class JSONFunctionMethods {
 					writer.write(object.toString());
 				} else {
 					writer.append('"');
-					String text = (String) DataTypeManagerService.getInstance(teiidVersion).transformValue(object, 
-					                                                                  DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+					String text = (String) DefaultDataTypeManager.getInstance(teiidVersion).transformValue(object, 
+					                                                                  DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
 					JSONParser.escape(text, writer);
 					writer.append('"');
 				}

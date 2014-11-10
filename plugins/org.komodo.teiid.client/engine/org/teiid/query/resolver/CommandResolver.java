@@ -23,7 +23,7 @@
 package org.teiid.query.resolver;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidParser;
@@ -39,7 +39,7 @@ public abstract class CommandResolver {
 
     private final TCQueryResolver queryResolver;
 
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
 
     /**
      * @param queryResolver
@@ -64,9 +64,9 @@ public abstract class CommandResolver {
         return getTeiidParser().createASTNode(type);
     }
 
-    protected DataTypeManagerService getDataTypeManager() {
+    protected DefaultDataTypeManager getDataTypeManager() {
         if (dataTypeManager == null)
-            dataTypeManager = DataTypeManagerService.getInstance(getTeiidVersion());
+            dataTypeManager = DefaultDataTypeManager.getInstance(getTeiidVersion());
 
         return dataTypeManager;
     }

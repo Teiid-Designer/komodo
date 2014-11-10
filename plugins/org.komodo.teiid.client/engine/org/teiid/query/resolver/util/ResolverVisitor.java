@@ -43,8 +43,8 @@ import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.UnresolvedSymbolDescription;
 import org.teiid.core.CoreConstants;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.core.util.StringUtil;
 import org.teiid.query.function.FunctionDescriptor;
@@ -394,11 +394,11 @@ public class ResolverVisitor extends LanguageVisitor
                     if (type == null) {
                         type = expr.getType();
                     } else if (type != expr.getType()) {
-                        type = DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass();
+                        type = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass();
                     }
                 }
                 if (type == null) {
-                    type = DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass();
+                    type = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass();
                 }
                 array.setComponentType(type);
             }
@@ -706,7 +706,7 @@ public class ResolverVisitor extends LanguageVisitor
 	    		if (function.getType() != null) {
 	    			setDesiredType(args[0], function.getType(), function);
 	    		}
-	    		if (args[0].getType() != DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass()) {
+	    		if (args[0].getType() != DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass()) {
 	    			throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID31145, getDataTypeManager().getDataTypeName(args[0].getType()), function));
 	    		}
 	    	}

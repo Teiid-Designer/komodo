@@ -28,13 +28,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.types.NullType;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService.DataSourceTypes;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager.DataSourceTypes;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
 /**
  *
@@ -42,34 +42,34 @@ import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractTestDataTypeManagerService {
 
-    protected final Map<TeiidVersion, DataTypeManagerService> dataTypeManagerCache = new HashMap<TeiidVersion, DataTypeManagerService>();
+    protected final Map<TeiidVersion, DefaultDataTypeManager> dataTypeManagerCache = new HashMap<TeiidVersion, DefaultDataTypeManager>();
 
     /**
      * @param teiidVersion
      */
     public AbstractTestDataTypeManagerService(TeiidVersion... Version) {
         for (TeiidVersion teiidVersion : Version) {
-            dataTypeManagerCache.put(teiidVersion, DataTypeManagerService.getInstance(teiidVersion));
+            dataTypeManagerCache.put(teiidVersion, DefaultDataTypeManager.getInstance(teiidVersion));
         }
     }
 
     @Test
     public void testCachedInstance() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
             TeiidVersion teiidVersion = entry.getKey();
-            DataTypeManagerService dataTypeManager = entry.getValue();
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
-            assertSame(dataTypeManager, DataTypeManagerService.getInstance(teiidVersion));
+            assertSame(dataTypeManager, DefaultDataTypeManager.getInstance(teiidVersion));
 
             // Using old teiid version as unlikely ever to match
-            assertNotSame(dataTypeManager, DataTypeManagerService.getInstance(new DefaultTeiidVersion("6.0.0"))); //$NON-NLS-1$
+            assertNotSame(dataTypeManager, DefaultDataTypeManager.getInstance(new DefaultTeiidVersion("6.0.0"))); //$NON-NLS-1$
         }
     }
 
     @Test
     public void testGetDefaultDataType() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             // Test for null
             try {
@@ -89,8 +89,8 @@ public abstract class AbstractTestDataTypeManagerService {
 
     @Test
     public void testGetDataType() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             assertSame(DefaultDataTypes.NULL, dataTypeManager.getDataType((String)null));
 
@@ -104,8 +104,8 @@ public abstract class AbstractTestDataTypeManagerService {
 
     @Test
     public void testGetDataTypeClass() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             assertSame(NullType.class, dataTypeManager.getDataTypeClass((String)null));
 
@@ -119,8 +119,8 @@ public abstract class AbstractTestDataTypeManagerService {
 
     @Test
     public void testGetDefaultDataTypeClass() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             try {
                 dataTypeManager.getDefaultDataClass(null);
@@ -136,8 +136,8 @@ public abstract class AbstractTestDataTypeManagerService {
 
     @Test
     public void testGetDataType4Class() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             try {
                 dataTypeManager.getDataType((Class<?>)null);
@@ -153,8 +153,8 @@ public abstract class AbstractTestDataTypeManagerService {
 
     @Test
     public void testGetDataSourceType() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             assertSame(DataSourceTypes.JDBC.id(), dataTypeManager.getDataSourceType(DataSourceTypes.JDBC));
             assertSame(DataSourceTypes.UNKNOWN.id(), dataTypeManager.getDataSourceType(DataSourceTypes.UNKNOWN));

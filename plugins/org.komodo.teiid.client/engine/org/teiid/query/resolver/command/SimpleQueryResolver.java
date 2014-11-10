@@ -42,7 +42,7 @@ import org.komodo.spi.query.sql.lang.IJoinType.Types;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.UnresolvedSymbolDescription;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
@@ -368,7 +368,7 @@ public class SimpleQueryResolver extends CommandResolver {
         	LinkedHashSet<GroupSymbol> saved = preTableFunctionReference(obj);
         	this.visitNode(obj.getFile());
         	try {
-				obj.setFile(ResolverUtil.convertExpression(obj.getFile(), DataTypeManagerService.DefaultDataTypes.CLOB.getId(), metadata));
+				obj.setFile(ResolverUtil.convertExpression(obj.getFile(), DefaultDataTypeManager.DefaultDataTypes.CLOB.getId(), metadata));
 			} catch (Exception e) {
 				 throw new RuntimeException(e);
 			}
@@ -416,7 +416,7 @@ public class SimpleQueryResolver extends CommandResolver {
         	visitNodes(obj.getPassing());
 			postTableFunctionReference(obj, saved);
 			try {
-	    		ResolverUtil.setDesiredType(obj.getPassing(), obj, DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass());
+	    		ResolverUtil.setDesiredType(obj.getPassing(), obj, DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass());
 				for (ObjectColumn column : obj.getColumns()) {
 					if (column.getDefaultExpression() == null) {
 						continue;
@@ -681,17 +681,17 @@ public class SimpleQueryResolver extends CommandResolver {
 		public void visit(Limit obj) {
 			super.visit(obj);
 			if (obj.getOffset() != null) {
-				ResolverUtil.setTypeIfNull(obj.getOffset(), DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass());
+				ResolverUtil.setTypeIfNull(obj.getOffset(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass());
 				try {
-					obj.setOffset(ResolverUtil.convertExpression(obj.getOffset(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), metadata));
+					obj.setOffset(ResolverUtil.convertExpression(obj.getOffset(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), metadata));
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 			}
 			if (obj.getRowLimit() != null) {
-                ResolverUtil.setTypeIfNull(obj.getRowLimit(), DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass());
+                ResolverUtil.setTypeIfNull(obj.getRowLimit(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass());
                 try {
-                    obj.setRowLimit(ResolverUtil.convertExpression(obj.getRowLimit(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), metadata));
+                    obj.setRowLimit(ResolverUtil.convertExpression(obj.getRowLimit(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), metadata));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.CommandResolver;
 import org.teiid.query.resolver.TCQueryResolver;
@@ -86,8 +86,8 @@ public class SetQueryResolver extends CommandResolver {
             for (int i = 0; i < firstProjectTypes.size(); i++) {
                 Class<?> clazz = firstProjectTypes.get(i);
                 
-                if (DataTypeManagerService.DefaultDataTypes.NULL.getTypeClass().equals(clazz)) {
-                    firstProjectTypes.set(i, DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+                if (DefaultDataTypeManager.DefaultDataTypes.NULL.getTypeClass().equals(clazz)) {
+                    firstProjectTypes.set(i, DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
                 }
             }
         }
@@ -122,7 +122,7 @@ public class SetQueryResolver extends CommandResolver {
                     Expression ses = (Expression)projectedSymbols.get(j);
                     Class<?> targetType = firstProjectTypes.get(j);
                     if (ses.getType() != targetType && orderByContainsVariable(child.getOrderBy(), ses, j)) {
-                        DataTypeManagerService dataTypeManager = getDataTypeManager();
+                        DefaultDataTypeManager dataTypeManager = getDataTypeManager();
                         String sourceTypeName = dataTypeManager.getDataTypeName(ses.getType());
                         String targetTypeName = dataTypeManager.getDataTypeName(targetType);
                         throw new QueryResolverException(Messages.getString(Messages.QueryResolver.type_conversion,
@@ -158,7 +158,7 @@ public class SetQueryResolver extends CommandResolver {
             if(firstProjType.equals(projType)){
                 continue;
             }
-            DataTypeManagerService dataTypeManager = getDataTypeManager();
+            DefaultDataTypeManager dataTypeManager = getDataTypeManager();
 
             String sourceType = dataTypeManager.getDataTypeName(firstProjType);
             String targetType = dataTypeManager.getDataTypeName(projType);
@@ -166,7 +166,7 @@ public class SetQueryResolver extends CommandResolver {
             String commonType = ResolverUtil.getCommonType(getTeiidVersion(), new String[] {sourceType, targetType});
             
             if (commonType == null) {
-            	commonType = DataTypeManagerService.DefaultDataTypes.OBJECT.getId();
+            	commonType = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId();
             }
             
             firstProjectTypes.set(j, dataTypeManager.getDataTypeClass(commonType));

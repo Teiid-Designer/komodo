@@ -33,15 +33,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeAliases;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.type.DataTypeManager;
+import org.komodo.spi.type.DataTypeManager.DataTypeAliases;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.VDBMetaData;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.core.util.PropertiesUtils;
 import org.teiid.metadata.Datatype;
@@ -72,7 +72,7 @@ public class SystemMetadata {
 	}
 
 	private final TeiidVersion teiidVersion;
-	private final DataTypeManagerService dataTypeManager;
+	private final DefaultDataTypeManager dataTypeManager;
 	private List<Datatype> dataTypes = new ArrayList<Datatype>();
 	private Map<String, Datatype> typeMap = new TreeMap<String, Datatype>(String.CASE_INSENSITIVE_ORDER);
 	private MetadataStore systemStore;
@@ -85,7 +85,7 @@ public class SystemMetadata {
 	        throw new UnsupportedOperationException(Messages.getString(Messages.Misc.TeiidVersionFailure, this.getClass().getSimpleName(), teiidVersion));
 
 		this.teiidVersion = teiidVersion;
-		this.dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+		this.dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
 
 		String resourceLocation = this.getClass().getPackage().getName();
         resourceLocation = resourceLocation.replaceAll("\\.", File.separator); //$NON-NLS-1$
@@ -108,9 +108,9 @@ public class SystemMetadata {
 				}
 				PropertiesUtils.setBeanProperties(dt, p, null);
 				if ("string".equals(dt.getName())) { //$NON-NLS-1$
-					dt.setLength(DataTypeManagerService.MAX_STRING_LENGTH);
+					dt.setLength(DefaultDataTypeManager.MAX_STRING_LENGTH);
 				} else if ("varbinary".equals(dt.getName())) { //$NON-NLS-1$
-					dt.setLength(DataTypeManagerService.MAX_LOB_MEMORY_BYTES);
+					dt.setLength(DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES);
 				}
 				dataTypes.add(dt);
 				if (dt.isBuiltin()) {
@@ -127,12 +127,12 @@ public class SystemMetadata {
 				throw new RuntimeException(e);
 			}
 		}
-		addAliasType(DataTypeManagerService.DataTypeAliases.BIGINT);
-		addAliasType(DataTypeManagerService.DataTypeAliases.DECIMAL);
-		addAliasType(DataTypeManagerService.DataTypeAliases.REAL);
-		addAliasType(DataTypeManagerService.DataTypeAliases.SMALLINT);
-		addAliasType(DataTypeManagerService.DataTypeAliases.TINYINT);
-		addAliasType(DataTypeManagerService.DataTypeAliases.VARCHAR);
+		addAliasType(DataTypeManager.DataTypeAliases.BIGINT);
+		addAliasType(DataTypeManager.DataTypeAliases.DECIMAL);
+		addAliasType(DataTypeManager.DataTypeAliases.REAL);
+		addAliasType(DataTypeManager.DataTypeAliases.SMALLINT);
+		addAliasType(DataTypeManager.DataTypeAliases.TINYINT);
+		addAliasType(DataTypeManager.DataTypeAliases.VARCHAR);
 		for (String name : dataTypeManager.getAllDataTypeNames()) {
 			if (!name.equals(DefaultDataTypes.NULL.getId())) {
 				ArgCheck.isNotNull(typeMap.get(name), name);

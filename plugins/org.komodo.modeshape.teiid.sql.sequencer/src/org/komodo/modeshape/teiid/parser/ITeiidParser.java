@@ -31,7 +31,7 @@ import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
 import org.komodo.modeshape.teiid.sql.proc.Statement;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.DataTypeManager;
 
 /**
  *
@@ -51,7 +51,7 @@ public interface ITeiidParser {
     /**
      * @return dataTypeManagerService
      */
-    IDataTypeManagerService getDataTypeService();
+    DataTypeManager getDataTypeService();
 
     /**
      * Reset the parser against the new sql reader

@@ -23,20 +23,20 @@
 package org.teiid.core.types;
 
 import java.util.Arrays;
-import org.komodo.spi.type.IBinaryType;
+import org.komodo.spi.type.BinaryType;
 import org.teiid.core.util.PropertiesUtils;
 
 /**
  * Type class representing binary data
  */
-public final class BinaryType implements IBinaryType {
+public final class BinaryTypeImpl implements BinaryType {
 	
 	private byte[] bytes;
 	
 	/**
 	 * @param bytes
 	 */
-	public BinaryType(byte[] bytes) {
+	public BinaryTypeImpl(byte[] bytes) {
 	    if (bytes == null)
 	        throw new IllegalArgumentException();
 		//to be truly immutable we should clone here
@@ -67,7 +67,7 @@ public final class BinaryType implements IBinaryType {
 	}
 	
 	@Override
-	public int compareTo(IBinaryType o) {
+	public int compareTo(BinaryType o) {
 		int len1 = getLength();
 		int len2 = o.getLength();
 		int n = Math.min(len1, len2);
@@ -92,10 +92,10 @@ public final class BinaryType implements IBinaryType {
 		if (obj == this) {
 			return true;
 		}
-		if (!(obj instanceof BinaryType)) {
+		if (!(obj instanceof BinaryTypeImpl)) {
 			return false;
 		}
-		BinaryType other = (BinaryType)obj;
+		BinaryTypeImpl other = (BinaryTypeImpl)obj;
 		return Arrays.equals(this.bytes, other.bytes);
 	}
 	

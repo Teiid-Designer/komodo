@@ -27,7 +27,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestFunctionResolving;
 import org.teiid.query.resolver.util.ResolverVisitor;
@@ -61,7 +61,7 @@ public class Test7FunctionResolving extends AbstractTestFunctionResolving {
         Function function = getFactory().newFunction(
                                          "convert", new Expression[] {
                                              getFactory().newConstant(new Character('a')), 
-                                             getFactory().newConstant(DataTypeManagerService.DefaultDataTypes.DATE.getId())}); //$NON-NLS-1$
+                                             getFactory().newConstant(DefaultDataTypeManager.DefaultDataTypes.DATE.getId())}); //$NON-NLS-1$
 
         try {
             ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());

@@ -24,7 +24,7 @@ package org.teiid.core.types.basic;
 
 import java.sql.Time;
 import java.util.regex.Pattern;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -46,7 +46,7 @@ public class StringToTimeTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public StringToTimeTransform(DataTypeManagerService dataTypeManager) {
+    public StringToTimeTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 
@@ -80,7 +80,7 @@ public class StringToTimeTransform extends Transform {
 	 * @return Source type
 	 */
 	public Class<?> getSourceType() {
-		return DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass();
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class StringToTimeTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.TIME.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.TIME.getTypeClass();
 	}
 	
 	@Override

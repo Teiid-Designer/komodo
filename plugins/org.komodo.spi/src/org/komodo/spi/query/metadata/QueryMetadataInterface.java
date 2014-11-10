@@ -32,7 +32,7 @@ import javax.script.ScriptEngine;
 import org.komodo.spi.query.sql.ILanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.komodo.spi.xml.IMappingNode;
 
@@ -206,7 +206,7 @@ public interface QueryMetadataInterface {
 
     /**
      * Get the element type name for an element symbol.  These types are defined in 
-     * {@link IDataTypeManagerService}.
+     * {@link DataTypeManager}.
      * 
      * @param elementID
      * 
@@ -616,7 +616,7 @@ public interface QueryMetadataInterface {
 
     /**
      * Get the element length for a given element ID.  These types are defined in 
-     * {@link IDataTypeManagerService}.
+     * {@link DataTypeManager}.
      * 
      * @param elementID The element ID
      * 

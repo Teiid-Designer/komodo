@@ -53,7 +53,7 @@ import org.teiid.adminapi.impl.DataPolicyMetadata;
 import org.teiid.adminapi.impl.VDBMetaData;
 import org.teiid.core.types.BlobImpl;
 import org.teiid.core.types.ClobImpl;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.InputStreamFactory;
 import org.teiid.core.types.SQLXMLImpl;
 import org.teiid.core.util.ArgCheck;
@@ -155,7 +155,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
     private final TeiidParser teiidParser;
     private final CompositeMetadataStore store;
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
     private Map<String, VDBResources.Resource> vdbEntries;
     private FunctionLibrary functionLibrary;
     private VDBMetaData vdbMetaData;
@@ -236,9 +236,9 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
     /**
      * @return the dataTypeManager
      */
-    public DataTypeManagerService getDataTypeManager() {
+    public DefaultDataTypeManager getDataTypeManager() {
         if (dataTypeManager == null)
-            dataTypeManager = DataTypeManagerService.getInstance(getTeiidVersion());
+            dataTypeManager = DefaultDataTypeManager.getInstance(getTeiidVersion());
 
         return this.dataTypeManager;
     }

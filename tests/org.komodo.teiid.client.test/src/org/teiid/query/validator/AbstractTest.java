@@ -21,7 +21,7 @@
 */
 package org.teiid.query.validator;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidParser;
@@ -33,7 +33,7 @@ public abstract class AbstractTest {
 
     private final TeiidVersion teiidVersion;
 
-    private final DataTypeManagerService dataTypeManager;
+    private final DefaultDataTypeManager dataTypeManager;
 
     private final TCQueryParser queryParser;
 
@@ -44,7 +44,7 @@ public abstract class AbstractTest {
      */
     public AbstractTest(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
-        this.dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+        this.dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
         this.queryParser = new TCQueryParser(teiidVersion);
         this.metadataFactory = new RealMetadataFactory(teiidVersion);
     }
@@ -80,7 +80,7 @@ public abstract class AbstractTest {
     /**
      * @return the dataTypeManager
      */
-    public DataTypeManagerService getDataTypeManager() {
+    public DefaultDataTypeManager getDataTypeManager() {
         return this.dataTypeManager;
     }
 

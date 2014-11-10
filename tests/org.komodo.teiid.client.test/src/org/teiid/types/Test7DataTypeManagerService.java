@@ -31,13 +31,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.junit.Test;
-import org.teiid.core.types.BinaryType;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.BinaryTypeImpl;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.type.IDataTypeManagerService.DataSourceTypes;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager.DataSourceTypes;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
 /**
  *
@@ -51,8 +51,8 @@ public class Test7DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDefaultDataType1() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             try {
                 dataTypeManager.getDefaultDataType(DataTypeName.VARBINARY);
@@ -65,8 +65,8 @@ public class Test7DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDataType1() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             assertSame(DefaultDataTypes.OBJECT, dataTypeManager.getDataType("varbinary"));
         }
@@ -74,8 +74,8 @@ public class Test7DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDataTypeClass1() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             assertSame(Object.class, dataTypeManager.getDataTypeClass("varbinary"));
         }
@@ -83,8 +83,8 @@ public class Test7DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDefaultDataTypeClass1() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             try {
                 dataTypeManager.getDefaultDataClass(DataTypeName.VARBINARY);
@@ -97,17 +97,17 @@ public class Test7DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDataType4Class1() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
-            assertSame(DefaultDataTypes.OBJECT, dataTypeManager.getDataType(BinaryType.class));
+            assertSame(DefaultDataTypes.OBJECT, dataTypeManager.getDataType(BinaryTypeImpl.class));
         }
     }
 
     @Test
     public void testGetAllDataTypeNames() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             Set<String> names = dataTypeManager.getAllDataTypeNames();
             assertTrue(!names.isEmpty());
@@ -119,8 +119,8 @@ public class Test7DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDataSourceType1() {
-        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
-            DataTypeManagerService dataTypeManager = entry.getValue();
+        for (Entry<TeiidVersion, DefaultDataTypeManager> entry : dataTypeManagerCache.entrySet()) {
+            DefaultDataTypeManager dataTypeManager = entry.getValue();
 
             // Should retrieve the old value from the Updated annotation
             assertEquals("connector-salesforce", dataTypeManager.getDataSourceType(DataSourceTypes.SALESFORCE));

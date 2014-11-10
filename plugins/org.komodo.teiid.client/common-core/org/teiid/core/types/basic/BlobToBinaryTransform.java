@@ -24,9 +24,9 @@ package org.teiid.core.types.basic;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import org.teiid.core.types.BinaryType;
+import org.teiid.core.types.BinaryTypeImpl;
 import org.teiid.core.types.BlobType;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 import org.teiid.core.util.ObjectConverterUtil;
 import org.teiid.runtime.client.Messages;
@@ -38,7 +38,7 @@ public class BlobToBinaryTransform extends Transform {
     /**
      * @param dataTypeManager
      */
-    public BlobToBinaryTransform(DataTypeManagerService dataTypeManager) {
+    public BlobToBinaryTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 
@@ -54,8 +54,8 @@ public class BlobToBinaryTransform extends Transform {
         BlobType source = (BlobType)value;
         
         try {
-        	byte[] bytes = ObjectConverterUtil.convertToByteArray(source.getBinaryStream(), DataTypeManagerService.MAX_LOB_MEMORY_BYTES, true);
-            return new BinaryType(bytes);         
+        	byte[] bytes = ObjectConverterUtil.convertToByteArray(source.getBinaryStream(), DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES, true);
+            return new BinaryTypeImpl(bytes);         
         } catch (SQLException e) {
               throw new TeiidClientException(e, Messages.gs(Messages.TEIID.TEIID10080, new Object[] {getSourceType().getName(), getTargetType().getName()}));
         } catch(IOException e) {
@@ -72,11 +72,11 @@ public class BlobToBinaryTransform extends Transform {
 
 	@Override
 	public Class<?> getSourceType() {
-		return DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass();
 	}
 
 	@Override
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass();
 	}
 }

@@ -44,7 +44,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.DataTypeManager;
 import org.komodo.utils.StringUtils;
 import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
@@ -178,7 +178,7 @@ public abstract class AbstractTeiidParser implements ITeiidParser {
     }
 
     @Override
-    public IDataTypeManagerService getDataTypeService() {
+    public DataTypeManager getDataTypeService() {
         TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
         return factory.getDataTypeManagerService(getVersion());
     }

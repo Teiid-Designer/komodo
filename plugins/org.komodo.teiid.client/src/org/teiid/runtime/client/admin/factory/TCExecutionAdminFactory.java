@@ -29,8 +29,8 @@ import org.komodo.spi.runtime.ExecutionAdmin;
 import org.komodo.spi.runtime.ExecutionAdminFactory;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService;
+import org.komodo.spi.type.DataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.jdbc.TeiidDriver;
 import org.teiid.runtime.client.admin.TCExecutionAdmin;
 import org.teiid.runtime.client.query.TCQueryService;
@@ -40,7 +40,7 @@ import org.teiid.runtime.client.query.TCQueryService;
  */
 public class TCExecutionAdminFactory implements ExecutionAdminFactory {
 
-    private final Map<TeiidVersion, DataTypeManagerService> dataTypeManagerServiceCache = new HashMap<TeiidVersion, DataTypeManagerService>();
+    private final Map<TeiidVersion, DefaultDataTypeManager> dataTypeManagerServiceCache = new HashMap<TeiidVersion, DefaultDataTypeManager>();
     
     private final Map<TeiidVersion, TCQueryService> queryServiceCache = new HashMap<TeiidVersion, TCQueryService>();
 
@@ -50,10 +50,10 @@ public class TCExecutionAdminFactory implements ExecutionAdminFactory {
     }
     
     @Override
-    public IDataTypeManagerService getDataTypeManagerService(TeiidVersion teiidVersion) {
-        DataTypeManagerService dataTypeManagerService = dataTypeManagerServiceCache.get(teiidVersion);
+    public DataTypeManager getDataTypeManagerService(TeiidVersion teiidVersion) {
+        DefaultDataTypeManager dataTypeManagerService = dataTypeManagerServiceCache.get(teiidVersion);
         if (dataTypeManagerService == null) {
-            dataTypeManagerService = DataTypeManagerService.getInstance(teiidVersion);
+            dataTypeManagerService = DefaultDataTypeManager.getInstance(teiidVersion);
             dataTypeManagerServiceCache.put(teiidVersion, dataTypeManagerService);
         }
 

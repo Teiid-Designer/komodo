@@ -22,7 +22,7 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 /**
@@ -33,7 +33,7 @@ public class AnyToStringTransform extends Transform {
 
 	private Class<?> sourceType;
 	
-	public AnyToStringTransform(DataTypeManagerService dataTypeManager, Class<?> sourceType) {
+	public AnyToStringTransform(DefaultDataTypeManager dataTypeManager, Class<?> sourceType) {
 	    super(dataTypeManager);
 		this.sourceType = sourceType;
 	}
@@ -64,8 +64,8 @@ public class AnyToStringTransform extends Transform {
 	 */
 	public Object transformDirect(Object value) throws Exception {
 		String result = value.toString();
-		if (result != null && result.length() > DataTypeManagerService.MAX_STRING_LENGTH) {
-			return result.substring(0, DataTypeManagerService.MAX_STRING_LENGTH);
+		if (result != null && result.length() > DefaultDataTypeManager.MAX_STRING_LENGTH) {
+			return result.substring(0, DefaultDataTypeManager.MAX_STRING_LENGTH);
 		}
 		return result;
 	}

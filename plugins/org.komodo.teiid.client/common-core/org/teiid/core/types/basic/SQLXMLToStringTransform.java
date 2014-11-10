@@ -24,8 +24,8 @@ package org.teiid.core.types.basic;
 
 import java.io.IOException;
 import java.io.Reader;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.types.XMLType;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -33,7 +33,7 @@ import org.teiid.runtime.client.TeiidClientException;
 
 public class SQLXMLToStringTransform extends AnyToStringTransform {
 
-	public SQLXMLToStringTransform(DataTypeManagerService dataTypeManager) {
+	public SQLXMLToStringTransform(DefaultDataTypeManager dataTypeManager) {
 		super(dataTypeManager, DefaultDataTypes.XML.getTypeClass());
 	}
 	
@@ -49,7 +49,7 @@ public class SQLXMLToStringTransform extends AnyToStringTransform {
         XMLType source = (XMLType)value;
         Reader reader = null;
         try {       
-            char[] result = new char[DataTypeManagerService.MAX_STRING_LENGTH];
+            char[] result = new char[DefaultDataTypeManager.MAX_STRING_LENGTH];
             reader = source.getCharacterStream();
             int read = reader.read(result);
             return new String(result, 0, read);

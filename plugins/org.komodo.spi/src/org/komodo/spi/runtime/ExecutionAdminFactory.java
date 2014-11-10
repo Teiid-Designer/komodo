@@ -24,7 +24,7 @@ package org.komodo.spi.runtime;
 import java.sql.Driver;
 import org.komodo.spi.query.QueryService;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.type.DataTypeManager;
 
 /**
  * Factory for the creation of implementations of {@link ExecutionAdmin}
@@ -46,9 +46,9 @@ public interface ExecutionAdminFactory {
      * Get the teiid data type manager service
      * @param teiidVersion
      *
-     * @return instance of {@link IDataTypeManagerService}
+     * @return instance of {@link DataTypeManager}
      */
-    IDataTypeManagerService getDataTypeManagerService(TeiidVersion teiidVersion);
+    DataTypeManager getDataTypeManagerService(TeiidVersion teiidVersion);
 
     /**
      * Get the {@link Driver} for the Teiid Instance
