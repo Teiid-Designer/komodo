@@ -29,7 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.util.StringUtil;
 import org.teiid.query.mapping.xml.MappingAttribute;
@@ -328,7 +328,7 @@ public class XMLQueryResolver extends CommandResolver {
      * @throws Exception if resolving fails
      * @throws Exception if resolving fails
      */
-	void resolveXMLSelect(boolean subquery, Query query, GroupSymbol group, ResolvingNode validElements, IQueryMetadataInterface metadata)
+	void resolveXMLSelect(boolean subquery, Query query, GroupSymbol group, ResolvingNode validElements, QueryMetadataInterface metadata)
 		throws Exception {
         
         GroupContext externalGroups = null;
@@ -400,7 +400,7 @@ public class XMLQueryResolver extends CommandResolver {
      * @return collection of temporary elements
      * @throws Exception
      */
-    public Collection<ElementSymbol> collectTempElements(GroupSymbol group, IQueryMetadataInterface metadata)
+    public Collection<ElementSymbol> collectTempElements(GroupSymbol group, QueryMetadataInterface metadata)
         throws Exception {
     	ArrayList<ElementSymbol> validElements = new ArrayList<ElementSymbol>();
         // Create GroupSymbol for temp groups and add to groups
@@ -436,7 +436,7 @@ public class XMLQueryResolver extends CommandResolver {
      * @param metadata QueryMetadataInterface the metadata(for resolving criteria on temp groups)
      * @throws Exception if any of the above fail conditions are met
      */
-    public void resolveXMLCriteria(LanguageObject criteria,GroupContext externalGroups, ResolvingNode validElements, IQueryMetadataInterface metadata)
+    public void resolveXMLCriteria(LanguageObject criteria,GroupContext externalGroups, ResolvingNode validElements, QueryMetadataInterface metadata)
         throws Exception {
 
         // Walk through each element in criteria and check against valid elements
@@ -459,7 +459,7 @@ public class XMLQueryResolver extends CommandResolver {
      * @throws Exception if resolving fails
      * @throws Exception if resolving fails
      */
-    void resolveXMLOrderBy(OrderBy orderBy, GroupContext externalGroups, ResolvingNode validElements, IQueryMetadataInterface metadata)
+    void resolveXMLOrderBy(OrderBy orderBy, GroupContext externalGroups, ResolvingNode validElements, QueryMetadataInterface metadata)
         throws Exception {
 
         // Walk through each element in OrderBy clause and check against valid elements
@@ -479,7 +479,7 @@ public class XMLQueryResolver extends CommandResolver {
 	 * @throws Exception
 	 * @throws Exception
 	 */
-    void resolveElement(ElementSymbol elem, ResolvingNode validElements, GroupContext externalGroups, IQueryMetadataInterface metadata)
+    void resolveElement(ElementSymbol elem, ResolvingNode validElements, GroupContext externalGroups, QueryMetadataInterface metadata)
         throws Exception {
         
         // Get exact matching name
@@ -536,7 +536,7 @@ public class XMLQueryResolver extends CommandResolver {
     	}
     }
 
-    List<ElementSymbol> getElementsUnderNode(Object mid, Collection<ElementSymbol> validElements, IQueryMetadataInterface metadata) 
+    List<ElementSymbol> getElementsUnderNode(Object mid, Collection<ElementSymbol> validElements, QueryMetadataInterface metadata) 
         throws Exception {
         
         List<ElementSymbol> elements = new ArrayList<ElementSymbol>();

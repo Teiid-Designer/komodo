@@ -36,14 +36,14 @@ import org.komodo.spi.xml.IMappingNode;
 /**
  *
  */
-public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface {
+public class DelegatingQueryMetadataInterface implements QueryMetadataInterface {
 
-    private final IQueryMetadataInterface delegate;
+    private final QueryMetadataInterface delegate;
 
     /**
      * @param delegate
      */
-    public DelegatingQueryMetadataInterface(IQueryMetadataInterface delegate) {
+    public DelegatingQueryMetadataInterface(QueryMetadataInterface delegate) {
         this.delegate = delegate;
     }
 
@@ -93,7 +93,7 @@ public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface
     }
 
     @Override
-    public IStoredProcedureInfo getStoredProcedureInfoForProcedure(String fullyQualifiedProcedureName) throws Exception {
+    public StoredProcedureInfo getStoredProcedureInfoForProcedure(String fullyQualifiedProcedureName) throws Exception {
         return this.delegate.getStoredProcedureInfoForProcedure(fullyQualifiedProcedureName);
     }
 
@@ -163,7 +163,7 @@ public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface
     }
 
     @Override
-    public IQueryNode getVirtualPlan(Object groupID) throws Exception {
+    public QueryNode getVirtualPlan(Object groupID) throws Exception {
         return this.delegate.getVirtualPlan(groupID);
     }
 
@@ -388,12 +388,12 @@ public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface
     }
 
     @Override
-    public IQueryMetadataInterface getDesignTimeMetadata() {
+    public QueryMetadataInterface getDesignTimeMetadata() {
         return this.delegate.getDesignTimeMetadata();
     }
 
     @Override
-    public IQueryMetadataInterface getSessionMetadata() {
+    public QueryMetadataInterface getSessionMetadata() {
         return this.delegate.getSessionMetadata();
     }
 

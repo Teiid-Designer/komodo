@@ -45,7 +45,7 @@ import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
@@ -75,7 +75,7 @@ import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
 import org.teiid.query.function.FunctionLibrary;
 import org.teiid.query.function.FunctionTree;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.mapping.xml.MappingDocument;
 import org.teiid.query.mapping.xml.MappingLoader;
 import org.teiid.query.mapping.xml.MappingNode;
@@ -94,7 +94,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 	
 	public static final String ALLOWED_LANGUAGES = "allowed-languages"; //$NON-NLS-1$
 
-	private static final class LiveQueryNode extends QueryNode {
+	private static final class LiveQueryNode extends TCQueryNode {
 		Procedure p;
 		private LiveQueryNode(Procedure p) {
 			super(null);
@@ -106,7 +106,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 		}
 	}
 	
-	private static final class LiveTableQueryNode extends QueryNode {
+	private static final class LiveTableQueryNode extends TCQueryNode {
 		Table t;
 		private LiveTableQueryNode(Table t) {
 			super(null);
@@ -173,7 +173,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
     private Map<String, Object> metadataCache = Collections.synchronizedMap(new LRUCache<String, Object>(250));
     private Map<String, Object> groupInfoCache = Collections.synchronizedMap(new LRUCache<String, Object>(250));
     private Map<String, Collection<Table>> partialNameToFullNameCache = Collections.synchronizedMap(new LRUCache<String, Collection<Table>>(1000));
-    private Map<String, Collection<StoredProcedureInfo>> procedureCache = Collections.synchronizedMap(new LRUCache<String, Collection<StoredProcedureInfo>>(200));
+    private Map<String, Collection<TCStoredProcedureInfo>> procedureCache = Collections.synchronizedMap(new LRUCache<String, Collection<TCStoredProcedureInfo>>(200));
 
     /**
      * TransformationMetadata constructor
@@ -369,9 +369,9 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
     	}
     }
 
-    public StoredProcedureInfo getStoredProcedureInfoForProcedure(final String name)
+    public TCStoredProcedureInfo getStoredProcedureInfoForProcedure(final String name)
         throws Exception {
-        StoredProcedureInfo result = getStoredProcInfoDirect(name);
+        TCStoredProcedureInfo result = getStoredProcInfoDirect(name);
         
 		if (result == null) {
 			 throw new TeiidClientException(name+NOT_EXISTS_MESSAGE);
@@ -380,24 +380,24 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         return result;
     }
 
-	private StoredProcedureInfo getStoredProcInfoDirect(
+	private TCStoredProcedureInfo getStoredProcInfoDirect(
 			final String name)
 			throws Exception {
 		ArgCheck.isNotEmpty(name);
         String canonicalName = name.toUpperCase();
-        Collection<StoredProcedureInfo> results = this.procedureCache.get(canonicalName);
+        Collection<TCStoredProcedureInfo> results = this.procedureCache.get(canonicalName);
         
         if (results == null) {
         	Collection<Procedure> procRecords = getMetadataStore().getStoredProcedure(canonicalName);
         	if (procRecords.isEmpty()) {
         		return null;
         	}
-        	results = new ArrayList<StoredProcedureInfo>(procRecords.size());
+        	results = new ArrayList<TCStoredProcedureInfo>(procRecords.size());
         	for (Procedure procRecord : procRecords) {
                 String procedureFullName = procRecord.getFullName();
 
                 // create the storedProcedure info object that would hold procedure's metadata
-                StoredProcedureInfo procInfo = new StoredProcedureInfo();
+                TCStoredProcedureInfo procInfo = new TCStoredProcedureInfo();
                 procInfo.setProcedureCallableName(procedureFullName);
                 procInfo.setProcedureID(procRecord);
 
@@ -438,7 +438,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
                 // if this is a virtual procedure get the procedure plan
                 if(procRecord.isVirtual()) {
-                    QueryNode queryNode = new LiveQueryNode(procRecord);
+                    TCQueryNode queryNode = new LiveQueryNode(procRecord);
                     procInfo.setQueryPlan(queryNode);
                 }
                 
@@ -449,9 +449,9 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         	this.procedureCache.put(canonicalName, results);        	
         }
         
-        StoredProcedureInfo result = null;
+        TCStoredProcedureInfo result = null;
         
-        for (StoredProcedureInfo storedProcedureInfo : results) {
+        for (TCStoredProcedureInfo storedProcedureInfo : results) {
         	Schema schema = (Schema)storedProcedureInfo.getModelID();
 	        if(name.equalsIgnoreCase(storedProcedureInfo.getProcedureCallableName()) || vdbMetaData == null || vdbMetaData.isVisible(schema.getName())){
 	        	if (result != null) {
@@ -545,7 +545,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         return !modelRecord.isPhysical();
     }
 
-    public QueryNode getVirtualPlan(final Object groupID) throws Exception {
+    public TCQueryNode getVirtualPlan(final Object groupID) throws Exception {
         Table tableRecord = (Table) groupID;
         if (!tableRecord.isVirtual()) {
              throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30359, tableRecord.getFullName(), "Query")); //$NON-NLS-1$
@@ -1119,7 +1119,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 	}
 	
 	@Override
-	public IQueryMetadataInterface getDesignTimeMetadata() {
+	public QueryMetadataInterface getDesignTimeMetadata() {
 		TransformationMetadata tm = new TransformationMetadata(getTeiidParser(), store, functionLibrary);
 		tm.groupInfoCache = this.groupInfoCache;
 		tm.metadataCache = this.metadataCache;

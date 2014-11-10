@@ -24,7 +24,7 @@ package org.teiid.query.validator;
 
 import java.util.Iterator;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.validator.IValidator;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataStore;
@@ -37,12 +37,12 @@ import org.teiid.query.sql.visitor.CommandCollectorVisitor;
 public class Validator implements IValidator<LanguageObject> {
 
     @Override
-    public ValidatorReport validate(LanguageObject object, IQueryMetadataInterface metadata) throws Exception {
+    public ValidatorReport validate(LanguageObject object, QueryMetadataInterface metadata) throws Exception {
         ValidatorReport report1 = validate(object, metadata, new ValidationVisitor(object.getTeiidVersion()));
         return report1;
     }
 
-    public static final ValidatorReport validate(LanguageObject object, IQueryMetadataInterface metadata, AbstractValidationVisitor visitor)
+    public static final ValidatorReport validate(LanguageObject object, QueryMetadataInterface metadata, AbstractValidationVisitor visitor)
         throws Exception {
 
         // Execute on this command
@@ -62,7 +62,7 @@ public class Validator implements IValidator<LanguageObject> {
         return visitor.getReport();
     }
 
-    private static final void executeValidation(LanguageObject object, final IQueryMetadataInterface metadata, final AbstractValidationVisitor visitor) 
+    private static final void executeValidation(LanguageObject object, final QueryMetadataInterface metadata, final AbstractValidationVisitor visitor) 
         throws Exception {
 
         // Reset visitor
@@ -75,7 +75,7 @@ public class Validator implements IValidator<LanguageObject> {
         	
         	@Override
             protected void visitNode(LanguageObject obj) {
-        		IQueryMetadataInterface previous = visitor.getMetadata();
+        		QueryMetadataInterface previous = visitor.getMetadata();
         		setTempMetadata(metadata, visitor, obj);
         		super.visitNode(obj);
         		visitor.setMetadata(previous);
@@ -102,7 +102,7 @@ public class Validator implements IValidator<LanguageObject> {
         }                
     }
     
-	private static void setTempMetadata(final IQueryMetadataInterface metadata,
+	private static void setTempMetadata(final QueryMetadataInterface metadata,
 			final AbstractValidationVisitor visitor,
 			LanguageObject obj) {
 		if (obj instanceof Command) {

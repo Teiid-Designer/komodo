@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.Command;
@@ -46,7 +46,7 @@ public class AbstractValidationVisitor extends LanguageVisitor {
     // Validation error handling
     protected ValidatorReport report;
     
-    private IQueryMetadataInterface metadata;
+    private QueryMetadataInterface metadata;
     
     protected Command currentCommand;
     protected Stack<LanguageObject> stack = new Stack<LanguageObject>();
@@ -59,11 +59,11 @@ public class AbstractValidationVisitor extends LanguageVisitor {
         this.report = new ValidatorReport();
     }
 
-    public void setMetadata(IQueryMetadataInterface metadata) {
+    public void setMetadata(QueryMetadataInterface metadata) {
         this.metadata = metadata;
     }
     
-    protected IQueryMetadataInterface getMetadata() {
+    protected QueryMetadataInterface getMetadata() {
         return this.metadata;
     } 
     

@@ -24,7 +24,7 @@ package org.teiid.query.validator.v8;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
@@ -279,7 +279,7 @@ public class Test8Validator extends AbstractTestValidator {
     public void testValidateInModeler() throws Exception {
         // SQL is same as pm1.vsp36() in example1 
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN select 1, 2; END";        
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
         Command command = getQueryParser().parseCommand(sql);
         GroupSymbol group = getFactory().newGroupSymbol("pm1.vsp36");
         TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
@@ -364,7 +364,7 @@ public class Test8Validator extends AbstractTestValidator {
     @Test
     public void testInsertIntoVirtualWithQueryExpression() {
 
-        IQueryMetadataInterface qmi = getMetadataFactory().example1();
+        QueryMetadataInterface qmi = getMetadataFactory().example1();
 
         String sql = "insert into vm1.g1 (e1, e2, e3, e4) select * from pm1.g1";
 

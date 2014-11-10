@@ -28,7 +28,7 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.metadata.Table;
 import org.teiid.query.metadata.TempMetadataAdapter;
@@ -48,7 +48,7 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
         super(teiidVersion);
     }
 
-    protected Command resolveProcedure(String userUpdateStr, IQueryMetadataInterface metadata) throws Exception {
+    protected Command resolveProcedure(String userUpdateStr, QueryMetadataInterface metadata) throws Exception {
         ProcedureContainer userCommand = (ProcedureContainer)getQueryParser().parseCommand(userUpdateStr);
         TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(userCommand, metadata);
@@ -56,7 +56,7 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
         return queryResolver.expandCommand(userCommand, metadata);
     }
 
-    protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {       
+    protected Command helpResolve(Command command, QueryMetadataInterface queryMetadataInterface) {       
         // resolve
         try { 
             TCQueryResolver resolver = new TCQueryResolver(getTeiidVersion());
@@ -72,12 +72,12 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
         return command; 
     }
 
-    protected Command helpResolve(String sql, IQueryMetadataInterface queryMetadata) throws Exception {
+    protected Command helpResolve(String sql, QueryMetadataInterface queryMetadata) throws Exception {
         Command command = getQueryParser().parseCommand(sql);
         return helpResolve(command, queryMetadata);
     }
 
-    protected void helpResolveException(String userUpdateStr, IQueryMetadataInterface metadata, String msg) throws Exception {
+    protected void helpResolveException(String userUpdateStr, QueryMetadataInterface metadata, String msg) throws Exception {
         try {
             resolveProcedure(userUpdateStr, metadata);
             fail();

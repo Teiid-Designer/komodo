@@ -28,7 +28,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.metadata.Table;
@@ -69,7 +69,7 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
     @Override
     protected TriggerAction helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType)
         throws Exception {
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
         return (TriggerAction)resolveProcedure(userUpdateStr, metadata);
     }
 

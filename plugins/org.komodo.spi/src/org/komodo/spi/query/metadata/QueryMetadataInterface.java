@@ -47,7 +47,7 @@ import org.komodo.spi.xml.IMappingNode;
  * @param <Q> the query node class
  * @param <M> the mapping node class
  */
-public interface IQueryMetadataInterface {
+public interface QueryMetadataInterface {
 
     /**
      * Unknown cardinality.
@@ -202,7 +202,7 @@ public interface IQueryMetadataInterface {
      * 
      * @throws Exception implementation detected a problem during the request
      */
-    IStoredProcedureInfo getStoredProcedureInfoForProcedure(String fullyQualifiedProcedureName) throws Exception;
+    StoredProcedureInfo getStoredProcedureInfoForProcedure(String fullyQualifiedProcedureName) throws Exception;
 
     /**
      * Get the element type name for an element symbol.  These types are defined in 
@@ -358,7 +358,7 @@ public interface IQueryMetadataInterface {
      * 
      * @throws Exception
      */
-    IQueryNode getVirtualPlan(Object groupID) throws Exception;
+    QueryNode getVirtualPlan(Object groupID) throws Exception;
 
     /**
      * Get procedure defining the insert plan for this group.
@@ -823,12 +823,12 @@ public interface IQueryMetadataInterface {
     /**
      * @return design time metadata, if applicable
      */
-    IQueryMetadataInterface getDesignTimeMetadata();
+    QueryMetadataInterface getDesignTimeMetadata();
 
     /**
      * @return session metadata, if applicable
      */
-    IQueryMetadataInterface getSessionMetadata();
+    QueryMetadataInterface getSessionMetadata();
 
     /**
      * @return imported models

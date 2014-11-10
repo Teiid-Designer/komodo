@@ -34,7 +34,7 @@ import java.util.Map;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.IResolverVisitor;
 import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
 import org.komodo.spi.runtime.version.ITeiidVersion;
@@ -102,7 +102,7 @@ public class ResolverVisitor extends LanguageVisitor
 
     private Collection<GroupSymbol> groups;
     private GroupContext externalContext;
-    protected IQueryMetadataInterface metadata;
+    protected QueryMetadataInterface metadata;
     private Exception componentException;
     private Exception resolverException;
     private Map<Function, Exception> unresolvedFunctions;
@@ -130,7 +130,7 @@ public class ResolverVisitor extends LanguageVisitor
      * @param groups
      * @param externalContext
      */
-    public ResolverVisitor(ITeiidVersion teiidVersion, IQueryMetadataInterface metadata, Collection<GroupSymbol> internalGroups, GroupContext externalContext) {
+    public ResolverVisitor(ITeiidVersion teiidVersion, QueryMetadataInterface metadata, Collection<GroupSymbol> internalGroups, GroupContext externalContext) {
         this(teiidVersion);
 		this.groups = internalGroups;
         this.externalContext = externalContext;
@@ -138,7 +138,7 @@ public class ResolverVisitor extends LanguageVisitor
         setFindShortName(metadata);
     }
 
-    private void setFindShortName(IQueryMetadataInterface metadata) {
+    private void setFindShortName(QueryMetadataInterface metadata) {
         if (getTeiidVersion().isGreaterThanOrEqualTo(Version.TEIID_8_5.get()))
             this.findShortName = metadata.findShortName();
         else
@@ -1157,13 +1157,13 @@ public class ResolverVisitor extends LanguageVisitor
 	}
 	
     @Override
-    public void resolveLanguageObject(LanguageObject obj, IQueryMetadataInterface metadata)
+    public void resolveLanguageObject(LanguageObject obj, QueryMetadataInterface metadata)
     throws Exception {
 	    resolveLanguageObject(obj, null, metadata);
 	}
 	
 	@Override
-    public void resolveLanguageObject(LanguageObject obj, Collection<GroupSymbol> groups, IQueryMetadataInterface metadata)
+    public void resolveLanguageObject(LanguageObject obj, Collection<GroupSymbol> groups, QueryMetadataInterface metadata)
 	    throws Exception {
 	    resolveLanguageObject(obj, groups, null, metadata);
 	}
@@ -1175,7 +1175,7 @@ public class ResolverVisitor extends LanguageVisitor
 	 * @param metadata
 	 * @throws Exception
 	 */
-	public void resolveLanguageObject(LanguageObject obj, Collection<GroupSymbol> groups, GroupContext externalContext, IQueryMetadataInterface metadata)
+	public void resolveLanguageObject(LanguageObject obj, Collection<GroupSymbol> groups, GroupContext externalContext, QueryMetadataInterface metadata)
 	    throws Exception {
 	
 	    if(obj == null) {

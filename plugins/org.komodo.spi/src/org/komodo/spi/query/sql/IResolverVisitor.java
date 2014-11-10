@@ -23,7 +23,7 @@ package org.komodo.spi.query.sql;
 
 import java.util.Collection;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
@@ -37,7 +37,7 @@ public interface IResolverVisitor<LO extends ILanguageObject, GS extends IGroupS
     @Deprecated
     void setProperty(String propertyName, Object value);
 
-    void resolveLanguageObject(LO obj, IQueryMetadataInterface metadata) throws Exception;
+    void resolveLanguageObject(LO obj, QueryMetadataInterface metadata) throws Exception;
 
-    void resolveLanguageObject(LO obj, Collection<GS> groups, IQueryMetadataInterface metadata) throws Exception;
+    void resolveLanguageObject(LO obj, Collection<GS> groups, QueryMetadataInterface metadata) throws Exception;
 }

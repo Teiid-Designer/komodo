@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.core.util.ArgCheck;
@@ -231,7 +231,7 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
      * @throws Exception
      */
     @Override
-    protected String getPlan(IQueryMetadataInterface metadata,
+    protected String getPlan(QueryMetadataInterface metadata,
                            GroupSymbol group) throws Exception {
         return metadata.getInsertPlan(group.getMetadataID());
     }
@@ -252,7 +252,7 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
      */
     @Override
     public Map<ElementSymbol, Expression> getVariableValues(Command command, boolean changingOnly,
-                                 IQueryMetadataInterface metadata) throws Exception {
+                                 QueryMetadataInterface metadata) throws Exception {
         
         Insert insert = (Insert) command;
         

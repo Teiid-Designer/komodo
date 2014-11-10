@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import org.komodo.spi.outcome.Outcome;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.adminapi.impl.ModelMetaData;
@@ -52,7 +52,7 @@ import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
 import org.teiid.query.function.metadata.FunctionMetadataValidator;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.report.ActivityReport;
@@ -204,7 +204,7 @@ public class MetadataValidator {
 	private class ResolveQueryPlans implements MetadataRule {
 		@Override
 		public void execute(VDBMetaData vdb, MetadataStore store, ValidatorReport report, MetadataValidator metadataValidator) {
-			IQueryMetadataInterface metadata = vdb.getAttachment(IQueryMetadataInterface.class);
+			QueryMetadataInterface metadata = vdb.getAttachment(QueryMetadataInterface.class);
 	    	metadata = new TempMetadataAdapter(metadata, new TempMetadataStore());
 			for (Schema schema:store.getSchemaList()) {
 				if (vdb.getImportedModels().contains(schema.getName())) {
@@ -268,7 +268,7 @@ public class MetadataValidator {
 		}
 	}
 	
-    private void validate(VDBMetaData vdb, ModelMetaData model, AbstractMetadataRecord record, ValidatorReport report, IQueryMetadataInterface metadata, MetadataFactory mf) {
+    private void validate(VDBMetaData vdb, ModelMetaData model, AbstractMetadataRecord record, ValidatorReport report, QueryMetadataInterface metadata, MetadataFactory mf) {
     	ValidatorReport resolverReport = null;
     	try {
     		if (record instanceof Procedure) {
@@ -337,7 +337,7 @@ public class MetadataValidator {
     			
     			// this seems to parse, resolve and validate.
     			TCQueryResolver resolver = new TCQueryResolver(queryParser);
-    			resolver.resolveView(symbol, new QueryNode(t.getSelectTransformation()), SQLConstants.Reserved.SELECT, metadata);
+    			resolver.resolveView(symbol, new TCQueryNode(t.getSelectTransformation()), SQLConstants.Reserved.SELECT, metadata);
     		}
 			if(resolverReport != null && resolverReport.hasItems()) {
 				for (ValidatorFailure v:resolverReport.getItems()) {

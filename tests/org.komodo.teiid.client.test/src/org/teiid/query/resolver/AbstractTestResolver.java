@@ -45,7 +45,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.udf.IFunctionLibrary;
@@ -59,7 +59,7 @@ import org.teiid.metadata.Table.TriggerEvent;
 import org.teiid.query.function.FunctionDescriptor;
 import org.teiid.query.function.FunctionLibrary;
 import org.teiid.query.function.FunctionTree;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.metadata.TransformationMetadata;
@@ -103,7 +103,7 @@ import org.teiid.runtime.client.TeiidClientException;
 @SuppressWarnings( {"nls" , "javadoc"})
 public abstract class AbstractTestResolver extends AbstractTest {
 
-    protected IQueryMetadataInterface metadata;
+    protected QueryMetadataInterface metadata;
 
     /**
      * @param teiidVersion
@@ -168,7 +168,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         return variables;
     }
 
-    protected Command helpResolve(String sql, IQueryMetadataInterface queryMetadata) {
+    protected Command helpResolve(String sql, QueryMetadataInterface queryMetadata) {
         return helpResolve(helpParse(sql), queryMetadata);
     }
 
@@ -180,7 +180,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         return helpResolve(command, this.metadata);
     }
 
-    protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {
+    protected Command helpResolve(Command command, QueryMetadataInterface queryMetadataInterface) {
         // resolve
         try {
             TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
@@ -223,12 +223,12 @@ public abstract class AbstractTestResolver extends AbstractTest {
         return criteria;
     }
 
-    protected Command helpResolveWithBindings(String sql, IQueryMetadataInterface metadata, List bindings) throws Exception {
+    protected Command helpResolveWithBindings(String sql, QueryMetadataInterface metadata, List bindings) throws Exception {
 
         // parse
         Command command = helpParse(sql);
 
-        QueryNode qn = new QueryNode(sql);
+        TCQueryNode qn = new TCQueryNode(sql);
         qn.setBindings(bindings);
         // resolve
         TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
@@ -242,11 +242,11 @@ public abstract class AbstractTestResolver extends AbstractTest {
         return command;
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata) {
         helpResolveException(sql, queryMetadata, null);
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
 
         // parse
         Command command = helpParse(sql);
@@ -360,7 +360,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     }
 
     protected Command helpResolveUpdateProcedure(String procedure, String userUpdateStr) throws Exception {
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(TriggerEvent.UPDATE, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(TriggerEvent.UPDATE, procedure);
 
         Command userCommand = getQueryParser().parseCommand(userUpdateStr);
         assertTrue(userCommand instanceof ProcedureContainer);
@@ -1504,7 +1504,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testNamespacedFunction() throws Exception {
         String sql = "SELECT namespace.func('e1')  FROM vm1.g1 "; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().createTransformationMetadata(getMetadataFactory().example1Cached().getMetadataStore(),
+        QueryMetadataInterface metadata = getMetadataFactory().createTransformationMetadata(getMetadataFactory().example1Cached().getMetadataStore(),
                                                                                         "example1",
                                                                                         new FunctionTree(
                                                                                                          getTeiidVersion(),
@@ -2182,7 +2182,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testProcParamComparison_defect13653() {
         String userSql = "SELECT * FROM (EXEC mmspTest1.MMSP5('a')) AS a, (EXEC mmsptest1.mmsp6('b')) AS b"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleBQTCached();
+        QueryMetadataInterface metadata = getMetadataFactory().exampleBQTCached();
 
         Query query = (Query)helpResolve(userSql, metadata);
         From from = query.getFrom();
@@ -2586,7 +2586,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Procedure sq2 = getMetadataFactory().createStoredProcedure("sq2", pm1, Arrays.asList(rs2p2)); //$NON-NLS-1$
         sq2.setResultSet(rs2);
 
-        IQueryMetadataInterface metadata = getMetadataFactory().createTransformationMetadata(metadataStore, "example1");
+        QueryMetadataInterface metadata = getMetadataFactory().createTransformationMetadata(metadataStore, "example1");
 
         helpResolveException("select * from pm1.sq2", metadata, "TEIID30114 Cannot access procedure pm1.sq2 using table semantics since the parameter and result set column names are not all unique."); //$NON-NLS-1$ //$NON-NLS-2$
     }

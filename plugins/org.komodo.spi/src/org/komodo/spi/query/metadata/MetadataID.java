@@ -23,32 +23,34 @@ package org.komodo.spi.query.metadata;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.lang.ICommand;
-
-
 /**
  *
  */
-public interface IQueryNode {
-
+public interface MetadataID<M extends MetadataID> {
+    
     /**
-     * @param binding
+     * Get ID value 
+     * 
+     * @return ID value
      */
-    void addBinding(String binding);
-
+    String getID();
+    
+    /** 
+     * @return Returns the originalMetadataID.
+     */
+    Object getOriginalMetadataID();
+    
     /**
-     * @return list of bindings
+     * Get elements - only valid for groups
+     * 
+     * @return List of TempMetadataID for groups, null for elements
      */
-    List<String> getBindings();
-
+    List<M> getElements();
+    
     /**
-     * @return command
+     * Get type - only valid for elements
+     *
+     * @return Type for elements, null for groups
      */
-    ICommand getCommand();
-
-    /**
-     * @return sql of the query
-     */
-    String getQuery();
-
+    Class<?> getType();
 }

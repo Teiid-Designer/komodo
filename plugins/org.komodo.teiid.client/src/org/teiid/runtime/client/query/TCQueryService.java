@@ -32,7 +32,7 @@ import org.komodo.spi.query.QueryFactory;
 import org.komodo.spi.query.QueryParser;
 import org.komodo.spi.query.QueryResolver;
 import org.komodo.spi.query.QueryService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.ICommandCollectorVisitor;
 import org.komodo.spi.query.sql.IElementCollectorVisitor;
 import org.komodo.spi.query.sql.IFunctionCollectorVisitor;
@@ -296,7 +296,7 @@ public class TCQueryService implements QueryService {
     }
 
     @Override
-    public IUpdateValidator getUpdateValidator(IQueryMetadataInterface metadata, TransformUpdateType tInsertType, TransformUpdateType tUpdateType, TransformUpdateType tDeleteType) {
+    public IUpdateValidator getUpdateValidator(QueryMetadataInterface metadata, TransformUpdateType tInsertType, TransformUpdateType tUpdateType, TransformUpdateType tDeleteType) {
 
         UpdateType insertType = UpdateType.valueOf(tInsertType.name());
         UpdateType updateType = UpdateType.valueOf(tUpdateType.name());
@@ -306,7 +306,7 @@ public class TCQueryService implements QueryService {
     }
 
     @Override
-    public void resolveGroup(IGroupSymbol groupSymbol, IQueryMetadataInterface metadata) throws Exception {
+    public void resolveGroup(IGroupSymbol groupSymbol, QueryMetadataInterface metadata) throws Exception {
         ResolverUtil.resolveGroup((GroupSymbol)groupSymbol, metadata);
     }
 

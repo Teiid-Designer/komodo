@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface.SupportConstants;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
 import org.komodo.spi.validator.IUpdateValidator;
 import org.teiid.query.optimizer.relational.PartitionAnalyzer;
 import org.teiid.query.resolver.util.ResolverUtil;
@@ -263,7 +263,7 @@ public class UpdateValidator implements IUpdateValidator<Command, ElementSymbol>
 		
 	}
 	
-	private IQueryMetadataInterface metadata;
+	private QueryMetadataInterface metadata;
 	private UpdateInfo updateInfo = new UpdateInfo();
 	
 	private ValidatorReport report = new ValidatorReport();
@@ -271,7 +271,7 @@ public class UpdateValidator implements IUpdateValidator<Command, ElementSymbol>
 	private ValidatorReport updateReport = new ValidatorReport();
 	private ValidatorReport deleteReport = new ValidatorReport();
 	
-	public UpdateValidator(IQueryMetadataInterface qmi, UpdateType insertType, UpdateType updateType, UpdateType deleteType) {
+	public UpdateValidator(QueryMetadataInterface qmi, UpdateType insertType, UpdateType updateType, UpdateType deleteType) {
 		this.metadata = qmi;
 		this.updateInfo.deleteType = deleteType;
 		this.updateInfo.insertType = insertType;

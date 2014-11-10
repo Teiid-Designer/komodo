@@ -30,7 +30,7 @@ import org.komodo.spi.query.sql.lang.ISPParameter;
 * and the QueryResolver via the facades
 */
 
-public interface IStoredProcedureInfo<P extends ISPParameter, Q extends IQueryNode> {
+public interface StoredProcedureInfo<P extends ISPParameter, Q extends QueryNode> {
 
     String getProcedureCallableName();
     

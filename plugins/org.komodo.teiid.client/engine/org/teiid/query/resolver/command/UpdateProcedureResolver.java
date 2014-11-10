@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface.SupportConstants;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
@@ -149,7 +149,7 @@ public class UpdateProcedureResolver extends CommandResolver {
 
     @Removed(Version.TEIID_8_0)
     @Deprecated
-    private void resolveVirtualGroupElements(CreateUpdateProcedureCommand procCommand, IQueryMetadataInterface metadata)
+    private void resolveVirtualGroupElements(CreateUpdateProcedureCommand procCommand, QueryMetadataInterface metadata)
         throws Exception {
 
         // virtual group on procedure

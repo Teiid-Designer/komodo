@@ -30,10 +30,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.komodo.spi.query.metadata.IMetadataID;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.MetadataID;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.core.util.LRUCache;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.Symbol;
 
@@ -46,7 +46,7 @@ import org.teiid.query.sql.symbol.Symbol;
  * TODO: we should be using the real metadata objects, but internal and
  * designer legacy keep us on the temp framework
  */
-public class TempMetadataID implements Serializable, IMetadataID<TempMetadataID> {
+public class TempMetadataID implements Serializable, MetadataID<TempMetadataID> {
     
 	private static final long serialVersionUID = -1879211827339120135L;
 	private static final int LOCAL_CACHE_SIZE = 8;
@@ -56,9 +56,9 @@ public class TempMetadataID implements Serializable, IMetadataID<TempMetadataID>
 	public static class TableData {
 		Collection<TempMetadataID> accessPatterns;
 		List<TempMetadataID> elements;
-		int cardinality = IQueryMetadataInterface.UNKNOWN_CARDINALITY;
+		int cardinality = QueryMetadataInterface.UNKNOWN_CARDINALITY;
 		List<TempMetadataID> primaryKey;
-		QueryNode queryNode;
+		TCQueryNode queryNode;
 		Map<Object, Object> localCache;
 		List<List<TempMetadataID>> keys;
 		List<TempMetadataID> indexes;
@@ -360,11 +360,11 @@ public class TempMetadataID implements Serializable, IMetadataID<TempMetadataID>
 		this.position = position;
 	}
 	
-	public QueryNode getQueryNode() {
+	public TCQueryNode getQueryNode() {
 		return getTableData().queryNode;
 	}
 	
-	public void setQueryNode(QueryNode queryNode) {
+	public void setQueryNode(TCQueryNode queryNode) {
 		this.getTableData().queryNode = queryNode;
 	}
 

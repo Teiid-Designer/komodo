@@ -28,9 +28,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.metadata.IQueryNode;
-import org.komodo.spi.query.metadata.IStoredProcedureInfo;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryNode;
+import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.runtime.version.TeiidVersion;
@@ -84,7 +84,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
      * 
      * @throws Exception
      */
-    public Command expandCommand(ProcedureContainer procCommand, IQueryMetadataInterface metadata)
+    public Command expandCommand(ProcedureContainer procCommand, QueryMetadataInterface metadata)
     throws Exception {
         
         // Resolve group so we can tell whether it is an update procedure
@@ -117,7 +117,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
      * @throws Exception
      * @throws Exception
      */
-    protected abstract String getPlan(IQueryMetadataInterface metadata,
+    protected abstract String getPlan(QueryMetadataInterface metadata,
                            GroupSymbol group) throws Exception;
         
 	private static void addChanging(TeiidParser parser, TempMetadataStore discoveredMetadata,
@@ -148,7 +148,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
         //getPlan(metadata, procCommand);
     }
 
-	private String getPlan(IQueryMetadataInterface metadata, ProcedureContainer procCommand)
+	private String getPlan(QueryMetadataInterface metadata, ProcedureContainer procCommand)
 			throws Exception {
 		if(!procCommand.getGroup().isTempTable() && metadata.isVirtualGroup(procCommand.getGroup().getMetadataID())) {
             String plan = getPlan(metadata, procCommand.getGroup());
@@ -162,7 +162,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 		return null;
 	}
 	
-	public UpdateInfo getUpdateInfo(GroupSymbol group, IQueryMetadataInterface metadata, int type, boolean validate) throws Exception {
+	public UpdateInfo getUpdateInfo(GroupSymbol group, QueryMetadataInterface metadata, int type, boolean validate) throws Exception {
 		UpdateInfo info = getUpdateInfo(group, metadata);
 		
 		if (info == null) {
@@ -194,7 +194,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 	}
 
 	public UpdateInfo getUpdateInfo(GroupSymbol group,
-			IQueryMetadataInterface metadata) throws Exception {
+			QueryMetadataInterface metadata) throws Exception {
 		if (!getQueryResolver().isView(group, metadata)) {
 			return null;
 		}
@@ -259,7 +259,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 	 * @throws Exception 
 	 */
 	public static void findChildCommandMetadata(TCQueryResolver queryResolver, Command currentCommand,
-			GroupSymbol container, int type, IQueryMetadataInterface metadata, boolean inferProcedureResultSetColumns)
+			GroupSymbol container, int type, QueryMetadataInterface metadata, boolean inferProcedureResultSetColumns)
 			throws Exception {
 	    TeiidParser parser = queryResolver.getQueryParser().getTeiidParser();
 		//find the childMetadata using a clean metadata store
@@ -284,7 +284,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
             cupc.setVirtualGroup(container);
 
             if (type == ICommand.TYPE_STORED_PROCEDURE) {
-                IStoredProcedureInfo<ISPParameter, IQueryNode> info = metadata.getStoredProcedureInfoForProcedure(container.getCanonicalName());
+                StoredProcedureInfo<ISPParameter, QueryNode> info = metadata.getStoredProcedureInfoForProcedure(container.getCanonicalName());
                 // Create temporary metadata that defines a group based on either the stored proc
                 // name or the stored query name - this will be used later during planning
                 String procName = info.getProcedureCallableName();
@@ -310,7 +310,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 			cupc.setVirtualGroup(container);
 
 			if (type == ICommand.TYPE_STORED_PROCEDURE) {
-				IStoredProcedureInfo<ISPParameter, IQueryNode> info = metadata.getStoredProcedureInfoForProcedure(container.getName());
+				StoredProcedureInfo<ISPParameter, QueryNode> info = metadata.getStoredProcedureInfoForProcedure(container.getName());
 		        // Create temporary metadata that defines a group based on either the stored proc
 		        // name or the stored query name - this will be used later during planning
 		        String procName = info.getProcedureCallableName();
@@ -352,7 +352,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 	}
 
 	@Removed(Version.TEIID_8_0)
-    private static void createInputChangingMetadata(TeiidParser teiidParser, TempMetadataStore discoveredMetadata, IQueryMetadataInterface metadata, GroupSymbol group, GroupContext externalGroups)
+    private static void createInputChangingMetadata(TeiidParser teiidParser, TempMetadataStore discoveredMetadata, QueryMetadataInterface metadata, GroupSymbol group, GroupContext externalGroups)
         throws Exception {
         //Look up elements for the virtual group
         List<ElementSymbol> elements = ResolverUtil.resolveElementsInGroup(group, metadata);

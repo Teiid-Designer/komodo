@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeAliases;
@@ -149,7 +149,7 @@ public class SystemMetadata {
 		loadSchema(vdb, p, resourceLocation, "SYSADMIN", parser).mergeInto(systemStore); //$NON-NLS-1$
 		SystemFunctionManager systemFunctionManager = new SystemFunctionManager(teiidVersion, getClass().getClassLoader());
         TransformationMetadata tm = new TransformationMetadata(parser.getTeiidParser(), vdb, new CompositeMetadataStore(systemStore), null, systemFunctionManager.getSystemFunctions(), null);
-        vdb.addAttchment(IQueryMetadataInterface.class, tm);
+        vdb.addAttchment(QueryMetadataInterface.class, tm);
 		MetadataValidator validator = new MetadataValidator(this.teiidVersion, this.typeMap);
 		ValidatorReport report = validator.validate(vdb, systemStore);
 		if (report.hasItems()) {

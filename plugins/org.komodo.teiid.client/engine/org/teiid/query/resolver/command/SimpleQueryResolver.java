@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.metadata.IStoredProcedureInfo;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface.SupportConstants;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.metadata.StoredProcedureInfo;
+import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.IJoinType.Types;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
@@ -220,7 +220,7 @@ public class SimpleQueryResolver extends CommandResolver {
         }
 	}
 
-    private GroupSymbol resolveAllInGroup(MultipleElementSymbol allInGroupSymbol, Set<GroupSymbol> groups, IQueryMetadataInterface metadata) throws Exception {       
+    private GroupSymbol resolveAllInGroup(MultipleElementSymbol allInGroupSymbol, Set<GroupSymbol> groups, QueryMetadataInterface metadata) throws Exception {       
         String groupAlias = allInGroupSymbol.getGroup().getName();
         List<GroupSymbol> groupSymbols = ResolverUtil.findMatchingGroups(groupAlias, groups, metadata);
         if(groupSymbols.isEmpty() || groupSymbols.size() > 1) {
@@ -526,7 +526,7 @@ public class SimpleQueryResolver extends CommandResolver {
 			String fullName = metadata.getFullName(group.getMetadataID());
 			String queryName = group.getName();
 			
-			IStoredProcedureInfo storedProcedureInfo = metadata.getStoredProcedureInfoForProcedure(fullName);
+			StoredProcedureInfo storedProcedureInfo = metadata.getStoredProcedureInfoForProcedure(fullName);
 
 			StoredProcedure storedProcedureCommand = getTeiidParser().createASTNode(ASTNodes.STORED_PROCEDURE);
 			storedProcedureCommand.setProcedureRelational(true);

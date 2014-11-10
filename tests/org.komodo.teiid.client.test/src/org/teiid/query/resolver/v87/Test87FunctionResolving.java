@@ -27,7 +27,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.query.metadata.TransformationMetadata;
@@ -80,7 +80,7 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
     @Test
     public void testUDFResolveOrder() throws Exception {
 
-        IQueryMetadataInterface tm = getMetadataFactory().fromDDL("create foreign function func(x object) returns object; "
+        QueryMetadataInterface tm = getMetadataFactory().fromDDL("create foreign function func(x object) returns object; "
                                                                 + " create foreign function func(x string) returns string;"
                                                                 + " create foreign function func1(x object) returns double;"
                                                                 + " create foreign function func1(x string[]) returns bigdecimal;",

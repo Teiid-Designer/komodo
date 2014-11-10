@@ -30,11 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.metadata.IStoredProcedureInfo;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
@@ -79,7 +79,7 @@ public class ExecResolver extends ProcedureContainerResolver {
      * @throws TeiidComponentException
      * @throws QueryMetadataException
      */
-    private void findCommand7Metadata(IQueryMetadataInterface metadata, StoredProcedure storedProcedureCommand, IStoredProcedureInfo storedProcedureInfo, Collection<SPParameter> oldParams, boolean namedParameters)
+    private void findCommand7Metadata(QueryMetadataInterface metadata, StoredProcedure storedProcedureCommand, StoredProcedureInfo storedProcedureInfo, Collection<SPParameter> oldParams, boolean namedParameters)
         throws Exception {
         // Cache original input parameter expressions.  Depending on whether
         // the procedure was parsed with named or unnamed parameters, the keys
@@ -183,7 +183,7 @@ public class ExecResolver extends ProcedureContainerResolver {
         }
     }
 
-    private void findCommand8Metadata(IQueryMetadataInterface metadata, StoredProcedure storedProcedureCommand, IStoredProcedureInfo storedProcedureInfo, Collection<SPParameter> oldParams, boolean namedParameters)
+    private void findCommand8Metadata(QueryMetadataInterface metadata, StoredProcedure storedProcedureCommand, StoredProcedureInfo storedProcedureInfo, Collection<SPParameter> oldParams, boolean namedParameters)
         throws Exception {
 
         // Cache original input parameter expressions.  Depending on whether
@@ -362,12 +362,12 @@ public class ExecResolver extends ProcedureContainerResolver {
      * @see org.teiid.query.resolver.CommandResolver#findCommandMetadata(org.teiid.query.sql.lang.Command,
      * org.teiid.query.metadata.QueryMetadataInterface)
      */
-    private void findCommandMetadata(Command command, TempMetadataStore discoveredMetadata, IQueryMetadataInterface metadata)
+    private void findCommandMetadata(Command command, TempMetadataStore discoveredMetadata, QueryMetadataInterface metadata)
         throws Exception {
 
         StoredProcedure storedProcedureCommand = (StoredProcedure) command;
         
-        IStoredProcedureInfo storedProcedureInfo = null;
+        StoredProcedureInfo storedProcedureInfo = null;
         try {
         	storedProcedureInfo = metadata.getStoredProcedureInfoForProcedure(storedProcedureCommand.getProcedureName());
         } catch (Exception e) {
@@ -517,12 +517,12 @@ public class ExecResolver extends ProcedureContainerResolver {
      * @see org.teiid.query.resolver.ProcedureContainerResolver#getPlan(org.teiid.query.metadata.QueryMetadataInterface, org.teiid.query.sql.symbol.GroupSymbol)
      */
     @Override
-    protected String getPlan(IQueryMetadataInterface metadata,
+    protected String getPlan(QueryMetadataInterface metadata,
                              GroupSymbol group) throws Exception {
-        IStoredProcedureInfo<SPParameter, QueryNode> storedProcedureInfo = metadata.getStoredProcedureInfoForProcedure(group.getName());
+        StoredProcedureInfo<SPParameter, TCQueryNode> storedProcedureInfo = metadata.getStoredProcedureInfoForProcedure(group.getName());
         
         //if there is a query plan associated with the procedure, get it.
-        QueryNode plan = storedProcedureInfo.getQueryPlan();
+        TCQueryNode plan = storedProcedureInfo.getQueryPlan();
         
         if (plan.getQuery() == null) {
              throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30146, group));

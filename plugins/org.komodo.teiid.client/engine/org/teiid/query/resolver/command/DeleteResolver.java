@@ -25,7 +25,7 @@ package org.teiid.query.resolver.command;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.ProcedureContainerResolver;
 import org.teiid.query.resolver.TCQueryResolver;
@@ -72,7 +72,7 @@ public class DeleteResolver extends ProcedureContainerResolver {
      * @throws Exception
      */
     @Override
-    protected String getPlan(IQueryMetadataInterface metadata,
+    protected String getPlan(QueryMetadataInterface metadata,
                            GroupSymbol group) throws Exception {
         return metadata.getDeletePlan(group.getMetadataID());
     }

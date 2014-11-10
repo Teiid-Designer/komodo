@@ -24,7 +24,7 @@ package org.komodo.spi.query;
 import java.util.List;
 import java.util.Set;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.ICommandCollectorVisitor;
 import org.komodo.spi.query.sql.IElementCollectorVisitor;
 import org.komodo.spi.query.sql.IFunctionCollectorVisitor;
@@ -295,7 +295,7 @@ public interface QueryService {
      * 
      * @return instance of {@link IUpdateValidator}
      */
-    IUpdateValidator getUpdateValidator(IQueryMetadataInterface metadata, TransformUpdateType insertType, TransformUpdateType updateType, TransformUpdateType deleteType);
+    IUpdateValidator getUpdateValidator(QueryMetadataInterface metadata, TransformUpdateType insertType, TransformUpdateType updateType, TransformUpdateType deleteType);
 
     /**
      * Resolve the given group
@@ -304,7 +304,7 @@ public interface QueryService {
      * @param metadata
      * @throws Exception 
      */
-    void resolveGroup(IGroupSymbol groupSymbol, IQueryMetadataInterface metadata) throws Exception;
+    void resolveGroup(IGroupSymbol groupSymbol, QueryMetadataInterface metadata) throws Exception;
 
     /**
      * Convert all elements in a command to their fully qualified names.

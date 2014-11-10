@@ -37,7 +37,7 @@ import org.teiid.metadata.MetadataStore;
 import org.teiid.metadata.Procedure;
 import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
@@ -83,7 +83,7 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
 
 	public Command createView(String sql, TransformationMetadata md, String vGroup)
 			throws Exception {
-		QueryNode vm1g1n1 = new QueryNode(sql); 
+		TCQueryNode vm1g1n1 = new TCQueryNode(sql); 
 		Table vm1g1 = getMetadataFactory().createUpdatableVirtualGroup(vGroup, md.getMetadataStore().getSchema("VM1"), vm1g1n1);
 
 		Command command = getQueryParser().parseCommand(sql);
@@ -162,15 +162,15 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
         pm1g3e.get(2).setDefaultValue("xyz"); //$NON-NLS-1$
 
 		// Create virtual groups
-		QueryNode vm1g1n1 = new QueryNode("SELECT e1 as a, e2 FROM pm1.g1 WHERE e3 > 5"); //$NON-NLS-1$ //$NON-NLS-2$
+		TCQueryNode vm1g1n1 = new TCQueryNode("SELECT e1 as a, e2 FROM pm1.g1 WHERE e3 > 5"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vm1g1 = getMetadataFactory().createUpdatableVirtualGroup("g1", vm1, vm1g1n1); //$NON-NLS-1$
-		QueryNode vm1g2n1 = new QueryNode("SELECT e1, e2, e3, e4 FROM pm1.g2 WHERE e3 > 5"); //$NON-NLS-1$ //$NON-NLS-2$
+		TCQueryNode vm1g2n1 = new TCQueryNode("SELECT e1, e2, e3, e4 FROM pm1.g2 WHERE e3 > 5"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vm1g2 = getMetadataFactory().createUpdatableVirtualGroup("g2", vm1, vm1g2n1); //$NON-NLS-1$
-        QueryNode vm1g3n1 = new QueryNode("SELECT e1, e3 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
+        TCQueryNode vm1g3n1 = new TCQueryNode("SELECT e1, e3 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vm1g3 = getMetadataFactory().createUpdatableVirtualGroup("g3", vm1, vm1g3n1); //$NON-NLS-1$
-        QueryNode vm1g4n1 = new QueryNode("SELECT e1, e2 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
+        TCQueryNode vm1g4n1 = new TCQueryNode("SELECT e1, e2 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vm1g4 = getMetadataFactory().createUpdatableVirtualGroup("g4", vm1, vm1g4n1); //$NON-NLS-1$
-        QueryNode vm1g5n1 = new QueryNode("SELECT e2, e3 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
+        TCQueryNode vm1g5n1 = new TCQueryNode("SELECT e2, e3 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vm1g5 = getMetadataFactory().createVirtualGroup("g5", vm1, vm1g5n1); //$NON-NLS-1$
 
 		// Create virtual elements
@@ -207,7 +207,7 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
                                                                             new String[] {
                                                                                 DataTypeManagerService.DefaultDataTypes.STRING.getId(),
                                                                                 DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
-        QueryNode sq1n1 = new QueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$
+        TCQueryNode sq1n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq1 = getMetadataFactory().createVirtualProcedure("sq1", pm1, Collections.EMPTY_LIST, sq1n1);  //$NON-NLS-1$
         sq1.setResultSet(rs1);
 		// Create the facade from the store

@@ -23,9 +23,9 @@ package org.komodo.spi.query;
 
 import java.util.List;
 
-import org.komodo.spi.query.metadata.IMetadataID;
-import org.komodo.spi.query.metadata.IQueryNode;
-import org.komodo.spi.query.metadata.IStoredProcedureInfo;
+import org.komodo.spi.query.metadata.MetadataID;
+import org.komodo.spi.query.metadata.QueryNode;
+import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.query.sql.lang.IBetweenCriteria;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.ICompareCriteria;
@@ -594,24 +594,24 @@ public interface QueryFactory<E extends IExpression,
      * @param upperCase
      * @param clazz
      * 
-     * @return instance of {@link IMetadataID}
+     * @return instance of {@link MetadataID}
      */
-    IMetadataID createMetadataID(String upperCase, Class clazz);
+    MetadataID createMetadataID(String upperCase, Class clazz);
 
     /**
      * Create a stored procedure info
      * 
-     * @return instance of {@link IStoredProcedureInfo}
+     * @return instance of {@link StoredProcedureInfo}
      */
-    IStoredProcedureInfo createStoredProcedureInfo();
+    StoredProcedureInfo createStoredProcedureInfo();
 
     /**
      * Create a query node
      * 
      * @param queryPlan
      * 
-     * @return instance of {@link IQueryNode}
+     * @return instance of {@link QueryNode}
      */
-    IQueryNode createQueryNode(String queryPlan);
+    QueryNode createQueryNode(String queryPlan);
 
 }

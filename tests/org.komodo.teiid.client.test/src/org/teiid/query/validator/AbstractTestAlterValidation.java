@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.lang.Command;
@@ -47,7 +47,7 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
         super(teiidVersion);
     }
 
-    private Command helpResolve(String sql, IQueryMetadataInterface metadata) {
+    private Command helpResolve(String sql, QueryMetadataInterface metadata) {
         Command command = null;
 
         try {
@@ -61,13 +61,13 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
         return command;
     }
 
-    public ValidatorReport helpValidate(String sql, String[] expectedStringArray, IQueryMetadataInterface metadata) {
+    public ValidatorReport helpValidate(String sql, String[] expectedStringArray, QueryMetadataInterface metadata) {
         Command command = helpResolve(sql, metadata);
 
         return helpRunValidator(command, expectedStringArray, metadata);
     }
 
-    public ValidatorReport helpRunValidator(Command command, String[] expectedStringArray, IQueryMetadataInterface metadata) {
+    public ValidatorReport helpRunValidator(Command command, String[] expectedStringArray, QueryMetadataInterface metadata) {
         try {
             ValidatorReport report = new Validator().validate(command, metadata);
 

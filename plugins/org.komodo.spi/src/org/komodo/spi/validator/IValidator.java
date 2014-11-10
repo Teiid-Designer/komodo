@@ -23,7 +23,7 @@ package org.komodo.spi.validator;
 
 import java.util.Collection;
 import org.komodo.spi.outcome.Outcome;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.ILanguageVisitor;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
 
@@ -68,6 +68,6 @@ public interface IValidator<L extends ILanguageObject<? extends ILanguageVisitor
      * @return report of validation
      * @throws Exception 
      */
-    IValidatorReport validate(L languageObject, IQueryMetadataInterface queryMetadata) throws Exception;
+    IValidatorReport validate(L languageObject, QueryMetadataInterface queryMetadata) throws Exception;
 
 }

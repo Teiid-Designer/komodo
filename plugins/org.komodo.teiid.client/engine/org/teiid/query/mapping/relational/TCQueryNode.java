@@ -25,7 +25,7 @@ package org.teiid.query.mapping.relational;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.komodo.spi.query.metadata.IQueryNode;
+import org.komodo.spi.query.metadata.QueryNode;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.validator.UpdateValidator.UpdateInfo;
 
@@ -40,7 +40,7 @@ import org.teiid.query.validator.UpdateValidator.UpdateInfo;
  * <p>A QueryNode must have a group name and a query.  It may have a command (just used
  * for convenient storage during conversion - this is not persisted).</p>
  */
-public class QueryNode implements IQueryNode {
+public class TCQueryNode implements QueryNode {
 
 	// Initial state
 	private String query;
@@ -53,7 +53,7 @@ public class QueryNode implements IQueryNode {
      * Construct a query node with the required parameters.
      * @param query SQL query
      */
-	public QueryNode(String query) {
+	public TCQueryNode(String query) {
 		this.query = query;
 	}
 

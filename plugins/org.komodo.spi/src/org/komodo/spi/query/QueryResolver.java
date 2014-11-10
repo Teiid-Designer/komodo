@@ -23,7 +23,7 @@ package org.komodo.spi.query;
 
 import java.util.List;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
@@ -40,7 +40,7 @@ public interface QueryResolver<C extends ICommand, GS extends IGroupSymbol, E ex
      * @param metadata
      * @throws Exception 
      */
-    void resolveCommand(C command, GS gSymbol, int teiidCommandType, IQueryMetadataInterface metadata) throws Exception;
+    void resolveCommand(C command, GS gSymbol, int teiidCommandType, QueryMetadataInterface metadata) throws Exception;
 
     /**
      * @param command
@@ -49,7 +49,7 @@ public interface QueryResolver<C extends ICommand, GS extends IGroupSymbol, E ex
      * @param metadata
      * @param projectedSymbols
      */
-    void postResolveCommand(C command, GS gSymbol, int teiidCommandType, IQueryMetadataInterface metadata,
+    void postResolveCommand(C command, GS gSymbol, int teiidCommandType, QueryMetadataInterface metadata,
                                                List<E> projectedSymbols);
 
 }

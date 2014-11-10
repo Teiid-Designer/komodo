@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.query.parser.LanguageVisitor;
@@ -46,7 +46,7 @@ public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
 
     private List virtualGroup;
 
-    private IQueryMetadataInterface metadata;
+    private QueryMetadataInterface metadata;
 
     /**
      * Constructor for ResolveElementsVisitor with no specified groups.  In this
@@ -55,7 +55,7 @@ public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
      * @param virtualGroup 
      * @param metadata
      */
-    public ResolveVirtualGroupCriteriaVisitor(ITeiidVersion teiidVersion, GroupSymbol virtualGroup,  IQueryMetadataInterface metadata) {
+    public ResolveVirtualGroupCriteriaVisitor(ITeiidVersion teiidVersion, GroupSymbol virtualGroup,  QueryMetadataInterface metadata) {
         super(teiidVersion);
         this.virtualGroup = Arrays.asList(new Object[] {virtualGroup});
         this.metadata = metadata;
@@ -102,7 +102,7 @@ public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
      * @param metadata
      * @throws Exception
      */
-    public static void resolveCriteria(LanguageObject obj, GroupSymbol virtualGroup,  IQueryMetadataInterface metadata)
+    public static void resolveCriteria(LanguageObject obj, GroupSymbol virtualGroup,  QueryMetadataInterface metadata)
         throws Exception {
         if(obj == null) {
             return;

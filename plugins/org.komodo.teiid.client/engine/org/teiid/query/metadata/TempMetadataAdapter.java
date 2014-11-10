@@ -30,15 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.metadata.IQueryNode;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryNode;
 import org.komodo.spi.xml.IMappingNode;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.core.util.StringUtil;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.Procedure;
 import org.teiid.metadata.Table;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TempMetadataID.Type;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.runtime.client.Messages;
@@ -68,14 +68,14 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
 
     private TempMetadataStore tempStore;
     private Map<Object, Object> materializationTables;
-    private Map<Object, QueryNode> queryNodes;
+    private Map<Object, TCQueryNode> queryNodes;
     private boolean session;
 	
 	/**
 	 * @param metadata
 	 * @param tempStore
 	 */
-	public TempMetadataAdapter(IQueryMetadataInterface metadata, TempMetadataStore tempStore) {
+	public TempMetadataAdapter(QueryMetadataInterface metadata, TempMetadataStore tempStore) {
 		super(metadata);
         this.tempStore = tempStore;
 	}
@@ -86,7 +86,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
      * @param materializationTables
      * @param queryNodes
      */
-    public TempMetadataAdapter(IQueryMetadataInterface metadata, TempMetadataStore tempStore, Map<Object, Object> materializationTables, Map<Object, QueryNode> queryNodes) {
+    public TempMetadataAdapter(QueryMetadataInterface metadata, TempMetadataStore tempStore, Map<Object, Object> materializationTables, Map<Object, TCQueryNode> queryNodes) {
     	super(metadata);
         this.tempStore = tempStore;
         this.materializationTables = materializationTables;
@@ -108,7 +108,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
 	}
     
     @Override
-    public IQueryMetadataInterface getSessionMetadata() {
+    public QueryMetadataInterface getSessionMetadata() {
     	if (isSession()) {
     		TempMetadataAdapter tma = new TempMetadataAdapter(new BasicQueryMetadata(getTeiidVersion()), this.tempStore);
     		tma.session = true;
@@ -118,7 +118,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
     
     @Override
-    protected IQueryMetadataInterface createDesignTimeMetadata() {
+    protected QueryMetadataInterface createDesignTimeMetadata() {
     	if (isSession()) {
     		return new TempMetadataAdapter(this.actualMetadata.getDesignTimeMetadata(), new TempMetadataStore());
     	}
@@ -135,7 +135,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     /**
      * @return metadata underlying adapter
      */
-    public IQueryMetadataInterface getMetadata() {
+    public QueryMetadataInterface getMetadata() {
         return this.actualMetadata;
     }
     
@@ -329,7 +329,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
 
     /**
-     * @see IQueryMetadataInterface#getDistinctValues(java.lang.Object)
+     * @see QueryMetadataInterface#getDistinctValues(java.lang.Object)
      */
     @Override
     public float getDistinctValues(Object elementID) throws Exception {
@@ -340,7 +340,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
 
     /**
-     * @see IQueryMetadataInterface#getNullValues(java.lang.Object)
+     * @see QueryMetadataInterface#getNullValues(java.lang.Object)
      */
     @Override
     public float getNullValues(Object elementID) throws Exception {
@@ -355,11 +355,11 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
 
     @Override
-    public IQueryNode getVirtualPlan(Object groupID)
+    public QueryNode getVirtualPlan(Object groupID)
         throws Exception {
 		
         if (this.queryNodes != null) {
-        	QueryNode node = this.queryNodes.get(groupID);
+        	TCQueryNode node = this.queryNodes.get(groupID);
         	if (node != null) {
         		return node;
         	}
@@ -383,7 +383,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
 	}
 
     /** 
-     * @see IQueryMetadataInterface#hasMaterialization(java.lang.Object)
+     * @see QueryMetadataInterface#hasMaterialization(java.lang.Object)
      *
      */
     @Override
@@ -403,7 +403,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
     
     /** 
-     * @see IQueryMetadataInterface#getMaterialization(java.lang.Object)
+     * @see QueryMetadataInterface#getMaterialization(java.lang.Object)
      *
      */
     @Override
@@ -426,7 +426,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
     
     /** 
-     * @see IQueryMetadataInterface#getMaterializationStage(java.lang.Object)
+     * @see QueryMetadataInterface#getMaterializationStage(java.lang.Object)
      *
      */
     @Override
@@ -494,7 +494,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
 	}
 
     /**
-     * @see IQueryMetadataInterface#getIndexesInGroup(java.lang.Object)
+     * @see QueryMetadataInterface#getIndexesInGroup(java.lang.Object)
      */
     @Override
     public Collection getIndexesInGroup(Object groupID)
@@ -545,7 +545,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }    
 
     /**
-     * @see IQueryMetadataInterface#getElementIDsInIndex(java.lang.Object)
+     * @see QueryMetadataInterface#getElementIDsInIndex(java.lang.Object)
      */
     @Override
     public List getElementIDsInIndex(Object index)
@@ -602,7 +602,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
 
     /**
-     * @see IQueryMetadataInterface#getVirtualDatabaseName()
+     * @see QueryMetadataInterface#getVirtualDatabaseName()
      */
     @Override
     public String getVirtualDatabaseName() 
@@ -612,7 +612,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
 
 	/**
-	 * @see IQueryMetadataInterface#getAccessPatternsInGroup(Object)
+	 * @see QueryMetadataInterface#getAccessPatternsInGroup(Object)
 	 */
 	@Override
     public Collection getAccessPatternsInGroup(Object groupID)
@@ -629,7 +629,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
 	}
 
 	/**
-	 * @see IQueryMetadataInterface#getElementIDsInAccessPattern(Object)
+	 * @see QueryMetadataInterface#getElementIDsInAccessPattern(Object)
 	 */
 	@Override
     public List getElementIDsInAccessPattern(Object accessPattern)
@@ -692,7 +692,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     	metadataID = getActualMetadataId(metadataID);
     	
     	if (metadataID instanceof TempMetadataID) {
-    		return IQueryMetadataInterface.EMPTY_PROPS;
+    		return QueryMetadataInterface.EMPTY_PROPS;
     	}
 
         return actualMetadata.getExtensionProperties(metadataID);

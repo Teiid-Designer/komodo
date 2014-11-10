@@ -37,9 +37,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface.SupportConstants;
-import org.komodo.spi.query.metadata.IStoredProcedureInfo;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
+import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.query.sql.lang.IJoinType.Types;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
@@ -227,7 +227,7 @@ public class ResolverUtil {
      * @return
      * @throws Exception 
      */
-    public static Expression convertExpression(Expression sourceExpression, String targetTypeName, IQueryMetadataInterface metadata) throws Exception {
+    public static Expression convertExpression(Expression sourceExpression, String targetTypeName, QueryMetadataInterface metadata) throws Exception {
         return convertExpression(sourceExpression,
                                  DataTypeManagerService.getInstance(sourceExpression.getTeiidVersion()).getDataTypeName(sourceExpression.getType()),
                                  targetTypeName, metadata);
@@ -243,7 +243,7 @@ public class ResolverUtil {
      * @return
      * @throws Exception 
      */
-    public static Expression convertExpression(Expression sourceExpression, String sourceTypeName, String targetTypeName, IQueryMetadataInterface metadata) throws Exception {
+    public static Expression convertExpression(Expression sourceExpression, String sourceTypeName, String targetTypeName, QueryMetadataInterface metadata) throws Exception {
         if (sourceTypeName.equals(targetTypeName)) {
             return sourceExpression;
         }
@@ -373,7 +373,7 @@ public class ResolverUtil {
 	 * @param metadata
 	 *            IQueryMetadataInterface
 	 */
-    public static void resolveOrderBy(OrderBy orderBy, QueryCommand command, IQueryMetadataInterface metadata)
+    public static void resolveOrderBy(OrderBy orderBy, QueryCommand command, QueryMetadataInterface metadata)
         throws Exception {
 
     	List<Expression> knownElements = command.getProjectedQuery().getSelect().getProjectedSymbols();
@@ -509,7 +509,7 @@ public class ResolverUtil {
      * @throws Exception
      *
      */
-	public static Expression getDefault(ElementSymbol symbol, IQueryMetadataInterface metadata) throws Exception {
+	public static Expression getDefault(ElementSymbol symbol, QueryMetadataInterface metadata) throws Exception {
         //Check if there is a default value, if so use it
 		Object mid = symbol.getMetadataID();
     	Class<?> type = symbol.getType();
@@ -523,7 +523,7 @@ public class ResolverUtil {
         return getProperlyTypedConstant(defaultValue, type, symbol.getTeiidParser());
 	}    
 	
-	public static boolean hasDefault(Object mid, IQueryMetadataInterface metadata) throws Exception {
+	public static boolean hasDefault(Object mid, QueryMetadataInterface metadata) throws Exception {
         Object defaultValue = metadata.getDefaultValue(mid);
         
         return defaultValue != null || metadata.elementSupports(mid, SupportConstants.Element.NULL);
@@ -559,17 +559,17 @@ public class ResolverUtil {
      * The resolved elements may not contain non-selectable columns depending on the metadata first used for resolving.
      * 
      */
-    public static List<ElementSymbol> resolveElementsInGroup(GroupSymbol group, IQueryMetadataInterface metadata)
+    public static List<ElementSymbol> resolveElementsInGroup(GroupSymbol group, QueryMetadataInterface metadata)
     throws Exception {
         return new ArrayList<ElementSymbol>(getGroupInfo(group, metadata).getSymbolList());
     }
     
-    public static void clearGroupInfo(GroupSymbol group, IQueryMetadataInterface metadata) throws Exception {
+    public static void clearGroupInfo(GroupSymbol group, QueryMetadataInterface metadata) throws Exception {
     	metadata.addToMetadataCache(group.getMetadataID(), GroupInfo.CACHE_PREFIX + group.getName(), null);
     }
     
 	static GroupInfo getGroupInfo(GroupSymbol group,
-			IQueryMetadataInterface metadata)
+			QueryMetadataInterface metadata)
 			throws Exception {
 		String key = GroupInfo.CACHE_PREFIX + group.getName();
 		GroupInfo groupInfo = (GroupInfo)metadata.getFromMetadataCache(group.getMetadataID(), key);
@@ -613,7 +613,7 @@ public class ResolverUtil {
      * @return
      * @throws Exception
      */
-	public static List getAccessPatternElementsInGroups(final IQueryMetadataInterface metadata, Collection groups, boolean flatten) throws Exception {
+	public static List getAccessPatternElementsInGroups(final QueryMetadataInterface metadata, Collection groups, boolean flatten) throws Exception {
 		List accessPatterns = null;
 		Iterator i = groups.iterator();
 		while (i.hasNext()){
@@ -742,7 +742,7 @@ public class ResolverUtil {
      */
     public static List<GroupSymbol> findMatchingGroups(String groupContext,
                             Collection<GroupSymbol> groups,
-                            IQueryMetadataInterface metadata) throws Exception {
+                            QueryMetadataInterface metadata) throws Exception {
 
         if (groups == null) {
             return null;
@@ -819,7 +819,7 @@ public class ResolverUtil {
 	 * @throws Exception if a conversion is necessary but none can
 	 * be found
 	 */
-	static Expression resolveSubqueryPredicateCriteria(Expression expression, SubqueryContainer crit, IQueryMetadataInterface metadata)
+	static Expression resolveSubqueryPredicateCriteria(Expression expression, SubqueryContainer crit, QueryMetadataInterface metadata)
 		throws Exception {
 	
 		// Check that type of the expression is same as the type of the
@@ -845,7 +845,7 @@ public class ResolverUtil {
 	    return result;
 	}
 
-	public static ResolvedLookup resolveLookup(Function lookup, IQueryMetadataInterface metadata) throws Exception {
+	public static ResolvedLookup resolveLookup(Function lookup, QueryMetadataInterface metadata) throws Exception {
 		Expression[] args = lookup.getArgs();
 		TeiidParser parser = lookup.getTeiidParser();
 
@@ -900,7 +900,7 @@ public class ResolverUtil {
         return e;
 	}
 
-	public static void resolveGroup(GroupSymbol symbol, IQueryMetadataInterface metadata)
+	public static void resolveGroup(GroupSymbol symbol, QueryMetadataInterface metadata)
 	    throws Exception {
 	
 	    if (symbol.getMetadataID() != null){
@@ -965,7 +965,7 @@ public class ResolverUtil {
 	    if (groupID == null || metadata.isProcedure(groupID)) {
 		    //try procedure relational resolving
 	        try {
-	            IStoredProcedureInfo storedProcedureInfo = metadata.getStoredProcedureInfoForProcedure(potentialID);
+	            StoredProcedureInfo storedProcedureInfo = metadata.getStoredProcedureInfoForProcedure(potentialID);
 	            symbol.setProcedure(true);
 	            groupID = storedProcedureInfo.getProcedureID();
 	        } catch(Exception e) {
@@ -998,7 +998,7 @@ public class ResolverUtil {
 		}
 	}
 	
-	public static void findKeyPreserved(Query query, Set<GroupSymbol> keyPreservingGroups, IQueryMetadataInterface metadata)
+	public static void findKeyPreserved(Query query, Set<GroupSymbol> keyPreservingGroups, QueryMetadataInterface metadata)
 	throws Exception {
 		if (query.getFrom() == null) {
 			return;
@@ -1114,7 +1114,7 @@ public class ResolverUtil {
         }
     }
 	
-	public static void findKeyPreserved(FromClause clause, Set<GroupSymbol> keyPreservingGroups, IQueryMetadataInterface metadata)
+	public static void findKeyPreserved(FromClause clause, Set<GroupSymbol> keyPreservingGroups, QueryMetadataInterface metadata)
 	throws Exception {
 		if (clause instanceof UnaryFromClause) {
 			UnaryFromClause ufc = (UnaryFromClause)clause;
@@ -1185,7 +1185,7 @@ public class ResolverUtil {
 	/**
 	 * Taken from RuleRaiseAccess
 	 */
-    private static boolean matchesForeignKey(IQueryMetadataInterface metadata, Collection<Object> leftIds, Collection<Object> rightIds, GroupSymbol leftGroup, boolean exact)
+    private static boolean matchesForeignKey(QueryMetadataInterface metadata, Collection<Object> leftIds, Collection<Object> rightIds, GroupSymbol leftGroup, boolean exact)
         throws Exception {
         Collection fks = metadata.getForeignKeysInGroup(leftGroup.getMetadataID());
         for (Object fk : fks) {
@@ -1208,7 +1208,7 @@ public class ResolverUtil {
 
 	static private HashSet<GroupSymbol> findKeyPreserved(Set<GroupSymbol> keyPreservingGroups,
 		Set<GroupSymbol> pk,
-		HashMap<List<GroupSymbol>, List<HashSet<Object>>> crits, boolean left, IQueryMetadataInterface metadata, Set<GroupSymbol> otherGroups)
+		HashMap<List<GroupSymbol>, List<HashSet<Object>>> crits, boolean left, QueryMetadataInterface metadata, Set<GroupSymbol> otherGroups)
 		throws Exception {
 		HashSet<GroupSymbol> result = new HashSet<GroupSymbol>();
 		for (GroupSymbol gs : pk) {

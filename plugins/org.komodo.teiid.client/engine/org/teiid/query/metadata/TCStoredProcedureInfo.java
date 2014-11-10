@@ -26,9 +26,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.komodo.spi.query.metadata.IStoredProcedureInfo;
+import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.sql.lang.SPParameter;
 
 /**
@@ -36,7 +36,7 @@ import org.teiid.query.sql.lang.SPParameter;
 * and the QueryResolver via the facades
 */
 
-public class StoredProcedureInfo implements Serializable, IStoredProcedureInfo<SPParameter, QueryNode> {
+public class TCStoredProcedureInfo implements Serializable, StoredProcedureInfo<SPParameter, TCQueryNode> {
 
     /** Constant identifying an IN parameter */
     public static final int IN = ISPParameter.ParameterInfo.IN.index();
@@ -57,7 +57,7 @@ public class StoredProcedureInfo implements Serializable, IStoredProcedureInfo<S
     private Object procedureID;
     private List<SPParameter> parameters = new ArrayList<SPParameter>();
     private String callableName;
-    private QueryNode query;
+    private TCQueryNode query;
     private int updateCount = -1;
 
     public String getProcedureCallableName(){
@@ -89,10 +89,10 @@ public class StoredProcedureInfo implements Serializable, IStoredProcedureInfo<S
         this.parameters.add(parameter);
     }
            
-    public QueryNode getQueryPlan(){
+    public TCQueryNode getQueryPlan(){
         return this.query;
     }
-    public void setQueryPlan(QueryNode queryNode){
+    public void setQueryPlan(TCQueryNode queryNode){
         this.query = queryNode;
     }
 

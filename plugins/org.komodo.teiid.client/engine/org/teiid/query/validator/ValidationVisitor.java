@@ -43,9 +43,9 @@ import net.sf.saxon.om.QNameException;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.query.metadata.IQueryNode;
-import org.komodo.spi.query.metadata.IStoredProcedureInfo;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface.SupportConstants;
+import org.komodo.spi.query.metadata.QueryNode;
+import org.komodo.spi.query.metadata.StoredProcedureInfo;
+import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
@@ -1855,7 +1855,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 	    	}
 	    	Validator.validate(obj.getDefinition(), getMetadata(), this);
 	    	TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
-	    	IStoredProcedureInfo<ISPParameter, IQueryNode> info = getMetadata().getStoredProcedureInfoForProcedure(gs.getName());
+	    	StoredProcedureInfo<ISPParameter, QueryNode> info = getMetadata().getStoredProcedureInfoForProcedure(gs.getName());
 	    	for (ISPParameter param : info.getParameters()) {
 	    		if (param.getParameterType() == SPParameter.RESULT_SET) {
 	    	    	queryResolver.validateProjectedSymbols(gs, param.getResultSetColumns(), obj.getDefinition().getProjectedSymbols());

@@ -24,7 +24,7 @@ package org.teiid.query.resolver;
 
 import java.util.Map;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
@@ -32,6 +32,6 @@ import org.teiid.query.sql.symbol.Expression;
 
 public interface VariableResolver {
 
-    Map<ElementSymbol, Expression> getVariableValues(Command command, boolean changingOnly, IQueryMetadataInterface metadata) throws Exception;
+    Map<ElementSymbol, Expression> getVariableValues(Command command, boolean changingOnly, QueryMetadataInterface metadata) throws Exception;
     
 }

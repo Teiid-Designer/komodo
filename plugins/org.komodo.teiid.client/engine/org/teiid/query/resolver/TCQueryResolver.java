@@ -31,15 +31,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.komodo.spi.query.QueryResolver;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.metadata.IQueryNode;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryNode;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.QueryValidatorException;
 import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
@@ -178,7 +178,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
         return isTeiidVersionOrGreater(Version.TEIID_8_7);
     }
 
-    public Command expandCommand(ProcedureContainer proc, IQueryMetadataInterface metadata) throws Exception {
+    public Command expandCommand(ProcedureContainer proc, QueryMetadataInterface metadata) throws Exception {
         ProcedureContainerResolver cr = (ProcedureContainerResolver)chooseResolver(proc, metadata);
         Command command = cr.expandCommand(proc, metadata);
         if (command == null) {
@@ -211,7 +211,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 	 * @return store of metadata ids representing the resolution of all symbols
 	 * @throws Exception
 	 */
-	public TempMetadataStore resolveCommand(Command command, IQueryMetadataInterface metadata) throws Exception {
+	public TempMetadataStore resolveCommand(Command command, QueryMetadataInterface metadata) throws Exception {
 		return resolveCommand(command, metadata, true);
 	}
 
@@ -225,12 +225,12 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 	 * @return metadata object store
 	 * @throws Exception 
 	 */
-    public TempMetadataStore resolveCommand(Command currentCommand, GroupSymbol container, int type, IQueryMetadataInterface metadata, boolean inferProcedureResultSetColumns) throws Exception {
+    public TempMetadataStore resolveCommand(Command currentCommand, GroupSymbol container, int type, QueryMetadataInterface metadata, boolean inferProcedureResultSetColumns) throws Exception {
     	ResolverUtil.resolveGroup(container, metadata);
     	switch (type) {
 	    case ICommand.TYPE_QUERY:
 	    	ResolverUtil.resolveGroup(container, metadata);
-	        IQueryNode queryNode = metadata.getVirtualPlan(container.getMetadataID());
+	        QueryNode queryNode = metadata.getVirtualPlan(container.getMetadataID());
             
 	        return resolveWithBindingMetadata(currentCommand, metadata, queryNode, false);
     	case ICommand.TYPE_INSERT:
@@ -243,14 +243,14 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
     }
 
     @Override
-    public void resolveCommand(Command command, GroupSymbol gSymbol, int teiidCommandType, IQueryMetadataInterface metadata)
+    public void resolveCommand(Command command, GroupSymbol gSymbol, int teiidCommandType, QueryMetadataInterface metadata)
         throws Exception {
         resolveCommand(command, gSymbol, teiidCommandType, metadata, true);
     }
 
     @Override
     public void postResolveCommand(Command command, GroupSymbol gSymbol, int commandType,
-                                   IQueryMetadataInterface metadata, List<Expression> projectedSymbols) {
+                                   QueryMetadataInterface metadata, List<Expression> projectedSymbols) {
 
         if (command instanceof CreateUpdateProcedureCommand) {
 
@@ -283,7 +283,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 	 * @throws Exception 
 	 */
 	public TempMetadataStore resolveWithBindingMetadata(Command currentCommand,
-			IQueryMetadataInterface metadata, IQueryNode queryNode, boolean replaceBindings)
+			QueryMetadataInterface metadata, QueryNode queryNode, boolean replaceBindings)
 			throws Exception {
 		Map<ElementSymbol, ElementSymbol> symbolMap = null;
 		TeiidParser teiidParser = parser.getTeiidParser();
@@ -360,7 +360,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 	 * @return
 	 * @throws Exception
 	 */
-    public List<Expression> parseBindings(IQueryNode planNode) throws Exception {
+    public List<Expression> parseBindings(QueryNode planNode) throws Exception {
         Collection<String> bindingsCol = planNode.getBindings();
         if (bindingsCol == null) {
             return Collections.emptyList();
@@ -378,7 +378,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
         return parsedBindings;
     }
 
-    public TempMetadataStore resolveCommand(Command currentCommand, IQueryMetadataInterface metadata, boolean resolveNullLiterals)
+    public TempMetadataStore resolveCommand(Command currentCommand, QueryMetadataInterface metadata, boolean resolveNullLiterals)
         throws Exception {
 
 //        TODO
@@ -426,7 +426,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
      * @param metadata
      * @return CommandResolver
      */
-    private CommandResolver chooseResolver(Command command, IQueryMetadataInterface metadata)
+    private CommandResolver chooseResolver(Command command, QueryMetadataInterface metadata)
         throws Exception {
 
         switch(command.getType()) {
@@ -463,7 +463,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
      * @return true if query is xml query, false otherwise
      * @throws Exception 
      */
-    public boolean isXMLQuery(Query query, IQueryMetadataInterface metadata)
+    public boolean isXMLQuery(Query query, QueryMetadataInterface metadata)
      throws Exception {
 
         if (query.getWith() != null) {
@@ -506,7 +506,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
      * @param metadata Metadata implementation
      * @throws Exception
      */
-    public void resolveCriteria(Criteria criteria, IQueryMetadataInterface metadata)
+    public void resolveCriteria(Criteria criteria, QueryMetadataInterface metadata)
         throws Exception {
         ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
         visitor.resolveLanguageObject(criteria, metadata);
@@ -530,7 +530,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
         subCommand.setExternalGroupContexts(parentContext);
     }
     
-    public Map<ElementSymbol, Expression> getVariableValues(Command command, boolean changingOnly, IQueryMetadataInterface metadata) throws Exception {
+    public Map<ElementSymbol, Expression> getVariableValues(Command command, boolean changingOnly, QueryMetadataInterface metadata) throws Exception {
         
         CommandResolver resolver = chooseResolver(command, metadata);
         
@@ -553,7 +553,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
         }
 	}
 
-    public static void validateWithVisitor(AbstractValidationVisitor visitor, IQueryMetadataInterface metadata, Command command)
+    public static void validateWithVisitor(AbstractValidationVisitor visitor, QueryMetadataInterface metadata, Command command)
         throws Exception {
 
         // Validate with visitor
@@ -564,11 +564,11 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
         }
     }
 
-	public QueryNode resolveView(GroupSymbol virtualGroup, IQueryNode qnode,
-			String cacheString, IQueryMetadataInterface qmi) throws Exception {
+	public TCQueryNode resolveView(GroupSymbol virtualGroup, QueryNode qnode,
+			String cacheString, QueryMetadataInterface qmi) throws Exception {
 		qmi = qmi.getDesignTimeMetadata();
 		cacheString = "transformation/" + cacheString; //$NON-NLS-1$
-		QueryNode cachedNode = (QueryNode)qmi.getFromMetadataCache(virtualGroup.getMetadataID(), cacheString);
+		TCQueryNode cachedNode = (TCQueryNode)qmi.getFromMetadataCache(virtualGroup.getMetadataID(), cacheString);
         if (cachedNode == null) {
         	Command result = (Command) qnode.getCommand();
         	List<String> bindings = null;
@@ -591,7 +591,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 	        validateWithVisitor(new ValidationVisitor(getTeiidVersion()), qmi, result);
 
 	        validateProjectedSymbols(virtualGroup, qmi, result);
-            cachedNode = new QueryNode(qnode.getQuery());
+            cachedNode = new TCQueryNode(qnode.getQuery());
             cachedNode.setCommand(result);
 	        
 			if(isView(virtualGroup, qmi)) {
@@ -617,7 +617,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 	}
 
 	public void validateProjectedSymbols(GroupSymbol virtualGroup,
-			IQueryMetadataInterface qmi, Command result)
+			QueryMetadataInterface qmi, Command result)
 			throws QueryValidatorException, Exception {
 		//ensure that null types match the view
 		List<ElementSymbol> symbols = ResolverUtil.resolveElementsInGroup(virtualGroup, qmi);
@@ -648,7 +648,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 	}
 
 	public boolean isView(GroupSymbol virtualGroup,
-			IQueryMetadataInterface qmi) throws Exception {
+			QueryMetadataInterface qmi) throws Exception {
 		return !(virtualGroup.getMetadataID() instanceof TempMetadataID) && qmi.isVirtualGroup(virtualGroup.getMetadataID());// && qmi.isVirtualModel(qmi.getModelID(virtualGroup.getMetadataID()));
 	}
 	

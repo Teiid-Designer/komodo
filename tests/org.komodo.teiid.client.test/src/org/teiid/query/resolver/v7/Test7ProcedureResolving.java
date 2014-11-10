@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.teiid.metadata.Table;
@@ -68,7 +68,7 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
 
     @Override
     protected CreateUpdateProcedureCommand helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType) throws Exception {
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
         return (CreateUpdateProcedureCommand) resolveProcedure(userUpdateStr, metadata);
     }
 
@@ -741,7 +741,7 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
         //        procedure = procedure + "UPDATE pm1.g1 SET pm1.g1.e1 = INPUTS.e1, pm1.g1.e2 = INPUTS.e2;\n";
         procedure = procedure + "END\n"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.UPDATE, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.UPDATE, procedure);
 
         Command procCommand = getQueryParser().parseCommand(procedure);
         GroupSymbol virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
@@ -779,7 +779,7 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
 
         Command procCommand = getQueryParser().parseCommand(procedure);
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.INSERT, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.INSERT, procedure);
 
         GroupSymbol virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
         virtualGroup.setMetadataID(metadata.getGroupID("vm1.g1")); //$NON-NLS-1$
@@ -798,7 +798,7 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
 
         Command procCommand = getQueryParser().parseCommand(procedure);
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.UPDATE, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.UPDATE, procedure);
 
         GroupSymbol virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
         virtualGroup.setMetadataID(metadata.getGroupID("vm1.g1")); //$NON-NLS-1$

@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ISetQuery;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.query.parser.LanguageVisitor;
@@ -35,7 +35,7 @@ public class SetQuery extends QueryCommand
 
     private List<Class<?>> projectedTypes = null;  //set during resolving
 
-    private IQueryMetadataInterface metadata = null; // set during resolving
+    private QueryMetadataInterface metadata = null; // set during resolving
 
     /**
      * @param p
@@ -158,7 +158,7 @@ public class SetQuery extends QueryCommand
      * @param projectedTypes The projectedSymbols to set.
      * @param metadata
      */
-    public void setProjectedTypes(List<Class<?>> projectedTypes, IQueryMetadataInterface metadata) {
+    public void setProjectedTypes(List<Class<?>> projectedTypes, QueryMetadataInterface metadata) {
         this.projectedTypes = projectedTypes;
         this.metadata = metadata;
     }
@@ -170,7 +170,7 @@ public class SetQuery extends QueryCommand
         return this.projectedTypes;
     }
 
-    public static List<Expression> getTypedProjectedSymbols(List<? extends Expression> acutal, List<Class<?>> projectedTypes, IQueryMetadataInterface metadata) {
+    public static List<Expression> getTypedProjectedSymbols(List<? extends Expression> acutal, List<Class<?>> projectedTypes, QueryMetadataInterface metadata) {
         List<Expression> newProject = new ArrayList<Expression>();
         for (int i = 0; i < acutal.size(); i++) {
             Expression originalSymbol = acutal.get(i);

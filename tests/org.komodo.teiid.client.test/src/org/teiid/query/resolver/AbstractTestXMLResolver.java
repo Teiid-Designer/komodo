@@ -29,7 +29,7 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.sql.lang.Command;
@@ -62,7 +62,7 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
         }
     }
 
-    protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {
+    protected Command helpResolve(Command command, QueryMetadataInterface queryMetadataInterface) {
         // resolve
         try {
             TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
@@ -78,7 +78,7 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
         return command;
     }
 
-    protected Command helpResolve(String sql, IQueryMetadataInterface queryMetadata) {
+    protected Command helpResolve(String sql, QueryMetadataInterface queryMetadata) {
         return helpResolve(helpParse(sql), queryMetadata);
     }
 
@@ -88,7 +88,7 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
         return cmd;
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
 
         // parse
         Command command = helpParse(sql);
@@ -107,7 +107,7 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
         }
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata) {
         helpResolveException(sql, queryMetadata, null);
     }
 

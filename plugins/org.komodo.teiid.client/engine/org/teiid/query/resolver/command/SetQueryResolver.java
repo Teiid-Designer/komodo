@@ -25,7 +25,7 @@ package org.teiid.query.resolver.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.query.metadata.TempMetadataAdapter;
@@ -110,7 +110,7 @@ public class SetQueryResolver extends CommandResolver {
     }
 
     private void setProjectedTypes(SetQuery setQuery,
-                                   List<Class<?>> firstProjectTypes, IQueryMetadataInterface metadata) throws Exception {
+                                   List<Class<?>> firstProjectTypes, QueryMetadataInterface metadata) throws Exception {
         for (QueryCommand subCommand : setQuery.getQueryCommands()) {
             if (!(subCommand instanceof SetQuery)) {
                 continue;

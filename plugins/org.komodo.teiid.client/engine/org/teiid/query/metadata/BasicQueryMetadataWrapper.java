@@ -30,9 +30,9 @@ import java.util.Set;
 
 import javax.script.ScriptEngine;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.metadata.IQueryNode;
-import org.komodo.spi.query.metadata.IStoredProcedureInfo;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryNode;
+import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.komodo.spi.xml.IMappingNode;
@@ -42,16 +42,16 @@ import org.teiid.query.sql.symbol.Expression;
 /**
  * Basic Query Metadata Wrapper
  */
-public class BasicQueryMetadataWrapper implements IQueryMetadataInterface {
+public class BasicQueryMetadataWrapper implements QueryMetadataInterface {
 	
-	protected IQueryMetadataInterface actualMetadata;
-	protected IQueryMetadataInterface designTimeMetadata;
+	protected QueryMetadataInterface actualMetadata;
+	protected QueryMetadataInterface designTimeMetadata;
 	protected boolean designTime;
 
 	/**
 	 * @param actualMetadata
 	 */
-	public BasicQueryMetadataWrapper(IQueryMetadataInterface actualMetadata) {
+	public BasicQueryMetadataWrapper(QueryMetadataInterface actualMetadata) {
 		this.actualMetadata = actualMetadata;
 	}
 
@@ -292,7 +292,7 @@ public class BasicQueryMetadataWrapper implements IQueryMetadataInterface {
 	}
 
 	@Override
-    public IStoredProcedureInfo getStoredProcedureInfoForProcedure(
+    public StoredProcedureInfo getStoredProcedureInfoForProcedure(
 			String fullyQualifiedProcedureName)
 			throws Exception {
 		return actualMetadata
@@ -322,7 +322,7 @@ public class BasicQueryMetadataWrapper implements IQueryMetadataInterface {
 	}
 
 	@Override
-    public IQueryNode getVirtualPlan(Object groupID)
+    public QueryNode getVirtualPlan(Object groupID)
 			throws Exception {
 		return actualMetadata.getVirtualPlan(groupID);
 	}
@@ -426,7 +426,7 @@ public class BasicQueryMetadataWrapper implements IQueryMetadataInterface {
 	}
 	
 	@Override
-	public IQueryMetadataInterface getDesignTimeMetadata() {
+	public QueryMetadataInterface getDesignTimeMetadata() {
 		if (designTime) {
 			return this;
 		}
@@ -439,7 +439,7 @@ public class BasicQueryMetadataWrapper implements IQueryMetadataInterface {
 		return designTimeMetadata;
 	}
 	
-	protected IQueryMetadataInterface createDesignTimeMetadata() {
+	protected QueryMetadataInterface createDesignTimeMetadata() {
 		return actualMetadata.getDesignTimeMetadata();
 	}
 	
@@ -454,7 +454,7 @@ public class BasicQueryMetadataWrapper implements IQueryMetadataInterface {
 	}
 	
 	@Override
-	public IQueryMetadataInterface getSessionMetadata() {
+	public QueryMetadataInterface getSessionMetadata() {
 		return actualMetadata.getSessionMetadata();
 	}
 	

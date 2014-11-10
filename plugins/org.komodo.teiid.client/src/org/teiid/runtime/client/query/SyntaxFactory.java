@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.QueryFactory;
-import org.komodo.spi.query.metadata.IMetadataID;
-import org.komodo.spi.query.metadata.IQueryNode;
-import org.komodo.spi.query.metadata.IStoredProcedureInfo;
+import org.komodo.spi.query.metadata.MetadataID;
+import org.komodo.spi.query.metadata.QueryNode;
+import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.query.sql.lang.IBetweenCriteria;
 import org.komodo.spi.query.sql.lang.ICompareCriteria;
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
@@ -75,8 +75,8 @@ import org.komodo.spi.query.sql.symbol.IScalarSubquery;
 import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.teiid.query.mapping.relational.QueryNode;
-import org.teiid.query.metadata.StoredProcedureInfo;
+import org.teiid.query.mapping.relational.TCQueryNode;
+import org.teiid.query.metadata.TCStoredProcedureInfo;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.TeiidNodeFactory;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
@@ -583,17 +583,17 @@ public class SyntaxFactory implements QueryFactory <Expression,
     }
 
     @Override
-    public IMetadataID createMetadataID(String id, Class clazz) {
+    public MetadataID createMetadataID(String id, Class clazz) {
         return new TempMetadataID(id, clazz);
     }
 
     @Override
-    public IStoredProcedureInfo createStoredProcedureInfo() {
-        return new StoredProcedureInfo();
+    public StoredProcedureInfo createStoredProcedureInfo() {
+        return new TCStoredProcedureInfo();
     }
 
     @Override
-    public IQueryNode createQueryNode(String queryPlan) {
-        return new QueryNode(queryPlan);
+    public QueryNode createQueryNode(String queryPlan) {
+        return new TCQueryNode(queryPlan);
     }
 }
