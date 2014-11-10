@@ -8,14 +8,14 @@ import java.util.List;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.proc.ITranslateCriteria;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
  */
 @Removed(Version.TEIID_8_0)
-public class TranslateCriteria extends Criteria implements PredicateCriteria, ITranslateCriteria<LanguageVisitor> {
+public class TranslateCriteria extends Criteria implements PredicateCriteria, ITranslateCriteria<TCLanguageVisitorImpl> {
 
     // the selector object used to determine if a type of criteria is specified 
     // on the user's query  
@@ -114,7 +114,7 @@ public class TranslateCriteria extends Criteria implements PredicateCriteria, IT
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

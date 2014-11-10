@@ -21,11 +21,11 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
  */
-public interface ITableFunctionReference<LV extends ILanguageVisitor> extends IFromClause<LV> {
+public interface ITableFunctionReference<LV extends LanguageVisitor> extends IFromClause<LV> {
     // No methods required
 }

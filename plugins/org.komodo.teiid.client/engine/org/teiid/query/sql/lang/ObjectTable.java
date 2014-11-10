@@ -11,7 +11,7 @@ import javax.script.ScriptEngine;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IObjectTable;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.DerivedColumn;
 
@@ -19,7 +19,7 @@ import org.teiid.query.sql.symbol.DerivedColumn;
  *
  */
 @Since(Version.TEIID_8_0)
-public class ObjectTable extends TableFunctionReference implements IObjectTable<LanguageVisitor> {
+public class ObjectTable extends TableFunctionReference implements IObjectTable<TCLanguageVisitorImpl> {
 
     /**
      * Default language key for script engine
@@ -175,7 +175,7 @@ public class ObjectTable extends TableFunctionReference implements IObjectTable<
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

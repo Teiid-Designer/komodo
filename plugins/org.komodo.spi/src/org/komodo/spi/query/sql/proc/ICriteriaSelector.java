@@ -22,7 +22,7 @@
 package org.komodo.spi.query.sql.proc;
 
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
@@ -30,6 +30,6 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
  *
  */
 @Removed(Version.TEIID_8_0)
-public interface ICriteriaSelector <LV extends ILanguageVisitor> extends ILanguageObject<LV> {
+public interface ICriteriaSelector <LV extends LanguageVisitor> extends ILanguageObject<LV> {
     // No methods required
 }

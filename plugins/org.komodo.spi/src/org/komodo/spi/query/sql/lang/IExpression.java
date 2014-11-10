@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 /**
  *
  */
-public interface IExpression<LV extends ILanguageVisitor> extends ILanguageObject<LV> {
+public interface IExpression<LV extends LanguageVisitor> extends ILanguageObject<LV> {
 
     /**
      * Get the return type of this expression. 

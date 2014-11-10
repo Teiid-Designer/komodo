@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IOrderBy;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
@@ -16,7 +16,7 @@ import org.teiid.runtime.client.Messages;
  *
  */
 public class OrderBy extends SimpleNode
-    implements IOrderBy<Expression, OrderByItem, LanguageVisitor> {
+    implements IOrderBy<Expression, OrderByItem, TCLanguageVisitorImpl> {
 
     private List<OrderByItem> orderByItems = new ArrayList<OrderByItem>();
 
@@ -111,7 +111,7 @@ public class OrderBy extends SimpleNode
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

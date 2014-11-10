@@ -23,12 +23,12 @@ package org.komodo.spi.query.sql.lang;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
  */
-public interface ISelect<E extends ILanguageObject, LV extends ILanguageVisitor> 
+public interface ISelect<E extends ILanguageObject, LV extends LanguageVisitor> 
     extends ILanguageObject<LV> {
 
     /**

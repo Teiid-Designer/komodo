@@ -29,8 +29,8 @@ import java.util.List;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.lang.CompareCriteria;
 import org.teiid.query.sql.lang.CriteriaSelector;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -42,7 +42,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
 
 /**
  */
-public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
+public class ResolveVirtualGroupCriteriaVisitor extends TCLanguageVisitorImpl {
 
     private List virtualGroup;
 
@@ -69,7 +69,7 @@ public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
 				CompareCriteria ccrit = (CompareCriteria) transIter.next();
 				ElementSymbol element = (ElementSymbol) ccrit.getLeftExpression();
 				try {
-                    ResolverVisitor resolverVisitor = new ResolverVisitor(getTeiidVersion());
+                    ResolverVisitorImpl resolverVisitor = new ResolverVisitorImpl(getTeiidVersion());
                     resolverVisitor.resolveLanguageObject(element, virtualGroup, metadata);
 				} catch(Exception e) {
                     throw new RuntimeException(e);
@@ -85,7 +85,7 @@ public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
 			while(elmntIter.hasNext()) {
 				ElementSymbol virtualElement = (ElementSymbol) elmntIter.next();
                 try {
-                    ResolverVisitor resolverVisitor = new ResolverVisitor(getTeiidVersion());
+                    ResolverVisitorImpl resolverVisitor = new ResolverVisitorImpl(getTeiidVersion());
                     resolverVisitor.resolveLanguageObject(virtualElement, virtualGroup, metadata);
                 } catch(Exception e) {
                     throw new RuntimeException(e);

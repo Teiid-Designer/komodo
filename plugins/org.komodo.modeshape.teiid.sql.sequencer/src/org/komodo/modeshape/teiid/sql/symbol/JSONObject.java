@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IJSONObject;
@@ -33,7 +33,7 @@ import org.komodo.spi.type.DataTypeManager.DataTypeName;
 /**
  *
  */
-public class JSONObject extends ASTNode implements Expression, IJSONObject<LanguageVisitor> {
+public class JSONObject extends ASTNode implements Expression, IJSONObject<SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -84,7 +84,7 @@ public class JSONObject extends ASTNode implements Expression, IJSONObject<Langu
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

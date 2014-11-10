@@ -31,7 +31,7 @@ import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.Table;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
@@ -43,7 +43,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
  *
  */
 public class Create extends Command
-    implements TargetedCommand, ICreate<Expression, LanguageVisitor> {
+    implements TargetedCommand, ICreate<Expression, TCLanguageVisitorImpl> {
 
     /**
      * @param p
@@ -231,7 +231,7 @@ public class Create extends Command
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

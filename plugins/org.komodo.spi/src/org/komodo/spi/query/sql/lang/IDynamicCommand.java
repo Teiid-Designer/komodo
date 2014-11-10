@@ -21,12 +21,12 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
  */
-public interface IDynamicCommand<E extends IExpression, LV extends ILanguageVisitor>
+public interface IDynamicCommand<E extends IExpression, LV extends LanguageVisitor>
     extends ICommand<E, LV> {
     // No methods required
 }

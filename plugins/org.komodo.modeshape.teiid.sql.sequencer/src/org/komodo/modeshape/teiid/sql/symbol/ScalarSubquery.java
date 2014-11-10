@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.QueryCommand;
@@ -34,7 +34,7 @@ import org.komodo.spi.type.DataTypeManager.DataTypeName;
 /**
  *
  */
-public class ScalarSubquery extends ASTNode implements Expression, SubqueryContainer<QueryCommand>, IScalarSubquery<LanguageVisitor, QueryCommand> {
+public class ScalarSubquery extends ASTNode implements Expression, SubqueryContainer<QueryCommand>, IScalarSubquery<SQLanguageVisitorImpl, QueryCommand> {
 
     /**
      * @param p teiid parser
@@ -97,7 +97,7 @@ public class ScalarSubquery extends ASTNode implements Expression, SubqueryConta
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

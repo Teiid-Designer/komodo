@@ -5,7 +5,7 @@ package org.teiid.query.sql.proc;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.proc.IReturnStatement;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -13,7 +13,7 @@ import org.teiid.query.sql.symbol.Expression;
  *
  */
 @Since(Version.TEIID_8_0)
-public class ReturnStatement extends AssignmentStatement implements IReturnStatement<Expression, LanguageVisitor> {
+public class ReturnStatement extends AssignmentStatement implements IReturnStatement<Expression, TCLanguageVisitorImpl> {
 
     /**
      * @param p
@@ -35,7 +35,7 @@ public class ReturnStatement extends AssignmentStatement implements IReturnState
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

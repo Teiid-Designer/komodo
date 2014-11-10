@@ -5,13 +5,13 @@ package org.teiid.query.sql.lang;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.ITextColumn;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
  */
-public class TextColumn extends ProjectedColumn implements ITextColumn<LanguageVisitor> {
+public class TextColumn extends ProjectedColumn implements ITextColumn<TCLanguageVisitorImpl> {
 
     private Integer width;
 
@@ -143,7 +143,7 @@ public class TextColumn extends ProjectedColumn implements ITextColumn<LanguageV
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

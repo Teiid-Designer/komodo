@@ -26,7 +26,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.function.TCFunctionDescriptor;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.Node;
 import org.teiid.query.sql.lang.OrderBy;
 import org.teiid.query.sql.lang.SingleElementSymbol;
@@ -35,7 +35,7 @@ import org.teiid.query.sql.lang.SingleElementSymbol;
  *
  */
 @SuppressWarnings( "unused" )
-public interface AggregateSymbol extends Node, SingleElementSymbol, Expression, IAggregateSymbol<LanguageVisitor> {
+public interface AggregateSymbol extends Node, SingleElementSymbol, Expression, IAggregateSymbol<TCLanguageVisitorImpl> {
 
     /**
      * @return name

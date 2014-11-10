@@ -29,7 +29,7 @@ import org.komodo.spi.query.sql.symbol.IElementSymbol;
 /**
  *
  */
-public interface IElementCollectorVisitor<LO extends ILanguageObject, ES extends IElementSymbol> {
+public interface ElementCollectorVisitor<LO extends ILanguageObject, ES extends IElementSymbol> {
 
     /**
      * Helper to quickly get the elements from obj in a collection.  The

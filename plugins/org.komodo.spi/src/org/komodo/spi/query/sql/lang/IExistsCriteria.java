@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 /**
  *
  */
-public interface IExistsCriteria<LV extends ILanguageVisitor, C extends ICommand>
+public interface IExistsCriteria<LV extends LanguageVisitor, C extends ICommand>
     extends IPredicateCriteria<LV>, ISubqueryContainer<C> {
 
     /**

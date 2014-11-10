@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IInsert;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
@@ -18,7 +18,7 @@ import org.teiid.query.sql.util.SymbolMap;
  *
  */
 public class Insert extends ProcedureContainer
-    implements TargetedCommand, IInsert<ElementSymbol, Expression, GroupSymbol, QueryCommand, LanguageVisitor> {
+    implements TargetedCommand, IInsert<ElementSymbol, Expression, GroupSymbol, QueryCommand, TCLanguageVisitorImpl> {
 
     /** Identifies the group to be updated. */
     private GroupSymbol group;
@@ -249,7 +249,7 @@ public class Insert extends ProcedureContainer
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

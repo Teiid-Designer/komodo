@@ -25,11 +25,11 @@ package org.komodo.modeshape.teiid.sql.proc;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Labeled;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
-import org.komodo.spi.query.sql.ISQLConstants;
+import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.spi.query.sql.proc.IBlock;
 import org.komodo.spi.query.sql.symbol.ISymbol;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
@@ -37,7 +37,7 @@ import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 /**
  *
  */
-public class Block extends Statement implements Labeled, IBlock<Statement, LanguageVisitor> {
+public class Block extends Statement implements Labeled, IBlock<Statement, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -91,11 +91,11 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
                 stmt.setCommand(null);
                 stmt.setExpression(null);
                 ElementSymbol variable = stmt.getVariable();
-                if (variable != null && variable.getShortName().equalsIgnoreCase(ISQLConstants.ROWCOUNT) 
-                        && variable.getGroupSymbol() != null && variable.getGroupSymbol().getName().equalsIgnoreCase(ISQLConstants.VARIABLES)) {
+                if (variable != null && variable.getShortName().equalsIgnoreCase(SQLConstants.ROWCOUNT) 
+                        && variable.getGroupSymbol() != null && variable.getGroupSymbol().getName().equalsIgnoreCase(SQLConstants.VARIABLES)) {
                     return;
                 }
-                String fullName = ISQLConstants.VARIABLES + ISymbol.SEPARATOR + ISQLConstants.ROWCOUNT;
+                String fullName = SQLConstants.VARIABLES + ISymbol.SEPARATOR + SQLConstants.ROWCOUNT;
                 ElementSymbol es = getTeiidParser().createASTNode(ASTNodes.ELEMENT_SYMBOL);
                 es.setName(fullName);
                 stmt.setExpression(es);
@@ -169,7 +169,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

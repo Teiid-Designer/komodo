@@ -23,14 +23,14 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.spi.query.sql.symbol.IAliasSymbol;
 
 /**
  *
  */
-public class AliasSymbol extends Symbol implements Expression, IAliasSymbol<Expression, LanguageVisitor> {
+public class AliasSymbol extends Symbol implements Expression, IAliasSymbol<Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -81,7 +81,7 @@ public class AliasSymbol extends Symbol implements Expression, IAliasSymbol<Expr
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -33,7 +33,7 @@ import java.util.Set;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.BetweenCriteria;
 import org.teiid.query.sql.lang.CompareCriteria;
@@ -84,7 +84,7 @@ import org.teiid.query.sql.symbol.XMLSerialize;
  * It is important to use a Post Navigator with this class, 
  * otherwise a replacement containing itself will not work
  */
-public class ExpressionMappingVisitor extends LanguageVisitor {
+public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
 
     private Map symbolMap;
     private boolean clone = true;
@@ -208,7 +208,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
 	}
     
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.symbol.AliasSymbol)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.symbol.AliasSymbol)
      */
     @Override
     public void visit(AliasSymbol obj) {
@@ -222,7 +222,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }
     
     /**
-     * @see LanguageVisitor#visit(BetweenCriteria)
+     * @see TCLanguageVisitorImpl#visit(BetweenCriteria)
      */
     @Override
     public void visit(BetweenCriteria obj) {
@@ -248,7 +248,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }
 
     /**
-     * @see LanguageVisitor#visit(CompareCriteria)
+     * @see TCLanguageVisitorImpl#visit(CompareCriteria)
      */
     @Override
     public void visit(CompareCriteria obj) {
@@ -257,7 +257,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }
 
     /**
-     * @see LanguageVisitor#visit(Function)
+     * @see TCLanguageVisitorImpl#visit(Function)
      */
     @Override
     public void visit(Function obj) {
@@ -270,7 +270,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }
 
     /**
-     * @see LanguageVisitor#visit(IsNullCriteria)
+     * @see TCLanguageVisitorImpl#visit(IsNullCriteria)
      */
     @Override
     public void visit(IsNullCriteria obj) {
@@ -278,7 +278,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }
 
     /**
-     * @see LanguageVisitor#visit(MatchCriteria)
+     * @see TCLanguageVisitorImpl#visit(MatchCriteria)
      */
     @Override
     public void visit(MatchCriteria obj) {
@@ -300,7 +300,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }
 
     /**
-     * @see LanguageVisitor#visit(SetCriteria)
+     * @see TCLanguageVisitorImpl#visit(SetCriteria)
      */
     @Override
     public void visit(SetCriteria obj) {
@@ -320,7 +320,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }
 
     /**
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.SubqueryCompareCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SubqueryCompareCriteria)
      */
     @Override
     public void visit(SubqueryCompareCriteria obj) {
@@ -328,7 +328,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }
     
     /**
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.SubquerySetCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SubquerySetCriteria)
      */
     @Override
     public void visit(SubquerySetCriteria obj) {
@@ -456,8 +456,8 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
         if (!visitor.elementSymbolsOnly) {
         	for (Map.Entry<? extends Expression, ? extends Expression> entry : exprMap.entrySet()) {
             	if (!(entry.getValue() instanceof ElementSymbol)) {
-            		useReverseMapping = !Collections.disjoint(GroupsUsedByElementsVisitor.getGroups(exprMap.keySet()),
-                    		GroupsUsedByElementsVisitor.getGroups(exprMap.values()));
+            		useReverseMapping = !Collections.disjoint(GroupsUsedByElementsVisitorImpl.getGroups(exprMap.keySet()),
+                    		GroupsUsedByElementsVisitorImpl.getGroups(exprMap.values()));
             		break;
             	}
     		}
@@ -491,7 +491,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }    
     
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.proc.AssignmentStatement)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.proc.AssignmentStatement)
      *
      */
     @Override
@@ -500,7 +500,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
     }
     
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.Insert)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.Insert)
      *
      */
     @Override

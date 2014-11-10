@@ -6,14 +6,14 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IJSONObject;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
  *
  */
-public class JSONObject extends SimpleNode implements Expression, IJSONObject<LanguageVisitor> {
+public class JSONObject extends SimpleNode implements Expression, IJSONObject<TCLanguageVisitorImpl> {
 
     private List<DerivedColumn> args;
 
@@ -66,7 +66,7 @@ public class JSONObject extends SimpleNode implements Expression, IJSONObject<La
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

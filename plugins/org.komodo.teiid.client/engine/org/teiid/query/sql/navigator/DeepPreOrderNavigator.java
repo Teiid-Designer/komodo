@@ -22,7 +22,7 @@
 
 package org.teiid.query.sql.navigator;
 
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.LanguageObject;
 
 
@@ -34,7 +34,7 @@ public class DeepPreOrderNavigator extends PreOrPostOrderNavigator {
     /** 
      * @param visitor
      */
-    public DeepPreOrderNavigator(LanguageVisitor visitor) {
+    public DeepPreOrderNavigator(TCLanguageVisitorImpl visitor) {
     	super(visitor, PreOrPostOrderNavigator.PRE_ORDER, true);
     }
 
@@ -42,7 +42,7 @@ public class DeepPreOrderNavigator extends PreOrPostOrderNavigator {
      * @param object
      * @param visitor
      */
-    public static void doVisit(LanguageObject object, LanguageVisitor visitor) {
+    public static void doVisit(LanguageObject object, TCLanguageVisitorImpl visitor) {
         DeepPreOrderNavigator nav = new DeepPreOrderNavigator(visitor);
         object.acceptVisitor(nav);
     }

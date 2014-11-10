@@ -12,7 +12,7 @@ import java.util.TreeMap;
 
 import org.komodo.spi.query.sql.lang.IStoredProcedure;
 import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
@@ -24,7 +24,7 @@ import org.teiid.runtime.client.Messages;
  *
  */
 public class StoredProcedure extends ProcedureContainer
-    implements TargetedCommand, IStoredProcedure<SPParameter, Expression, LanguageVisitor> {
+    implements TargetedCommand, IStoredProcedure<SPParameter, Expression, TCLanguageVisitorImpl> {
 
     /** Used as parameters */
     private Map<Integer, SPParameter> mapOfParameters = new TreeMap<Integer, SPParameter>();
@@ -382,7 +382,7 @@ public class StoredProcedure extends ProcedureContainer
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

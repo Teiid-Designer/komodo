@@ -23,13 +23,13 @@ package org.komodo.spi.query.sql.symbol;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
 
 /**
  *
  */
-public interface IMultipleElementSymbol<E extends IElementSymbol, LV extends ILanguageVisitor>
+public interface IMultipleElementSymbol<E extends IElementSymbol, LV extends LanguageVisitor>
     extends ILanguageObject<LV> {
 
     /**

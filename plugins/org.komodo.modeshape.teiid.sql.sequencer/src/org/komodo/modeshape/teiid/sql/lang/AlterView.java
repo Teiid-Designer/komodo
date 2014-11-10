@@ -22,7 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IAlterView;
@@ -31,7 +31,7 @@ import org.komodo.spi.query.sql.lang.IAlterView;
 /**
  *
  */
-public class AlterView  extends Alter<QueryCommand> implements IAlterView<Expression, LanguageVisitor> {
+public class AlterView  extends Alter<QueryCommand> implements IAlterView<Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -44,7 +44,7 @@ public class AlterView  extends Alter<QueryCommand> implements IAlterView<Expres
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

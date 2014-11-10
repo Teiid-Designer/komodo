@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IXMLQuery;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.query.xquery.saxon.SaxonXQueryExpression;
@@ -15,7 +15,7 @@ import org.teiid.query.xquery.saxon.SaxonXQueryExpression;
 /**
  *
  */
-public class XMLQuery extends SimpleNode implements Expression, IXMLQuery<LanguageVisitor> {
+public class XMLQuery extends SimpleNode implements Expression, IXMLQuery<TCLanguageVisitorImpl> {
 
     private XMLNamespaces namespaces;
 
@@ -139,7 +139,7 @@ public class XMLQuery extends SimpleNode implements Expression, IXMLQuery<Langua
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

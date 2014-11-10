@@ -59,7 +59,7 @@ import org.teiid.query.report.ActivityReport;
 import org.teiid.query.report.ReportItem;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.lang.QueryCommand;
@@ -69,7 +69,7 @@ import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.symbol.Symbol;
 import org.teiid.query.sql.visitor.EvaluatableVisitor;
-import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
+import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.query.validator.DefaultValidator;
 import org.teiid.query.validator.ValidatorFailure;
 import org.teiid.query.validator.ValidatorReport;
@@ -317,9 +317,9 @@ public class MetadataValidator {
 	    						String exprString = c.getNameInSource();
 	    						try {
 		    						Expression ex = queryParser.parseExpression(exprString);
-		    						ResolverVisitor resolverVisitor = new ResolverVisitor(teiidVersion);
+		    						ResolverVisitorImpl resolverVisitor = new ResolverVisitorImpl(teiidVersion);
 									resolverVisitor.resolveLanguageObject(ex, groups, metadata);
-									if (!ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(ex).isEmpty()) {
+									if (!ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(ex).isEmpty()) {
 										log(report, model, Messages.gs(Messages.TEIID.TEIID31114, exprString, fbi.getFullName()));
 									} 
 									EvaluatableVisitor ev = new EvaluatableVisitor(teiidVersion);

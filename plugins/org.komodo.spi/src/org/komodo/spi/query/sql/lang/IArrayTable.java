@@ -21,11 +21,11 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
  */
-public interface IArrayTable<LV extends ILanguageVisitor> extends ITableFunctionReference<LV> {
+public interface IArrayTable<LV extends LanguageVisitor> extends ITableFunctionReference<LV> {
     // No methods required
 }

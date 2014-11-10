@@ -28,7 +28,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.eval.Evaluator;
 import org.teiid.query.metadata.TransformationMetadata;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.resolver.v85.Test85FunctionResolving;
 import org.teiid.query.sql.symbol.Function;
 
@@ -60,7 +60,7 @@ public class Test86FunctionResolving extends Test85FunctionResolving {
         String sql = "func(('a', 'b'))";
 
         Function func = (Function)getQueryParser().parseExpression(sql);
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
         visitor.resolveLanguageObject(func, tm);
         assertEquals(1, func.getArgs().length);
 

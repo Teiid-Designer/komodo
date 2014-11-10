@@ -30,14 +30,14 @@ import java.util.Stack;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.lang.Query;
 import org.teiid.query.sql.symbol.ElementSymbol;
 
 
-public class AbstractValidationVisitor extends LanguageVisitor {
+public class AbstractValidationVisitor extends TCLanguageVisitorImpl {
     
     // Exception handling
     private Exception exception;

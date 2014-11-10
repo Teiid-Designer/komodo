@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IIsNullCriteria;
@@ -31,7 +31,7 @@ import org.komodo.spi.query.sql.lang.IIsNullCriteria;
 /**
  *
  */
-public class IsNullCriteria extends Criteria implements PredicateCriteria, IIsNullCriteria<Expression, LanguageVisitor> {
+public class IsNullCriteria extends Criteria implements PredicateCriteria, IIsNullCriteria<Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -91,7 +91,7 @@ public class IsNullCriteria extends Criteria implements PredicateCriteria, IIsNu
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

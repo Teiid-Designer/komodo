@@ -21,24 +21,22 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.symbol.IFunction;
+import org.komodo.spi.query.sql.symbol.IReference;
 
 /**
  *
  */
-public interface IFunctionCollectorVisitor<LO extends ILanguageObject, F extends IFunction> {
+public interface ReferenceCollectorVisitor<LO extends ILanguageObject, R extends IReference> {
 
     /**
-     * Get the functions from the given language object
+     * Get the references from obj in a collection.
      * 
      * @param obj Language object
-     * @param removeDuplicates remove duplicates
-     * @param deep collect deeply
      * 
-     * @return collection of functions
+     * @return List of {@link IReference}
      */
-    Collection<F> findFunctions(LO obj, boolean deep);
+    List<R> findReferences(LO obj);
 }

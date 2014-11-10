@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 /**
  *
  */
-public interface IOrderByItem<E extends IExpression, LV extends ILanguageVisitor> 
+public interface IOrderByItem<E extends IExpression, LV extends LanguageVisitor> 
     extends ILanguageObject<LV> {
 
     /**

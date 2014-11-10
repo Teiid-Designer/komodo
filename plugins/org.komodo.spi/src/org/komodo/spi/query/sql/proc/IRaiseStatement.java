@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.proc;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
 
 /**
  *
  */
-public interface IRaiseStatement<LV extends ILanguageVisitor, E extends IExpression>
+public interface IRaiseStatement<LV extends LanguageVisitor, E extends IExpression>
     extends IStatement<LV>, IExpressionStatement<E> {
     // No methods required
 }

@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 /**
  *
  */
-public interface IBetweenCriteria<LV extends ILanguageVisitor> extends IPredicateCriteria<LV> {
+public interface IBetweenCriteria<LV extends LanguageVisitor> extends IPredicateCriteria<LV> {
 
     /**
      * Has this been negated

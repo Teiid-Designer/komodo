@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ITableFunctionReference;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
@@ -37,7 +37,7 @@ import org.teiid.query.sql.util.SymbolMap;
  *
  */
 public abstract class TableFunctionReference extends FromClause
-    implements ITableFunctionReference<LanguageVisitor> {
+    implements ITableFunctionReference<TCLanguageVisitorImpl> {
 
     private GroupSymbol symbol;
 

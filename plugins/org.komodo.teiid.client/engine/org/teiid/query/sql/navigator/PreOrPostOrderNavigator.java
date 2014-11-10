@@ -28,7 +28,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.AlterProcedure;
 import org.teiid.query.sql.lang.AlterTrigger;
 import org.teiid.query.sql.lang.AlterView;
@@ -144,7 +144,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
      * @param order
      * @param deep
      */
-    public PreOrPostOrderNavigator(LanguageVisitor visitor, boolean order, boolean deep) {
+    public PreOrPostOrderNavigator(TCLanguageVisitorImpl visitor, boolean order, boolean deep) {
         super(visitor);
         this.order = order;
         this.deep = deep;
@@ -658,7 +658,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
      * NOTE: we specifically don't need to visit the as columns or the using identifiers.
      * These will be resolved by the dynamic command resolver instead.
      * 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.DynamicCommand)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.DynamicCommand)
      */
     @Override
     public void visit(DynamicCommand obj) {
@@ -912,7 +912,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
      * @param visitor
      * @param order
      */
-    public static void doVisit(LanguageObject object, LanguageVisitor visitor, boolean order) {
+    public static void doVisit(LanguageObject object, TCLanguageVisitorImpl visitor, boolean order) {
         doVisit(object, visitor, order, false);
     }
 
@@ -922,7 +922,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
      * @param order
      * @param deep
      */
-    public static void doVisit(LanguageObject object, LanguageVisitor visitor, boolean order, boolean deep) {
+    public static void doVisit(LanguageObject object, TCLanguageVisitorImpl visitor, boolean order, boolean deep) {
         PreOrPostOrderNavigator nav = new PreOrPostOrderNavigator(visitor, order, deep);
         object.acceptVisitor(nav);
     }

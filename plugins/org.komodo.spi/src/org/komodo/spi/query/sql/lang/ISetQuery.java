@@ -22,7 +22,7 @@
 package org.komodo.spi.query.sql.lang;
 
 import java.util.List;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
@@ -31,7 +31,7 @@ public interface ISetQuery<QC extends IQueryCommand,
                                                 O extends IOrderBy,
                                                 Q extends IQuery,
                                                 E extends IExpression, 
-                                                LV extends ILanguageVisitor> extends IQueryCommand<O, Q, E, LV> {
+                                                LV extends LanguageVisitor> extends IQueryCommand<O, Q, E, LV> {
 
     /**
      * Enumerator of types of operation

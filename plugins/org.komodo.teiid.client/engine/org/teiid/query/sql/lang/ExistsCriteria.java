@@ -3,14 +3,14 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IExistsCriteria;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
  */
 public class ExistsCriteria extends Criteria
-    implements PredicateCriteria, SubqueryContainer<QueryCommand>, IExistsCriteria<LanguageVisitor, QueryCommand> {
+    implements PredicateCriteria, SubqueryContainer<QueryCommand>, IExistsCriteria<TCLanguageVisitorImpl, QueryCommand> {
 
     private QueryCommand command;
 
@@ -106,7 +106,7 @@ public class ExistsCriteria extends Criteria
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

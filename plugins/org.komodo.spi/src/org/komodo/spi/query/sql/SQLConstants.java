@@ -26,7 +26,7 @@ package org.komodo.spi.query.sql;
  *
  *
  */
-public interface ISQLConstants {
+public interface SQLConstants {
 
     String EMPTY_STR = ""; //$NON-NLS-1$
     String TAB = "\t"; //$NON-NLS-1$

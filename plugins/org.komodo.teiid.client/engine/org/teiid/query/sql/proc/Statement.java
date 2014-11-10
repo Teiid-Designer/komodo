@@ -3,14 +3,14 @@
 package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IStatement;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
  *
  */
-public abstract class Statement extends SimpleNode implements IStatement<LanguageVisitor> {
+public abstract class Statement extends SimpleNode implements IStatement<TCLanguageVisitorImpl> {
 
     /**
      * Types of statement
@@ -111,7 +111,7 @@ public abstract class Statement extends SimpleNode implements IStatement<Languag
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

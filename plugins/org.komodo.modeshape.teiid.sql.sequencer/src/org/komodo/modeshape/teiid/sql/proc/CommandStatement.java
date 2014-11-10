@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryContainer;
@@ -32,7 +32,7 @@ import org.komodo.spi.query.sql.proc.ICommandStatement;
 /**
  *
  */
-public class CommandStatement extends Statement implements SubqueryContainer<Command>, ICommandStatement<LanguageVisitor, Command> {
+public class CommandStatement extends Statement implements SubqueryContainer<Command>, ICommandStatement<SQLanguageVisitorImpl, Command> {
 
     /**
      * @param p teiid parser
@@ -93,7 +93,7 @@ public class CommandStatement extends Statement implements SubqueryContainer<Com
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

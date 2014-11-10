@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.metadata.TempMetadataID;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.query.sql.symbol.ElementSymbol;
@@ -40,7 +40,7 @@ import org.teiid.query.sql.symbol.Symbol;
  * to TemporaryMetadatID's.
  */
 @SuppressWarnings( {"javadoc"} )
-public class CheckNoTempMetadataIDsVisitor extends LanguageVisitor {
+public class CheckNoTempMetadataIDsVisitor extends TCLanguageVisitorImpl {
 
     private Collection<Symbol> symbolsWithTempMetadataIDs;
     

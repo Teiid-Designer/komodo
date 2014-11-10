@@ -60,7 +60,7 @@ import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.lang.ProcedureContainer;
 import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractTestValidator extends AbstractTest {
@@ -286,7 +286,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Set<String> expectedStrings = new HashSet<String>(Arrays.asList(expectedStringArray));
         Set<String> actualStrings = new HashSet<String>();
         for (LanguageObject obj : actualObjs) {
-            actualStrings.add(SQLStringVisitor.getSQLString(obj));
+            actualStrings.add(SQLStringVisitorImpl.getSQLString(obj));
         }
 
         if (expectedStrings.size() == 0 && actualStrings.size() > 0) {

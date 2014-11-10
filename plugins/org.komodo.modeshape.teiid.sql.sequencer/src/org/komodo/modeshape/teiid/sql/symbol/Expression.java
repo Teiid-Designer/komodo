@@ -22,7 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.symbol;
 
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
 import org.komodo.spi.query.sql.lang.IExpression;
 
@@ -32,7 +32,7 @@ import org.komodo.spi.query.sql.lang.IExpression;
  * types of expressions, such as literal values, element references, and 
  * functions.   
  */
-public interface Expression extends LanguageObject, IExpression<LanguageVisitor> {
+public interface Expression extends LanguageObject, IExpression<SQLanguageVisitorImpl> {
     /**
      * Determine the type returned by this expression.
      * 

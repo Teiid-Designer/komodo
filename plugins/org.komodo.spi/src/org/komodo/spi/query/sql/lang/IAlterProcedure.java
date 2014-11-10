@@ -21,11 +21,11 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
  */
-public interface IAlterProcedure <E extends IExpression, LV extends ILanguageVisitor> extends IAlter<E, LV> {
+public interface IAlterProcedure <E extends IExpression, LV extends LanguageVisitor> extends IAlter<E, LV> {
     // No methods required
 }

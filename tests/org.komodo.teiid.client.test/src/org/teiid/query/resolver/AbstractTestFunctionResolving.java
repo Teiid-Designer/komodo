@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.Function;
@@ -51,7 +51,7 @@ public abstract class AbstractTestFunctionResolving extends AbstractTest {
         e1.setMetadataID(new Object());
         Function function = getFactory().newFunction("abs", new Expression[] {e1}); //$NON-NLS-1$
 
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
         visitor.resolveLanguageObject(function, getMetadataFactory().example1Cached());
 
         assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), function.getType());
@@ -63,7 +63,7 @@ public abstract class AbstractTestFunctionResolving extends AbstractTest {
                                          "convert", new Expression[] { //$NON-NLS-1$
                                              getFactory().newReference(0), getFactory().newConstant(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId())});
 
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
         visitor.resolveLanguageObject(function, getMetadataFactory().example1Cached());
 
         assertEquals(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass(), function.getType());
@@ -121,7 +121,7 @@ public abstract class AbstractTestFunctionResolving extends AbstractTest {
     public Expression getExpression(String sql)
         throws Exception {
         Expression func = getQueryParser().parseExpression(sql);
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
         visitor.resolveLanguageObject(func, getMetadataFactory().example1Cached());
         return func;
     }

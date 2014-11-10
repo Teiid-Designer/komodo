@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.Collection;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IUnaryFromClause;
@@ -32,7 +32,7 @@ import org.komodo.spi.query.sql.lang.IUnaryFromClause;
 /**
  *
  */
-public class UnaryFromClause extends FromClause implements IUnaryFromClause<GroupSymbol, LanguageVisitor> {
+public class UnaryFromClause extends FromClause implements IUnaryFromClause<GroupSymbol, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -97,7 +97,7 @@ public class UnaryFromClause extends FromClause implements IUnaryFromClause<Grou
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

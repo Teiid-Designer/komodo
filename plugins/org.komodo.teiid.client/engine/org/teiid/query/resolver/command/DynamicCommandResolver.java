@@ -34,7 +34,7 @@ import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.CommandResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.DynamicCommand;
@@ -84,7 +84,7 @@ public class DynamicCommandResolver extends CommandResolver {
             }
         }
         
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidParser().getVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidParser().getVersion());
         visitor.resolveLanguageObject(dynamicCmd, groups, dynamicCmd.getExternalGroupContexts(), metadata);
         String sqlType = getDataTypeManager().getDataTypeName(dynamicCmd.getSql().getType());
         String targetType = DefaultDataTypeManager.DefaultDataTypes.STRING.getId();

@@ -8,7 +8,7 @@ import java.util.List;
 import org.komodo.spi.query.sql.lang.IXMLTable;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.DerivedColumn;
@@ -18,7 +18,7 @@ import org.teiid.query.xquery.saxon.SaxonXQueryExpression;
 /**
  *
  */
-public class XMLTable extends TableFunctionReference implements IXMLTable<LanguageVisitor> {
+public class XMLTable extends TableFunctionReference implements IXMLTable<TCLanguageVisitorImpl> {
 
     private List<XMLColumn> columns = new ArrayList<XMLColumn>();
 
@@ -180,7 +180,7 @@ public class XMLTable extends TableFunctionReference implements IXMLTable<Langua
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

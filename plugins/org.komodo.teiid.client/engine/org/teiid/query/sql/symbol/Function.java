@@ -8,7 +8,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.symbol.IFunction;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.function.TCFunctionDescriptor;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
@@ -16,7 +16,7 @@ import org.teiid.query.sql.lang.SimpleNode;
 /**
  *
  */
-public class Function extends SimpleNode implements Expression, IFunction<TCFunctionDescriptor, LanguageVisitor> {
+public class Function extends SimpleNode implements Expression, IFunction<TCFunctionDescriptor, TCLanguageVisitorImpl> {
 
     private Class<?> type;
 
@@ -223,7 +223,7 @@ public class Function extends SimpleNode implements Expression, IFunction<TCFunc
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

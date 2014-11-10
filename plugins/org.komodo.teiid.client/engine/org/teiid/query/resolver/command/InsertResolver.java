@@ -42,7 +42,7 @@ import org.teiid.query.resolver.ProcedureContainerResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.VariableResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.GroupContext;
@@ -166,7 +166,7 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
         if (elements == null || elements.isEmpty())
             return;
 
-        ResolverVisitor visitor = new ResolverVisitor(elements.iterator().next().getTeiidVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(elements.iterator().next().getTeiidVersion());
         for (Iterator<? extends Expression> i = elements.iterator(); i.hasNext();) {
             Expression expr = i.next();
             visitor.resolveLanguageObject(expr, groups, externalGroups, metadata);

@@ -5,7 +5,7 @@ package org.teiid.query.sql.lang;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IWithQueryCommand;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -14,7 +14,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
  *
  */
 public class WithQueryCommand extends SimpleNode
-    implements SubqueryContainer<QueryCommand>, IWithQueryCommand<LanguageVisitor, QueryCommand> {
+    implements SubqueryContainer<QueryCommand>, IWithQueryCommand<TCLanguageVisitorImpl, QueryCommand> {
 
     private GroupSymbol groupSymbol;
 
@@ -112,7 +112,7 @@ public class WithQueryCommand extends SimpleNode
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

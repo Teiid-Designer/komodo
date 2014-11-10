@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.komodo.spi.query.sql.IGroupsUsedByElementsVisitor;
+import org.komodo.spi.query.sql.GroupsUsedByElementsVisitor;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -35,8 +35,8 @@ import org.teiid.query.sql.symbol.GroupSymbol;
 /**
  * groups used by elements visitor
  */
-public class GroupsUsedByElementsVisitor
-    implements IGroupsUsedByElementsVisitor<LanguageObject, GroupSymbol> {
+public class GroupsUsedByElementsVisitorImpl
+    implements GroupsUsedByElementsVisitor<LanguageObject, GroupSymbol> {
 
     /**
      * Helper to quickly get the groups from obj in the elements collection
@@ -44,7 +44,7 @@ public class GroupsUsedByElementsVisitor
      * @param groups Collection to collect groups in
      */
     public static final void getGroups(LanguageObject obj, Collection<GroupSymbol> groups) {
-        Collection<ElementSymbol> elements = ElementCollectorVisitor.getElements(obj, true);
+        Collection<ElementSymbol> elements = ElementCollectorVisitorImpl.getElements(obj, true);
 
         for (ElementSymbol elementSymbol : elements) {
         	if (elementSymbol.getGroupSymbol() != null) {
@@ -86,7 +86,7 @@ public class GroupsUsedByElementsVisitor
                 ElementSymbol elem = (ElementSymbol) languageObject;
                 groups.add(elem.getGroupSymbol());
             } else {
-                GroupsUsedByElementsVisitor.getGroups(languageObject, groups);
+                GroupsUsedByElementsVisitorImpl.getGroups(languageObject, groups);
             }
         }
     }
@@ -102,7 +102,7 @@ public class GroupsUsedByElementsVisitor
                 ElementSymbol elem = (ElementSymbol) languageObject;
                 groups.add(elem.getGroupSymbol());
             } else {
-                GroupsUsedByElementsVisitor.getGroups(languageObject, groups);
+                GroupsUsedByElementsVisitorImpl.getGroups(languageObject, groups);
             }
         }
     }
@@ -112,7 +112,7 @@ public class GroupsUsedByElementsVisitor
      * @param groups
      */
     public void findGroups(LanguageObject obj, Collection<GroupSymbol> groups) {
-        Collection<ElementSymbol> elements = ElementCollectorVisitor.getElements(obj, true);
+        Collection<ElementSymbol> elements = ElementCollectorVisitorImpl.getElements(obj, true);
 
         for (ElementSymbol elementSymbol : elements) {
             if (elementSymbol.getGroupSymbol() != null) {

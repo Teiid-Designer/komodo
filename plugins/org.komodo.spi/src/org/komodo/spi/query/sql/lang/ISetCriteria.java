@@ -23,12 +23,12 @@ package org.komodo.spi.query.sql.lang;
 
 import java.util.Collection;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
  */
-public interface ISetCriteria<E extends IExpression, LV extends ILanguageVisitor>
+public interface ISetCriteria<E extends IExpression, LV extends LanguageVisitor>
     extends IPredicateCriteria<LV> {
 
     /**

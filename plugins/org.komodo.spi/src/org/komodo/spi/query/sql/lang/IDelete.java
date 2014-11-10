@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
 
@@ -31,7 +31,7 @@ import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 public interface IDelete<C extends ICriteria, 
                                            G extends IGroupSymbol,
                                            E extends IExpression,
-                                           LV extends ILanguageVisitor> extends IProcedureContainer<E, LV> {
+                                           LV extends LanguageVisitor> extends IProcedureContainer<E, LV> {
 
     /**
      * Returns the group being deleted from

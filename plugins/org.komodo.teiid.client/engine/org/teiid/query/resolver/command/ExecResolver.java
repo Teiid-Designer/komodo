@@ -42,7 +42,7 @@ import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.ProcedureContainerResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.GroupContext;
 import org.teiid.query.sql.lang.ProcedureContainer;
@@ -53,7 +53,7 @@ import org.teiid.query.sql.symbol.Array;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
+import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
@@ -443,13 +443,13 @@ public class ExecResolver extends ProcedureContainerResolver {
             if(expr == null) {
             	continue;
             }
-            for (SubqueryContainer<?> container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(expr)) {
+            for (SubqueryContainer<?> container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(expr)) {
                 getQueryResolver().setChildMetadata(container.getCommand(), command);
                 
                 getQueryResolver().resolveCommand(container.getCommand(), metadata.getMetadata());
             }
             try {
-            	ResolverVisitor visitor = new ResolverVisitor(expr.getTeiidVersion());
+            	ResolverVisitorImpl visitor = new ResolverVisitorImpl(expr.getTeiidVersion());
             	visitor.resolveLanguageObject(expr, null, externalGroups, metadata);
             } catch (Exception e) {
             	if (!checkForArray(param, expr)) {

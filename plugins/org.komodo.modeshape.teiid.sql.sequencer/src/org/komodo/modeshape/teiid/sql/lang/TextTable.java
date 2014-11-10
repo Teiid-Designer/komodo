@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ITextTable;
@@ -32,7 +32,7 @@ import org.komodo.spi.query.sql.lang.ITextTable;
 /**
  *
  */
-public class TextTable extends TableFunctionReference implements ITextTable<LanguageVisitor> {
+public class TextTable extends TableFunctionReference implements ITextTable<SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -204,7 +204,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

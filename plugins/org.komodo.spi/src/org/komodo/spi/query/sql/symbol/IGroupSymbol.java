@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.symbol;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 /**
  *
  */
-public interface IGroupSymbol<LV extends ILanguageVisitor> extends ISymbol<LV>{
+public interface IGroupSymbol<LV extends LanguageVisitor> extends ISymbol<LV>{
 
 
     /**

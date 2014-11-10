@@ -5,14 +5,14 @@ package org.teiid.query.sql.lang;
 import javax.script.CompiledScript;
 
 import org.komodo.spi.query.sql.lang.IObjectColumn;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
  *
  */
-public class ObjectColumn extends ProjectedColumn implements IObjectColumn<LanguageVisitor> {
+public class ObjectColumn extends ProjectedColumn implements IObjectColumn<TCLanguageVisitorImpl> {
 
     private String path;
 
@@ -96,7 +96,7 @@ public class ObjectColumn extends ProjectedColumn implements IObjectColumn<Langu
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

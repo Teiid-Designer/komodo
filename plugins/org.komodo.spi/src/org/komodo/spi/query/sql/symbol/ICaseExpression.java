@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.symbol;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
 
 /**
  *
  */
-public interface ICaseExpression<LV extends ILanguageVisitor> extends IExpression<LV> {
+public interface ICaseExpression<LV extends LanguageVisitor> extends IExpression<LV> {
 
     IExpression getExpression();
 

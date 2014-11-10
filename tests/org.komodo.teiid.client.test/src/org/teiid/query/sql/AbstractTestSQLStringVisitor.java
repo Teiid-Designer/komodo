@@ -80,7 +80,7 @@ import org.teiid.query.sql.symbol.Function;
 import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.symbol.ScalarSubquery;
 import org.teiid.query.sql.symbol.SearchedCaseExpression;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 import org.teiid.query.unittest.RealMetadataFactory;
 
 /**
@@ -102,7 +102,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
     // ################################## TEST HELPERS ################################ 
 
     protected void helpTest(LanguageObject obj, String expectedStr) {
-        String actualStr = SQLStringVisitor.getSQLString(obj);
+        String actualStr = SQLStringVisitorImpl.getSQLString(obj);
         assertEquals("Expected and actual strings don't match: ", expectedStr, actualStr);
     }
 
@@ -185,8 +185,8 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
 
     @Test
     public void testNull() {
-        String sql = SQLStringVisitor.getSQLString(null);
-        assertEquals("Incorrect string for null object", SQLStringVisitor.UNDEFINED, sql);
+        String sql = SQLStringVisitorImpl.getSQLString(null);
+        assertEquals("Incorrect string for null object", SQLStringVisitorImpl.UNDEFINED, sql);
     }
 
     @Test

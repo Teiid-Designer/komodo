@@ -35,7 +35,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public abstract class AbstractTestAlterValidation extends AbstractTest {
@@ -87,7 +87,7 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
         Set<String> expectedStrings = new HashSet<String>(Arrays.asList(expectedStringArray));
         Set<String> actualStrings = new HashSet<String>();
         for (LanguageObject obj : actualObjs) {
-            actualStrings.add(SQLStringVisitor.getSQLString(obj));
+            actualStrings.add(SQLStringVisitorImpl.getSQLString(obj));
         }
 
         if (expectedStrings.size() == 0 && actualStrings.size() > 0) {

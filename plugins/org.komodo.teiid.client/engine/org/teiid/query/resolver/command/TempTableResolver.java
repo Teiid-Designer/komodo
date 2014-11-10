@@ -35,7 +35,7 @@ import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.resolver.CommandResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Create;
 import org.teiid.query.sql.lang.Drop;
@@ -94,7 +94,7 @@ public class TempTableResolver extends CommandResolver {
             ResolverUtil.resolveGroup(create.getTable(), metadata);
             Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
             groups.add(create.getTable());
-            ResolverVisitor visitor = new ResolverVisitor(command.getTeiidVersion());
+            ResolverVisitorImpl visitor = new ResolverVisitorImpl(command.getTeiidVersion());
             visitor.resolveLanguageObject(command, groups, metadata);
             addAdditionalMetadata(create, tempTable);
             tempTable.setOriginalMetadataID(create.getTableMetadata());

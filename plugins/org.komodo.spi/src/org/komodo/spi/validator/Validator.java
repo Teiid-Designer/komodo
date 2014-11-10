@@ -24,14 +24,14 @@ package org.komodo.spi.validator;
 import java.util.Collection;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
 
 /**
  *
  * @param <L> 
  */
-public interface Validator<L extends ILanguageObject<? extends ILanguageVisitor>> {
+public interface Validator<L extends ILanguageObject<? extends LanguageVisitor>> {
     
     /**
      *

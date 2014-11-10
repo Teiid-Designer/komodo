@@ -3,7 +3,7 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.ISetClause;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
@@ -11,7 +11,7 @@ import org.teiid.query.sql.symbol.Expression;
 /**
  *
  */
-public class SetClause extends SimpleNode implements ISetClause<LanguageVisitor> {
+public class SetClause extends SimpleNode implements ISetClause<TCLanguageVisitorImpl> {
 
     private ElementSymbol symbol;
 
@@ -79,7 +79,7 @@ public class SetClause extends SimpleNode implements ISetClause<LanguageVisitor>
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

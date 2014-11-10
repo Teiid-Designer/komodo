@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IDynamicCommand;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
@@ -16,7 +16,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
 /**
  *
  */
-public class DynamicCommand extends Command implements IDynamicCommand<Expression, LanguageVisitor> {
+public class DynamicCommand extends Command implements IDynamicCommand<Expression, TCLanguageVisitorImpl> {
 
     private Expression sql;
     
@@ -200,7 +200,7 @@ public class DynamicCommand extends Command implements IDynamicCommand<Expressio
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

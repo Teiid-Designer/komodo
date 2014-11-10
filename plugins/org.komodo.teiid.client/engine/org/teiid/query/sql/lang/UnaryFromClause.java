@@ -5,14 +5,14 @@ package org.teiid.query.sql.lang;
 import java.util.Collection;
 
 import org.komodo.spi.query.sql.lang.IUnaryFromClause;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
 /**
  *
  */
-public class UnaryFromClause extends FromClause implements IUnaryFromClause<GroupSymbol, LanguageVisitor> {
+public class UnaryFromClause extends FromClause implements IUnaryFromClause<GroupSymbol, TCLanguageVisitorImpl> {
 
     private GroupSymbol groupSymbol;
     
@@ -87,7 +87,7 @@ public class UnaryFromClause extends FromClause implements IUnaryFromClause<Grou
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

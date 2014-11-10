@@ -17,7 +17,7 @@ import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.PropertiesUtils;
 import org.teiid.query.function.FunctionMethods;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
@@ -26,7 +26,7 @@ import org.teiid.runtime.client.Messages;
 /**
  *
  */
-public class Constant extends SimpleNode implements Expression, IConstant<LanguageVisitor> {
+public class Constant extends SimpleNode implements Expression, IConstant<TCLanguageVisitorImpl> {
 
     private Class<?> type = DefaultDataTypeManager.DefaultDataTypes.NULL.getTypeClass();
 
@@ -281,7 +281,7 @@ public class Constant extends SimpleNode implements Expression, IConstant<Langua
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

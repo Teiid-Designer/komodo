@@ -5,7 +5,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.Collection;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
@@ -19,7 +19,7 @@ import org.komodo.spi.query.sql.lang.IFromClause;
  * and may contain criteria.
  */
 public abstract class FromClause extends ASTNode
-    implements IFromClause<LanguageVisitor>, TeiidSQLConstants.Reserved {
+    implements IFromClause<SQLanguageVisitorImpl>, TeiidSQLConstants.Reserved {
 
     /**
      * @param p teiid parser
@@ -171,7 +171,7 @@ public abstract class FromClause extends ASTNode
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

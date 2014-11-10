@@ -6,7 +6,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.proc.IRaiseStatement;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -15,7 +15,7 @@ import org.teiid.query.sql.symbol.Expression;
  */
 @Since(Version.TEIID_8_0)
 public class RaiseStatement extends Statement
-    implements ExpressionStatement, IRaiseStatement<LanguageVisitor, Expression> {
+    implements ExpressionStatement, IRaiseStatement<TCLanguageVisitorImpl, Expression> {
 
     private Expression expression;
 
@@ -98,7 +98,7 @@ public class RaiseStatement extends Statement
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

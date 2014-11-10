@@ -64,7 +64,7 @@ import org.teiid.metadata.Table;
 import org.teiid.query.eval.Evaluator;
 import org.teiid.query.function.FunctionMethods;
 import org.teiid.query.function.source.XMLSystemFunctions;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.ProcedureContainerResolver;
 import org.teiid.query.resolver.TCQueryResolver;
@@ -153,15 +153,15 @@ import org.teiid.query.sql.symbol.XMLNamespaces;
 import org.teiid.query.sql.symbol.XMLParse;
 import org.teiid.query.sql.symbol.XMLQuery;
 import org.teiid.query.sql.symbol.XMLSerialize;
-import org.teiid.query.sql.visitor.AggregateSymbolCollectorVisitor;
-import org.teiid.query.sql.visitor.AggregateSymbolCollectorVisitor.AggregateStopNavigator;
-import org.teiid.query.sql.visitor.ElementCollectorVisitor;
+import org.teiid.query.sql.visitor.AggregateSymbolCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.AggregateSymbolCollectorVisitorImpl.AggregateStopNavigator;
+import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
 import org.teiid.query.sql.visitor.EvaluatableVisitor;
-import org.teiid.query.sql.visitor.FunctionCollectorVisitor;
-import org.teiid.query.sql.visitor.GroupCollectorVisitor;
-import org.teiid.query.sql.visitor.GroupsUsedByElementsVisitor;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
-import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
+import org.teiid.query.sql.visitor.FunctionCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.GroupCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.GroupsUsedByElementsVisitorImpl;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
+import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
 import org.teiid.query.xquery.saxon.SaxonXQueryExpression;
 import org.teiid.runtime.client.Messages;
@@ -171,7 +171,7 @@ import org.teiid.translator.SourceSystemFunctions;
 /**
  *
  */
-public class ValidationVisitor extends AbstractValidationVisitor {
+public class ValidationVisitorImpl extends AbstractValidationVisitor {
 
     private static final class PositiveIntegerConstraint implements Reference.Constraint {
     	
@@ -197,14 +197,14 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     private boolean inQuery;
 
 	// update procedure being validated
-	private ICreateProcedureCommand<Block, GroupSymbol, Expression, LanguageVisitor> createProc;
+	private ICreateProcedureCommand<Block, GroupSymbol, Expression, TCLanguageVisitorImpl> createProc;
 
 	private final DefaultDataTypeManager dataTypeManager;
 
 	/**
      * @param teiidVersion
      */
-    public ValidationVisitor(TeiidVersion teiidVersion) {
+    public ValidationVisitorImpl(TeiidVersion teiidVersion) {
         super(teiidVersion);
         dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
     }
@@ -258,7 +258,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
         List<Expression> groupBySymbols = obj.getSymbols();
         validateSortable(groupBySymbols);
         for (Expression expr : groupBySymbols) {
-            if (!ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(expr).isEmpty() || expr instanceof Constant || expr instanceof Reference) {
+            if (!ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(expr).isEmpty() || expr instanceof Constant || expr instanceof Reference) {
             	handleValidationError(Messages.getString(Messages.ValidationVisitor.groupby_subquery, expr), expr);
             }
 		}
@@ -337,7 +337,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
             //if it is select with no from, should not have ScalarSubQuery
             if(obj.getSelect() != null && obj.getFrom() == null){
-                if(!ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(obj.getSelect()).isEmpty()){
+                if(!ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(obj.getSelect()).isEmpty()){
                     handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0067),obj);
                 }
             }
@@ -422,7 +422,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     	if(FunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(obj.getName())) {
     		try {
 				ResolverUtil.ResolvedLookup resolvedLookup = ResolverUtil.resolveLookup(obj, getMetadata());
-				if(ValidationVisitor.isNonComparable(resolvedLookup.getKeyElement())) {
+				if(ValidationVisitorImpl.isNonComparable(resolvedLookup.getKeyElement())) {
 		            handleValidationError(Messages.getString(Messages.ValidationVisitor.invalid_lookup_key, resolvedLookup.getKeyElement()), resolvedLookup.getKeyElement());            
 		        }
 			} catch (Exception e) {
@@ -437,7 +437,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
                     handleValidationError(Messages.getString(Messages.ERR.ERR_015_004_0036), obj); 
                 }
                 
-                for (Iterator<Function> functions = FunctionCollectorVisitor.getFunctions(obj.getArg(1), false).iterator(); functions.hasNext();) {
+                for (Iterator<Function> functions = FunctionCollectorVisitorImpl.getFunctions(obj.getArg(1), false).iterator(); functions.hasNext();) {
                     Function function = functions.next();
                     
                     if (FunctionLibrary.FunctionName.CONTEXT.equalsIgnoreCase(function.getName())) {
@@ -569,7 +569,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     protected void validateContainsRowsUpdatedVariable(CreateUpdateProcedureCommand obj) {
         final Collection<ElementSymbol> assignVars = new ArrayList<ElementSymbol>();
        // Use visitor to find assignment statements
-        LanguageVisitor visitor = new LanguageVisitor(getTeiidVersion()) {
+        TCLanguageVisitorImpl visitor = new TCLanguageVisitorImpl(getTeiidVersion()) {
             @Override
             public void visit(AssignmentStatement stmt) {
                 assignVars.add(stmt.getVariable());
@@ -594,7 +594,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
         if(!obj.isUpdateProcedure()){
             
             //check that the procedure does not contain references to itself
-            if (GroupCollectorVisitor.getGroups(obj,true).contains(obj.getVirtualGroup())) {
+            if (GroupCollectorVisitorImpl.getGroups(obj,true).contains(obj.getVirtualGroup())) {
                 handleValidationError(Messages.getString(Messages.ValidationVisitor.Procedure_has_group_self_reference),obj);
             }
             
@@ -610,7 +610,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     public void visit(CreateProcedureCommand obj) {
         //check that the procedure does not contain references to itself
     	if (obj.getUpdateType() == ICommand.TYPE_UNKNOWN) {
-	        if (GroupCollectorVisitor.getGroups(obj,true).contains(obj.getVirtualGroup())) {
+	        if (GroupCollectorVisitorImpl.getGroups(obj,true).contains(obj.getVirtualGroup())) {
 	        	handleValidationError(Messages.getString(Messages.ValidationVisitor.Procedure_has_group_self_reference),obj);
 	        }
 	        if (obj.getResultSetColumns() != null) {
@@ -652,7 +652,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
             Iterator critIter = obj.getTranslations().iterator();
             while(critIter.hasNext()) {
                 CompareCriteria transCrit = (CompareCriteria) critIter.next();
-                Collection<ElementSymbol> leftElmnts = ElementCollectorVisitor.getElements(transCrit.getLeftExpression(), true);
+                Collection<ElementSymbol> leftElmnts = ElementCollectorVisitorImpl.getElements(transCrit.getLeftExpression(), true);
                 // there is always only one element
                 ElementSymbol leftExpr = leftElmnts.iterator().next();
 
@@ -673,9 +673,9 @@ public class ValidationVisitor extends AbstractValidationVisitor {
         if (isXML) {
             // Collect all occurrances of rowlimit and rowlimitexception functions
             List<Function> rowLimitFunctions = new ArrayList<Function>();
-            FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
+            FunctionCollectorVisitorImpl visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
             PreOrderNavigator.doVisit(obj, visitor); 
-            visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
+            visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
             PreOrderNavigator.doVisit(obj, visitor);
             final int functionCount = rowLimitFunctions.size();
             if (functionCount > 0) {
@@ -743,8 +743,8 @@ public class ValidationVisitor extends AbstractValidationVisitor {
             return;
         }
 
-        Collection<ElementSymbol> transleElmnts = ElementCollectorVisitor.getElements(obj, true);
-        Collection<GroupSymbol> groups = GroupCollectorVisitor.getGroups(this.currentCommand, true);
+        Collection<ElementSymbol> transleElmnts = ElementCollectorVisitorImpl.getElements(obj, true);
+        Collection<GroupSymbol> groups = GroupCollectorVisitorImpl.getGroups(this.currentCommand, true);
         Operator selectType = obj.getSelector().getSelectorType();
 
         for (Criteria predCrit : Criteria.separateCriteriaByAnd(userCrit)) {
@@ -772,7 +772,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
                     }
                 }
             }
-            Iterator<ElementSymbol> critEmlntIter = ElementCollectorVisitor.getElements(predCrit, true).iterator();
+            Iterator<ElementSymbol> critEmlntIter = ElementCollectorVisitorImpl.getElements(predCrit, true).iterator();
             // collect all elements elements on the criteria map to
             while(critEmlntIter.hasNext()) {
                 ElementSymbol criteriaElement = critEmlntIter.next();
@@ -782,7 +782,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
                         handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0022, criteriaElement), criteriaElement);
                     }
 
-                    if (!groups.containsAll(GroupsUsedByElementsVisitor.getGroups(mappedExpr))) {
+                    if (!groups.containsAll(GroupsUsedByElementsVisitorImpl.getGroups(mappedExpr))) {
                         handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0023, criteriaElement), criteriaElement);
                     }
                 }
@@ -795,7 +795,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     		return;
     	}
 
-        Collection<ElementSymbol> elements = ElementCollectorVisitor.getElements(obj, true);
+        Collection<ElementSymbol> elements = ElementCollectorVisitorImpl.getElements(obj, true);
         
         Collection<ElementSymbol> cantSelect = validateElementsSupport(
             elements,
@@ -882,7 +882,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     	try {
 	    	if(! getMetadata().groupSupports(groupSymbol.getMetadataID(), SupportConstants.Group.UPDATE)) {
 	            handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0033, 
-	                                                     SQLStringVisitor.getSQLString(groupSymbol)), groupSymbol);
+	                                                     SQLStringVisitorImpl.getSQLString(groupSymbol)), groupSymbol);
 	        }
 	    } catch (Exception e) {
 	        handleException(e, groupSymbol);
@@ -936,14 +936,14 @@ public class ValidationVisitor extends AbstractValidationVisitor {
         LinkedList<AggregateSymbol> aggs = new LinkedList<AggregateSymbol>();
         if (having != null) {
             validateCorrelatedReferences(query, correlationGroups, groupSymbols, having, invalid);
-        	AggregateSymbolCollectorVisitor.getAggregates(having, aggs, invalid, null, invalidWindowFunctions, groupSymbols);
+        	AggregateSymbolCollectorVisitorImpl.getAggregates(having, aggs, invalid, null, invalidWindowFunctions, groupSymbols);
         	hasAgg = true;
         }
         for (Expression symbol : select.getProjectedSymbols()) {
         	if (hasAgg || !aggs.isEmpty()) {
         		validateCorrelatedReferences(query, correlationGroups, groupSymbols, symbol, invalid);
         	}
-        	AggregateSymbolCollectorVisitor.getAggregates(symbol, aggs, invalid, null, null, groupSymbols);                                            
+        	AggregateSymbolCollectorVisitorImpl.getAggregates(symbol, aggs, invalid, null, null, groupSymbols);                                            
         }
         if ((!aggs.isEmpty() || hasAgg) && !invalid.isEmpty()) {
     		handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0037, invalid), invalid);
@@ -962,7 +962,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 		if (query.getFrom() == null) {
 			return;
 		}
-		ElementCollectorVisitor ecv = new ElementCollectorVisitor(getTeiidVersion(), invalid) {
+		ElementCollectorVisitorImpl ecv = new ElementCollectorVisitorImpl(getTeiidVersion(), invalid) {
 			@Override
             public void visit(ElementSymbol obj) {
 				if (obj.isExternalReference() && correlationGroups.contains(obj.getGroupSymbol())
@@ -980,7 +980,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
         	return;
         }
 		LinkedHashSet<Expression> aggs = new LinkedHashSet<Expression>();
-		AggregateSymbolCollectorVisitor.getAggregates(clause, aggs, null, null, aggs, null);
+		AggregateSymbolCollectorVisitorImpl.getAggregates(clause, aggs, null, null, aggs, null);
 		if (!aggs.isEmpty()) {
 			handleValidationError(Messages.getString(Messages.TeiidParser.Aggregate_only_top_level, aggs), aggs);
 		}
@@ -1089,7 +1089,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
                 if(value instanceof Constant) {
     			    // If value is null, check that element supports this as a nullable column
                     if(((Constant)value).getValue() == null && ! getMetadata().elementSupports(elementID.getMetadataID(), SupportConstants.Element.NULL)) {
-                        handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0060, SQLStringVisitor.getSQLString(elementID)), elementID);
+                        handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0060, SQLStringVisitorImpl.getSQLString(elementID)), elementID);
                     }// end of if
                 } 
 		    }
@@ -1165,9 +1165,9 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     private void validateRowLimitFunctionNotInInvalidCriteria(Criteria obj) {
         // Collect all occurrances of rowlimit and rowlimitexception functions
         List<Function> rowLimitFunctions = new ArrayList<Function>();
-        FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
+        FunctionCollectorVisitorImpl visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
         PreOrderNavigator.doVisit(obj, visitor);      
-        visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
+        visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
         PreOrderNavigator.doVisit(obj, visitor); 
         if (rowLimitFunctions.size() > 0) {
             handleValidationError(Messages.getString(Messages.ValidationVisitor.rowlimit3), obj);
@@ -1175,7 +1175,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     }
     
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.BetweenCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.BetweenCriteria)
      *
      */
     @Override
@@ -1187,7 +1187,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     }
 
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.IsNullCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.IsNullCriteria)
      *
      */
     @Override
@@ -1196,7 +1196,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     }
 
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.MatchCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.MatchCriteria)
      *
      */
     @Override
@@ -1205,7 +1205,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     }
 
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.NotCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.NotCriteria)
      *
      */
     @Override
@@ -1214,7 +1214,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     }
 
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.SetCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SetCriteria)
      *
      */
     @Override
@@ -1226,7 +1226,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     }
 
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.SubqueryCompareCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SubqueryCompareCriteria)
      *
      */
     @Override
@@ -1260,7 +1260,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     }
     
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.DynamicCommand)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.DynamicCommand)
      */
     @Override
     public void visit(DynamicCommand obj) {
@@ -1286,7 +1286,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
     }
     
     /** 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.Drop)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.Drop)
      */
     @Override
     public void visit(Drop drop) {
@@ -1313,9 +1313,9 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 
         // Collect all occurrences of rowlimit function
         List rowLimitFunctions = new ArrayList();
-        FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
+        FunctionCollectorVisitorImpl visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
         PreOrderNavigator.doVisit(obj, visitor);   
-        visitor = new FunctionCollectorVisitor(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
+        visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
         PreOrderNavigator.doVisit(obj, visitor);            
         final int functionCount = rowLimitFunctions.size();
         if (functionCount > 0) {
@@ -1532,10 +1532,10 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 	}
 
 	private void validateNoSubqueriesOrOuterReferences(Expression expr) {
-		if (!ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(expr).isEmpty()) {
+		if (!ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(expr).isEmpty()) {
 			handleValidationError(Messages.getString(Messages.ValidationVisitor.filter_subquery, expr), expr);
 		}
-		for (ElementSymbol es : ElementCollectorVisitor.getElements(expr, false)) {
+		for (ElementSymbol es : ElementCollectorVisitorImpl.getElements(expr, false)) {
 			if (es.isExternalReference()) {
 				handleValidationError(Messages.getString(Messages.ValidationVisitor.filter_subquery, es), es);
 			}
@@ -1546,7 +1546,7 @@ public class ValidationVisitor extends AbstractValidationVisitor {
 		// Check for any nested aggregates (which are not allowed)
         if(aggExp != null) {
         	HashSet<Expression> nestedAggs = new LinkedHashSet<Expression>();
-            AggregateSymbolCollectorVisitor.getAggregates(aggExp, nestedAggs, null, null, nestedAggs, null);
+            AggregateSymbolCollectorVisitorImpl.getAggregates(aggExp, nestedAggs, null, null, nestedAggs, null);
             if(!nestedAggs.isEmpty()) {
                 handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0039, nestedAggs), nestedAggs);
             }

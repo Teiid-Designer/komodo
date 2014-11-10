@@ -22,12 +22,12 @@
 package org.komodo.spi.query.sql.lang;
 
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
  */
-public interface IJoinType <LV extends ILanguageVisitor> extends ILanguageObject<LV>, StringConstants {
+public interface IJoinType <LV extends LanguageVisitor> extends ILanguageObject<LV>, StringConstants {
 
     /**
      * Delineation of the category of join type

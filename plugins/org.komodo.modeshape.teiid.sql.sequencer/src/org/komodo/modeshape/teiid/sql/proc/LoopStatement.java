@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Labeled;
@@ -33,7 +33,7 @@ import org.komodo.spi.query.sql.proc.ILoopStatement;
 /**
  *
  */
-public class LoopStatement extends Statement implements Labeled, SubqueryContainer<Command>, ILoopStatement<LanguageVisitor, Command> {
+public class LoopStatement extends Statement implements Labeled, SubqueryContainer<Command>, ILoopStatement<SQLanguageVisitorImpl, Command> {
 
     /**
      * @param p teiid parser
@@ -127,7 +127,7 @@ public class LoopStatement extends Statement implements Labeled, SubqueryContain
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -25,7 +25,7 @@ package org.teiid.query.sql.navigator;
 import java.util.Collection;
 import java.util.List;
 import java.util.RandomAccess;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.LanguageObject;
 
 
@@ -33,14 +33,14 @@ import org.teiid.query.sql.lang.LanguageObject;
 /** 
  * abstract parent class of navigators
  */
-public class AbstractNavigator extends LanguageVisitor {
+public class AbstractNavigator extends TCLanguageVisitorImpl {
 
-    private LanguageVisitor visitor;
+    private TCLanguageVisitorImpl visitor;
     
     /**
      * @param visitor
      */
-    public AbstractNavigator(LanguageVisitor visitor) {
+    public AbstractNavigator(TCLanguageVisitorImpl visitor) {
         super(visitor.getTeiidVersion());
         this.visitor = visitor;
     }
@@ -48,7 +48,7 @@ public class AbstractNavigator extends LanguageVisitor {
     /**
      * @return internal vistor
      */
-    public LanguageVisitor getVisitor() {
+    public TCLanguageVisitorImpl getVisitor() {
         return this.visitor;
     }
 

@@ -23,14 +23,14 @@ package org.komodo.spi.query.sql.lang;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 
 /**
  *
  */
-public interface ICompoundCriteria<C extends ICriteria, LV extends ILanguageVisitor> 
+public interface ICompoundCriteria<C extends ICriteria, LV extends LanguageVisitor> 
     extends ILogicalCriteria<LV> {
 
     /** Constant indicating the logical "or" of two or more criteria. */

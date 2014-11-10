@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.navigator.PreOrPostOrderNavigator;
 import org.teiid.query.sql.symbol.AggregateSymbol;
@@ -37,20 +37,20 @@ import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.WindowFunction;
 
 
-public class AggregateSymbolCollectorVisitor extends LanguageVisitor {
+public class AggregateSymbolCollectorVisitorImpl extends TCLanguageVisitorImpl {
     
     public static class AggregateStopNavigator extends PreOrPostOrderNavigator {
     	
     	private Collection<? extends Expression> groupingCols;
     	private Collection<? super Expression> groupingColsUsed;
     	
-        public AggregateStopNavigator(LanguageVisitor visitor, Collection<? super Expression> groupingColsUsed, Collection<? extends Expression> groupingCols) {
+        public AggregateStopNavigator(TCLanguageVisitorImpl visitor, Collection<? super Expression> groupingColsUsed, Collection<? extends Expression> groupingCols) {
             super(visitor, PreOrPostOrderNavigator.PRE_ORDER, false);
             this.groupingCols = groupingCols;
             this.groupingColsUsed = groupingColsUsed;
         }
         
-        public AggregateStopNavigator(LanguageVisitor visitor) {
+        public AggregateStopNavigator(TCLanguageVisitorImpl visitor) {
             super(visitor, PreOrPostOrderNavigator.PRE_ORDER, true);
         }
         
@@ -77,7 +77,7 @@ public class AggregateSymbolCollectorVisitor extends LanguageVisitor {
     private Collection<? super ElementSymbol> otherElements;
     private Collection<? super WindowFunction> windowFunctions;
     
-	public AggregateSymbolCollectorVisitor(TeiidVersion teiidVersion, Collection<? super AggregateSymbol> aggregates, Collection<? super ElementSymbol> elements) {
+	public AggregateSymbolCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<? super AggregateSymbol> aggregates, Collection<? super ElementSymbol> elements) {
 	    super(teiidVersion);
         this.aggregates = aggregates;
         this.otherElements = elements;
@@ -107,7 +107,7 @@ public class AggregateSymbolCollectorVisitor extends LanguageVisitor {
     		Collection<? super Expression> groupingColsUsed, 
     		Collection<? super WindowFunction> windowFunctions, 
     		Collection<? extends Expression> groupingCols) {
-        AggregateSymbolCollectorVisitor visitor = new AggregateSymbolCollectorVisitor(obj.getTeiidVersion(), aggregates, otherElements);
+        AggregateSymbolCollectorVisitorImpl visitor = new AggregateSymbolCollectorVisitorImpl(obj.getTeiidVersion(), aggregates, otherElements);
         visitor.windowFunctions = windowFunctions;
         AggregateStopNavigator asn = new AggregateStopNavigator(visitor, groupingColsUsed, groupingCols);
         asn.visitNode(obj);
@@ -123,7 +123,7 @@ public class AggregateSymbolCollectorVisitor extends LanguageVisitor {
         } else {
             aggregates = new ArrayList<AggregateSymbol>();    
         }
-        AggregateSymbolCollectorVisitor visitor = new AggregateSymbolCollectorVisitor(obj.getTeiidVersion(), aggregates, null);
+        AggregateSymbolCollectorVisitorImpl visitor = new AggregateSymbolCollectorVisitorImpl(obj.getTeiidVersion(), aggregates, null);
         AggregateStopNavigator asn = new AggregateStopNavigator(visitor, null, null);
         obj.acceptVisitor(asn);
         return aggregates;

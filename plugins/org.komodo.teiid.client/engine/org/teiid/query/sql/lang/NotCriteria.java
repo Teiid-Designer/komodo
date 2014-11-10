@@ -3,13 +3,13 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.INotCriteria;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
  */
-public class NotCriteria extends Criteria implements INotCriteria<LanguageVisitor> {
+public class NotCriteria extends Criteria implements INotCriteria<TCLanguageVisitorImpl> {
 
     /** The single sub criteria */
     private Criteria criteria;
@@ -61,7 +61,7 @@ public class NotCriteria extends Criteria implements INotCriteria<LanguageVisito
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

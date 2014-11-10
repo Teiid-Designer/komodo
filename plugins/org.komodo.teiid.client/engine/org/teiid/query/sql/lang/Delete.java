@@ -5,7 +5,7 @@ package org.teiid.query.sql.lang;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IDelete;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -14,7 +14,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
  *
  */
 public class Delete extends ProcedureContainer
-    implements TargetedCommand, IDelete<Criteria, GroupSymbol, Expression, LanguageVisitor>{
+    implements TargetedCommand, IDelete<Criteria, GroupSymbol, Expression, TCLanguageVisitorImpl>{
 
     /** Identifies the group to delete data from. */
     private GroupSymbol group;
@@ -112,7 +112,7 @@ public class Delete extends ProcedureContainer
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

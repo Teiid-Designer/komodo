@@ -3,7 +3,7 @@
 package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.query.sql.symbol.IExpressionSymbol;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SingleElementSymbol;
 
@@ -12,7 +12,7 @@ import org.teiid.query.sql.lang.SingleElementSymbol;
  */
 @SuppressWarnings( "unused" )
 public class ExpressionSymbol extends Symbol
-    implements SingleElementSymbol, Expression, IExpressionSymbol<Expression, LanguageVisitor> {
+    implements SingleElementSymbol, Expression, IExpressionSymbol<Expression, TCLanguageVisitorImpl> {
 
     private Expression expression;
 
@@ -73,7 +73,7 @@ public class ExpressionSymbol extends Symbol
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

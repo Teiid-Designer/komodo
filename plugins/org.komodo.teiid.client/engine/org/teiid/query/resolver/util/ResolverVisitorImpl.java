@@ -35,7 +35,7 @@ import java.util.Map;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.IResolverVisitor;
+import org.komodo.spi.query.sql.ResolverVisitor;
 import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -51,7 +51,7 @@ import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.metadata.GroupInfo;
 import org.teiid.query.metadata.TempMetadataID;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.BetweenCriteria;
 import org.teiid.query.sql.lang.CompareCriteria;
@@ -85,8 +85,8 @@ import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
 
-public class ResolverVisitor extends LanguageVisitor
-    implements IResolverVisitor<LanguageObject, GroupSymbol> {
+public class ResolverVisitorImpl extends TCLanguageVisitorImpl
+    implements ResolverVisitor<LanguageObject, GroupSymbol> {
     
     public static final String TEIID_PASS_THROUGH_TYPE = "teiid:pass-through-type"; //$NON-NLS-1$
 
@@ -118,7 +118,7 @@ public class ResolverVisitor extends LanguageVisitor
      * External groups are ordered from inner to outer most
      * @param teiidVersion
      */
-    public ResolverVisitor(TeiidVersion teiidVersion) {
+    public ResolverVisitorImpl(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -130,7 +130,7 @@ public class ResolverVisitor extends LanguageVisitor
      * @param groups
      * @param externalContext
      */
-    public ResolverVisitor(TeiidVersion teiidVersion, QueryMetadataInterface metadata, Collection<GroupSymbol> internalGroups, GroupContext externalContext) {
+    public ResolverVisitorImpl(TeiidVersion teiidVersion, QueryMetadataInterface metadata, Collection<GroupSymbol> internalGroups, GroupContext externalContext) {
         this(teiidVersion);
 		this.groups = internalGroups;
         this.externalContext = externalContext;

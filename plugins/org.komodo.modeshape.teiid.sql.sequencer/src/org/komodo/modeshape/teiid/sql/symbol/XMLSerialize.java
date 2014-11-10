@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
@@ -32,7 +32,7 @@ import org.komodo.spi.type.DataTypeManager.DataTypeName;
 /**
  *
  */
-public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<LanguageVisitor> {
+public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -166,7 +166,7 @@ public class XMLSerialize extends ASTNode implements Expression, IXMLSerialize<L
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -9,7 +9,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.function.TCFunctionDescriptor;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.v7.Teiid7ClientParser;
 import org.teiid.query.sql.lang.OrderBy;
 import org.teiid.query.sql.symbol.AggregateSymbol;
@@ -249,7 +249,7 @@ public class Aggregate7Symbol extends ExpressionSymbol implements AggregateSymbo
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit((AggregateSymbol) this);
     }
 

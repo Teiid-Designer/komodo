@@ -3,14 +3,14 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.ILimit;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
  *
  */
-public class Limit extends SimpleNode implements ILimit<LanguageVisitor> {
+public class Limit extends SimpleNode implements ILimit<TCLanguageVisitorImpl> {
 
     /**
      * Non Strict token
@@ -119,7 +119,7 @@ public class Limit extends SimpleNode implements ILimit<LanguageVisitor> {
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

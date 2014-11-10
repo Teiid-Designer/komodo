@@ -45,7 +45,7 @@ import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.CommandResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.lang.GroupContext;
@@ -61,9 +61,9 @@ import org.teiid.query.sql.symbol.ExpressionSymbol;
 import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.symbol.MultipleElementSymbol;
 import org.teiid.query.sql.symbol.Symbol;
-import org.teiid.query.sql.visitor.ElementCollectorVisitor;
-import org.teiid.query.sql.visitor.GroupCollectorVisitor;
-import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
+import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.GroupCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.runtime.client.Messages;
 
 
@@ -207,7 +207,7 @@ public class XMLQueryResolver extends CommandResolver {
 		query.setIsXML(docGroup == null);
 
 		// get the group on this query
-		Collection<GroupSymbol> groups = GroupCollectorVisitor.getGroups(query, true);
+		Collection<GroupSymbol> groups = GroupCollectorVisitorImpl.getGroups(query, true);
 		GroupSymbol group = groups.iterator().next();
 
 		boolean subQuery = true;
@@ -250,7 +250,7 @@ public class XMLQueryResolver extends CommandResolver {
 		OrderBy orderBy = query.getOrderBy();
 		
 		if(crit != null) {
-	        List<SubqueryContainer> commands = ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(crit);
+	        List<SubqueryContainer> commands = ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(crit);
 	        if (!commands.isEmpty()) {
 	        	TempMetadataAdapter tma = new TempMetadataAdapter(metadata, new TempMetadataStore());
 	        	if (!subQuery) {
@@ -268,7 +268,7 @@ public class XMLQueryResolver extends CommandResolver {
 
 			resolveXMLCriteria(crit, externalGroups, root, metadata);
 			// Resolve functions in current query
-			ResolverVisitor visitor = new ResolverVisitor(crit.getTeiidVersion());
+			ResolverVisitorImpl visitor = new ResolverVisitorImpl(crit.getTeiidVersion());
 			visitor.resolveLanguageObject(crit, metadata);
 		}
 
@@ -440,7 +440,7 @@ public class XMLQueryResolver extends CommandResolver {
         throws Exception {
 
         // Walk through each element in criteria and check against valid elements
-        Collection<ElementSymbol> critElems = ElementCollectorVisitor.getElements(criteria, false);
+        Collection<ElementSymbol> critElems = ElementCollectorVisitorImpl.getElements(criteria, false);
         for (ElementSymbol critElem : critElems) {
             if(! critElem.isExternalReference()) {
                 resolveElement(critElem, validElements, externalGroups, metadata);
@@ -463,7 +463,7 @@ public class XMLQueryResolver extends CommandResolver {
         throws Exception {
 
         // Walk through each element in OrderBy clause and check against valid elements
-        Collection<ElementSymbol> orderElems = ElementCollectorVisitor.getElements(orderBy, false);
+        Collection<ElementSymbol> orderElems = ElementCollectorVisitorImpl.getElements(orderBy, false);
         for (ElementSymbol orderElem : orderElems) {
             resolveElement(orderElem, validElements, externalGroups, metadata);
         }
@@ -508,7 +508,7 @@ public class XMLQueryResolver extends CommandResolver {
 					}
 				}
 				try {
-	                ResolverVisitor visitor = new ResolverVisitor(elem.getTeiidVersion());
+	                ResolverVisitorImpl visitor = new ResolverVisitorImpl(elem.getTeiidVersion());
 	                visitor.resolveLanguageObject(elem, Collections.EMPTY_LIST, externalGroups, metadata);
 	                return;
 	            } catch (Exception e) {

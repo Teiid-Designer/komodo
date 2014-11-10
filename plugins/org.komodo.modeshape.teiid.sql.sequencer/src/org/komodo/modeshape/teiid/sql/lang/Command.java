@@ -25,14 +25,14 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ICommand;
 
 /**
  *
  */
-public abstract class Command extends ASTNode implements ICommand<Expression, LanguageVisitor> {
+public abstract class Command extends ASTNode implements ICommand<Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -165,7 +165,7 @@ public abstract class Command extends ASTNode implements ICommand<Expression, La
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -31,14 +31,14 @@ import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
-import org.teiid.query.sql.visitor.CommandCollectorVisitor;
+import org.teiid.query.sql.visitor.CommandCollectorVisitorImpl;
 
 
 public class DefaultValidator implements Validator<LanguageObject> {
 
     @Override
     public ValidatorReport validate(LanguageObject object, QueryMetadataInterface metadata) throws Exception {
-        ValidatorReport report1 = validate(object, metadata, new ValidationVisitor(object.getTeiidVersion()));
+        ValidatorReport report1 = validate(object, metadata, new ValidationVisitorImpl(object.getTeiidVersion()));
         return report1;
     }
 
@@ -51,7 +51,7 @@ public class DefaultValidator implements Validator<LanguageObject> {
         // Construct combined runtime / query metadata if necessary
         if(object instanceof Command) {                        
             // Recursively validate subcommands
-            Iterator<Command> iter = CommandCollectorVisitor.getCommands((Command)object).iterator();
+            Iterator<Command> iter = CommandCollectorVisitorImpl.getCommands((Command)object).iterator();
             while(iter.hasNext()) {
                 Command subCommand = iter.next();
                 validate(subCommand, metadata, visitor);

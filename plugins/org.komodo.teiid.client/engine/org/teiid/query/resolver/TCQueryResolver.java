@@ -58,7 +58,7 @@ import org.teiid.query.resolver.command.UpdateProcedureResolver;
 import org.teiid.query.resolver.command.UpdateResolver;
 import org.teiid.query.resolver.command.XMLQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.lang.DynamicCommand;
@@ -78,12 +78,12 @@ import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.symbol.Reference;
 import org.teiid.query.sql.symbol.Symbol;
 import org.teiid.query.sql.visitor.ExpressionMappingVisitor;
-import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
+import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.query.validator.AbstractValidationVisitor;
 import org.teiid.query.validator.DefaultUpdateValidator;
 import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
 import org.teiid.query.validator.DefaultUpdateValidator.UpdateType;
-import org.teiid.query.validator.ValidationVisitor;
+import org.teiid.query.validator.ValidationVisitorImpl;
 import org.teiid.query.validator.DefaultValidator;
 import org.teiid.query.validator.ValidatorFailure;
 import org.teiid.query.validator.ValidatorReport;
@@ -301,7 +301,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 		    		positional = false;
 		    	}
 		    	ElementSymbol elementSymbol = (ElementSymbol)ses;
-		    	ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+		    	ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
 		    	visitor.resolveLanguageObject(elementSymbol, metadata);
 		    	elementSymbol.setIsExternalReference(true);
 		    	if (!positional) {
@@ -508,7 +508,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
      */
     public void resolveCriteria(Criteria criteria, QueryMetadataInterface metadata)
         throws Exception {
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
         visitor.resolveLanguageObject(criteria, metadata);
     }
 
@@ -544,7 +544,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
 	public void resolveSubqueries(Command command,
 			TempMetadataAdapter metadata, Collection<GroupSymbol> externalGroups)
 			throws Exception {
-		for (SubqueryContainer container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(command)) {
+		for (SubqueryContainer container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(command)) {
             setChildMetadata(container.getCommand(), command);
             if (externalGroups != null) {
             	container.getCommand().pushNewResolvingContext(externalGroups);
@@ -588,7 +588,7 @@ public class TCQueryResolver implements QueryResolver<Command, GroupSymbol, Expr
             } else {
             	resolveCommand(result, qmi, false);
             }
-	        validateWithVisitor(new ValidationVisitor(getTeiidVersion()), qmi, result);
+	        validateWithVisitor(new ValidationVisitorImpl(getTeiidVersion()), qmi, result);
 
 	        validateProjectedSymbols(virtualGroup, qmi, result);
             cachedNode = new TCQueryNode(qnode.getQuery());

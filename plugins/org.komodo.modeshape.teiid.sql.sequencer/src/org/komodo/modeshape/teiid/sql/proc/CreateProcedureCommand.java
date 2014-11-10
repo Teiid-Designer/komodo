@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.proc;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -35,7 +35,7 @@ import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
  *
  */
 public class CreateProcedureCommand extends Command
-    implements ICreateProcedureCommand<Block, GroupSymbol, Expression, LanguageVisitor> {
+    implements ICreateProcedureCommand<Block, GroupSymbol, Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -94,7 +94,7 @@ public class CreateProcedureCommand extends Command
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -46,7 +46,7 @@ import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.GroupContext;
@@ -337,7 +337,7 @@ public abstract class ProcedureContainerResolver extends CommandResolver {
 		        }
 		        GroupSymbol gs = addScalarGroup(parser, procName, childMetadata, externalGroups, tempElements, updatable);
 		        if (cupc.getReturnVariable() != null) {
-		        	ResolverVisitor visitor = new ResolverVisitor(parser.getVersion());
+		        	ResolverVisitorImpl visitor = new ResolverVisitorImpl(parser.getVersion());
 		        	visitor.resolveLanguageObject(cupc.getReturnVariable(), Arrays.asList(gs), metadata);
 		        }
 		        cupc.setResultSetColumns(rsColumns);

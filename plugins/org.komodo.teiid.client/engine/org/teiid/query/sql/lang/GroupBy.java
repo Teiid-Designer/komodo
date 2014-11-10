@@ -8,7 +8,7 @@ import java.util.List;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IGroupBy;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
@@ -16,7 +16,7 @@ import org.teiid.query.sql.symbol.Expression;
 /**
  *
  */
-public class GroupBy extends SimpleNode implements IGroupBy<Expression, LanguageVisitor> {
+public class GroupBy extends SimpleNode implements IGroupBy<Expression, TCLanguageVisitorImpl> {
 
     /** The set of expressions for the data elements to be group. */
     private List<Expression> symbols = new ArrayList<Expression>();
@@ -91,7 +91,7 @@ public class GroupBy extends SimpleNode implements IGroupBy<Expression, Language
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

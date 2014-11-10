@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.lang.IJoinPredicate;
 import org.komodo.spi.query.sql.lang.IJoinType.Types;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -17,7 +17,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
  *
  */
 public class JoinPredicate extends FromClause
-    implements IJoinPredicate<FromClause, LanguageVisitor>{
+    implements IJoinPredicate<FromClause, TCLanguageVisitorImpl>{
 
     private FromClause leftClause;
 
@@ -154,7 +154,7 @@ public class JoinPredicate extends FromClause
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 /**
  *
  */
-public interface ISubqueryCompareCriteria<LV extends ILanguageVisitor, C extends ICommand>
+public interface ISubqueryCompareCriteria<LV extends LanguageVisitor, C extends ICommand>
     extends IPredicateCriteria<LV>, ISubqueryContainer<C>{
 
     /** "Some" predicate quantifier (equivalent to "Any") */

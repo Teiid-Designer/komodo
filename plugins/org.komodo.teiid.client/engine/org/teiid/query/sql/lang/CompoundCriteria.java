@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.runtime.client.Messages;
 
 /**
  *
  */
-public class CompoundCriteria extends Criteria implements ICompoundCriteria<Criteria, LanguageVisitor> {
+public class CompoundCriteria extends Criteria implements ICompoundCriteria<Criteria, TCLanguageVisitorImpl> {
 
     /** Constant indicating the logical "or" of two or more criteria. */
     public static int OR = 1;
@@ -129,7 +129,7 @@ public class CompoundCriteria extends Criteria implements ICompoundCriteria<Crit
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

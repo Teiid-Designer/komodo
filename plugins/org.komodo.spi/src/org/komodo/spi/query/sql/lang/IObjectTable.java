@@ -22,13 +22,13 @@
 package org.komodo.spi.query.sql.lang;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
  */
 @Since(Version.TEIID_8_0)
-public interface IObjectTable<LV extends ILanguageVisitor> extends ITableFunctionReference<LV>{
+public interface IObjectTable<LV extends LanguageVisitor> extends ITableFunctionReference<LV>{
     // No methods required
 }

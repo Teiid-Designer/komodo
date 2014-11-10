@@ -9,7 +9,7 @@ import java.util.Map;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.StoredProcedure;
@@ -22,7 +22,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
  */
 @Removed(Version.TEIID_8_0)
 public class CreateUpdateProcedureCommand extends Command
-    implements ICreateProcedureCommand<Block, GroupSymbol, Expression, LanguageVisitor> {
+    implements ICreateProcedureCommand<Block, GroupSymbol, Expression, TCLanguageVisitorImpl> {
 
     // top level block for the procedure
     private Block block;
@@ -211,7 +211,7 @@ public class CreateUpdateProcedureCommand extends Command
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

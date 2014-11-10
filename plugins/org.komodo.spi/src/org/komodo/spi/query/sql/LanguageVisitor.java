@@ -111,7 +111,7 @@ import org.komodo.spi.query.sql.symbol.IXMLSerialize;
 /**
  *
  */
-public interface ILanguageVisitor {
+public interface LanguageVisitor {
      
     // Visitor methods for language objects
     void visit(IBetweenCriteria obj);

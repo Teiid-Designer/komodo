@@ -219,7 +219,7 @@ import org.teiid.query.sql.symbol.XMLSerialize;
  *
  */
 @SuppressWarnings( "javadoc" )
-public abstract class LanguageVisitor extends AbstractLanguageVisitor {
+public abstract class TCLanguageVisitorImpl extends AbstractLanguageVisitor {
 
     private final TeiidVersion teiidVersion;
 
@@ -236,7 +236,7 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
 
     static {
         // cache all the methods on this visitor
-        Method[] methods = LanguageVisitor.class.getMethods();
+        Method[] methods = TCLanguageVisitorImpl.class.getMethods();
         for (Method method : methods) {
             if (!method.getName().equals("visit")) //$NON-NLS-1$
                 continue;
@@ -260,7 +260,7 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
      * @param teiidVersion used to check visitor methods are
      *                                      applicable
      */
-    public LanguageVisitor(TeiidVersion teiidVersion) {
+    public TCLanguageVisitorImpl(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         this.parser = new TCQueryParser(teiidVersion);
     }

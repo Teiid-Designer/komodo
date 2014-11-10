@@ -24,7 +24,7 @@ package org.komodo.spi.query.sql.lang;
 import java.util.Collection;
 import java.util.List;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.symbol.IElementSymbol;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
@@ -36,7 +36,7 @@ public interface IInsert<ES extends IElementSymbol,
                                            E extends IExpression, 
                                            G extends IGroupSymbol, 
                                            Q extends IQueryCommand,
-                                           LV extends ILanguageVisitor> extends IProcedureContainer<E, LV> {
+                                           LV extends LanguageVisitor> extends IProcedureContainer<E, LV> {
 
     /**
      * Returns the group being inserted into

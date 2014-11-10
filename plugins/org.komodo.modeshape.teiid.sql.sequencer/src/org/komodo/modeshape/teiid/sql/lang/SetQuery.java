@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ISetQuery;
@@ -35,7 +35,7 @@ import org.komodo.spi.query.sql.lang.ISetQuery;
  *
  */
 public class SetQuery extends QueryCommand
-    implements ISetQuery<QueryCommand, OrderBy, Query, Expression, LanguageVisitor>{
+    implements ISetQuery<QueryCommand, OrderBy, Query, Expression, SQLanguageVisitorImpl>{
 
     /**
      * @param p teiid parser
@@ -131,7 +131,7 @@ public class SetQuery extends QueryCommand
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

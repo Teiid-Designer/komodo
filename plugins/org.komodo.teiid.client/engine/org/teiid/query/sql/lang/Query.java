@@ -10,18 +10,18 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IQuery;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.visitor.AggregateSymbolCollectorVisitor;
+import org.teiid.query.sql.visitor.AggregateSymbolCollectorVisitorImpl;
 
 /**
  *
  */
 public class Query extends QueryCommand
-    implements IQuery<Select, From, Into, Criteria, GroupBy, OrderBy, Query, Expression, LanguageVisitor> {
+    implements IQuery<Select, From, Into, Criteria, GroupBy, OrderBy, Query, Expression, TCLanguageVisitorImpl> {
 
     /** The select clause. */
     private Select select;
@@ -273,7 +273,7 @@ public class Query extends QueryCommand
     public boolean hasAggregates() {
         return getGroupBy() != null 
         || getHaving() != null 
-        || !AggregateSymbolCollectorVisitor.getAggregates(getSelect(), false).isEmpty();
+        || !AggregateSymbolCollectorVisitorImpl.getAggregates(getSelect(), false).isEmpty();
     }
 
     @Override
@@ -324,7 +324,7 @@ public class Query extends QueryCommand
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

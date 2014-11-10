@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ISetClauseList;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
@@ -15,7 +15,7 @@ import org.teiid.query.sql.symbol.Expression;
 /**
  *
  */
-public class SetClauseList extends SimpleNode implements ISetClauseList<LanguageVisitor> {
+public class SetClauseList extends SimpleNode implements ISetClauseList<TCLanguageVisitorImpl> {
 
     private List<SetClause> setClauses = new ArrayList<SetClause>();
 
@@ -81,7 +81,7 @@ public class SetClauseList extends SimpleNode implements ISetClauseList<Language
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

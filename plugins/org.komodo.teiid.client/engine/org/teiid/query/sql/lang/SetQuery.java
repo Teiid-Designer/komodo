@@ -10,7 +10,7 @@ import java.util.List;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ISetQuery;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.resolver.util.ResolverUtil;
@@ -23,7 +23,7 @@ import org.teiid.query.sql.util.SymbolMap;
  *
  */
 public class SetQuery extends QueryCommand
-    implements ISetQuery<QueryCommand, OrderBy, Query, Expression, LanguageVisitor>{
+    implements ISetQuery<QueryCommand, OrderBy, Query, Expression, TCLanguageVisitorImpl>{
 
     private boolean all = true;
 
@@ -227,7 +227,7 @@ public class SetQuery extends QueryCommand
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

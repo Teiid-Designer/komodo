@@ -9,9 +9,9 @@ import java.util.List;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 
 /**
  * Base class for AST Nodes
@@ -117,7 +117,7 @@ public class SimpleNode implements Node, LanguageObject {
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 
@@ -127,7 +127,7 @@ public class SimpleNode implements Node, LanguageObject {
      */
     @Override
     public String toString() {
-        return SQLStringVisitor.getSQLString(this);
+        return SQLStringVisitorImpl.getSQLString(this);
     }
 
     /* Override this method if you want to customize how the node dumps

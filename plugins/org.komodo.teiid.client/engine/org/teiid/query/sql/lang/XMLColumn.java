@@ -5,14 +5,14 @@ package org.teiid.query.sql.lang;
 import net.sf.saxon.sxpath.XPathExpression;
 
 import org.komodo.spi.query.sql.lang.IXMLColumn;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
  *
  */
-public class XMLColumn extends ProjectedColumn implements IXMLColumn<LanguageVisitor> {
+public class XMLColumn extends ProjectedColumn implements IXMLColumn<TCLanguageVisitorImpl> {
 
     private String path;
 
@@ -118,7 +118,7 @@ public class XMLColumn extends ProjectedColumn implements IXMLColumn<LanguageVis
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

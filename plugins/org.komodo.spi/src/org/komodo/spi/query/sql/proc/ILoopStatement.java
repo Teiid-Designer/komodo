@@ -21,14 +21,14 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.proc;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.ISubqueryContainer;
 
 /**
  *
  */
-public interface ILoopStatement<LV extends ILanguageVisitor, C extends ICommand>
+public interface ILoopStatement<LV extends LanguageVisitor, C extends ICommand>
     extends IStatement<LV>, ISubqueryContainer<C> {
     // No methods required
 }

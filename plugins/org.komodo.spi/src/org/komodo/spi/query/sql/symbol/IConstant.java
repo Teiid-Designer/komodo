@@ -21,14 +21,14 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.symbol;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
 
 
 /**
  *
  */
-public interface IConstant<LV extends ILanguageVisitor> extends IExpression<LV> {
+public interface IConstant<LV extends LanguageVisitor> extends IExpression<LV> {
 
     /**
      * Value of the constant

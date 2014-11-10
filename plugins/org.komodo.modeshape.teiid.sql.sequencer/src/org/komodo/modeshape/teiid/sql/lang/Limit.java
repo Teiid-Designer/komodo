@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -32,7 +32,7 @@ import org.komodo.spi.query.sql.lang.ILimit;
 /**
  *
  */
-public class Limit extends ASTNode implements ILimit<LanguageVisitor>, TeiidSQLConstants.NonReserved {
+public class Limit extends ASTNode implements ILimit<SQLanguageVisitorImpl>, TeiidSQLConstants.NonReserved {
 
     /**
      * @param p teiid parser
@@ -130,7 +130,7 @@ public class Limit extends ASTNode implements ILimit<LanguageVisitor>, TeiidSQLC
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

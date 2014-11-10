@@ -22,6 +22,7 @@
 package org.komodo.spi.query.sql;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.komodo.spi.query.sql.lang.ILanguageObject;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
@@ -29,25 +30,28 @@ import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 /**
  *
  */
-public interface IGroupCollectorVisitor<LO extends ILanguageObject, GS extends IGroupSymbol> {
+public interface GroupsUsedByElementsVisitor<LO extends ILanguageObject, GS extends IGroupSymbol> {
 
     /**
-     * Get the groups from obj in a collection.  The
-     * removeDuplicates flag affects whether duplicate groups will be
-     * filtered out.
+     * Find the groups containd in the given object.
      * 
-     * @param obj Language object
+     * Duplicates are removed.
+     * 
+     * @param object Language object
+     * 
      * @return Collection of {@link IGroupSymbol}
      */
-    Collection<GS> findGroups(LO obj);
+    Set<GS> findGroups(LO object);
+    
     
     /**
-     * Get the groups from obj in a collection.  The 
-     * removeDuplicates flag affects whether duplicate groups will be 
-     * filtered out.
+     * Find the groups contains in the collection of given objects.
      * 
-     * @param obj Language object
+     * Duplicates are removed.
+     * 
+     * @param objects Collection of language objects
+     * 
      * @return Collection of {@link IGroupSymbol}
      */
-    Collection<GS> findGroupsIgnoreInlineViews(LO obj);
+    <T extends LO> Set<GS> findGroups(Collection<T> objects);
 }

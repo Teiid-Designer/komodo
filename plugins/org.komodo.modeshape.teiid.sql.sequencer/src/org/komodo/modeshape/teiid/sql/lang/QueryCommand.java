@@ -4,7 +4,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IQueryCommand;
@@ -13,7 +13,7 @@ import org.komodo.spi.query.sql.lang.IQueryCommand;
  *
  */
 public abstract class QueryCommand extends Command
-    implements IQueryCommand<OrderBy, Query, Expression, LanguageVisitor> {
+    implements IQueryCommand<OrderBy, Query, Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -101,7 +101,7 @@ public abstract class QueryCommand extends Command
     public abstract QueryCommand clone();
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  * @param <LV> 
  *
  */
-public interface ILanguageObject<LV extends ILanguageVisitor> {
+public interface ILanguageObject<LV extends LanguageVisitor> {
 
     /**
      * Clone this language object

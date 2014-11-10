@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.proc;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.proc.IStatement;
@@ -31,7 +31,7 @@ import org.komodo.spi.query.sql.proc.IStatement;
 /**
  *
  */
-public abstract class Statement extends ASTNode implements IStatement<LanguageVisitor> {
+public abstract class Statement extends ASTNode implements IStatement<SQLanguageVisitorImpl> {
 
     /**
      * Types of statement
@@ -155,7 +155,7 @@ public abstract class Statement extends ASTNode implements IStatement<LanguageVi
     public abstract Statement clone();
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

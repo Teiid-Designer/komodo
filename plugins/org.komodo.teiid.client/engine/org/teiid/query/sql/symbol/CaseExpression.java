@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.ICaseExpression;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.runtime.client.Messages;
@@ -14,7 +14,7 @@ import org.teiid.runtime.client.Messages;
 /**
  *
  */
-public class CaseExpression extends SimpleNode implements Expression, ICaseExpression<LanguageVisitor> {
+public class CaseExpression extends SimpleNode implements Expression, ICaseExpression<TCLanguageVisitorImpl> {
 
     private Class type;
 
@@ -208,7 +208,7 @@ public class CaseExpression extends SimpleNode implements Expression, ICaseExpre
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

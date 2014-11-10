@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 
@@ -29,7 +29,7 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
 /**
  *
  */
-public interface IJoinPredicate<T extends IFromClause, LV extends ILanguageVisitor> extends IFromClause<LV> {
+public interface IJoinPredicate<T extends IFromClause, LV extends LanguageVisitor> extends IFromClause<LV> {
 
     /**
      * Get left clause

@@ -49,7 +49,7 @@ import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.CommandResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.lang.ArrayTable;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.ExistsCriteria;
@@ -90,7 +90,7 @@ import org.teiid.query.sql.symbol.MultipleElementSymbol;
 import org.teiid.query.sql.symbol.Reference;
 import org.teiid.query.sql.symbol.ScalarSubquery;
 import org.teiid.query.sql.symbol.Symbol;
-import org.teiid.query.sql.visitor.ElementCollectorVisitor;
+import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
 import org.teiid.query.sql.visitor.ExpressionMappingVisitor;
 import org.teiid.runtime.client.Messages;
 
@@ -120,7 +120,7 @@ public class SimpleQueryResolver extends CommandResolver {
         try {
             QueryResolverVisitor qrv = new QueryResolverVisitor(query, metadata);
             qrv.visit(query);
-            ResolverVisitor visitor = (ResolverVisitor)qrv.getVisitor();
+            ResolverVisitorImpl visitor = (ResolverVisitorImpl)qrv.getVisitor();
 			visitor.throwException(true);
 			if (visitor.hasUserDefinedAggregate() && getTeiidVersion().isGreaterThanOrEqualTo(Version.TEIID_8_6.get())) {
 				ExpressionMappingVisitor emv = new ExpressionMappingVisitor(getTeiidVersion(), null) {
@@ -203,7 +203,7 @@ public class SimpleQueryResolver extends CommandResolver {
             obj.getGroupSymbol().setMetadataID(metadata.getMetadataStore().getTempGroupID(obj.getGroupSymbol().getName()));
             obj.getGroupSymbol().setIsTempTable(true);
             List<GroupSymbol> groups = Collections.singletonList(obj.getGroupSymbol());
-            ResolverVisitor visitor = new ResolverVisitor(obj.getTeiidVersion());
+            ResolverVisitorImpl visitor = new ResolverVisitorImpl(obj.getTeiidVersion());
             if (obj.getColumns() != null && !obj.getColumns().isEmpty()) {
 	            for (Expression singleElementSymbol : projectedSymbols) {
 	                visitor.resolveLanguageObject(singleElementSymbol, groups, metadata);
@@ -251,8 +251,8 @@ public class SimpleQueryResolver extends CommandResolver {
          * @param metadata
          */
         public QueryResolverVisitor(Query query, TempMetadataAdapter metadata) {
-            super(new ResolverVisitor(query.getTeiidVersion(), metadata, null, query.getExternalGroupContexts()));
-            ResolverVisitor visitor = (ResolverVisitor)getVisitor();
+            super(new ResolverVisitorImpl(query.getTeiidVersion(), metadata, null, query.getExternalGroupContexts()));
+            ResolverVisitorImpl visitor = (ResolverVisitorImpl)getVisitor();
             visitor.setGroups(currentGroups);
             this.query = query;
             this.metadata = metadata;
@@ -261,7 +261,7 @@ public class SimpleQueryResolver extends CommandResolver {
         @Override
         protected void postVisitVisitor(LanguageObject obj) {
             super.postVisitVisitor(obj);
-            ResolverVisitor visitor = (ResolverVisitor)getVisitor();
+            ResolverVisitorImpl visitor = (ResolverVisitorImpl)getVisitor();
             try {
 				visitor.throwException(false);
 			} catch (Exception e) {
@@ -448,7 +448,7 @@ public class SimpleQueryResolver extends CommandResolver {
          */
         public void postTableFunctionReference(TableFunctionReference obj, LinkedHashSet<GroupSymbol> saved) {
 			//we didn't create a true external context, so we manually mark external
-			for (ElementSymbol symbol : ElementCollectorVisitor.getElements(obj, false)) {
+			for (ElementSymbol symbol : ElementCollectorVisitorImpl.getElements(obj, false)) {
 				if (symbol.isExternalReference()) {
 					continue;
 				}
@@ -470,7 +470,7 @@ public class SimpleQueryResolver extends CommandResolver {
             //now resolve the projected symbols
             Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
             groups.add(obj.getGroupSymbol());
-            ResolverVisitor visitor = new ResolverVisitor(obj.getTeiidVersion());
+            ResolverVisitorImpl visitor = new ResolverVisitorImpl(obj.getTeiidVersion());
             for (ElementSymbol symbol : obj.getProjectedSymbols()) {
                 try {
 					visitor.resolveLanguageObject(symbol, groups, null, metadata);

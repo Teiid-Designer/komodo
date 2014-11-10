@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.symbol;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
 
 /**
  *
  */
-public interface IAliasSymbol<E extends IExpression, LV extends ILanguageVisitor>
+public interface IAliasSymbol<E extends IExpression, LV extends LanguageVisitor>
     extends ISymbol<LV>, IExpression<LV> {
 
     /**

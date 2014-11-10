@@ -7,7 +7,7 @@ import java.util.Collection;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IFromClause;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Option.MakeDep;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -19,7 +19,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
  * is the {@link JoinPredicate} which represents a join between two FromClauses
  * and may contain criteria.
  */
-public abstract class FromClause extends SimpleNode implements IFromClause<LanguageVisitor> {
+public abstract class FromClause extends SimpleNode implements IFromClause<TCLanguageVisitorImpl> {
 
     /**
      * 
@@ -186,7 +186,7 @@ public abstract class FromClause extends SimpleNode implements IFromClause<Langu
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

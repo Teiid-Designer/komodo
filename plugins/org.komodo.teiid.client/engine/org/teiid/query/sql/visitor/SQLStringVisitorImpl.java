@@ -32,7 +32,7 @@ import java.util.Map;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.query.sql.ISQLStringVisitor;
+import org.komodo.spi.query.sql.SQLStringVisitor;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -51,7 +51,7 @@ import org.teiid.metadata.KeyRecord;
 import org.teiid.metadata.MetadataFactory;
 import org.teiid.metadata.Table;
 import org.teiid.query.metadata.DDLConstants;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.AlterProcedure;
 import org.teiid.query.sql.lang.AlterTrigger;
@@ -165,8 +165,8 @@ import org.teiid.translator.SourceSystemFunctions;
  * The SQLStringVisitor will visit a set of ast nodes and return the corresponding SQL string representation.
  * </p>
  */
-public class SQLStringVisitor extends LanguageVisitor
-    implements SQLConstants.Reserved, SQLConstants.NonReserved, SQLConstants.Tokens, DDLConstants, ISQLStringVisitor<LanguageObject> {
+public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
+    implements SQLConstants.Reserved, SQLConstants.NonReserved, SQLConstants.Tokens, DDLConstants, SQLStringVisitor<LanguageObject> {
 
     @Since(Version.TEIID_8_0)
     private final static Map<String, String> BUILTIN_PREFIXES = new HashMap<String, String>();
@@ -210,7 +210,7 @@ public class SQLStringVisitor extends LanguageVisitor
     /**
      * @param teiidVersion
      */
-    public SQLStringVisitor(TeiidVersion teiidVersion) {
+    public SQLStringVisitorImpl(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -226,7 +226,7 @@ public class SQLStringVisitor extends LanguageVisitor
             return UNDEFINED;
         }
 
-        SQLStringVisitor visitor = new SQLStringVisitor(obj.getTeiidVersion());
+        SQLStringVisitorImpl visitor = new SQLStringVisitorImpl(obj.getTeiidVersion());
         return visitor.returnSQLString(obj);
     }
 
@@ -1259,7 +1259,7 @@ public class SQLStringVisitor extends LanguageVisitor
      * @param makedep
      * @return this visitor
      */
-    public SQLStringVisitor appendMakeDepOptions(MakeDep makedep) {
+    public SQLStringVisitorImpl appendMakeDepOptions(MakeDep makedep) {
         if (isLessThanTeiidVersion(Version.TEIID_8_5))
             return this;
 

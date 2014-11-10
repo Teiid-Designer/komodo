@@ -21,14 +21,14 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
 
 /**
  *
  */
-public interface IUnaryFromClause<GS extends IGroupSymbol, LV extends ILanguageVisitor> extends IFromClause<LV> {
+public interface IUnaryFromClause<GS extends IGroupSymbol, LV extends LanguageVisitor> extends IFromClause<LV> {
 
     /**
      * Set the group held by the clause

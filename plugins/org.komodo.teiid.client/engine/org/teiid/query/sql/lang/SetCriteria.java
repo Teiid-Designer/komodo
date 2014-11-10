@@ -5,14 +5,14 @@ package org.teiid.query.sql.lang;
 import java.util.Collection;
 
 import org.komodo.spi.query.sql.lang.ISetCriteria;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
  *
  */
-public class SetCriteria extends AbstractSetCriteria implements ISetCriteria<Expression, LanguageVisitor> {
+public class SetCriteria extends AbstractSetCriteria implements ISetCriteria<Expression, TCLanguageVisitorImpl> {
 
     /** The set of value expressions */
     private Collection<Expression> values;
@@ -89,7 +89,7 @@ public class SetCriteria extends AbstractSetCriteria implements ISetCriteria<Exp
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

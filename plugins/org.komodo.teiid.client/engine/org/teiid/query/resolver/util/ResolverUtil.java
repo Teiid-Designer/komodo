@@ -85,8 +85,8 @@ import org.teiid.query.sql.symbol.ScalarSubquery;
 import org.teiid.query.sql.symbol.SearchedCaseExpression;
 import org.teiid.query.sql.symbol.Symbol;
 import org.teiid.query.sql.util.SymbolMap;
-import org.teiid.query.sql.visitor.ElementCollectorVisitor;
-import org.teiid.query.sql.visitor.GroupsUsedByElementsVisitor;
+import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.GroupsUsedByElementsVisitorImpl;
 import org.teiid.runtime.client.Messages;
 
 
@@ -459,8 +459,8 @@ public class ResolverUtil {
         	if (command instanceof SetQuery) {
     			 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30086, sortKey));
     		}
-        	ResolverVisitor visitor = new ResolverVisitor(command.getTeiidVersion());
-        	for (ElementSymbol symbol : ElementCollectorVisitor.getElements(sortKey, false)) {
+        	ResolverVisitorImpl visitor = new ResolverVisitorImpl(command.getTeiidVersion());
+        	for (ElementSymbol symbol : ElementCollectorVisitorImpl.getElements(sortKey, false)) {
         		try {
         	    	visitor.resolveLanguageObject(symbol, fromClauseGroups, command.getExternalGroupContexts(), metadata);
         	    } catch(Exception e) {
@@ -872,7 +872,7 @@ public class ResolverUtil {
 		String returnElementName = (String) ((Constant)args[0]).getValue() + "." + (String) ((Constant)args[1]).getValue(); //$NON-NLS-1$
 		ElementSymbol returnElement = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
 		returnElement.setName(returnElementName);
-		ResolverVisitor visitor = new ResolverVisitor(parser.getVersion());
+		ResolverVisitorImpl visitor = new ResolverVisitorImpl(parser.getVersion());
         try {
             visitor.resolveLanguageObject(returnElement, groups, metadata);
         } catch(Exception e) {
@@ -1076,7 +1076,7 @@ public class ResolverUtil {
 	 */
     private static void separateCriteria(Collection<GroupSymbol> leftGroups, Collection<GroupSymbol> rightGroups, List<Expression> leftExpressions, List<Expression> rightExpressions, List<Criteria> crits, List<Criteria> nonEquiJoinCriteria) {
         for (Criteria theCrit : crits) {
-            Set<GroupSymbol> critGroups = GroupsUsedByElementsVisitor.getGroups(theCrit);
+            Set<GroupSymbol> critGroups = GroupsUsedByElementsVisitorImpl.getGroups(theCrit);
 
             if (leftGroups.containsAll(critGroups) || rightGroups.containsAll(critGroups)) {
                 nonEquiJoinCriteria.add(theCrit);
@@ -1097,8 +1097,8 @@ public class ResolverUtil {
             Expression leftExpr = crit.getLeftExpression();
             Expression rightExpr = crit.getRightExpression();
 
-            Set<GroupSymbol> leftExprGroups = GroupsUsedByElementsVisitor.getGroups(leftExpr);
-            Set<GroupSymbol> rightExprGroups = GroupsUsedByElementsVisitor.getGroups(rightExpr);
+            Set<GroupSymbol> leftExprGroups = GroupsUsedByElementsVisitorImpl.getGroups(leftExpr);
+            Set<GroupSymbol> rightExprGroups = GroupsUsedByElementsVisitorImpl.getGroups(rightExpr);
 
             if (leftGroups.isEmpty() || rightGroups.isEmpty()) {
                 nonEquiJoinCriteria.add(theCrit);
@@ -1230,7 +1230,7 @@ public class ResolverUtil {
 	 * @param command Command to convert
 	 */
 	public static void fullyQualifyElements(Command command) {
-	    Collection<ElementSymbol> elements = ElementCollectorVisitor.getElements(command, false, true);
+	    Collection<ElementSymbol> elements = ElementCollectorVisitorImpl.getElements(command, false, true);
 	    for (ElementSymbol element : elements) {
 	        element.setDisplayFullyQualified(true);
 	    }

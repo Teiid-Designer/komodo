@@ -21,22 +21,42 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql;
 
-import java.util.List;
-
+import org.komodo.spi.query.sql.lang.ICriteria;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.lang.ISubqueryContainer;
+
 
 /**
  *
  */
-public interface IValueIteratorProviderCollectorVisitor<LO extends ILanguageObject, SC extends ISubqueryContainer<?>> {
+public interface SQLStringVisitorCallback {
 
     /**
-     * Get the ValueIteratorProvider instances from obj
-     * 
-     * @param obj Language object
-     * 
-     * @return List of found ValueIteratorProvider
+     * @param obj
      */
-    List<SC> findValueIteratorProviders(LO obj);
+    void visitNode(ILanguageObject obj);
+    
+    /**
+     * @param obj
+     */
+    void append(Object obj);
+
+    /**
+     * @param level
+     */
+    void addTabs(int level);
+
+    /**
+     * Allows for the creation of having/where nodes
+     * even though there isn't a direct language representation
+     * 
+     * @param keyWord
+     * @param crit
+     */
+    void visitCriteria(String keyWord, ICriteria crit);
+
+    /**
+     * @param level
+     */
+    void beginClause(int level);
+
 }

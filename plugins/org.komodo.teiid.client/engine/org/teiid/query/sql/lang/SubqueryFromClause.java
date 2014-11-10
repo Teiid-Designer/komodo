@@ -5,7 +5,7 @@ package org.teiid.query.sql.lang;
 import java.util.Collection;
 
 import org.komodo.spi.query.sql.lang.ISubqueryFromClause;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -14,7 +14,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
  *
  */
 public class SubqueryFromClause extends FromClause
-    implements SubqueryContainer<Command>, ISubqueryFromClause<LanguageVisitor, Command> {
+    implements SubqueryContainer<Command>, ISubqueryFromClause<TCLanguageVisitorImpl, Command> {
 
     private GroupSymbol symbol;
 
@@ -124,7 +124,7 @@ public class SubqueryFromClause extends FromClause
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

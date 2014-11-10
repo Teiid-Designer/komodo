@@ -3,13 +3,13 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IJoinType;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
  */
-public class JoinType extends SimpleNode implements IJoinType<LanguageVisitor>{
+public class JoinType extends SimpleNode implements IJoinType<TCLanguageVisitorImpl>{
 
     private Types kind = Types.JOIN_CROSS;
 
@@ -73,7 +73,7 @@ public class JoinType extends SimpleNode implements IJoinType<LanguageVisitor>{
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

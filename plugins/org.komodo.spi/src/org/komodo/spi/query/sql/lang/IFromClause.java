@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 
@@ -29,7 +29,7 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
 /**
  *
  */
-public interface IFromClause<LV extends ILanguageVisitor> extends ILanguageObject<LV> {
+public interface IFromClause<LV extends LanguageVisitor> extends ILanguageObject<LV> {
 
     /**
      * Is the clause optional

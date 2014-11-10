@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 /**
@@ -35,7 +35,7 @@ public interface IQuery<S extends ISelect,
                                           O extends IOrderBy,
                                           Q extends IQuery,
                                           E extends IExpression, 
-                                          LV extends ILanguageVisitor> extends IQueryCommand<O, Q, E, LV> {
+                                          LV extends LanguageVisitor> extends IQueryCommand<O, Q, E, LV> {
 
     /**
      * Get the select clause for the query.

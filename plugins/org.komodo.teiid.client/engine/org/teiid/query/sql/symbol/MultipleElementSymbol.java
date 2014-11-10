@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IMultipleElementSymbol;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.SimpleNode;
@@ -15,7 +15,7 @@ import org.teiid.query.sql.lang.SimpleNode;
  *
  */
 public class MultipleElementSymbol extends SimpleNode
-    implements Expression, IMultipleElementSymbol<ElementSymbol, LanguageVisitor> {
+    implements Expression, IMultipleElementSymbol<ElementSymbol, TCLanguageVisitorImpl> {
 
     private List<ElementSymbol> elementSymbols;
 
@@ -117,7 +117,7 @@ public class MultipleElementSymbol extends SimpleNode
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

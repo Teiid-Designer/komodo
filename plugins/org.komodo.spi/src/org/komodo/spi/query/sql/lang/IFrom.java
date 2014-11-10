@@ -23,7 +23,7 @@ package org.komodo.spi.query.sql.lang;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
 
@@ -32,7 +32,7 @@ import org.komodo.spi.query.sql.symbol.IGroupSymbol;
  */
 public interface IFrom<F extends IFromClause, 
                                         G extends IGroupSymbol,
-                                        LV extends ILanguageVisitor> extends ILanguageObject<LV> {
+                                        LV extends LanguageVisitor> extends ILanguageObject<LV> {
 
     /** 
      * Get all the clauses in FROM

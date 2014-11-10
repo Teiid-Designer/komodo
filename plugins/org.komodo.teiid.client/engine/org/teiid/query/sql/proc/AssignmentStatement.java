@@ -3,7 +3,7 @@
 package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IAssignmentStatement;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
@@ -16,7 +16,7 @@ import org.teiid.query.sql.symbol.ScalarSubquery;
 /**
  *
  */
-public class AssignmentStatement extends Statement implements ExpressionStatement, IAssignmentStatement<Expression, LanguageVisitor> {
+public class AssignmentStatement extends Statement implements ExpressionStatement, IAssignmentStatement<Expression, TCLanguageVisitorImpl> {
 
     // the variable to which a value is assigned
     private ElementSymbol variable;
@@ -156,7 +156,7 @@ public class AssignmentStatement extends Statement implements ExpressionStatemen
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

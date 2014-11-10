@@ -7,14 +7,14 @@ import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 import org.komodo.spi.query.sql.symbol.ISymbol;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.runtime.client.Messages;
 
 /**
  *
  */
-public class GroupSymbol extends Symbol implements IGroupSymbol<LanguageVisitor> {
+public class GroupSymbol extends Symbol implements IGroupSymbol<TCLanguageVisitorImpl> {
 
     /**
      * Prefix used for denoting a temporary group symbol prefix
@@ -276,7 +276,7 @@ public class GroupSymbol extends Symbol implements IGroupSymbol<LanguageVisitor>
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

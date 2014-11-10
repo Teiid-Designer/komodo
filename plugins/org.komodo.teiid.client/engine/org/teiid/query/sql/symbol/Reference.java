@@ -4,14 +4,14 @@ package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.query.sql.symbol.IReference;
 import org.teiid.query.metadata.TempMetadataID;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
  *
  */
-public class Reference extends SimpleNode implements Expression, IReference<LanguageVisitor> {
+public class Reference extends SimpleNode implements Expression, IReference<TCLanguageVisitorImpl> {
 
     /**
      *
@@ -171,7 +171,7 @@ public class Reference extends SimpleNode implements Expression, IReference<Lang
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

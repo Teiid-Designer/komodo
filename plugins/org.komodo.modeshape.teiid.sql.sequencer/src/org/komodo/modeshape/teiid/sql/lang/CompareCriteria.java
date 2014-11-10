@@ -24,14 +24,14 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.ICompareCriteria;
 
 /**
  *
  */
-public class CompareCriteria extends AbstractCompareCriteria implements ICompareCriteria<Expression, LanguageVisitor> {
+public class CompareCriteria extends AbstractCompareCriteria implements ICompareCriteria<Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -102,7 +102,7 @@ public class CompareCriteria extends AbstractCompareCriteria implements ICompare
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -4,7 +4,7 @@ package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.ISubqueryCompareCriteria;
 import org.teiid.language.SQLConstants;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
@@ -14,7 +14,7 @@ import org.teiid.query.sql.symbol.ScalarSubquery;
  *
  */
 public class SubqueryCompareCriteria extends AbstractCompareCriteria
-    implements SubqueryContainer<QueryCommand>, ISubqueryCompareCriteria< LanguageVisitor, QueryCommand> {
+    implements SubqueryContainer<QueryCommand>, ISubqueryCompareCriteria< TCLanguageVisitorImpl, QueryCommand> {
 
     /**
      * Predicate quantifiers
@@ -140,7 +140,7 @@ public class SubqueryCompareCriteria extends AbstractCompareCriteria
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

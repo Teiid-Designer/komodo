@@ -3,13 +3,13 @@
 package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IBranchingStatement;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
  */
-public class BranchingStatement extends Statement implements IBranchingStatement<LanguageVisitor> {
+public class BranchingStatement extends Statement implements IBranchingStatement<TCLanguageVisitorImpl> {
 
     /**
      * Modes of branching
@@ -110,7 +110,7 @@ public class BranchingStatement extends Statement implements IBranchingStatement
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

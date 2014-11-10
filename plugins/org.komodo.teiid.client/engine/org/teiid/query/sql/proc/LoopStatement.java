@@ -3,7 +3,7 @@
 package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.ILoopStatement;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Labeled;
@@ -14,7 +14,7 @@ import org.teiid.query.sql.lang.SubqueryContainer;
  *
  */
 public class LoopStatement extends Statement
-    implements Labeled, SubqueryContainer<Command>, ILoopStatement<LanguageVisitor, Command> {
+    implements Labeled, SubqueryContainer<Command>, ILoopStatement<TCLanguageVisitorImpl, Command> {
 
     private String cursorName;
 
@@ -137,7 +137,7 @@ public class LoopStatement extends Statement
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

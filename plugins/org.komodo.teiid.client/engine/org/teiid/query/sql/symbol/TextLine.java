@@ -7,14 +7,14 @@ import java.util.List;
 import org.komodo.spi.query.sql.symbol.ITextLine;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
  *
  */
-public class TextLine extends SimpleNode implements Expression, ITextLine<LanguageVisitor> {
+public class TextLine extends SimpleNode implements Expression, ITextLine<TCLanguageVisitorImpl> {
 
     public static final String nl = System.getProperty("line.separator"); //$NON-NLS-1$
 
@@ -160,7 +160,7 @@ public class TextLine extends SimpleNode implements Expression, ITextLine<Langua
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

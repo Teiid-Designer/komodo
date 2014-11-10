@@ -22,7 +22,7 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.proc.IReturnStatement;
@@ -30,7 +30,7 @@ import org.komodo.spi.query.sql.proc.IReturnStatement;
 /**
  *
  */
-public class ReturnStatement extends AssignmentStatement implements IReturnStatement<Expression, LanguageVisitor> {
+public class ReturnStatement extends AssignmentStatement implements IReturnStatement<Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -41,7 +41,7 @@ public class ReturnStatement extends AssignmentStatement implements IReturnState
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

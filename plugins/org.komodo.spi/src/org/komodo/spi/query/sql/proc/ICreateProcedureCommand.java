@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.proc;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
@@ -33,7 +33,7 @@ import org.komodo.spi.query.sql.symbol.IGroupSymbol;
  * @param <LV> 
  *
  */
-public interface ICreateProcedureCommand<B extends IBlock, GS extends IGroupSymbol, E extends IExpression, LV extends ILanguageVisitor>
+public interface ICreateProcedureCommand<B extends IBlock, GS extends IGroupSymbol, E extends IExpression, LV extends LanguageVisitor>
     extends ICommand<E, LV> {
 
     /**

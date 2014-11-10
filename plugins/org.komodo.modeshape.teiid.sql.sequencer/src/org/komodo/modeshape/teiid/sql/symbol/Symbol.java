@@ -22,7 +22,7 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.query.sql.symbol.ISymbol;
@@ -31,7 +31,7 @@ import org.komodo.spi.query.sql.symbol.ISymbol;
 /**
  *
  */
-public abstract class Symbol extends ASTNode implements ISymbol<LanguageVisitor> {
+public abstract class Symbol extends ASTNode implements ISymbol<SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -104,7 +104,7 @@ public abstract class Symbol extends ASTNode implements ISymbol<LanguageVisitor>
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -10,7 +10,7 @@ import java.util.regex.PatternSyntaxException;
 import org.komodo.spi.query.sql.lang.IMatchCriteria;
 import org.teiid.core.util.LRUCache;
 import org.teiid.core.util.PropertiesUtils;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.runtime.client.Messages;
@@ -20,7 +20,7 @@ import org.teiid.runtime.client.TeiidClientException;
  *
  */
 public class MatchCriteria extends Criteria
-    implements PredicateCriteria, IMatchCriteria<Expression, LanguageVisitor> {
+    implements PredicateCriteria, IMatchCriteria<Expression, TCLanguageVisitorImpl> {
 
     /** The internal null escape character */
     public static final char NULL_ESCAPE_CHAR = 0;
@@ -169,7 +169,7 @@ public class MatchCriteria extends Criteria
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

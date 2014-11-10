@@ -3,7 +3,7 @@
 package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.ICommandStatement;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.SubqueryContainer;
@@ -12,7 +12,7 @@ import org.teiid.query.sql.lang.SubqueryContainer;
  *
  */
 public class CommandStatement extends Statement
-    implements SubqueryContainer<Command>, ICommandStatement<LanguageVisitor, Command> {
+    implements SubqueryContainer<Command>, ICommandStatement<TCLanguageVisitorImpl, Command> {
 
     // the command this statement represents
     private Command command;
@@ -92,7 +92,7 @@ public class CommandStatement extends Statement
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -4,7 +4,7 @@ package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.query.sql.symbol.IAliasSymbol;
 import org.teiid.core.util.ArgCheck;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SingleElementSymbol;
 import org.teiid.runtime.client.Messages;
@@ -18,7 +18,7 @@ import org.teiid.runtime.client.Messages;
  */
 @SuppressWarnings( "unused" )
 public class AliasSymbol extends Symbol
-    implements SingleElementSymbol, Expression, IAliasSymbol<Expression, LanguageVisitor> {
+    implements SingleElementSymbol, Expression, IAliasSymbol<Expression, TCLanguageVisitorImpl> {
 
     private Expression symbol;
 
@@ -79,7 +79,7 @@ public class AliasSymbol extends Symbol
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -8,7 +8,7 @@ import java.util.TreeMap;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.v8.Teiid8ClientParser;
 import org.teiid.query.sql.lang.OrderBy;
 import org.teiid.query.sql.symbol.AggregateSymbol;
@@ -295,7 +295,7 @@ public class Aggregate8Symbol extends Function implements AggregateSymbol {
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit((AggregateSymbol)this);
     }
 

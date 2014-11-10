@@ -22,12 +22,12 @@
 package org.komodo.spi.query.sql.lang;
 
 import java.util.List;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
  */
-public interface IStoredProcedure<P extends ISPParameter, E extends IExpression, LV extends ILanguageVisitor> 
+public interface IStoredProcedure<P extends ISPParameter, E extends IExpression, LV extends LanguageVisitor> 
     extends IProcedureContainer<E, LV> {
 
     void setProcedureID(Object procedureID);

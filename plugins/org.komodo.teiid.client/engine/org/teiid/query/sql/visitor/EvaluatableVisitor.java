@@ -30,7 +30,7 @@ import org.teiid.metadata.FunctionMethod.Determinism;
 import org.teiid.metadata.FunctionMethod.PushDown;
 import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.metadata.TempMetadataID;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.ExistsCriteria;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.lang.SPParameter;
@@ -53,7 +53,7 @@ import org.teiid.query.sql.symbol.ScalarSubquery;
  * <p>This visitor class will traverse a language object tree, and determine
  * if the current expression can be evaluated</p>
  */
-public class EvaluatableVisitor extends LanguageVisitor {
+public class EvaluatableVisitor extends TCLanguageVisitorImpl {
 	
 	/**
      * @param teiidVersion

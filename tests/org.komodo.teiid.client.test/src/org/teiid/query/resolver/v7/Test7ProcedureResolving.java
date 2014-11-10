@@ -44,7 +44,7 @@ import org.teiid.query.sql.proc.LoopStatement;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.v7.Test7Factory;
-import org.teiid.query.sql.visitor.ElementCollectorVisitor;
+import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
 
 @SuppressWarnings( {"javadoc"} )
 public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
@@ -117,7 +117,7 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
 
         assStmt = (AssignmentStatement)inner.getStatements().get(0);
 
-        ElementSymbol value = ElementCollectorVisitor.getElements(assStmt.getExpression(), false).iterator().next();
+        ElementSymbol value = ElementCollectorVisitorImpl.getElements(assStmt.getExpression(), false).iterator().next();
 
         assertEquals("LOOPCURSOR", value.getGroupSymbol().getCanonicalName()); //$NON-NLS-1$
     }

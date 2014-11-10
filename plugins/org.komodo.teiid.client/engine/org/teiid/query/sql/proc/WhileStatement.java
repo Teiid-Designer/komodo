@@ -3,7 +3,7 @@
 package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IWhileStatement;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.lang.Labeled;
@@ -11,7 +11,7 @@ import org.teiid.query.sql.lang.Labeled;
 /**
  *
  */
-public class WhileStatement extends Statement implements Labeled, IWhileStatement<LanguageVisitor> {
+public class WhileStatement extends Statement implements Labeled, IWhileStatement<TCLanguageVisitorImpl> {
 
     private Block whileBlock;
 
@@ -108,7 +108,7 @@ public class WhileStatement extends Statement implements Labeled, IWhileStatemen
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

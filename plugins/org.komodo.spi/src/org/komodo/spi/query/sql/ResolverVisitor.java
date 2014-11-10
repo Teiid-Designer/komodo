@@ -22,36 +22,22 @@
 package org.komodo.spi.query.sql;
 
 import java.util.Collection;
-import java.util.Set;
 
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
 /**
  *
  */
-public interface IGroupsUsedByElementsVisitor<LO extends ILanguageObject, GS extends IGroupSymbol> {
+public interface ResolverVisitor<LO extends ILanguageObject, GS extends IGroupSymbol> {
+    
+    public static final String SHORT_NAME = "shortName"; //$NON-NLS-1$
 
-    /**
-     * Find the groups containd in the given object.
-     * 
-     * Duplicates are removed.
-     * 
-     * @param object Language object
-     * 
-     * @return Collection of {@link IGroupSymbol}
-     */
-    Set<GS> findGroups(LO object);
-    
-    
-    /**
-     * Find the groups contains in the collection of given objects.
-     * 
-     * Duplicates are removed.
-     * 
-     * @param objects Collection of language objects
-     * 
-     * @return Collection of {@link IGroupSymbol}
-     */
-    <T extends LO> Set<GS> findGroups(Collection<T> objects);
+    @Deprecated
+    void setProperty(String propertyName, Object value);
+
+    void resolveLanguageObject(LO obj, QueryMetadataInterface metadata) throws Exception;
+
+    void resolveLanguageObject(LO obj, Collection<GS> groups, QueryMetadataInterface metadata) throws Exception;
 }

@@ -21,14 +21,14 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.symbol;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
 
 
 /**
  *
  */
-public interface IElementSymbol<G extends IGroupSymbol, LV extends ILanguageVisitor>
+public interface IElementSymbol<G extends IGroupSymbol, LV extends LanguageVisitor>
     extends ISymbol<LV>, IExpression<LV> {
 
     public enum DisplayMode {

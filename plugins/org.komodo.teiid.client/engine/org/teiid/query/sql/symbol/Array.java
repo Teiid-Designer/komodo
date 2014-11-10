@@ -25,7 +25,7 @@ package org.teiid.query.sql.symbol;
 import java.util.List;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.ArgCheck;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
@@ -147,7 +147,7 @@ public class Array extends SimpleNode implements Expression {
     }
 
 	@Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
     

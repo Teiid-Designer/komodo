@@ -39,7 +39,7 @@ import org.teiid.query.resolver.ProcedureContainerResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.VariableResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.SetClause;
@@ -75,7 +75,7 @@ public class UpdateResolver extends ProcedureContainerResolver implements Variab
         // Resolve elements and functions
         Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
         groups.add(update.getGroup());
-        ResolverVisitor visitor = new ResolverVisitor(command.getTeiidVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(command.getTeiidVersion());
         for (SetClause clause : update.getChangeList().getClauses()) {
         	visitor.resolveLanguageObject(clause.getSymbol(), groups, null, metadata);
 		}

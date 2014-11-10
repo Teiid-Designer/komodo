@@ -23,14 +23,14 @@ package org.komodo.spi.query.proc;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.ISQLConstants;
+import org.komodo.spi.query.sql.SQLConstants;
 
 
 
 /**
  *
  */
-public interface TeiidMetadataFileInfo extends TeiidFileInfo, ISQLConstants {
+public interface TeiidMetadataFileInfo extends TeiidFileInfo, SQLConstants {
 
     int DEFAULT_HEADER_LINE_NUMBER = 1;
     

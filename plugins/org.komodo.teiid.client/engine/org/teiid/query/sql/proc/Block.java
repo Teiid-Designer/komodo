@@ -5,9 +5,9 @@ package org.teiid.query.sql.proc;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.komodo.spi.query.sql.ISQLConstants;
+import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.spi.query.sql.proc.IBlock;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
@@ -18,7 +18,7 @@ import org.teiid.query.sql.symbol.Symbol;
 /**
  *
  */
-public class Block extends Statement implements Labeled, IBlock<Statement, LanguageVisitor> {
+public class Block extends Statement implements Labeled, IBlock<Statement, TCLanguageVisitorImpl> {
 
     private List<Statement> statements = new ArrayList<Statement>();
 
@@ -81,11 +81,11 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
                 stmt.setCommand(null);
                 stmt.setExpression(null);
                 ElementSymbol variable = stmt.getVariable();
-                if (variable != null && variable.getShortName().equalsIgnoreCase(ISQLConstants.ROWCOUNT) 
-                        && variable.getGroupSymbol() != null && variable.getGroupSymbol().getName().equalsIgnoreCase(ISQLConstants.VARIABLES)) {
+                if (variable != null && variable.getShortName().equalsIgnoreCase(SQLConstants.ROWCOUNT) 
+                        && variable.getGroupSymbol() != null && variable.getGroupSymbol().getName().equalsIgnoreCase(SQLConstants.VARIABLES)) {
                     return;
                 }
-                String fullName = ISQLConstants.VARIABLES + Symbol.SEPARATOR + ISQLConstants.ROWCOUNT;
+                String fullName = SQLConstants.VARIABLES + Symbol.SEPARATOR + SQLConstants.ROWCOUNT;
                 ElementSymbol es = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
                 es.setName(fullName);
                 stmt.setExpression(es);
@@ -200,7 +200,7 @@ public class Block extends Statement implements Labeled, IBlock<Statement, Langu
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

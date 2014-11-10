@@ -21,14 +21,14 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  * Tagging interface for Atomic Criteria objects
  *
  * @param <LV> Language Visitor implementation 
  */
-public interface IAtomicCriteria<LV extends ILanguageVisitor> extends ILogicalCriteria<LV> {
+public interface IAtomicCriteria<LV extends LanguageVisitor> extends ILogicalCriteria<LV> {
 
     // No methods required
 

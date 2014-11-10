@@ -33,7 +33,7 @@ import org.komodo.spi.query.proc.TeiidXmlFileInfo;
 import org.komodo.spi.query.proc.wsdl.WsdlRequestInfo;
 import org.komodo.spi.query.proc.wsdl.WsdlResponseInfo;
 import org.komodo.spi.query.proc.wsdl.WsdlWrapperInfo;
-import org.komodo.spi.query.sql.ISQLConstants;
+import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.proc.wsdl.WsdlRequestProcedureHelper;
 import org.teiid.query.proc.wsdl.WsdlResponseProcedureHelper;
@@ -43,7 +43,7 @@ import org.teiid.runtime.client.Messages;
 /**
  *
  */
-public class TCProcedureService implements ProcedureService, ISQLConstants {
+public class TCProcedureService implements ProcedureService, SQLConstants {
 
     private final TeiidVersion teiidVersion;
 

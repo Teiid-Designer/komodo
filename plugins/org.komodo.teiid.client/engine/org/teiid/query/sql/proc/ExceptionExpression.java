@@ -23,7 +23,7 @@ package org.teiid.query.sql.proc;
 
 import org.komodo.spi.query.sql.proc.IExceptionExpression;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.query.sql.symbol.Expression;
@@ -31,7 +31,7 @@ import org.teiid.query.sql.symbol.Expression;
 /**
  *
  */
-public class ExceptionExpression extends SimpleNode implements Expression, IExceptionExpression<LanguageVisitor> {
+public class ExceptionExpression extends SimpleNode implements Expression, IExceptionExpression<TCLanguageVisitorImpl> {
 
     /**
      * @param teiidParser 
@@ -155,7 +155,7 @@ public class ExceptionExpression extends SimpleNode implements Expression, IExce
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

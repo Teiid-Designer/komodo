@@ -6,14 +6,14 @@ import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IQueryString;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
  *
  */
-public class QueryString extends SimpleNode implements Expression, IQueryString<LanguageVisitor> {
+public class QueryString extends SimpleNode implements Expression, IQueryString<TCLanguageVisitorImpl> {
 
     private List<DerivedColumn> args;
 
@@ -86,7 +86,7 @@ public class QueryString extends SimpleNode implements Expression, IQueryString<
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -25,7 +25,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.symbol.ISymbol;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 import org.teiid.runtime.client.Messages;
@@ -34,7 +34,7 @@ import org.teiid.runtime.client.Messages;
 /**
  *
  */
-public class Symbol extends SimpleNode implements ISymbol<LanguageVisitor> {
+public class Symbol extends SimpleNode implements ISymbol<TCLanguageVisitorImpl> {
 
     /**
      * Character used to delimit name components in a symbol
@@ -188,7 +188,7 @@ public class Symbol extends SimpleNode implements ISymbol<LanguageVisitor> {
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 
@@ -31,7 +31,7 @@ import org.komodo.spi.query.sql.ILanguageVisitor;
 /**
  *
  */
-public interface ISubqueryFromClause<LV extends ILanguageVisitor, C extends ICommand>
+public interface ISubqueryFromClause<LV extends LanguageVisitor, C extends ICommand>
     extends IFromClause<LV>, ISubqueryContainer<C> {
 
     /**

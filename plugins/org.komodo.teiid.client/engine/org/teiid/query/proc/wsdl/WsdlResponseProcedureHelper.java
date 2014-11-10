@@ -29,13 +29,13 @@ import org.komodo.spi.query.proc.wsdl.WsdlColumnInfo;
 import org.komodo.spi.query.proc.wsdl.WsdlConstants;
 import org.komodo.spi.query.proc.wsdl.WsdlResponseInfo;
 import org.komodo.spi.query.proc.wsdl.WsdlWrapperInfo;
-import org.komodo.spi.query.sql.ISQLConstants;
+import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  *
  */
-public class WsdlResponseProcedureHelper extends AbstractWsdlHelper implements WsdlConstants, ISQLConstants {
+public class WsdlResponseProcedureHelper extends AbstractWsdlHelper implements WsdlConstants, SQLConstants {
 
     private final WsdlResponseInfo responseInfo;
     

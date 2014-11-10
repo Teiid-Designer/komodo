@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
@@ -37,7 +37,7 @@ import org.komodo.spi.query.sql.lang.IInsert;
 /**
  *
  */
-public class Insert extends ProcedureContainer implements TargetedCommand, IInsert<ElementSymbol, Expression, GroupSymbol, QueryCommand, LanguageVisitor> {
+public class Insert extends ProcedureContainer implements TargetedCommand, IInsert<ElementSymbol, Expression, GroupSymbol, QueryCommand, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -195,7 +195,7 @@ public class Insert extends ProcedureContainer implements TargetedCommand, IInse
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

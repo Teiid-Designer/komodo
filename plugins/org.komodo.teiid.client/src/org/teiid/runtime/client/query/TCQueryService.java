@@ -27,65 +27,64 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.komodo.spi.query.QueryFactory;
 import org.komodo.spi.query.QueryParser;
 import org.komodo.spi.query.QueryResolver;
 import org.komodo.spi.query.QueryService;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.ICommandCollectorVisitor;
-import org.komodo.spi.query.sql.IElementCollectorVisitor;
-import org.komodo.spi.query.sql.IFunctionCollectorVisitor;
-import org.komodo.spi.query.sql.IGroupCollectorVisitor;
-import org.komodo.spi.query.sql.IGroupsUsedByElementsVisitor;
-import org.komodo.spi.query.sql.IPredicateCollectorVisitor;
-import org.komodo.spi.query.sql.IReferenceCollectorVisitor;
-import org.komodo.spi.query.sql.IResolverVisitor;
-import org.komodo.spi.query.sql.ISQLStringVisitor;
-import org.komodo.spi.query.sql.ISQLStringVisitorCallback;
-import org.komodo.spi.query.sql.IValueIteratorProviderCollectorVisitor;
+import org.komodo.spi.query.sql.CommandCollectorVisitor;
+import org.komodo.spi.query.sql.ElementCollectorVisitor;
+import org.komodo.spi.query.sql.FunctionCollectorVisitor;
+import org.komodo.spi.query.sql.GroupCollectorVisitor;
+import org.komodo.spi.query.sql.GroupsUsedByElementsVisitor;
+import org.komodo.spi.query.sql.PredicateCollectorVisitor;
+import org.komodo.spi.query.sql.ReferenceCollectorVisitor;
+import org.komodo.spi.query.sql.ResolverVisitor;
+import org.komodo.spi.query.sql.SQLStringVisitor;
+import org.komodo.spi.query.sql.SQLStringVisitorCallback;
+import org.komodo.spi.query.sql.ValueIteratorProviderCollectorVisitor;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 import org.komodo.spi.query.sql.symbol.ISymbol;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.udf.FunctionMethodDescriptor;
 import org.komodo.spi.udf.FunctionParameterDescriptor;
-import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.validator.UpdateValidator;
-import org.komodo.spi.validator.Validator;
 import org.komodo.spi.validator.UpdateValidator.TransformUpdateType;
+import org.komodo.spi.validator.Validator;
 import org.komodo.spi.xml.MappingDocumentFactory;
 import org.teiid.core.types.JDBCSQLTypeInfo;
 import org.teiid.language.SQLConstants;
 import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.FunctionMethod.Determinism;
 import org.teiid.metadata.FunctionParameter;
-import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.function.FunctionTree;
 import org.teiid.query.function.SystemFunctionManager;
+import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.function.UDFSource;
 import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.visitor.CallbackSQLStringVisitor;
-import org.teiid.query.sql.visitor.CommandCollectorVisitor;
-import org.teiid.query.sql.visitor.ElementCollectorVisitor;
-import org.teiid.query.sql.visitor.FunctionCollectorVisitor;
-import org.teiid.query.sql.visitor.GroupCollectorVisitor;
-import org.teiid.query.sql.visitor.GroupsUsedByElementsVisitor;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
-import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
-import org.teiid.query.validator.PredicateCollectorVisitor;
-import org.teiid.query.validator.ReferenceCollectorVisitor;
+import org.teiid.query.sql.visitor.CommandCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.FunctionCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.GroupCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.GroupsUsedByElementsVisitorImpl;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
+import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.query.validator.DefaultUpdateValidator;
 import org.teiid.query.validator.DefaultUpdateValidator.UpdateType;
 import org.teiid.query.validator.DefaultValidator;
+import org.teiid.query.validator.PredicateCollectorVisitorImpl;
+import org.teiid.query.validator.ReferenceCollectorVisitorImpl;
 import org.teiid.runtime.client.proc.TCProcedureService;
 import org.teiid.runtime.client.xml.MappingDocumentFactoryImpl;
 
@@ -236,58 +235,58 @@ public class TCQueryService implements QueryService {
     }
 
     @Override
-    public SQLStringVisitor getSQLStringVisitor() {
-        return new SQLStringVisitor(teiidVersion);
+    public SQLStringVisitorImpl getSQLStringVisitor() {
+        return new SQLStringVisitorImpl(teiidVersion);
     }
 
     @Override
-    public ISQLStringVisitor getCallbackSQLStringVisitor(ISQLStringVisitorCallback visitorCallback) {
+    public SQLStringVisitor getCallbackSQLStringVisitor(SQLStringVisitorCallback visitorCallback) {
         return new CallbackSQLStringVisitor(teiidVersion, visitorCallback);
     }
 
     @Override
-    public IGroupCollectorVisitor getGroupCollectorVisitor(boolean removeDuplicates) {
-        return new GroupCollectorVisitor(teiidVersion, removeDuplicates);
+    public GroupCollectorVisitor getGroupCollectorVisitor(boolean removeDuplicates) {
+        return new GroupCollectorVisitorImpl(teiidVersion, removeDuplicates);
     }
 
     @Override
-    public IGroupsUsedByElementsVisitor getGroupsUsedByElementsVisitor() {
-        return new GroupsUsedByElementsVisitor();
+    public GroupsUsedByElementsVisitor getGroupsUsedByElementsVisitor() {
+        return new GroupsUsedByElementsVisitorImpl();
     }
 
     @Override
-    public IElementCollectorVisitor getElementCollectorVisitor(boolean removeDuplicates) {
-        return new ElementCollectorVisitor(teiidVersion, removeDuplicates);
+    public ElementCollectorVisitor getElementCollectorVisitor(boolean removeDuplicates) {
+        return new ElementCollectorVisitorImpl(teiidVersion, removeDuplicates);
     }
 
     @Override
-    public ICommandCollectorVisitor getCommandCollectorVisitor() {
-        return new CommandCollectorVisitor(teiidVersion);
+    public CommandCollectorVisitor getCommandCollectorVisitor() {
+        return new CommandCollectorVisitorImpl(teiidVersion);
     }
 
     @Override
-    public IFunctionCollectorVisitor getFunctionCollectorVisitor(boolean removeDuplicates) {
-        return new FunctionCollectorVisitor(teiidVersion, removeDuplicates);
+    public FunctionCollectorVisitor getFunctionCollectorVisitor(boolean removeDuplicates) {
+        return new FunctionCollectorVisitorImpl(teiidVersion, removeDuplicates);
     }
 
     @Override
-    public IPredicateCollectorVisitor getPredicateCollectorVisitor() {
-        return new PredicateCollectorVisitor(teiidVersion);
+    public PredicateCollectorVisitor getPredicateCollectorVisitor() {
+        return new PredicateCollectorVisitorImpl(teiidVersion);
     }
 
     @Override
-    public IReferenceCollectorVisitor getReferenceCollectorVisitor() {
-        return new ReferenceCollectorVisitor(teiidVersion);
+    public ReferenceCollectorVisitor getReferenceCollectorVisitor() {
+        return new ReferenceCollectorVisitorImpl(teiidVersion);
     }
 
     @Override
-    public IValueIteratorProviderCollectorVisitor getValueIteratorProviderCollectorVisitor() {
-        return new ValueIteratorProviderCollectorVisitor(teiidVersion);
+    public ValueIteratorProviderCollectorVisitor getValueIteratorProviderCollectorVisitor() {
+        return new ValueIteratorProviderCollectorVisitorImpl(teiidVersion);
     }
 
     @Override
-    public IResolverVisitor getResolverVisitor() {
-        return new ResolverVisitor(teiidVersion);
+    public ResolverVisitor getResolverVisitor() {
+        return new ResolverVisitorImpl(teiidVersion);
     }
 
     @Override

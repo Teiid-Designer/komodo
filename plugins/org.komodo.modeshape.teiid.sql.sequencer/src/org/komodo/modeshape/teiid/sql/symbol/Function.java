@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.symbol.Function.SQFunctionDescriptor;
 import org.komodo.spi.query.sql.symbol.IFunction;
@@ -36,7 +36,7 @@ import org.komodo.spi.udf.FunctionDescriptor;
 /**
  *
  */
-public class Function extends ASTNode implements Expression, IFunction<SQFunctionDescriptor, LanguageVisitor> {
+public class Function extends ASTNode implements Expression, IFunction<SQFunctionDescriptor, SQLanguageVisitorImpl> {
 
     public static class SQFunctionDescriptor implements FunctionDescriptor {
 
@@ -185,7 +185,7 @@ public class Function extends ASTNode implements Expression, IFunction<SQFunctio
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

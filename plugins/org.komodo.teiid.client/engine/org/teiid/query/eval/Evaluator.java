@@ -114,7 +114,7 @@ import org.teiid.query.sql.symbol.XMLParse;
 import org.teiid.query.sql.symbol.XMLQuery;
 import org.teiid.query.sql.symbol.XMLSerialize;
 import org.teiid.query.sql.util.ValueIterator;
-import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
+import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.query.util.CommandContext;
 import org.teiid.query.xquery.saxon.SaxonXQueryExpression;
 import org.teiid.query.xquery.saxon.SaxonXQueryExpression.Result;
@@ -1031,7 +1031,7 @@ public class Evaluator {
 			if (builder == null) {
 				returnValue = true;
 				//preevaluate subqueries to prevent blocked exceptions
-				for (SubqueryContainer<?> container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(function)) {
+				for (SubqueryContainer<?> container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(function)) {
 					evaluateSubquery(container);
 				}
 				builder = new JSONBuilder(function.getTeiidVersion());
@@ -1094,7 +1094,7 @@ public class Evaluator {
 				returnValue = true;
 				if (eval != null) {
 					//preevaluate subqueries to prevent blocked exceptions
-					for (SubqueryContainer<?> container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(f)) {
+					for (SubqueryContainer<?> container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(f)) {
 						eval.evaluateSubquery(container);
 					}
 				}

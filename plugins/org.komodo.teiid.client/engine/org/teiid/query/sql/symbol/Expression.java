@@ -23,7 +23,7 @@
 package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.query.sql.lang.IExpression;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.LanguageObject;
 
 /**
@@ -31,7 +31,7 @@ import org.teiid.query.sql.lang.LanguageObject;
  * types of expressions, such as literal values, element references, and 
  * functions.   
  */
-public interface Expression extends LanguageObject, IExpression<LanguageVisitor> {
+public interface Expression extends LanguageObject, IExpression<TCLanguageVisitorImpl> {
 
     /**
      * Determine the type returned by this expression.

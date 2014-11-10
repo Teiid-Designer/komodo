@@ -3,7 +3,7 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -11,7 +11,7 @@ import org.teiid.query.sql.symbol.Expression;
  *
  */
 public class SubquerySetCriteria extends AbstractSetCriteria
-implements SubqueryContainer<QueryCommand>, ISubquerySetCriteria<Expression, LanguageVisitor, QueryCommand>{
+implements SubqueryContainer<QueryCommand>, ISubquerySetCriteria<Expression, TCLanguageVisitorImpl, QueryCommand>{
 
     private QueryCommand command;
 
@@ -83,7 +83,7 @@ implements SubqueryContainer<QueryCommand>, ISubquerySetCriteria<Expression, Lan
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

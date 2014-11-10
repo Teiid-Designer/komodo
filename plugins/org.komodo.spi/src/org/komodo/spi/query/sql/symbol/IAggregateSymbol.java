@@ -22,7 +22,7 @@
 package org.komodo.spi.query.sql.symbol;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
@@ -31,7 +31,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 /**
  *
  */
-public interface IAggregateSymbol<LV extends ILanguageVisitor>
+public interface IAggregateSymbol<LV extends LanguageVisitor>
     extends IExpression<LV> {
 
     public enum Type {        

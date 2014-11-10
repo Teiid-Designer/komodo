@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IAlterProcedure;
 import org.komodo.spi.query.sql.lang.IAlterTrigger;
 import org.komodo.spi.query.sql.lang.IAlterView;
@@ -108,9 +108,9 @@ import org.komodo.spi.query.sql.symbol.IXMLQuery;
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
 
 /**
- * An implementation of a {@link ILanguageVisitor language object visitor} that does nothing.
+ * An implementation of a {@link LanguageVisitor language object visitor} that does nothing.
  */
-public abstract class AbstractLanguageVisitor implements ILanguageVisitor {
+public abstract class AbstractLanguageVisitor implements LanguageVisitor {
 
     @Override
     public void visit(IBetweenCriteria obj) {

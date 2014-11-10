@@ -45,13 +45,13 @@ import org.teiid.language.SQLConstants.NonReserved;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.CommandResolver;
 import org.teiid.query.resolver.ProcedureContainerResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Criteria;
@@ -80,7 +80,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.symbol.Symbol;
 import org.teiid.query.sql.util.SymbolMap;
 import org.teiid.query.sql.visitor.ResolveVirtualGroupCriteriaVisitor;
-import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
+import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.runtime.client.Messages;
 
 /**
@@ -132,7 +132,7 @@ public class UpdateProcedureResolver extends CommandResolver {
 
     private void resolveCommand(TriggerAction ta, TempMetadataAdapter metadata, boolean resolveNullLiterals) throws Exception {
 
-        ICreateProcedureCommand<Block, GroupSymbol, Expression, LanguageVisitor> cmd;
+        ICreateProcedureCommand<Block, GroupSymbol, Expression, TCLanguageVisitorImpl> cmd;
         if (getTeiidVersion().isLessThan(Version.TEIID_8_0.get())) {
             cmd = create(ASTNodes.CREATE_UPDATE_PROCEDURE_COMMAND);
         } else {
@@ -267,7 +267,7 @@ public class UpdateProcedureResolver extends CommandResolver {
      * @param metadata
      * @throws Exception
      */
-    public void resolveBlock(ICreateProcedureCommand<Block, GroupSymbol, Expression, LanguageVisitor> command, Block block, GroupContext originalExternalGroups, TempMetadataAdapter metadata)
+    public void resolveBlock(ICreateProcedureCommand<Block, GroupSymbol, Expression, TCLanguageVisitorImpl> command, Block block, GroupContext originalExternalGroups, TempMetadataAdapter metadata)
         throws Exception {
 
         //create a new variable and metadata context for this block so that discovered metadata is not visible else where
@@ -319,13 +319,13 @@ public class UpdateProcedureResolver extends CommandResolver {
     @Deprecated
     private void resolveStatement(CreateUpdateProcedureCommand command, Statement statement, GroupContext externalGroups, GroupSymbol variables, TempMetadataAdapter metadata)
         throws Exception {
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
 
         switch (statement.getType()) {
             case TYPE_IF:
                 IfStatement ifStmt = (IfStatement)statement;
                 Criteria ifCrit = ifStmt.getCondition();
-                for (SubqueryContainer container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(ifCrit)) {
+                for (SubqueryContainer container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(ifCrit)) {
                     resolveEmbeddedCommand(metadata, externalGroups, container.getCommand());
                 }
                 visitor.resolveLanguageObject(ifCrit, null, externalGroups, metadata);
@@ -401,7 +401,7 @@ public class UpdateProcedureResolver extends CommandResolver {
                 //first resolve the value.  this ensures the value cannot use the variable being defined
                 if (exprStmt.getExpression() != null) {
                     Expression expr = exprStmt.getExpression();
-                    for (SubqueryContainer container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(expr)) {
+                    for (SubqueryContainer container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(expr)) {
                         resolveEmbeddedCommand(metadata, externalGroups, container.getCommand());
                     }
                     visitor.resolveLanguageObject(expr, null, externalGroups, metadata);
@@ -434,7 +434,7 @@ public class UpdateProcedureResolver extends CommandResolver {
             case TYPE_WHILE:
                 WhileStatement whileStmt = (WhileStatement)statement;
                 Criteria whileCrit = whileStmt.getCondition();
-                for (SubqueryContainer container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(whileCrit)) {
+                for (SubqueryContainer container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(whileCrit)) {
                     resolveEmbeddedCommand(metadata, externalGroups, container.getCommand());
                 }
                 visitor.resolveLanguageObject(whileCrit, null, externalGroups, metadata);
@@ -471,13 +471,13 @@ public class UpdateProcedureResolver extends CommandResolver {
     @SuppressWarnings( "incomplete-switch" )
     private void resolveStatement(CreateProcedureCommand command, Statement statement, GroupContext externalGroups, GroupSymbol variables, TempMetadataAdapter metadata)
         throws Exception {
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
 
         switch (statement.getType()) {
             case TYPE_IF:
                 IfStatement ifStmt = (IfStatement)statement;
                 Criteria ifCrit = ifStmt.getCondition();
-                for (SubqueryContainer container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(ifCrit)) {
+                for (SubqueryContainer container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(ifCrit)) {
                     resolveEmbeddedCommand(metadata, externalGroups, container.getCommand());
                 }
                 visitor.resolveLanguageObject(ifCrit, null, externalGroups, metadata);
@@ -552,7 +552,7 @@ public class UpdateProcedureResolver extends CommandResolver {
                 //first resolve the value.  this ensures the value cannot use the variable being defined
                 if (exprStmt.getExpression() != null) {
                     Expression expr = exprStmt.getExpression();
-                    for (SubqueryContainer container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(expr)) {
+                    for (SubqueryContainer container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(expr)) {
                         resolveEmbeddedCommand(metadata, externalGroups, container.getCommand());
                     }
                     visitor.resolveLanguageObject(expr, null, externalGroups, metadata);
@@ -594,14 +594,14 @@ public class UpdateProcedureResolver extends CommandResolver {
                     String varTypeName = getDataTypeManager().getDataTypeName(varType);
                     exprStmt.setExpression(ResolverUtil.convertExpression(exprStmt.getExpression(), varTypeName, metadata));
                     if (statement.getType() == StatementType.TYPE_ERROR) {
-                        ResolverVisitor.checkException(exprStmt.getExpression());
+                        ResolverVisitorImpl.checkException(exprStmt.getExpression());
                     }
                 }
                 break;
             case TYPE_WHILE:
                 WhileStatement whileStmt = (WhileStatement)statement;
                 Criteria whileCrit = whileStmt.getCondition();
-                for (SubqueryContainer container : ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(whileCrit)) {
+                for (SubqueryContainer container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(whileCrit)) {
                     resolveEmbeddedCommand(metadata, externalGroups, container.getCommand());
                 }
                 visitor.resolveLanguageObject(whileCrit, null, externalGroups, metadata);
@@ -689,7 +689,7 @@ public class UpdateProcedureResolver extends CommandResolver {
         }
         boolean exists = false;
         try {
-            ResolverVisitor visitor = new ResolverVisitor(variable.getTeiidVersion());
+            ResolverVisitorImpl visitor = new ResolverVisitorImpl(variable.getTeiidVersion());
             visitor.resolveLanguageObject(variable, null, externalGroups, metadata);
             exists = true;
         } catch (Exception e) {

@@ -3,7 +3,7 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IAlterProcedure;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
@@ -12,7 +12,7 @@ import org.teiid.query.sql.symbol.Expression;
  *
  * @param <T>
  */
-public abstract class AlterProcedure<T extends Command> extends Alter<T> implements IAlterProcedure<Expression, LanguageVisitor> {
+public abstract class AlterProcedure<T extends Command> extends Alter<T> implements IAlterProcedure<Expression, TCLanguageVisitorImpl> {
 
     /**
      * @param p

@@ -24,14 +24,14 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.spi.query.sql.lang.ISetClauseList;
 
 /**
  *
  */
-public class SetClauseList extends ASTNode implements ISetClauseList<LanguageVisitor> {
+public class SetClauseList extends ASTNode implements ISetClauseList<SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -80,7 +80,7 @@ public class SetClauseList extends ASTNode implements ISetClauseList<LanguageVis
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -25,9 +25,9 @@ package org.teiid.query.validator;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.komodo.spi.query.sql.IPredicateCollectorVisitor;
+import org.komodo.spi.query.sql.PredicateCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.BetweenCriteria;
 import org.teiid.query.sql.lang.CompareCriteria;
 import org.teiid.query.sql.lang.Criteria;
@@ -54,8 +54,8 @@ import org.teiid.query.sql.navigator.PreOrderNavigator;
  * <li>{@link IsNullCriteria} IsNullCriteria</li>
  * </ul>
  */
-public class PredicateCollectorVisitor extends LanguageVisitor
-    implements IPredicateCollectorVisitor<LanguageObject, Criteria> {
+public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
+    implements PredicateCollectorVisitor<LanguageObject, Criteria> {
 
     private Collection<Criteria> predicates;
 
@@ -64,7 +64,7 @@ public class PredicateCollectorVisitor extends LanguageVisitor
      * {@link java.util.ArrayList}.
      * @param teiidVersion
      */
-    public PredicateCollectorVisitor(TeiidVersion teiidVersion) {
+    public PredicateCollectorVisitorImpl(TeiidVersion teiidVersion) {
         super(teiidVersion);
         this.predicates = new ArrayList<Criteria>();
     }
@@ -120,7 +120,7 @@ public class PredicateCollectorVisitor extends LanguageVisitor
     }
 
     /**
-     * @see LanguageVisitor#visit(ExistsCriteria)
+     * @see TCLanguageVisitorImpl#visit(ExistsCriteria)
      */
     @Override
     public void visit(ExistsCriteria obj) {
@@ -128,7 +128,7 @@ public class PredicateCollectorVisitor extends LanguageVisitor
     }
 
     /**
-     * @see LanguageVisitor#visit(SubqueryCompareCriteria)
+     * @see TCLanguageVisitorImpl#visit(SubqueryCompareCriteria)
      */
     @Override
     public void visit(SubqueryCompareCriteria obj) {
@@ -167,7 +167,7 @@ public class PredicateCollectorVisitor extends LanguageVisitor
      * @return collection of {@link Criteria} objects
      */
     public static final Collection<Criteria> getPredicates(LanguageObject obj) {
-        PredicateCollectorVisitor visitor = new PredicateCollectorVisitor(obj.getTeiidVersion());
+        PredicateCollectorVisitorImpl visitor = new PredicateCollectorVisitorImpl(obj.getTeiidVersion());
         return visitor.findPredicates(obj);
     }
 

@@ -26,14 +26,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.spi.query.sql.lang.IJoinPredicate;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 
 
-public class JoinPredicate extends FromClause implements IJoinPredicate<FromClause, LanguageVisitor> {
+public class JoinPredicate extends FromClause implements IJoinPredicate<FromClause, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -149,7 +149,7 @@ public class JoinPredicate extends FromClause implements IJoinPredicate<FromClau
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

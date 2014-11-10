@@ -5,14 +5,14 @@ package org.teiid.query.sql.symbol;
 import java.util.List;
 
 import org.komodo.spi.query.sql.symbol.IXMLAttributes;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
  *
  */
-public class XMLAttributes extends SimpleNode implements IXMLAttributes<LanguageVisitor> {
+public class XMLAttributes extends SimpleNode implements IXMLAttributes<TCLanguageVisitorImpl> {
 
     private List<DerivedColumn> args;
 
@@ -60,7 +60,7 @@ public class XMLAttributes extends SimpleNode implements IXMLAttributes<Language
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

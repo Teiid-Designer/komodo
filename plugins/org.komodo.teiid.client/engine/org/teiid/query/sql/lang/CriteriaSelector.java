@@ -8,7 +8,7 @@ import java.util.List;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.proc.ICriteriaSelector;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 
@@ -16,7 +16,7 @@ import org.teiid.query.sql.symbol.ElementSymbol;
  *
  */
 @Removed(Version.TEIID_8_0)
-public class CriteriaSelector extends SimpleNode implements CriteriaOperator, ICriteriaSelector<LanguageVisitor> {
+public class CriteriaSelector extends SimpleNode implements CriteriaOperator, ICriteriaSelector<TCLanguageVisitorImpl> {
 
     // type of criteria
     private Operator selectorType = Operator.NO_TYPE;
@@ -108,7 +108,7 @@ public class CriteriaSelector extends SimpleNode implements CriteriaOperator, IC
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

@@ -12,19 +12,19 @@ import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataStore;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.GroupSymbol;
 import org.teiid.query.sql.util.SymbolMap;
-import org.teiid.query.sql.visitor.CommandCollectorVisitor;
+import org.teiid.query.sql.visitor.CommandCollectorVisitorImpl;
 
 /**
  *
  */
-public abstract class Command extends SimpleNode implements ICommand<Expression, LanguageVisitor>{
+public abstract class Command extends SimpleNode implements ICommand<Expression, TCLanguageVisitorImpl>{
 
     private static List<Expression> updateCommandSymbol;
 
@@ -241,7 +241,7 @@ public abstract class Command extends SimpleNode implements ICommand<Expression,
 
         // Add children recursively
         tabLevel++;
-        for (Command subCommand : CommandCollectorVisitor.getCommands(this)) {
+        for (Command subCommand : CommandCollectorVisitorImpl.getCommands(this)) {
             subCommand.printCommandTree(str, tabLevel);
         }
     }
@@ -292,7 +292,7 @@ public abstract class Command extends SimpleNode implements ICommand<Expression,
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

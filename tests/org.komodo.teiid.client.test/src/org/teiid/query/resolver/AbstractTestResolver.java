@@ -93,10 +93,10 @@ import org.teiid.query.sql.symbol.Reference;
 import org.teiid.query.sql.symbol.Symbol;
 import org.teiid.query.sql.symbol.XMLQuery;
 import org.teiid.query.sql.util.SymbolMap;
-import org.teiid.query.sql.visitor.CommandCollectorVisitor;
-import org.teiid.query.sql.visitor.ElementCollectorVisitor;
-import org.teiid.query.sql.visitor.FunctionCollectorVisitor;
-import org.teiid.query.sql.visitor.GroupCollectorVisitor;
+import org.teiid.query.sql.visitor.CommandCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.FunctionCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.GroupCollectorVisitorImpl;
 import org.teiid.query.unittest.TimestampUtil;
 import org.teiid.runtime.client.TeiidClientException;
 
@@ -158,7 +158,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     }
 
     public Collection<ElementSymbol> getVariables(LanguageObject languageObject) {
-        Collection<ElementSymbol> variables = ElementCollectorVisitor.getElements(languageObject, false, true);
+        Collection<ElementSymbol> variables = ElementCollectorVisitorImpl.getElements(languageObject, false, true);
         for (Iterator<ElementSymbol> iterator = variables.iterator(); iterator.hasNext();) {
             ElementSymbol elementSymbol = iterator.next();
             if (!elementSymbol.isExternalReference()) {
@@ -300,7 +300,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     protected void helpCheckElements(LanguageObject langObj, String[] elementNames, String[] elementIDs) {
         List<ElementSymbol> elements = new ArrayList<ElementSymbol>();
-        ElementCollectorVisitor.getElements(langObj, elements);
+        ElementCollectorVisitorImpl.getElements(langObj, elements);
         assertEquals("Wrong number of elements: ", elementNames.length, elements.size()); //$NON-NLS-1$
 
         for (int i = 0; i < elements.size(); i++) {
@@ -926,7 +926,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Query resolvedQuery = (Query)helpResolve("select * from (EXEC pm1.sq2('abc')) as x"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"x"}); //$NON-NLS-1$
 
-        List<ElementSymbol> elements = (List<ElementSymbol>)ElementCollectorVisitor.getElements(resolvedQuery.getSelect(), false);
+        List<ElementSymbol> elements = (List<ElementSymbol>)ElementCollectorVisitorImpl.getElements(resolvedQuery.getSelect(), false);
 
         ElementSymbol elem1 = elements.get(0);
         assertEquals("Did not get expected element", "x.e1", elem1.getName()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1216,7 +1216,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         assertEquals("Resolved string form was incorrect ", sql, outerQuery.toString()); //$NON-NLS-1$
 
         //make sure there is a convert function wrapping the criteria left expression
-        Collection functions = FunctionCollectorVisitor.getFunctions(outerQuery, true);
+        Collection functions = FunctionCollectorVisitorImpl.getFunctions(outerQuery, true);
         assertTrue(functions.size() == 1);
         Function function = (Function)functions.iterator().next();
         assertTrue(function.getName().equals(FunctionLibrary.FunctionName.CONVERT.text()));
@@ -2232,7 +2232,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Query command = (Query)helpParse(sql);
         TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, metadata);
-        Collection groups = GroupCollectorVisitor.getGroups(command, false);
+        Collection groups = GroupCollectorVisitorImpl.getGroups(command, false);
         assertFalse(groups.contains(inputSet));
     }
 
@@ -2821,7 +2821,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         SetQuery command = (SetQuery)helpResolve(sql);
 
-        assertEquals(1, CommandCollectorVisitor.getCommands(command).size());
+        assertEquals(1, CommandCollectorVisitorImpl.getCommands(command).size());
     }
 
     @Test

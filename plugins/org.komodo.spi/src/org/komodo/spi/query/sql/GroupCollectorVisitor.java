@@ -23,21 +23,31 @@ package org.komodo.spi.query.sql;
 
 import java.util.Collection;
 
-import org.komodo.spi.query.sql.lang.ICriteria;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
+import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
 /**
  *
  */
-public interface IPredicateCollectorVisitor<LO extends ILanguageObject, C extends ICriteria> {
-    
+public interface GroupCollectorVisitor<LO extends ILanguageObject, GS extends IGroupSymbol> {
+
     /**
-     * Get the predicates from obj
+     * Get the groups from obj in a collection.  The
+     * removeDuplicates flag affects whether duplicate groups will be
+     * filtered out.
      * 
      * @param obj Language object
-     * 
-     * @return collection of criteria 
+     * @return Collection of {@link IGroupSymbol}
      */
-    Collection<C> findPredicates(LO obj);
-
+    Collection<GS> findGroups(LO obj);
+    
+    /**
+     * Get the groups from obj in a collection.  The 
+     * removeDuplicates flag affects whether duplicate groups will be 
+     * filtered out.
+     * 
+     * @param obj Language object
+     * @return Collection of {@link IGroupSymbol}
+     */
+    Collection<GS> findGroupsIgnoreInlineViews(LO obj);
 }

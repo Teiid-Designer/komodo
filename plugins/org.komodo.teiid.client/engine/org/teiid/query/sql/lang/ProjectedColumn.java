@@ -3,7 +3,7 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IProjectedColumn;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.symbol.ElementSymbol;
@@ -11,7 +11,7 @@ import org.teiid.query.sql.symbol.ElementSymbol;
 /**
  *
  */
-public class ProjectedColumn extends SimpleNode implements IProjectedColumn<LanguageVisitor> {
+public class ProjectedColumn extends SimpleNode implements IProjectedColumn<TCLanguageVisitorImpl> {
     
     private String name;
 
@@ -100,7 +100,7 @@ public class ProjectedColumn extends SimpleNode implements IProjectedColumn<Lang
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

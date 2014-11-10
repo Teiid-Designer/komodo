@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.komodo.spi.query.sql.IGroupCollectorVisitor;
+import org.komodo.spi.query.sql.GroupCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.Into;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.lang.StoredProcedure;
@@ -49,8 +49,8 @@ import org.teiid.runtime.client.Messages;
  * the visitor (and possibly the collection), run the visitor, and get the collection.
  * The public visit() methods should NOT be called directly.</p>
  */
-public class GroupCollectorVisitor extends LanguageVisitor
-    implements IGroupCollectorVisitor<LanguageObject, GroupSymbol> {
+public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
+    implements GroupCollectorVisitor<LanguageObject, GroupSymbol> {
 
     private Collection<GroupSymbol> groups;
 
@@ -66,7 +66,7 @@ public class GroupCollectorVisitor extends LanguageVisitor
      * 
      * @param removeDuplicates 
      */
-    public GroupCollectorVisitor(TeiidVersion teiidVersion, boolean removeDuplicates) {
+    public GroupCollectorVisitorImpl(TeiidVersion teiidVersion, boolean removeDuplicates) {
         this(teiidVersion, removeDuplicates ? new HashSet<GroupSymbol>() : new ArrayList<GroupSymbol>());
     }
     
@@ -77,7 +77,7 @@ public class GroupCollectorVisitor extends LanguageVisitor
      * @param groups Collection to use for groups
      * @throws IllegalArgumentException If groups is null
      */
-	public GroupCollectorVisitor(TeiidVersion teiidVersion, Collection<GroupSymbol> groups) {
+	public GroupCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<GroupSymbol> groups) {
 	    super(teiidVersion);
         if(groups == null) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0023));
@@ -148,7 +148,7 @@ public class GroupCollectorVisitor extends LanguageVisitor
      * @param elements Collection to collect groups in
      */
     public static void getGroups(LanguageObject obj, Collection<GroupSymbol> groups) {
-        GroupCollectorVisitor visitor = new GroupCollectorVisitor(obj.getTeiidVersion(), groups);
+        GroupCollectorVisitorImpl visitor = new GroupCollectorVisitorImpl(obj.getTeiidVersion(), groups);
         PreOrderNavigator.doVisit(obj, visitor);
     }
 
@@ -167,7 +167,7 @@ public class GroupCollectorVisitor extends LanguageVisitor
         } else {
             groups = new ArrayList<GroupSymbol>();
         }
-        GroupCollectorVisitor visitor = new GroupCollectorVisitor(obj.getTeiidVersion(), groups);
+        GroupCollectorVisitorImpl visitor = new GroupCollectorVisitorImpl(obj.getTeiidVersion(), groups);
         PreOrderNavigator.doVisit(obj, visitor);
         return groups;
     }
@@ -178,7 +178,7 @@ public class GroupCollectorVisitor extends LanguageVisitor
      * @param elements Collection to collect groups in
      */
     public static void getGroupsIgnoreInlineViews(LanguageObject obj, Collection<GroupSymbol> groups) {
-        GroupCollectorVisitor visitor = new GroupCollectorVisitor(obj.getTeiidVersion(), groups);
+        GroupCollectorVisitorImpl visitor = new GroupCollectorVisitorImpl(obj.getTeiidVersion(), groups);
         visitor.setIgnoreInlineViewGroups(true);
         DeepPreOrderNavigator.doVisit(obj, visitor);  
         
@@ -202,7 +202,7 @@ public class GroupCollectorVisitor extends LanguageVisitor
         } else {
             groups = new ArrayList<GroupSymbol>();
         }    
-        GroupCollectorVisitor visitor = new GroupCollectorVisitor(obj.getTeiidVersion(), groups);
+        GroupCollectorVisitorImpl visitor = new GroupCollectorVisitorImpl(obj.getTeiidVersion(), groups);
         visitor.setIgnoreInlineViewGroups(true);
         DeepPreOrderNavigator.doVisit(obj, visitor);
         

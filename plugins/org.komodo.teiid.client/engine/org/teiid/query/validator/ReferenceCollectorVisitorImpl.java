@@ -25,9 +25,9 @@ package org.teiid.query.validator;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.komodo.spi.query.sql.IReferenceCollectorVisitor;
+import org.komodo.spi.query.sql.ReferenceCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.query.sql.symbol.Reference;
@@ -41,15 +41,15 @@ import org.teiid.query.sql.symbol.Reference;
  * the visitor (and possibly the collection), run the visitor, and return the collection.
  * The public visit() methods should NOT be called directly.</p>
  */
-public class ReferenceCollectorVisitor extends LanguageVisitor
-    implements IReferenceCollectorVisitor<LanguageObject, Reference> {
+public class ReferenceCollectorVisitorImpl extends TCLanguageVisitorImpl
+    implements ReferenceCollectorVisitor<LanguageObject, Reference> {
 
     private List<Reference> references = new ArrayList<Reference>();
 
     /**
      * @param teiidVersion
      */
-    public ReferenceCollectorVisitor(TeiidVersion teiidVersion) {
+    public ReferenceCollectorVisitorImpl(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -84,7 +84,7 @@ public class ReferenceCollectorVisitor extends LanguageVisitor
      * @return List of {@link org.teiid.query.sql.symbol.Reference}
      */
     public static List<Reference> getReferences(LanguageObject obj) {
-        ReferenceCollectorVisitor visitor = new ReferenceCollectorVisitor(obj.getTeiidVersion());
+        ReferenceCollectorVisitorImpl visitor = new ReferenceCollectorVisitorImpl(obj.getTeiidVersion());
         return visitor.findReferences(obj);
     }
     

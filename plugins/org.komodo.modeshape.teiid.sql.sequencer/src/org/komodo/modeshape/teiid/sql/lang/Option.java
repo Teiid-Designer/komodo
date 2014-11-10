@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.query.sql.lang.IOption;
@@ -35,7 +35,7 @@ import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 /**
  *
  */
-public class Option extends ASTNode implements IOption<LanguageVisitor>, TeiidSQLConstants.Reserved {
+public class Option extends ASTNode implements IOption<SQLanguageVisitorImpl>, TeiidSQLConstants.Reserved {
 
     /**
      * @param p teiid parser
@@ -172,7 +172,7 @@ public class Option extends ASTNode implements IOption<LanguageVisitor>, TeiidSQ
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

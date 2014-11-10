@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
@@ -156,7 +156,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

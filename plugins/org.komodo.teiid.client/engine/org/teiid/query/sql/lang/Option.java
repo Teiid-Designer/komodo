@@ -10,14 +10,14 @@ import org.komodo.spi.query.sql.lang.IOption;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.language.SQLConstants.Reserved;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 
 /**
  *
  */
-public class Option extends SimpleNode implements IOption<LanguageVisitor> {
+public class Option extends SimpleNode implements IOption<TCLanguageVisitorImpl> {
 
     /**
      * Make Dep token
@@ -73,7 +73,7 @@ public class Option extends SimpleNode implements IOption<LanguageVisitor> {
         
         @Override
         public String toString() {
-            return new SQLStringVisitor(teiidVersion).appendMakeDepOptions(this).getSQLString();
+            return new SQLStringVisitorImpl(teiidVersion).appendMakeDepOptions(this).getSQLString();
         }
 
         public Integer getMax() {
@@ -238,7 +238,7 @@ public class Option extends SimpleNode implements IOption<LanguageVisitor> {
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

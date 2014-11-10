@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.language.SortSpecification;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.query.sql.lang.IOrderByItem;
@@ -32,7 +32,7 @@ import org.komodo.spi.query.sql.lang.IOrderByItem;
 /**
  *
  */
-public class OrderByItem extends ASTNode implements IOrderByItem<Expression, LanguageVisitor> {
+public class OrderByItem extends ASTNode implements IOrderByItem<Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -103,7 +103,7 @@ public class OrderByItem extends ASTNode implements IOrderByItem<Expression, Lan
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

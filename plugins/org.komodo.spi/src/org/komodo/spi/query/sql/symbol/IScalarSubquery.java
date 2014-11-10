@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.symbol;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.query.sql.lang.ISubqueryContainer;
@@ -30,7 +30,7 @@ import org.komodo.spi.query.sql.lang.ISubqueryContainer;
 /**
  *
  */
-public interface IScalarSubquery<LV extends ILanguageVisitor, C extends ICommand>
+public interface IScalarSubquery<LV extends LanguageVisitor, C extends ICommand>
     extends IExpression<LV>, ISubqueryContainer<C> {
     // No methods required
 }

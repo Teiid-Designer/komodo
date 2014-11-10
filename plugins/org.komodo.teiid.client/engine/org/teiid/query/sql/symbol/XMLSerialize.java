@@ -4,14 +4,14 @@ package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
 import org.teiid.core.types.DefaultDataTypeManager;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.SimpleNode;
 
 /**
  *
  */
-public class XMLSerialize extends SimpleNode implements Expression, IXMLSerialize<LanguageVisitor> {
+public class XMLSerialize extends SimpleNode implements Expression, IXMLSerialize<TCLanguageVisitorImpl> {
 
     private Boolean document;
 
@@ -177,7 +177,7 @@ public class XMLSerialize extends SimpleNode implements Expression, IXMLSerializ
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

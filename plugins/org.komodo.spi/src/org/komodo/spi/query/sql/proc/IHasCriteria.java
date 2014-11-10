@@ -22,7 +22,7 @@
 package org.komodo.spi.query.sql.proc;
 
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IPredicateCriteria;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
@@ -30,6 +30,6 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
  *
  */
 @Removed(Version.TEIID_8_0)
-public interface IHasCriteria<LV extends ILanguageVisitor> extends IPredicateCriteria<LV> {
+public interface IHasCriteria<LV extends LanguageVisitor> extends IPredicateCriteria<LV> {
     // No methods required
 }

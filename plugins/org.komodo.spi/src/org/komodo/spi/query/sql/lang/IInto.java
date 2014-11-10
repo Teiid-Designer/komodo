@@ -21,13 +21,13 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql.lang;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
 /**
  *
  */
-public interface IInto <LV extends ILanguageVisitor> extends ILanguageObject<LV> {
+public interface IInto <LV extends LanguageVisitor> extends ILanguageObject<LV> {
 
     /**
      * Get group held by clause

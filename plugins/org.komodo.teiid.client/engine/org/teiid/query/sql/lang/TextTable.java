@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ITextTable;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
  *
  */
-public class TextTable extends TableFunctionReference implements ITextTable<LanguageVisitor> {
+public class TextTable extends TableFunctionReference implements ITextTable<TCLanguageVisitorImpl> {
 
     private Expression file;
 
@@ -255,7 +255,7 @@ public class TextTable extends TableFunctionReference implements ITextTable<Lang
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

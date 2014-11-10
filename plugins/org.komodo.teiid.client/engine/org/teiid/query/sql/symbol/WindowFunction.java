@@ -23,7 +23,7 @@ package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.Node;
 import org.teiid.query.sql.lang.SingleElementSymbol;
 
@@ -70,6 +70,6 @@ public interface WindowFunction extends Node, SingleElementSymbol, Expression {
 
     /** Accept the visitor. **/
     @Override
-    void acceptVisitor(LanguageVisitor visitor);
+    void acceptVisitor(TCLanguageVisitorImpl visitor);
 
 }

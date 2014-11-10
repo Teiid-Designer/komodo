@@ -3,14 +3,14 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IAlterView;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.Expression;
 
 /**
  *
  */
-public class AlterView extends Alter<QueryCommand> implements IAlterView<Expression, LanguageVisitor> {
+public class AlterView extends Alter<QueryCommand> implements IAlterView<Expression, TCLanguageVisitorImpl> {
 
     /**
      * @param p
@@ -27,7 +27,7 @@ public class AlterView extends Alter<QueryCommand> implements IAlterView<Express
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

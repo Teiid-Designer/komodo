@@ -22,7 +22,7 @@
 package org.komodo.spi.query.sql.symbol;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
@@ -30,6 +30,6 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
  *
  */
 @Since(Version.TEIID_8_0)
-public interface IJSONObject <LV extends ILanguageVisitor> extends IExpression<LV> {
+public interface IJSONObject <LV extends LanguageVisitor> extends IExpression<LV> {
     // No methods required
 }

@@ -28,7 +28,7 @@ import org.komodo.spi.query.sql.lang.ICommand;
 /**
  *
  */
-public interface ICommandCollectorVisitor<C extends ICommand> {
+public interface CommandCollectorVisitor<C extends ICommand> {
 
     /**
      * Retrieve the commands from the given command

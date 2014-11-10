@@ -21,25 +21,23 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql;
 
+import java.util.Collection;
+
+import org.komodo.spi.query.sql.lang.ICriteria;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
 
 /**
  *
  */
-public interface ISQLStringVisitor<LO extends ILanguageObject> extends ILanguageVisitor {
-
-    /**
-     * Should the visitor fail to evaluate then this
-     * text is returned
-     */
-    public static final String UNDEFINED = "<undefined>"; //$NON-NLS-1$
+public interface PredicateCollectorVisitor<LO extends ILanguageObject, C extends ICriteria> {
     
     /**
-     * Find the string representation of the given object
+     * Get the predicates from obj
      * 
-     * @param languageObject
+     * @param obj Language object
      * 
-     * @return SQL string
+     * @return collection of criteria 
      */
-    String returnSQLString(LO languageObject);
+    Collection<C> findPredicates(LO obj);
+
 }

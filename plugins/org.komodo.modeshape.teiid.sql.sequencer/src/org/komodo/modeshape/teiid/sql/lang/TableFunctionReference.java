@@ -24,7 +24,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.Collection;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
@@ -34,7 +34,7 @@ import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 /**
  *
  */
-public abstract class TableFunctionReference extends FromClause implements ITableFunctionReference<LanguageVisitor> {
+public abstract class TableFunctionReference extends FromClause implements ITableFunctionReference<SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser

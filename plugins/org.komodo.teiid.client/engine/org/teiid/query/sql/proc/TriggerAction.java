@@ -5,7 +5,7 @@ package org.teiid.query.sql.proc;
 import java.util.List;
 
 import org.komodo.spi.query.sql.proc.ITriggerAction;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.symbol.Expression;
@@ -14,7 +14,7 @@ import org.teiid.query.sql.symbol.GroupSymbol;
 /**
  *
  */
-public class TriggerAction extends Command implements ITriggerAction<Expression, LanguageVisitor> {
+public class TriggerAction extends Command implements ITriggerAction<Expression, TCLanguageVisitorImpl> {
 
     private Block block;
 
@@ -88,7 +88,7 @@ public class TriggerAction extends Command implements ITriggerAction<Expression,
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

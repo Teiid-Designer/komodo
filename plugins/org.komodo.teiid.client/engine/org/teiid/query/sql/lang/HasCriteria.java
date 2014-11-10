@@ -5,14 +5,14 @@ package org.teiid.query.sql.lang;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.query.sql.proc.IHasCriteria;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 
 /**
  *
  */
 @Removed(Version.TEIID_8_0)
-public class HasCriteria extends Criteria implements PredicateCriteria, IHasCriteria<LanguageVisitor> {
+public class HasCriteria extends Criteria implements PredicateCriteria, IHasCriteria<TCLanguageVisitorImpl> {
 
     // the selector object used to determine if a type of criteria is specified 
     // on the user's query
@@ -64,7 +64,7 @@ public class HasCriteria extends Criteria implements PredicateCriteria, IHasCrit
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

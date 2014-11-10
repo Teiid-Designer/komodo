@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ISelect;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
@@ -18,7 +18,7 @@ import org.teiid.query.sql.symbol.Symbol;
 /**
  *
  */
-public class Select extends SimpleNode implements ISelect<Expression, LanguageVisitor> {
+public class Select extends SimpleNode implements ISelect<Expression, TCLanguageVisitorImpl> {
 
     /** The set of symbols for the data elements to be selected. */
     private List<Expression> symbols = new ArrayList<Expression>();
@@ -164,7 +164,7 @@ public class Select extends SimpleNode implements ISelect<Expression, LanguageVi
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

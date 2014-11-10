@@ -23,12 +23,12 @@ package org.komodo.spi.query.sql.proc;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 /**
  *
  */
-public interface IBlock<S extends IStatement, LV extends ILanguageVisitor> extends IStatement<LV> {
+public interface IBlock<S extends IStatement, LV extends LanguageVisitor> extends IStatement<LV> {
 
     /**
      * Get all the statements contained on this block.

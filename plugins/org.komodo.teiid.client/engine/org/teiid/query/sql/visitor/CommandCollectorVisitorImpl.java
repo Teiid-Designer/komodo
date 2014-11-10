@@ -24,10 +24,8 @@ package org.teiid.query.sql.visitor;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.komodo.spi.query.sql.ICommandCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.ExistsCriteria;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -50,13 +48,13 @@ import org.teiid.query.sql.symbol.ScalarSubquery;
  * the visitor, run the visitor, and get the collection. 
  * The public visit() methods should NOT be called directly.</p>
  */
-public class CommandCollectorVisitor extends LanguageVisitor
-    implements ICommandCollectorVisitor<Command> {
+public class CommandCollectorVisitorImpl extends TCLanguageVisitorImpl
+    implements org.komodo.spi.query.sql.CommandCollectorVisitor<Command> {
 
     /**
      * @param teiidVersion
      */
-    public CommandCollectorVisitor(TeiidVersion teiidVersion) {
+    public CommandCollectorVisitorImpl(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -72,7 +70,7 @@ public class CommandCollectorVisitor extends LanguageVisitor
     }
 
     /**
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.ExistsCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.ExistsCriteria)
      */
     @Override
     public void visit(ExistsCriteria obj) {
@@ -158,7 +156,7 @@ public class CommandCollectorVisitor extends LanguageVisitor
      * @return list of commands
      */
     public static final List<Command> getCommands(Command command) {
-        CommandCollectorVisitor visitor = new CommandCollectorVisitor(command.getTeiidVersion());
+        CommandCollectorVisitorImpl visitor = new CommandCollectorVisitorImpl(command.getTeiidVersion());
         return visitor.findCommands(command);
     }
     

@@ -30,7 +30,7 @@ import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestFunctionResolving;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.symbol.Expression;
 import org.teiid.query.sql.symbol.Function;
@@ -64,7 +64,7 @@ public class Test7FunctionResolving extends AbstractTestFunctionResolving {
                                              getFactory().newConstant(DefaultDataTypeManager.DefaultDataTypes.DATE.getId())}); //$NON-NLS-1$
 
         try {
-            ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+            ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
             visitor.resolveLanguageObject(function, getMetadataFactory().example1Cached());
             fail("excpetion expected"); //$NON-NLS-1$
         } catch (QueryResolverException err) {
@@ -78,7 +78,7 @@ public class Test7FunctionResolving extends AbstractTestFunctionResolving {
                                                      new Expression[] {getFactory().newReference(0)}); //$NON-NLS-1$
 
         try {
-            ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+            ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
             visitor.resolveLanguageObject(function, getMetadataFactory().example1Cached());
             fail("excpetion expected"); //$NON-NLS-1$
         } catch (QueryResolverException err) {

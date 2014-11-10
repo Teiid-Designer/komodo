@@ -29,9 +29,9 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.komodo.spi.query.sql.IElementCollectorVisitor;
+import org.komodo.spi.query.sql.ElementCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
@@ -50,8 +50,8 @@ import org.teiid.runtime.client.Messages;
  * the visitor (and possibly the collection), run the visitor, and return the collection.
  * The public visit() methods should NOT be called directly.</p>
  */
-public class ElementCollectorVisitor extends LanguageVisitor
-    implements IElementCollectorVisitor<LanguageObject, ElementSymbol> {
+public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
+    implements ElementCollectorVisitor<LanguageObject, ElementSymbol> {
 
     private Collection<? super ElementSymbol> elements;
     private boolean aggsOnly;
@@ -61,7 +61,7 @@ public class ElementCollectorVisitor extends LanguageVisitor
      * @param teiidVersion
      * @param removeDuplicates 
      */
-    public ElementCollectorVisitor(TeiidVersion teiidVersion, boolean removeDuplicates) {
+    public ElementCollectorVisitorImpl(TeiidVersion teiidVersion, boolean removeDuplicates) {
         this(teiidVersion, removeDuplicates ? new HashSet<ElementSymbol>() : new ArrayList<ElementSymbol>());
     }
 
@@ -72,7 +72,7 @@ public class ElementCollectorVisitor extends LanguageVisitor
      * @param elements Collection to use for elements
      * @throws IllegalArgumentException If elements is null
      */
-	public ElementCollectorVisitor(TeiidVersion teiidVersion, Collection<? super ElementSymbol> elements) {
+	public ElementCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<? super ElementSymbol> elements) {
 	    super(teiidVersion);
         if(elements == null) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0021));
@@ -116,7 +116,7 @@ public class ElementCollectorVisitor extends LanguageVisitor
     	if(obj == null) {
     		return;
     	}
-        ElementCollectorVisitor visitor = new ElementCollectorVisitor(obj.getTeiidVersion(), elements);
+        ElementCollectorVisitorImpl visitor = new ElementCollectorVisitorImpl(obj.getTeiidVersion(), elements);
         PreOrderNavigator.doVisit(obj, visitor);
     }
     
@@ -130,7 +130,7 @@ public class ElementCollectorVisitor extends LanguageVisitor
     	}
 
     	LanguageObject obj = objs.iterator().next();
-        ElementCollectorVisitor visitor = new ElementCollectorVisitor(obj.getTeiidVersion(), elements);
+        ElementCollectorVisitorImpl visitor = new ElementCollectorVisitorImpl(obj.getTeiidVersion(), elements);
         for (LanguageObject object : objs) {
             PreOrderNavigator.doVisit(object, visitor);
 		}
@@ -145,7 +145,7 @@ public class ElementCollectorVisitor extends LanguageVisitor
      * @return Collection of {@link ElementSymbol}
      */
     public static final Collection<ElementSymbol> getElements(LanguageObject obj, boolean removeDuplicates) {
-        return ElementCollectorVisitor.getElements(obj, removeDuplicates, false);
+        return ElementCollectorVisitorImpl.getElements(obj, removeDuplicates, false);
     }
 
     /**
@@ -179,7 +179,7 @@ public class ElementCollectorVisitor extends LanguageVisitor
         } else {
             elements = new ArrayList<ElementSymbol>();
         }
-        ElementCollectorVisitor visitor = new ElementCollectorVisitor(obj.getTeiidVersion(), elements);
+        ElementCollectorVisitorImpl visitor = new ElementCollectorVisitorImpl(obj.getTeiidVersion(), elements);
         visitor.aggsOnly = aggsOnly;
         if (useDeepIteration){
             DeepPreOrderNavigator.doVisit(obj, visitor);

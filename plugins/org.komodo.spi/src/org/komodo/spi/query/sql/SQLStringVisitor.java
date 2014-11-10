@@ -21,23 +21,25 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql;
 
-import java.util.Collection;
-
-import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
 
 /**
  *
  */
-public interface IResolverVisitor<LO extends ILanguageObject, GS extends IGroupSymbol> {
+public interface SQLStringVisitor<LO extends ILanguageObject> extends LanguageVisitor {
+
+    /**
+     * Should the visitor fail to evaluate then this
+     * text is returned
+     */
+    public static final String UNDEFINED = "<undefined>"; //$NON-NLS-1$
     
-    public static final String SHORT_NAME = "shortName"; //$NON-NLS-1$
-
-    @Deprecated
-    void setProperty(String propertyName, Object value);
-
-    void resolveLanguageObject(LO obj, QueryMetadataInterface metadata) throws Exception;
-
-    void resolveLanguageObject(LO obj, Collection<GS> groups, QueryMetadataInterface metadata) throws Exception;
+    /**
+     * Find the string representation of the given object
+     * 
+     * @param languageObject
+     * 
+     * @return SQL string
+     */
+    String returnSQLString(LO languageObject);
 }

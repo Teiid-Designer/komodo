@@ -3,14 +3,14 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.query.sql.lang.IInto;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.symbol.GroupSymbol;
 
 /**
  *
  */
-public class Into extends SimpleNode implements IInto<LanguageVisitor> {
+public class Into extends SimpleNode implements IInto<TCLanguageVisitorImpl> {
 
     private GroupSymbol group;
 
@@ -61,7 +61,7 @@ public class Into extends SimpleNode implements IInto<LanguageVisitor> {
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

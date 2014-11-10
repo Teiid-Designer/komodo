@@ -23,12 +23,12 @@ package org.komodo.spi.query.proc;
 
 import java.util.List;
 import org.komodo.spi.outcome.Outcome;
-import org.komodo.spi.query.sql.ISQLConstants;
+import org.komodo.spi.query.sql.SQLConstants;
 
 /**
  *
  */
-public interface TeiidXmlFileInfo<T extends TeiidXmlColumnInfo> extends TeiidFileInfo, ISQLConstants {
+public interface TeiidXmlFileInfo<T extends TeiidXmlColumnInfo> extends TeiidFileInfo, SQLConstants {
 
     /**
      * Is the Xml file an url

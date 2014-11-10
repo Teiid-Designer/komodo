@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.komodo.spi.query.sql.IFunctionCollectorVisitor;
+import org.komodo.spi.query.sql.FunctionCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.metadata.FunctionMethod.Determinism;
-import org.teiid.query.parser.LanguageVisitor;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
@@ -50,8 +50,8 @@ import org.teiid.runtime.client.Messages;
  * the visitor (and possibly the collection), run the visitor, and return the collection.
  * The public visit() methods should NOT be called directly.</p>
  */
-public class FunctionCollectorVisitor extends LanguageVisitor
-    implements IFunctionCollectorVisitor<LanguageObject, Function> {    
+public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
+    implements FunctionCollectorVisitor<LanguageObject, Function> {    
 
     private Collection<Function> functions;
     
@@ -63,7 +63,7 @@ public class FunctionCollectorVisitor extends LanguageVisitor
      * @param teiidVersion
      * @param removeDuplicates 
      */
-    public FunctionCollectorVisitor(TeiidVersion teiidVersion, boolean removeDuplicates) {
+    public FunctionCollectorVisitorImpl(TeiidVersion teiidVersion, boolean removeDuplicates) {
         this(teiidVersion, removeDuplicates ? new HashSet<Function>() : new ArrayList<Function>());
     }
     
@@ -75,7 +75,7 @@ public class FunctionCollectorVisitor extends LanguageVisitor
      * @param functions
      * @throws IllegalArgumentException If elements is null
      */
-	public FunctionCollectorVisitor(TeiidVersion teiidVersion, Collection<Function> functions) {
+	public FunctionCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<Function> functions) {
         this(teiidVersion, functions, null);
 	}
 
@@ -89,7 +89,7 @@ public class FunctionCollectorVisitor extends LanguageVisitor
      *
      * @throws IllegalArgumentException If elements is null
      */
-    public FunctionCollectorVisitor(TeiidVersion teiidVersion, Collection<Function> functions, String functionName) {
+    public FunctionCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<Function> functions, String functionName) {
         super(teiidVersion);
         if(functions == null) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0022));
@@ -147,7 +147,7 @@ public class FunctionCollectorVisitor extends LanguageVisitor
      * @param deep
      */
     public static final void getFunctions(LanguageObject obj, Collection<Function> functions, boolean deep) {
-        FunctionCollectorVisitor visitor = new FunctionCollectorVisitor(obj.getTeiidVersion(), functions);
+        FunctionCollectorVisitorImpl visitor = new FunctionCollectorVisitorImpl(obj.getTeiidVersion(), functions);
         visitor.findFunctions(obj, deep);
     }
 
@@ -190,7 +190,7 @@ public class FunctionCollectorVisitor extends LanguageVisitor
 	 * @return true if non deterministic
 	 */
 	public static boolean isNonDeterministic(LanguageObject ex) {
-		Collection<Function> functions = FunctionCollectorVisitor.getFunctions(ex, true, false);
+		Collection<Function> functions = FunctionCollectorVisitorImpl.getFunctions(ex, true, false);
 		for (Function function : functions) {
 			if ( function.getFunctionDescriptor().getDeterministic() == Determinism.NONDETERMINISTIC) {
 				return true;

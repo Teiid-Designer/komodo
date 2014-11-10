@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
@@ -36,7 +36,7 @@ import org.komodo.spi.query.sql.lang.IStoredProcedure;
 /**
  *
  */
-public class StoredProcedure extends ProcedureContainer implements TargetedCommand, IStoredProcedure<SPParameter, Expression, LanguageVisitor> {
+public class StoredProcedure extends ProcedureContainer implements TargetedCommand, IStoredProcedure<SPParameter, Expression, SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -187,7 +187,7 @@ public class StoredProcedure extends ProcedureContainer implements TargetedComma
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

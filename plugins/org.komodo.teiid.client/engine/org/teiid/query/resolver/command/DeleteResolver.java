@@ -29,7 +29,7 @@ import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.ProcedureContainerResolver;
 import org.teiid.query.resolver.TCQueryResolver;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Delete;
 import org.teiid.query.sql.symbol.GroupSymbol;
@@ -60,7 +60,7 @@ public class DeleteResolver extends ProcedureContainerResolver {
         Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
         groups.add(delete.getGroup());
         getQueryResolver().resolveSubqueries(command, metadata, groups);
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidParser().getVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidParser().getVersion());
         visitor.resolveLanguageObject(delete, groups, delete.getExternalGroupContexts(), metadata);
     }
     

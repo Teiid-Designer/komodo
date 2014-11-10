@@ -23,13 +23,13 @@ package org.komodo.spi.query.sql.lang;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 
 
 /**
  *
  */
-public interface IOrderBy<E extends IExpression, O extends IOrderByItem, LV extends ILanguageVisitor> 
+public interface IOrderBy<E extends IExpression, O extends IOrderByItem, LV extends LanguageVisitor> 
     extends ILanguageObject<LV> {
 
     /** Constant for the ascending value */

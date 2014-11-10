@@ -25,17 +25,17 @@ import java.util.List;
 import java.util.Set;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.ICommandCollectorVisitor;
-import org.komodo.spi.query.sql.IElementCollectorVisitor;
-import org.komodo.spi.query.sql.IFunctionCollectorVisitor;
-import org.komodo.spi.query.sql.IGroupCollectorVisitor;
-import org.komodo.spi.query.sql.IGroupsUsedByElementsVisitor;
-import org.komodo.spi.query.sql.IPredicateCollectorVisitor;
-import org.komodo.spi.query.sql.IReferenceCollectorVisitor;
-import org.komodo.spi.query.sql.IResolverVisitor;
-import org.komodo.spi.query.sql.ISQLStringVisitor;
-import org.komodo.spi.query.sql.ISQLStringVisitorCallback;
-import org.komodo.spi.query.sql.IValueIteratorProviderCollectorVisitor;
+import org.komodo.spi.query.sql.CommandCollectorVisitor;
+import org.komodo.spi.query.sql.ElementCollectorVisitor;
+import org.komodo.spi.query.sql.FunctionCollectorVisitor;
+import org.komodo.spi.query.sql.GroupCollectorVisitor;
+import org.komodo.spi.query.sql.GroupsUsedByElementsVisitor;
+import org.komodo.spi.query.sql.PredicateCollectorVisitor;
+import org.komodo.spi.query.sql.ReferenceCollectorVisitor;
+import org.komodo.spi.query.sql.ResolverVisitor;
+import org.komodo.spi.query.sql.SQLStringVisitor;
+import org.komodo.spi.query.sql.SQLStringVisitorCallback;
+import org.komodo.spi.query.sql.ValueIteratorProviderCollectorVisitor;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.ICompareCriteria;
 import org.komodo.spi.query.sql.lang.IExpression;
@@ -173,17 +173,17 @@ public interface QueryService {
      * 
      * @return SQL string visitor
      */
-    ISQLStringVisitor getSQLStringVisitor();
+    SQLStringVisitor getSQLStringVisitor();
 
     /**
-     * An {@link ISQLStringVisitor} that can be extended
+     * An {@link SQLStringVisitor} that can be extended
      * using the given callback
      * 
      * @param visitorCallback
      * 
-     * @return instance of {@link ISQLStringVisitor}
+     * @return instance of {@link SQLStringVisitor}
      */
-    ISQLStringVisitor getCallbackSQLStringVisitor(ISQLStringVisitorCallback visitorCallback);
+    SQLStringVisitor getCallbackSQLStringVisitor(SQLStringVisitorCallback visitorCallback);
 
     /**
      * This visitor class will traverse a language object tree and collect all group
@@ -193,17 +193,17 @@ public interface QueryService {
      * 
      * @param removeDuplicates 
      * 
-     * @return instance of {@link IGroupCollectorVisitor}
+     * @return instance of {@link GroupCollectorVisitor}
      */
-    IGroupCollectorVisitor getGroupCollectorVisitor(boolean removeDuplicates);
+    GroupCollectorVisitor getGroupCollectorVisitor(boolean removeDuplicates);
 
     /**
      * Get the visitor the retrieves the groups used by elements
      * in a collection.
      * 
-     * @return instance of {@link IGroupsUsedByElementsVisitor}
+     * @return instance of {@link GroupsUsedByElementsVisitor}
      */
-    IGroupsUsedByElementsVisitor getGroupsUsedByElementsVisitor();
+    GroupsUsedByElementsVisitor getGroupsUsedByElementsVisitor();
 
     /**
      * This visitor class will traverse a language object tree and collect all element
@@ -213,17 +213,17 @@ public interface QueryService {
      * 
      * @param removeDuplicates 
      * 
-     * @return instance of {@link IElementCollectorVisitor}
+     * @return instance of {@link ElementCollectorVisitor}
      */
-    IElementCollectorVisitor getElementCollectorVisitor(boolean removeDuplicates);
+    ElementCollectorVisitor getElementCollectorVisitor(boolean removeDuplicates);
 
     /**
     * This visitor class will traverse a language object tree and collect all sub-commands 
     * it finds.  It uses a List to collect the sub-commands in the order they're found.
     * 
-    * @return instance of {@link ICommandCollectorVisitor}
+    * @return instance of {@link CommandCollectorVisitor}
     */
-    ICommandCollectorVisitor getCommandCollectorVisitor();
+    CommandCollectorVisitor getCommandCollectorVisitor();
     
     /**
      * <p>This visitor class will traverse a language object tree and collect all Function
@@ -235,9 +235,9 @@ public interface QueryService {
      * 
      * @param removeDuplicates 
      *
-     * @return instance of {@link IFunctionCollectorVisitor}
+     * @return instance of {@link FunctionCollectorVisitor}
      */
-    IFunctionCollectorVisitor getFunctionCollectorVisitor(boolean removeDuplicates);
+    FunctionCollectorVisitor getFunctionCollectorVisitor(boolean removeDuplicates);
 
     /**
      * <p>Walk a tree of language objects and collect any predicate criteria that are found.
@@ -251,32 +251,32 @@ public interface QueryService {
      * <li>{@link IIsNullCriteria} IsNullCriteria</li>
      * </ul>
      * 
-     * @return instance of {@link IPredicateCollectorVisitor} 
+     * @return instance of {@link PredicateCollectorVisitor} 
      */
-    IPredicateCollectorVisitor getPredicateCollectorVisitor();
+    PredicateCollectorVisitor getPredicateCollectorVisitor();
     
     /**
      * This visitor class will traverse a language object tree and collect all
      * references it finds.
      * 
-     * @return instance of {@link IReferenceCollectorVisitor}
+     * @return instance of {@link ReferenceCollectorVisitor}
      */
-    IReferenceCollectorVisitor getReferenceCollectorVisitor();
+    ReferenceCollectorVisitor getReferenceCollectorVisitor();
     
     /**
      * This visitor class will traverse a language object tree and collect all language
      * objects that implement {@link ISubqueryContainer}.
      * 
-     * @return instance of {@link IValueIteratorProviderCollectorVisitor}
+     * @return instance of {@link ValueIteratorProviderCollectorVisitor}
      */
-    IValueIteratorProviderCollectorVisitor getValueIteratorProviderCollectorVisitor();
+    ValueIteratorProviderCollectorVisitor getValueIteratorProviderCollectorVisitor();
     
     /**
      * This visitor class will traverse and resolve the given language object
      * 
-     * @return instance of {@link IResolverVisitor}
+     * @return instance of {@link ResolverVisitor}
      */
-    IResolverVisitor getResolverVisitor();
+    ResolverVisitor getResolverVisitor();
     
     /**
      * Get the validator

@@ -22,14 +22,14 @@
 package org.komodo.spi.query.sql.symbol;
 
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.query.sql.ILanguageVisitor;
+import org.komodo.spi.query.sql.LanguageVisitor;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
 
 
 /**
  *
  */
-public interface ISymbol <LV extends ILanguageVisitor> extends ILanguageObject<LV>, StringConstants {
+public interface ISymbol <LV extends LanguageVisitor> extends ILanguageObject<LV>, StringConstants {
 
     /**
      * Character used to delimit name components in a symbol

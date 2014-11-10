@@ -23,7 +23,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.spi.query.sql.lang.IProjectedColumn;
@@ -32,7 +32,7 @@ import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 /**
  *
  */
-public class ProjectedColumn extends ASTNode implements IProjectedColumn<LanguageVisitor> {
+public class ProjectedColumn extends ASTNode implements IProjectedColumn<SQLanguageVisitorImpl> {
 
     /**
      * @param p teiid parser
@@ -101,7 +101,7 @@ public class ProjectedColumn extends ASTNode implements IProjectedColumn<Languag
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 

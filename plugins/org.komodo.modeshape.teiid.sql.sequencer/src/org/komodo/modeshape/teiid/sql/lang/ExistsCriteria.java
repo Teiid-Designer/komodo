@@ -24,14 +24,14 @@ package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.spi.query.sql.lang.IExistsCriteria;
 
 /**
  * Criteria node for exists keyword
  */
-public class ExistsCriteria extends Criteria implements PredicateCriteria, SubqueryContainer<QueryCommand>, IExistsCriteria<LanguageVisitor, QueryCommand> {
+public class ExistsCriteria extends Criteria implements PredicateCriteria, SubqueryContainer<QueryCommand>, IExistsCriteria<SQLanguageVisitorImpl, QueryCommand> {
 
     /**
      * @param p parent parser
@@ -114,7 +114,7 @@ public class ExistsCriteria extends Criteria implements PredicateCriteria, Subqu
     }
 
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 
