@@ -23,11 +23,11 @@ package org.komodo.spi.query;
 
 import java.util.Properties;
 
-import org.komodo.spi.query.proc.ITeiidMetadataFileInfo;
-import org.komodo.spi.query.proc.ITeiidXmlFileInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlRequestInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlResponseInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlWrapperInfo;
+import org.komodo.spi.query.proc.TeiidMetadataFileInfo;
+import org.komodo.spi.query.proc.TeiidXmlFileInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlRequestInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlResponseInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlWrapperInfo;
 
 /**
  * Provides getters for sql syntax strings that differ between runtime client versions
@@ -42,7 +42,7 @@ public interface ProcedureService {
      * 
      * @return SQL statement based on the given metadata information
      */
-    String getSQLStatement(ITeiidMetadataFileInfo metadataFileInfo, String relationalModelName);
+    String getSQLStatement(TeiidMetadataFileInfo metadataFileInfo, String relationalModelName);
 
     /**
      * Prepare an SQL statement for the given xml-based metdata
@@ -52,7 +52,7 @@ public interface ProcedureService {
      * 
      * @return SQL statement based on the given metadata information
      */
-    String getSQLStatement(ITeiidXmlFileInfo xmlFileInfo, String relationalModelName);
+    String getSQLStatement(TeiidXmlFileInfo xmlFileInfo, String relationalModelName);
     
     /**
      * Prepare an SQL statement for the given wsdl-based wrapper metadata
@@ -61,7 +61,7 @@ public interface ProcedureService {
      * 
      * @return SQL statement based on the given metadata information
      */
-    String getSQLStatement(IWsdlWrapperInfo wrapperInfo);
+    String getSQLStatement(WsdlWrapperInfo wrapperInfo);
     
     /**
      * Prepare an SQL statement for the given wsdl-based wrapper procedure metadata
@@ -71,7 +71,7 @@ public interface ProcedureService {
      * 
      * @return SQL statement based on the given metadata information
      */
-    String getSQLStatement(IWsdlWrapperInfo wrapperInfo, Properties properties);
+    String getSQLStatement(WsdlWrapperInfo wrapperInfo, Properties properties);
     
     /**
      * Prepare an SQL statement for the given wsdl-based request metadata
@@ -81,7 +81,7 @@ public interface ProcedureService {
      *  
      * @return SQL statement based on the given metadata information 
      */
-    String getSQLStatement(IWsdlRequestInfo requestInfo, Properties properties);
+    String getSQLStatement(WsdlRequestInfo requestInfo, Properties properties);
 
     /**
      * Prepare an SQL statement for the given wsdl-based response metadata
@@ -91,6 +91,6 @@ public interface ProcedureService {
      * 
      * @return SQL statement based on the given metadata information
      */
-    String getSQLStatement(IWsdlResponseInfo responseInfo, Properties properties);
+    String getSQLStatement(WsdlResponseInfo responseInfo, Properties properties);
 
 }

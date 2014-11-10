@@ -28,7 +28,7 @@ import org.komodo.spi.query.sql.ISQLConstants;
 /**
  *
  */
-public interface ITeiidXmlFileInfo<T extends ITeiidXmlColumnInfo> extends ITeiidFileInfo, ISQLConstants {
+public interface TeiidXmlFileInfo<T extends TeiidXmlColumnInfo> extends TeiidFileInfo, ISQLConstants {
 
     /**
      * Is the Xml file an url

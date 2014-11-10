@@ -23,30 +23,30 @@ package org.teiid.query.proc.wsdl;
 
 import java.util.Properties;
 
-import org.komodo.spi.query.proc.wsdl.IWsdlAttributeInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlColumnInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlConstants;
-import org.komodo.spi.query.proc.wsdl.IWsdlProcedureInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlRequestInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlResponseInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlWrapperInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlAttributeInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlColumnInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlConstants;
+import org.komodo.spi.query.proc.wsdl.WsdlProcedureInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlRequestInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlResponseInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlWrapperInfo;
 import org.komodo.spi.query.sql.ISQLConstants;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 
 /**
  *
  */
-public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConstants, ISQLConstants {
+public class WsdlWrapperHelper extends AbstractWsdlHelper implements WsdlConstants, ISQLConstants {
 
-    private final IWsdlWrapperInfo wrapperInfo;
-    private final IWsdlRequestInfo requestInfo;
-    private final IWsdlResponseInfo responseInfo;
+    private final WsdlWrapperInfo wrapperInfo;
+    private final WsdlRequestInfo requestInfo;
+    private final WsdlResponseInfo responseInfo;
 
     /**
      * @param teiidVersion 
      * @param wrapperInfo
      */
-    public WsdlWrapperHelper(ITeiidVersion teiidVersion, IWsdlWrapperInfo wrapperInfo) {
+    public WsdlWrapperHelper(ITeiidVersion teiidVersion, WsdlWrapperInfo wrapperInfo) {
         super(teiidVersion);
         this.wrapperInfo = wrapperInfo;
         this.requestInfo = wrapperInfo.getRequestInfo();
@@ -62,7 +62,7 @@ public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConsta
         return builder.toString();
     }
     
-    private String getProcedureFullName(IWsdlProcedureInfo info) {
+    private String getProcedureFullName(WsdlProcedureInfo info) {
         StringBuilder builder = new StringBuilder();
         builder.append(wrapperInfo.getViewModelName());
         builder.append('.').append(info.getProcedureName());
@@ -114,7 +114,7 @@ public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConsta
          END
         */
         
-        IWsdlColumnInfo[] reqBodyColumnInfoList = requestInfo.getBodyColumnInfoList();
+        WsdlColumnInfo[] reqBodyColumnInfoList = requestInfo.getBodyColumnInfoList();
 
         StringBuilder sb = new StringBuilder();
 
@@ -135,7 +135,7 @@ public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConsta
         sb.append(L_PAREN);
         int nColumns = reqBodyColumnInfoList.length;
         int i = 0;
-        for (IWsdlColumnInfo columnInfo : reqBodyColumnInfoList) {
+        for (WsdlColumnInfo columnInfo : reqBodyColumnInfoList) {
             String name = columnInfo.getSymbolName();
             sb.append(getParameterFullName(name));
 
@@ -143,7 +143,7 @@ public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConsta
             if (nAttributes > 0) {
                 int index = 0;
                 sb.append(COMMA).append(SPACE);
-                for (IWsdlAttributeInfo attrInfo : columnInfo.getAttributeInfoArray()) {
+                for (WsdlAttributeInfo attrInfo : columnInfo.getAttributeInfoArray()) {
                     sb.append(getParameterFullName(attrInfo.getSymbolName()));
                     if (nAttributes > 1 && index < nAttributes - 1) {
                         sb.append(COMMA).append(SPACE);
@@ -209,7 +209,7 @@ public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConsta
         END
         */
 
-        IWsdlColumnInfo[] reqBodyColumnInfoList = requestInfo.getBodyColumnInfoList();
+        WsdlColumnInfo[] reqBodyColumnInfoList = requestInfo.getBodyColumnInfoList();
 
         StringBuilder sb = new StringBuilder();
 
@@ -232,7 +232,7 @@ public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConsta
         int nColumns = reqBodyColumnInfoList.length;
         int hColumns = requestInfo.getHeaderColumnInfoList().length;
 
-        for (IWsdlColumnInfo columnInfo : requestInfo.getHeaderColumnInfoList()) {
+        for (WsdlColumnInfo columnInfo : requestInfo.getHeaderColumnInfoList()) {
             String nameSegment = convertSqlNameSegment(columnInfo.getSymbolName());
             sb.append(TAB4).append(getWrapperProcedureParameterName(nameSegment));
             if (i < (hColumns - 1)) {
@@ -244,7 +244,7 @@ public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConsta
         i = 0;
         nColumns = reqBodyColumnInfoList.length;
         if (hColumns > 0) sb.append(COMMA);
-        for (IWsdlColumnInfo columnInfo : reqBodyColumnInfoList) {
+        for (WsdlColumnInfo columnInfo : reqBodyColumnInfoList) {
             int nAttributes = columnInfo.getAttributeInfoArray().length;
             String nameSegment = convertSqlNameSegment(columnInfo.getSymbolName());
             sb.append(TAB4).append(getWrapperProcedureParameterName(nameSegment));
@@ -255,7 +255,7 @@ public class WsdlWrapperHelper extends AbstractWsdlHelper implements IWsdlConsta
             if (nAttributes > 0) {
                 int index = 0;
                 sb.append(COMMA).append(SPACE);
-                for (IWsdlAttributeInfo attrInfo : columnInfo.getAttributeInfoArray()) {
+                for (WsdlAttributeInfo attrInfo : columnInfo.getAttributeInfoArray()) {
                     String attrNameSegment = convertSqlNameSegment(attrInfo.getSymbolName());
                     sb.append(TAB4).append(getWrapperProcedureParameterName(attrNameSegment));
                     if (nAttributes > 1 && index < nAttributes - 1) {

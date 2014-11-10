@@ -19,34 +19,45 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.spi.query.proc.wsdl;
-
-import java.util.Properties;
+package org.komodo.spi.query.proc.wsdl.model;
 
 
 /**
+ * This class represents an Operation as defined in the WSDL It does not contain any information about the messages that are used
+ * by the operation as they are of no interest until it is time to actually create an MM model
+ *
  *
  */
-public interface IWsdlWrapperInfo extends IWsdlConstants {
+public interface Operation extends WsdlElement {
 
-    IWsdlRequestInfo getRequestInfo();
+    /**
+     * @return the binding that contains this operation
+     */
+    Binding getBinding();
 
-    IWsdlResponseInfo getResponseInfo();
+    /**
+     * @return the name of the input message
+     */
+    Message getInputMessage();
 
-    String getViewModelName();
+    /**
+     * @return the name of the output message
+     */
+    Message getOutputMessage();
 
-    String getWrapperProcedureName();
+    /**
+     * @return the style of the operation
+     */
+    String getStyle();
 
-    String getSoapAction();
-    
-    String getBindingType();
-    
-    String getSourceModelName();
+    /**
+     * @return an array of the names of possible faults
+     */
+    Fault[] getFaults();
 
-    String getNamespaceURI();
+    String getSOAPAction();
 
-    String getWrapperSqlString();
-    
-    String getWrapperProcedureSqlString(Properties properties);
+    boolean canModel();
 
+    String[] getProblemMessages();
 }

@@ -19,44 +19,31 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.spi.query.proc.wsdl;
+package org.komodo.spi.query.proc.wsdl.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.komodo.spi.query.proc.wsdl.model.IOperation;
-
 /**
+ * This class represents the model hierarchy as defined by a give WSDL
+ *
  *
  */
-public interface IWsdlProcedureInfo extends IWsdlConstants {
-    
-    String getDefaultProcedureName();
-
-    Map<String, String> getNamespaceMap();
-
-    ProcedureType getType();
-
-    IWsdlColumnInfo[] getBodyColumnInfoList();
-
-    IWsdlColumnInfo[] getHeaderColumnInfoList();
-
-    String getProcedureName();
-    
-    HashMap<String, String> getReverseNSMap();
+public interface Model {
 
     /**
-     * 
-     * @return rootPath the root path xquery expression
+     * @return an array of the services defined in the WSDL
      */
-    String getRootPath();
+    Service[] getServices();
 
-    IOperation getOperation();
+    Map getNamespaces();
 
-    String getUniqueBodyColumnName(String proposedName);
+    Service getService( String name );
 
-    String getUniqueHeaderColumnName(String proposedName);
+    Port getPort( String name );
 
-    IWsdlWrapperInfo getWrapperProcedure();
-
+    Operation getOperation( String name );
+    
+    Operation[] getModelableOperations(String portName);
+    
+    String[] getModelablePortNames();
 }

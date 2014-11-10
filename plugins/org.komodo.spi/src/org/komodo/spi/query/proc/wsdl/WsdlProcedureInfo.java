@@ -19,34 +19,44 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.spi.query.proc.wsdl.model;
+package org.komodo.spi.query.proc.wsdl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.komodo.spi.query.proc.wsdl.model.Operation;
 
 /**
- * This class represents a Binding as defined in a WSDL
- *
  *
  */
-public interface IBinding extends IWsdlElement {
+public interface WsdlProcedureInfo extends WsdlConstants {
+    
+    String getDefaultProcedureName();
+
+    Map<String, String> getNamespaceMap();
+
+    ProcedureType getType();
+
+    WsdlColumnInfo[] getBodyColumnInfoList();
+
+    WsdlColumnInfo[] getHeaderColumnInfoList();
+
+    String getProcedureName();
+    
+    HashMap<String, String> getReverseNSMap();
 
     /**
-     * @return returns the operations defined within the Binding
-     */
-    IOperation[] getOperations();
-
-    /**
-     * @return the port that contains this binding
-     */
-    IPort getPort();
-
-    /**
-     * @return uri the URI for the SOAP Binding
-     */
-    String getTransportURI();
-
-    /**
-     * This returns the style information returned by the SOAP binding (RPC or DOC)
      * 
-     * @return the style for the SOAP web service
+     * @return rootPath the root path xquery expression
      */
-    String getStyle();
+    String getRootPath();
+
+    Operation getOperation();
+
+    String getUniqueBodyColumnName(String proposedName);
+
+    String getUniqueHeaderColumnName(String proposedName);
+
+    WsdlWrapperInfo getWrapperProcedure();
+
 }

@@ -19,44 +19,35 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.spi.query.proc.wsdl;
-
-import org.komodo.spi.outcome.Outcome;
+package org.komodo.spi.query.proc.wsdl.model;
 
 /**
  *
  */
-public interface IWsdlAttributeInfo {
+public interface Message extends WsdlElement {
+	
+	int REQUEST_TYPE = 0x00;
+	int RESPONSE_TYPE = 0x02;
+	int FAULT_TYPE = 0x04;
+	
+	Part[] getParts();     
+    
+	Operation getOperation();
+	
+	Fault getFault();
+	
+	boolean isRequest();
+	
+	boolean isResponse();
+	
+	boolean isFault();
+	
+	int getType();
 
-    /**
-     * Get the column name for display in the UI. This removes any quotes for
-     * aesthetic reasons. Use {@link #getSymbolName()} for retrieving the 
-     * fully validated column name.
-     * 
-     * @return the column name sans quotes.
-     */
-    String getName();
-
-    /**
-     * Get the fully validated column name. This should be used in SQL string
-     * generation.
-     *
-     * @return name the column name
-     */
-    String getSymbolName();
-
-    /**
-     * 
-     * @return name the attribute alias
-     */
-    String getAlias();
-
-    String getSignature();
-
-    /**
-     * 
-     * @return outcome the <code>IOutcome</code> representing the validity of the data in this info object
-     */
-    Outcome getOutcome();
-
+	String getUse();
+	
+	String getNamespaceURI();
+	
+	String getEncodingStyle();
+	
 }

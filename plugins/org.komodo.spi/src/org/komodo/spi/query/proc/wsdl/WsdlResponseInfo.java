@@ -19,25 +19,28 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.spi.query.proc.wsdl.model;
+package org.komodo.spi.query.proc.wsdl;
+
+import java.util.Properties;
 
 /**
  *
  */
-public interface IPart extends IWsdlElement {
-	
-	String getElementName();
+public interface WsdlResponseInfo extends WsdlProcedureInfo {
+    
+    String SOAPENVELOPE_ROOTPATH = "/soap:Envelope";//$NON-NLS-1$
+    
+    String SOAPHEADER_ROOTPATH = "/soap:Header";//$NON-NLS-1$
+    
+    String SOAPBODY_ROOTPATH = "/soap:Body";//$NON-NLS-1$
+    
+    String DEFAULT_NS = "ns";//$NON-NLS-1$
 
-	String getElementNamespace();
-	
-	String getTypeName();
-	
-	String getTypeNamespace();
-	
-	IMessage getMessage();
-	
-	boolean isType();
-	
-	boolean isElement();
-	
+    @Override
+	String getDefaultProcedureName();
+
+    String getSqlStringTemplate();
+
+    String getSqlString(Properties properties);
+
 }

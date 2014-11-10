@@ -21,35 +21,42 @@
  ************************************************************************************/
 package org.komodo.spi.query.proc.wsdl;
 
+import org.komodo.spi.outcome.Outcome;
+
 /**
  *
  */
-public interface IWsdlConstants {
+public interface WsdlAttributeInfo {
 
-    String KEY_REQUEST_PROCEDURE_NAME = "requestProcedureName"; //$NON-NLS-1$
-    String KEY_RESPONSE_PROCEDURE_NAME = "responseProcedureName"; //$NON-NLS-1$
-    String KEY_WRAPPER_PROCEDURE_NAME = "wrapperProcedureName"; //$NON-NLS-1$
-    String SQL_BEGIN = "CREATE VIRTUAL PROCEDURE\nBEGIN\n"; //$NON-NLS-1$
-    String SQL_END = "\nEND"; //$NON-NLS-1$
-    String REQUEST = "REQUEST"; //$NON-NLS-1$
-    String RESPONSE = "RESPONSE"; //$NON-NLS-1$
-    String REQUEST_LOWER = "request"; //$NON-NLS-1$
-    String RESPONSE_LOWER = "response"; //$NON-NLS-1$
-    String TABLE_EXEC = "TABLE(EXEC "; //$NON-NLS-1$
-    String XMI_EXTENSION = ".xmi"; //$NON-NLS-1$
-    String RESULT_LOWER = "result"; //$NON-NLS-1$
-    String INVOKE_SEGMENT_1 = "invoke('"; //$NON-NLS-1$
-    String INVOKE_SEGMENT_2 = "', null, REQUEST.xml_out, null, TRUE))"; //$NON-NLS-1$
-    String NULL_LOWER = "null"; //$NON-NLS-1$
-    String XSI_NAMESPACE_PREFIX = "xsi"; //$NON-NLS-1$
-    int TYPE_BODY = 0;
-    int TYPE_HEADER = 1;
-    Object XML_OUT = "xml_out"; //$NON-NLS-1$
-    
-    enum ProcedureType {
-        REQUEST,
-        RESPONSE,
-        BOTH
-    }
+    /**
+     * Get the column name for display in the UI. This removes any quotes for
+     * aesthetic reasons. Use {@link #getSymbolName()} for retrieving the 
+     * fully validated column name.
+     * 
+     * @return the column name sans quotes.
+     */
+    String getName();
+
+    /**
+     * Get the fully validated column name. This should be used in SQL string
+     * generation.
+     *
+     * @return name the column name
+     */
+    String getSymbolName();
+
+    /**
+     * 
+     * @return name the attribute alias
+     */
+    String getAlias();
+
+    String getSignature();
+
+    /**
+     * 
+     * @return outcome the <code>IOutcome</code> representing the validity of the data in this info object
+     */
+    Outcome getOutcome();
 
 }

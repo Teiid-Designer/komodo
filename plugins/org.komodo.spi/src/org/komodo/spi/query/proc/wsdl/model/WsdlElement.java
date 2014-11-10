@@ -22,45 +22,27 @@
 package org.komodo.spi.query.proc.wsdl.model;
 
 /**
- * This class represents a port as defined in a WSDL
+ * This class is an abstract representation of the elements that appear in a WSDL
  *
  *
  */
-public interface IPort extends IWsdlElement {
-	
-	static final String HTTP = "HTTP"; //$NON-NLS-1$
-    static final String SOAP11 = "SOAP11"; //$NON-NLS-1$
-    static final String SOAP12 = "SOAP12"; //$NON-NLS-1$
-	
-	static final String HTTP_TRANSPORT_URI = "http://schemas.xmlsoap.org/wsdl/http/"; //$NON-NLS-1$
-	static final String SOAP11_TRANSPORT_URI = "http://schemas.xmlsoap.org/wsdl/soap/"; //$NON-NLS-1$
-	static final String SOAP12_TRANSPORT_URI = "http://schemas.xmlsoap.org/wsdl/soap12/"; //$NON-NLS-1$
+public interface WsdlElement {
 
     /**
-     * @return a binding defined in this port
+     * @return the name of the element
      */
-    IBinding getBinding();
+    String getName();
 
     /**
-     * @return the service that defines this port
+     * @return the id of the element
      */
-    IService getService();
-    
-    /**
-     * @param uri - the binding type (SOAP11, SOAP12 or HTTP). 
-     */
-    String getBindingType( );
-    
-    /**
-     * @param uri - the binding namespace URI attribute of the <soap:address> element. 
-     */
-    String getBindingTypeURI();
+    String getId();
 
     /**
-     * @return the location attribute of the <soap:address> element. The endpoint URL for the port.
+     * This method is used for making defensive copies of WSDLElements
+     * 
+     * @return a copy of the element
      */
-    String getLocationURI();
-
-    String getNamespaceURI();
+    WsdlElement copy();
 
 }

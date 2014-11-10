@@ -24,30 +24,20 @@ package org.komodo.spi.query.proc.wsdl.model;
 /**
  *
  */
-public interface IMessage extends IWsdlElement {
+public interface Part extends WsdlElement {
 	
-	int REQUEST_TYPE = 0x00;
-	int RESPONSE_TYPE = 0x02;
-	int FAULT_TYPE = 0x04;
-	
-	IPart[] getParts();     
-    
-	IOperation getOperation();
-	
-	IFault getFault();
-	
-	boolean isRequest();
-	
-	boolean isResponse();
-	
-	boolean isFault();
-	
-	int getType();
+	String getElementName();
 
-	String getUse();
+	String getElementNamespace();
 	
-	String getNamespaceURI();
+	String getTypeName();
 	
-	String getEncodingStyle();
+	String getTypeNamespace();
+	
+	Message getMessage();
+	
+	boolean isType();
+	
+	boolean isElement();
 	
 }

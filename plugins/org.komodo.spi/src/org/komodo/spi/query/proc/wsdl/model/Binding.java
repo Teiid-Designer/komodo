@@ -19,25 +19,34 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.spi.query.proc.wsdl;
-
-import java.util.Properties;
+package org.komodo.spi.query.proc.wsdl.model;
 
 /**
+ * This class represents a Binding as defined in a WSDL
+ *
  *
  */
-public interface IWsdlRequestInfo extends IWsdlProcedureInfo {
-    
-    @Override
-	String getDefaultProcedureName();
+public interface Binding extends WsdlElement {
 
-    String getSqlStringTemplate();
+    /**
+     * @return returns the operations defined within the Binding
+     */
+    Operation[] getOperations();
 
-    String getSqlString(Properties properties);
+    /**
+     * @return the port that contains this binding
+     */
+    Port getPort();
 
-    boolean isMessageServiceMode();
+    /**
+     * @return uri the URI for the SOAP Binding
+     */
+    String getTransportURI();
 
-    @Override
-	IWsdlWrapperInfo getWrapperProcedure();
-    
+    /**
+     * This returns the style information returned by the SOAP binding (RPC or DOC)
+     * 
+     * @return the style for the SOAP web service
+     */
+    String getStyle();
 }

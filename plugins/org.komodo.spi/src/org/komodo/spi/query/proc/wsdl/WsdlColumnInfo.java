@@ -19,26 +19,18 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.spi.query.proc;
+package org.komodo.spi.query.proc.wsdl;
 
 import org.komodo.spi.outcome.Outcome;
 
 /**
  *
  */
-public interface ITeiidColumnInfo {
+public interface WsdlColumnInfo {
 
     public static final String DEFAULT_DATATYPE = "string"; //$NON-NLS-1$
     public static final String INTEGER_DATATYPE = "integer"; //$NON-NLS-1$
     public static final int DEFAULT_WIDTH = 10;
-
-    /**
-     * Get the fully validated column name. This should be used in SQL string
-     * generation.
-     * 
-     * @return name the column name
-     */
-    String getSymbolName();
 
     /**
      * Get the column name for display in the UI. This removes any quotes for
@@ -48,6 +40,14 @@ public interface ITeiidColumnInfo {
      * @return the column name sans quotes.
      */
     String getName();
+
+    /**
+     * Get the fully validated column name. This should be used in SQL string
+     * generation.
+     *
+     * @return name the column name
+     */
+    String getSymbolName();
 
     /**
      * 
@@ -75,9 +75,21 @@ public interface ITeiidColumnInfo {
 
     /**
      * 
+     * @return xmlPath the column xmlPath
+     */
+    String getFullXmlPath();
+
+    /**
+     * 
      * @return forOrdinality the column forOrdinality
      */
     boolean getOrdinality();
+
+    String getNamespace();
+    
+    WsdlAttributeInfo[] getAttributeInfoArray();
+
+    String getUniqueAttributeName(String proposedName);
 
     /**
      * 

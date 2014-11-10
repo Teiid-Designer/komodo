@@ -26,7 +26,7 @@ import org.komodo.spi.outcome.Outcome;
 /**
  *
  */
-public interface ITeiidXmlColumnInfo {
+public interface TeiidXmlColumnInfo {
 
     public static final String DEFAULT_DATATYPE = "string"; //$NON-NLS-1$
     

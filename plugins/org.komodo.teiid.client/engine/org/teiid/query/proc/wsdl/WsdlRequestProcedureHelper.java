@@ -26,22 +26,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.komodo.spi.query.proc.wsdl.IWsdlAttributeInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlColumnInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlConstants;
-import org.komodo.spi.query.proc.wsdl.IWsdlRequestInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlWrapperInfo;
-import org.komodo.spi.query.proc.wsdl.model.IMessage;
-import org.komodo.spi.query.proc.wsdl.model.IPart;
+import org.komodo.spi.query.proc.wsdl.WsdlAttributeInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlColumnInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlConstants;
+import org.komodo.spi.query.proc.wsdl.WsdlRequestInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlWrapperInfo;
+import org.komodo.spi.query.proc.wsdl.model.Message;
+import org.komodo.spi.query.proc.wsdl.model.Part;
 import org.komodo.spi.query.sql.ISQLConstants;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 
 /**
  *
  */
-public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements IWsdlConstants, ISQLConstants {
+public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements WsdlConstants, ISQLConstants {
 	
-	private final IWsdlRequestInfo requestInfo;
+	private final WsdlRequestInfo requestInfo;
     private final Properties properties;
     private final static String NSSTRING = "nsString"; //$NON-NLS-1$
     private final static String NS = "ns"; //$NON-NLS-1$
@@ -52,13 +52,13 @@ public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements IW
      * @param requestInfo
      * @param properties
      */
-    public WsdlRequestProcedureHelper(ITeiidVersion teiidVersion, IWsdlRequestInfo requestInfo, Properties properties) {
+    public WsdlRequestProcedureHelper(ITeiidVersion teiidVersion, WsdlRequestInfo requestInfo, Properties properties) {
         super(teiidVersion);
         this.requestInfo = requestInfo;
         this.properties = properties;
     }
 
-    private IWsdlWrapperInfo getWrapperProcedure() {
+    private WsdlWrapperInfo getWrapperProcedure() {
         return requestInfo.getWrapperProcedure();
     }
     
@@ -70,7 +70,7 @@ public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements IW
         return builder.toString();
     }
 
-    private String getPartElementName(IPart part) {
+    private String getPartElementName(Part part) {
         String partElementName = null;
 
         partElementName = part.getTypeName();
@@ -81,12 +81,12 @@ public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements IW
         return partElementName;
     }
     
-    private void addAttributesForElement(StringBuffer sb, IWsdlColumnInfo columnInfo) {
+    private void addAttributesForElement(StringBuffer sb, WsdlColumnInfo columnInfo) {
         if( columnInfo.getAttributeInfoArray().length > 0 ) {
             sb.append(COMMA).append(RETURN).append(TAB).append(TAB).append(TAB).append(TAB).append(XMLATTRIBUTES);
             sb.append(L_PAREN);
             int index = 0;
-            for( IWsdlAttributeInfo attrInfo : columnInfo.getAttributeInfoArray() ) {
+            for( WsdlAttributeInfo attrInfo : columnInfo.getAttributeInfoArray() ) {
                 if( index > 0 ) {
                     sb.append(COMMA).append(SPACE);
                 }
@@ -146,7 +146,7 @@ public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements IW
             headerString.append(R_PAREN).append(COMMA).append(SPACE).append(XMLELEMENT).append(L_PAREN).append(NAME).append(SPACE);
             headerString.append(D_QUOTE).append(HEADER_NAME).append(D_QUOTE);
         
-            for (IWsdlColumnInfo columnInfo : requestInfo.getHeaderColumnInfoList()){
+            for (WsdlColumnInfo columnInfo : requestInfo.getHeaderColumnInfoList()){
                 headerString.append(COMMA).append(SPACE).append(XMLELEMENT).append(L_PAREN).append(NAME).append(SPACE).append(columnInfo.getSymbolName());
                 headerString.append(COMMA).append(SPACE).append(getFullParameterName(requestInfo.getProcedureName(), columnInfo.getSymbolName()));
                 headerString.append(R_PAREN);
@@ -167,7 +167,7 @@ public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements IW
 		return prefix!=null && prefix.trim().length()==0;
 	}
     
-    private String getPartElementNamespace(IPart part) {
+    private String getPartElementNamespace(Part part) {
         String partElementNamespace = null;
 
         partElementNamespace = part.getTypeNamespace();
@@ -178,7 +178,7 @@ public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements IW
         return partElementNamespace;
     }
     
-    private Map<String, String> getNamespaceString(IPart[] parts) {
+    private Map<String, String> getNamespaceString(Part[] parts) {
         
     	Map<String, String> nsMap = new HashMap<String, String>();
     	String ns = null;
@@ -260,8 +260,8 @@ public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements IW
         sb.append(NAME).append(SPACE);
         
         String elementName = null;
-        IMessage message = null;
-        IPart[] parts = null;
+        Message message = null;
+        Part[] parts = null;
        
             
         if (!(requestInfo.isMessageServiceMode())) {
@@ -305,7 +305,7 @@ public class WsdlRequestProcedureHelper extends AbstractWsdlHelper implements IW
         // SELECT XMLELEMENT(NAME GetStateInfo, XMLNAMESPACES(DEFAULT 'http://www.teiid.org/stateService/'), 
         //        XMLELEMENT(NAME stateCode, XMLNAMESPACES(NO DEFAULT), stateServiceView.GetStateInfo_request.stateCode)) AS xml_out;
             
-        for( IWsdlColumnInfo columnInfo : requestInfo.getBodyColumnInfoList()) {
+        for( WsdlColumnInfo columnInfo : requestInfo.getBodyColumnInfoList()) {
             String name = columnInfo.getSymbolName();
             String convertedName = convertSqlNameSegment(name);
             Object nsPrefixObject = this.requestInfo.getReverseNSMap().get(columnInfo.getNamespace());

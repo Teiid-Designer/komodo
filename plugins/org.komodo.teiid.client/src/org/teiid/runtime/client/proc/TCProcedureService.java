@@ -26,13 +26,13 @@ import java.util.List;
 import java.util.Properties;
 
 import org.komodo.spi.query.ProcedureService;
-import org.komodo.spi.query.proc.ITeiidColumnInfo;
-import org.komodo.spi.query.proc.ITeiidMetadataFileInfo;
-import org.komodo.spi.query.proc.ITeiidXmlColumnInfo;
-import org.komodo.spi.query.proc.ITeiidXmlFileInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlRequestInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlResponseInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlWrapperInfo;
+import org.komodo.spi.query.proc.TeiidColumnInfo;
+import org.komodo.spi.query.proc.TeiidMetadataFileInfo;
+import org.komodo.spi.query.proc.TeiidXmlColumnInfo;
+import org.komodo.spi.query.proc.TeiidXmlFileInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlRequestInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlResponseInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlWrapperInfo;
 import org.komodo.spi.query.sql.ISQLConstants;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.teiid.query.proc.wsdl.WsdlRequestProcedureHelper;
@@ -55,7 +55,7 @@ public class TCProcedureService implements ProcedureService, ISQLConstants {
     }
 
     @Override
-    public String getSQLStatement(ITeiidMetadataFileInfo metadataFileInfo, String relationalModelName) {
+    public String getSQLStatement(TeiidMetadataFileInfo metadataFileInfo, String relationalModelName) {
         /*
          * 
          * TEXTTABLE(expression COLUMNS <COLUMN>, ... [DELIMITER char] [(QUOTE|ESCAPE) char] [HEADER [integer]] [SKIP integer]) AS name
@@ -74,13 +74,13 @@ public class TCProcedureService implements ProcedureService, ISQLConstants {
          * SELECT {0} FROM (EXEC {1}.getTextFiles({2})) AS f, TEXTTABLE(file COLUMNS {3}  HEADER {4}) AS {5}
          */
         List<String> tokens = new ArrayList<String>();
-        List<ITeiidColumnInfo> columnInfoList = metadataFileInfo.getColumnInfoList();
+        List<TeiidColumnInfo> columnInfoList = metadataFileInfo.getColumnInfoList();
         
         String alias = "A"; //$NON-NLS-1$
         StringBuffer sb = new StringBuffer();
         int i=0;
         int nColumns = columnInfoList.size();
-        for(ITeiidColumnInfo columnStr : columnInfoList) {
+        for(TeiidColumnInfo columnStr : columnInfoList) {
             sb.append(alias).append(DOT).append(columnStr.getSymbolName());
             
             if(i < (nColumns-1)) {
@@ -93,7 +93,7 @@ public class TCProcedureService implements ProcedureService, ISQLConstants {
         
         sb = new StringBuffer();
         i=0;
-        for( ITeiidColumnInfo columnStr : columnInfoList) {
+        for( TeiidColumnInfo columnStr : columnInfoList) {
             sb.append(columnStr.getSymbolName()).append(SPACE).append(columnStr.getDatatype());
             if( metadataFileInfo.isFixedWidthColumns()) {
                 sb.append(SPACE).append(WIDTH).append(SPACE).append(Integer.toString(columnStr.getWidth()));
@@ -171,7 +171,7 @@ public class TCProcedureService implements ProcedureService, ISQLConstants {
     }
     
     @Override
-    public String getSQLStatement(ITeiidXmlFileInfo xmlFileInfo, String relationalModelName) {
+    public String getSQLStatement(TeiidXmlFileInfo xmlFileInfo, String relationalModelName) {
         /*
         ##  SELECT
         ##      title.pmid AS pmid, title.journal AS journal, title.title AS title
@@ -204,13 +204,13 @@ public class TCProcedureService implements ProcedureService, ISQLConstants {
         
         */
         List<String> tokens = new ArrayList<String>();
-        List<ITeiidXmlColumnInfo> columnInfoList = xmlFileInfo.getColumnInfoList();
+        List<TeiidXmlColumnInfo> columnInfoList = xmlFileInfo.getColumnInfoList();
         
         String alias = "A"; //$NON-NLS-1$
         StringBuffer sb = new StringBuffer();
         int i=0;
         int nColumns = columnInfoList.size();
-        for( ITeiidXmlColumnInfo columnInfo : columnInfoList) {
+        for( TeiidXmlColumnInfo columnInfo : columnInfoList) {
             String name = columnInfo.getSymbolName();
             sb.append(alias).append(DOT).append(name).append(SPACE).append(AS).append(SPACE).append(name);
             
@@ -249,7 +249,7 @@ public class TCProcedureService implements ProcedureService, ISQLConstants {
         
         sb = new StringBuffer();
         i=0;
-        for( ITeiidXmlColumnInfo columnInfo : columnInfoList) {
+        for( TeiidXmlColumnInfo columnInfo : columnInfoList) {
             if( columnInfo.getOrdinality() ) {
                 sb.append(columnInfo.getSymbolName()).append(SPACE).append(FOR_ORDINALITY);
             } else {
@@ -289,25 +289,25 @@ public class TCProcedureService implements ProcedureService, ISQLConstants {
     }
     
     @Override
-    public String getSQLStatement(IWsdlWrapperInfo wrapperInfo) {
+    public String getSQLStatement(WsdlWrapperInfo wrapperInfo) {
         WsdlWrapperHelper helper = new WsdlWrapperHelper(teiidVersion, wrapperInfo);
         return helper.getWrapperStatement();
     }
     
     @Override
-    public String getSQLStatement(IWsdlWrapperInfo wrapperInfo, Properties properties) {
+    public String getSQLStatement(WsdlWrapperInfo wrapperInfo, Properties properties) {
         WsdlWrapperHelper helper = new WsdlWrapperHelper(teiidVersion, wrapperInfo);
         return helper.getWrapperProcedureStatement(properties);
     }
     
     @Override
-    public String getSQLStatement(IWsdlRequestInfo requestInfo, Properties properties) {
+    public String getSQLStatement(WsdlRequestInfo requestInfo, Properties properties) {
         WsdlRequestProcedureHelper helper = new WsdlRequestProcedureHelper(teiidVersion, requestInfo, properties);
         return helper.getSQLStatement();
     }
     
     @Override
-    public String getSQLStatement(IWsdlResponseInfo responseInfo, Properties properties) {
+    public String getSQLStatement(WsdlResponseInfo responseInfo, Properties properties) {
         WsdlResponseProcedureHelper helper = new WsdlResponseProcedureHelper(teiidVersion, responseInfo, properties);
         return helper.getSQLStatement();
     }

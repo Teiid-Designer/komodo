@@ -30,7 +30,7 @@ import org.komodo.spi.query.sql.ISQLConstants;
 /**
  *
  */
-public interface ITeiidMetadataFileInfo extends ITeiidFileInfo, ISQLConstants {
+public interface TeiidMetadataFileInfo extends TeiidFileInfo, ISQLConstants {
 
     int DEFAULT_HEADER_LINE_NUMBER = 1;
     
@@ -79,7 +79,7 @@ public interface ITeiidMetadataFileInfo extends ITeiidFileInfo, ISQLConstants {
      * 
      * @return columnInfoList the <code>TeiidColumnInfo[]</code> list parsed from the header in the data file
      */
-    List<ITeiidColumnInfo> getColumnInfoList();
+    List<TeiidColumnInfo> getColumnInfoList();
 
     /**
      * 

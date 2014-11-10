@@ -25,19 +25,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.komodo.spi.query.proc.wsdl.IWsdlColumnInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlConstants;
-import org.komodo.spi.query.proc.wsdl.IWsdlResponseInfo;
-import org.komodo.spi.query.proc.wsdl.IWsdlWrapperInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlColumnInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlConstants;
+import org.komodo.spi.query.proc.wsdl.WsdlResponseInfo;
+import org.komodo.spi.query.proc.wsdl.WsdlWrapperInfo;
 import org.komodo.spi.query.sql.ISQLConstants;
 import org.komodo.spi.runtime.version.ITeiidVersion;
 
 /**
  *
  */
-public class WsdlResponseProcedureHelper extends AbstractWsdlHelper implements IWsdlConstants, ISQLConstants {
+public class WsdlResponseProcedureHelper extends AbstractWsdlHelper implements WsdlConstants, ISQLConstants {
 
-    private final IWsdlResponseInfo responseInfo;
+    private final WsdlResponseInfo responseInfo;
     
     private final Properties properties;
 
@@ -46,13 +46,13 @@ public class WsdlResponseProcedureHelper extends AbstractWsdlHelper implements I
      * @param responseInfo
      * @param properties
      */
-    public WsdlResponseProcedureHelper(ITeiidVersion teiidVersion, IWsdlResponseInfo responseInfo, Properties properties) {
+    public WsdlResponseProcedureHelper(ITeiidVersion teiidVersion, WsdlResponseInfo responseInfo, Properties properties) {
         super(teiidVersion);
         this.responseInfo = responseInfo;
         this.properties = properties;
     }
     
-    private IWsdlWrapperInfo getWrapperProcedure() {
+    private WsdlWrapperInfo getWrapperProcedure() {
         return responseInfo.getWrapperProcedure();
     }
     
@@ -86,10 +86,10 @@ public class WsdlResponseProcedureHelper extends AbstractWsdlHelper implements I
         sb.append(TAB).append(COLUMNS).append(SPACE).append(RETURN);
 
         int i = 0;
-        IWsdlColumnInfo[] bodyColumnInfoList = responseInfo.getBodyColumnInfoList();
+        WsdlColumnInfo[] bodyColumnInfoList = responseInfo.getBodyColumnInfoList();
         int nColumns = bodyColumnInfoList.length;
 
-        for (IWsdlColumnInfo columnInfo : bodyColumnInfoList) {
+        for (WsdlColumnInfo columnInfo : bodyColumnInfoList) {
             if (columnInfo.getOrdinality()) {
                 sb.append(columnInfo.getSymbolName()).append(SPACE)
                         .append(FOR_ORDINALITY);
