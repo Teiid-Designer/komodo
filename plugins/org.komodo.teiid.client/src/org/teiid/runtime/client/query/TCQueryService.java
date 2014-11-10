@@ -55,7 +55,7 @@ import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.validator.UpdateValidator;
 import org.komodo.spi.validator.Validator;
 import org.komodo.spi.validator.UpdateValidator.TransformUpdateType;
-import org.komodo.spi.xml.IMappingDocumentFactory;
+import org.komodo.spi.xml.MappingDocumentFactory;
 import org.teiid.core.types.JDBCSQLTypeInfo;
 import org.teiid.language.SQLConstants;
 import org.teiid.metadata.FunctionMethod;
@@ -87,7 +87,7 @@ import org.teiid.query.validator.DefaultUpdateValidator;
 import org.teiid.query.validator.DefaultUpdateValidator.UpdateType;
 import org.teiid.query.validator.DefaultValidator;
 import org.teiid.runtime.client.proc.TCProcedureService;
-import org.teiid.runtime.client.xml.MappingDocumentFactory;
+import org.teiid.runtime.client.xml.MappingDocumentFactoryImpl;
 
 /**
  *
@@ -204,9 +204,9 @@ public class TCQueryService implements QueryService {
     }
 
     @Override
-    public IMappingDocumentFactory getMappingDocumentFactory() {
+    public MappingDocumentFactory getMappingDocumentFactory() {
         getQueryParser();
-        return new MappingDocumentFactory(queryParser.getTeiidParser());
+        return new MappingDocumentFactoryImpl(queryParser.getTeiidParser());
     }
 
     @Override

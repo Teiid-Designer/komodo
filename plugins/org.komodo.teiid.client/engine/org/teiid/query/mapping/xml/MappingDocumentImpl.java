@@ -29,7 +29,7 @@ import java.io.PrintWriter;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.xml.IMappingDocument;
+import org.komodo.spi.xml.MappingDocument;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.runtime.client.Messages;
@@ -39,18 +39,18 @@ import org.teiid.runtime.client.Messages;
 /** 
  * A Mapping Node document object.
  */
-public class MappingDocument extends MappingBaseNode implements IMappingDocument<MappingNode> {
+public class MappingDocumentImpl extends MappingBaseNodeImpl implements MappingDocument<MappingNodeImpl> {
     
-    MappingBaseNode root;
+    MappingBaseNodeImpl root;
     boolean formatted;
     String encoding;
     String name;
     
-    public MappingDocument(TeiidParser teiidParser, boolean formatted) {
+    public MappingDocumentImpl(TeiidParser teiidParser, boolean formatted) {
         this(teiidParser, MappingNodeConstants.Defaults.DEFAULT_DOCUMENT_ENCODING, formatted);
     }
             
-    public MappingDocument(TeiidParser teiidParser, String encoding, boolean formatted) {
+    public MappingDocumentImpl(TeiidParser teiidParser, String encoding, boolean formatted) {
         super(teiidParser);
         if (encoding == null) {
             encoding = MappingNodeConstants.Defaults.DEFAULT_DOCUMENT_ENCODING;
@@ -80,7 +80,7 @@ public class MappingDocument extends MappingBaseNode implements IMappingDocument
         return name.toUpperCase();
     }
 
-    public MappingBaseNode getRootNode() {
+    public MappingBaseNodeImpl getRootNode() {
         return root;
     }
     
@@ -89,14 +89,14 @@ public class MappingDocument extends MappingBaseNode implements IMappingDocument
      * at root, but what ever is the first maping element that is the tag root.
      * @return
      */
-    public MappingElement getTagRootElement() {
-        if (this.root instanceof MappingSourceNode) {
-            return (MappingElement)this.root.getNodeChildren().get(0);
+    public MappingElementImpl getTagRootElement() {
+        if (this.root instanceof MappingSourceNodeImpl) {
+            return (MappingElementImpl)this.root.getNodeChildren().get(0);
         }
-        return (MappingElement)this.root;
+        return (MappingElementImpl)this.root;
     }
     
-    void setRoot(MappingBaseNode root) {
+    void setRoot(MappingBaseNodeImpl root) {
         if (root != null) {
             this.root = root;
             this.getChildren().clear();
@@ -129,40 +129,40 @@ public class MappingDocument extends MappingBaseNode implements IMappingDocument
     /**
      * Make sure the cardinality is set correctly
      */
-    private void fixCardinality(MappingElement root) {
+    private void fixCardinality(MappingElementImpl root) {
         root.setMaxOccurrs(1);
         root.setMinOccurrs(1);
     }     
     
-    public void addAllNode(MappingAllNode elem) {
+    public void addAllNode(MappingAllNodeImpl elem) {
          throw new RuntimeException(Messages.gs(Messages.TEIID.TEIID30452));
     }
 
-    public void addChoiceNode(MappingChoiceNode elem) {
+    public void addChoiceNode(MappingChoiceNodeImpl elem) {
          throw new RuntimeException(Messages.gs(Messages.TEIID.TEIID30452));
     }
 
-    public void addSequenceNode(MappingSequenceNode elem) {
+    public void addSequenceNode(MappingSequenceNodeImpl elem) {
          throw new RuntimeException(Messages.gs(Messages.TEIID.TEIID30452));
     }
     
-    public void addChildElement(MappingElement elem) {
+    public void addChildElement(MappingElementImpl elem) {
     	ArgCheck.isNotNull(elem);
         fixCardinality(elem);
         setRoot(elem);
     }    
     
-    public void addSourceNode(MappingSourceNode elem) {
+    public void addSourceNode(MappingSourceNodeImpl elem) {
         ArgCheck.isNotNull(elem);
         setRoot(elem);
     }
     
     /** 
-     * @see org.teiid.query.mapping.xml.MappingNode#clone()
+     * @see org.teiid.query.mapping.xml.MappingNodeImpl#clone()
      */
-    public MappingDocument clone() {
-		MappingDocument clone = (MappingDocument) super.clone();
-		clone.root = (MappingBaseNode) clone.getChildren().iterator().next();
+    public MappingDocumentImpl clone() {
+		MappingDocumentImpl clone = (MappingDocumentImpl) super.clone();
+		clone.root = (MappingBaseNodeImpl) clone.getChildren().iterator().next();
 		return clone;
     }  
     

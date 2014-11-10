@@ -23,39 +23,39 @@ package org.teiid.runtime.client.xml;
 
 import java.io.InputStream;
 
-import org.komodo.spi.xml.IMappingAllNode;
-import org.komodo.spi.xml.IMappingAttribute;
-import org.komodo.spi.xml.IMappingChoiceNode;
-import org.komodo.spi.xml.IMappingCriteriaNode;
-import org.komodo.spi.xml.IMappingDocument;
-import org.komodo.spi.xml.IMappingDocumentFactory;
-import org.komodo.spi.xml.IMappingElement;
-import org.komodo.spi.xml.IMappingRecursiveElement;
-import org.komodo.spi.xml.IMappingSequenceNode;
-import org.teiid.query.mapping.xml.MappingAllNode;
-import org.teiid.query.mapping.xml.MappingAttribute;
-import org.teiid.query.mapping.xml.MappingChoiceNode;
-import org.teiid.query.mapping.xml.MappingCriteriaNode;
-import org.teiid.query.mapping.xml.MappingDocument;
-import org.teiid.query.mapping.xml.MappingElement;
-import org.teiid.query.mapping.xml.MappingLoader;
+import org.komodo.spi.xml.MappingAllNode;
+import org.komodo.spi.xml.MappingAttribute;
+import org.komodo.spi.xml.MappingChoiceNode;
+import org.komodo.spi.xml.MappingCriteriaNode;
+import org.komodo.spi.xml.MappingDocument;
+import org.komodo.spi.xml.MappingDocumentFactory;
+import org.komodo.spi.xml.MappingElement;
+import org.komodo.spi.xml.MappingRecursiveElement;
+import org.komodo.spi.xml.MappingSequenceNode;
+import org.teiid.query.mapping.xml.MappingAllNodeImpl;
+import org.teiid.query.mapping.xml.MappingAttributeImpl;
+import org.teiid.query.mapping.xml.MappingChoiceNodeImpl;
+import org.teiid.query.mapping.xml.MappingCriteriaNodeImpl;
+import org.teiid.query.mapping.xml.MappingDocumentImpl;
+import org.teiid.query.mapping.xml.MappingElementImpl;
+import org.teiid.query.mapping.xml.MappingLoaderImpl;
 import org.teiid.query.mapping.xml.MappingNodeConstants;
-import org.teiid.query.mapping.xml.MappingRecursiveElement;
-import org.teiid.query.mapping.xml.MappingSequenceNode;
+import org.teiid.query.mapping.xml.MappingRecursiveElementImpl;
+import org.teiid.query.mapping.xml.MappingSequenceNodeImpl;
 import org.teiid.query.mapping.xml.Namespace;
 import org.teiid.query.parser.TeiidParser;
 
 /**
  *
  */
-public class MappingDocumentFactory implements IMappingDocumentFactory {
+public class MappingDocumentFactoryImpl implements MappingDocumentFactory {
 
     private final TeiidParser teiidParser;
 
     /**
      * @param teiidParser
      */
-    public MappingDocumentFactory(TeiidParser teiidParser) {
+    public MappingDocumentFactoryImpl(TeiidParser teiidParser) {
         this.teiidParser = teiidParser;
     }
 
@@ -67,9 +67,9 @@ public class MappingDocumentFactory implements IMappingDocumentFactory {
     }
 
     @Override
-    public IMappingDocument loadMappingDocument(InputStream inputStream, String documentName) throws Exception {
-        MappingLoader reader = new MappingLoader(getTeiidParser());
-        MappingDocument mappingDoc = null;
+    public MappingDocument loadMappingDocument(InputStream inputStream, String documentName) throws Exception {
+        MappingLoaderImpl reader = new MappingLoaderImpl(getTeiidParser());
+        MappingDocumentImpl mappingDoc = null;
         mappingDoc = reader.loadDocument(inputStream);
         mappingDoc.setName(documentName);
         
@@ -77,8 +77,8 @@ public class MappingDocumentFactory implements IMappingDocumentFactory {
     }
     
     @Override
-    public IMappingDocument createMappingDocument(String encoding, boolean formatted) {
-        return new MappingDocument(getTeiidParser(), encoding, formatted);
+    public MappingDocument createMappingDocument(String encoding, boolean formatted) {
+        return new MappingDocumentImpl(getTeiidParser(), encoding, formatted);
     }
     
     private Namespace getNamespace(final String prefix) {
@@ -93,49 +93,49 @@ public class MappingDocumentFactory implements IMappingDocumentFactory {
     }
     
     @Override
-    public void addNamespace(IMappingElement element, String prefix, String uri) {
+    public void addNamespace(MappingElement element, String prefix, String uri) {
         Namespace namespace = getNamespace(prefix, uri);
-        ((MappingElement) element).addNamespace(namespace);
+        ((MappingElementImpl) element).addNamespace(namespace);
     }
 
     @Override
-    public IMappingElement createMappingElement(String name, String nsPrefix) {
+    public MappingElement createMappingElement(String name, String nsPrefix) {
         Namespace namespace = getNamespace(nsPrefix);
-        return new MappingElement(getTeiidParser(), name, namespace);
+        return new MappingElementImpl(getTeiidParser(), name, namespace);
     }
 
     @Override
-    public IMappingRecursiveElement createMappingRecursiveElement(String name,
+    public MappingRecursiveElement createMappingRecursiveElement(String name,
                                                                   String nsPrefix,
                                                                   String recursionMappingClass) {
         Namespace namespace = getNamespace(nsPrefix);
-        return new MappingRecursiveElement(getTeiidParser(), name, namespace, recursionMappingClass);
+        return new MappingRecursiveElementImpl(getTeiidParser(), name, namespace, recursionMappingClass);
     }
 
     @Override
-    public IMappingAttribute createMappingAttribute(String name, String nsPrefix) {
+    public MappingAttribute createMappingAttribute(String name, String nsPrefix) {
         Namespace namespace = getNamespace(nsPrefix);
-        return new MappingAttribute(getTeiidParser(), name, namespace);
+        return new MappingAttributeImpl(getTeiidParser(), name, namespace);
     }
 
     @Override
-    public IMappingCriteriaNode createMappingCriteriaNode(String criteria, boolean isDefault) {
-        return new MappingCriteriaNode(getTeiidParser(), criteria, isDefault); 
+    public MappingCriteriaNode createMappingCriteriaNode(String criteria, boolean isDefault) {
+        return new MappingCriteriaNodeImpl(getTeiidParser(), criteria, isDefault); 
     }
 
     @Override
-    public IMappingChoiceNode createMappingChoiceNode(boolean exceptionOnDefault) {
-        return new MappingChoiceNode(getTeiidParser(), exceptionOnDefault);
+    public MappingChoiceNode createMappingChoiceNode(boolean exceptionOnDefault) {
+        return new MappingChoiceNodeImpl(getTeiidParser(), exceptionOnDefault);
     }
     
     @Override
-    public IMappingAllNode createMappingAllNode() {
-        return new MappingAllNode(getTeiidParser());
+    public MappingAllNode createMappingAllNode() {
+        return new MappingAllNodeImpl(getTeiidParser());
     }
     
     @Override
-    public IMappingSequenceNode createMappingSequenceNode() {
-        return new MappingSequenceNode(getTeiidParser());
+    public MappingSequenceNode createMappingSequenceNode() {
+        return new MappingSequenceNodeImpl(getTeiidParser());
     }
   
 }

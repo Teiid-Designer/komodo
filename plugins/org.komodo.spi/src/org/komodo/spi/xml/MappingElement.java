@@ -25,8 +25,8 @@ package org.komodo.spi.xml;
 /**
  *
  */
-public interface IMappingElement<A extends IMappingAttribute, N extends IMappingNode>
-    extends IMappingBaseNode<N> {
+public interface MappingElement<A extends MappingAttribute, N extends MappingNode>
+    extends MappingBaseNode<N> {
 
     /**
      * @param nameInSource

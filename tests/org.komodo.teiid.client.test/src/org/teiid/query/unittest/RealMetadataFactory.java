@@ -63,12 +63,12 @@ import org.teiid.query.function.FunctionTree;
 import org.teiid.query.function.SystemFunctionManager;
 import org.teiid.query.function.UDFSource;
 import org.teiid.query.mapping.relational.TCQueryNode;
-import org.teiid.query.mapping.xml.MappingAttribute;
-import org.teiid.query.mapping.xml.MappingDocument;
-import org.teiid.query.mapping.xml.MappingElement;
-import org.teiid.query.mapping.xml.MappingNode;
+import org.teiid.query.mapping.xml.MappingAttributeImpl;
+import org.teiid.query.mapping.xml.MappingDocumentImpl;
+import org.teiid.query.mapping.xml.MappingElementImpl;
+import org.teiid.query.mapping.xml.MappingNodeImpl;
 import org.teiid.query.mapping.xml.MappingOutputter;
-import org.teiid.query.mapping.xml.MappingSequenceNode;
+import org.teiid.query.mapping.xml.MappingSequenceNodeImpl;
 import org.teiid.query.mapping.xml.MappingVisitor;
 import org.teiid.query.mapping.xml.Navigator;
 import org.teiid.query.metadata.CompositeMetadataStore;
@@ -1751,7 +1751,7 @@ public class RealMetadataFactory {
         return table;
 	}
 	
-	public Table createXmlDocument(String name, Schema model, MappingDocument plan) {
+	public Table createXmlDocument(String name, Schema model, MappingDocumentImpl plan) {
 		String doc = docToString(plan);
 		Table table = createVirtualGroup(name, model, new TCQueryNode(doc));
 		table.setTableType(org.teiid.metadata.Table.Type.Document);
@@ -1759,15 +1759,15 @@ public class RealMetadataFactory {
 		return table;
 	}
 	
-	private void extractColumns(final Table table, MappingDocument plan) {
+	private void extractColumns(final Table table, MappingDocumentImpl plan) {
 		MappingVisitor mv = new MappingVisitor() {
 			@Override
-            public void visit(MappingElement element) {
+            public void visit(MappingElementImpl element) {
 				String type = element.getType();
 				addColumn(element, type);
 			}
 
-			private void addColumn(MappingNode element,
+			private void addColumn(MappingNodeImpl element,
 					String type) {
 				if (type != null) {
 					//TODO: choose the appropriate runtime type
@@ -1782,7 +1782,7 @@ public class RealMetadataFactory {
 			}
 			
 			@Override
-            public void visit(MappingAttribute attribute) {
+            public void visit(MappingAttributeImpl attribute) {
 				String type = attribute.getType();
 				addColumn(attribute, type);
 			}
@@ -1790,7 +1790,7 @@ public class RealMetadataFactory {
 		plan.acceptVisitor(new Navigator(true, mv));
 	}
 
-	public String docToString(MappingDocument plan) {
+	public String docToString(MappingDocumentImpl plan) {
 		MappingOutputter out = new MappingOutputter();
         StringWriter stream = new StringWriter();
         try {
@@ -1946,102 +1946,102 @@ public class RealMetadataFactory {
     	return createKey(org.teiid.metadata.KeyRecord.Type.AccessPattern, name, group, elements);
     }
     
-    private MappingDocument exampleDoc1() {
-        MappingDocument doc = new MappingDocument(getTeiidParser(), false);
+    private MappingDocumentImpl exampleDoc1() {
+        MappingDocumentImpl doc = new MappingDocumentImpl(getTeiidParser(), false);
         
-        MappingElement root = new MappingElement(getTeiidParser(), "root"); //$NON-NLS-1$
+        MappingElementImpl root = new MappingElementImpl(getTeiidParser(), "root"); //$NON-NLS-1$
         doc.addChildElement(root);
-        MappingElement node1 = new MappingElement(getTeiidParser(), "node1"); //$NON-NLS-1$
+        MappingElementImpl node1 = new MappingElementImpl(getTeiidParser(), "node1"); //$NON-NLS-1$
         root.addChildElement(node1);
-        MappingElement node2 = new MappingElement(getTeiidParser(), "node2"); //$NON-NLS-1$
+        MappingElementImpl node2 = new MappingElementImpl(getTeiidParser(), "node2"); //$NON-NLS-1$
         node1.addChildElement(node2);
-        MappingElement node3 = new MappingElement(getTeiidParser(), "node3"); //$NON-NLS-1$
+        MappingElementImpl node3 = new MappingElementImpl(getTeiidParser(), "node3"); //$NON-NLS-1$
         node2.addChildElement(node3);
         return doc;
     }
 
-    private MappingDocument exampleDoc2() {
-        MappingDocument doc = new MappingDocument(getTeiidParser(), false);
+    private MappingDocumentImpl exampleDoc2() {
+        MappingDocumentImpl doc = new MappingDocumentImpl(getTeiidParser(), false);
         
-        MappingElement root = new MappingElement(getTeiidParser(), "root"); //$NON-NLS-1$
+        MappingElementImpl root = new MappingElementImpl(getTeiidParser(), "root"); //$NON-NLS-1$
         doc.addChildElement(root);
-        MappingElement node1 = new MappingElement(getTeiidParser(), "node1"); //$NON-NLS-1$
+        MappingElementImpl node1 = new MappingElementImpl(getTeiidParser(), "node1"); //$NON-NLS-1$
         root.addChildElement(node1);
-        MappingSequenceNode node2 = new MappingSequenceNode(getTeiidParser());
+        MappingSequenceNodeImpl node2 = new MappingSequenceNodeImpl(getTeiidParser());
         node1.addSequenceNode(node2);
-        MappingElement node3 = new MappingElement(getTeiidParser(), "node3"); //$NON-NLS-1$
+        MappingElementImpl node3 = new MappingElementImpl(getTeiidParser(), "node3"); //$NON-NLS-1$
         node2.addChildElement(node3);
-        MappingElement node2a = new MappingElement(getTeiidParser(), "node2"); //$NON-NLS-1$
+        MappingElementImpl node2a = new MappingElementImpl(getTeiidParser(), "node2"); //$NON-NLS-1$
         root.addChildElement(node2a);
         return doc;
     }
 
     // has ambiguous short and long names
-    private MappingDocument exampleDoc3() {
-        MappingDocument doc = new MappingDocument(getTeiidParser(), false);
-        MappingElement root = new MappingElement(getTeiidParser(), "root"); //$NON-NLS-1$
+    private MappingDocumentImpl exampleDoc3() {
+        MappingDocumentImpl doc = new MappingDocumentImpl(getTeiidParser(), false);
+        MappingElementImpl root = new MappingElementImpl(getTeiidParser(), "root"); //$NON-NLS-1$
         doc.addChildElement(root);
 
-        MappingElement node1 = new MappingElement(getTeiidParser(), "node1"); //$NON-NLS-1$
+        MappingElementImpl node1 = new MappingElementImpl(getTeiidParser(), "node1"); //$NON-NLS-1$
         root.addChildElement(node1);  
 
-        MappingElement node2 = new MappingElement(getTeiidParser(), "node2"); //$NON-NLS-1$
+        MappingElementImpl node2 = new MappingElementImpl(getTeiidParser(), "node2"); //$NON-NLS-1$
         node1.addChildElement(node2);
-        MappingElement node2a = new MappingElement(getTeiidParser(), "node2"); //$NON-NLS-1$
+        MappingElementImpl node2a = new MappingElementImpl(getTeiidParser(), "node2"); //$NON-NLS-1$
         root.addChildElement(node2a);
         return doc;
     }
    
     // has attributes and elements
-    private MappingDocument exampleDoc4() {
+    private MappingDocumentImpl exampleDoc4() {
         
-        MappingDocument doc = new MappingDocument(getTeiidParser(), false);
+        MappingDocumentImpl doc = new MappingDocumentImpl(getTeiidParser(), false);
         
-        MappingElement root = new MappingElement(getTeiidParser(), "root"); //$NON-NLS-1$
+        MappingElementImpl root = new MappingElementImpl(getTeiidParser(), "root"); //$NON-NLS-1$
         doc.addChildElement(root);
 
-        root.addAttribute(new MappingAttribute(getTeiidParser(), "node6")); //$NON-NLS-1$
+        root.addAttribute(new MappingAttributeImpl(getTeiidParser(), "node6")); //$NON-NLS-1$
         root.addStagingTable("xmltest.doc4.tm1.g1"); //$NON-NLS-1$
         
-        MappingElement node1 = new MappingElement(getTeiidParser(), "node1"); //$NON-NLS-1$
+        MappingElementImpl node1 = new MappingElementImpl(getTeiidParser(), "node1"); //$NON-NLS-1$
         root.addChildElement(node1);
-        node1.addAttribute(new MappingAttribute(getTeiidParser(), "node2")); //$NON-NLS-1$
+        node1.addAttribute(new MappingAttributeImpl(getTeiidParser(), "node2")); //$NON-NLS-1$
 
-        MappingElement node3 = new MappingElement(getTeiidParser(), "node3"); //$NON-NLS-1$
+        MappingElementImpl node3 = new MappingElementImpl(getTeiidParser(), "node3"); //$NON-NLS-1$
         root.addChildElement(node3);
-        node3.addAttribute(new MappingAttribute(getTeiidParser(), "node4")); //$NON-NLS-1$
+        node3.addAttribute(new MappingAttributeImpl(getTeiidParser(), "node4")); //$NON-NLS-1$
         
-        MappingElement node5 = new MappingElement(getTeiidParser(), "node4"); //$NON-NLS-1$
+        MappingElementImpl node5 = new MappingElementImpl(getTeiidParser(), "node4"); //$NON-NLS-1$
         node3.addChildElement(node5);
-        MappingElement duplicateRoot = new MappingElement(getTeiidParser(), "root"); //$NON-NLS-1$
+        MappingElementImpl duplicateRoot = new MappingElementImpl(getTeiidParser(), "root"); //$NON-NLS-1$
         node5.addChildElement(duplicateRoot);
 
-        duplicateRoot.addChildElement(new MappingElement(getTeiidParser(), "node6")); //$NON-NLS-1$        
+        duplicateRoot.addChildElement(new MappingElementImpl(getTeiidParser(), "node6")); //$NON-NLS-1$        
         return doc;
     }    
 
     // has a union in the mapping class
-    private MappingDocument exampleDoc5() {
-        MappingDocument doc = new MappingDocument(getTeiidParser(), false);
-        MappingElement root = new MappingElement(getTeiidParser(), "root"); //$NON-NLS-1$
+    private MappingDocumentImpl exampleDoc5() {
+        MappingDocumentImpl doc = new MappingDocumentImpl(getTeiidParser(), false);
+        MappingElementImpl root = new MappingElementImpl(getTeiidParser(), "root"); //$NON-NLS-1$
         doc.addChildElement(root);
 
-        MappingElement node1 = new MappingElement(getTeiidParser(), "node1"); //$NON-NLS-1$
+        MappingElementImpl node1 = new MappingElementImpl(getTeiidParser(), "node1"); //$NON-NLS-1$
         root.addChildElement(node1);
-        node1.addChildElement(new MappingElement(getTeiidParser(), "node2","xmltest.mc1.e1")); //$NON-NLS-1$ //$NON-NLS-2$
+        node1.addChildElement(new MappingElementImpl(getTeiidParser(), "node2","xmltest.mc1.e1")); //$NON-NLS-1$ //$NON-NLS-2$
         node1.setSource("xmltest.mc1"); //$NON-NLS-1$
         node1.setMaxOccurrs(-1);
         return doc;
     }	
     
     // has two elements with common suffix, but not ambiguous
-    private MappingDocument exampleDoc6() {
-        MappingDocument doc = new MappingDocument(getTeiidParser(), false);
-        MappingElement root = new MappingElement(getTeiidParser(), "root"); //$NON-NLS-1$
+    private MappingDocumentImpl exampleDoc6() {
+        MappingDocumentImpl doc = new MappingDocumentImpl(getTeiidParser(), false);
+        MappingElementImpl root = new MappingElementImpl(getTeiidParser(), "root"); //$NON-NLS-1$
         doc.addChildElement(root);
 
-        root.addChildElement(new MappingElement(getTeiidParser(), "node")); //$NON-NLS-1$
-        root.addChildElement(new MappingElement(getTeiidParser(), "thenode")); //$NON-NLS-1$
+        root.addChildElement(new MappingElementImpl(getTeiidParser(), "node")); //$NON-NLS-1$
+        root.addChildElement(new MappingElementImpl(getTeiidParser(), "thenode")); //$NON-NLS-1$
         return doc;
     }
 
@@ -2589,60 +2589,60 @@ public class RealMetadataFactory {
 	        new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 	
 	    // MAPPING DOC ======================================================================
-	    MappingDocument doc = new MappingDocument(getTeiidParser(), false);
-	    MappingElement root = new MappingElement(getTeiidParser(), "Catalogs"); //$NON-NLS-1$
+	    MappingDocumentImpl doc = new MappingDocumentImpl(getTeiidParser(), false);
+	    MappingElementImpl root = new MappingElementImpl(getTeiidParser(), "Catalogs"); //$NON-NLS-1$
         doc.addChildElement(root);
 	    
-	    MappingElement cats = new MappingElement(getTeiidParser(), "Catalog"); //$NON-NLS-1$
+	    MappingElementImpl cats = new MappingElementImpl(getTeiidParser(), "Catalog"); //$NON-NLS-1$
 	    root.addChildElement(cats);
-	    MappingElement itemsA = new MappingElement(getTeiidParser(), "Items"); //$NON-NLS-1$
+	    MappingElementImpl itemsA = new MappingElementImpl(getTeiidParser(), "Items"); //$NON-NLS-1$
 	    cats.addChildElement(itemsA);
 
-	    MappingElement item = new MappingElement(getTeiidParser(), "Item"); //$NON-NLS-1$
+	    MappingElementImpl item = new MappingElementImpl(getTeiidParser(), "Item"); //$NON-NLS-1$
 	    itemsA.addChildElement(item);
 
 	    item.setSource("xmltest.items");//$NON-NLS-1$
 	    item.setMaxOccurrs(-1);
-	    item.addAttribute(new MappingAttribute(getTeiidParser(), "ItemID", "xmltest.items.itemNum")); //$NON-NLS-1$ //$NON-NLS-2$
-	    item.addChildElement(new MappingElement(getTeiidParser(), "Name", "xmltest.items.itemName")); //$NON-NLS-1$ //$NON-NLS-2$
-	    item.addChildElement(new MappingElement(getTeiidParser(), "Quantity", "xmltest.items.itemQuantity")); //$NON-NLS-1$ //$NON-NLS-2$
+	    item.addAttribute(new MappingAttributeImpl(getTeiidParser(), "ItemID", "xmltest.items.itemNum")); //$NON-NLS-1$ //$NON-NLS-2$
+	    item.addChildElement(new MappingElementImpl(getTeiidParser(), "Name", "xmltest.items.itemName")); //$NON-NLS-1$ //$NON-NLS-2$
+	    item.addChildElement(new MappingElementImpl(getTeiidParser(), "Quantity", "xmltest.items.itemQuantity")); //$NON-NLS-1$ //$NON-NLS-2$
 	    
 	    //NESTED STUFF======================================================================
-	    MappingElement nestedWrapper = new MappingElement(getTeiidParser(), "Suppliers"); //$NON-NLS-1$
+	    MappingElementImpl nestedWrapper = new MappingElementImpl(getTeiidParser(), "Suppliers"); //$NON-NLS-1$
 	    item.addChildElement(nestedWrapper);
-	    MappingElement supplier = new MappingElement(getTeiidParser(), "Supplier"); //$NON-NLS-1$
+	    MappingElementImpl supplier = new MappingElementImpl(getTeiidParser(), "Supplier"); //$NON-NLS-1$
 	    nestedWrapper.addChildElement(supplier);
 	    supplier.setSource("xmltest.suppliers");//$NON-NLS-1$
 	    supplier.setMaxOccurrs(-1);
-	    supplier.addAttribute(new MappingAttribute(getTeiidParser(), "SupplierID", "xmltest.suppliers.supplierNum")); //$NON-NLS-1$ //$NON-NLS-2$
-	    supplier.addChildElement(new MappingElement(getTeiidParser(), "Name","xmltest.suppliers.supplierName")); //$NON-NLS-1$ //$NON-NLS-2$
-	    supplier.addChildElement(new MappingElement(getTeiidParser(), "Zip", "xmltest.suppliers.supplierZipCode")); //$NON-NLS-1$ //$NON-NLS-2$
+	    supplier.addAttribute(new MappingAttributeImpl(getTeiidParser(), "SupplierID", "xmltest.suppliers.supplierNum")); //$NON-NLS-1$ //$NON-NLS-2$
+	    supplier.addChildElement(new MappingElementImpl(getTeiidParser(), "Name","xmltest.suppliers.supplierName")); //$NON-NLS-1$ //$NON-NLS-2$
+	    supplier.addChildElement(new MappingElementImpl(getTeiidParser(), "Zip", "xmltest.suppliers.supplierZipCode")); //$NON-NLS-1$ //$NON-NLS-2$
 	    
-	    MappingElement ordersWrapper = new MappingElement(getTeiidParser(), "Orders"); //$NON-NLS-1$
+	    MappingElementImpl ordersWrapper = new MappingElementImpl(getTeiidParser(), "Orders"); //$NON-NLS-1$
 	    supplier.addChildElement(ordersWrapper);
-	    MappingElement order = new MappingElement(getTeiidParser(), "Order"); //$NON-NLS-1$
+	    MappingElementImpl order = new MappingElementImpl(getTeiidParser(), "Order"); //$NON-NLS-1$
 	    ordersWrapper.addChildElement(order);
 	    order.setSource("xmltest.orders"); //$NON-NLS-1$
 	    order.setMaxOccurrs(-1);
-	    order.addAttribute(new MappingAttribute(getTeiidParser(), "OrderID", "xmltest.orders.orderNum")); //$NON-NLS-1$ //$NON-NLS-2$
-	    order.addChildElement(new MappingElement(getTeiidParser(), "OrderDate", "xmltest.orders.orderDate")); //$NON-NLS-1$ //$NON-NLS-2$
-	    order.addChildElement(new MappingElement(getTeiidParser(), "OrderQuantity", "xmltest.orders.orderQty")); //$NON-NLS-1$ //$NON-NLS-2$
+	    order.addAttribute(new MappingAttributeImpl(getTeiidParser(), "OrderID", "xmltest.orders.orderNum")); //$NON-NLS-1$ //$NON-NLS-2$
+	    order.addChildElement(new MappingElementImpl(getTeiidParser(), "OrderDate", "xmltest.orders.orderDate")); //$NON-NLS-1$ //$NON-NLS-2$
+	    order.addChildElement(new MappingElementImpl(getTeiidParser(), "OrderQuantity", "xmltest.orders.orderQty")); //$NON-NLS-1$ //$NON-NLS-2$
 	
-	    MappingElement orderStatus = new MappingElement(getTeiidParser(), "OrderStatus", "xmltest.orders.orderStatus"); //$NON-NLS-1$ //$NON-NLS-2$
+	    MappingElementImpl orderStatus = new MappingElementImpl(getTeiidParser(), "OrderStatus", "xmltest.orders.orderStatus"); //$NON-NLS-1$ //$NON-NLS-2$
 	    order.addChildElement(orderStatus);
 	    orderStatus.setMinOccurrs(0);                
 	    //NESTED STUFF======================================================================
 	    
-	    MappingElement employeesWrapper = new MappingElement(getTeiidParser(), "Employees"); //$NON-NLS-1$
+	    MappingElementImpl employeesWrapper = new MappingElementImpl(getTeiidParser(), "Employees"); //$NON-NLS-1$
 	    supplier.addChildElement(employeesWrapper);
-	    MappingElement employee = new MappingElement(getTeiidParser(), "Employee"); //$NON-NLS-1$
+	    MappingElementImpl employee = new MappingElementImpl(getTeiidParser(), "Employee"); //$NON-NLS-1$
 	    employeesWrapper.addChildElement(employee);
 	    employee.setSource("xmltest.employees"); //$NON-NLS-1$
 	    employee.setMaxOccurrs(-1);
-	    employee.addAttribute(new MappingAttribute(getTeiidParser(), "EmployeeID", "xmltest.employees.employeeNum")); //$NON-NLS-1$ //$NON-NLS-2$
-	    employee.addChildElement(new MappingElement(getTeiidParser(), "FirstName", "xmltest.employees.firstName")); //$NON-NLS-1$ //$NON-NLS-2$
-	    employee.addChildElement(new MappingElement(getTeiidParser(), "LastName", "xmltest.employees.lastName")); //$NON-NLS-1$ //$NON-NLS-2$
-	    employee.addAttribute(new MappingAttribute(getTeiidParser(), "SupervisorID", "xmltest.employees.supervisorNum")); //$NON-NLS-1$ //$NON-NLS-2$
+	    employee.addAttribute(new MappingAttributeImpl(getTeiidParser(), "EmployeeID", "xmltest.employees.employeeNum")); //$NON-NLS-1$ //$NON-NLS-2$
+	    employee.addChildElement(new MappingElementImpl(getTeiidParser(), "FirstName", "xmltest.employees.firstName")); //$NON-NLS-1$ //$NON-NLS-2$
+	    employee.addChildElement(new MappingElementImpl(getTeiidParser(), "LastName", "xmltest.employees.lastName")); //$NON-NLS-1$ //$NON-NLS-2$
+	    employee.addAttribute(new MappingAttributeImpl(getTeiidParser(), "SupervisorID", "xmltest.employees.supervisorNum")); //$NON-NLS-1$ //$NON-NLS-2$
 	    
 	    // END MAPPING DOC ======================================================================
 	    
@@ -2678,33 +2678,33 @@ public class RealMetadataFactory {
 	
 	    
 	    // MAPPING DOC - baseball players ======================================================================
-	    MappingDocument doc2 = new MappingDocument(getTeiidParser(), false);
-	    MappingElement root2 = new MappingElement(getTeiidParser(), "BaseballPlayers"); //$NON-NLS-1$
+	    MappingDocumentImpl doc2 = new MappingDocumentImpl(getTeiidParser(), false);
+	    MappingElementImpl root2 = new MappingElementImpl(getTeiidParser(), "BaseballPlayers"); //$NON-NLS-1$
         doc2.addChildElement(root);
 	    
-	    MappingElement player = new MappingElement(getTeiidParser(), "Player"); //$NON-NLS-1$
+	    MappingElementImpl player = new MappingElementImpl(getTeiidParser(), "Player"); //$NON-NLS-1$
 	    root2.addChildElement(player);
 	    player.setSource("xmltest.player"); //$NON-NLS-1$
 	    player.setMaxOccurrs(-1);
-	    player.addAttribute(new MappingAttribute(getTeiidParser(), "PlayerID", "xmltest.player.employeeNum")); //$NON-NLS-1$ //$NON-NLS-2$
-	    player.addChildElement(new MappingElement(getTeiidParser(), "FirstName", "xmltest.player.firstName")); //$NON-NLS-1$ //$NON-NLS-2$
-	    player.addChildElement(new MappingElement(getTeiidParser(), "LastName", "xmltest.player.lastName")); //$NON-NLS-1$ //$NON-NLS-2$
+	    player.addAttribute(new MappingAttributeImpl(getTeiidParser(), "PlayerID", "xmltest.player.employeeNum")); //$NON-NLS-1$ //$NON-NLS-2$
+	    player.addChildElement(new MappingElementImpl(getTeiidParser(), "FirstName", "xmltest.player.firstName")); //$NON-NLS-1$ //$NON-NLS-2$
+	    player.addChildElement(new MappingElementImpl(getTeiidParser(), "LastName", "xmltest.player.lastName")); //$NON-NLS-1$ //$NON-NLS-2$
 	
-	    MappingElement manager = new MappingElement(getTeiidParser(), "Manager"); //$NON-NLS-1$
+	    MappingElementImpl manager = new MappingElementImpl(getTeiidParser(), "Manager"); //$NON-NLS-1$
 	    player.addChildElement(manager);
 	    manager.setSource("xmltest.managers");//$NON-NLS-1$
 	    manager.setMaxOccurrs(-1);
-	    manager.addAttribute(new MappingAttribute(getTeiidParser(), "ManagerID", "xmltest.managers.employeeNum")); //$NON-NLS-1$ //$NON-NLS-2$
-	    manager.addChildElement(new MappingElement(getTeiidParser(), "FirstName", "xmltest.managers.firstName")); //$NON-NLS-1$ //$NON-NLS-2$
-	    manager.addChildElement(new MappingElement(getTeiidParser(), "LastName", "xmltest.managers.lastName")); //$NON-NLS-1$ //$NON-NLS-2$
+	    manager.addAttribute(new MappingAttributeImpl(getTeiidParser(), "ManagerID", "xmltest.managers.employeeNum")); //$NON-NLS-1$ //$NON-NLS-2$
+	    manager.addChildElement(new MappingElementImpl(getTeiidParser(), "FirstName", "xmltest.managers.firstName")); //$NON-NLS-1$ //$NON-NLS-2$
+	    manager.addChildElement(new MappingElementImpl(getTeiidParser(), "LastName", "xmltest.managers.lastName")); //$NON-NLS-1$ //$NON-NLS-2$
 	            
-	    MappingElement owner = new MappingElement(getTeiidParser(), "Owner"); //$NON-NLS-1$
+	    MappingElementImpl owner = new MappingElementImpl(getTeiidParser(), "Owner"); //$NON-NLS-1$
 	    manager.addChildElement(owner);
 	    owner.setSource("xmltest.owners"); //$NON-NLS-1$
 	    owner.setMaxOccurrs(-1);
-	    owner.addAttribute(new MappingAttribute(getTeiidParser(), "OwnerID", "xmltest.owners.employeeNum")); //$NON-NLS-1$ //$NON-NLS-2$
-	    owner.addChildElement(new MappingElement(getTeiidParser(), "FirstName", "xmltest.owners.firstName")); //$NON-NLS-1$ //$NON-NLS-2$
-	    owner.addChildElement(new MappingElement(getTeiidParser(), "LastName", "xmltest.owners.lastName")); //$NON-NLS-1$ //$NON-NLS-2$       
+	    owner.addAttribute(new MappingAttributeImpl(getTeiidParser(), "OwnerID", "xmltest.owners.employeeNum")); //$NON-NLS-1$ //$NON-NLS-2$
+	    owner.addChildElement(new MappingElementImpl(getTeiidParser(), "FirstName", "xmltest.owners.firstName")); //$NON-NLS-1$ //$NON-NLS-2$
+	    owner.addChildElement(new MappingElementImpl(getTeiidParser(), "LastName", "xmltest.owners.lastName")); //$NON-NLS-1$ //$NON-NLS-2$       
 	    // END MAPPING DOC ======================================================================
 	    
 	    // Create virtual docs and doc elements

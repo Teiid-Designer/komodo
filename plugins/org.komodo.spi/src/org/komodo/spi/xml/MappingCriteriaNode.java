@@ -24,6 +24,6 @@ package org.komodo.spi.xml;
 /**
  *
  */
-public interface IMappingSequenceNode<N extends IMappingNode> extends IMappingBaseNode<N> {
+public interface MappingCriteriaNode<N extends MappingNode> extends MappingBaseNode<N> {
     // No methods required
 }

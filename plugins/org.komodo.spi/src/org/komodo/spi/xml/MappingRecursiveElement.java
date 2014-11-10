@@ -24,7 +24,18 @@ package org.komodo.spi.xml;
 /**
  *
  */
-public interface IMappingChoiceNode<CN extends IMappingCriteriaNode, N extends IMappingNode>
-    extends IMappingBaseNode<N> {
-    // No methods required
+public interface MappingRecursiveElement<A extends MappingAttribute, N extends MappingNode>
+    extends MappingElement<A, N> {
+
+    /**
+     * @param recursionCriteria
+     */
+    void setCriteria(String recursionCriteria);
+
+    /**
+     * @param recursionLimit
+     * @param throwExceptionOnRecursionLimit
+     */
+    void setRecursionLimit(int recursionLimit, boolean throwExceptionOnRecursionLimit);
+
 }

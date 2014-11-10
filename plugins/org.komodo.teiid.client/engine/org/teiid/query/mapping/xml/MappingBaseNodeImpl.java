@@ -29,7 +29,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.xml.IMappingBaseNode;
+import org.komodo.spi.xml.MappingBaseNode;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.runtime.client.Messages;
 
@@ -40,28 +40,28 @@ import org.teiid.runtime.client.Messages;
  * enough to define a Element node. Specially designed for sequence, choice and all node 
  * types
  */
-public abstract class MappingBaseNode extends MappingNode implements IMappingBaseNode<MappingNode> {
+public abstract class MappingBaseNodeImpl extends MappingNodeImpl implements MappingBaseNode<MappingNodeImpl> {
     // An ID on the recursive parent as to who the recursive child node is?  
     String recursionId;
     
-    protected MappingBaseNode(TeiidParser teiidParser) {
+    protected MappingBaseNodeImpl(TeiidParser teiidParser) {
         super(teiidParser);
     }
     
     @Override
-    public void addChildNode(MappingNode childNode) {
-        if (childNode instanceof MappingAllNode)
-            addAllNode((MappingAllNode) childNode);
-        else if (childNode instanceof MappingChoiceNode)
-            addChoiceNode((MappingChoiceNode) childNode);
-        else if (childNode instanceof MappingCriteriaNode)
-            addCriteriaNode((MappingCriteriaNode) childNode);
-        else if (childNode instanceof MappingElement)
-            addChildElement((MappingElement) childNode);
-        else if (childNode instanceof MappingSequenceNode)
-            addSequenceNode((MappingSequenceNode) childNode);
-        else if (childNode instanceof MappingSourceNode)
-            addSourceNode((MappingSourceNode) childNode);
+    public void addChildNode(MappingNodeImpl childNode) {
+        if (childNode instanceof MappingAllNodeImpl)
+            addAllNode((MappingAllNodeImpl) childNode);
+        else if (childNode instanceof MappingChoiceNodeImpl)
+            addChoiceNode((MappingChoiceNodeImpl) childNode);
+        else if (childNode instanceof MappingCriteriaNodeImpl)
+            addCriteriaNode((MappingCriteriaNodeImpl) childNode);
+        else if (childNode instanceof MappingElementImpl)
+            addChildElement((MappingElementImpl) childNode);
+        else if (childNode instanceof MappingSequenceNodeImpl)
+            addSequenceNode((MappingSequenceNodeImpl) childNode);
+        else if (childNode instanceof MappingSourceNodeImpl)
+            addSourceNode((MappingSourceNodeImpl) childNode);
         else
             throw new RuntimeException(Messages.gs(Messages.TEIID.TEIID30457, childNode));
     }
@@ -87,10 +87,10 @@ public abstract class MappingBaseNode extends MappingNode implements IMappingBas
         return (String)getProperty(MappingNodeConstants.Properties.RESULT_SET_NAME);
     }     
     
-    public void addChildElement(MappingElement elem) {
+    public void addChildElement(MappingElementImpl elem) {
         if (elem.isRecursive()) {
-            MappingRecursiveElement recursiveElement = (MappingRecursiveElement)elem;
-            MappingBaseNode recursiveRoot = getRecursiveRootNode(recursiveElement);
+            MappingRecursiveElementImpl recursiveElement = (MappingRecursiveElementImpl)elem;
+            MappingBaseNodeImpl recursiveRoot = getRecursiveRootNode(recursiveElement);
 			String mappingClass = recursiveElement.getMappingClass();
 
 			/* The upper case of the class is used in Teiid 7 mappings */
@@ -106,11 +106,11 @@ public abstract class MappingBaseNode extends MappingNode implements IMappingBas
         }
     }
     
-    private MappingBaseNode getRecursiveRootNode(MappingRecursiveElement elem) {
+    private MappingBaseNodeImpl getRecursiveRootNode(MappingRecursiveElementImpl elem) {
         if (hasSource(elem.getMappingClass())) {
             return this;
         }
-        MappingBaseNode parent = this.getParentNode();
+        MappingBaseNodeImpl parent = this.getParentNode();
         if (parent != null) {
             return parent.getRecursiveRootNode(elem);
         }
@@ -127,29 +127,29 @@ public abstract class MappingBaseNode extends MappingNode implements IMappingBas
         return source.equals(getSource());
     }
     
-    public void addChoiceNode(MappingChoiceNode elem) {
+    public void addChoiceNode(MappingChoiceNodeImpl elem) {
         addChild(elem);
     }
     
-    public void addSequenceNode(MappingSequenceNode elem) {
+    public void addSequenceNode(MappingSequenceNodeImpl elem) {
         addChild(elem);
     }
     
-    public void addAllNode(MappingAllNode elem) {
+    public void addAllNode(MappingAllNodeImpl elem) {
         addChild(elem);
     }     
     
-    public void addSourceNode(MappingSourceNode elem) {
+    public void addSourceNode(MappingSourceNodeImpl elem) {
         addChild(elem);
     }     
     
-    public void addCriteriaNode(MappingCriteriaNode node) {
+    public void addCriteriaNode(MappingCriteriaNodeImpl node) {
         addChild(node);     
     }
     
-    public MappingBaseNode getParentNode() {
-        if (getParent() instanceof MappingBaseNode) {
-            return (MappingBaseNode)getParent();
+    public MappingBaseNodeImpl getParentNode() {
+        if (getParent() instanceof MappingBaseNodeImpl) {
+            return (MappingBaseNodeImpl)getParent();
         }
         return null;
     }
@@ -165,7 +165,7 @@ public abstract class MappingBaseNode extends MappingNode implements IMappingBas
         return getFullyQualifiedName().toUpperCase();
     }
 
-    public void removeChildNode(MappingBaseNode toRemove) {
+    public void removeChildNode(MappingBaseNodeImpl toRemove) {
         getChildren().remove(toRemove);
     }
         
@@ -206,9 +206,9 @@ public abstract class MappingBaseNode extends MappingNode implements IMappingBas
      * Get the document node of this node.
      * @return
      */
-    public MappingDocument getDocument() {
+    public MappingDocumentImpl getDocument() {
         if (isDocumentNode()) {
-            return (MappingDocument)this;
+            return (MappingDocumentImpl)this;
         }
         return getParentNode().getDocument();
     }
@@ -252,8 +252,8 @@ public abstract class MappingBaseNode extends MappingNode implements IMappingBas
     }  
     
     @Override
-    public MappingNode clone() {
-    	MappingBaseNode clone = (MappingBaseNode) super.clone();
+    public MappingNodeImpl clone() {
+    	MappingBaseNodeImpl clone = (MappingBaseNodeImpl) super.clone();
     	List<String> staging = getStagingTables();
     	if (getStagingTables() != null && staging != MappingNodeConstants.Defaults.DEFAULT_VALUES.get(MappingNodeConstants.Properties.TEMP_GROUP_NAMES)) {
     		clone.setStagingTables(new ArrayList<String>(staging));

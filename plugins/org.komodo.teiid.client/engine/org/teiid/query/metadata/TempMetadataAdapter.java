@@ -32,7 +32,7 @@ import java.util.Properties;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.metadata.QueryNode;
-import org.komodo.spi.xml.IMappingNode;
+import org.komodo.spi.xml.MappingNode;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 import org.teiid.metadata.Column;
@@ -585,7 +585,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
     
     @Override
-    public IMappingNode getMappingNode(Object groupID)
+    public MappingNode getMappingNode(Object groupID)
         throws Exception {
             
         return this.actualMetadata.getMappingNode(groupID);

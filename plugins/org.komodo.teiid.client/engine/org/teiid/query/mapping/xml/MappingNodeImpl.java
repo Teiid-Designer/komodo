@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.xml.IMappingNode;
+import org.komodo.spi.xml.MappingNode;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 import org.teiid.runtime.client.Messages;
@@ -44,15 +44,15 @@ import org.teiid.runtime.client.Messages;
  * for every entity (element or attribute) in a target XML document.
  * @see MappingNodeConstants
  */
-public abstract class MappingNode implements Cloneable, Serializable, IMappingNode {
+public abstract class MappingNodeImpl implements Cloneable, Serializable, MappingNode {
 
 	private static final long serialVersionUID = 6761829541871178451L;
 
 	/** The parent of this node, null if root. */
-    private MappingNode parent;
+    private MappingNodeImpl parent;
 
     /** Child nodes, usually just 1 or 2, but occasionally more */
-    private List<MappingNode> children = new LinkedList<MappingNode>();
+    private List<MappingNodeImpl> children = new LinkedList<MappingNodeImpl>();
 
     /** node properties, as defined in NodeConstants.Properties. */
     private Map<MappingNodeConstants.Properties, Object> nodeProperties;
@@ -65,7 +65,7 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
     /** 
      * @param teiidParser
      */
-    public MappingNode(TeiidParser teiidParser){
+    public MappingNodeImpl(TeiidParser teiidParser){
         this.teiidParser = teiidParser;
     }
 
@@ -83,15 +83,15 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
     /**
      * Get the parent of this node.
      */
-    public MappingNode getParent() {
+    public MappingNodeImpl getParent() {
         return this.parent;
     }
     
-    public static MappingNode findNode(MappingNode root, String partialName) {
+    public static MappingNodeImpl findNode(MappingNodeImpl root, String partialName) {
     	return findNode(root, partialName, 0);
     }
     
-    public static MappingNode findNode(MappingNode root, String partialName, int start) {
+    public static MappingNodeImpl findNode(MappingNodeImpl root, String partialName, int start) {
         String canonicalName = root.getName();
         
         if (canonicalName != null) {
@@ -110,9 +110,9 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
             }
         }
         
-        for (Iterator<MappingNode> i = root.getChildren().iterator(); i.hasNext();) {
-            MappingNode child = i.next();
-            MappingNode found = findNode(child, partialName, start);
+        for (Iterator<MappingNodeImpl> i = root.getChildren().iterator(); i.hasNext();) {
+            MappingNodeImpl child = i.next();
+            MappingNodeImpl found = findNode(child, partialName, start);
             if (found != null) {
                 return found;
             }
@@ -125,7 +125,7 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
      * Set the parent of this node.  This method is restricted, as
      * it should be called only when {@link #addChild adding a child node}
      */
-    void setParent( MappingNode parent ) {
+    void setParent( MappingNodeImpl parent ) {
         this.parent = parent;
     }
 
@@ -133,7 +133,7 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
      * Get the children contained by this node, or an empty List
      * @return children; if no children, return empty List (never null)
      */
-    public List<MappingNode> getChildren(){
+    public List<MappingNodeImpl> getChildren(){
         return this.children;
     }
 
@@ -141,11 +141,11 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
      * Get all children of this node of a specified target node type.  The value
      * of node type should be one of {@link #ATTRIBUTE} or {@link #ELEMENT}.
      */
-    public List<MappingNode> getChildren( String type ) {
-        List<MappingNode> subset = new ArrayList<MappingNode>();
-        Iterator<MappingNode> iter = children.iterator();
+    public List<MappingNodeImpl> getChildren( String type ) {
+        List<MappingNodeImpl> subset = new ArrayList<MappingNodeImpl>();
+        Iterator<MappingNodeImpl> iter = children.iterator();
         while ( iter.hasNext() ) {
-            MappingNode node = iter.next();
+            MappingNodeImpl node = iter.next();
             if ( node.getProperty(MappingNodeConstants.Properties.NODE_TYPE).equals(type) ) {
                 subset.add( node );
             }
@@ -153,11 +153,11 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
         return subset;
     }
     
-    public List<MappingNode> getNodeChildren() {
-        List<MappingNode> subset = new ArrayList<MappingNode>();
-        Iterator<MappingNode> iter = children.iterator();
+    public List<MappingNodeImpl> getNodeChildren() {
+        List<MappingNodeImpl> subset = new ArrayList<MappingNodeImpl>();
+        Iterator<MappingNodeImpl> iter = children.iterator();
         while ( iter.hasNext() ) {
-            MappingNode node = iter.next();
+            MappingNodeImpl node = iter.next();
             if ( !node.getProperty(MappingNodeConstants.Properties.NODE_TYPE).equals(MappingNodeConstants.ATTRIBUTE) ) {
                 subset.add( node );
             }
@@ -167,10 +167,10 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
 
     /**
      * Add a child mapping node to this one.
-     * @param MappingNode to add as a child of this node
+     * @param MappingNodeImpl to add as a child of this node
      * @return the added node, with parent set to this node
      */
-    public void addChild( MappingNode node ) {
+    public void addChild( MappingNodeImpl node ) {
         this.children.add( node );
         node.setParent(this);
     }
@@ -279,8 +279,8 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
             return true;
         }
 
-        if(obj != null && obj instanceof MappingNode) {
-            return ((MappingNode)obj).getNodeProperties().equals(getNodeProperties());
+        if(obj != null && obj instanceof MappingNodeImpl) {
+            return ((MappingNodeImpl)obj).getNodeProperties().equals(getNodeProperties());
         }
         return false;
     }
@@ -319,11 +319,11 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
     /**
      * Prints the whole tree of MappingNodes to the provided PrintStream.
      */
-    public static void printMappingNodeTree(MappingNode root, PrintStream output){
+    public static void printMappingNodeTree(MappingNodeImpl root, PrintStream output){
         output.print(toStringNodeTree(root));
     }
 
-    public static String toStringNodeTree(MappingNode root){
+    public static String toStringNodeTree(MappingNodeImpl root){
         StringBuffer str = new StringBuffer();
         buildTreeString(root, str, 0);
         return str.toString();
@@ -332,13 +332,13 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
     // Define a single tab
     private static final String TAB = "  "; //$NON-NLS-1$
 
-    private static void buildTreeString(MappingNode node, StringBuffer str, int tabLevel){
+    private static void buildTreeString(MappingNodeImpl node, StringBuffer str, int tabLevel){
         setTab(str, tabLevel++);
         str.append(node.toString());
         str.append(node.getNodeProperties());
         str.append("\n"); //$NON-NLS-1$
 
-        Iterator<MappingNode> i = node.getChildren().iterator();
+        Iterator<MappingNodeImpl> i = node.getChildren().iterator();
         while (i.hasNext()){
             buildTreeString(i.next(), str, tabLevel);
         }
@@ -365,7 +365,7 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
      * {@link MappingNodeConstants#SEARCH_DOWN} or {@link MappingNodeConstants#SEARCH_DOWN_BREADTH_FIRST}
      * @return MappingNode first node found that has the indicated property and value, or null if none found
      */
-    static MappingNode findFirstNodeWithProperty(MappingNodeConstants.Properties propertyKey, Object value, MappingNode node, int searchDirection) {
+    static MappingNodeImpl findFirstNodeWithProperty(MappingNodeConstants.Properties propertyKey, Object value, MappingNodeImpl node, int searchDirection) {
         return findFirstNodeWithPropertyValue(propertyKey, value, false, node, searchDirection);
     }
     
@@ -385,11 +385,11 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
      * {@link MappingNodeConstants#SEARCH_DOWN} or {@link MappingNodeConstants#SEARCH_DOWN_BREADTH_FIRST}
      * @return MappingNode first node found that has the indicated property and value, or null if none found
      */
-    static MappingNode findFirstNodeWithPropertyString(MappingNodeConstants.Properties propertyKey, String value, MappingNode node, int searchDirection) {
+    static MappingNodeImpl findFirstNodeWithPropertyString(MappingNodeConstants.Properties propertyKey, String value, MappingNodeImpl node, int searchDirection) {
         return findFirstNodeWithPropertyValue(propertyKey, value, true, node, searchDirection);
     }
 
-    private static MappingNode findFirstNodeWithPropertyValue(MappingNodeConstants.Properties propertyKey, Object value, boolean isStringValue, MappingNode node, int searchDirection) {
+    private static MappingNodeImpl findFirstNodeWithPropertyValue(MappingNodeConstants.Properties propertyKey, Object value, boolean isStringValue, MappingNodeImpl node, int searchDirection) {
         
         if (node == null || propertyKey == null){
             return null;
@@ -409,11 +409,11 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
         }
     }
 
-    private static MappingNode traverseDownForFirstNodeWithPropertyString(MappingNodeConstants.Properties propertyKey, Object value, boolean isStringValue, MappingNode node, boolean breadthFirst) {
+    private static MappingNodeImpl traverseDownForFirstNodeWithPropertyString(MappingNodeConstants.Properties propertyKey, Object value, boolean isStringValue, MappingNodeImpl node, boolean breadthFirst) {
         if (breadthFirst) {
-            Iterator<MappingNode> children = node.getChildren().iterator();
+            Iterator<MappingNodeImpl> children = node.getChildren().iterator();
             while (children.hasNext()){
-                MappingNode child = children.next();
+                MappingNodeImpl child = children.next();
                 if (checkThisNodeForPropertyValue(propertyKey, value, isStringValue, child)){
                     return child;
                 }
@@ -424,12 +424,12 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
             }
         }
         
-        Iterator<MappingNode> children = node.getChildren().iterator();
+        Iterator<MappingNodeImpl> children = node.getChildren().iterator();
         while (children.hasNext()){
-            MappingNode child = children.next();
+            MappingNodeImpl child = children.next();
             
             //recursive call to this method
-            MappingNode result = traverseDownForFirstNodeWithPropertyString(propertyKey, value, isStringValue, child, breadthFirst);
+            MappingNodeImpl result = traverseDownForFirstNodeWithPropertyString(propertyKey, value, isStringValue, child, breadthFirst);
             if (result != null){
                 return result;
             }
@@ -438,7 +438,7 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
         return null;
     }
     
-    private static boolean checkThisNodeForPropertyValue(MappingNodeConstants.Properties propertyKey, Object value, boolean isStringValue, MappingNode node) {
+    private static boolean checkThisNodeForPropertyValue(MappingNodeConstants.Properties propertyKey, Object value, boolean isStringValue, MappingNodeImpl node) {
         Object thisValue = node.getProperty(propertyKey);
         if (thisValue != null){
             if (value == null){
@@ -454,7 +454,7 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
         return false;
     }
 
-    private static MappingNode traverseUpForFirstNodeWithPropertyString(MappingNodeConstants.Properties propertyKey, Object value, boolean isStringValue, MappingNode node) {
+    private static MappingNodeImpl traverseUpForFirstNodeWithPropertyString(MappingNodeConstants.Properties propertyKey, Object value, boolean isStringValue, MappingNodeImpl node) {
         while (node != null){
             if (checkThisNodeForPropertyValue(propertyKey, value, isStringValue, node)){
                 return node;
@@ -486,7 +486,7 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
      * If not find nearest one looking up the tree. 
      * @return
      */
-    public MappingSourceNode getSourceNode() {
+    public MappingSourceNodeImpl getSourceNode() {
         if (getParent() != null) {
             return getParent().getSourceNode();
         }
@@ -497,12 +497,12 @@ public abstract class MappingNode implements Cloneable, Serializable, IMappingNo
         return null;        
     }    
     
-    public MappingNode clone() {
+    public MappingNodeImpl clone() {
     	try {
-			MappingNode clone = (MappingNode) super.clone();
-			clone.children = new ArrayList<MappingNode>(children);
+			MappingNodeImpl clone = (MappingNodeImpl) super.clone();
+			clone.children = new ArrayList<MappingNodeImpl>(children);
 			for (int i = 0; i < clone.children.size(); i++) {
-				MappingNode childClone = clone.children.get(i).clone();
+				MappingNodeImpl childClone = clone.children.get(i).clone();
 				childClone.setParent(clone);
 				clone.children.set(i, childClone);
 			}

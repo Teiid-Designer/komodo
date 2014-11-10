@@ -56,9 +56,9 @@ import org.xml.sax.SAXException;
  *     MappingNode mappingRootNode = loader.loadDocument(istream);
  * </pre></p>
  *
- * @see MappingNode
+ * @see MappingNodeImpl
  */
-public class MappingLoader {
+public class MappingLoaderImpl {
     
     private HashMap unresolvedNamespaces = new HashMap();
 
@@ -67,7 +67,7 @@ public class MappingLoader {
     /**
      * @param teiidParser
      */
-    public MappingLoader(TeiidParser teiidParser) {
+    public MappingLoaderImpl(TeiidParser teiidParser) {
         this.teiidParser = teiidParser;
     }
 
@@ -81,7 +81,7 @@ public class MappingLoader {
     /**
      * <p>Load mapping definition from XML Document object. </p>
      */
-    public MappingDocument loadDocument(InputStream stream) throws MappingException {
+    public MappingDocumentImpl loadDocument(InputStream stream) throws MappingExceptionImpl {
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setValidating(false);
@@ -89,15 +89,15 @@ public class MappingLoader {
             Document doc = db.parse(stream);
             return loadContents(doc);
         } catch (IOException e) {
-            throw new MappingException(e);
+            throw new MappingExceptionImpl(e);
         } catch (ParserConfigurationException e) {
-        	throw new MappingException(e);
+        	throw new MappingExceptionImpl(e);
 		} catch (SAXException e) {
-			throw new MappingException(e);
+			throw new MappingExceptionImpl(e);
 		}
     }
     
-    public MappingDocument loadDocument(String fileName) throws MappingException, FileNotFoundException {
+    public MappingDocumentImpl loadDocument(String fileName) throws MappingExceptionImpl, FileNotFoundException {
     	FileInputStream fis = new FileInputStream(fileName);
     	return loadDocument(fis);
     }    
@@ -105,21 +105,21 @@ public class MappingLoader {
     /**
      * Load contents into temporary structures.
      */
-    MappingDocument loadContents(Document document) throws MappingException {
-        MappingDocument doc = new MappingDocument(getTeiidParser(), false);
+    MappingDocumentImpl loadContents(Document document) throws MappingExceptionImpl {
+        MappingDocumentImpl doc = new MappingDocumentImpl(getTeiidParser(), false);
         
         loadDocumentProperties(doc, document.getDocumentElement());
         
         // now load all the children
         Collection mappingChildren = getChildren(document.getDocumentElement(), MappingNodeConstants.Tags.MAPPING_NODE_NAME); 
-        doc = (MappingDocument)recursiveLoadContents(mappingChildren, doc);
+        doc = (MappingDocumentImpl)recursiveLoadContents(mappingChildren, doc);
         return doc;
     }
         
-    private MappingNode recursiveLoadContents(Collection mappingChildren, MappingBaseNode parent) 
-        throws MappingException {
+    private MappingNodeImpl recursiveLoadContents(Collection mappingChildren, MappingBaseNodeImpl parent) 
+        throws MappingExceptionImpl {
         
-        MappingBaseNode node = null;
+        MappingBaseNodeImpl node = null;
         for (Iterator i = mappingChildren.iterator(); i.hasNext();){
             Element elem = (Element)i.next();
 
@@ -159,8 +159,8 @@ public class MappingLoader {
      * @param element - parent element
      * @return a sequence node
      */
-    MappingSequenceNode loadSequenceNode(Element element, MappingBaseNode parentNode) {
-        MappingSequenceNode node = new MappingSequenceNode(getTeiidParser());
+    MappingSequenceNodeImpl loadSequenceNode(Element element, MappingBaseNodeImpl parentNode) {
+        MappingSequenceNodeImpl node = new MappingSequenceNodeImpl(getTeiidParser());
         node.setMinOccurrs(getMinOccurrences(element));
         node.setMaxOccurrs(getMaxOccurrences(element));        
         node.setSource(getSource(element));
@@ -175,14 +175,14 @@ public class MappingLoader {
      * @param element - parent element
      * @return retuns a MappingElement
      */
-    MappingElement loadElementNode(Element element, MappingBaseNode parentNode, boolean rootElement) 
-        throws MappingException{
+    MappingElementImpl loadElementNode(Element element, MappingBaseNodeImpl parentNode, boolean rootElement) 
+        throws MappingExceptionImpl{
         
-        MappingElement node = null;
+        MappingElementImpl node = null;
         
         String name = getName(element);
         if (name == null || name.length()==0) {
-            throw new MappingException(Messages.getString(Messages.Mapping.invalidName));
+            throw new MappingExceptionImpl(Messages.getString(Messages.Mapping.invalidName));
         }
         
         Namespace[] namespaces = getNamespaceDeclarations(element);
@@ -191,14 +191,14 @@ public class MappingLoader {
         // There are effectively three types of elements, recursive, criteria and regular..
         if (isRecursive(element)) {
             // first check if this is a "recursive" element
-            MappingRecursiveElement elem = new MappingRecursiveElement(getTeiidParser(), name, namespace, getRecursionMappingClass(element));
+            MappingRecursiveElementImpl elem = new MappingRecursiveElementImpl(getTeiidParser(), name, namespace, getRecursionMappingClass(element));
             elem.setCriteria(getRecursionCriteria(element));
             elem.setRecursionLimit(getRecursionLimit(element), throwExceptionOnRecursionLimit(element));
             node = elem;
         }
         else {
             // this regular element
-            node = new MappingElement(getTeiidParser(), name, namespace);
+            node = new MappingElementImpl(getTeiidParser(), name, namespace);
         }
         
         // now load all other common properties.
@@ -230,12 +230,12 @@ public class MappingLoader {
     /**
      * Load an attribute node from the element
      */
-    void loadAttributeNode(Element element, MappingElement parent) throws MappingException {
+    void loadAttributeNode(Element element, MappingElementImpl parent) throws MappingExceptionImpl {
         String name = getName(element);
         String nsPrefix = getElementValue(element, MappingNodeConstants.Tags.NAMESPACE_PREFIX);
         
         if (name == null || name.length()==0) {
-            throw new MappingException(Messages.getString(Messages.Mapping.invalidName));
+            throw new MappingExceptionImpl(Messages.getString(Messages.Mapping.invalidName));
         }
         
         Namespace namespace = null;
@@ -267,7 +267,7 @@ public class MappingLoader {
         // if this not any namespace specific attribute then it is any normal attribute on the
         // tree; treat it as such.
         if (normalAttribute) {
-            MappingAttribute attribute = new MappingAttribute(getTeiidParser(), getName(element), namespace);
+            MappingAttributeImpl attribute = new MappingAttributeImpl(getTeiidParser(), getName(element), namespace);
             // now get all other properties for the attribute.
             attribute.setNameInSource(getNameInSource(element));
             attribute.setDefaultValue(getDefaultValue(element));
@@ -285,8 +285,8 @@ public class MappingLoader {
      * @param element
      * @return
      */
-    MappingChoiceNode loadChoiceNode(Element element, MappingBaseNode parentNode) {
-        MappingChoiceNode node = new MappingChoiceNode(getTeiidParser(), exceptionOnDefault(element));
+    MappingChoiceNodeImpl loadChoiceNode(Element element, MappingBaseNodeImpl parentNode) {
+        MappingChoiceNodeImpl node = new MappingChoiceNodeImpl(getTeiidParser(), exceptionOnDefault(element));
         node.setMinOccurrs(getMinOccurrences(element));
         node.setMaxOccurrs(getMaxOccurrences(element));        
         node.setSource(getSource(element));
@@ -298,8 +298,8 @@ public class MappingLoader {
     /**
      * Load the "all" node
      */
-    MappingAllNode loadAllNode(Element element, MappingBaseNode parentNode) {
-        MappingAllNode node = new MappingAllNode(getTeiidParser());
+    MappingAllNodeImpl loadAllNode(Element element, MappingBaseNodeImpl parentNode) {
+        MappingAllNodeImpl node = new MappingAllNodeImpl(getTeiidParser());
         node.setMinOccurrs(getMinOccurrences(element));
         node.setMaxOccurrs(getMaxOccurrences(element));        
         node.setSource(getSource(element));
@@ -311,15 +311,15 @@ public class MappingLoader {
     /**
      * Load the comment node
      */
-    void loadCommentNode(Element element, MappingElement parent) {
-        MappingCommentNode comment = new MappingCommentNode(getTeiidParser(), getCommentText(element));
+    void loadCommentNode(Element element, MappingElementImpl parent) {
+        MappingCommentNodeImpl comment = new MappingCommentNodeImpl(getTeiidParser(), getCommentText(element));
         parent.addCommentNode(comment);
     }
     
     /**
      * Load the mapping document
      */
-    MappingDocument loadDocumentProperties (MappingDocument doc, Element element) {
+    MappingDocumentImpl loadDocumentProperties (MappingDocumentImpl doc, Element element) {
         boolean formatted = isFormattedDocument(element);
         if (formatted != MappingNodeConstants.Defaults.DEFAULT_FORMATTED_DOCUMENT.booleanValue()) {
             doc.setFormatted(formatted);
@@ -334,12 +334,12 @@ public class MappingLoader {
     /**
      * Load a criteria node; Criteria node can only be child of a choice node.
      */
-    MappingCriteriaNode loadCriteriaNode(Element element, MappingBaseNode parentNode) throws MappingException{
+    MappingCriteriaNodeImpl loadCriteriaNode(Element element, MappingBaseNodeImpl parentNode) throws MappingExceptionImpl{
         if (getCriteria(element) != null || isDefaultOnChoiceNode(element)) {
             // add this criteria node to the parent and make it the parent itself for rest of the information.
-            return new MappingCriteriaNode(getTeiidParser(), getCriteria(element), isDefaultOnChoiceNode(element));
+            return new MappingCriteriaNodeImpl(getTeiidParser(), getCriteria(element), isDefaultOnChoiceNode(element));
         }
-        throw new MappingException(Messages.getString(Messages.Mapping.invalid_criteria_node));
+        throw new MappingExceptionImpl(Messages.getString(Messages.Mapping.invalid_criteria_node));
     }
     
     /**
@@ -350,9 +350,9 @@ public class MappingLoader {
      * time, for the root Element
      * @return MappingNode just processed
      */
-    MappingBaseNode processMappingNode(Element element, MappingBaseNode parentNode) throws MappingException {
+    MappingBaseNodeImpl processMappingNode(Element element, MappingBaseNodeImpl parentNode) throws MappingExceptionImpl {
         
-        boolean isRootNode = (parentNode instanceof MappingDocument);
+        boolean isRootNode = (parentNode instanceof MappingDocumentImpl);
         
         // Parse the node based on the node type.
         String nodeType = getElementValue( element, MappingNodeConstants.Tags.NODE_TYPE );
@@ -362,7 +362,7 @@ public class MappingLoader {
          
         // Load the document properties
         if (isRootNode && nodeType.equalsIgnoreCase(MappingNodeConstants.ELEMENT)) {
-            MappingDocument doc = (MappingDocument)parentNode;
+            MappingDocumentImpl doc = (MappingDocumentImpl)parentNode;
             loadDocumentProperties(doc, element);
         }
         
@@ -372,45 +372,45 @@ public class MappingLoader {
         if (nodeType.equalsIgnoreCase(MappingNodeConstants.ELEMENT)
                         && (getCriteria(element) != null || isDefaultOnChoiceNode(element))) {
             // add this criteria node to the parent and make it the parent itself for rest of the information.
-            MappingCriteriaNode node = new MappingCriteriaNode(getTeiidParser(), getCriteria(element), isDefaultOnChoiceNode(element));
+            MappingCriteriaNodeImpl node = new MappingCriteriaNodeImpl(getTeiidParser(), getCriteria(element), isDefaultOnChoiceNode(element));
             parentNode.addCriteriaNode(node);
             parentNode = node;
         }
         
         if (nodeType.equalsIgnoreCase(MappingNodeConstants.ELEMENT)) {
-            MappingElement child = loadElementNode(element, parentNode, isRootNode);
+            MappingElementImpl child = loadElementNode(element, parentNode, isRootNode);
             parentNode.addChildElement(child);
             return child;
         }      
         else if (nodeType.equalsIgnoreCase(MappingNodeConstants.ATTRIBUTE)) {
-            loadAttributeNode(element, (MappingElement)parentNode);
+            loadAttributeNode(element, (MappingElementImpl)parentNode);
         }
         else if (nodeType.equalsIgnoreCase(MappingNodeConstants.CHOICE)) {
-            MappingChoiceNode child = loadChoiceNode(element, parentNode);
+            MappingChoiceNodeImpl child = loadChoiceNode(element, parentNode);
             parentNode.addChoiceNode(child);
             return child;
         }
         else if (nodeType.equalsIgnoreCase(MappingNodeConstants.CRITERIA)) {
-            MappingCriteriaNode child = loadCriteriaNode(element, parentNode);
+            MappingCriteriaNodeImpl child = loadCriteriaNode(element, parentNode);
             parentNode.addCriteriaNode(child);
             return child;
         }                
         else if (nodeType.equalsIgnoreCase(MappingNodeConstants.ALL)) {
-            MappingAllNode child = loadAllNode(element, parentNode);
+            MappingAllNodeImpl child = loadAllNode(element, parentNode);
             parentNode.addAllNode(child);
             return child;
         }        
         else if (nodeType.equalsIgnoreCase(MappingNodeConstants.SEQUENCE)) {
-            MappingSequenceNode child = loadSequenceNode(element, parentNode);
+            MappingSequenceNodeImpl child = loadSequenceNode(element, parentNode);
             parentNode.addSequenceNode(child);
             return child;
         }
         else if (nodeType.equalsIgnoreCase(MappingNodeConstants.COMMENT)) {
-            loadCommentNode(element, (MappingElement)parentNode);
+            loadCommentNode(element, (MappingElementImpl)parentNode);
         }
         else {
             // should we ignore I am not sure??
-            throw new MappingException(Messages.getString(Messages.Mapping.unknown_node_type, nodeType));            
+            throw new MappingExceptionImpl(Messages.getString(Messages.Mapping.unknown_node_type, nodeType));            
         }
         return null;
     }
@@ -594,7 +594,7 @@ public class MappingLoader {
         return getBooleanElementValue(element, MappingNodeConstants.Tags.ALWAYS_INCLUDE, false);
     }    
 
-    Namespace getNamespace(Element element, Namespace[] localNamespaces, MappingBaseNode parentNode) { 
+    Namespace getNamespace(Element element, Namespace[] localNamespaces, MappingBaseNodeImpl parentNode) { 
         String prefix = getElementValue(element, MappingNodeConstants.Tags.NAMESPACE_PREFIX);
         
         if (prefix != null) {
@@ -609,8 +609,8 @@ public class MappingLoader {
             
             // then look in the parent nodes.
             while (parentNode != null) {
-                if (parentNode instanceof MappingElement) {
-                    MappingElement parentElement = (MappingElement)parentNode;
+                if (parentNode instanceof MappingElementImpl) {
+                    MappingElementImpl parentElement = (MappingElementImpl)parentNode;
                     return getNamespace(element, parentElement.getNamespaces(), parentElement.getParentNode());
                 }
                 parentNode = parentNode.getParentNode();

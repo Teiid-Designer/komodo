@@ -24,7 +24,7 @@ package org.komodo.spi.xml;
 /**
  *
  */
-public interface IMappingNode {
+public interface MappingNode {
     
     /** The default build in type */
     String DEFAULT_BUILT_IN_TYPE = ""; //$NON-NLS-1$
@@ -65,6 +65,6 @@ public interface IMappingNode {
     /**
      * @return
      */
-    IMappingNode clone();
+    MappingNode clone();
 
 }

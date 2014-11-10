@@ -22,7 +22,7 @@
 
 package org.teiid.query.mapping.xml;
 
-import org.komodo.spi.xml.IMappingRecursiveElement;
+import org.komodo.spi.xml.MappingRecursiveElement;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.Criteria;
 
@@ -33,17 +33,17 @@ import org.teiid.query.sql.lang.Criteria;
  * A recursive element is that embeds the self node type of elements 
  * upto given depth limit. 
  */
-public class MappingRecursiveElement extends MappingElement
-    implements IMappingRecursiveElement<MappingAttribute, MappingNode> {
+public class MappingRecursiveElementImpl extends MappingElementImpl
+    implements MappingRecursiveElement<MappingAttributeImpl, MappingNodeImpl> {
     Criteria criteriaNode;    
     
-    public MappingRecursiveElement(TeiidParser teiidParser, String name, String mappingClass) {
+    public MappingRecursiveElementImpl(TeiidParser teiidParser, String name, String mappingClass) {
         super(teiidParser, name);
         setProperty(MappingNodeConstants.Properties.IS_RECURSIVE, Boolean.TRUE);
         setProperty(MappingNodeConstants.Properties.RECURSION_ROOT_MAPPING_CLASS, mappingClass);         
     }
     
-    public MappingRecursiveElement(TeiidParser teiidParser, String name, Namespace namespace, String mappingClass) {
+    public MappingRecursiveElementImpl(TeiidParser teiidParser, String name, Namespace namespace, String mappingClass) {
         super(teiidParser, name, namespace);
         setProperty(MappingNodeConstants.Properties.IS_RECURSIVE, Boolean.TRUE);
         setProperty(MappingNodeConstants.Properties.RECURSION_ROOT_MAPPING_CLASS, mappingClass);         
@@ -55,7 +55,7 @@ public class MappingRecursiveElement extends MappingElement
     
     /**
      * Is recursice
-     * @see org.teiid.query.mapping.xml.MappingElement#isRecursive()
+     * @see org.teiid.query.mapping.xml.MappingElementImpl#isRecursive()
      */
     public boolean isRecursive() {
         return true;

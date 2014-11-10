@@ -22,21 +22,23 @@
 
 package org.teiid.query.mapping.xml;
 
-import org.komodo.spi.xml.IMappingAllNode;
-import org.teiid.query.parser.TeiidParser;
-
 
 /** 
- * This defines a "All" node in the XML Schema Mapping document
+ * This exception details about any issues related to the mapping document
+ * loading and its violations in document structure expected.
  */
-public class MappingAllNode extends MappingBaseNode implements IMappingAllNode<MappingNode> {
-
-    public MappingAllNode(TeiidParser teiidParser) {
-        super(teiidParser);
-        setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.ALL);
+public class MappingExceptionImpl extends Exception {
+    
+    public MappingExceptionImpl(String msg) {
+        super(msg);
+    }
+    
+    public MappingExceptionImpl(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+    
+    public MappingExceptionImpl(Throwable cause) {
+        super(cause);
     }    
     
-    public void acceptVisitor(MappingVisitor visitor) {
-        visitor.visit(this);
-    }        
 }

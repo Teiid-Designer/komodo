@@ -25,7 +25,7 @@ package org.teiid.query.mapping.xml;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.xml.IMappingAttribute;
+import org.komodo.spi.xml.MappingAttribute;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 
@@ -33,23 +33,23 @@ import org.teiid.query.sql.symbol.ElementSymbol;
 /** 
  * A Mapping node which denotes a attribute node.
  */
-public class MappingAttribute extends MappingNode implements IMappingAttribute {
+public class MappingAttributeImpl extends MappingNodeImpl implements MappingAttribute {
     // Element symbol in the resultset source
     ElementSymbol symbol;
     
     // namespace of the attribute
     Namespace namespace;
     
-    public MappingAttribute(TeiidParser teiidParser, String name) {
+    public MappingAttributeImpl(TeiidParser teiidParser, String name) {
         this(teiidParser, name, MappingNodeConstants.NO_NAMESPACE);
     }
     
-    public MappingAttribute(TeiidParser teiidParser, String name, String nameInSource) {
+    public MappingAttributeImpl(TeiidParser teiidParser, String name, String nameInSource) {
         this(teiidParser, name, MappingNodeConstants.NO_NAMESPACE);
         setNameInSource(nameInSource);
     }    
         
-    public MappingAttribute(TeiidParser teiidParser, String name, Namespace namespace) {
+    public MappingAttributeImpl(TeiidParser teiidParser, String name, Namespace namespace) {
         super(teiidParser);
         setProperty(MappingNodeConstants.Properties.NAME, name);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.ATTRIBUTE);
@@ -64,8 +64,8 @@ public class MappingAttribute extends MappingNode implements IMappingAttribute {
         visitor.visit(this);
     }
     
-    public MappingElement getParentNode() {
-        return (MappingElement)getParent();
+    public MappingElementImpl getParentNode() {
+        return (MappingElementImpl)getParent();
     }
     
     public Namespace getNamespace() {
@@ -105,7 +105,7 @@ public class MappingAttribute extends MappingNode implements IMappingAttribute {
     }
     
     /** 
-     * @see org.teiid.query.mapping.xml.MappingNode#getPathName()
+     * @see org.teiid.query.mapping.xml.MappingNodeImpl#getPathName()
      */
     public String getPathName() {
         return "@" + super.getPathName(); //$NON-NLS-1$
@@ -173,16 +173,16 @@ public class MappingAttribute extends MappingNode implements IMappingAttribute {
     }
     
     /** 
-     * @see org.teiid.query.mapping.xml.MappingNode#getSourceNode()
+     * @see org.teiid.query.mapping.xml.MappingNodeImpl#getSourceNode()
      */
-    public MappingSourceNode getSourceNode() {
+    public MappingSourceNodeImpl getSourceNode() {
         String nameInSource = getNameInSource();
         if (nameInSource != null) {
             String source = nameInSource.substring(0, nameInSource.lastIndexOf('.'));
-            MappingBaseNode parent = getParentNode();
+            MappingBaseNodeImpl parent = getParentNode();
             while(parent != null) {
-                if (parent instanceof MappingSourceNode) {
-                    MappingSourceNode sourceNode = (MappingSourceNode)parent;
+                if (parent instanceof MappingSourceNodeImpl) {
+                    MappingSourceNodeImpl sourceNode = (MappingSourceNodeImpl)parent;
                     if (sourceNode.getResultName().equalsIgnoreCase(source)) {
                         return sourceNode;
                     }
@@ -199,7 +199,7 @@ public class MappingAttribute extends MappingNode implements IMappingAttribute {
     }
 
     @Since(Version.TEIID_8_0)    
-    public MappingAttribute setType(String type) {
+    public MappingAttributeImpl setType(String type) {
         if (type != null) {
             setProperty(MappingNodeConstants.Properties.BUILT_IN_TYPE, type);
         }

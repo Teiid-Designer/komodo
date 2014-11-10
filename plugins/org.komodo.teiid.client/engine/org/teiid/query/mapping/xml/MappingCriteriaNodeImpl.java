@@ -22,7 +22,7 @@
 
 package org.teiid.query.mapping.xml;
 
-import org.komodo.spi.xml.IMappingCriteriaNode;
+import org.komodo.spi.xml.MappingCriteriaNode;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.Criteria;
 
@@ -32,18 +32,18 @@ import org.teiid.query.sql.lang.Criteria;
  * Represents a Criteria Node under a Choice Node, which defines the criteria
  * on the selection of child elements.
  */
-public class MappingCriteriaNode extends MappingBaseNode implements IMappingCriteriaNode<MappingNode> {
+public class MappingCriteriaNodeImpl extends MappingBaseNodeImpl implements MappingCriteriaNode<MappingNodeImpl> {
     boolean defalt;
     Criteria criteriaNode;
     
-    public MappingCriteriaNode(TeiidParser teiidParser, String criteria, boolean defalt) {
+    public MappingCriteriaNodeImpl(TeiidParser teiidParser, String criteria, boolean defalt) {
         super(teiidParser);
         setCriteria(criteria);
         setAsDefault(defalt);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.CRITERIA);
     }
          
-    public MappingCriteriaNode(TeiidParser teiidParser) {
+    public MappingCriteriaNodeImpl(TeiidParser teiidParser) {
         super(teiidParser);
         setAsDefault(true);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.CRITERIA);
@@ -53,7 +53,7 @@ public class MappingCriteriaNode extends MappingBaseNode implements IMappingCrit
         visitor.visit(this);
     }
     
-    public MappingCriteriaNode setCriteria(String criteria) {        
+    public MappingCriteriaNodeImpl setCriteria(String criteria) {        
         if (criteria != null && criteria.length() > 0) {
             criteria = criteria.trim();
             setProperty(MappingNodeConstants.Properties.CRITERIA, criteria);
@@ -61,7 +61,7 @@ public class MappingCriteriaNode extends MappingBaseNode implements IMappingCrit
         return this;
     }
     
-    public MappingCriteriaNode setAsDefault(boolean defalt) {
+    public MappingCriteriaNodeImpl setAsDefault(boolean defalt) {
         this.defalt = defalt;
         setProperty(MappingNodeConstants.Properties.IS_DEFAULT_CHOICE, Boolean.valueOf(defalt));
         return this;
@@ -89,7 +89,7 @@ public class MappingCriteriaNode extends MappingBaseNode implements IMappingCrit
     }
     
     /** 
-     * @see org.teiid.query.mapping.xml.MappingNode#isExcluded()
+     * @see org.teiid.query.mapping.xml.MappingNodeImpl#isExcluded()
      */
     public boolean isExcluded() {
         return false;

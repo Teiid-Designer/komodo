@@ -25,7 +25,7 @@ package org.teiid.query.mapping.xml;
 import java.util.Iterator;
 import java.util.List;
 
-import org.komodo.spi.xml.IMappingChoiceNode;
+import org.komodo.spi.xml.MappingChoiceNode;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.runtime.client.Messages;
 
@@ -37,14 +37,14 @@ import org.teiid.runtime.client.Messages;
  * 
  * This allows only the criteria nodes to be added to choice node.
  */
-public class MappingChoiceNode extends MappingBaseNode
-    implements IMappingChoiceNode<MappingCriteriaNode, MappingNode> {
+public class MappingChoiceNodeImpl extends MappingBaseNodeImpl
+    implements MappingChoiceNode<MappingCriteriaNodeImpl, MappingNodeImpl> {
 
-    public MappingChoiceNode(TeiidParser teiidParser) {
+    public MappingChoiceNodeImpl(TeiidParser teiidParser) {
         this(teiidParser, false);
     }
     
-    public MappingChoiceNode(TeiidParser teiidParser, boolean exceptionOnDefault) {
+    public MappingChoiceNodeImpl(TeiidParser teiidParser, boolean exceptionOnDefault) {
         super(teiidParser);
         //setProperty(MappingNodeConstants.Properties.NAME, "{ChoiceNode}"); //$NON-NLS-1$
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.CHOICE);
@@ -59,7 +59,7 @@ public class MappingChoiceNode extends MappingBaseNode
      * Adds the Element Node to the current Element node and returns the 
      * child node added to the current node.
      */
-    public void addCriteriaNode(MappingCriteriaNode node) {
+    public void addCriteriaNode(MappingCriteriaNodeImpl node) {
         String criteria = node.getCriteria();
         if (criteria == null && !node.isDefault()) {
             throw new RuntimeException(Messages.getString(Messages.Mapping.noCriteria));
@@ -68,10 +68,10 @@ public class MappingChoiceNode extends MappingBaseNode
         addChild(node);
     } 
     
-    public MappingCriteriaNode getDefaultNode() {
+    public MappingCriteriaNodeImpl getDefaultNode() {
         List critNodes = getChildren();
         for (final Iterator i = critNodes.iterator(); i.hasNext();) {
-            final MappingCriteriaNode node= (MappingCriteriaNode)i.next();
+            final MappingCriteriaNodeImpl node= (MappingCriteriaNodeImpl)i.next();
             if (node.isDefault()) {
                 return node;
             }
@@ -87,23 +87,23 @@ public class MappingChoiceNode extends MappingBaseNode
         return false;
     }
 
-    public void addAllNode(MappingAllNode elem) {
+    public void addAllNode(MappingAllNodeImpl elem) {
          throw new RuntimeException(Messages.gs(Messages.TEIID.TEIID30452));
     }
 
-    public void addChoiceNode(MappingChoiceNode elem) {
+    public void addChoiceNode(MappingChoiceNodeImpl elem) {
          throw new RuntimeException(Messages.gs(Messages.TEIID.TEIID30452));
     }
 
-    public void addSequenceNode(MappingSequenceNode elem) {
+    public void addSequenceNode(MappingSequenceNodeImpl elem) {
          throw new RuntimeException(Messages.gs(Messages.TEIID.TEIID30452));
     }
     
-    public void addChildElement(MappingElement elem) {
+    public void addChildElement(MappingElementImpl elem) {
          throw new RuntimeException(Messages.gs(Messages.TEIID.TEIID30452));
     }    
     
-    public void addSourceNode(MappingSourceNode elem) {
+    public void addSourceNode(MappingSourceNodeImpl elem) {
          throw new RuntimeException(Messages.gs(Messages.TEIID.TEIID30452));
     }     
 }

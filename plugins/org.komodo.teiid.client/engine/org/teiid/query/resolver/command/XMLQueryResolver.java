@@ -32,10 +32,10 @@ import java.util.TreeMap;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.util.StringUtil;
-import org.teiid.query.mapping.xml.MappingAttribute;
-import org.teiid.query.mapping.xml.MappingBaseNode;
-import org.teiid.query.mapping.xml.MappingDocument;
-import org.teiid.query.mapping.xml.MappingElement;
+import org.teiid.query.mapping.xml.MappingAttributeImpl;
+import org.teiid.query.mapping.xml.MappingBaseNodeImpl;
+import org.teiid.query.mapping.xml.MappingDocumentImpl;
+import org.teiid.query.mapping.xml.MappingElementImpl;
 import org.teiid.query.mapping.xml.MappingVisitor;
 import org.teiid.query.mapping.xml.Navigator;
 import org.teiid.query.metadata.TempMetadataAdapter;
@@ -92,15 +92,15 @@ public class XMLQueryResolver extends CommandResolver {
 		}
 
 		@Override
-		public void visit(MappingBaseNode baseNode) {
+		public void visit(MappingBaseNodeImpl baseNode) {
 			if (baseNode.getSource() != null && baseNode.getFullyQualifiedName().equalsIgnoreCase(mc)) {
 				source = baseNode.getSource();
 			}
 		}
 
 		@Override
-		public void visit(MappingElement element) {
-			visit((MappingBaseNode)element);
+		public void visit(MappingElementImpl element) {
+			visit((MappingBaseNodeImpl)element);
 			String nis = element.getNameInSource();
 			getMappingClassColumn(nis, element.getFullyQualifiedName());
 		}
@@ -116,7 +116,7 @@ public class XMLQueryResolver extends CommandResolver {
 		}
 
 		@Override
-		public void visit(MappingAttribute attribute) {
+		public void visit(MappingAttributeImpl attribute) {
 			getMappingClassColumn(attribute.getNameInSource(), attribute.getFullyQualifiedName());
 		}
 	}
@@ -233,7 +233,7 @@ public class XMLQueryResolver extends CommandResolver {
         root.addAll(validElems);
 		if (subQuery) {
         	//the select can only be to the mapping class itself
-        	MappingDocument doc = (MappingDocument) metadata.getMappingNode(docGroup.getMetadataID());
+        	MappingDocumentImpl doc = (MappingDocumentImpl) metadata.getMappingNode(docGroup.getMetadataID());
     		final String mc = group.getNonCorrelationName();
     		List<ElementSymbol> selectElems = new LinkedList<ElementSymbol>();
             doc.acceptVisitor(new Navigator(true, new SubSelectVisitor(selectElems, root, mc)));
@@ -294,13 +294,13 @@ public class XMLQueryResolver extends CommandResolver {
 		 * The next section of resolving logic adds in pseduo groups that can be used
 		 * in subqueries
 		 */
-		MappingDocument doc = (MappingDocument) metadata.getMappingNode(docGroup.getMetadataID());
+		MappingDocumentImpl doc = (MappingDocumentImpl) metadata.getMappingNode(docGroup.getMetadataID());
 		
 		final String prefix = group.getNonCorrelationName() + Symbol.SEPARATOR;
 
         doc.acceptVisitor(new Navigator(true, new MappingVisitor() {
         	@Override
-        	public void visit(MappingBaseNode baseNode) {
+        	public void visit(MappingBaseNodeImpl baseNode) {
         		if (baseNode.getSource() == null) {
         			return;
         		}

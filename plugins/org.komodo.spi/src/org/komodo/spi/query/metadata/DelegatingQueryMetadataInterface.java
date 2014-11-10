@@ -31,7 +31,7 @@ import javax.script.ScriptEngine;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.FunctionLibrary;
-import org.komodo.spi.xml.IMappingNode;
+import org.komodo.spi.xml.MappingNode;
 
 /**
  *
@@ -253,7 +253,7 @@ public class DelegatingQueryMetadataInterface implements QueryMetadataInterface 
     }
 
     @Override
-    public IMappingNode getMappingNode(Object groupID) throws Exception {
+    public MappingNode getMappingNode(Object groupID) throws Exception {
         return this.delegate.getMappingNode(groupID);
     }
 

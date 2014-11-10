@@ -22,16 +22,16 @@
 
 package org.teiid.query.mapping.xml;
 
-import org.komodo.spi.xml.IMappingSequenceNode;
+import org.komodo.spi.xml.MappingSequenceNode;
 import org.teiid.query.parser.TeiidParser;
 
 
 /** 
  * A node that describes a <b>Sequence</b> in XML Schema Mapping document
  */
-public class MappingSequenceNode extends MappingBaseNode implements IMappingSequenceNode<MappingNode> {
+public class MappingSequenceNodeImpl extends MappingBaseNodeImpl implements MappingSequenceNode<MappingNodeImpl> {
     
-    public MappingSequenceNode(TeiidParser teiidParser) {
+    public MappingSequenceNodeImpl(TeiidParser teiidParser) {
         super(teiidParser);
         //setProperty(MappingNodeConstants.Properties.NAME, "{SequenceNode}"); //$NON-NLS-1$
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.SEQUENCE);

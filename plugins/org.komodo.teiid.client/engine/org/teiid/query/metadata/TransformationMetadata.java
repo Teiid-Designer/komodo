@@ -76,9 +76,9 @@ import org.teiid.metadata.Table;
 import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.function.FunctionTree;
 import org.teiid.query.mapping.relational.TCQueryNode;
-import org.teiid.query.mapping.xml.MappingDocument;
-import org.teiid.query.mapping.xml.MappingLoader;
-import org.teiid.query.mapping.xml.MappingNode;
+import org.teiid.query.mapping.xml.MappingDocumentImpl;
+import org.teiid.query.mapping.xml.MappingLoaderImpl;
+import org.teiid.query.mapping.xml.MappingNodeImpl;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.ObjectTable;
 import org.teiid.query.sql.lang.SPParameter;
@@ -772,10 +772,10 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         return null;
     }
 
-    public MappingNode getMappingNode(final Object groupID) throws Exception {
+    public MappingNodeImpl getMappingNode(final Object groupID) throws Exception {
         Table tableRecord = (Table) groupID;
         
-        MappingDocument mappingDoc = (MappingDocument) getFromMetadataCache(groupID, "xml-doc"); //$NON-NLS-1$
+        MappingDocumentImpl mappingDoc = (MappingDocumentImpl) getFromMetadataCache(groupID, "xml-doc"); //$NON-NLS-1$
         
         if (mappingDoc != null) {
         	return mappingDoc;
@@ -786,7 +786,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
             // get mapping transform
             String document = tableRecord.getSelectTransformation();            
             InputStream inputStream = new ByteArrayInputStream(document.getBytes());
-            MappingLoader reader = new MappingLoader(getTeiidParser());
+            MappingLoaderImpl reader = new MappingLoaderImpl(getTeiidParser());
             try{
                 mappingDoc = reader.loadDocument(inputStream);
                 mappingDoc.setName(groupName);

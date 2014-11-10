@@ -24,18 +24,47 @@ package org.komodo.spi.xml;
 /**
  *
  */
-public interface IMappingRecursiveElement<A extends IMappingAttribute, N extends IMappingNode>
-    extends IMappingElement<A, N> {
+public interface MappingAttribute extends MappingNode {
 
     /**
-     * @param recursionCriteria
+     * The XML Schema namespace for attribute instances
      */
-    void setCriteria(String recursionCriteria);
+    public static final String NAMESPACE_DECLARATION_ATTRIBUTE_NAMESPACE = "xmlns"; //$NON-NLS-1$
+    
+    /**
+     * @param nameInSource
+     */
+    void setNameInSource(String nameInSource);
+    
+    /**
+     * @param defaultValue
+     */
+    void setDefaultValue(String defaultValue);
+    
+    /**
+     * @param value
+     */
+    void setValue(String value);
 
     /**
-     * @param recursionLimit
-     * @param throwExceptionOnRecursionLimit
+     * @param b
      */
-    void setRecursionLimit(int recursionLimit, boolean throwExceptionOnRecursionLimit);
+    void setOptional(boolean b);
+
+    /**
+     * @param b
+     */
+    void setAlwaysInclude(boolean b);
+    
+    /**
+     * @param excludeFromDocument
+     */
+    @Override
+	void setExclude(boolean excludeFromDocument);
+    
+    /**
+     * @param normalization
+     */
+    void setNormalizeText(String normalization);
 
 }

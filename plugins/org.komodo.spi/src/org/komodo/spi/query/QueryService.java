@@ -50,7 +50,7 @@ import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.validator.UpdateValidator;
 import org.komodo.spi.validator.Validator;
 import org.komodo.spi.validator.UpdateValidator.TransformUpdateType;
-import org.komodo.spi.xml.IMappingDocumentFactory;
+import org.komodo.spi.xml.MappingDocumentFactory;
 
 /**
  *
@@ -135,7 +135,7 @@ public interface QueryService {
      * 
      * @return factory
      */
-    IMappingDocumentFactory getMappingDocumentFactory();
+    MappingDocumentFactory getMappingDocumentFactory();
 
     /**
      * Get the symbol name version of the

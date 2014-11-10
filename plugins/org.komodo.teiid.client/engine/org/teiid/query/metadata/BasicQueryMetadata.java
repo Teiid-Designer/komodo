@@ -34,7 +34,7 @@ import javax.script.ScriptEngine;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.FunctionLibrary;
-import org.komodo.spi.xml.IMappingNode;
+import org.komodo.spi.xml.MappingNode;
 import org.teiid.query.eval.TeiidScriptEngine;
 import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.sql.lang.ObjectTable;
@@ -415,7 +415,7 @@ public class BasicQueryMetadata implements QueryMetadataInterface {
      * @see QueryMetadataInterface#getMappingNode(Object)
      */
     @Override
-    public IMappingNode getMappingNode(Object groupID)
+    public MappingNode getMappingNode(Object groupID)
         throws Exception {
         return null;
     }

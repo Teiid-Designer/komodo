@@ -37,16 +37,16 @@ import org.teiid.query.sql.symbol.GroupSymbol;
  * This represents a source node. A source node is which produces results from
  * executing a relational query.
  */
-public class MappingSourceNode extends MappingBaseNode {
+public class MappingSourceNodeImpl extends MappingBaseNodeImpl {
     
     private transient ResultSetInfo resultSetInfo;
     private Map symbolMap = new HashMap();
     
-    protected MappingSourceNode(TeiidParser teiidParser) {
+    protected MappingSourceNodeImpl(TeiidParser teiidParser) {
         super(teiidParser);
     }
     
-    public MappingSourceNode(TeiidParser teiidParser, String source) {
+    public MappingSourceNodeImpl(TeiidParser teiidParser, String source) {
         this(teiidParser);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.SOURCE);
         setSource(source);
@@ -79,7 +79,7 @@ public class MappingSourceNode extends MappingBaseNode {
         }
     }        
     
-    public MappingSourceNode getSourceNode() {
+    public MappingSourceNodeImpl getSourceNode() {
         return this;
     }
     
@@ -87,11 +87,11 @@ public class MappingSourceNode extends MappingBaseNode {
         return getParentSourceNode() == null;
     }
     
-    public MappingSourceNode getParentSourceNode() {
-        MappingBaseNode parent = getParentNode();
+    public MappingSourceNodeImpl getParentSourceNode() {
+        MappingBaseNodeImpl parent = getParentNode();
         while (parent != null) {
-            if (parent instanceof MappingSourceNode) {
-                return (MappingSourceNode)parent;
+            if (parent instanceof MappingSourceNodeImpl) {
+                return (MappingSourceNodeImpl)parent;
             }
             parent = parent.getParentNode();
         }
@@ -152,7 +152,7 @@ public class MappingSourceNode extends MappingBaseNode {
     
     public Map buildFullSymbolMap() {
         HashMap map = new HashMap();
-        MappingSourceNode sourceNode = this;
+        MappingSourceNodeImpl sourceNode = this;
         
         while(sourceNode != null) {
             map.putAll(sourceNode.getSymbolMap());
@@ -166,7 +166,7 @@ public class MappingSourceNode extends MappingBaseNode {
         if (mappedSymbol == null) {
             ArgCheck.isTrue(symbol.getGroupSymbol() == null || !symbolMap.containsKey(symbol.getGroupSymbol()), "invalid symbol " + symbol); //$NON-NLS-1$
 
-            MappingSourceNode parentSourceNode = getParentSourceNode();
+            MappingSourceNodeImpl parentSourceNode = getParentSourceNode();
             if (parentSourceNode != null) {
                 return parentSourceNode.getMappedSymbol(symbol);
             }
@@ -182,7 +182,7 @@ public class MappingSourceNode extends MappingBaseNode {
     public GroupSymbol getMappedSymbol(GroupSymbol symbol) {
         GroupSymbol mappedSymbol = (GroupSymbol)symbolMap.get(symbol);
         if (mappedSymbol == null) {
-            MappingSourceNode parentSourceNode = getParentSourceNode();
+            MappingSourceNodeImpl parentSourceNode = getParentSourceNode();
             if (parentSourceNode != null) {
                 return parentSourceNode.getMappedSymbol(symbol);
             }

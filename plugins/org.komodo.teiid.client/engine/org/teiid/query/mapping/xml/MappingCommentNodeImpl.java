@@ -22,16 +22,16 @@
 
 package org.teiid.query.mapping.xml;
 
-import org.komodo.spi.xml.IMappingCommentNode;
+import org.komodo.spi.xml.MappingCommentNode;
 import org.teiid.query.parser.TeiidParser;
 
 
 /** 
  * This node describes a <b>comment</b> in XML Mapping document 
  */
-public class MappingCommentNode extends MappingNode implements IMappingCommentNode {
+public class MappingCommentNodeImpl extends MappingNodeImpl implements MappingCommentNode {
 
-    public MappingCommentNode(TeiidParser teiidParser, String comment) {
+    public MappingCommentNodeImpl(TeiidParser teiidParser, String comment) {
         super(teiidParser);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.COMMENT);
         if (comment != null) {
@@ -43,8 +43,8 @@ public class MappingCommentNode extends MappingNode implements IMappingCommentNo
         visitor.visit(this);
     }
     
-    public MappingElement getParentNode() {
-        return (MappingElement)getParent();
+    public MappingElementImpl getParentNode() {
+        return (MappingElementImpl)getParent();
     }    
     
     public String getComment() {

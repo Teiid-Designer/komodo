@@ -34,7 +34,7 @@ import org.komodo.spi.query.sql.lang.IExpression;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.udf.FunctionLibrary;
-import org.komodo.spi.xml.IMappingNode;
+import org.komodo.spi.xml.MappingNode;
 
 
 /**
@@ -557,7 +557,7 @@ public interface QueryMetadataInterface {
      * @return mapping node
      * @throws Exception
      */
-    IMappingNode getMappingNode(Object groupID) throws Exception;
+    MappingNode getMappingNode(Object groupID) throws Exception;
 
     /**
      * Get the currently connected virtual database name.  If the current metadata is not

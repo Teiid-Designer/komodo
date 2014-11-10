@@ -29,7 +29,7 @@ import java.io.InputStream;
 /**
  *
  */
-public interface IMappingDocumentFactory {
+public interface MappingDocumentFactory {
 
     /**
      * Add a namespace to the given element
@@ -38,7 +38,7 @@ public interface IMappingDocumentFactory {
      * @param prefix 
      * @param uri
      */
-    void addNamespace(IMappingElement element, String prefix, String uri);
+    void addNamespace(MappingElement element, String prefix, String uri);
 
     /**
      * Load a mapping document from the input stream and assign 
@@ -50,7 +50,7 @@ public interface IMappingDocumentFactory {
      * 
      * @throws Exception
      */
-    IMappingDocument loadMappingDocument(InputStream inputStream, String documentName) throws Exception;
+    MappingDocument loadMappingDocument(InputStream inputStream, String documentName) throws Exception;
     
     /**
      * Create an XML Mapping Document
@@ -58,9 +58,9 @@ public interface IMappingDocumentFactory {
      * @param encoding 
      * @param formatted 
      * 
-     * @return instance of {@link IMappingDocument} 
+     * @return instance of {@link MappingDocument} 
      */
-    IMappingDocument createMappingDocument(String encoding, boolean formatted);
+    MappingDocument createMappingDocument(String encoding, boolean formatted);
 
     /**
      * Create a mapping element
@@ -68,9 +68,9 @@ public interface IMappingDocumentFactory {
      * @param name
      * @param nsPrefix
      * 
-     * @return instance of {@link IMappingElement}
+     * @return instance of {@link MappingElement}
      */
-    IMappingElement createMappingElement(String name, String nsPrefix);
+    MappingElement createMappingElement(String name, String nsPrefix);
 
     /**
      * Create a recursive mapping element
@@ -79,9 +79,9 @@ public interface IMappingDocumentFactory {
      * @param nsPrefix
      * @param recursionMappingClass
      * 
-     * @return instance of {@link IMappingRecursiveElement}
+     * @return instance of {@link MappingRecursiveElement}
      */
-    IMappingRecursiveElement createMappingRecursiveElement(String name,
+    MappingRecursiveElement createMappingRecursiveElement(String name,
                                                            String nsPrefix,
                                                            String recursionMappingClass);
 
@@ -91,9 +91,9 @@ public interface IMappingDocumentFactory {
      * @param name
      * @param nsPrefix
      * 
-     * @return instance of {@link IMappingAttribute}
+     * @return instance of {@link MappingAttribute}
      */
-    IMappingAttribute createMappingAttribute(String name, String nsPrefix);
+    MappingAttribute createMappingAttribute(String name, String nsPrefix);
 
     /**
      * Create a mapping criteria node
@@ -101,31 +101,31 @@ public interface IMappingDocumentFactory {
      * @param criteria
      * @param isDefault
      * 
-     * @return instance of {@link IMappingCriteriaNode}
+     * @return instance of {@link MappingCriteriaNode}
      */
-    IMappingCriteriaNode createMappingCriteriaNode(String criteria, boolean isDefault);
+    MappingCriteriaNode createMappingCriteriaNode(String criteria, boolean isDefault);
     
     /**
      * Create a mapping choice node
      * 
      * @param exceptionOnDefault
      * 
-     * @return instance of {@link IMappingChoiceNode}
+     * @return instance of {@link MappingChoiceNode}
      */
-    IMappingChoiceNode createMappingChoiceNode(boolean exceptionOnDefault);
+    MappingChoiceNode createMappingChoiceNode(boolean exceptionOnDefault);
 
     /**
      * Create a mapping sequence node
      * 
-     * @return instance of {@link IMappingSequenceNode}
+     * @return instance of {@link MappingSequenceNode}
      */
-    IMappingSequenceNode createMappingSequenceNode();
+    MappingSequenceNode createMappingSequenceNode();
 
     /**
      * Create a mapping all node
      *
-     * @return instance of {@link IMappingAllNode}
+     * @return instance of {@link MappingAllNode}
      */
-    IMappingAllNode createMappingAllNode();
+    MappingAllNode createMappingAllNode();
 
 }

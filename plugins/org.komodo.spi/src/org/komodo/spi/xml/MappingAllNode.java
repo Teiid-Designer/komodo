@@ -24,19 +24,6 @@ package org.komodo.spi.xml;
 /**
  *
  */
-public interface IMappingDocument<N extends IMappingNode> extends IMappingBaseNode<N> {
-
-    /**
-     * @return the root node
-     */
-    IMappingBaseNode getRootNode();
-
-    /**
-     * Generate a string from the mapping stream
-     * 
-     * @return xml mapping string
-     * @throws Exception 
-     */
-    String getMappingString() throws Exception;
-
+public interface MappingAllNode<N extends MappingNode> extends MappingBaseNode<N> {
+    // No methods required
 }

@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.komodo.spi.xml.IMappingElement;
+import org.komodo.spi.xml.MappingElement;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.symbol.ElementSymbol;
 
@@ -36,24 +36,24 @@ import org.teiid.query.sql.symbol.ElementSymbol;
 /** 
  * A Mapping Node which defines a Element in XML Schema Mapping document
  */
-public class MappingElement extends MappingBaseNode
-    implements IMappingElement<MappingAttribute, MappingNode> {
+public class MappingElementImpl extends MappingBaseNodeImpl
+    implements MappingElement<MappingAttributeImpl, MappingNodeImpl> {
 
     // Element symbol in the resultset source
     ElementSymbol symbol;
     
     Namespace namespace;
     
-    public MappingElement(TeiidParser teiidParser, String name) {
+    public MappingElementImpl(TeiidParser teiidParser, String name) {
         this(teiidParser, name, MappingNodeConstants.NO_NAMESPACE);
     }
     
-    public MappingElement(TeiidParser teiidParser, String name, String nameInSource) {
+    public MappingElementImpl(TeiidParser teiidParser, String name, String nameInSource) {
         this(teiidParser, name, MappingNodeConstants.NO_NAMESPACE);
         setNameInSource(nameInSource);
     }    
     
-    public MappingElement(TeiidParser teiidParser, String name, Namespace namespace) {
+    public MappingElementImpl(TeiidParser teiidParser, String name, Namespace namespace) {
         super(teiidParser);
         setProperty(MappingNodeConstants.Properties.NAME, name);
         setProperty(MappingNodeConstants.Properties.NODE_TYPE, MappingNodeConstants.ELEMENT);
@@ -118,20 +118,20 @@ public class MappingElement extends MappingBaseNode
      * Adds a comment node to the current element and returns the added
      * child node 
      */
-    public void addCommentNode(MappingCommentNode elem) {
+    public void addCommentNode(MappingCommentNodeImpl elem) {
         addChild(elem);
     }
     
     @Override
     public void addCommentNode(String text) {
-        addChild(new MappingCommentNode(getTeiidParser(), text));
+        addChild(new MappingCommentNodeImpl(getTeiidParser(), text));
     }
     
     /**
      * Adds the attribute node to the current node and returns the current node
      */
     @Override
-    public void addAttribute(MappingAttribute attr) {
+    public void addAttribute(MappingAttributeImpl attr) {
         addChild(attr);
     }
 
@@ -139,7 +139,7 @@ public class MappingElement extends MappingBaseNode
      * Adds a sibiling node to the current node and returns the added sibiling node;
      * @param elem
      */
-    public void addSibilingElement(MappingElement elem) {
+    public void addSibilingElement(MappingElementImpl elem) {
         getParent().addChild(elem);
     }
     
@@ -147,7 +147,7 @@ public class MappingElement extends MappingBaseNode
      * Remove attribute node from element
      * @param toRemove
      */
-    public void removeAttribute(MappingAttribute toRemove) {
+    public void removeAttribute(MappingAttributeImpl toRemove) {
         List children = getChildren();
         for (final Iterator i = children.iterator(); i.hasNext();) {
             if (i.next() == toRemove) {
@@ -291,12 +291,12 @@ public class MappingElement extends MappingBaseNode
     }
     
     /**
-     * @see org.teiid.query.mapping.xml.MappingBaseNode#isTagRoot()
+     * @see org.teiid.query.mapping.xml.MappingBaseNodeImpl#isTagRoot()
      */
     public boolean isTagRoot() {
-        MappingBaseNode parent = getParentNode();
+        MappingBaseNodeImpl parent = getParentNode();
         while (parent != null) {
-            if (parent instanceof MappingElement) {
+            if (parent instanceof MappingElementImpl) {
                 return false;
             }
             parent = parent.getParentNode();
@@ -313,16 +313,16 @@ public class MappingElement extends MappingBaseNode
     }
     
     /** 
-     * @see org.teiid.query.mapping.xml.MappingNode#getSourceNode()
+     * @see org.teiid.query.mapping.xml.MappingNodeImpl#getSourceNode()
      */
-    public MappingSourceNode getSourceNode() {
+    public MappingSourceNodeImpl getSourceNode() {
         String nameInSource = getNameInSource();
         if (nameInSource != null) {
             String source = nameInSource.substring(0, nameInSource.lastIndexOf('.'));
-            MappingBaseNode parent = getParentNode();
+            MappingBaseNodeImpl parent = getParentNode();
             while(parent != null) {
-                if (parent instanceof MappingSourceNode) {
-                    MappingSourceNode sourceNode = (MappingSourceNode)parent;
+                if (parent instanceof MappingSourceNodeImpl) {
+                    MappingSourceNodeImpl sourceNode = (MappingSourceNodeImpl)parent;
                     if (sourceNode.getResultName().equalsIgnoreCase(source)) {
                         return sourceNode;
                     }
@@ -334,8 +334,8 @@ public class MappingElement extends MappingBaseNode
     }
     
     @Override
-    public MappingNode clone() {
-    	MappingElement node = (MappingElement)super.clone();
+    public MappingNodeImpl clone() {
+    	MappingElementImpl node = (MappingElementImpl)super.clone();
     	if (namespace != null) {
     		node.namespace = new Namespace(namespace.getPrefix(), namespace.getUri());
     	}

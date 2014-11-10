@@ -22,8 +22,35 @@
 package org.komodo.spi.xml;
 
 /**
+ * @param <N> 
  *
  */
-public interface IMappingCommentNode extends IMappingNode {
-    // No methods required
+public interface MappingBaseNode<N extends MappingNode> extends MappingNode {
+
+    /**
+     * Add a child to this node
+     * 
+     * @param childNode
+     */
+    void addChildNode(N childNode);
+    
+    /**
+     * @param minOccurrences
+     */
+    void setMinOccurrs(int minOccurrences);
+
+    /**
+     * @param maxOccurrences
+     */
+    void setMaxOccurrs(int maxOccurrences);
+    
+    /**
+     * @param source
+     */
+    void setSource(String source);
+    
+    /**
+     * @param stagingTable
+     */
+    void addStagingTable(String stagingTable);
 }
