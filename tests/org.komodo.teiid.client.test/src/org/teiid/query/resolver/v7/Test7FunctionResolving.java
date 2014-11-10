@@ -28,7 +28,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestFunctionResolving;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.sql.AbstractTestFactory;

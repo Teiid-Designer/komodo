@@ -23,7 +23,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationPresenter;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.komodo.modeshape.teiid.parser.SQQueryParser;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  * The SQL content assis processor. This content assist processor proposes 
@@ -45,7 +45,7 @@ public class SqlCompletionProcessor
     /**
      * @param teiidVersion
      */
-    public SqlCompletionProcessor(ITeiidVersion teiidVersion) {
+    public SqlCompletionProcessor(TeiidVersion teiidVersion) {
         new SqlSyntax(teiidVersion);
         queryParser = new SQQueryParser(teiidVersion);
     }

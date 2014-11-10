@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.client.BatchSerializer;
 import org.teiid.client.ResizingArrayList;
 import org.teiid.core.types.BinaryType;
@@ -66,7 +66,7 @@ public class Batch1Serializer extends BatchSerializer{
     /**
      * @param teiidVersion
      */
-    public Batch1Serializer(ITeiidVersion teiidVersion) {
+    public Batch1Serializer(TeiidVersion teiidVersion) {
         super(teiidVersion);
 
         serializers.put(DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getId(),   new BigDecimalColumnSerializer());

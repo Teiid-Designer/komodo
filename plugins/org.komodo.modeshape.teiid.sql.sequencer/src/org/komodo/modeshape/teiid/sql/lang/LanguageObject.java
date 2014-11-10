@@ -25,7 +25,7 @@ package org.komodo.modeshape.teiid.sql.lang;
 import org.komodo.modeshape.teiid.parser.LanguageVisitor;
 import org.komodo.modeshape.teiid.parser.ITeiidParser;
 import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 
 /**
@@ -41,7 +41,7 @@ public interface LanguageObject extends ILanguageObject<LanguageVisitor> {
     /**
      * @return teiid version of associated parser
      */
-    ITeiidVersion getTeiidVersion();
+    TeiidVersion getTeiidVersion();
 
     /**
      * @return copy of this language object

@@ -67,9 +67,9 @@ package org.teiid.query.parser.v8;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.query.sql.lang.IMatchCriteria.MatchMode;
 import org.komodo.spi.query.sql.lang.IJoinType;
 import org.komodo.spi.query.sql.lang.ISetQuery;
@@ -216,9 +216,9 @@ public class Teiid8Parser extends AbstractTeiidParser {
     }
 
     @Override
-    public ITeiidVersion getVersion() {
+    public TeiidVersion getVersion() {
         if (version == null)
-            version = new TeiidVersion("8.x.x");
+            version = new DefaultTeiidVersion("8.x.x");
 
         return version;
     }

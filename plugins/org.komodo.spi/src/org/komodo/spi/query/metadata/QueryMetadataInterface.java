@@ -31,7 +31,7 @@ import javax.script.ScriptEngine;
 
 import org.komodo.spi.query.sql.ILanguageVisitor;
 import org.komodo.spi.query.sql.lang.IExpression;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.komodo.spi.xml.IMappingNode;
@@ -100,7 +100,7 @@ public interface QueryMetadataInterface {
     /**
      * @return the version of teiid for which this metadata is applicable
      */
-    ITeiidVersion getTeiidVersion();
+    TeiidVersion getTeiidVersion();
 
     /**
      * Get the metadata-implementation identifier object for the given element name.  

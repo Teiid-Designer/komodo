@@ -44,8 +44,8 @@ import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.teiid.runtime.client.Messages;
@@ -64,7 +64,7 @@ public class TCTeiidInstance implements TeiidInstance, StringConstants {
 
     private TeiidVersionProbe probe;
 
-    private ITeiidVersion version;
+    private TeiidVersion version;
 
     private ExecutionAdmin admin;
 
@@ -189,13 +189,13 @@ public class TCTeiidInstance implements TeiidInstance, StringConstants {
     }
 
     @Override
-    public ITeiidVersion getVersion() throws Exception {
+    public TeiidVersion getVersion() throws Exception {
         if (version == null) {
             try {
                 this.version = getProbe().getVersion();
             } catch (Exception ex) {
                 // Ensure this instance has a version if host is not available
-                this.version = TeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
+                this.version = DefaultTeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
 
                 throw new Exception(Messages.getString(Messages.TeiidInstance.versionFailure, getHost()), ex);
             }

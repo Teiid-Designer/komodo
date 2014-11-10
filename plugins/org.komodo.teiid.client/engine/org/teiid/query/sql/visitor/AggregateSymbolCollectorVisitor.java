@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.navigator.PreOrPostOrderNavigator;
@@ -77,7 +77,7 @@ public class AggregateSymbolCollectorVisitor extends LanguageVisitor {
     private Collection<? super ElementSymbol> otherElements;
     private Collection<? super WindowFunction> windowFunctions;
     
-	public AggregateSymbolCollectorVisitor(ITeiidVersion teiidVersion, Collection<? super AggregateSymbol> aggregates, Collection<? super ElementSymbol> elements) {
+	public AggregateSymbolCollectorVisitor(TeiidVersion teiidVersion, Collection<? super AggregateSymbol> aggregates, Collection<? super ElementSymbol> elements) {
 	    super(teiidVersion);
         this.aggregates = aggregates;
         this.otherElements = elements;

@@ -22,8 +22,8 @@
 package org.teiid.query.sql.v85;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.lang.From;
 import org.teiid.query.sql.lang.GroupBy;
 import org.teiid.query.sql.lang.Query;
@@ -37,7 +37,7 @@ import org.teiid.query.sql.v84.TestQuery84Parser;
 @SuppressWarnings( {"javadoc"} )
 public class TestQuery85Parser extends TestQuery84Parser {
 
-    protected TestQuery85Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery85Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

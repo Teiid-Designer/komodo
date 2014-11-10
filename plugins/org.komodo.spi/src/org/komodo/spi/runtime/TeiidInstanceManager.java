@@ -23,7 +23,7 @@ package org.komodo.spi.runtime;
 
 import java.util.Collection;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  *
@@ -115,7 +115,7 @@ public interface TeiidInstanceManager extends EventManager {
      *
      * @return Teiid Instance version
      */
-    ITeiidVersion getDefaultVersion();
+    TeiidVersion getDefaultVersion();
 
     /**
      * Is this teiid instance the default

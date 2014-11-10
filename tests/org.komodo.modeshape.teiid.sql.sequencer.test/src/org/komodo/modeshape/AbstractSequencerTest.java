@@ -70,8 +70,8 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.UnaryFromClause;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.utils.KLog;
@@ -150,7 +150,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
     /**
      * @param teiidVersion
      */
-    public AbstractSequencerTest(ITeiidVersion teiidVersion) {
+    public AbstractSequencerTest(TeiidVersion teiidVersion) {
         TeiidVersionProvider.getInstance().setTeiidVersion(teiidVersion);
     }
 
@@ -197,7 +197,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         sequencingFailureLatches.clear();
     }
 
-    protected ITeiidVersion getTeiidVersion() {
+    protected TeiidVersion getTeiidVersion() {
         return TeiidVersionProvider.getInstance().getTeiidVersion();
     }
 
@@ -415,7 +415,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
     protected String deriveProcPrefix(boolean useNewLine) {
         StringBuilder builder = new StringBuilder();
         
-        if (getTeiidVersion().isLessThan(TeiidVersion.Version.TEIID_8_4.get())) {
+        if (getTeiidVersion().isLessThan(DefaultTeiidVersion.Version.TEIID_8_4.get())) {
             builder.append("CREATE VIRTUAL PROCEDURE");
             if (useNewLine)
                 builder.append(NEW_LINE);

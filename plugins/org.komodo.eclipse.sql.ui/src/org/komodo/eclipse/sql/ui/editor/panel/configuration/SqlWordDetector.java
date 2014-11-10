@@ -10,7 +10,7 @@
 package org.komodo.eclipse.sql.ui.editor.panel.configuration;
 
 import org.eclipse.jface.text.rules.IWordDetector;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  * Determines whether a given character is valid as part of an SQL keyword in 
@@ -22,7 +22,7 @@ public class SqlWordDetector implements IWordDetector {
    
     private SqlSyntax sqlSyntax;
 
-    public SqlWordDetector(ITeiidVersion teiidVersion) {
+    public SqlWordDetector(TeiidVersion teiidVersion) {
         sqlSyntax = new SqlSyntax(teiidVersion);
     }
 

@@ -17,7 +17,7 @@ import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.ExecutionConfigurationListener;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.utils.KLog;
 
@@ -30,7 +30,7 @@ import org.komodo.utils.KLog;
  */
 public class SqlSyntax {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     ExecutionConfigurationListener configurationListener = new ExecutionConfigurationListener() {
         
@@ -57,7 +57,7 @@ public class SqlSyntax {
      * Create a new instance
      * @param teiidVersion 
      */
-    public SqlSyntax(ITeiidVersion teiidVersion) {
+    public SqlSyntax(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         init();
     }

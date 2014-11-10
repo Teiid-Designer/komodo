@@ -43,8 +43,8 @@ import org.komodo.modeshape.teiid.sql.symbol.Constant;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.modeshape.teiid.sql.v8.Test8Factory;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -54,7 +54,7 @@ public class Test8SqlNodeVisitor extends AbstractTestSqlNodeVisitor {
 
     private Test8Factory factory;
 
-    protected Test8SqlNodeVisitor(ITeiidVersion teiidVersion) {
+    protected Test8SqlNodeVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

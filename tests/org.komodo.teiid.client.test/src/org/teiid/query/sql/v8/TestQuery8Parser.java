@@ -24,8 +24,8 @@ package org.teiid.query.sql.v8;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.AbstractTestQueryParser;
@@ -62,7 +62,7 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     private Test8Factory factory;
 
-    protected TestQuery8Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery8Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

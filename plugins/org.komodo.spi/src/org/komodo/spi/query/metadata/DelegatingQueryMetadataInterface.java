@@ -29,7 +29,7 @@ import java.util.Set;
 
 import javax.script.ScriptEngine;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.komodo.spi.xml.IMappingNode;
 
@@ -48,7 +48,7 @@ public class DelegatingQueryMetadataInterface implements QueryMetadataInterface 
     }
 
     @Override
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.delegate.getTeiidVersion();
     }
 

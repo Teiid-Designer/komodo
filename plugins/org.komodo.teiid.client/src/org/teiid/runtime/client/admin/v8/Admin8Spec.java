@@ -26,7 +26,7 @@ import java.util.Collection;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminComponentException;
 import org.teiid.adminapi.AdminException;
@@ -49,7 +49,7 @@ public class Admin8Spec extends AdminSpec {
     /**
      * @param teiidVersion
      */
-    public Admin8Spec(ITeiidVersion teiidVersion) {
+    public Admin8Spec(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -61,7 +61,7 @@ public class Admin8Spec extends AdminSpec {
             passwordArray = teiidAdminInfo.getPassword().toCharArray();
         }
 
-        ITeiidVersion teiidVersion = null;
+        TeiidVersion teiidVersion = null;
         try {
             teiidVersion = teiidInstance.getVersion();
         } catch (Exception ex) {

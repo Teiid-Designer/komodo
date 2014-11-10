@@ -35,8 +35,8 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeAliases;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.VDBMetaData;
@@ -55,13 +55,13 @@ import org.teiid.runtime.client.Messages;
 
 public class SystemMetadata {
 	
-	private static Map<ITeiidVersion, SystemMetadata> instances = new HashMap<ITeiidVersion, SystemMetadata>();
+	private static Map<TeiidVersion, SystemMetadata> instances = new HashMap<TeiidVersion, SystemMetadata>();
 	
 	/**
 	 * @param teiidVersion
 	 * @return get singleton instance keyed on given teiid version
 	 */
-	public static SystemMetadata getInstance(ITeiidVersion teiidVersion) {
+	public static SystemMetadata getInstance(TeiidVersion teiidVersion) {
 		SystemMetadata instance = instances.get(teiidVersion);
 		if (instance == null) {
 		    instance = new SystemMetadata(teiidVersion);
@@ -71,7 +71,7 @@ public class SystemMetadata {
 		return instance;
 	}
 
-	private final ITeiidVersion teiidVersion;
+	private final TeiidVersion teiidVersion;
 	private final DataTypeManagerService dataTypeManager;
 	private List<Datatype> dataTypes = new ArrayList<Datatype>();
 	private Map<String, Datatype> typeMap = new TreeMap<String, Datatype>(String.CASE_INSENSITIVE_ORDER);
@@ -80,7 +80,7 @@ public class SystemMetadata {
 	/**
 	 * @param teiidVersion
 	 */
-	public SystemMetadata(ITeiidVersion teiidVersion) {
+	public SystemMetadata(TeiidVersion teiidVersion) {
 	    if (teiidVersion.isLessThan(Version.TEIID_8_0.get()))
 	        throw new UnsupportedOperationException(Messages.getString(Messages.Misc.TeiidVersionFailure, this.getClass().getSimpleName(), teiidVersion));
 

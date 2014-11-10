@@ -8,7 +8,7 @@ import java.util.List;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.Command;

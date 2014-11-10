@@ -30,7 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.komodo.spi.query.sql.IElementCollectorVisitor;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
@@ -61,7 +61,7 @@ public class ElementCollectorVisitor extends LanguageVisitor
      * @param teiidVersion
      * @param removeDuplicates 
      */
-    public ElementCollectorVisitor(ITeiidVersion teiidVersion, boolean removeDuplicates) {
+    public ElementCollectorVisitor(TeiidVersion teiidVersion, boolean removeDuplicates) {
         this(teiidVersion, removeDuplicates ? new HashSet<ElementSymbol>() : new ArrayList<ElementSymbol>());
     }
 
@@ -72,7 +72,7 @@ public class ElementCollectorVisitor extends LanguageVisitor
      * @param elements Collection to use for elements
      * @throws IllegalArgumentException If elements is null
      */
-	public ElementCollectorVisitor(ITeiidVersion teiidVersion, Collection<? super ElementSymbol> elements) {
+	public ElementCollectorVisitor(TeiidVersion teiidVersion, Collection<? super ElementSymbol> elements) {
 	    super(teiidVersion);
         if(elements == null) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0021));

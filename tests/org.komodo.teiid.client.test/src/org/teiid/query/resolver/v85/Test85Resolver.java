@@ -24,15 +24,15 @@ package org.teiid.query.resolver.v85;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.v8.Test8Resolver;
 import org.teiid.query.sql.lang.Command;
 
 @SuppressWarnings( {"javadoc"} )
 public class Test85Resolver extends Test8Resolver {
 
-    protected Test85Resolver(ITeiidVersion teiidVersion) {
+    protected Test85Resolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

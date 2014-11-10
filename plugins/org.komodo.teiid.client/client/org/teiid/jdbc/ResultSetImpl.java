@@ -52,8 +52,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.client.RequestMessage;
 import org.teiid.client.ResultsMessage;
 import org.teiid.client.lob.LobChunkInputStream;
@@ -166,7 +166,7 @@ public class ResultSetImpl extends WrapperImpl implements TeiidResultSet, BatchF
 		this.batchResults = new BatchResults(this, getCurrentBatch(resultsMsg), this.cursorType == ResultSet.TYPE_FORWARD_ONLY ? 1 : BatchResults.DEFAULT_SAVED_BATCHES);
 	}
 
-	private ITeiidVersion getTeiidVersion() {
+	private TeiidVersion getTeiidVersion() {
 	    return statement.getTeiidVersion();
 	}
 

@@ -29,7 +29,7 @@ import java.util.Collection;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.metadata.Table;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.sql.lang.Command;
@@ -44,7 +44,7 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestProcedureResolving(ITeiidVersion teiidVersion) {
+    public AbstractTestProcedureResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

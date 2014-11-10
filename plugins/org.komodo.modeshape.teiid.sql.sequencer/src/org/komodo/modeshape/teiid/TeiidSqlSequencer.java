@@ -39,7 +39,7 @@ import javax.jcr.ValueFactory;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.common.annotation.NotThreadSafe;
@@ -63,7 +63,7 @@ public class TeiidSqlSequencer extends Sequencer {
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return TeiidVersionProvider.getInstance().getTeiidVersion();
     }
 

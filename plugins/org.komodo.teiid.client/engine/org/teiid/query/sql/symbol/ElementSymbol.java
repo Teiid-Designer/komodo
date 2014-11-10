@@ -3,7 +3,7 @@
 package org.teiid.query.sql.symbol;
 
 import org.komodo.spi.query.sql.symbol.IElementSymbol;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidParser;

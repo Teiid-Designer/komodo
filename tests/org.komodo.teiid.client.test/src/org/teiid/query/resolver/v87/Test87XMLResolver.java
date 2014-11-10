@@ -21,8 +21,8 @@
 */
 package org.teiid.query.resolver.v87;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.v86.Test86XMLResolver;
 
 /**
@@ -31,7 +31,7 @@ import org.teiid.query.resolver.v86.Test86XMLResolver;
 @SuppressWarnings( "javadoc" )
 public class Test87XMLResolver extends Test86XMLResolver {
 
-    protected Test87XMLResolver(ITeiidVersion teiidVersion) {
+    protected Test87XMLResolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

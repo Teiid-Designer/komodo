@@ -24,7 +24,7 @@ package org.teiid.query.resolver;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -49,7 +49,7 @@ public class CheckNoTempMetadataIDsVisitor extends LanguageVisitor {
      * no symbols to ignore
      * @param teiidVersion
      */
-	public CheckNoTempMetadataIDsVisitor(ITeiidVersion teiidVersion) {
+	public CheckNoTempMetadataIDsVisitor(TeiidVersion teiidVersion) {
 	    super(teiidVersion);
         symbolsWithTempMetadataIDs = new ArrayList<Symbol>();    
     }

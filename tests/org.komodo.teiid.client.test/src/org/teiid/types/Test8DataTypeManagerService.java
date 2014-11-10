@@ -32,8 +32,8 @@ import org.junit.Test;
 import org.teiid.core.types.BinaryType;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService.DataSourceTypes;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
@@ -50,7 +50,7 @@ public class Test8DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDefaultDataType1() {
-        for (Entry<ITeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
+        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
             DataTypeManagerService dataTypeManager = entry.getValue();
 
             assertSame(DefaultDataTypes.VARBINARY.getId(), dataTypeManager.getDefaultDataType(DataTypeName.VARBINARY));
@@ -59,7 +59,7 @@ public class Test8DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDataType1() {
-        for (Entry<ITeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
+        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
             DataTypeManagerService dataTypeManager = entry.getValue();
 
             assertSame(DefaultDataTypes.VARBINARY, dataTypeManager.getDataType("varbinary"));
@@ -68,7 +68,7 @@ public class Test8DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDataTypeClass1() {
-        for (Entry<ITeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
+        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
             DataTypeManagerService dataTypeManager = entry.getValue();
 
             assertSame(BinaryType.class, dataTypeManager.getDataTypeClass("varbinary"));
@@ -77,7 +77,7 @@ public class Test8DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDefaultDataTypeClass1() {
-        for (Entry<ITeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
+        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
             DataTypeManagerService dataTypeManager = entry.getValue();
 
             assertSame(BinaryType.class, dataTypeManager.getDefaultDataClass(DataTypeName.VARBINARY));
@@ -86,7 +86,7 @@ public class Test8DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDataType4Class1() {
-        for (Entry<ITeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
+        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
             DataTypeManagerService dataTypeManager = entry.getValue();
 
             assertSame(DefaultDataTypes.VARBINARY, dataTypeManager.getDataType(BinaryType.class));
@@ -95,7 +95,7 @@ public class Test8DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetAllDataTypeNames() {
-        for (Entry<ITeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
+        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
             DataTypeManagerService dataTypeManager = entry.getValue();
 
             Set<String> names = dataTypeManager.getAllDataTypeNames();
@@ -108,7 +108,7 @@ public class Test8DataTypeManagerService extends AbstractTestDataTypeManagerServ
 
     @Test
     public void testGetDataSourceType1() {
-        for (Entry<ITeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
+        for (Entry<TeiidVersion, DataTypeManagerService> entry : dataTypeManagerCache.entrySet()) {
             DataTypeManagerService dataTypeManager = entry.getValue();
 
             assertEquals(DataSourceTypes.SALESFORCE.id(), dataTypeManager.getDataSourceType(DataSourceTypes.SALESFORCE));

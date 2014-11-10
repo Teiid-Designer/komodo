@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.parser.LanguageVisitor;

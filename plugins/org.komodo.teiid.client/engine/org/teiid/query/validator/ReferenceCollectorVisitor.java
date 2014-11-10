@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.IReferenceCollectorVisitor;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
@@ -49,7 +49,7 @@ public class ReferenceCollectorVisitor extends LanguageVisitor
     /**
      * @param teiidVersion
      */
-    public ReferenceCollectorVisitor(ITeiidVersion teiidVersion) {
+    public ReferenceCollectorVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

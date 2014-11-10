@@ -47,8 +47,8 @@ import org.komodo.modeshape.teiid.sql.symbol.Function;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.JSONObject;
 import org.komodo.modeshape.teiid.sql.symbol.XMLSerialize;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  * Unit testing for the SQLStringVisitor for teiid version 8
@@ -58,7 +58,7 @@ public class Test8Cloning extends AbstractTestCloning {
 
     private Test8Factory factory;
 
-    protected Test8Cloning(ITeiidVersion teiidVersion) {
+    protected Test8Cloning(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

@@ -34,7 +34,7 @@ import org.komodo.spi.query.proc.wsdl.WsdlRequestInfo;
 import org.komodo.spi.query.proc.wsdl.WsdlResponseInfo;
 import org.komodo.spi.query.proc.wsdl.WsdlWrapperInfo;
 import org.komodo.spi.query.sql.ISQLConstants;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.proc.wsdl.WsdlRequestProcedureHelper;
 import org.teiid.query.proc.wsdl.WsdlResponseProcedureHelper;
 import org.teiid.query.proc.wsdl.WsdlWrapperHelper;
@@ -45,12 +45,12 @@ import org.teiid.runtime.client.Messages;
  */
 public class TCProcedureService implements ProcedureService, ISQLConstants {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     /**
      * @param teiidVersion
      */
-    public TCProcedureService(ITeiidVersion teiidVersion) {
+    public TCProcedureService(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 

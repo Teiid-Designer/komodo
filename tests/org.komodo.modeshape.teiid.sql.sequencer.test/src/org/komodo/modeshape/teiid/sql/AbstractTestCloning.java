@@ -29,7 +29,7 @@ import org.komodo.modeshape.teiid.sql.lang.Query;
 import org.komodo.modeshape.teiid.sql.lang.Select;
 import org.komodo.modeshape.teiid.sql.proc.Statement;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
@@ -37,7 +37,7 @@ public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
     /**
      * @param teiidVersion 
      */
-    public AbstractTestCloning(ITeiidVersion teiidVersion) {
+    public AbstractTestCloning(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

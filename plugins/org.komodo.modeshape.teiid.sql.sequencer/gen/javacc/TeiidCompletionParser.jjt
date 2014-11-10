@@ -71,9 +71,9 @@ import org.komodo.modeshape.teiid.sql.lang.Command;
 import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.modeshape.teiid.sql.proc.Statement;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.modeshape.teiid.Messages;
 import org.komodo.utils.StringUtils;
@@ -88,8 +88,10 @@ public class TeiidCompletionParser extends AbstractTeiidParser {
 	private BNF bnf = new BNF(getVersion());
 
 	@ Override
-	public ITeiidVersion getVersion() {
-		if (version == null) version = new TeiidVersion("8.x.x");
+	public TeiidVersion getVersion() {
+		if (version == null)
+		  version = new DefaultTeiidVersion("8.x.x");
+
 		return version;
 	}
 

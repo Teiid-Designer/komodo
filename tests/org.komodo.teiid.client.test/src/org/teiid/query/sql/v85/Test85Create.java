@@ -21,8 +21,8 @@
 */
 package org.teiid.query.sql.v85;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.v8.Test8Create;
 
 /**
@@ -31,7 +31,7 @@ import org.teiid.query.sql.v8.Test8Create;
 @SuppressWarnings( {"javadoc"} )
 public class Test85Create extends Test8Create {
 
-    protected Test85Create(ITeiidVersion teiidVersion) {
+    protected Test85Create(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.lang.Insert;

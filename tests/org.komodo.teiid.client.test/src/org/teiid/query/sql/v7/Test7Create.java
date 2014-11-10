@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.AbstractTestQueryParser;
 import org.teiid.query.sql.lang.Create;
 

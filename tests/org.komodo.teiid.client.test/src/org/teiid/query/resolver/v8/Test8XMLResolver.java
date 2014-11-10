@@ -22,8 +22,8 @@
 
 package org.teiid.query.resolver.v8;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestXMLResolver;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.v8.Test8Factory;
@@ -34,7 +34,7 @@ public class Test8XMLResolver extends AbstractTestXMLResolver {
     
     private Test8Factory factory;
 
-    protected Test8XMLResolver(ITeiidVersion teiidVersion) {
+    protected Test8XMLResolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
    

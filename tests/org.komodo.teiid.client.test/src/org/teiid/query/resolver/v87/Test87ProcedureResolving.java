@@ -30,8 +30,8 @@ import java.util.Arrays;
 
 import org.junit.Test;
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.resolver.v86.Test86ProcedureResolving;
 import org.teiid.query.sql.lang.StoredProcedure;
@@ -43,7 +43,7 @@ import org.teiid.query.sql.symbol.Symbol;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class Test87ProcedureResolving extends Test86ProcedureResolving {
 
-    protected Test87ProcedureResolving(ITeiidVersion teiidVersion) {
+    protected Test87ProcedureResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

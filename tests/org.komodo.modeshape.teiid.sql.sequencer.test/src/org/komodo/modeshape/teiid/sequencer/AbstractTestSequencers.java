@@ -41,7 +41,7 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.MultipleElementSymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
 import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.modeshape.jcr.api.observation.Event;
 
 /**
@@ -53,7 +53,7 @@ public abstract class AbstractTestSequencers extends AbstractSequencerTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestSequencers(ITeiidVersion teiidVersion) {
+    public AbstractTestSequencers(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

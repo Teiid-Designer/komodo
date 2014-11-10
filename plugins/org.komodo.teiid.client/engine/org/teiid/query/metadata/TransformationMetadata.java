@@ -46,9 +46,9 @@ import javax.script.ScriptEngineManager;
 
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.adminapi.impl.DataPolicyMetadata;
 import org.teiid.adminapi.impl.VDBMetaData;
 import org.teiid.core.types.BlobImpl;
@@ -229,7 +229,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         return teiidParser;
     }
 
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return teiidParser.getVersion();
     }
 

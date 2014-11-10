@@ -21,8 +21,8 @@
 */
 package org.teiid.query.resolver.v8;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestAccessPattern;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.v8.Test8Factory;
@@ -35,7 +35,7 @@ public class Test8AccessPattern extends AbstractTestAccessPattern {
 
     private Test8Factory factory;
 
-    protected Test8AccessPattern(ITeiidVersion teiidVersion) {
+    protected Test8AccessPattern(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
    

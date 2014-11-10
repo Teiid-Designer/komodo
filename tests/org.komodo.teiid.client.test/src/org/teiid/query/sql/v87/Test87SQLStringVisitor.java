@@ -21,8 +21,8 @@
 */
 package org.teiid.query.sql.v87;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.v85.Test85SQLStringVisitor;
 
 /**
@@ -31,7 +31,7 @@ import org.teiid.query.sql.v85.Test85SQLStringVisitor;
 @SuppressWarnings( {"javadoc"} )
 public class Test87SQLStringVisitor extends Test85SQLStringVisitor {
 
-    protected Test87SQLStringVisitor(ITeiidVersion teiidVersion) {
+    protected Test87SQLStringVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

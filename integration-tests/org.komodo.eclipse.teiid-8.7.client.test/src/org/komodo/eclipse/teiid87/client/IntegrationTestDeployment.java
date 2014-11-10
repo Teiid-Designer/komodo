@@ -45,8 +45,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.komodo.eclipse.teiid87.client.util.AdminUtil;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.ITeiidVersion.VersionID;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.VersionID;
 import org.komodo.test.utils.AbstractTeiidVersionTest;
 import org.komodo.test.utils.SmartTestKomodoSuite;
 import org.komodo.test.utils.TeiidInstanceBuilder;
@@ -66,7 +66,7 @@ import org.teiid.runtime.client.admin.AdminSpec;
 @SuppressWarnings({"javadoc", "nls", "deprecation"})
 public class IntegrationTestDeployment extends AbstractTeiidVersionTest {
 
-    private static final VersionID TEIID_VERSION_ID = ITeiidVersion.VersionID.TEIID_8_7;
+    private static final VersionID TEIID_VERSION_ID = TeiidVersion.VersionID.TEIID_8_7;
 
     private final AdminSpec adminSpec;
 

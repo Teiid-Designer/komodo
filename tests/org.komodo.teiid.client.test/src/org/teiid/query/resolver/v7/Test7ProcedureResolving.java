@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.teiid.core.types.DataTypeManagerService;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.Table;
 import org.teiid.query.resolver.AbstractTestProcedureResolving;
 import org.teiid.query.resolver.TCQueryResolver;

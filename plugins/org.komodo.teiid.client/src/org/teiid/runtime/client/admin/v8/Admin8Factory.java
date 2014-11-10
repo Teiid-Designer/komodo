@@ -62,9 +62,9 @@ import org.jboss.dmr.ModelType;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.DataSourceDriver;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminComponentException;
 import org.teiid.adminapi.AdminException;
@@ -127,7 +127,7 @@ public class Admin8Factory {
      * @return
      * @throws AdminException
      */
-    public Admin createAdmin(ITeiidVersion teiidVersion, String host, int port, String userName, char[] password) throws AdminException {
+    public Admin createAdmin(TeiidVersion teiidVersion, String host, int port, String userName, char[] password) throws AdminException {
         if(host == null) {
             host = "localhost"; //$NON-NLS-1$
         }
@@ -212,7 +212,7 @@ public class Admin8Factory {
     public class AdminImpl implements Admin {
     	private static final String CLASS_NAME = "class-name";
 		private static final String JAVA_CONTEXT = "java:/";
-		private final ITeiidVersion teiidVersion;
+		private final TeiidVersion teiidVersion;
 		private ModelControllerClient connection;
     	private boolean domainMode = false;
     	private String profileName = "ha";
@@ -221,7 +221,7 @@ public class Admin8Factory {
          * @param teiidVersion
          * @param connection
          */
-        public AdminImpl(ITeiidVersion teiidVersion, ModelControllerClient connection) {
+        public AdminImpl(TeiidVersion teiidVersion, ModelControllerClient connection) {
             this.teiidVersion = teiidVersion;
             this.connection = connection;
             List<String> nodeTypes = Util.getNodeTypes(connection, new DefaultOperationRequestAddress());
@@ -233,11 +233,11 @@ public class Admin8Factory {
         /**
          * @return the teiidVersion
          */
-        public ITeiidVersion getTeiidVersion() {
+        public TeiidVersion getTeiidVersion() {
             return teiidVersion;
         }
 
-        private void requires(String item, ITeiidVersion requiredVersion) throws AdminException {
+        private void requires(String item, TeiidVersion requiredVersion) throws AdminException {
             if (getTeiidVersion().isLessThan(requiredVersion))
                 throw new AdminComponentException(Messages.getString(Messages.Misc.TeiidVersionFailure, item, getTeiidVersion()));
         }
@@ -2011,7 +2011,7 @@ public class Admin8Factory {
      * @return teiid version if the host was successfully contacted, otherwise null
      * @throws Exception
      */
-    public ITeiidVersion getTeiidVersion(String host, int port, String userName, String password) throws Exception {
+    public TeiidVersion getTeiidVersion(String host, int port, String userName, String password) throws Exception {
         CallbackHandler cbh = new AuthenticationCallbackHandler(userName, password.toCharArray());
         ModelControllerClient client = ModelControllerClient.Factory.create(host, port, cbh);
 
@@ -2030,7 +2030,7 @@ public class Admin8Factory {
         if (!outcome.hasDefined("result"))
             return null;
 
-        ITeiidVersion teiidVersion = new TeiidVersion(outcome.get("result").asString());
+        TeiidVersion teiidVersion = new DefaultTeiidVersion(outcome.get("result").asString());
         return teiidVersion;
     }
 }

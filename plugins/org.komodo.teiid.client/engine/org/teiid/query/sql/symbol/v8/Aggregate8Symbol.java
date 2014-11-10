@@ -5,7 +5,7 @@ package org.teiid.query.sql.symbol.v8;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
 import org.teiid.query.parser.LanguageVisitor;

@@ -22,7 +22,7 @@
 
 package org.teiid.query.resolver;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
@@ -52,7 +52,7 @@ public abstract class CommandResolver {
         return this.queryResolver;
     }
 
-    protected ITeiidVersion getTeiidVersion() {
+    protected TeiidVersion getTeiidVersion() {
         return getQueryResolver().getTeiidVersion();
     }
 

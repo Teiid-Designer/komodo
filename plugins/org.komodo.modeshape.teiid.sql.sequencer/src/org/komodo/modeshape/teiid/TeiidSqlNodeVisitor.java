@@ -157,9 +157,9 @@ import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
 import org.komodo.spi.query.sql.symbol.IElementSymbol;
 import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
 import org.komodo.spi.query.sql.symbol.ISymbol;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.komodo.utils.KLog;
@@ -218,7 +218,7 @@ public class TeiidSqlNodeVisitor
 
     private StringBuilder builder;
 
-    private ITeiidVersion teiidVersion;
+    private TeiidVersion teiidVersion;
 
     private IDataTypeManagerService dataTypeManager;
 
@@ -230,12 +230,12 @@ public class TeiidSqlNodeVisitor
     }
 
     protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
-        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+        TeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
     }
 
     protected boolean isLessThanTeiidVersion(Version teiidVersion) {
-        ITeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
+        TeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
         return maxVersion.isLessThan(teiidVersion.get());
     }
 
@@ -246,7 +246,7 @@ public class TeiidSqlNodeVisitor
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 
@@ -268,12 +268,12 @@ public class TeiidSqlNodeVisitor
      * @return SQL String representation of the given node
      * @throws Exception if node causes a failure
      */
-    public String getTeiidSql(ITeiidVersion teiidVersion, Node node) throws Exception {
+    public String getTeiidSql(TeiidVersion teiidVersion, Node node) throws Exception {
         if (node == null)
             return UNDEFINED;
 
         if (teiidVersion == null)
-            teiidVersion = TeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
+            teiidVersion = DefaultTeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
 
         this.teiidVersion = teiidVersion;
         this.dataTypeManager = getDataTypeManager();

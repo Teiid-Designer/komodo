@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.lang.IFromClause;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.Option.MakeDep;

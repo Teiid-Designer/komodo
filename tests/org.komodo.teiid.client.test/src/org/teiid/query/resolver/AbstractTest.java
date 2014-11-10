@@ -22,7 +22,7 @@
 package org.teiid.query.resolver;
 
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.unittest.RealMetadataFactory;
@@ -30,7 +30,7 @@ import org.teiid.query.unittest.RealMetadataFactory;
 @SuppressWarnings( {"javadoc"} )
 public abstract class AbstractTest {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     private final DataTypeManagerService dataTypeManager;
 
@@ -41,7 +41,7 @@ public abstract class AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTest(ITeiidVersion teiidVersion) {
+    public AbstractTest(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         this.dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
         this.queryParser = new TCQueryParser(teiidVersion);
@@ -51,7 +51,7 @@ public abstract class AbstractTest {
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 

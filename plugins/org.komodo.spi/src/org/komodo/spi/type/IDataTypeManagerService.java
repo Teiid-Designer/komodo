@@ -2,7 +2,7 @@ package org.komodo.spi.type;
 
 import java.util.Set;
 import org.komodo.spi.annotation.Updated;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *

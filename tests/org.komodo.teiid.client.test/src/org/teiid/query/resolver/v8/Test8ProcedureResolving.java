@@ -29,8 +29,8 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.teiid.core.types.DataTypeManagerService;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.Table;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.resolver.AbstractTestProcedureResolving;
@@ -50,7 +50,7 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
 
     private Test8Factory factory;
 
-    protected Test8ProcedureResolving(ITeiidVersion teiidVersion) {
+    protected Test8ProcedureResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

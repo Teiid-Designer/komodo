@@ -31,8 +31,8 @@ import org.komodo.modeshape.teiid.sql.proc.CommandStatement;
 import org.komodo.modeshape.teiid.sql.proc.CreateProcedureCommand;
 import org.komodo.modeshape.teiid.sql.proc.RaiseStatement;
 import org.komodo.modeshape.teiid.sql.proc.Statement;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -40,7 +40,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class Test84SqlNodeVisitor extends Test8SqlNodeVisitor {
 
-    protected Test84SqlNodeVisitor(ITeiidVersion teiidVersion) {
+    protected Test84SqlNodeVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

@@ -49,7 +49,7 @@ import net.sf.saxon.trans.XPathException;
 
 import org.komodo.spi.query.sql.lang.ICompareCriteria;
 import org.komodo.spi.query.sql.lang.IMatchCriteria.MatchMode;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.core.types.ArrayImpl;
 import org.teiid.core.types.BaseLob;
@@ -235,7 +235,7 @@ public class Evaluator {
     /**
      * @param teiidVersion
      */
-    public Evaluator(ITeiidVersion teiidVersion) {
+    public Evaluator(TeiidVersion teiidVersion) {
         commandContext = new CommandContext(teiidVersion);
     }
 

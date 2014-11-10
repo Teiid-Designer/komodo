@@ -24,8 +24,8 @@ package org.teiid.query.sql.v8;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.AbstractTestCloning;
 import org.teiid.query.sql.lang.Criteria;
@@ -59,7 +59,7 @@ public class Test8Cloning extends AbstractTestCloning {
 
     private Test8Factory factory;
 
-    protected Test8Cloning(ITeiidVersion teiidVersion) {
+    protected Test8Cloning(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

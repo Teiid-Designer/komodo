@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.komodo.spi.query.sql.IGroupCollectorVisitor;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.Into;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -66,7 +66,7 @@ public class GroupCollectorVisitor extends LanguageVisitor
      * 
      * @param removeDuplicates 
      */
-    public GroupCollectorVisitor(ITeiidVersion teiidVersion, boolean removeDuplicates) {
+    public GroupCollectorVisitor(TeiidVersion teiidVersion, boolean removeDuplicates) {
         this(teiidVersion, removeDuplicates ? new HashSet<GroupSymbol>() : new ArrayList<GroupSymbol>());
     }
     
@@ -77,7 +77,7 @@ public class GroupCollectorVisitor extends LanguageVisitor
      * @param groups Collection to use for groups
      * @throws IllegalArgumentException If groups is null
      */
-	public GroupCollectorVisitor(ITeiidVersion teiidVersion, Collection<GroupSymbol> groups) {
+	public GroupCollectorVisitor(TeiidVersion teiidVersion, Collection<GroupSymbol> groups) {
 	    super(teiidVersion);
         if(groups == null) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0023));

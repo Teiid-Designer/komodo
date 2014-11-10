@@ -28,8 +28,8 @@ import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.core.types.DataTypeManagerService;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.resolver.util.ResolverVisitor;
 import org.teiid.query.resolver.v86.Test86FunctionResolving;
@@ -39,7 +39,7 @@ import org.teiid.query.unittest.RealMetadataFactory.DDLHolder;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test87FunctionResolving extends Test86FunctionResolving {
 
-    protected Test87FunctionResolving(ITeiidVersion teiidVersion) {
+    protected Test87FunctionResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

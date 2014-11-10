@@ -22,8 +22,8 @@
 package org.komodo.modeshape.teiid.sequencer.v8;
 
 import org.komodo.modeshape.teiid.sequencer.AbstractTestTeiidSqlSequencer;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -35,7 +35,7 @@ public class TestTeiid8SqlSequencer extends AbstractTestTeiidSqlSequencer {
         super(Version.TEIID_8_0.get());
     }
 
-    protected TestTeiid8SqlSequencer(ITeiidVersion teiidVersion) {
+    protected TestTeiid8SqlSequencer(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

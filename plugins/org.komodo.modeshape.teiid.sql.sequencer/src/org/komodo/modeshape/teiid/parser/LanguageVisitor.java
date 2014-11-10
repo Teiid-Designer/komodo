@@ -203,8 +203,8 @@ import org.komodo.spi.query.sql.symbol.IXMLNamespaces;
 import org.komodo.spi.query.sql.symbol.IXMLParse;
 import org.komodo.spi.query.sql.symbol.IXMLQuery;
 import org.komodo.spi.query.sql.symbol.IXMLSerialize;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -212,7 +212,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 @SuppressWarnings( "javadoc" )
 public abstract class LanguageVisitor extends AbstractLanguageVisitor {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     /*
      * Required if nodes are to be created by the visitor
@@ -249,7 +249,7 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
      * @param teiidVersion used to check visitor methods are
      *                                      applicable
      */
-    public LanguageVisitor(ITeiidVersion teiidVersion) {
+    public LanguageVisitor(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         this.parser = new SQQueryParser(teiidVersion);
     }
@@ -257,17 +257,17 @@ public abstract class LanguageVisitor extends AbstractLanguageVisitor {
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 
     protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
-        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+        TeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
     }
 
     protected boolean isLessThanTeiidVersion(Version teiidVersion) {
-        ITeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
+        TeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
         return maxVersion.isLessThan(teiidVersion.get());
     }
 

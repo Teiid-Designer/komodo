@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.resolver.util.ResolverVisitor;
@@ -55,7 +55,7 @@ public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
      * @param virtualGroup 
      * @param metadata
      */
-    public ResolveVirtualGroupCriteriaVisitor(ITeiidVersion teiidVersion, GroupSymbol virtualGroup,  QueryMetadataInterface metadata) {
+    public ResolveVirtualGroupCriteriaVisitor(TeiidVersion teiidVersion, GroupSymbol virtualGroup,  QueryMetadataInterface metadata) {
         super(teiidVersion);
         this.virtualGroup = Arrays.asList(new Object[] {virtualGroup});
         this.metadata = metadata;

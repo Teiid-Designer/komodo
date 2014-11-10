@@ -22,8 +22,8 @@
 package org.komodo.modeshape.teiid.parser.bnf;
 
 import java.util.List;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  * Teiid BNF implemented auto completion class based on Teiid Parser template
@@ -34,7 +34,7 @@ public class BNF  extends AbstractBNF {
 	/**
 	 * @param version of teiid
 	 */
-	public BNF(ITeiidVersion version) {
+	public BNF(TeiidVersion version) {
 		super(version);
 	}
 

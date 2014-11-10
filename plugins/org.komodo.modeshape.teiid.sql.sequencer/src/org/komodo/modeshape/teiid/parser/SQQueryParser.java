@@ -39,8 +39,8 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.QueryParser;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  * <p>Converts a SQL-string to an object version of a query.  This
@@ -52,14 +52,14 @@ public class SQQueryParser implements QueryParser, StringConstants {
 
 	private ITeiidParser teiidParser;
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
     
 	/**
 	 * Construct a QueryParser - this may be reused.
 	 *
 	 * @param teiidVersion version of teiid
 	 */
-	public SQQueryParser(ITeiidVersion teiidVersion) {
+	public SQQueryParser(TeiidVersion teiidVersion) {
 	    this.teiidVersion = teiidVersion;
 	    this.teiidParser = createTeiidParser(new StringReader("")); //$NON-NLS-1$
 	}

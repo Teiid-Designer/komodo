@@ -26,8 +26,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.Table;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.AbstractTestFactory;
@@ -44,7 +44,7 @@ public class Test8Validator extends AbstractTestValidator {
 
     private Test8Factory factory;
 
-    protected Test8Validator(ITeiidVersion teiidVersion) {
+    protected Test8Validator(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

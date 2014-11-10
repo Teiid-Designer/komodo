@@ -36,15 +36,15 @@ import org.komodo.spi.query.QueryService;
 import org.komodo.spi.runtime.ExecutionAdmin;
 import org.komodo.spi.runtime.ExecutionAdminFactory;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
 
 /**
  *
  */
-public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersion, ExecutionAdminFactory> {
+public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<TeiidVersion, ExecutionAdminFactory> {
     
     private static final String EXT_POINT_ID = "org.teiid.designer.spi.teiidRuntimeClient"; //$NON-NLS-1$
 
@@ -87,7 +87,7 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
             String minor = version.getAttribute(MINOR_ATTRIBUTE_ID);
             String micro = version.getAttribute(MICRO_ATTRIBUTE_ID);
 
-            ITeiidVersion teiidVersion = new TeiidVersion(major, minor, micro);
+            TeiidVersion teiidVersion = new DefaultTeiidVersion(major, minor, micro);
             register(teiidVersion, adminFactory);
         }
     }
@@ -100,7 +100,7 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
      * @return instance of {@link ExecutionAdminFactory}
      * @throws Exception
      */
-    public ExecutionAdminFactory getExecutionAdminFactory(ITeiidVersion teiidVersion) throws Exception {
+    public ExecutionAdminFactory getExecutionAdminFactory(TeiidVersion teiidVersion) throws Exception {
         ExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
             throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));
@@ -129,7 +129,7 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
      * @return instance of {@link IDataTypeManagerService}
      * @throws Exception 
      */
-    public IDataTypeManagerService getDataTypeManagerService(ITeiidVersion teiidVersion) throws Exception {
+    public IDataTypeManagerService getDataTypeManagerService(TeiidVersion teiidVersion) throws Exception {
         ExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
             throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));
@@ -145,7 +145,7 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
      * @return the Teiid Driver
      * @throws Exception
      */
-    public Driver getTeiidDriver(ITeiidVersion teiidVersion) throws Exception {
+    public Driver getTeiidDriver(TeiidVersion teiidVersion) throws Exception {
         ExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
             throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));
@@ -161,7 +161,7 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
      * @return instance of {@link QueryService}
      * @throws Exception 
      */
-    public QueryService getQueryService(ITeiidVersion teiidVersion) throws Exception {
+    public QueryService getQueryService(TeiidVersion teiidVersion) throws Exception {
         ExecutionAdminFactory factory = search(teiidVersion);
         if (factory == null)
             throw new Exception(NLS.bind(Messages.NoExecutionAdminFactory, teiidVersion));
@@ -173,14 +173,14 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
      * @param teiidVersion
      * @return
      */
-    private ExecutionAdminFactory search(ITeiidVersion teiidVersion) {
+    private ExecutionAdminFactory search(TeiidVersion teiidVersion) {
         
         ExecutionAdminFactory factory = getRegistered(teiidVersion);
         if (factory != null)
             return factory;
         
-        for (Map.Entry<ITeiidVersion, ExecutionAdminFactory> entry : getRegisteredEntries()) {
-            ITeiidVersion entryVersion = entry.getKey();
+        for (Map.Entry<TeiidVersion, ExecutionAdminFactory> entry : getRegisteredEntries()) {
+            TeiidVersion entryVersion = entry.getKey();
             
             if (teiidVersion.compareTo(entryVersion))
                 return entry.getValue();
@@ -194,7 +194,7 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
      * 
      * @return unmodifiable collection
      */
-    public Collection<ITeiidVersion> getRegisteredTeiidVersions() {
+    public Collection<TeiidVersion> getRegisteredTeiidVersions() {
         return getRegisteredKeys();
     }
 
@@ -207,12 +207,12 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
      * the installed client runtimes but if none, returns the
      * hardcoded default value.
      *
-     * @return {@link ITeiidVersion} default version
+     * @return {@link TeiidVersion} default version
      */
-    public static ITeiidVersion deriveUltimateDefaultTeiidVersion() {
-        ITeiidVersion lastTestedDefault = Version.DEFAULT_TEIID_VERSION.get();
+    public static TeiidVersion deriveUltimateDefaultTeiidVersion() {
+        TeiidVersion lastTestedDefault = Version.DEFAULT_TEIID_VERSION.get();
 
-        Collection<ITeiidVersion> teiidVersions = null;
+        Collection<TeiidVersion> teiidVersions = null;
         try {
             teiidVersions = getInstance().getRegisteredTeiidVersions();
         } catch (Exception ex) {
@@ -228,7 +228,7 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
 
         // Find the latest version by sorting the registered client runtime versions
         List<String> items = new ArrayList<String>(teiidVersions.size());
-        for (ITeiidVersion teiidVersion : teiidVersions) {
+        for (TeiidVersion teiidVersion : teiidVersions) {
             /*
              * Do not offer unreleased and untested versions by default.
              * Does not stop the user choosing such versions but avoids
@@ -241,6 +241,6 @@ public class TeiidRuntimeRegistry extends AbstractExtensionRegistry<ITeiidVersio
         }
         Collections.sort(items, Collections.reverseOrder());
 
-        return new TeiidVersion(items.get(0));
+        return new DefaultTeiidVersion(items.get(0));
     }
 }

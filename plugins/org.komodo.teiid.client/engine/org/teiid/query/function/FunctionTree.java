@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.UserDefinedAggregate;
 import org.teiid.core.CoreConstants;
 import org.teiid.core.types.DataTypeManagerService;
@@ -62,7 +62,7 @@ import org.teiid.runtime.client.TeiidClientException;
  */
 public class FunctionTree {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     // Constant used to look up the special descriptor key in a node map
     private static final Integer DESCRIPTOR_KEY = -1;
@@ -86,7 +86,7 @@ public class FunctionTree {
      * @param teiidVersion
      * @param source The metadata source
      */
-    public FunctionTree(ITeiidVersion teiidVersion, String name, FunctionMetadataSource source) {
+    public FunctionTree(TeiidVersion teiidVersion, String name, FunctionMetadataSource source) {
     	this(teiidVersion, name, source, false);
     }
     
@@ -95,7 +95,7 @@ public class FunctionTree {
      * @param teiidVersion
      * @param source The metadata source
      */
-    public FunctionTree(ITeiidVersion teiidVersion, String name, FunctionMetadataSource source, boolean validateClass) {
+    public FunctionTree(TeiidVersion teiidVersion, String name, FunctionMetadataSource source, boolean validateClass) {
         this.teiidVersion = teiidVersion;
         // Load data structures
     	this.validateClass = validateClass;

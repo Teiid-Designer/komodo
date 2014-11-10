@@ -27,8 +27,8 @@ import java.util.List;
 
 import org.junit.Test;
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.AbstractTestQueryParser;
@@ -41,7 +41,7 @@ public class Test8CreateDrop extends AbstractTestQueryParser {
 
     private Test8Factory factory;
 
-    protected Test8CreateDrop(ITeiidVersion teiidVersion) {
+    protected Test8CreateDrop(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.junit.Test;
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.language.SQLConstants.NonReserved;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.AbstractTestSQLStringVisitor;
@@ -56,7 +56,7 @@ public class Test8SQLStringVisitor extends AbstractTestSQLStringVisitor {
 
     private Test8Factory factory;
 
-    protected Test8SQLStringVisitor(ITeiidVersion teiidVersion) {
+    protected Test8SQLStringVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

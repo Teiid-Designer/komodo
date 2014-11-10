@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.LanguageObject;
@@ -43,7 +43,7 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestAlterValidation(ITeiidVersion teiidVersion) {
+    public AbstractTestAlterValidation(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

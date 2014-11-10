@@ -21,8 +21,8 @@
 */
 package org.teiid.query.validator.v87;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.validator.v86.Test86UpdateValidator;
 
 /**
@@ -31,7 +31,7 @@ import org.teiid.query.validator.v86.Test86UpdateValidator;
 @SuppressWarnings( "javadoc" )
 public class Test87UpdateValidator extends Test86UpdateValidator {
 
-    protected Test87UpdateValidator(ITeiidVersion teiidVersion) {
+    protected Test87UpdateValidator(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

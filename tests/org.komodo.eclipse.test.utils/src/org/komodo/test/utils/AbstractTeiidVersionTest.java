@@ -21,9 +21,9 @@
  */
 package org.komodo.test.utils;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.ITeiidVersion.VersionID;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.VersionID;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 
 /**
  *
@@ -31,19 +31,19 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class AbstractTeiidVersionTest {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     /**
      * @param teiidVersionId
      */
     public AbstractTeiidVersionTest(VersionID teiidVersionId) {
-        teiidVersion = new TeiidVersion(teiidVersionId.toString());
+        teiidVersion = new DefaultTeiidVersion(teiidVersionId.toString());
     }
 
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 

@@ -21,14 +21,14 @@
 */
 package org.teiid.query.resolver.v86;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.v85.Test85ProcedureResolving;
 
 @SuppressWarnings( {"javadoc"} )
 public class Test86ProcedureResolving extends Test85ProcedureResolving {
 
-    protected Test86ProcedureResolving(ITeiidVersion teiidVersion) {
+    protected Test86ProcedureResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

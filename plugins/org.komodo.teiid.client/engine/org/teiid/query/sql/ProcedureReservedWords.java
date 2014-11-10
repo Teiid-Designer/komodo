@@ -29,8 +29,8 @@ import java.util.Set;
 
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.language.SQLConstants.Reserved;
 
 /**
@@ -55,7 +55,7 @@ public class ProcedureReservedWords {
     
     public static final String DVARS = "DVARS"; //$NON-NLS-1$
 
-    private static ITeiidVersion CACHED_TEIID_VERSION = null;
+    private static TeiidVersion CACHED_TEIID_VERSION = null;
 
     private static Set<String> RESERVED_WORDS = null;
 
@@ -92,7 +92,7 @@ public class ProcedureReservedWords {
     /**
      * @param teiidVersion
      */
-    private static void initialiseConstants(ITeiidVersion teiidVersion) {
+    private static void initialiseConstants(TeiidVersion teiidVersion) {
         CACHED_TEIID_VERSION = teiidVersion;
         RESERVED_WORDS = extractFieldNames(ProcedureReservedWords.class);
     }
@@ -103,7 +103,7 @@ public class ProcedureReservedWords {
      * @param str String to check
      * @return True if procedure reserved word, false if not or null
      */
-    public static final boolean isProcedureReservedWord(ITeiidVersion teiidVersion, String str) {
+    public static final boolean isProcedureReservedWord(TeiidVersion teiidVersion, String str) {
         if (str == null) 
             return false;
 

@@ -28,8 +28,8 @@ import org.komodo.modeshape.teiid.sql.lang.Query;
 import org.komodo.modeshape.teiid.sql.lang.Select;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
 import org.komodo.modeshape.teiid.sql.v84.TestQuery84Parser;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -37,7 +37,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 @SuppressWarnings( {"javadoc"} )
 public class TestQuery85Parser extends TestQuery84Parser {
 
-    protected TestQuery85Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery85Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

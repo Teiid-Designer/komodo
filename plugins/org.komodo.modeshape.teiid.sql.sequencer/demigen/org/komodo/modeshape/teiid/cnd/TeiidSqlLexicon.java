@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 
 /**

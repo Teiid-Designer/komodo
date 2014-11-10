@@ -40,8 +40,8 @@ import org.teiid.core.types.DataTypeManagerService;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ICommand;
 import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.Column.SearchType;
@@ -68,7 +68,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestValidator(ITeiidVersion teiidVersion) {
+    public AbstractTestValidator(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

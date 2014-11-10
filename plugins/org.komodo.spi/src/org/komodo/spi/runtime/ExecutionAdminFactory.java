@@ -23,7 +23,7 @@ package org.komodo.spi.runtime;
 
 import java.sql.Driver;
 import org.komodo.spi.query.QueryService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 
 /**
@@ -48,7 +48,7 @@ public interface ExecutionAdminFactory {
      *
      * @return instance of {@link IDataTypeManagerService}
      */
-    IDataTypeManagerService getDataTypeManagerService(ITeiidVersion teiidVersion);
+    IDataTypeManagerService getDataTypeManagerService(TeiidVersion teiidVersion);
 
     /**
      * Get the {@link Driver} for the Teiid Instance
@@ -56,7 +56,7 @@ public interface ExecutionAdminFactory {
      *
      * @return the driver
      */
-    Driver getTeiidDriver(ITeiidVersion teiidVersion);
+    Driver getTeiidDriver(TeiidVersion teiidVersion);
 
     /**
      * Get the query service
@@ -64,5 +64,5 @@ public interface ExecutionAdminFactory {
      * 
      * @return instance of {@link QueryService}
      */
-    QueryService getQueryService(ITeiidVersion teiidVersion);
+    QueryService getQueryService(TeiidVersion teiidVersion);
 }

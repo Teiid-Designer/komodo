@@ -21,7 +21,7 @@
  */
 package org.komodo.spi.runtime.version;
 
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  * Provider class that holds the default teiid version
@@ -30,7 +30,7 @@ public final class TeiidVersionProvider {
 
     private static TeiidVersionProvider instance;
 
-    private ITeiidVersion teiidVersion = Version.DEFAULT_TEIID_VERSION.get();
+    private TeiidVersion teiidVersion = Version.DEFAULT_TEIID_VERSION.get();
 
     /**
      * @return singleton instance of provider
@@ -47,14 +47,14 @@ public final class TeiidVersionProvider {
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 
     /**
      * @param teiidVersion the teiidVersion to set
      */
-    public void setTeiidVersion(ITeiidVersion teiidVersion) {
+    public void setTeiidVersion(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 

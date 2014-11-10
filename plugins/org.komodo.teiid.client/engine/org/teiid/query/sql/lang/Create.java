@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.sql.lang.ICreate;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.metadata.Column;

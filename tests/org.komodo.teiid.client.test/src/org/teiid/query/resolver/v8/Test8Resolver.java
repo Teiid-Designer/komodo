@@ -30,8 +30,8 @@ import java.util.List;
 
 import org.junit.Test;
 import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestResolver;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.ProcedureReservedWords;
@@ -53,7 +53,7 @@ public class Test8Resolver extends AbstractTestResolver {
 
     private Test8Factory factory;
 
-    protected Test8Resolver(ITeiidVersion teiidVersion) {
+    protected Test8Resolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
    

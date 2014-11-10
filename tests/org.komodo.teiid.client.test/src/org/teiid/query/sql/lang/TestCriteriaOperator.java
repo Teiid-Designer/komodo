@@ -26,8 +26,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.teiid.query.sql.lang.CriteriaOperator.Operator;
 
 /**
@@ -36,25 +36,25 @@ import org.teiid.query.sql.lang.CriteriaOperator.Operator;
 public class TestCriteriaOperator {
 
     private class ExpectedResults {
-        private final ITeiidVersion version;
+        private final TeiidVersion version;
         private final int totalEnums;
         private final String[] missingSymbols;
 
-        public ExpectedResults(ITeiidVersion version, int totalEnums, String... missingSymbols) {
+        public ExpectedResults(TeiidVersion version, int totalEnums, String... missingSymbols) {
             this.version = version;
             this.totalEnums = totalEnums;
             this.missingSymbols = missingSymbols;
         }
     }
 
-    private ITeiidVersion version(String versionString) {
-        return new TeiidVersion(versionString);
+    private TeiidVersion version(String versionString) {
+        return new DefaultTeiidVersion(versionString);
     }
 
     /**
-     * Test the {@link Operator#getOperator(ITeiidVersion, String)}
+     * Test the {@link Operator#getOperator(TeiidVersion, String)}
      * function to ensure that the correct number of enum values are returned
-     * given a specific {@link TeiidVersion}.
+     * given a specific {@link DefaultTeiidVersion}.
      */
     @Test
     public void testGetOperator() {

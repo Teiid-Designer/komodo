@@ -30,7 +30,7 @@ import org.komodo.modeshape.teiid.sql.lang.Criteria;
 import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
 import org.komodo.modeshape.teiid.sql.proc.Statement;
 import org.komodo.modeshape.teiid.sql.symbol.Expression;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 
 /**
@@ -41,12 +41,12 @@ public interface ITeiidParser {
     /**
      * @return teiid version of this parser
      */
-    ITeiidVersion getVersion();
+    TeiidVersion getVersion();
 
     /**
      * @param teiidVersion
      */
-    void setVersion(ITeiidVersion teiidVersion);
+    void setVersion(TeiidVersion teiidVersion);
 
     /**
      * @return dataTypeManagerService

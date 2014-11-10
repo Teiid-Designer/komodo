@@ -22,8 +22,8 @@
 package org.teiid.query.sql.v85;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.Delete;
 import org.teiid.query.sql.proc.AssignmentStatement;
@@ -40,7 +40,7 @@ import org.teiid.query.sql.v8.Test8SQLStringVisitor;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test85SQLStringVisitor extends Test8SQLStringVisitor {
 
-    protected Test85SQLStringVisitor(ITeiidVersion teiidVersion) {
+    protected Test85SQLStringVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

@@ -81,7 +81,7 @@ import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
 import org.komodo.spi.query.sql.lang.IJoinType;
 import org.komodo.spi.query.sql.lang.ISetQuery;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.modeshape.jcr.api.JcrConstants;
 
@@ -94,7 +94,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
     /**
      * @param teiidVersion
      */
-    public AbstractTestTeiidSqlSequencer(ITeiidVersion teiidVersion) {
+    public AbstractTestTeiidSqlSequencer(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

@@ -44,8 +44,8 @@ import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.komodo.eclipse.sql.ui.graphics.ColorManager;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 
 /**
@@ -55,7 +55,7 @@ public class SqlEditorPanel extends SashForm
     implements SelectionListener, ISelectionChangedListener, IPropertyChangeListener,
     KeyListener, MouseListener, IMenuListener, StringConstants {
 
-    private final ITeiidVersion teiidVersion = Version.TEIID_8_7.get();
+    private final TeiidVersion teiidVersion = Version.TEIID_8_7.get();
 
     /** Changes Pending Message */
     private static final String QUERY_CHANGES_PENDING_MESSAGE = "Pending"; //TODO //$NON-NLS-1$

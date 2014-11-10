@@ -29,8 +29,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.ITeiidVersion.VersionID;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.VersionID;
 import org.komodo.test.utils.AbstractTeiidVersionTest;
 import org.mockito.Mockito;
 import org.teiid.runtime.client.instance.TCTeiidInstance;
@@ -42,7 +42,7 @@ import org.teiid.runtime.client.instance.TCTeiidInstance;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class IntegrationTestTeiidInstance extends AbstractTeiidVersionTest {
 
-    private static final VersionID TEIID_VERSION_ID = ITeiidVersion.VersionID.TEIID_8_7;
+    private static final VersionID TEIID_VERSION_ID = TeiidVersion.VersionID.TEIID_8_7;
 
     private TeiidParent teiidParent;
 
@@ -75,7 +75,7 @@ public class IntegrationTestTeiidInstance extends AbstractTeiidVersionTest {
 
     @Test
     public void testVersion() throws Exception {
-        ITeiidVersion version = teiidInstance.getVersion();
+        TeiidVersion version = teiidInstance.getVersion();
         assertEquals(getTeiidVersion(), version);
     }
 }

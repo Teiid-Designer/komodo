@@ -33,9 +33,9 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.util.ApplicationInfo;
 import org.teiid.core.util.PropertiesUtils;
 import org.teiid.jdbc.JDBCURL.ConnectionType;
@@ -75,7 +75,7 @@ public class TeiidDriver implements Driver {
     
     private ConnectionProfile socketProfile = new SocketProfile();
 
-    private ITeiidVersion teiidVersion = Version.DEFAULT_TEIID_VERSION.get();
+    private TeiidVersion teiidVersion = Version.DEFAULT_TEIID_VERSION.get();
 
     public static TeiidDriver getInstance() {
         return INSTANCE;
@@ -84,14 +84,14 @@ public class TeiidDriver implements Driver {
 	/**
 	 * @return teiid version property
 	 */
-	public ITeiidVersion getTeiidVersion() {
+	public TeiidVersion getTeiidVersion() {
 	    return teiidVersion;
 	}
 
     /**
      * @param teiidVersion
      */
-    public void setTeiidVersion(ITeiidVersion teiidVersion) {
+    public void setTeiidVersion(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         ApplicationInfo.getInstance().setTeiidVersion(teiidVersion);
     }
@@ -116,7 +116,7 @@ public class TeiidDriver implements Driver {
         /*
          * Add the teiid server version to the properties
          */
-        info.setProperty(ITeiidVersion.TEIID_VERSION_PROPERTY, getTeiidVersion().toString());
+        info.setProperty(TeiidVersion.TEIID_VERSION_PROPERTY, getTeiidVersion().toString());
 
         try {
             myConnection = socketProfile.connect(url, info);

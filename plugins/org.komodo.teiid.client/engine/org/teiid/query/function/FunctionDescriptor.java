@@ -28,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.IFunctionDescriptor;
 import org.komodo.spi.udf.IFunctionLibrary;
 import org.teiid.query.util.CommandContext;
@@ -54,7 +54,7 @@ public class FunctionDescriptor implements Serializable, Cloneable, IFunctionDes
 
 	private static final boolean ALLOW_NAN_INFINITY = PropertiesUtils.getBooleanProperty(System.getProperties(), "org.teiid.allowNanInfinity", false); //$NON-NLS-1$
 
-	private final ITeiidVersion teiidVersion;
+	private final TeiidVersion teiidVersion;
 	private Class<?>[] types;
 	private Class<?> returnType;	
     private boolean requiresContext;
@@ -69,7 +69,7 @@ public class FunctionDescriptor implements Serializable, Cloneable, IFunctionDes
     // the real VM descriptor for execution.
     private transient Method invocationMethod;
 
-	FunctionDescriptor(ITeiidVersion teiidVersion, FunctionMethod method, Class<?>[] types,
+	FunctionDescriptor(TeiidVersion teiidVersion, FunctionMethod method, Class<?>[] types,
 			Class<?> outputType, Method invocationMethod,
 			boolean requiresContext) {
 		this.teiidVersion = teiidVersion;

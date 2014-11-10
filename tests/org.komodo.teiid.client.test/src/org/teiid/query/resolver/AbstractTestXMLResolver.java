@@ -30,7 +30,7 @@ import java.util.Collection;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.CompareCriteria;
@@ -50,7 +50,7 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestXMLResolver(ITeiidVersion teiidVersion) {
+    public AbstractTestXMLResolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

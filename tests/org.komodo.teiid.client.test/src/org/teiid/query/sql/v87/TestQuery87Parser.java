@@ -22,8 +22,8 @@
 package org.teiid.query.sql.v87;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.lang.From;
 import org.teiid.query.sql.lang.SPParameter;
 import org.teiid.query.sql.lang.StoredProcedure;
@@ -36,7 +36,7 @@ import org.teiid.query.sql.v86.TestQuery86Parser;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class TestQuery87Parser extends TestQuery86Parser {
 
-    protected TestQuery87Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery87Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

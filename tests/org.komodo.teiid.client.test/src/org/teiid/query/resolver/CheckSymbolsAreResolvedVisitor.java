@@ -24,7 +24,7 @@ package org.teiid.query.resolver;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.symbol.CaseExpression;
@@ -48,7 +48,7 @@ public class CheckSymbolsAreResolvedVisitor extends LanguageVisitor {
 	/**
 	 * @param teiidVersion
 	 */
-	public CheckSymbolsAreResolvedVisitor(ITeiidVersion teiidVersion) {
+	public CheckSymbolsAreResolvedVisitor(TeiidVersion teiidVersion) {
 	    super(teiidVersion);
         unresolvedSymbols = new ArrayList<LanguageObject>();    
     }

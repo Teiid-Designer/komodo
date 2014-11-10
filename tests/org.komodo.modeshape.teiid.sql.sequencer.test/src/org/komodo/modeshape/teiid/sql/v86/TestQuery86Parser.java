@@ -34,8 +34,8 @@ import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbol;
 import org.komodo.modeshape.teiid.sql.symbol.WindowFunction;
 import org.komodo.modeshape.teiid.sql.symbol.WindowSpecification;
 import org.komodo.modeshape.teiid.sql.v85.TestQuery85Parser;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -43,7 +43,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class TestQuery86Parser extends TestQuery85Parser {
 
-    protected TestQuery86Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery86Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

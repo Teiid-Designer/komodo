@@ -25,8 +25,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestAlterResolving;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.lang.AlterProcedure;
@@ -44,7 +44,7 @@ public class Test8AlterResolving extends AbstractTestAlterResolving {
 
     private Test8Factory factory;
 
-    protected Test8AlterResolving(ITeiidVersion teiidVersion) {
+    protected Test8AlterResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
    

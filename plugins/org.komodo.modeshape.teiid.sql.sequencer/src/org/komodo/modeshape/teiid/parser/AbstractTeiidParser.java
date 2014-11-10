@@ -42,8 +42,8 @@ import org.komodo.modeshape.teiid.sql.symbol.Expression;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.utils.StringUtils;
 import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
@@ -126,13 +126,13 @@ public abstract class AbstractTeiidParser implements ITeiidParser {
     
     protected Pattern SOURCE_HINT_ARG = Pattern.compile("\\s*([^: ]+)(\\s+KEEP ALIASES)?\\s*:((?:'[^']*')+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL); //$NON-NLS-1$
 
-    protected ITeiidVersion version;
+    protected TeiidVersion version;
 
     /**
      * @return teiid instance version
      */
     @Override
-    public ITeiidVersion getVersion() {
+    public TeiidVersion getVersion() {
         return version;
     }
 
@@ -153,7 +153,7 @@ public abstract class AbstractTeiidParser implements ITeiidParser {
      * @param teiidVersion version of teiid
      */
     @Override
-    public void setVersion(ITeiidVersion teiidVersion) {
+    public void setVersion(TeiidVersion teiidVersion) {
         this.version = teiidVersion;
     }
 

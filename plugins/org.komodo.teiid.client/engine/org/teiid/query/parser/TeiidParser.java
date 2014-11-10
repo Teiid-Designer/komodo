@@ -24,8 +24,8 @@ package org.teiid.query.parser;
 import java.io.Reader;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.metadata.MetadataFactory;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
@@ -43,12 +43,12 @@ public interface TeiidParser {
     /**
      * @return teiid version of this parser
      */
-    ITeiidVersion getVersion();
+    TeiidVersion getVersion();
 
     /**
      * @param teiidVersion
      */
-    void setVersion(ITeiidVersion teiidVersion);
+    void setVersion(TeiidVersion teiidVersion);
 
     /**
      * @return dataTypeManagerService

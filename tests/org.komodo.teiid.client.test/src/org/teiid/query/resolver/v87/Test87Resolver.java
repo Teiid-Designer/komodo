@@ -27,15 +27,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.v86.Test86Resolver;
 import org.teiid.query.sql.lang.Query;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test87Resolver extends Test86Resolver {
 
-    protected Test87Resolver(ITeiidVersion teiidVersion) {
+    protected Test87Resolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

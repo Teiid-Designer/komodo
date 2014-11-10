@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.teiid.query.parser.LanguageVisitor;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.lang.BetweenCriteria;
@@ -95,7 +95,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
      * @param teiidVersion
      * @param symbolMap Map of ElementSymbol to Expression
      */
-    public ExpressionMappingVisitor(ITeiidVersion teiidVersion, Map symbolMap) {
+    public ExpressionMappingVisitor(TeiidVersion teiidVersion, Map symbolMap) {
         super(teiidVersion);
         this.symbolMap = symbolMap;
     }
@@ -105,7 +105,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
      * @param symbolMap
      * @param clone
      */
-    public ExpressionMappingVisitor(TeiidVersion teiidVersion, Map symbolMap, boolean clone) {
+    public ExpressionMappingVisitor(DefaultTeiidVersion teiidVersion, Map symbolMap, boolean clone) {
         super(teiidVersion);
         this.symbolMap = symbolMap;
         this.clone = clone;
@@ -442,7 +442,7 @@ public class ExpressionMappingVisitor extends LanguageVisitor {
         if(obj == null || exprMap == null || exprMap.isEmpty()) { 
             return;
         }
-        ITeiidVersion teiidVersion = obj.getTeiidVersion();
+        TeiidVersion teiidVersion = obj.getTeiidVersion();
         final ExpressionMappingVisitor visitor = new ExpressionMappingVisitor(teiidVersion, exprMap);
         visitor.elementSymbolsOnly = true;
         boolean preOrder = true;

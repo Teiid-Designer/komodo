@@ -27,8 +27,8 @@ import org.komodo.modeshape.teiid.sql.lang.SPParameter;
 import org.komodo.modeshape.teiid.sql.lang.StoredProcedure;
 import org.komodo.modeshape.teiid.sql.lang.SubqueryFromClause;
 import org.komodo.modeshape.teiid.sql.v86.TestQuery86Parser;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -36,7 +36,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class TestQuery87Parser extends TestQuery86Parser {
 
-    protected TestQuery87Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery87Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

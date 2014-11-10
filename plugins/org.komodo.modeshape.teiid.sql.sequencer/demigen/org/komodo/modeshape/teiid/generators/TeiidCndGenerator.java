@@ -52,8 +52,8 @@ import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.value.Reference;
 
@@ -1204,7 +1204,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
             PropertyAspect propAspect = new PropertyAspect(aspectName, ModeshapeType.STRING, multiple);
             propAspect.setConstraints(constraints);
             aspect = propAspect;
-        } else if (parameterClass.equals(ITeiidVersion.class)) {
+        } else if (parameterClass.equals(TeiidVersion.class)) {
             aspect = new PropertyAspect(aspectName, ModeshapeType.STRING, multiple);
         } else
             System.out.println("The class " + classNode.klazz().getSimpleName() + " has the setter method " + method.getName() + " with a parameter type '" + aspectType + "' is not supported");

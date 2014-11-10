@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  *
@@ -40,6 +40,6 @@ public interface TeiidInstanceVersionListener {
      * 
      * @param version
      */
-    void versionChanged(ITeiidVersion version);
+    void versionChanged(TeiidVersion version);
     
 }

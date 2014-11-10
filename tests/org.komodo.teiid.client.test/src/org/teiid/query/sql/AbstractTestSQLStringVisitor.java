@@ -32,7 +32,7 @@ import org.teiid.core.types.DataTypeManagerService;
 import org.komodo.spi.query.sql.lang.IOrderBy;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.lang.BetweenCriteria;
@@ -94,7 +94,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<Command>
     /**
      * @param teiidVersion 
      */
-    public AbstractTestSQLStringVisitor(ITeiidVersion teiidVersion) {
+    public AbstractTestSQLStringVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
         metadataFactory = new RealMetadataFactory(teiidVersion);
     }

@@ -25,8 +25,8 @@ import java.io.InputStream;
 import java.util.Collection;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.AdminException;
 import org.teiid.adminapi.VDB;
@@ -38,16 +38,16 @@ import org.teiid.runtime.client.admin.v8.Admin8Spec;
  */
 public abstract class AdminSpec {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     /**
      * @param teiidVersion
      */
-    public AdminSpec(ITeiidVersion teiidVersion) {
+    public AdminSpec(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 
-    protected ITeiidVersion getTeiidVersion() {
+    protected TeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 
@@ -61,7 +61,7 @@ public abstract class AdminSpec {
      * @param teiidVersion
      * @return admin spec for specific teiid version
      */
-    public static AdminSpec getInstance(ITeiidVersion teiidVersion) {
+    public static AdminSpec getInstance(TeiidVersion teiidVersion) {
         if (teiidVersion.isLessThan(Version.TEIID_8_0.get()))
             throw new UnsupportedOperationException(Messages.getString(Messages.Misc.TeiidVersionNotSupported, teiidVersion));
         else

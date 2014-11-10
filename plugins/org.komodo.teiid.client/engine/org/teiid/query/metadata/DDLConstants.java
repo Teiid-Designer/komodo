@@ -22,7 +22,7 @@
 package org.teiid.query.metadata;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 public interface DDLConstants {
 	public static final String JAVA_METHOD = "JAVA_METHOD";//$NON-NLS-1$

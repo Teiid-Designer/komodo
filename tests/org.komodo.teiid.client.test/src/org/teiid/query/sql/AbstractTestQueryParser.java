@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.language.SQLConstants.NonReserved;
 import org.teiid.language.SQLConstants.Reserved;
@@ -120,7 +120,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> {
     /**
      * @param teiidVersion 
      */
-    public AbstractTestQueryParser(ITeiidVersion teiidVersion) {
+    public AbstractTestQueryParser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

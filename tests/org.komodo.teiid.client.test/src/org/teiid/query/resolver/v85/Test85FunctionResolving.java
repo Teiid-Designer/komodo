@@ -24,8 +24,8 @@ package org.teiid.query.resolver.v85;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.eval.Evaluator;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.resolver.util.ResolverVisitor;
@@ -35,7 +35,7 @@ import org.teiid.query.sql.symbol.Function;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test85FunctionResolving extends Test8FunctionResolving {
 
-    protected Test85FunctionResolving(ITeiidVersion teiidVersion) {
+    protected Test85FunctionResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

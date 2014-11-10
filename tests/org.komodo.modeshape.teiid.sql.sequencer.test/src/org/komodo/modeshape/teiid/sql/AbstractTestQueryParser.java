@@ -111,7 +111,7 @@ import org.komodo.modeshape.teiid.sql.symbol.XMLSerialize;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 
 /**
@@ -123,7 +123,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<Command> impl
     /**
      * @param teiidVersion 
      */
-    public AbstractTestQueryParser(ITeiidVersion teiidVersion) {
+    public AbstractTestQueryParser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

@@ -34,8 +34,8 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.ISQLStringVisitor;
 import org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.ArrayImpl;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.core.util.StringUtil;
@@ -210,7 +210,7 @@ public class SQLStringVisitor extends LanguageVisitor
     /**
      * @param teiidVersion
      */
-    public SQLStringVisitor(ITeiidVersion teiidVersion) {
+    public SQLStringVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

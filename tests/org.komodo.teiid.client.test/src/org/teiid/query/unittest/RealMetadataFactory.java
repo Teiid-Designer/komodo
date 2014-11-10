@@ -40,8 +40,8 @@ import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.Column.SearchType;
@@ -93,19 +93,19 @@ public class RealMetadataFactory {
 	private TransformationMetadata CACHED_BQT = null;
 	private TransformationMetadata CACHED_AGGREGATES = null;
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     private final TCQueryParser parser;
 
     private DataTypeManagerService dataTypeManager;
         
-	public RealMetadataFactory(ITeiidVersion teiidVersion) {
+	public RealMetadataFactory(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         SFM = new SystemFunctionManager(teiidVersion, getClass().getClassLoader());
         parser = new TCQueryParser(teiidVersion);
 	}
 
-	public ITeiidVersion getTeiidVersion() {
+	public TeiidVersion getTeiidVersion() {
 	    return teiidVersion;
 	}
 

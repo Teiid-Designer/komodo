@@ -26,14 +26,14 @@ import static org.mockito.Mockito.when;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 @SuppressWarnings( {"javadoc"} )
 public class TeiidInstanceBuilder {
 
 	private TeiidInstance teiidInstance;
 
-	public TeiidInstanceBuilder(ITeiidVersion teiidVersion) throws Exception {
+	public TeiidInstanceBuilder(TeiidVersion teiidVersion) throws Exception {
 		teiidInstance = mock(TeiidInstance.class);
 		when(teiidInstance.getVersion()).thenReturn(teiidVersion);
 

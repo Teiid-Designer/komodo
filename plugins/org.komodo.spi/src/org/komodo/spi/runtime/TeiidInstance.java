@@ -22,7 +22,7 @@
 package org.komodo.spi.runtime;
 
 import org.komodo.spi.outcome.Outcome;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 /**
  *
  *
@@ -33,7 +33,7 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      * @return the version information of this instance
      * @throws Exception 
      */
-    ITeiidVersion getVersion() throws Exception;
+    TeiidVersion getVersion() throws Exception;
 
     /**
      * Disconnect then connect to this instance. This is preferable to 

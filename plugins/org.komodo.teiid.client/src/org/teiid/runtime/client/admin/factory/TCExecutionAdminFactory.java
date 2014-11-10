@@ -28,7 +28,7 @@ import org.komodo.spi.query.QueryService;
 import org.komodo.spi.runtime.ExecutionAdmin;
 import org.komodo.spi.runtime.ExecutionAdminFactory;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.teiid.core.types.DataTypeManagerService;
 import org.teiid.jdbc.TeiidDriver;
@@ -40,9 +40,9 @@ import org.teiid.runtime.client.query.TCQueryService;
  */
 public class TCExecutionAdminFactory implements ExecutionAdminFactory {
 
-    private final Map<ITeiidVersion, DataTypeManagerService> dataTypeManagerServiceCache = new HashMap<ITeiidVersion, DataTypeManagerService>();
+    private final Map<TeiidVersion, DataTypeManagerService> dataTypeManagerServiceCache = new HashMap<TeiidVersion, DataTypeManagerService>();
     
-    private final Map<ITeiidVersion, TCQueryService> queryServiceCache = new HashMap<ITeiidVersion, TCQueryService>();
+    private final Map<TeiidVersion, TCQueryService> queryServiceCache = new HashMap<TeiidVersion, TCQueryService>();
 
     @Override
     public ExecutionAdmin createExecutionAdmin(TeiidInstance teiidInstance) throws Exception {
@@ -50,7 +50,7 @@ public class TCExecutionAdminFactory implements ExecutionAdminFactory {
     }
     
     @Override
-    public IDataTypeManagerService getDataTypeManagerService(ITeiidVersion teiidVersion) {
+    public IDataTypeManagerService getDataTypeManagerService(TeiidVersion teiidVersion) {
         DataTypeManagerService dataTypeManagerService = dataTypeManagerServiceCache.get(teiidVersion);
         if (dataTypeManagerService == null) {
             dataTypeManagerService = DataTypeManagerService.getInstance(teiidVersion);
@@ -61,14 +61,14 @@ public class TCExecutionAdminFactory implements ExecutionAdminFactory {
     }
 
     @Override
-    public Driver getTeiidDriver(ITeiidVersion teiidVersion) {
+    public Driver getTeiidDriver(TeiidVersion teiidVersion) {
         TeiidDriver instance = TeiidDriver.getInstance();
         instance.setTeiidVersion(teiidVersion);
         return instance;
     }
 
     @Override
-    public QueryService getQueryService(ITeiidVersion teiidVersion) {
+    public QueryService getQueryService(TeiidVersion teiidVersion) {
         TCQueryService queryService = queryServiceCache.get(teiidVersion);
         if (queryService == null) {
             queryService = new TCQueryService(teiidVersion);

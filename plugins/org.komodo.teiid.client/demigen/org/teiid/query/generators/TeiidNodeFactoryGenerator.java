@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.teiid.query.parser.AbstractTeiidParser;
 import org.teiid.query.parser.TeiidParser;
 import org.teiid.query.sql.lang.AlterProcedure;
@@ -135,7 +135,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         }
 
         Class<?>[] klazzes = { TeiidParser.class, Messages.class, 
-                                             TeiidVersion.Version.class,
+                                             DefaultTeiidVersion.Version.class,
                                              Removed.class, Since.class };
 
         for (Class<?> klazz : klazzes) {

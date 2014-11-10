@@ -23,7 +23,7 @@ package org.teiid.query.sql;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.ParseInfo;
 import org.teiid.query.sql.lang.LanguageObject;
 import org.teiid.query.sql.lang.Query;
@@ -37,7 +37,7 @@ public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
     /**
      * @param teiidVersion 
      */
-    public AbstractTestCloning(ITeiidVersion teiidVersion) {
+    public AbstractTestCloning(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

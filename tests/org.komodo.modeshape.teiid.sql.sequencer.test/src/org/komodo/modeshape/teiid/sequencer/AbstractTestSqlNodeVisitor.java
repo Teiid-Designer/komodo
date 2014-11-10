@@ -87,7 +87,7 @@ import org.komodo.spi.query.sql.lang.ICompoundCriteria;
 import org.komodo.spi.query.sql.lang.IOrderBy;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
 import org.modeshape.jcr.api.nodetype.NodeTypeManager;
@@ -103,7 +103,7 @@ public abstract class AbstractTestSqlNodeVisitor extends AbstractSequencerTest {
     /**
      * @param teiidVersion 
      */
-    public AbstractTestSqlNodeVisitor(ITeiidVersion teiidVersion) {
+    public AbstractTestSqlNodeVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
         this.parser = new SQQueryParser(teiidVersion);
     }

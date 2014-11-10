@@ -22,8 +22,8 @@
 package org.komodo.modeshape.teiid.sequencer.v85;
 
 import org.komodo.modeshape.teiid.sequencer.v84.Test84Sequencers;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -35,7 +35,7 @@ public class Test85Sequencers extends Test84Sequencers {
         super(Version.TEIID_8_5.get());
     }
 
-    protected Test85Sequencers(ITeiidVersion teiidVersion) {
+    protected Test85Sequencers(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

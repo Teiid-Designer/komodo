@@ -22,7 +22,7 @@
 package org.teiid.query.sql.visitor;
 
 import org.komodo.spi.query.sql.ISQLStringVisitorCallback;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.lang.LanguageObject;
 
@@ -37,7 +37,7 @@ public class CallbackSQLStringVisitor extends SQLStringVisitor {
      * @param teiidVersion
      * @param callback 
      */
-    public CallbackSQLStringVisitor(ITeiidVersion teiidVersion, ISQLStringVisitorCallback callback) {
+    public CallbackSQLStringVisitor(TeiidVersion teiidVersion, ISQLStringVisitorCallback callback) {
         super(teiidVersion);
         this.callback = callback;
     }

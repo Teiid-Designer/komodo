@@ -24,8 +24,8 @@ package org.teiid.query.sql.v84;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.lang.CompareCriteria;
 import org.teiid.query.sql.lang.Criteria;
 import org.teiid.query.sql.lang.CriteriaOperator;
@@ -51,7 +51,7 @@ import org.teiid.query.sql.v8.TestQuery8Parser;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class TestQuery84Parser extends TestQuery8Parser {
 
-    protected TestQuery84Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery84Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

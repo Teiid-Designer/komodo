@@ -53,8 +53,8 @@ import org.komodo.spi.runtime.TeiidTranslator.TranslatorPropertyType;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.TeiidExecutionException;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.utils.KLog;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.PropertyDefinition;
@@ -129,7 +129,7 @@ public class TCExecutionAdmin implements ExecutionAdmin {
     }
     
     private boolean isLessThanTeiidEightSeven() throws Exception {
-        ITeiidVersion minVersion = teiidInstance.getVersion().getMinimumVersion();
+        TeiidVersion minVersion = teiidInstance.getVersion().getMinimumVersion();
         return minVersion.isLessThan(Version.TEIID_8_7.get());
     }
 
