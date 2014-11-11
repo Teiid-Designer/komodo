@@ -33,7 +33,7 @@ public class ArgCheck {
 
     /**
      * Check that the boolean condition is true; throw an IllegalArgumentException if not.
-     * 
+     *
      * @param condition The boolean condition to check
      * @param message Exception message if check fails
      * @throws IllegalArgumentException if condition is false
@@ -46,7 +46,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that the value is non-negative (>=0).
-//     * 
+//     *
 //     * @param value Value
 //     * @throws IllegalArgumentException If value is negative (<0)
 //     */
@@ -56,7 +56,7 @@ public class ArgCheck {
 
     /**
      * Check that the value is non-negative (>=0).
-     * 
+     *
      * @param value Value
      * @param message Exception message if check fails
      * @throws IllegalArgumentException If value is negative (<0)
@@ -70,7 +70,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that the value is positive (>0).
-//     * 
+//     *
 //     * @param value Value
 //     * @throws IllegalArgumentException If value is non-positive (<=0)
 //     */
@@ -80,7 +80,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that the value is positive (>0).
-//     * 
+//     *
 //     * @param value Value
 //     * @param message Exception message if check fails
 //     * @throws IllegalArgumentException If value is non-positive (<=0)
@@ -94,7 +94,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that the string is non-null and has length > 0
-//     * 
+//     *
 //     * @param value Value
 //     * @throws IllegalArgumentException If value is null or length == 0
 //     */
@@ -104,7 +104,7 @@ public class ArgCheck {
 
     /**
      * Check that the string is non-null and has length > 0
-     * 
+     *
      * @param value Value
      * @param message Exception message if check fails
      * @throws IllegalArgumentException If value is null or length == 0
@@ -119,7 +119,7 @@ public class ArgCheck {
 
     /**
      * Check that the object is non-null
-     * 
+     *
      * @param value Value
      * @throws IllegalArgumentException If value is null
      */
@@ -129,7 +129,7 @@ public class ArgCheck {
 
     /**
      * Check that the object is non-null
-     * 
+     *
      * @param value Value
      * @param message Exception message if check fails
      * @throws IllegalArgumentException If value is null
@@ -143,7 +143,7 @@ public class ArgCheck {
 
     /**
      * Check that the object is an instance of the specified Class
-     * 
+     *
      * @param theClass Class
      * @param value Value
      * @throws IllegalArgumentException If value is null
@@ -154,7 +154,7 @@ public class ArgCheck {
 
     /**
      * Check that the object is an instance of the specified Class
-     * 
+     *
      * @param theClass Class
      * @param value Value
      * @param message Exception message if check fails
@@ -172,7 +172,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that the collection is not empty
-//     * 
+//     *
 //     * @param collection Collection
 //     * @throws IllegalArgumentException If collection is null or empty
 //     */
@@ -182,7 +182,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that the collection is not empty
-//     * 
+//     *
 //     * @param collection Collection
 //     * @param message Exception message if check fails
 //     * @throws IllegalArgumentException If collection is null or empty
@@ -197,7 +197,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that the properties is not empty
-//     * 
+//     *
 //     * @param properties
 //     * @throws IllegalArgumentException If properties is null or empty
 //     */
@@ -207,7 +207,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that the properties is not empty
-//     * 
+//     *
 //     * @param properties
 //     * @param message Exception message if check fails
 //     * @throws IllegalArgumentException If properties is null or empty
@@ -222,7 +222,7 @@ public class ArgCheck {
 
     /**
      * Check that the string is not empty
-     * 
+     *
      * @param string String
      * @throws IllegalArgumentException If string is null or empty
      *
@@ -233,7 +233,7 @@ public class ArgCheck {
 
     /**
      * Check that the string is not empty
-     * 
+     *
      * @param string String
      * @param message Exception message if check fails
      * @throws IllegalArgumentException If string is null or empty
@@ -242,10 +242,28 @@ public class ArgCheck {
     public static final void isNotEmpty(String string, String message) {
         isNotZeroLength(string, message);
     }
+
+    /**
+     * Check that the array is not <code>null</code> and not empty.
+     *
+     * @param items the array being checked
+     * @param message the message if check fails
+     * @throws IllegalArgumentException if array is <code>null</code> or empty
+     *
+     */
+    public static final void isNotEmpty(final Object[] items,
+                                        final String message) {
+        isNotNull(items, message);
+
+        if (items.length == 0) {
+            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isArrayNotEmpty);
+            throw new IllegalArgumentException(msg);
+        }
+    }
 //
 //    /**
 //     * Check that the collection contains the value
-//     * 
+//     *
 //     * @param collection Collection to check
 //     * @param value Value to check for, may be null
 //     * @throws IllegalArgumentException If collection is null or doesn't contain value
@@ -256,7 +274,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that the collection contains the value
-//     * 
+//     *
 //     * @param collection Collection to check
 //     * @param value Value to check for, may be null
 //     * @param message Exception message if check fails
@@ -272,7 +290,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that two boolean values are equal
-//     * 
+//     *
 //     * @param value1 the first boolean value
 //     * @param value2 the second boolean value
 //     * @throws IllegalArgumentException if booleans are not equal
@@ -283,7 +301,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Check that two boolean values are equal
-//     * 
+//     *
 //     * @param value1 the first boolean value
 //     * @param value2 the second boolean value
 //     * @param message Exception message if check fails
@@ -299,7 +317,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Checks if two booleans are NOT equal
-//     * 
+//     *
 //     * @param value1 the first boolean value
 //     * @param value2 the second boolean value
 //     * @throws IllegalArgumentException if booleans are equal
@@ -310,7 +328,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Checks if two booleans are NOT equal
-//     * 
+//     *
 //     * @param value1 the first boolean value
 //     * @param value2 the second boolean value
 //     * @param message Exception message if check fails
@@ -326,7 +344,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Checks if two integer values are equal
-//     * 
+//     *
 //     * @param value1 the first integer value
 //     * @param value2 the second integer value
 //     * @throws IllegalArgumentException if booleans are equal
@@ -337,7 +355,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Checks if two integer values are equal
-//     * 
+//     *
 //     * @param value1 the first integer value
 //     * @param value2 the second integer value
 //     * @param message Exception message if check fails
@@ -353,7 +371,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Checks if two integer values are NOT equal
-//     * 
+//     *
 //     * @param value1 the first integer value
 //     * @param value2 the second integer value
 //     * @throws IllegalArgumentException if booleans are equal
@@ -364,7 +382,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Checks if two integer values are NOT equal
-//     * 
+//     *
 //     * @param value1 the first integer value
 //     * @param value2 the second integer value
 //     * @param message Exception message if check fails
@@ -380,7 +398,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Compares with object1.equals(object2).
-//     * 
+//     *
 //     * @param object1 the first object
 //     * @param object2 the second object
 //     * @throws IllegalArgumentException if booleans are equal
@@ -391,7 +409,7 @@ public class ArgCheck {
 //
 //    /**
 //     * Compares with object1.equals(object2).
-//     * 
+//     *
 //     * @param object1 the first object
 //     * @param object2 the second object
 //     * @param message Exception message if check fails

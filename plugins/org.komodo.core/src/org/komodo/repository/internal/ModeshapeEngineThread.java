@@ -31,7 +31,6 @@ import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
 import org.modeshape.common.collection.Problems;
 import org.modeshape.jcr.JcrRepository;
-import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.ModeShapeEngine;
 import org.modeshape.jcr.RepositoryConfiguration;
 
@@ -72,7 +71,7 @@ public class ModeshapeEngineThread extends Thread {
     }
 
     /**
-     * Request crafted by 
+     * Request crafted by
      * wishing to be notified of a change of engine state
      */
     public static class Request {
@@ -82,7 +81,7 @@ public class ModeshapeEngineThread extends Thread {
         private RequestCallback callback;
 
         /**
-         * @param requestType type of request 
+         * @param requestType type of request
          * @param callback callback for execution after change of engine state
          */
         public Request(RequestType requestType, RequestCallback callback) {
@@ -108,8 +107,6 @@ public class ModeshapeEngineThread extends Thread {
     private final static ModeShapeEngine msEngine = new ModeShapeEngine();
 
     private JcrRepository repository;
-
-    private static JcrSession session;
 
     private BlockingQueue<Request> queue = new LinkedBlockingQueue<Request>();
 
@@ -145,7 +142,7 @@ public class ModeshapeEngineThread extends Thread {
 
             // start the ModeShape Engine
             msEngine.start();
-         
+
             // start the local repository
             final RepositoryConfiguration config = RepositoryConfiguration.read(configPath);
 
@@ -201,13 +198,8 @@ public class ModeshapeEngineThread extends Thread {
 
     private synchronized void stopEngine(RequestCallback requestCallback) throws Exception {
         try {
-            if (session != null) {
-                session.save();
-                session.logout();
-            }
             msEngine.shutdown();
         } finally {
-            session = null;
             repository = null;
 
             if (requestCallback != null)
@@ -233,7 +225,7 @@ public class ModeshapeEngineThread extends Thread {
                         break;
                 }
 
-                
+
             }
         } catch (Exception ex) {
             KLog.getLogger().error(

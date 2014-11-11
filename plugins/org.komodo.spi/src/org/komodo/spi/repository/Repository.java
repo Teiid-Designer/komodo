@@ -21,13 +21,65 @@
  */
 package org.komodo.spi.repository;
 
+import java.io.File;
 import java.net.URL;
+import java.util.List;
+import org.komodo.spi.KException;
 
 /**
- * A repository is a data store containing artifacts
- * generated while modelling VDBs
+ * A repository is a data store containing artifacts generated while modeling VDBs
  */
 public interface Repository {
+
+    /**
+     * A repository identifier.
+     */
+    public interface Id {
+
+        /**
+         * @return the repository configuration location
+         */
+        URL getConfiguration();
+
+        /**
+         * @return the repository name (cannot be empty)
+         */
+        String getName();
+
+        /**
+         * @return the repository URL (cannot be empty)
+         */
+        String getUrl();
+    }
+
+    /**
+     * Library and workspace searches using keywords will use one of these criteria.
+     */
+    public enum KeywordCriteria {
+
+        /**
+         * All keywords must be present in the search result.
+         */
+        ALL,
+
+        /**
+         * At least one of the keywords must be present in the search result. This is the default.
+         */
+        ANY,
+
+        /**
+         * None of the keywords may be present in the search result.
+         */
+        NONE;
+
+        /**
+         * @return the default keyword to use (never <code>null</code>)
+         */
+        public static KeywordCriteria getDefault() {
+            return ANY;
+        }
+
+    }
 
     /**
      * The repository state.
@@ -69,25 +121,146 @@ public interface Repository {
     }
 
     /**
-     * A repository identifier.
+     * Represents one or more operations grouped together forming a {@link IRepository repository} transaction.
      */
-    public interface Id {
+    public interface UnitOfWork {
 
         /**
-         * @return the repository name (cannot be empty)
+         * Saves all changes made during the transaction. If this is a roll back transaction then {@link #rollback()} is called.
+         */
+        void commit();
+
+        /**
+         * @return the listener being notified when the transaction is finished (can be <code>null</code>)
+         */
+        UnitOfWorkListener getCallback();
+
+        /**
+         * @return the name of the transaction (never <code>null</code>)
          */
         String getName();
 
         /**
-         * @return the repository URL (cannot be empty)
+         * Discards all current changes made during this transaction.
          */
-        String getUrl();
+        void rollback();
+
+    }
+
+    /**
+     * A listener notified when a unit of work completes.
+     */
+    public interface UnitOfWorkListener {
 
         /**
-         * @return the repository configuration location
+         * @param work
+         *        the work that was completed (never <code>null</code>)
          */
-        URL getConfiguration();
+        void completedSuccessfully( final UnitOfWork work );
+
+        /**
+         * @param work
+         *        the work that was completed (never <code>null</code>)
+         * @param error
+         *        the error that occurred processing the transaction (never <code>null</code>)
+         */
+        void errorOccurred( final UnitOfWork work,
+                            final Exception error );
+
     }
+
+    /**
+     * Creates then commits a transaction containing only this operation.
+     *
+     * @param parentPath
+     *        the parent path where the workspace object is created (can be empty if adding at the root of the workspace)
+     * @param name
+     *        the name of the object (cannot be empty)
+     * @return the new workspace object (never <code>null</code>)
+     * @throws KException
+     *         if the parent path does not exist or an error occurs
+     */
+    public KomodoObject add( final String parentPath,
+                             final String name ) throws KException;
+
+    /**
+     * The transaction must be committed or rolled back by the caller.
+     *
+     * @param transaction
+     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     * @param parentPath
+     *        the parent path where the workspace object is created (can be empty if adding at the root of the workspace)
+     * @param name
+     *        the name of the object (cannot be empty)
+     * @return the new workspace object (never <code>null</code>)
+     * @throws KException
+     *         if the parent path does not exist or an error occurs
+     */
+    public KomodoObject add( final UnitOfWork transaction,
+                             final String parentPath,
+                             final String name ) throws KException;
+
+    /**
+     * Add an {@link IRepositoryClient} to receive notifications from
+     *
+     * @param client
+     */
+    void addClient( IRepositoryClient client );
+
+    /**
+     * @param observer
+     *        the observer to be added
+     */
+    void addObserver( IRepositoryObserver observer );
+
+    /**
+     * @param name
+     *        a name for the transaction (cannot be empty)
+     * @param rollbackOnly
+     *        <code>true</code> if the transaction should only be rolled back
+     * @param callback
+     *        a listener that is notified when the transaction is finished (can be <code>null</code>
+     * @return a unit of work transaction that must be either committed or rolled back (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public UnitOfWork createTransaction( final String name,
+                                         final boolean rollbackOnly,
+                                         final UnitOfWorkListener callback ) throws KException;
+
+    /**
+     * @param keywords
+     *        words that should be matched to words found in the description (can be empty)
+     * @param criteria
+     *        the search criteria (can be <code>null</code> if the default criteria should be used)
+     * @param artifactTypes
+     *        the artifact type(s) (can be empty if all artifacts of any type are wanted)
+     * @return the requested artifacts (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if parent path does not exist or an error occurs
+     */
+    public ArtifactDescriptor[] find( final List< String > keywords,
+                                      final KeywordCriteria criteria,
+                                      final String... artifactTypes ) throws KException;
+
+    /**
+     * @param artifactTypes
+     *        the artifact type(s) (can be empty if all artifacts of any type are wanted)
+     * @return the requested artifacts (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if parent path does not exist or an error occurs
+     */
+    public ArtifactDescriptor[] find( final String... artifactTypes ) throws KException;
+
+    /**
+     * @param parentPath
+     *        the path to the workspace container whose contents are being requested (can be empty if the workspace roots are
+     *        being requested)
+     * @return the requested workspace Komodo objects (never <code>null</code> but can be empty)
+     * @throws Exception
+     *         if an error occurs
+     */
+    public KomodoObject[] get( final String parentPath ) throws Exception;
 
     /**
      * @return the repository identifier (never <code>null</code>)
@@ -105,38 +278,192 @@ public interface Repository {
     Type getType();
 
     /**
-     * @return <code>true</code> if the repository can be communicated with
-     */
-    boolean ping();
-
-    /**
-     * Add an {@link RepositoryClient} to receive notifications from
+     * Creates then commits a transaction containing only this operation.
      *
-     * @param client
+     * @param file
+     *        the file being added to the workspace (cannot be <code>null</code>)
+     * @param name
+     *        the name of the Komodo object to create (cannot be empty)
+     * @param parentPath
+     *        the path to where the object will be created (can be empty if creating at the workspace root)
+     * @return the Komodo object for the file (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
      */
-    void addClient(RepositoryClient client);
+    public KomodoObject importFile( final File file,
+                                    final String name,
+                                    final String parentPath ) throws KException;
 
     /**
-     * Remove an {@link RepositoryClient} that we no longer wish to receive notifications from
+     * The transaction must be committed or rolled back by the caller.
      *
-     * @param client
+     * @param transaction
+     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     * @param file
+     *        the file being added to the workspace (cannot be <code>null</code>)
+     * @param name
+     *        the name of the Komodo object to create (cannot be empty)
+     * @param parentPath
+     *        the path to where the object will be created (can be empty if creating at the workspace root)
+     * @return the Komodo object for the file (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
      */
-    void removeClient(RepositoryClient client);
+    public KomodoObject importFile( final UnitOfWork transaction,
+                                    final File file,
+                                    final String name,
+                                    final String parentPath ) throws KException;
 
     /**
-     * @param observer the observer to be added
+     * The transaction must be committed or rolled back by the caller.
+     *
+     * @param transaction
+     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     * @param url
+     *        the resource being added to the workspace (cannot be <code>null</code>)
+     * @param name
+     *        the name of the Komodo object to create (cannot be empty)
+     * @param parentPath
+     *        the path to where the Komodo object will be created (can be empty if importing to the root of the workspace)
+     * @return the Komodo object for the resource (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
      */
-    void addObserver(RepositoryObserver observer);
+    public KomodoObject importResource( final UnitOfWork transaction,
+                                        final URL url,
+                                        final String name,
+                                        final String parentPath ) throws KException;
 
     /**
-     * @param observer the observer to be removed
+     * Creates then commits a transaction containing only this operation.
+     *
+     * @param url
+     *        the resource being added to the workspace (cannot be <code>null</code>)
+     * @param name
+     *        the name of the Komodo object to create (cannot be empty)
+     * @param parentPath
+     *        the path to where the Komodo object will be created (can be empty if creating at the workspace root)
+     * @return the Komodo object for the resource (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
      */
-    void removeObserver(RepositoryObserver observer);
+    public KomodoObject importResource( final URL url,
+                                        final String name,
+                                        final String parentPath ) throws KException;
 
     /**
      * Notify the repository of the given {@link RepositoryClientEvent}
      *
      * @param event
      */
-    void notify(RepositoryClientEvent event);
+    void notify( RepositoryClientEvent event );
+
+    /**
+     * @return <code>true</code> if the repository can be communicated with
+     */
+    boolean ping();
+
+    /**
+     * Creates then commits a transaction containing only this operation.
+     *
+     * @param overwrite
+     *        <code>true</code> if existing artifacts should be updated
+     * @param descriptor
+     *        the artifact descriptor (cannot be <code>null</code>)
+     * @param komodoObject
+     *        the Komodo object being added to the library (cannot be <code>null</code>)
+     * @throws KException
+     *         if artifact already exists and not in overwrite mode or an error occurs
+     */
+    public void publish( final boolean overwrite,
+                         final ArtifactDescriptor descriptor,
+                         final KomodoObject komodoObject ) throws KException;
+
+    /**
+     * The transaction must be committed or rolled back by the caller.
+     *
+     * @param transaction
+     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     * @param overwrite
+     *        <code>true</code> if existing artifacts should be updated
+     * @param descriptor
+     *        the artifact descriptor (cannot be <code>null</code>)
+     * @param komodoObject
+     *        the Komodo object being added to the library (cannot be <code>null</code>)
+     * @throws KException
+     *         if artifact already exists and not in overwrite mode or an error occurs
+     */
+    public void publish( final UnitOfWork transaction,
+                         final boolean overwrite,
+                         final ArtifactDescriptor descriptor,
+                         final KomodoObject komodoObject ) throws KException;
+
+    /**
+     * Creates then commits a transaction containing only this operation.
+     *
+     * @param paths
+     *        the paths of the workspace objects being removed (cannot be <code>null</code> or empty)
+     * @throws KException
+     *         if a workspace path does not exist or an error occurs
+     */
+    public void remove( final String... paths ) throws KException;
+
+    /**
+     * The transaction must be committed or rolled back by the caller.
+     *
+     * @param transaction
+     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     * @param paths
+     *        the paths of the workspace objects being removed (cannot be <code>null</code> or empty)
+     * @throws KException
+     *         if a workspace path does not exist or an error occurs
+     */
+    public void remove( final UnitOfWork transaction,
+                        final String... paths ) throws KException;
+
+    /**
+     * Remove an {@link RepositoryClient} that we no longer wish to receive notifications from
+     *
+     * @param client
+     */
+    void removeClient( IRepositoryClient client );
+
+    /**
+     * @param observer
+     *        the observer to be removed
+     */
+    void removeObserver( IRepositoryObserver observer );
+
+    /**
+     * @param artifactPaths
+     *        the paths of the artifacts being requested (cannot be <code>null</code> or empty)
+     * @return the requested artifacts (never <code>null</code>)
+     * @throws KException
+     *         if an artifact does not exist or an error occurs
+     */
+    public Artifact[] retrieve( final String... artifactPaths ) throws KException;
+
+    /**
+     * Creates then commits a transaction containing only this operation.
+     *
+     * @param artifactPaths
+     *        the paths of the the artifacts being removed (cannot be <code>null</code> or empty)
+     * @throws KException
+     *         if an artifact does not exist in the library or an error occurs
+     */
+    public void unpublish( final String... artifactPaths ) throws KException;
+
+    /**
+     * The transaction must be committed or rolled back by the caller.
+     *
+     * @param transaction
+     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     * @param artifactPaths
+     *        the paths of the the artifacts being removed (cannot be <code>null</code> or empty)
+     * @throws KException
+     *         if an artifact does not exist in the library or an error occurs
+     */
+    public void unpublish( final UnitOfWork transaction,
+                           final String... artifactPaths ) throws KException;
+
 }

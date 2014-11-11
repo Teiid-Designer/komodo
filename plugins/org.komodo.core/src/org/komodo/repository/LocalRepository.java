@@ -22,24 +22,18 @@
 package org.komodo.repository;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import org.komodo.repository.internal.ModeshapeEngineThread;
 import org.komodo.repository.internal.ModeshapeEngineThread.Request;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestType;
+import org.komodo.repository.internal.RepositoryImpl;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.Repository;
-import org.komodo.spi.repository.RepositoryClient;
-import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.spi.repository.RepositoryClientEvent;
-import org.komodo.utils.KLog;
 
 /**
- * A repository installed on the local machine, using the modeshape
- * engine and repository.
+ * A repository installed on the local machine, using the modeshape engine and repository.
  */
-public class LocalRepository implements Repository, StringConstants {
+public class LocalRepository extends RepositoryImpl implements StringConstants {
 
     private static String LOCAL_REPOSITORY_CONFIG = "local-repository-config.json"; //$NON-NLS-1$
 
@@ -63,37 +57,27 @@ public class LocalRepository implements Repository, StringConstants {
         public URL getConfiguration() {
             return configPath;
         }
-        
+
     }
 
     /**
      * @return singleton instance
      */
     public static LocalRepository getInstance() {
-        if (instance == null)
-            instance = new LocalRepository();
+        if (instance == null) instance = new LocalRepository();
 
         return instance;
     }
 
-    private final LocalRepositoryId id = new LocalRepositoryId();
-
     private State state;
-
-    private List<RepositoryObserver> observers = new ArrayList<RepositoryObserver>();
-    
-    private List<RepositoryClient> clients = new ArrayList<RepositoryClient>();
 
     private ModeshapeEngineThread engineThread;
 
     /**
      * Create instance
      */
-    private LocalRepository() {}
-
-    @Override
-    public Id getId() {
-        return id;
+    private LocalRepository() {
+        super(Type.LOCAL, new LocalRepositoryId());
     }
 
     @Override
@@ -102,63 +86,22 @@ public class LocalRepository implements Repository, StringConstants {
     }
 
     @Override
-    public Type getType() {
-        return null;
-    }
-
-    @Override
     public boolean ping() {
         return false;
     }
 
-    @Override
-    public void addClient(RepositoryClient client) {
-        clients .add(client);
-    }
-
-    @Override
-    public void removeClient(RepositoryClient client) {
-        clients.remove(client);
-    }
-
-    @Override
-    public void addObserver(RepositoryObserver observer) {
-        observers.add(observer);
-    }
-
-    @Override
-    public void removeObserver(RepositoryObserver observer) {
-        observers.remove(observer);
-    }
-
-    private void notifyObservers() {
-        for (RepositoryObserver observer : observers) {
-            try {
-                // Ensure all observers are informed even if one
-                // throws an exception
-                observer.stateChanged();
-            } catch (Exception ex) {
-                KLog.getLogger().error(
-                                       Messages.getString(
-                                                          Messages.LocalRepository.General_Exception), ex);
-            }
-        }
-    }
-
     private void createEngineThread() {
-        if (engineThread != null && engineThread.isAlive())
-            return;
+        if (engineThread != null && engineThread.isAlive()) return;
 
-        if (engineThread != null && !engineThread.isAlive())
-            throw new RuntimeException(Messages.getString(Messages.LocalRepository.EngineThread_Died));
+        if (engineThread != null && !engineThread.isAlive()) throw new RuntimeException(
+                                                                                        Messages.getString(Messages.LocalRepository.EngineThread_Died));
 
         engineThread = new ModeshapeEngineThread(getId().getConfiguration());
         engineThread.start();
     }
 
     private void startRepository() {
-        if (this.state == State.REACHABLE)
-            return;
+        if (this.state == State.REACHABLE) return;
 
         createEngineThread();
 
@@ -176,7 +119,7 @@ public class LocalRepository implements Repository, StringConstants {
     }
 
     @Override
-    public void notify(RepositoryClientEvent event) {
+    public void notify( RepositoryClientEvent event ) {
         if (event.getType() == RepositoryClientEvent.EventType.STARTED) {
             // Start the modeshape engine if not already started
             startRepository();

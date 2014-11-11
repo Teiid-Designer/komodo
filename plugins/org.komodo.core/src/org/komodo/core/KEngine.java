@@ -27,6 +27,7 @@ import java.util.Set;
 import org.komodo.core.event.KEvent;
 import org.komodo.core.event.KListener;
 import org.komodo.repository.LocalRepository;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryClient;
