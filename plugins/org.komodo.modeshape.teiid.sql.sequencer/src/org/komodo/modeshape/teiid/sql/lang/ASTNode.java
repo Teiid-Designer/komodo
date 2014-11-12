@@ -47,7 +47,7 @@ import org.modeshape.jcr.api.JcrConstants;
  * Utility object class designed to facilitate constructing an AST or Abstract Syntax Tree representing nodes and properties that
  * are compatible with ModeShape graph component structure.
  */
-public abstract class ASTNode extends SimpleNode implements LanguageObject, StringConstants, Cloneable {
+public abstract class ASTNode extends SimpleNode implements BaseLanguageObject, StringConstants, Cloneable {
 
     /**
      * 
@@ -519,7 +519,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param referenceName name for identifier
      * @param languageObject child to add
      */
-    public void addLastChild(String referenceName, LanguageObject languageObject) {
+    public void addLastChild(String referenceName, BaseLanguageObject languageObject) {
         if (languageObject == null)
             languageObject = new NullNode(getTeiidParser());
 
@@ -535,7 +535,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param referenceName name for identifier
      * @param languageObject child to add
      */
-    public void setChild(String referenceName, LanguageObject languageObject) {
+    public void setChild(String referenceName, BaseLanguageObject languageObject) {
         removeChildren(referenceName);
 
         if (languageObject == null)
@@ -552,13 +552,13 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param referenceName name for identifier
      * @param languageObjects children to add
      */
-    public void setChildren(String referenceName, Collection<? extends LanguageObject> languageObjects) {
+    public void setChildren(String referenceName, Collection<? extends BaseLanguageObject> languageObjects) {
         removeChildren(referenceName);
 
         if (languageObjects == null)
             return;
 
-        for (LanguageObject object : languageObjects) {
+        for (BaseLanguageObject object : languageObjects) {
             addLastChild(referenceName, object);
         }
     }

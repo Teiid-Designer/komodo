@@ -29,11 +29,11 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.metadata.MetadataFactory;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.proc.Statement;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.proc.StatementImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
 
 /**
  *
@@ -67,7 +67,7 @@ public interface TeiidClientParser {
      * 
      * @return instance of commonly used node
      */
-    <T extends LanguageObject> T createASTNode(ASTNodes nodeType);
+    <T extends BaseLanguageObject> T createASTNode(ASTNodes nodeType);
 
     /**
      * @param parseInfo
@@ -75,7 +75,7 @@ public interface TeiidClientParser {
      * @return command for trigger action
      * @throws Exception 
      */
-    Command forEachRowTriggerAction(ParseInfo parseInfo) throws Exception;
+    CommandImpl forEachRowTriggerAction(ParseInfo parseInfo) throws Exception;
 
     /**
      * Parse an expression
@@ -84,7 +84,7 @@ public interface TeiidClientParser {
      * @return the expression
      * @throws Exception
      */
-    Expression expression(ParseInfo info) throws Exception;
+    BaseExpression expression(ParseInfo info) throws Exception;
 
     /**
      * Parse a command
@@ -93,7 +93,7 @@ public interface TeiidClientParser {
      * @return the command
      * @throws Exception
      */
-    Command command(ParseInfo parseInfo) throws Exception;
+    CommandImpl command(ParseInfo parseInfo) throws Exception;
 
     /**
      * Parse a designer command
@@ -102,7 +102,7 @@ public interface TeiidClientParser {
      * @return the command
      * @throws Exception
      */
-    Command designerCommand(ParseInfo parseInfo) throws Exception;
+    CommandImpl designerCommand(ParseInfo parseInfo) throws Exception;
 
     /**
      * Parse a criteria
@@ -111,7 +111,7 @@ public interface TeiidClientParser {
      * @return the criteria
      * @throws Exception
      */
-    Criteria criteria(ParseInfo parseInfo) throws Exception;
+    CriteriaImpl criteria(ParseInfo parseInfo) throws Exception;
 
     /**
      * Parse a statement
@@ -120,7 +120,7 @@ public interface TeiidClientParser {
      * @return the statement
      * @throws Exception
      */
-    Statement statement(ParseInfo info) throws Exception;
+    StatementImpl statement(ParseInfo info) throws Exception;
 
     /**
      * Parse a select expression
@@ -129,7 +129,7 @@ public interface TeiidClientParser {
      * @return the select expression
      * @throws Exception
      */
-    Expression selectExpression(ParseInfo info) throws Exception;
+    BaseExpression selectExpression(ParseInfo info) throws Exception;
 
     /**
      * Parse a procedure command
@@ -139,7 +139,7 @@ public interface TeiidClientParser {
      * @throws Exception 
      */
     @Since(Version.TEIID_8_0)
-    Command procedureBodyCommand(ParseInfo parseInfo) throws Exception;
+    CommandImpl procedureBodyCommand(ParseInfo parseInfo) throws Exception;
 
     /**
      * @param factory

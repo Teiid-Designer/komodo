@@ -21,11 +21,11 @@
  ************************************************************************************/
 package org.teiid.query.sql.lang;
 
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.symbol.BaseExpression;
 
 /**
  *
  */
-public interface PredicateCriteria extends Expression {
+public interface PredicateCriteria extends BaseExpression {
 
 }

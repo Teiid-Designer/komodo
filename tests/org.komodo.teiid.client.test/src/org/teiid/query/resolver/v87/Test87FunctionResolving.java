@@ -33,7 +33,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.resolver.v86.Test86FunctionResolving;
-import org.teiid.query.sql.symbol.Function;
+import org.teiid.query.sql.symbol.FunctionImpl;
 import org.teiid.query.unittest.RealMetadataFactory.DDLHolder;
 
 @SuppressWarnings( {"nls", "javadoc"} )
@@ -61,7 +61,7 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
                                                                 new DDLHolder("z", "create foreign function f () returns string"));
 
         String sql = "f()";
-        Function func = (Function)getQueryParser().parseExpression(sql);
+        FunctionImpl func = (FunctionImpl)getQueryParser().parseExpression(sql);
 
         ResolverVisitorImpl resolver = new ResolverVisitorImpl(getTeiidVersion());
         try {
@@ -72,7 +72,7 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
         }
 
         sql = "z.f()";
-        func = (Function)getQueryParser().parseExpression(sql);
+        func = (FunctionImpl)getQueryParser().parseExpression(sql);
         resolver = new ResolverVisitorImpl(getTeiidVersion());
         resolver.resolveLanguageObject(func, tm);
     }
@@ -89,7 +89,7 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
 
         String sql = "func('a')";
 
-        Function func = (Function) getQueryParser().parseExpression(sql);
+        FunctionImpl func = (FunctionImpl) getQueryParser().parseExpression(sql);
         ResolverVisitorImpl resolver = new ResolverVisitorImpl(getTeiidVersion());
         resolver.resolveLanguageObject(func, tm);
         assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), func.getArgs()[0].getType());
@@ -97,7 +97,7 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
 
         sql = "func1(('1',))";
 
-        func = (Function) getQueryParser().parseExpression(sql);
+        func = (FunctionImpl) getQueryParser().parseExpression(sql);
         resolver = new ResolverVisitorImpl(getTeiidVersion());
         resolver.resolveLanguageObject(func, tm);
         System.out.println(func.getType());

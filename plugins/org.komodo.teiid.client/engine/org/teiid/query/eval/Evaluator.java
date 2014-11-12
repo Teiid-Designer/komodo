@@ -47,8 +47,8 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.trans.XPathException;
 
-import org.komodo.spi.query.sql.lang.ICompareCriteria;
-import org.komodo.spi.query.sql.lang.IMatchCriteria.MatchMode;
+import org.komodo.spi.query.sql.lang.CompareCriteria;
+import org.komodo.spi.query.sql.lang.MatchCriteria.MatchMode;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.core.types.ArrayImpl;
@@ -74,45 +74,45 @@ import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.sql.lang.AbstractCompareCriteria;
 import org.teiid.query.sql.lang.AbstractSetCriteria;
-import org.teiid.query.sql.lang.CollectionValueIterator;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.CompoundCriteria;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.lang.ExistsCriteria;
-import org.teiid.query.sql.lang.ExpressionCriteria;
-import org.teiid.query.sql.lang.IsNullCriteria;
-import org.teiid.query.sql.lang.MatchCriteria;
+import org.teiid.query.sql.lang.CollectionValueIteratorImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CompoundCriteriaImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
+import org.teiid.query.sql.lang.ExistsCriteriaImpl;
+import org.teiid.query.sql.lang.ExpressionCriteriaImpl;
+import org.teiid.query.sql.lang.IsNullCriteriaImpl;
+import org.teiid.query.sql.lang.MatchCriteriaImpl;
 import org.teiid.query.sql.lang.NamespaceItem;
-import org.teiid.query.sql.lang.NotCriteria;
-import org.teiid.query.sql.lang.SetCriteria;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria.PredicateQuantifier;
-import org.teiid.query.sql.lang.SubqueryContainer;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
-import org.teiid.query.sql.proc.ExceptionExpression;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.AliasSymbol;
-import org.teiid.query.sql.symbol.Array;
-import org.teiid.query.sql.symbol.CaseExpression;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.DerivedColumn;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.ExpressionSymbol;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.JSONObject;
-import org.teiid.query.sql.symbol.QueryString;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.ScalarSubquery;
-import org.teiid.query.sql.symbol.SearchedCaseExpression;
-import org.teiid.query.sql.symbol.TextLine;
-import org.teiid.query.sql.symbol.WindowFunction;
-import org.teiid.query.sql.symbol.XMLElement;
-import org.teiid.query.sql.symbol.XMLForest;
-import org.teiid.query.sql.symbol.XMLNamespaces;
-import org.teiid.query.sql.symbol.XMLParse;
-import org.teiid.query.sql.symbol.XMLQuery;
-import org.teiid.query.sql.symbol.XMLSerialize;
+import org.teiid.query.sql.lang.NotCriteriaImpl;
+import org.teiid.query.sql.lang.SetCriteriaImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl.PredicateQuantifier;
+import org.teiid.query.sql.lang.BaseSubqueryContainer;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
+import org.teiid.query.sql.proc.ExceptionExpressionImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.AliasSymbolImpl;
+import org.teiid.query.sql.symbol.ArraySymbolImpl;
+import org.teiid.query.sql.symbol.CaseExpressionImpl;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.DerivedColumnImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.ExpressionSymbolImpl;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.JSONObjectImpl;
+import org.teiid.query.sql.symbol.QueryStringImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
+import org.teiid.query.sql.symbol.SearchedCaseExpressionImpl;
+import org.teiid.query.sql.symbol.TextLineImpl;
+import org.teiid.query.sql.symbol.BaseWindowFunction;
+import org.teiid.query.sql.symbol.XMLElementImpl;
+import org.teiid.query.sql.symbol.XMLForestImpl;
+import org.teiid.query.sql.symbol.XMLNamespacesImpl;
+import org.teiid.query.sql.symbol.XMLParseImpl;
+import org.teiid.query.sql.symbol.XMLQueryImpl;
+import org.teiid.query.sql.symbol.XMLSerializeImpl;
 import org.teiid.query.sql.util.ValueIterator;
 import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.query.util.CommandContext;
@@ -222,10 +222,10 @@ public class Evaluator {
     }
 
 	private final static char[] REGEX_RESERVED = new char[] {'$', '(', ')', '*', '+', '.', '?', '[', '\\', ']', '^', '{', '|', '}'}; //in sorted order
-    private final static MatchCriteria.PatternTranslator LIKE_TO_REGEX = new MatchCriteria.PatternTranslator(new char[] {'%', '_'}, new String[] {".*", "."},  REGEX_RESERVED, '\\', Pattern.DOTALL);  //$NON-NLS-1$ //$NON-NLS-2$
+    private final static MatchCriteriaImpl.PatternTranslator LIKE_TO_REGEX = new MatchCriteriaImpl.PatternTranslator(new char[] {'%', '_'}, new String[] {".*", "."},  REGEX_RESERVED, '\\', Pattern.DOTALL);  //$NON-NLS-1$ //$NON-NLS-2$
     
     private final static char[] SIMILAR_REGEX_RESERVED = new char[] {'$', '.', '\\', '^'}; //in sorted order
-    private final static MatchCriteria.PatternTranslator SIMILAR_TO_REGEX = new MatchCriteria.PatternTranslator(
+    private final static MatchCriteriaImpl.PatternTranslator SIMILAR_TO_REGEX = new MatchCriteriaImpl.PatternTranslator(
     		new char[] {'%', '(', ')', '*', '?', '+', '[', ']', '_', '{', '|', '}'}, 
     		new String[] {"([a]|[^a])*", "(", ")", "*", "?", "+", //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$  //$NON-NLS-5$ //$NON-NLS-6$
     				"[", "]", "([a]|[^a])", "{", "|", "}"},  SIMILAR_REGEX_RESERVED, '\\', 0);  //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$  //$NON-NLS-5$ //$NON-NLS-6$  
@@ -244,7 +244,7 @@ public class Evaluator {
      * @return evaluation of criteria
      * @throws Exception
      */
-    public static boolean assess(Criteria criteria) throws Exception {
+    public static boolean assess(CriteriaImpl criteria) throws Exception {
     	return new Evaluator(criteria.getTeiidVersion()).evaluate(criteria);
     }
     
@@ -253,7 +253,7 @@ public class Evaluator {
      * @return evaluation of expression
      * @throws Exception
      */
-    public static Object assess(Expression expression) throws Exception {
+    public static Object assess(BaseExpression expression) throws Exception {
     	return new Evaluator(expression.getTeiidVersion()).evaluate(expression);
     }
 
@@ -262,51 +262,51 @@ public class Evaluator {
 	 * @return evaluation of criteria
 	 * @throws Exception
 	 */
-	public boolean evaluate(Criteria criteria)
+	public boolean evaluate(CriteriaImpl criteria)
         throws Exception {
 
         return Boolean.TRUE.equals(evaluateTVL(criteria));
     }
 
-    private Boolean evaluateTVL(Criteria criteria)
+    private Boolean evaluateTVL(CriteriaImpl criteria)
         throws Exception {
     	
 		return internalEvaluateTVL(criteria);
 	}
 
-	private Boolean internalEvaluateTVL(Criteria criteria)
+	private Boolean internalEvaluateTVL(CriteriaImpl criteria)
 			throws Exception {
-		if(criteria instanceof CompoundCriteria) {
-			return evaluate((CompoundCriteria)criteria);
-		} else if(criteria instanceof NotCriteria) {
-			return evaluate((NotCriteria)criteria);
-		} else if(criteria instanceof CompareCriteria) {
-			return evaluate((CompareCriteria)criteria);
-		} else if(criteria instanceof MatchCriteria) {
-			return evaluate((MatchCriteria)criteria);
+		if(criteria instanceof CompoundCriteriaImpl) {
+			return evaluate((CompoundCriteriaImpl)criteria);
+		} else if(criteria instanceof NotCriteriaImpl) {
+			return evaluate((NotCriteriaImpl)criteria);
+		} else if(criteria instanceof CompareCriteriaImpl) {
+			return evaluate((CompareCriteriaImpl)criteria);
+		} else if(criteria instanceof MatchCriteriaImpl) {
+			return evaluate((MatchCriteriaImpl)criteria);
 		} else if(criteria instanceof AbstractSetCriteria) {
 			return evaluate((AbstractSetCriteria)criteria);
-		} else if(criteria instanceof IsNullCriteria) {
-			return Boolean.valueOf(evaluate((IsNullCriteria)criteria));
-        } else if(criteria instanceof SubqueryCompareCriteria) {
-            return evaluate((SubqueryCompareCriteria)criteria);
-        } else if(criteria instanceof ExistsCriteria) {
-            return Boolean.valueOf(evaluate((ExistsCriteria)criteria));
-        } else if (criteria instanceof ExpressionCriteria) {
-        	return (Boolean)evaluate(((ExpressionCriteria)criteria).getExpression());
+		} else if(criteria instanceof IsNullCriteriaImpl) {
+			return Boolean.valueOf(evaluate((IsNullCriteriaImpl)criteria));
+        } else if(criteria instanceof SubqueryCompareCriteriaImpl) {
+            return evaluate((SubqueryCompareCriteriaImpl)criteria);
+        } else if(criteria instanceof ExistsCriteriaImpl) {
+            return Boolean.valueOf(evaluate((ExistsCriteriaImpl)criteria));
+        } else if (criteria instanceof ExpressionCriteriaImpl) {
+        	return (Boolean)evaluate(((ExpressionCriteriaImpl)criteria).getExpression());
 		} else {
              throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30311, criteria));
 		}
 	}
 
-	private Boolean evaluate(CompoundCriteria criteria)
+	private Boolean evaluate(CompoundCriteriaImpl criteria)
 		throws Exception {
 
-		List<Criteria> subCrits = criteria.getCriteria();
-		boolean and = criteria.getOperator() == CompoundCriteria.AND;
+		List<CriteriaImpl> subCrits = criteria.getCriteria();
+		boolean and = criteria.getOperator() == CompoundCriteriaImpl.AND;
         Boolean result = and?Boolean.TRUE:Boolean.FALSE;
 		for (int i = 0; i < subCrits.size(); i++) {
-			Criteria subCrit = subCrits.get(i);
+			CriteriaImpl subCrit = subCrits.get(i);
 			Boolean value = internalEvaluateTVL(subCrit);
             if (value == null) {
 				result = null;
@@ -321,10 +321,10 @@ public class Evaluator {
 		return result;
 	}
 
-	private Boolean evaluate(NotCriteria criteria)
+	private Boolean evaluate(NotCriteriaImpl criteria)
 		throws Exception {
 
-		Criteria subCrit = criteria.getCriteria();
+		CriteriaImpl subCrit = criteria.getCriteria();
 		Boolean result = internalEvaluateTVL(subCrit);
         if (result == null) {
             return null;
@@ -335,7 +335,7 @@ public class Evaluator {
         return Boolean.TRUE;
 	}
 
-	private Boolean evaluate(CompareCriteria criteria)
+	private Boolean evaluate(CompareCriteriaImpl criteria)
 		throws Exception {
 
 		// Evaluate left expression
@@ -368,7 +368,7 @@ public class Evaluator {
 		return compare(criteria, leftValue, rightValue);
 	}
 
-	private Boolean evaluate(MatchCriteria criteria)
+	private Boolean evaluate(MatchCriteriaImpl criteria)
 		throws Exception {
 
         boolean result = false;
@@ -427,7 +427,7 @@ public class Evaluator {
 			patternRegex = SIMILAR_TO_REGEX.translate(pattern, escape);
 			break;
 		case REGEX:
-			patternRegex = MatchCriteria.getPattern(pattern, pattern, 0);
+			patternRegex = MatchCriteriaImpl.getPattern(pattern, pattern, 0);
 			break;
 		default:
 			throw new AssertionError();
@@ -453,8 +453,8 @@ public class Evaluator {
         Boolean result = Boolean.FALSE;
 
         ValueIterator valueIter = null;
-        if (criteria instanceof SetCriteria) {
-        	SetCriteria set = (SetCriteria)criteria;
+        if (criteria instanceof SetCriteriaImpl) {
+        	SetCriteriaImpl set = (SetCriteriaImpl)criteria;
     		// Shortcut if null
     		if(leftValue == null) {
     			if (!set.getValues().isEmpty()) {
@@ -463,22 +463,22 @@ public class Evaluator {
     			return criteria.isNegated();
         	}
         	if (set.isAllConstants()) {
-        	    Constant c = teiidParser.createASTNode(ASTNodes.CONSTANT);
+        	    ConstantImpl c = teiidParser.createASTNode(ASTNodes.CONSTANT);
         	    c.setValue(leftValue);
         	    c.setType(criteria.getExpression().getType());
         		boolean exists = set.getValues().contains(c);
         		if (!exists) {
-        			if (set.getValues().contains(Constant.getNullConstant(teiidParser))) {
+        			if (set.getValues().contains(ConstantImpl.getNullConstant(teiidParser))) {
         				return null;
         			}
         			return criteria.isNegated();
         		}
         		return !criteria.isNegated();
         	}
-        	valueIter = new CollectionValueIterator(((SetCriteria)criteria).getValues());
-        } else if (criteria instanceof SubquerySetCriteria) {
+        	valueIter = new CollectionValueIteratorImpl(((SetCriteriaImpl)criteria).getValues());
+        } else if (criteria instanceof SubquerySetCriteriaImpl) {
         	try {
-				valueIter = evaluateSubquery((SubquerySetCriteria)criteria);
+				valueIter = evaluateSubquery((SubquerySetCriteriaImpl)criteria);
 			} catch (Exception e) {
 				 throw new TeiidClientException(e);
 			}
@@ -491,9 +491,9 @@ public class Evaluator {
         	}
             Object possibleValue = valueIter.next();
             Object value = null;
-            if(possibleValue instanceof Expression) {
+            if(possibleValue instanceof BaseExpression) {
     			try {
-    				value = evaluate((Expression) possibleValue);
+    				value = evaluate((BaseExpression) possibleValue);
     			} catch(Exception e) {
                      throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30323, possibleValue));
     			}
@@ -502,7 +502,7 @@ public class Evaluator {
             }
 
 			if(value != null) {
-				if(Constant.COMPARATOR.compare(leftValue, value) == 0) {
+				if(ConstantImpl.COMPARATOR.compare(leftValue, value) == 0) {
 					return Boolean.valueOf(!criteria.isNegated());
 				} // else try next value
 			} else {
@@ -517,7 +517,7 @@ public class Evaluator {
         return Boolean.valueOf(criteria.isNegated());
 	}
 
-	private boolean evaluate(IsNullCriteria criteria)
+	private boolean evaluate(IsNullCriteriaImpl criteria)
 		throws Exception {
 
 		// Evaluate expression
@@ -531,7 +531,7 @@ public class Evaluator {
 		return (value == null ^ criteria.isNegated());
 	}
 
-    private Boolean evaluate(SubqueryCompareCriteria criteria)
+    private Boolean evaluate(SubqueryCompareCriteriaImpl criteria)
         throws Exception {
 
         // Evaluate expression
@@ -611,32 +611,32 @@ public class Evaluator {
 		if (leftValue instanceof ArrayImpl) {
 			ArrayImpl av = (ArrayImpl)leftValue;
 			try {
-				compare = av.compareTo((ArrayImpl)value, true, Constant.COMPARATOR);
+				compare = av.compareTo((ArrayImpl)value, true, ConstantImpl.COMPARATOR);
 			} catch (ArrayImpl.NullException e) {
 				return null;
 			}
 		} else {
-			compare = Constant.COMPARATOR.compare(leftValue, value);
+			compare = ConstantImpl.COMPARATOR.compare(leftValue, value);
 		}
 		// Compare two non-null values using specified operator
 		Boolean result = null;
 		switch(criteria.getOperator()) {
-		    case ICompareCriteria.EQ:
+		    case CompareCriteria.EQ:
 		        result = Boolean.valueOf(compare == 0);
 		        break;
-		    case ICompareCriteria.NE:
+		    case CompareCriteria.NE:
 		        result = Boolean.valueOf(compare != 0);
 		        break;
-		    case ICompareCriteria.LT:
+		    case CompareCriteria.LT:
 		        result = Boolean.valueOf(compare < 0);
 		        break;
-		    case ICompareCriteria.LE:
+		    case CompareCriteria.LE:
 		        result = Boolean.valueOf(compare <= 0);
 		        break;
-		    case ICompareCriteria.GT:
+		    case CompareCriteria.GT:
 		        result = Boolean.valueOf(compare > 0);
 		        break;
-		    case ICompareCriteria.GE:
+		    case CompareCriteria.GE:
 		        result = Boolean.valueOf(compare >= 0);
 		        break;
 		    default:
@@ -645,7 +645,7 @@ public class Evaluator {
 		return result;
 	}
 
-    private boolean evaluate(ExistsCriteria criteria)
+    private boolean evaluate(ExistsCriteriaImpl criteria)
         throws Exception {
 
         ValueIterator valueIter;
@@ -665,7 +665,7 @@ public class Evaluator {
 	 * @return evaluated value of the given expression
 	 * @throws Exception
 	 */
-	public Object evaluate(Expression expression)
+	public Object evaluate(BaseExpression expression)
 		throws Exception {
 	
 	    try {
@@ -675,29 +675,29 @@ public class Evaluator {
 	    }
 	}
 	
-	protected Object internalEvaluate(Expression expression)
+	protected Object internalEvaluate(BaseExpression expression)
 	   throws Exception {
 	
-	   if(expression instanceof AggregateSymbol || expression instanceof AliasSymbol ||
-	       expression instanceof ElementSymbol || expression instanceof WindowFunction) {
+	   if(expression instanceof BaseAggregateSymbol || expression instanceof AliasSymbolImpl ||
+	       expression instanceof ElementSymbolImpl || expression instanceof BaseWindowFunction) {
 	       throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30328, expression, Messages.getString(Messages.Misc.Evaluator_noValue)));
 	   }
 	   // ExpressionSymbol so we just need to dive in and evaluate the expression itself
-       if (expression instanceof ExpressionSymbol) {            
-           ExpressionSymbol exprSyb = (ExpressionSymbol) expression;
-           Expression expr = exprSyb.getExpression();
+       if (expression instanceof ExpressionSymbolImpl) {            
+           ExpressionSymbolImpl exprSyb = (ExpressionSymbolImpl) expression;
+           BaseExpression expr = exprSyb.getExpression();
            return internalEvaluate(expr);
        } 
-	   if(expression instanceof Constant) {
-	       return ((Constant) expression).getValue();
-	   } else if(expression instanceof Function) {
-	       return evaluate((Function) expression);
-	   } else if(expression instanceof CaseExpression) {
-	       return evaluate((CaseExpression) expression);
-	   } else if(expression instanceof SearchedCaseExpression) {
-	       return evaluate((SearchedCaseExpression) expression);
-	   } else if(expression instanceof Reference) {
-		   Reference ref = (Reference)expression;
+	   if(expression instanceof ConstantImpl) {
+	       return ((ConstantImpl) expression).getValue();
+	   } else if(expression instanceof FunctionImpl) {
+	       return evaluate((FunctionImpl) expression);
+	   } else if(expression instanceof CaseExpressionImpl) {
+	       return evaluate((CaseExpressionImpl) expression);
+	   } else if(expression instanceof SearchedCaseExpressionImpl) {
+	       return evaluate((SearchedCaseExpressionImpl) expression);
+	   } else if(expression instanceof ReferenceImpl) {
+		   ReferenceImpl ref = (ReferenceImpl)expression;
 		   if (ref.isPositional() && ref.getExpression() == null) {
 		       throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30328, expression, Messages.getString(Messages.Misc.Evaluator_noValue)));
 		   }
@@ -710,31 +710,31 @@ public class Evaluator {
 			   }
 		   }
 		   return result;
-	   } else if(expression instanceof Criteria) {
-	       return evaluate((Criteria) expression);
-	   } else if(expression instanceof ScalarSubquery) {
-	       return evaluate((ScalarSubquery) expression);
-	   } else if (expression instanceof Criteria) {
-		   return evaluate((Criteria)expression);
-	   } else if (expression instanceof TextLine){
-		   return evaluateTextLine((TextLine)expression);
-	   } else if (expression instanceof XMLElement){
-		   return evaluateXMLElement((XMLElement)expression);
-	   } else if (expression instanceof XMLForest){
-		   return evaluateXMLForest((XMLForest)expression);
-	   } else if (expression instanceof JSONObject){
-		   return evaluateJSONObject((JSONObject)expression, null);
-	   } else if (expression instanceof XMLSerialize){
-		   return evaluateXMLSerialize((XMLSerialize)expression);
-	   } else if (expression instanceof XMLQuery) {
-		   return evaluateXMLQuery((XMLQuery)expression);
-	   } else if (expression instanceof QueryString) {
-		   return evaluateQueryString((QueryString)expression);
-	   } else if (expression instanceof XMLParse){
-		   return evaluateXMLParse((XMLParse)expression);
-	   } else if (expression instanceof Array) {
-		   Array array = (Array)expression;
-		   List<Expression> exprs = array.getExpressions();
+	   } else if(expression instanceof CriteriaImpl) {
+	       return evaluate((CriteriaImpl) expression);
+	   } else if(expression instanceof ScalarSubqueryImpl) {
+	       return evaluate((ScalarSubqueryImpl) expression);
+	   } else if (expression instanceof CriteriaImpl) {
+		   return evaluate((CriteriaImpl)expression);
+	   } else if (expression instanceof TextLineImpl){
+		   return evaluateTextLine((TextLineImpl)expression);
+	   } else if (expression instanceof XMLElementImpl){
+		   return evaluateXMLElement((XMLElementImpl)expression);
+	   } else if (expression instanceof XMLForestImpl){
+		   return evaluateXMLForest((XMLForestImpl)expression);
+	   } else if (expression instanceof JSONObjectImpl){
+		   return evaluateJSONObject((JSONObjectImpl)expression, null);
+	   } else if (expression instanceof XMLSerializeImpl){
+		   return evaluateXMLSerialize((XMLSerializeImpl)expression);
+	   } else if (expression instanceof XMLQueryImpl) {
+		   return evaluateXMLQuery((XMLQueryImpl)expression);
+	   } else if (expression instanceof QueryStringImpl) {
+		   return evaluateQueryString((QueryStringImpl)expression);
+	   } else if (expression instanceof XMLParseImpl){
+		   return evaluateXMLParse((XMLParseImpl)expression);
+	   } else if (expression instanceof ArraySymbolImpl) {
+		   ArraySymbolImpl array = (ArraySymbolImpl)expression;
+		   List<BaseExpression> exprs = array.getExpressions();
 		   Object[] result = (Object[]) java.lang.reflect.Array.newInstance(array.getComponentType(), exprs.size());
 		   for (int i = 0; i < exprs.size(); i++) {
 			   Object eval = internalEvaluate(exprs.get(i));
@@ -744,15 +744,15 @@ public class Evaluator {
 			   result[i] = eval;
 		   }
 		   return new ArrayImpl(expression.getTeiidVersion(), result);
-	   } else if (expression instanceof ExceptionExpression) {
-		   return evaluate((ExceptionExpression)expression);
+	   } else if (expression instanceof ExceptionExpressionImpl) {
+		   return evaluate((ExceptionExpressionImpl)expression);
 	   } else {
 	        throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30329, expression.getClass().getName()));
 	   }
 	}
 
 	@SuppressWarnings( "unused" )
-    private Object evaluate(ExceptionExpression ee)
+    private Object evaluate(ExceptionExpressionImpl ee)
 			throws Exception {
 		String msg = (String) internalEvaluate(ee.getMessage());
 		String sqlState = ee.getDefaultSQLState();
@@ -772,7 +772,7 @@ public class Evaluator {
 		return result;
 	}
 
-	private Object evaluateXMLParse(final XMLParse xp) throws Exception {
+	private Object evaluateXMLParse(final XMLParseImpl xp) throws Exception {
 		Object value = internalEvaluate(xp.getExpression());
 		if (value == null) {
 			return null;
@@ -835,7 +835,7 @@ public class Evaluator {
 		return new InputStreamFactory.SQLXMLInputStreamFactory((SQLXML)s.getReference());
 	}
 
-	private Type validate(final XMLParse xp, Reader r)
+	private Type validate(final XMLParseImpl xp, Reader r)
 			throws Exception {
 		if (!xp.isDocument()) {
 			LinkedList<Reader> readers = new LinkedList<Reader>();
@@ -862,7 +862,7 @@ public class Evaluator {
     }
 
 	//TODO: exception if length is too long?
-	private Object evaluateQueryString(QueryString queryString)
+	private Object evaluateQueryString(QueryStringImpl queryString)
 			throws Exception {
 		Evaluator.NameValuePair<Object>[] pairs = getNameValuePairs(queryString.getArgs(), false, true);
 		String path = (String)internalEvaluate(queryString.getPath());
@@ -889,7 +889,7 @@ public class Evaluator {
 		return result.toString();
 	}
 
-	private Object evaluateXMLQuery(XMLQuery xmlQuery)
+	private Object evaluateXMLQuery(XMLQueryImpl xmlQuery)
 			throws Exception {
 		boolean emptyOnEmpty = xmlQuery.getEmptyOnEmpty() == null || xmlQuery.getEmptyOnEmpty();
 		Result result = null;
@@ -928,7 +928,7 @@ public class Evaluator {
 		}
 	}
 	
-	private Object evaluateXMLSerialize(XMLSerialize xs)
+	private Object evaluateXMLSerialize(XMLSerializeImpl xs)
 			throws Exception {
 		XMLType value = (XMLType) internalEvaluate(xs.getExpression());
 		if (value == null) {
@@ -964,7 +964,7 @@ public class Evaluator {
 	/**
      * Taken from TextLine
      */
-	private <T> String[] evaluate(final List<T> values, ValueExtractor<T> valueExtractor, TextLine textLine) throws Exception {
+	private <T> String[] evaluate(final List<T> values, ValueExtractor<T> valueExtractor, TextLineImpl textLine) throws Exception {
         Character delimeter = textLine.getDelimiter();
         if (delimeter == null) {
             delimeter = Character.valueOf(',');
@@ -999,8 +999,8 @@ public class Evaluator {
         return result.toArray(new String[result.size()]);
     }
 
-	private Object evaluateTextLine(TextLine function) throws Exception {
-		List<DerivedColumn> args = function.getExpressions();
+	private Object evaluateTextLine(TextLineImpl function) throws Exception {
+		List<DerivedColumnImpl> args = function.getExpressions();
 		Evaluator.NameValuePair<Object>[] nameValuePairs = getNameValuePairs(args, true, true);
 		
 		try {
@@ -1010,9 +1010,9 @@ public class Evaluator {
 		}
 	}
 
-	private Object evaluateXMLForest(XMLForest function)
+	private Object evaluateXMLForest(XMLForestImpl function)
 			throws Exception {
-		List<DerivedColumn> args = function.getArgs();
+		List<DerivedColumnImpl> args = function.getArgs();
 		Evaluator.NameValuePair<Object>[] nameValuePairs = getNameValuePairs(args, true, true); 
 			
 		try {
@@ -1022,16 +1022,16 @@ public class Evaluator {
 		}
 	}
 	
-	private Object evaluateJSONObject(JSONObject function, JSONBuilder builder)
+	private Object evaluateJSONObject(JSONObjectImpl function, JSONBuilder builder)
 			throws Exception {
-		List<DerivedColumn> args = function.getArgs();
+		List<DerivedColumnImpl> args = function.getArgs();
 		Evaluator.NameValuePair<Object>[] nameValuePairs = getNameValuePairs(args, false, false);
 		boolean returnValue = false;
 		try {
 			if (builder == null) {
 				returnValue = true;
 				//preevaluate subqueries to prevent blocked exceptions
-				for (SubqueryContainer<?> container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(function)) {
+				for (BaseSubqueryContainer<?> container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(function)) {
 					evaluateSubquery(container);
 				}
 				builder = new JSONBuilder(function.getTeiidVersion());
@@ -1060,20 +1060,20 @@ public class Evaluator {
 			String name, Object value)
 			throws Exception {
 		try {
-			if (value instanceof JSONObject) {
+			if (value instanceof JSONObjectImpl) {
 				builder.startValue(name);
-				evaluateJSONObject((JSONObject)value, builder);
+				evaluateJSONObject((JSONObjectImpl)value, builder);
 				return;
 			}
-			if (value instanceof Function) {
-				Function f = (Function)value;
+			if (value instanceof FunctionImpl) {
+				FunctionImpl f = (FunctionImpl)value;
 				if (FunctionLibrary.FunctionName.JSONARRAY.equalsIgnoreCase(f.getName())) {
 					builder.startValue(name);
 					jsonArray(f, f.getArgs(), builder, this);
 					return;
 				}
 			}
-			builder.addValue(name, internalEvaluate((Expression)value));
+			builder.addValue(name, internalEvaluate((BaseExpression)value));
 		} catch (Exception e) {
 			throw e;
 		}
@@ -1087,14 +1087,14 @@ public class Evaluator {
 	 * @return json clob
 	 * @throws Exception
 	 */
-	public static ClobType jsonArray(Function f, Object[] vals, JSONBuilder builder, Evaluator eval) throws Exception {
+	public static ClobType jsonArray(FunctionImpl f, Object[] vals, JSONBuilder builder, Evaluator eval) throws Exception {
 		boolean returnValue = false;
 		try {
 			if (builder == null) {
 				returnValue = true;
 				if (eval != null) {
 					//preevaluate subqueries to prevent blocked exceptions
-					for (SubqueryContainer<?> container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(f)) {
+					for (BaseSubqueryContainer<?> container : ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(f)) {
 						eval.evaluateSubquery(container);
 					}
 				}
@@ -1122,11 +1122,11 @@ public class Evaluator {
 		}
 	}
 
-	private Object evaluateXMLElement(XMLElement function)
+	private Object evaluateXMLElement(XMLElementImpl function)
 			throws Exception {
-		List<Expression> content = function.getContent();
+		List<BaseExpression> content = function.getContent();
 		List<Object> values = new ArrayList<Object>(content.size());
-		for (Expression exp : content) {
+		for (BaseExpression exp : content) {
 			values.add(internalEvaluate(exp));
 		}
 		try {
@@ -1140,7 +1140,7 @@ public class Evaluator {
 		}
 	}
 	
-	private Result evaluateXQuery(SaxonXQueryExpression xquery, List<DerivedColumn> cols, RowProcessor processor) 
+	private Result evaluateXQuery(SaxonXQueryExpression xquery, List<DerivedColumnImpl> cols, RowProcessor processor) 
 	throws Exception {
 		HashMap<String, Object> parameters = new HashMap<String, Object>();
 		Object contextItem = evaluateParameters(cols, parameters);
@@ -1154,11 +1154,11 @@ public class Evaluator {
 	 * @return context item
 	 * @throws Exception 
 	 */
-	public Object evaluateParameters(List<DerivedColumn> cols,
+	public Object evaluateParameters(List<DerivedColumnImpl> cols,
 			Map<String, Object> parameters)
 			throws Exception {
 		Object contextItem = null;
-		for (DerivedColumn passing : cols) {
+		for (DerivedColumnImpl passing : cols) {
 			Object value = evaluateParameter(passing);
 			if (passing.getAlias() == null) {
 				contextItem = value;
@@ -1169,10 +1169,10 @@ public class Evaluator {
 		return contextItem;
 	}
 
-	private Object evaluateParameter(DerivedColumn passing)
+	private Object evaluateParameter(DerivedColumnImpl passing)
 			throws Exception {
-		if (passing.getExpression() instanceof Function) {
-			Function f = (Function)passing.getExpression();
+		if (passing.getExpression() instanceof FunctionImpl) {
+			FunctionImpl f = (FunctionImpl)passing.getExpression();
 			//narrow optimization of json based documents to allow for lower overhead streaming
 			if (f.getName().equalsIgnoreCase(SourceSystemFunctions.JSONTOXML)) {
 				String rootName = (String)this.evaluate(f.getArg(0));
@@ -1189,23 +1189,23 @@ public class Evaluator {
 					throw new TeiidClientException(e, Messages.gs(Messages.TEIID.TEIID30384, f.getFunctionDescriptor().getName()));
 				}
 			}
-		} else if (passing.getExpression() instanceof XMLParse) {
-			XMLParse xmlParse = (XMLParse)passing.getExpression();
+		} else if (passing.getExpression() instanceof XMLParseImpl) {
+			XMLParseImpl xmlParse = (XMLParseImpl)passing.getExpression();
 			xmlParse.setWellFormed(true);
 		}
 		Object value = this.evaluate(passing.getExpression());
 		return value;
 	}
 
-	private Evaluator.NameValuePair<Object>[] getNameValuePairs(List<DerivedColumn> args, boolean xmlNames, boolean eval)
+	private Evaluator.NameValuePair<Object>[] getNameValuePairs(List<DerivedColumnImpl> args, boolean xmlNames, boolean eval)
 			throws Exception {
 		Evaluator.NameValuePair<Object>[] nameValuePairs = new Evaluator.NameValuePair[args.size()];
 		for (int i = 0; i < args.size(); i++) {
-			DerivedColumn symbol = args.get(i);
+			DerivedColumnImpl symbol = args.get(i);
 			String name = symbol.getAlias();
-			Expression ex = symbol.getExpression();
-			if (name == null && ex instanceof ElementSymbol) {
-				name = ((ElementSymbol)ex).getShortName();
+			BaseExpression ex = symbol.getExpression();
+			if (name == null && ex instanceof ElementSymbolImpl) {
+				name = ((ElementSymbolImpl)ex).getShortName();
 				if (xmlNames) {
 					name = XMLSystemFunctions.escapeName(name, true);
 				}
@@ -1218,7 +1218,7 @@ public class Evaluator {
 		return nameValuePairs;
 	}
 	
-	private Evaluator.NameValuePair<String>[] namespaces(XMLNamespaces namespaces) {
+	private Evaluator.NameValuePair<String>[] namespaces(XMLNamespacesImpl namespaces) {
 		if (namespaces == null) {
 			return null;
 		}
@@ -1231,7 +1231,7 @@ public class Evaluator {
 	    return nameValuePairs;
 	}
 	
-	private Object evaluate(CaseExpression expr)
+	private Object evaluate(CaseExpressionImpl expr)
 	throws Exception {
 	    Object exprVal = internalEvaluate(expr.getExpression());
 	    for (int i = 0; i < expr.getWhenCount(); i++) {
@@ -1246,7 +1246,7 @@ public class Evaluator {
 	    return null;
 	}
 	
-	private Object evaluate(SearchedCaseExpression expr)
+	private Object evaluate(SearchedCaseExpressionImpl expr)
 	throws Exception {
 	    for (int i = 0; i < expr.getWhenCount(); i++) {
             if (evaluate(expr.getWhenCriteria(i))) {
@@ -1259,14 +1259,14 @@ public class Evaluator {
 	    return null;
 	}
 	
-	private Object evaluate(Function function)
+	private Object evaluate(FunctionImpl function)
 		throws Exception {
 	
 	    // Get function based on resolved function info
 	    TCFunctionDescriptor fd = function.getFunctionDescriptor();
 	    
 		// Evaluate args
-		Expression[] args = function.getArgs();
+		BaseExpression[] args = function.getArgs();
 	    Object[] values = null;
 	    int start = 0;
 	    
@@ -1313,12 +1313,12 @@ public class Evaluator {
 		return fd.invokeFunction(values, commandContext, null);
 	}
 	
-	protected Object evaluatePushdown(Function function,
+	protected Object evaluatePushdown(FunctionImpl function,
 			Object[] values) throws Exception {
 		throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30341, function.getFunctionDescriptor().getFullName()));
 	}
 
-	private Object evaluate(ScalarSubquery scalarSubquery)
+	private Object evaluate(ScalarSubqueryImpl scalarSubquery)
 	    throws Exception {
 		
 	    Object result = null;
@@ -1347,7 +1347,7 @@ public class Evaluator {
 	 * @throws BlockedException
 	 * @throws TeiidComponentException
 	 */
-	protected ValueIterator evaluateSubquery(SubqueryContainer<?> container) 
+	protected ValueIterator evaluateSubquery(BaseSubqueryContainer<?> container) 
 	throws Exception {
 		throw new UnsupportedOperationException("Subquery evaluation not possible with a base Evaluator"); //$NON-NLS-1$
 	}

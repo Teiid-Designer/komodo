@@ -23,139 +23,138 @@ package org.teiid.runtime.client.query;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.spi.query.QueryFactory;
 import org.komodo.spi.query.metadata.MetadataID;
 import org.komodo.spi.query.metadata.QueryNode;
 import org.komodo.spi.query.metadata.StoredProcedureInfo;
-import org.komodo.spi.query.sql.lang.IBetweenCriteria;
-import org.komodo.spi.query.sql.lang.ICompareCriteria;
-import org.komodo.spi.query.sql.lang.ICompoundCriteria;
-import org.komodo.spi.query.sql.lang.IDelete;
-import org.komodo.spi.query.sql.lang.IExistsCriteria;
-import org.komodo.spi.query.sql.lang.IFrom;
-import org.komodo.spi.query.sql.lang.IGroupBy;
-import org.komodo.spi.query.sql.lang.IInsert;
-import org.komodo.spi.query.sql.lang.IIsNullCriteria;
-import org.komodo.spi.query.sql.lang.IJoinPredicate;
-import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.query.sql.lang.IMatchCriteria;
-import org.komodo.spi.query.sql.lang.INotCriteria;
-import org.komodo.spi.query.sql.lang.IOption;
-import org.komodo.spi.query.sql.lang.IOrderBy;
-import org.komodo.spi.query.sql.lang.IQuery;
-import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.query.sql.lang.ISelect;
-import org.komodo.spi.query.sql.lang.ISetCriteria;
-import org.komodo.spi.query.sql.lang.ISetQuery;
-import org.komodo.spi.query.sql.lang.IStoredProcedure;
-import org.komodo.spi.query.sql.lang.ISubqueryCompareCriteria;
-import org.komodo.spi.query.sql.lang.ISubqueryFromClause;
-import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
-import org.komodo.spi.query.sql.lang.IUnaryFromClause;
-import org.komodo.spi.query.sql.lang.IUpdate;
-import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
-import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
-import org.komodo.spi.query.sql.proc.IAssignmentStatement;
-import org.komodo.spi.query.sql.proc.IBlock;
-import org.komodo.spi.query.sql.proc.ICommandStatement;
-import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
-import org.komodo.spi.query.sql.proc.IDeclareStatement;
-import org.komodo.spi.query.sql.proc.IRaiseStatement;
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
-import org.komodo.spi.query.sql.symbol.IAliasSymbol;
-import org.komodo.spi.query.sql.symbol.IConstant;
-import org.komodo.spi.query.sql.symbol.IElementSymbol;
-import org.komodo.spi.query.sql.symbol.IExpressionSymbol;
-import org.komodo.spi.query.sql.symbol.IFunction;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
-import org.komodo.spi.query.sql.symbol.IMultipleElementSymbol;
-import org.komodo.spi.query.sql.symbol.IReference;
-import org.komodo.spi.query.sql.symbol.IScalarSubquery;
-import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
-import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.query.sql.lang.BetweenCriteria;
+import org.komodo.spi.query.sql.lang.CompareCriteria;
+import org.komodo.spi.query.sql.lang.CompoundCriteria;
+import org.komodo.spi.query.sql.lang.Delete;
+import org.komodo.spi.query.sql.lang.ExistsCriteria;
+import org.komodo.spi.query.sql.lang.From;
+import org.komodo.spi.query.sql.lang.GroupBy;
+import org.komodo.spi.query.sql.lang.Insert;
+import org.komodo.spi.query.sql.lang.IsNullCriteria;
+import org.komodo.spi.query.sql.lang.JoinPredicate;
+import org.komodo.spi.query.sql.lang.JoinType;
+import org.komodo.spi.query.sql.lang.MatchCriteria;
+import org.komodo.spi.query.sql.lang.NotCriteria;
+import org.komodo.spi.query.sql.lang.Option;
+import org.komodo.spi.query.sql.lang.OrderBy;
+import org.komodo.spi.query.sql.lang.Query;
+import org.komodo.spi.query.sql.lang.SPParameter;
+import org.komodo.spi.query.sql.lang.SPParameter.ParameterInfo;
+import org.komodo.spi.query.sql.lang.Select;
+import org.komodo.spi.query.sql.lang.SetCriteria;
+import org.komodo.spi.query.sql.lang.SetQuery;
+import org.komodo.spi.query.sql.lang.SetQuery.Operation;
+import org.komodo.spi.query.sql.lang.StoredProcedure;
+import org.komodo.spi.query.sql.lang.SubqueryCompareCriteria;
+import org.komodo.spi.query.sql.lang.SubqueryFromClause;
+import org.komodo.spi.query.sql.lang.SubquerySetCriteria;
+import org.komodo.spi.query.sql.lang.UnaryFromClause;
+import org.komodo.spi.query.sql.lang.Update;
+import org.komodo.spi.query.sql.proc.AssignmentStatement;
+import org.komodo.spi.query.sql.proc.Block;
+import org.komodo.spi.query.sql.proc.CommandStatement;
+import org.komodo.spi.query.sql.proc.CreateProcedureCommand;
+import org.komodo.spi.query.sql.proc.DeclareStatement;
+import org.komodo.spi.query.sql.proc.RaiseStatement;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol;
+import org.komodo.spi.query.sql.symbol.AliasSymbol;
+import org.komodo.spi.query.sql.symbol.Constant;
+import org.komodo.spi.query.sql.symbol.ElementSymbol;
+import org.komodo.spi.query.sql.symbol.ElementSymbol.DisplayMode;
+import org.komodo.spi.query.sql.symbol.ExpressionSymbol;
+import org.komodo.spi.query.sql.symbol.Function;
+import org.komodo.spi.query.sql.symbol.GroupSymbol;
+import org.komodo.spi.query.sql.symbol.MultipleElementSymbol;
+import org.komodo.spi.query.sql.symbol.Reference;
+import org.komodo.spi.query.sql.symbol.ScalarSubquery;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TCStoredProcedureInfo;
 import org.teiid.query.metadata.TempMetadataID;
+import org.teiid.query.parser.TeiidClientParser;
 import org.teiid.query.parser.TeiidNodeFactory;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.lang.BetweenCriteria;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.CompoundCriteria;
-import org.teiid.query.sql.lang.Criteria;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.BetweenCriteriaImpl;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CompoundCriteriaImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
 import org.teiid.query.sql.lang.CriteriaOperator.Operator;
-import org.teiid.query.sql.lang.Delete;
-import org.teiid.query.sql.lang.ExistsCriteria;
-import org.teiid.query.sql.lang.From;
-import org.teiid.query.sql.lang.FromClause;
-import org.teiid.query.sql.lang.GroupBy;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.lang.IsNullCriteria;
-import org.teiid.query.sql.lang.JoinPredicate;
-import org.teiid.query.sql.lang.JoinType;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.MatchCriteria;
-import org.teiid.query.sql.lang.NotCriteria;
-import org.teiid.query.sql.lang.Option;
-import org.teiid.query.sql.lang.OrderBy;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.QueryCommand;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.lang.SetCriteria;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria.PredicateQuantifier;
-import org.teiid.query.sql.lang.SubqueryFromClause;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
-import org.teiid.query.sql.lang.UnaryFromClause;
-import org.teiid.query.sql.lang.Update;
-import org.teiid.query.sql.proc.AssignmentStatement;
-import org.teiid.query.sql.proc.Block;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateProcedureCommand;
-import org.teiid.query.sql.proc.CreateUpdateProcedureCommand;
-import org.teiid.query.sql.proc.DeclareStatement;
-import org.teiid.query.sql.proc.RaiseErrorStatement;
-import org.teiid.query.sql.proc.RaiseStatement;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.AliasSymbol;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.ExpressionSymbol;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.MultipleElementSymbol;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.ScalarSubquery;
+import org.teiid.query.sql.lang.DeleteImpl;
+import org.teiid.query.sql.lang.ExistsCriteriaImpl;
+import org.teiid.query.sql.lang.FromClauseImpl;
+import org.teiid.query.sql.lang.FromImpl;
+import org.teiid.query.sql.lang.GroupByImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.lang.IsNullCriteriaImpl;
+import org.teiid.query.sql.lang.JoinPredicateImpl;
+import org.teiid.query.sql.lang.JoinTypeImpl;
+import org.teiid.query.sql.lang.MatchCriteriaImpl;
+import org.teiid.query.sql.lang.NotCriteriaImpl;
+import org.teiid.query.sql.lang.OptionImpl;
+import org.teiid.query.sql.lang.OrderByImpl;
+import org.teiid.query.sql.lang.QueryCommandImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.lang.SetCriteriaImpl;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl.PredicateQuantifier;
+import org.teiid.query.sql.lang.SubqueryFromClauseImpl;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
+import org.teiid.query.sql.lang.UnaryFromClauseImpl;
+import org.teiid.query.sql.lang.UpdateImpl;
+import org.teiid.query.sql.proc.AssignmentStatementImpl;
+import org.teiid.query.sql.proc.BlockImpl;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateProcedureCommandImpl;
+import org.teiid.query.sql.proc.CreateUpdateProcedureCommandImpl;
+import org.teiid.query.sql.proc.DeclareStatementImpl;
+import org.teiid.query.sql.proc.RaiseErrorStatementImpl;
+import org.teiid.query.sql.proc.RaiseStatementImpl;
+import org.teiid.query.sql.symbol.AliasSymbolImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.ExpressionSymbolImpl;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.MultipleElementSymbolImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
 
 /**
  *
  */
-public class SyntaxFactory implements QueryFactory <Expression, 
-                                                                                                 Expression,
-                                                                                                 FromClause,
-                                                                                                 ElementSymbol,
-                                                                                                 Command,
-                                                                                                 QueryCommand,
-                                                                                                 Criteria,
-                                                                                                 Constant,
-                                                                                                 Block,
-                                                                                                 Expression,
-                                                                                                 GroupSymbol,
-                                                                                                 JoinType> {
+public class SyntaxFactory implements QueryFactory <BaseExpression, 
+                                                                                                 BaseExpression,
+                                                                                                 FromClauseImpl,
+                                                                                                 ElementSymbolImpl,
+                                                                                                 CommandImpl,
+                                                                                                 QueryCommandImpl,
+                                                                                                 CriteriaImpl,
+                                                                                                 ConstantImpl,
+                                                                                                 BlockImpl,
+                                                                                                 BaseExpression,
+                                                                                                 GroupSymbolImpl,
+                                                                                                 JoinTypeImpl> {
 
     private TeiidClientParser teiidParser;
 
     private final TeiidNodeFactory nodeFactory = TeiidNodeFactory.getInstance();
 
     /**
-     * @param teiidParser
+     * @param teiidParser teiid parser
      */
     public SyntaxFactory(TeiidClientParser teiidParser) {
         this.teiidParser = teiidParser;
@@ -166,32 +165,32 @@ public class SyntaxFactory implements QueryFactory <Expression,
         return minVersion.equals(teiidVersion) || minVersion.isGreaterThan(teiidVersion);
     }
 
-    private <T extends LanguageObject> T create(ASTNodes nodeType) {
+    private <T extends BaseLanguageObject> T create(ASTNodes nodeType) {
         return nodeFactory.create(teiidParser, nodeType);
     }
 
     @Override
-    public IFunction createFunction(String name, List<? extends Expression> arguments) {
+    public Function createFunction(String name, List<? extends BaseExpression> arguments) {
         if (arguments == null) {
-            arguments = new ArrayList<Expression>();
+            arguments = new ArrayList<BaseExpression>();
         }
 
-        Function function = create(ASTNodes.FUNCTION);
+        FunctionImpl function = create(ASTNodes.FUNCTION);
         function.setName(name);
-        function.setArgs(arguments.toArray(new Expression[0]));
+        function.setArgs(arguments.toArray(new BaseExpression[0]));
         return function;
     }
 
     @Override
-    public IAggregateSymbol createAggregateSymbol(String functionName, AggregateSymbol.Type functionType, boolean isDistinct, Expression expression) {
-        AggregateSymbol aggregateSymbol = create(ASTNodes.AGGREGATE_SYMBOL);
+    public AggregateSymbol createAggregateSymbol(String functionName, BaseAggregateSymbol.Type functionType, boolean isDistinct, BaseExpression expression) {
+        BaseAggregateSymbol aggregateSymbol = create(ASTNodes.AGGREGATE_SYMBOL);
         aggregateSymbol.setName(functionName);
         aggregateSymbol.setAggregateFunction(functionType);
         aggregateSymbol.setDistinct(isDistinct);
 
         if (expression != null) {
             if (isGreaterThanOrEqualTo(Version.TEIID_8_0.get()))
-                aggregateSymbol.setArgs(new Expression[] { expression });
+                aggregateSymbol.setArgs(new BaseExpression[] { expression });
             else
                 aggregateSymbol.setExpression(expression);
         }
@@ -200,15 +199,15 @@ public class SyntaxFactory implements QueryFactory <Expression,
     }
 
     @Override
-    public IElementSymbol createElementSymbol(String name) {
-        ElementSymbol elementSymbol = create(ASTNodes.ELEMENT_SYMBOL);
+    public ElementSymbol createElementSymbol(String name) {
+        ElementSymbolImpl elementSymbol = create(ASTNodes.ELEMENT_SYMBOL);
         elementSymbol.setName(name);
         return elementSymbol;
     }
 
     @Override
-    public IElementSymbol createElementSymbol(String name, boolean displayFullyQualified) {
-        ElementSymbol elementSymbol = create(ASTNodes.ELEMENT_SYMBOL);
+    public ElementSymbol createElementSymbol(String name, boolean displayFullyQualified) {
+        ElementSymbolImpl elementSymbol = create(ASTNodes.ELEMENT_SYMBOL);
         elementSymbol.setName(name);
         if (displayFullyQualified)
             elementSymbol.setDisplayMode(DisplayMode.FULLY_QUALIFIED);
@@ -219,86 +218,86 @@ public class SyntaxFactory implements QueryFactory <Expression,
     }
 
     @Override
-    public IAliasSymbol createAliasSymbol(String name, Expression symbol) {
-        AliasSymbol aliasSymbol = create(ASTNodes.ALIAS_SYMBOL);
+    public AliasSymbol createAliasSymbol(String name, BaseExpression symbol) {
+        AliasSymbolImpl aliasSymbol = create(ASTNodes.ALIAS_SYMBOL);
         aliasSymbol.setName(name);
         aliasSymbol.setSymbol(symbol);
         return aliasSymbol;
     }
 
     @Override
-    public IGroupSymbol createGroupSymbol(String name) {
-        GroupSymbol groupSymbol = create(ASTNodes.GROUP_SYMBOL);
+    public GroupSymbol createGroupSymbol(String name) {
+        GroupSymbolImpl groupSymbol = create(ASTNodes.GROUP_SYMBOL);
         groupSymbol.setName(name);
         return groupSymbol;
     }
 
     @Override
-    public IGroupSymbol createGroupSymbol(String name, String definition) {
-        GroupSymbol groupSymbol = create(ASTNodes.GROUP_SYMBOL);
+    public GroupSymbol createGroupSymbol(String name, String definition) {
+        GroupSymbolImpl groupSymbol = create(ASTNodes.GROUP_SYMBOL);
         groupSymbol.setName(name);
         groupSymbol.setDefinition(definition);
         return groupSymbol;
     }
 
     @Override
-    public IExpressionSymbol createExpressionSymbol(String name, Expression expression) {
-        ExpressionSymbol expressionSymbol = create(ASTNodes.EXPRESSION_SYMBOL);
+    public ExpressionSymbol createExpressionSymbol(String name, BaseExpression expression) {
+        ExpressionSymbolImpl expressionSymbol = create(ASTNodes.EXPRESSION_SYMBOL);
         expressionSymbol.setName(name);
         expressionSymbol.setExpression(expression);
         return expressionSymbol;
     }
 
     @Override
-    public IMultipleElementSymbol createMultipleElementSymbol() {
-        MultipleElementSymbol multipleElementSymbol = create(ASTNodes.MULTIPLE_ELEMENT_SYMBOL);
+    public MultipleElementSymbol createMultipleElementSymbol() {
+        MultipleElementSymbolImpl multipleElementSymbol = create(ASTNodes.MULTIPLE_ELEMENT_SYMBOL);
         return multipleElementSymbol;
     }
 
     @Override
-    public IConstant createConstant(Object value) {
-        Constant constant = create(ASTNodes.CONSTANT);
+    public Constant createConstant(Object value) {
+        ConstantImpl constant = create(ASTNodes.CONSTANT);
         constant.setValue(value);
         return constant;
     }
 
     @Override
-    public IDeclareStatement createDeclareStatement(ElementSymbol variable, String valueType) {
-        DeclareStatement declareStatement = create(ASTNodes.DECLARE_STATEMENT);
+    public DeclareStatement createDeclareStatement(ElementSymbolImpl variable, String valueType) {
+        DeclareStatementImpl declareStatement = create(ASTNodes.DECLARE_STATEMENT);
         declareStatement.setVariable(variable);
         declareStatement.setVariableType(valueType);
         return declareStatement;
     }
 
     @Override
-    public ICommandStatement createCommandStatement(Command command) {
-        CommandStatement commandStatement = create(ASTNodes.COMMAND_STATEMENT);
+    public CommandStatement createCommandStatement(CommandImpl command) {
+        CommandStatementImpl commandStatement = create(ASTNodes.COMMAND_STATEMENT);
         commandStatement.setCommand(command);
         return commandStatement;
     }
 
     @Override
-    public IRaiseStatement createRaiseStatement(Expression expression) {
+    public RaiseStatement createRaiseStatement(BaseExpression expression) {
         if (isGreaterThanOrEqualTo(Version.TEIID_8_0.get())) {
-            RaiseStatement raiseStatement = create(ASTNodes.RAISE_STATEMENT);
+            RaiseStatementImpl raiseStatement = create(ASTNodes.RAISE_STATEMENT);
             raiseStatement.setExpression(expression);
             return raiseStatement;
         } else {
-            RaiseErrorStatement raiseErrorStatement = create(ASTNodes.RAISE_ERROR_STATEMENT);
+            RaiseErrorStatementImpl raiseErrorStatement = create(ASTNodes.RAISE_ERROR_STATEMENT);
             raiseErrorStatement.setExpression(expression);
             return raiseErrorStatement;
         }
     }
 
     @Override
-    public IQuery createQuery() {
-        Query query = create(ASTNodes.QUERY);
+    public Query createQuery() {
+        QueryImpl query = create(ASTNodes.QUERY);
         return query;
     }
 
     @Override
-    public ISetQuery createSetQuery(Operation operation, boolean all, QueryCommand leftQuery, QueryCommand rightQuery) {
-        SetQuery setQuery = create(ASTNodes.SET_QUERY);
+    public SetQuery createSetQuery(Operation operation, boolean all, QueryCommandImpl leftQuery, QueryCommandImpl rightQuery) {
+        SetQueryImpl setQuery = create(ASTNodes.SET_QUERY);
         setQuery.setLeftQuery(leftQuery);
         setQuery.setAll(all);
         setQuery.setOperation(operation);
@@ -307,21 +306,21 @@ public class SyntaxFactory implements QueryFactory <Expression,
     }
 
     @Override
-    public ISetQuery createSetQuery(Operation operation) {
-        SetQuery setQuery = create(ASTNodes.SET_QUERY);
+    public SetQuery createSetQuery(Operation operation) {
+        SetQueryImpl setQuery = create(ASTNodes.SET_QUERY);
         setQuery.setOperation(operation);
         return setQuery;
     }
 
     @Override
-    public ICompareCriteria createCompareCriteria() {
-        CompareCriteria compareCriteria = create(ASTNodes.COMPARE_CRITERIA);
+    public CompareCriteria createCompareCriteria() {
+        CompareCriteriaImpl compareCriteria = create(ASTNodes.COMPARE_CRITERIA);
         return compareCriteria;
     }
 
     @Override
-    public ICompareCriteria createCompareCriteria(Expression expression1, int operator, Expression expression2) {
-        CompareCriteria compareCriteria = create(ASTNodes.COMPARE_CRITERIA);
+    public CompareCriteria createCompareCriteria(BaseExpression expression1, int operator, BaseExpression expression2) {
+        CompareCriteriaImpl compareCriteria = create(ASTNodes.COMPARE_CRITERIA);
         compareCriteria.setLeftExpression(expression1);
         compareCriteria.setOperator(Operator.findOperator(operator));
         compareCriteria.setRightExpression(expression2);
@@ -329,60 +328,60 @@ public class SyntaxFactory implements QueryFactory <Expression,
     }
 
     @Override
-    public IIsNullCriteria createIsNullCriteria() {
-        IsNullCriteria isNullCriteria = create(ASTNodes.IS_NULL_CRITERIA);
+    public IsNullCriteria createIsNullCriteria() {
+        IsNullCriteriaImpl isNullCriteria = create(ASTNodes.IS_NULL_CRITERIA);
         return isNullCriteria;
     }
 
     @Override
-    public IIsNullCriteria createIsNullCriteria(Expression expression) {
-        IsNullCriteria isNullCriteria = create(ASTNodes.IS_NULL_CRITERIA);
+    public IsNullCriteria createIsNullCriteria(BaseExpression expression) {
+        IsNullCriteriaImpl isNullCriteria = create(ASTNodes.IS_NULL_CRITERIA);
         isNullCriteria.setExpression(expression);
         return isNullCriteria;
     }
 
     @Override
-    public INotCriteria createNotCriteria() {
-        NotCriteria notCriteria = create(ASTNodes.NOT_CRITERIA);
+    public NotCriteria createNotCriteria() {
+        NotCriteriaImpl notCriteria = create(ASTNodes.NOT_CRITERIA);
         return notCriteria;
     }
 
     @Override
-    public INotCriteria createNotCriteria(Criteria criteria) {
-        NotCriteria notCriteria = create(ASTNodes.NOT_CRITERIA);
+    public NotCriteria createNotCriteria(CriteriaImpl criteria) {
+        NotCriteriaImpl notCriteria = create(ASTNodes.NOT_CRITERIA);
         notCriteria.setCriteria(criteria);
         return notCriteria;
     }
 
     @Override
-    public IMatchCriteria createMatchCriteria() {
-        MatchCriteria matchCriteria = create(ASTNodes.MATCH_CRITERIA);
+    public MatchCriteria createMatchCriteria() {
+        MatchCriteriaImpl matchCriteria = create(ASTNodes.MATCH_CRITERIA);
         return matchCriteria;
     }
 
     @Override
-    public ISetCriteria createSetCriteria() {
-        SetCriteria setCriteria = create(ASTNodes.SET_CRITERIA);
+    public SetCriteria createSetCriteria() {
+        SetCriteriaImpl setCriteria = create(ASTNodes.SET_CRITERIA);
         return setCriteria;
     }
 
     @Override
-    public ISubquerySetCriteria createSubquerySetCriteria() {
-        SubquerySetCriteria subquerySetCriteria = create(ASTNodes.SUBQUERY_SET_CRITERIA);
+    public SubquerySetCriteria createSubquerySetCriteria() {
+        SubquerySetCriteriaImpl subquerySetCriteria = create(ASTNodes.SUBQUERY_SET_CRITERIA);
         return subquerySetCriteria;
     }
 
     @Override
-    public ISubquerySetCriteria createSubquerySetCriteria(Expression expression, QueryCommand command) {
-        SubquerySetCriteria subquerySetCriteria = create(ASTNodes.SUBQUERY_SET_CRITERIA);
+    public SubquerySetCriteria createSubquerySetCriteria(BaseExpression expression, QueryCommandImpl command) {
+        SubquerySetCriteriaImpl subquerySetCriteria = create(ASTNodes.SUBQUERY_SET_CRITERIA);
         subquerySetCriteria.setExpression(expression);
         subquerySetCriteria.setCommand(command);
         return subquerySetCriteria;
     }
 
     @Override
-    public ISubqueryCompareCriteria createSubqueryCompareCriteria(Expression leftExpression, QueryCommand command, int operator, int predicateQuantifier) {
-        SubqueryCompareCriteria subqueryCompareCriteria = create(ASTNodes.SUBQUERY_COMPARE_CRITERIA);
+    public SubqueryCompareCriteria createSubqueryCompareCriteria(BaseExpression leftExpression, QueryCommandImpl command, int operator, int predicateQuantifier) {
+        SubqueryCompareCriteriaImpl subqueryCompareCriteria = create(ASTNodes.SUBQUERY_COMPARE_CRITERIA);
         subqueryCompareCriteria.setLeftExpression(leftExpression);
         subqueryCompareCriteria.setCommand(command);
         subqueryCompareCriteria.setOperator(Operator.findOperator(operator));
@@ -391,15 +390,15 @@ public class SyntaxFactory implements QueryFactory <Expression,
     }
 
     @Override
-    public IScalarSubquery createScalarSubquery(QueryCommand queryCommand) {
-        ScalarSubquery scalarSubquery = create(ASTNodes.SCALAR_SUBQUERY);
+    public ScalarSubquery createScalarSubquery(QueryCommandImpl queryCommand) {
+        ScalarSubqueryImpl scalarSubquery = create(ASTNodes.SCALAR_SUBQUERY);
         scalarSubquery.setCommand(queryCommand);
         return scalarSubquery;
     }
 
     @Override
-    public IBetweenCriteria createBetweenCriteria(ElementSymbol elementSymbol, Constant constant1, Constant constant2) {
-        BetweenCriteria betweenCriteria = create(ASTNodes.BETWEEN_CRITERIA);
+    public BetweenCriteria createBetweenCriteria(ElementSymbolImpl elementSymbol, ConstantImpl constant1, ConstantImpl constant2) {
+        BetweenCriteriaImpl betweenCriteria = create(ASTNodes.BETWEEN_CRITERIA);
         betweenCriteria.setExpression(elementSymbol);
         betweenCriteria.setLowerExpression(constant1);
         betweenCriteria.setUpperExpression(constant2);
@@ -407,106 +406,106 @@ public class SyntaxFactory implements QueryFactory <Expression,
     }
 
     @Override
-    public ICompoundCriteria createCompoundCriteria(int operator, List<? extends Criteria> criteria) {
-        CompoundCriteria compoundCriteria = create(ASTNodes.COMPOUND_CRITERIA);
+    public CompoundCriteria createCompoundCriteria(int operator, List<? extends CriteriaImpl> criteria) {
+        CompoundCriteriaImpl compoundCriteria = create(ASTNodes.COMPOUND_CRITERIA);
         compoundCriteria.setOperator(operator);
         compoundCriteria.setCriteria(criteria);
         return compoundCriteria;
     }
 
     @Override
-    public IExistsCriteria createExistsCriteria(QueryCommand queryCommand) {
-        ExistsCriteria existsCriteria = create(ASTNodes.EXISTS_CRITERIA);
+    public ExistsCriteria createExistsCriteria(QueryCommandImpl queryCommand) {
+        ExistsCriteriaImpl existsCriteria = create(ASTNodes.EXISTS_CRITERIA);
         existsCriteria.setCommand(queryCommand);
         return existsCriteria;
     }
 
     @Override
-    public IBlock createBlock() {
-        Block block = create(ASTNodes.BLOCK);
+    public Block createBlock() {
+        BlockImpl block = create(ASTNodes.BLOCK);
         return block;
     }
 
     @Override
-    public ICreateProcedureCommand createCreateProcedureCommand(Block block) {
+    public CreateProcedureCommand createCreateProcedureCommand(BlockImpl block) {
         if (isGreaterThanOrEqualTo(Version.TEIID_8_0.get())) {
-            CreateProcedureCommand command = create(ASTNodes.CREATE_PROCEDURE_COMMAND);
+            CreateProcedureCommandImpl command = create(ASTNodes.CREATE_PROCEDURE_COMMAND);
             command.setBlock(block);
             return command;
         } else {
-            CreateUpdateProcedureCommand command = create(ASTNodes.CREATE_UPDATE_PROCEDURE_COMMAND);
+            CreateUpdateProcedureCommandImpl command = create(ASTNodes.CREATE_UPDATE_PROCEDURE_COMMAND);
             command.setBlock(block);
             return command;
         }
     }
 
     @Override
-    public IAssignmentStatement createAssignmentStatement(ElementSymbol elementSymbol, Expression expression) {
-        AssignmentStatement assignmentStatement = create(ASTNodes.ASSIGNMENT_STATEMENT);
+    public AssignmentStatement createAssignmentStatement(ElementSymbolImpl elementSymbol, BaseExpression expression) {
+        AssignmentStatementImpl assignmentStatement = create(ASTNodes.ASSIGNMENT_STATEMENT);
         assignmentStatement.setVariable(elementSymbol);
         assignmentStatement.setExpression(expression);
         return assignmentStatement;
     }
 
     @Override
-    public IAssignmentStatement createAssignmentStatement(ElementSymbol elementSymbol, QueryCommand queryCommand) {
-        AssignmentStatement assignmentStatement = create(ASTNodes.ASSIGNMENT_STATEMENT);
+    public AssignmentStatement createAssignmentStatement(ElementSymbolImpl elementSymbol, QueryCommandImpl queryCommand) {
+        AssignmentStatementImpl assignmentStatement = create(ASTNodes.ASSIGNMENT_STATEMENT);
         assignmentStatement.setVariable(elementSymbol);
         assignmentStatement.setCommand(queryCommand);
         return assignmentStatement;
     }
 
     @Override
-    public ISelect createSelect() {
-        Select select = create(ASTNodes.SELECT);
+    public Select createSelect() {
+        SelectImpl select = create(ASTNodes.SELECT);
         return select;
     }
 
     @Override
-    public ISelect createSelect(List<? extends Expression> symbols) {
-        Select select = create(ASTNodes.SELECT);
+    public Select createSelect(List<? extends BaseExpression> symbols) {
+        SelectImpl select = create(ASTNodes.SELECT);
         select.setSymbols(symbols);
         return select;
     }
 
     @Override
-    public IFrom createFrom() {
-        From from = create(ASTNodes.FROM);
+    public From createFrom() {
+        FromImpl from = create(ASTNodes.FROM);
         return from;
     }
 
     @Override
-    public IFrom createFrom(List<? extends FromClause> fromClauses) {
-        From from = create(ASTNodes.FROM);
+    public From createFrom(List<? extends FromClauseImpl> fromClauses) {
+        FromImpl from = create(ASTNodes.FROM);
         from.setClauses(fromClauses);
         return from;
     }
 
     @Override
-    public IUnaryFromClause createUnaryFromClause(GroupSymbol symbol) {
-        UnaryFromClause unaryFromClause = create(ASTNodes.UNARY_FROM_CLAUSE);
+    public UnaryFromClause createUnaryFromClause(GroupSymbolImpl symbol) {
+        UnaryFromClauseImpl unaryFromClause = create(ASTNodes.UNARY_FROM_CLAUSE);
         unaryFromClause.setGroup(symbol);
         return unaryFromClause;
     }
 
     @Override
-    public ISubqueryFromClause createSubqueryFromClause(String name, QueryCommand command) {
-        SubqueryFromClause subqueryFromClause = create(ASTNodes.SUBQUERY_FROM_CLAUSE);
+    public SubqueryFromClause createSubqueryFromClause(String name, QueryCommandImpl command) {
+        SubqueryFromClauseImpl subqueryFromClause = create(ASTNodes.SUBQUERY_FROM_CLAUSE);
         subqueryFromClause.setName(name);
         subqueryFromClause.setCommand(command);
         return subqueryFromClause;
     }
 
     @Override
-    public IJoinType getJoinType(IJoinType.Types joinType) {
-        JoinType join = create(ASTNodes.JOIN_TYPE);
+    public JoinType getJoinType(JoinType.Types joinType) {
+        JoinTypeImpl join = create(ASTNodes.JOIN_TYPE);
         join.setKind(joinType);
         return join;
     }
 
     @Override
-    public IJoinPredicate createJoinPredicate(FromClause leftClause, FromClause rightClause, JoinType joinType) {
-        JoinPredicate joinPredicate = create(ASTNodes.JOIN_PREDICATE);
+    public JoinPredicate createJoinPredicate(FromClauseImpl leftClause, FromClauseImpl rightClause, JoinTypeImpl joinType) {
+        JoinPredicateImpl joinPredicate = create(ASTNodes.JOIN_PREDICATE);
         joinPredicate.setJoinType(joinType);
         joinPredicate.setLeftClause(leftClause);
         joinPredicate.setRightClause(rightClause);
@@ -514,8 +513,8 @@ public class SyntaxFactory implements QueryFactory <Expression,
     }
 
     @Override
-    public IJoinPredicate createJoinPredicate(FromClause leftClause, FromClause rightClause, JoinType joinType, List<Criteria> criteria) {
-        JoinPredicate joinPredicate = create(ASTNodes.JOIN_PREDICATE);
+    public JoinPredicate createJoinPredicate(FromClauseImpl leftClause, FromClauseImpl rightClause, JoinTypeImpl joinType, List<CriteriaImpl> criteria) {
+        JoinPredicateImpl joinPredicate = create(ASTNodes.JOIN_PREDICATE);
         joinPredicate.setJoinType(joinType);
         joinPredicate.setLeftClause(leftClause);
         joinPredicate.setRightClause(rightClause);
@@ -524,60 +523,60 @@ public class SyntaxFactory implements QueryFactory <Expression,
     }
 
     @Override
-    public IGroupBy createGroupBy() {
-        GroupBy groupBy = create(ASTNodes.GROUP_BY);
+    public GroupBy createGroupBy() {
+        GroupByImpl groupBy = create(ASTNodes.GROUP_BY);
         return groupBy;
     }
 
     @Override
-    public IOrderBy createOrderBy() {
-        OrderBy orderBy = create(ASTNodes.ORDER_BY);
+    public OrderBy createOrderBy() {
+        OrderByImpl orderBy = create(ASTNodes.ORDER_BY);
         return orderBy;
     }
 
     @Override
-    public IOption createOption() {
-        Option option = create(ASTNodes.OPTION);
+    public Option createOption() {
+        OptionImpl option = create(ASTNodes.OPTION);
         return option;
     }
 
     @Override
-    public IUpdate createUpdate() {
-        Update update = create(ASTNodes.UPDATE);
+    public Update createUpdate() {
+        UpdateImpl update = create(ASTNodes.UPDATE);
         return update;
     }
 
     @Override
-    public IDelete createDelete() {
-        Delete delete = create(ASTNodes.DELETE);
+    public Delete createDelete() {
+        DeleteImpl delete = create(ASTNodes.DELETE);
         return delete;
     }
 
     @Override
-    public IInsert createInsert() {
-        Insert insert = create(ASTNodes.INSERT);
+    public Insert createInsert() {
+        InsertImpl insert = create(ASTNodes.INSERT);
         return insert;
     }
 
     @Override
-    public IStoredProcedure createStoredProcedure() {
-        StoredProcedure storedProcedure = create(ASTNodes.STORED_PROCEDURE);
+    public StoredProcedure createStoredProcedure() {
+        StoredProcedureImpl storedProcedure = create(ASTNodes.STORED_PROCEDURE);
         return storedProcedure;
     }
 
     @Override
-    public ISPParameter createSPParameter(int index, Expression expression) {
-        return new SPParameter(teiidParser, index, expression);
+    public SPParameter createSPParameter(int index, BaseExpression expression) {
+        return new SPParameterImpl(teiidParser, index, expression);
     }
 
     @Override
-    public ISPParameter createSPParameter(int index, ParameterInfo parameterType, String name) {
-        return new SPParameter(teiidParser, index, parameterType.index(), name);
+    public SPParameter createSPParameter(int index, ParameterInfo parameterType, String name) {
+        return new SPParameterImpl(teiidParser, index, parameterType.index(), name);
     }
 
     @Override
-    public IReference createReference(int index) {
-        Reference reference = create(ASTNodes.REFERENCE);
+    public Reference createReference(int index) {
+        ReferenceImpl reference = create(ASTNodes.REFERENCE);
         reference.setIndex(index);
         return reference;
     }

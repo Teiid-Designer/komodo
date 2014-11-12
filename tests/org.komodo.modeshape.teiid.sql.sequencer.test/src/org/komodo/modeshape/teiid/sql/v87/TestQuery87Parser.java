@@ -22,10 +22,10 @@
 package org.komodo.modeshape.teiid.sql.v87;
 
 import org.junit.Test;
-import org.komodo.modeshape.teiid.sql.lang.From;
-import org.komodo.modeshape.teiid.sql.lang.SPParameter;
-import org.komodo.modeshape.teiid.sql.lang.StoredProcedure;
-import org.komodo.modeshape.teiid.sql.lang.SubqueryFromClause;
+import org.komodo.modeshape.teiid.sql.lang.FromImpl;
+import org.komodo.modeshape.teiid.sql.lang.SPParameterImpl;
+import org.komodo.modeshape.teiid.sql.lang.StoredProcedureImpl;
+import org.komodo.modeshape.teiid.sql.lang.SubqueryFromClauseImpl;
 import org.komodo.modeshape.teiid.sql.v86.TestQuery86Parser;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -47,12 +47,12 @@ public class TestQuery87Parser extends TestQuery86Parser {
     @Override
     @Test
     public void testStoredQuery2SanityCheck() {
-        StoredProcedure storedQuery = getFactory().newStoredProcedure();
+        StoredProcedureImpl storedQuery = getFactory().newStoredProcedure();
         storedQuery.setProcedureName("proc1");
-        SPParameter parameter = getFactory().newSPParameter(1, getFactory().newConstant("param1"));
+        SPParameterImpl parameter = getFactory().newSPParameter(1, getFactory().newConstant("param1"));
         storedQuery.addParameter(parameter);
-        From from = getFactory().newFrom();
-        SubqueryFromClause sfc = getFactory().newSubqueryFromClause("x", storedQuery);
+        FromImpl from = getFactory().newFrom();
+        SubqueryFromClauseImpl sfc = getFactory().newSubqueryFromClause("x", storedQuery);
         from.addClause(sfc);
 
         helpTest("exec proc1('param1')", "EXEC proc1('param1')", storedQuery);

@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.komodo.eclipse.sql.ui.graphics.ColorManager;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.query.sql.lang.ICommand;
+import org.komodo.spi.query.sql.lang.Command;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
@@ -98,7 +98,7 @@ public class SqlEditorPanel extends SashForm
 
     String savedSql = EMPTY_STRING;
     String currentMessage = EMPTY_STRING;
-    private ICommand command;
+    private Command command;
 
     /**
      * Constructor.
@@ -409,7 +409,7 @@ public class SqlEditorPanel extends SashForm
      * 
      * @return the command, null if the query is not both parseable
      */
-    public ICommand getCommand() {
+    public Command getCommand() {
         return command;
     }
 

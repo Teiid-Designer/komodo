@@ -24,7 +24,7 @@ package org.teiid.query.mapping.xml;
 
 import org.komodo.spi.xml.MappingRecursiveElement;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.lang.Criteria;
+import org.teiid.query.sql.lang.CriteriaImpl;
 
 
 
@@ -35,7 +35,7 @@ import org.teiid.query.sql.lang.Criteria;
  */
 public class MappingRecursiveElementImpl extends MappingElementImpl
     implements MappingRecursiveElement<MappingAttributeImpl, MappingNodeImpl> {
-    Criteria criteriaNode;    
+    CriteriaImpl criteriaNode;    
     
     public MappingRecursiveElementImpl(TeiidClientParser teiidParser, String name, String mappingClass) {
         super(teiidParser, name);
@@ -116,11 +116,11 @@ public class MappingRecursiveElementImpl extends MappingElementImpl
      * ValidateMappedCriteriaVisitor class during pre planning.
      * @param node
      */
-    public void setCriteriaNode(Criteria node) {
+    public void setCriteriaNode(CriteriaImpl node) {
         this.criteriaNode = node;
     }
     
-    public Criteria getCriteriaNode() {
+    public CriteriaImpl getCriteriaNode() {
         return this.criteriaNode;
     }    
 }

@@ -22,9 +22,9 @@
 package org.komodo.spi.query;
 
 
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.query.sql.lang.ICriteria;
-import org.komodo.spi.query.sql.lang.IExpression;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.query.sql.lang.Criteria;
+import org.komodo.spi.query.sql.lang.Expression;
 
 
 /**
@@ -37,39 +37,39 @@ public interface QueryParser {
      * 
      * @param criteriaString
      * 
-     * @return  an instance of {@link ICriteria}
+     * @return  an instance of {@link Criteria}
      * @throws Exception 
      */
-    ICriteria parseCriteria(String criteriaString) throws Exception;
+    Criteria parseCriteria(String criteriaString) throws Exception;
 
     /**
      * Parse the given command string
      * 
      * @param commandString
      * 
-     * @return an instance of {@link ICommand}
+     * @return an instance of {@link Command}
      * @throws Exception 
      */
-    ICommand parseCommand(String commandString) throws Exception;
+    Command parseCommand(String commandString) throws Exception;
     
     /**
      * Parse the given command string
      * 
      * @param commandString
      * 
-     * @return an instance of {@link ICommand}
+     * @return an instance of {@link Command}
      * @throws Exception 
      */
-    ICommand parseDesignerCommand(String commandString) throws Exception;
+    Command parseDesignerCommand(String commandString) throws Exception;
 
     /**
      * Parse the given expression string
      * 
      * @param expressionString
      * 
-     * @return an instance of {@link IExpression}
+     * @return an instance of {@link Expression}
      * @throws Exception 
      */
-    IExpression parseExpression(String expressionString) throws Exception;
+    Expression parseExpression(String expressionString) throws Exception;
 
 }

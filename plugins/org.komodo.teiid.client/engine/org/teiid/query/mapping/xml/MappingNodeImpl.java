@@ -35,7 +35,7 @@ import java.util.Map;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.xml.MappingNode;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 import org.teiid.runtime.client.Messages;
 
 
@@ -515,7 +515,7 @@ public abstract class MappingNodeImpl implements Cloneable, Serializable, Mappin
 		}
     }
     
-    public ElementSymbol getElementSymbol() {
+    public ElementSymbolImpl getElementSymbol() {
     	return null;
     }
 }

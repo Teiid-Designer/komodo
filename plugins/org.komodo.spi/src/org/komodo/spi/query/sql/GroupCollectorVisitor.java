@@ -23,13 +23,13 @@ package org.komodo.spi.query.sql;
 
 import java.util.Collection;
 
-import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
+import org.komodo.spi.query.sql.lang.LanguageObject;
+import org.komodo.spi.query.sql.symbol.GroupSymbol;
 
 /**
  *
  */
-public interface GroupCollectorVisitor<LO extends ILanguageObject, GS extends IGroupSymbol> {
+public interface GroupCollectorVisitor<LO extends LanguageObject, GS extends GroupSymbol> {
 
     /**
      * Get the groups from obj in a collection.  The
@@ -37,7 +37,7 @@ public interface GroupCollectorVisitor<LO extends ILanguageObject, GS extends IG
      * filtered out.
      * 
      * @param obj Language object
-     * @return Collection of {@link IGroupSymbol}
+     * @return Collection of {@link GroupSymbol}
      */
     Collection<GS> findGroups(LO obj);
     
@@ -47,7 +47,7 @@ public interface GroupCollectorVisitor<LO extends ILanguageObject, GS extends IG
      * filtered out.
      * 
      * @param obj Language object
-     * @return Collection of {@link IGroupSymbol}
+     * @return Collection of {@link GroupSymbol}
      */
     Collection<GS> findGroupsIgnoreInlineViews(LO obj);
 }

@@ -29,11 +29,11 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestAlterResolving;
 import org.teiid.query.sql.AbstractTestFactory;
-import org.teiid.query.sql.lang.AlterProcedure;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateProcedureCommand;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.lang.AlterProcedureImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateProcedureCommandImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 import org.teiid.query.sql.v8.Test8Factory;
 
 /**
@@ -62,13 +62,13 @@ public class Test8AlterResolving extends AbstractTestAlterResolving {
 
     @Test
     public void testAlterProcedure() {
-        AlterProcedure alterProc = (AlterProcedure)helpResolve("alter procedure MMSP5 as begin select param1; end",
+        AlterProcedureImpl alterProc = (AlterProcedureImpl)helpResolve("alter procedure MMSP5 as begin select param1; end",
                                                                getMetadataFactory().exampleBQTCached());
         assertNotNull(alterProc.getTarget().getMetadataID());
-        assertTrue(alterProc.getDefinition() instanceof CreateProcedureCommand);
+        assertTrue(alterProc.getDefinition() instanceof CreateProcedureCommandImpl);
 
-        CreateProcedureCommand command = (CreateProcedureCommand) alterProc.getDefinition();
-        Query q = (Query)((CommandStatement) command.getBlock().getStatements().get(0)).getCommand();
-        assertTrue(((ElementSymbol)q.getSelect().getSymbol(0)).isExternalReference());
+        CreateProcedureCommandImpl command = (CreateProcedureCommandImpl) alterProc.getDefinition();
+        QueryImpl q = (QueryImpl)((CommandStatementImpl) command.getBlock().getStatements().get(0)).getCommand();
+        assertTrue(((ElementSymbolImpl)q.getSelect().getSymbol(0)).isExternalReference());
     }
 }

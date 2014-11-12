@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol.Type;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.udf.FunctionLibrary;
@@ -44,9 +44,9 @@ import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.FunctionParameter;
 import org.teiid.query.function.metadata.FunctionCategoryConstants;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.Function;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.FunctionImpl;
 
 
 
@@ -273,7 +273,7 @@ public class DefaultFunctionLibrary implements FunctionLibrary {
      * FunctionDescriptors.
 	 * @throws Exception
 	 */
-	public TCFunctionDescriptor[] determineNecessaryConversions(String name, Class<?> returnType, Expression[] args, Class<?>[] types, boolean hasUnknownType) throws Exception {
+	public TCFunctionDescriptor[] determineNecessaryConversions(String name, Class<?> returnType, BaseExpression[] args, Class<?>[] types, boolean hasUnknownType) throws Exception {
 		// Check for no args - no conversion necessary
 		if(types.length == 0) {
 		    if (getTeiidVersion().isLessThan(Version.TEIID_8_0.get()))
@@ -331,7 +331,7 @@ public class DefaultFunctionLibrary implements FunctionLibrary {
 					Transform t = getConvertFunctionDescriptor(sourceType, targetType);
 					if (t != null) {
 		                if (t.isExplicit()) {
-		                	if (!(args[i] instanceof Constant) || ResolverUtil.convertConstant(getDataTypeManager().getDataTypeName(sourceType), tmpTypeName, (Constant)args[i]) == null) {
+		                	if (!(args[i] instanceof ConstantImpl) || ResolverUtil.convertConstant(getDataTypeManager().getDataTypeName(sourceType), tmpTypeName, (ConstantImpl)args[i]) == null) {
 		                		continue outer;
 		                	}
 		                	currentScore++;
@@ -509,8 +509,8 @@ public class DefaultFunctionLibrary implements FunctionLibrary {
         return fd;
     }
     
-    public static boolean isConvert(Function function) {
-        Expression[] args = function.getArgs();
+    public static boolean isConvert(FunctionImpl function) {
+        BaseExpression[] args = function.getArgs();
         String funcName = function.getName();
         
         return args.length == 2 && (FunctionName.CONVERT.equalsIgnoreCase(funcName) || FunctionName.CAST.equalsIgnoreCase(funcName));
@@ -534,7 +534,7 @@ public class DefaultFunctionLibrary implements FunctionLibrary {
      */
     public List<FunctionMethod> getBuiltInAggregateFunctions(boolean includeAnalytic) {
         ArrayList<FunctionMethod> result = new ArrayList<FunctionMethod>();
-        for (Type type : IAggregateSymbol.Type.values()) {
+        for (Type type : AggregateSymbol.Type.values()) {
             AggregateAttributes aa = new AggregateAttributes();
             String returnType = null;
             String[] argTypes = null;

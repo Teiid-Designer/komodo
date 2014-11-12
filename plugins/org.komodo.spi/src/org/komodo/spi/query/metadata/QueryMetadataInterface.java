@@ -30,7 +30,7 @@ import java.util.Set;
 import javax.script.ScriptEngine;
 
 import org.komodo.spi.query.sql.LanguageVisitor;
-import org.komodo.spi.query.sql.lang.IExpression;
+import org.komodo.spi.query.sql.lang.Expression;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.udf.FunctionLibrary;
@@ -852,7 +852,7 @@ public interface QueryMetadataInterface {
      * @param metadataID
      * @return map of function-based expression for metadata id
      */
-    <E extends IExpression<? extends LanguageVisitor>> Map<E, Integer> getFunctionBasedExpressions(Object metadataID);
+    <E extends Expression<? extends LanguageVisitor>> Map<E, Integer> getFunctionBasedExpressions(Object metadataID);
 
     /**
      * @param elementId

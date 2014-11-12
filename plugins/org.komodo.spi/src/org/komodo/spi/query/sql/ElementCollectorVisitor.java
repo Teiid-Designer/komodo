@@ -23,13 +23,13 @@ package org.komodo.spi.query.sql;
 
 import java.util.Collection;
 
-import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.symbol.IElementSymbol;
+import org.komodo.spi.query.sql.lang.LanguageObject;
+import org.komodo.spi.query.sql.symbol.ElementSymbol;
 
 /**
  *
  */
-public interface ElementCollectorVisitor<LO extends ILanguageObject, ES extends IElementSymbol> {
+public interface ElementCollectorVisitor<LO extends LanguageObject, ES extends ElementSymbol> {
 
     /**
      * Helper to quickly get the elements from obj in a collection.  The
@@ -37,7 +37,7 @@ public interface ElementCollectorVisitor<LO extends ILanguageObject, ES extends 
      * filtered out.
      * 
      * @param obj Language object
-     * @return Collection of {@link IElementSymbol}
+     * @return Collection of {@link ElementSymbol}
      */
     Collection<? super ES> findElements(LO obj);
     
@@ -50,7 +50,7 @@ public interface ElementCollectorVisitor<LO extends ILanguageObject, ES extends 
      * @param useDeepIteration indicates whether or not to iterate into nested
      *                 subqueries of the query 
      * 
-     * @return Collection of {@link IElementSymbol}
+     * @return Collection of {@link ElementSymbol}
      */
     Collection<? super ES> findElements(LO obj, boolean useDeepIteration);
     
@@ -64,7 +64,7 @@ public interface ElementCollectorVisitor<LO extends ILanguageObject, ES extends 
      *                 subqueries of the query 
      * @param aggsOnly
      * 
-     * @return Collection of {@link IElementSymbol}
+     * @return Collection of {@link ElementSymbol}
      */
     Collection<? super ES> findElements(LO obj, boolean useDeepIteration, boolean aggsOnly);
 }

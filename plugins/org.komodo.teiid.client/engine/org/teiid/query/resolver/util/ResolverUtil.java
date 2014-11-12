@@ -40,7 +40,7 @@ import java.util.TreeSet;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
 import org.komodo.spi.query.metadata.StoredProcedureInfo;
-import org.komodo.spi.query.sql.lang.IJoinType.Types;
+import org.komodo.spi.query.sql.lang.JoinType.Types;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
@@ -57,33 +57,33 @@ import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.lang.FromClause;
-import org.teiid.query.sql.lang.JoinPredicate;
-import org.teiid.query.sql.lang.JoinType;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.Limit;
-import org.teiid.query.sql.lang.OrderBy;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.QueryCommand;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.lang.SubqueryContainer;
-import org.teiid.query.sql.lang.UnaryFromClause;
-import org.teiid.query.sql.symbol.AliasSymbol;
-import org.teiid.query.sql.symbol.CaseExpression;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.DerivedColumn;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.ExpressionSymbol;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.ScalarSubquery;
-import org.teiid.query.sql.symbol.SearchedCaseExpression;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
+import org.teiid.query.sql.lang.FromClauseImpl;
+import org.teiid.query.sql.lang.JoinPredicateImpl;
+import org.teiid.query.sql.lang.JoinTypeImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.LimitImpl;
+import org.teiid.query.sql.lang.OrderByImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.QueryCommandImpl;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.lang.BaseSubqueryContainer;
+import org.teiid.query.sql.lang.UnaryFromClauseImpl;
+import org.teiid.query.sql.symbol.AliasSymbolImpl;
+import org.teiid.query.sql.symbol.CaseExpressionImpl;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.DerivedColumnImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.ExpressionSymbolImpl;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
+import org.teiid.query.sql.symbol.SearchedCaseExpressionImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
 import org.teiid.query.sql.util.SymbolMap;
 import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
 import org.teiid.query.sql.visitor.GroupsUsedByElementsVisitorImpl;
@@ -96,26 +96,26 @@ import org.teiid.runtime.client.Messages;
 public class ResolverUtil {
 
     public static class ResolvedLookup {
-		private GroupSymbol group;
-		private ElementSymbol keyElement;
-		private ElementSymbol returnElement;
+		private GroupSymbolImpl group;
+		private ElementSymbolImpl keyElement;
+		private ElementSymbolImpl returnElement;
 		
-		void setGroup(GroupSymbol group) {
+		void setGroup(GroupSymbolImpl group) {
 			this.group = group;
 		}
-		public GroupSymbol getGroup() {
+		public GroupSymbolImpl getGroup() {
 			return group;
 		}
-		void setKeyElement(ElementSymbol keyElement) {
+		void setKeyElement(ElementSymbolImpl keyElement) {
 			this.keyElement = keyElement;
 		}
-		public ElementSymbol getKeyElement() {
+		public ElementSymbolImpl getKeyElement() {
 			return keyElement;
 		}
-		void setReturnElement(ElementSymbol returnElement) {
+		void setReturnElement(ElementSymbolImpl returnElement) {
 			this.returnElement = returnElement;
 		}
-		public ElementSymbol getReturnElement() {
+		public ElementSymbolImpl getReturnElement() {
 			return returnElement;
 		}
 	}
@@ -227,7 +227,7 @@ public class ResolverUtil {
      * @return
      * @throws Exception 
      */
-    public static Expression convertExpression(Expression sourceExpression, String targetTypeName, QueryMetadataInterface metadata) throws Exception {
+    public static BaseExpression convertExpression(BaseExpression sourceExpression, String targetTypeName, QueryMetadataInterface metadata) throws Exception {
         return convertExpression(sourceExpression,
                                  DefaultDataTypeManager.getInstance(sourceExpression.getTeiidVersion()).getDataTypeName(sourceExpression.getType()),
                                  targetTypeName, metadata);
@@ -243,13 +243,13 @@ public class ResolverUtil {
      * @return
      * @throws Exception 
      */
-    public static Expression convertExpression(Expression sourceExpression, String sourceTypeName, String targetTypeName, QueryMetadataInterface metadata) throws Exception {
+    public static BaseExpression convertExpression(BaseExpression sourceExpression, String sourceTypeName, String targetTypeName, QueryMetadataInterface metadata) throws Exception {
         if (sourceTypeName.equals(targetTypeName)) {
             return sourceExpression;
         }
         
         if(canImplicitlyConvert(sourceExpression.getTeiidVersion(), sourceTypeName, targetTypeName) 
-                        || (sourceExpression instanceof Constant && convertConstant(sourceTypeName, targetTypeName, (Constant)sourceExpression) != null)) {
+                        || (sourceExpression instanceof ConstantImpl && convertConstant(sourceTypeName, targetTypeName, (ConstantImpl)sourceExpression) != null)) {
             return getConversion(sourceExpression, sourceTypeName, targetTypeName, true, (DefaultFunctionLibrary) metadata.getFunctionLibrary());
         }
 
@@ -257,16 +257,16 @@ public class ResolverUtil {
          throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30082, new Object[] {targetTypeName, sourceExpression, sourceTypeName}));
     }
 
-    public static Constant convertConstant(String sourceTypeName,
+    public static ConstantImpl convertConstant(String sourceTypeName,
                                            String targetTypeName,
-                                           Constant constant) {
+                                           ConstantImpl constant) {
         if (!DefaultDataTypeManager.getInstance(constant.getTeiidVersion()).isTransformable(sourceTypeName, targetTypeName)) {
         	return null;
         }
 
         try {
 	        //try to get the converted constant, if this fails then it is not in a valid format
-	        Constant result = getProperlyTypedConstant(constant.getValue(),
+	        ConstantImpl result = getProperlyTypedConstant(constant.getValue(),
 	                                                   DefaultDataTypeManager.getInstance(constant.getTeiidVersion()).getDataTypeClass(targetTypeName),
 	                                                   constant.getTeiidParser());
 
@@ -289,7 +289,7 @@ public class ResolverUtil {
 	        	return null; //this is the case for xml constants
 	        }
 	        
-	        Constant reverse = getProperlyTypedConstant(result.getValue(), constant.getType(), constant.getTeiidParser());
+	        ConstantImpl reverse = getProperlyTypedConstant(result.getValue(), constant.getType(), constant.getTeiidParser());
 	        
 	        if (((Comparable)constant.getValue()).compareTo(reverse.getValue()) == 0) {
 	            return result;
@@ -301,7 +301,7 @@ public class ResolverUtil {
         return null;
     }
 
-    public static Function getConversion(Expression sourceExpression,
+    public static FunctionImpl getConversion(BaseExpression sourceExpression,
                                             String sourceTypeName,
                                             String targetTypeName,
                                             boolean implicit, DefaultFunctionLibrary library) {
@@ -310,12 +310,12 @@ public class ResolverUtil {
 
         TCFunctionDescriptor fd = library.findTypedConversionFunction(srcType, dataTypeManagerService.getDataTypeClass(targetTypeName));
 
-        Constant constant = sourceExpression.getTeiidParser().createASTNode(ASTNodes.CONSTANT);
+        ConstantImpl constant = sourceExpression.getTeiidParser().createASTNode(ASTNodes.CONSTANT);
         constant.setValue(targetTypeName);
         TeiidClientParser teiidParser = sourceExpression.getTeiidParser();
-        Function conversion = teiidParser.createASTNode(ASTNodes.FUNCTION);
+        FunctionImpl conversion = teiidParser.createASTNode(ASTNodes.FUNCTION);
         conversion.setName(fd.getName());
-        conversion.setArgs(new Expression[] { sourceExpression, constant });
+        conversion.setArgs(new BaseExpression[] { sourceExpression, constant });
         conversion.setType(dataTypeManagerService.getDataTypeClass(targetTypeName));
         conversion.setFunctionDescriptor(fd);
         if (implicit) {
@@ -325,12 +325,12 @@ public class ResolverUtil {
         return conversion;
     }
 
-    public static void setDesiredType(List<DerivedColumn> passing, LanguageObject obj) throws Exception {
+    public static void setDesiredType(List<DerivedColumnImpl> passing, BaseLanguageObject obj) throws Exception {
     	setDesiredType(passing, obj, DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass());
     }
     
-    public static void setDesiredType(List<DerivedColumn> passing, LanguageObject obj, Class<?> type) throws Exception {
-		for (DerivedColumn dc : passing) {
+    public static void setDesiredType(List<DerivedColumnImpl> passing, BaseLanguageObject obj, Class<?> type) throws Exception {
+		for (DerivedColumnImpl dc : passing) {
 	    	setDesiredType(dc.getExpression(), type, obj);
 		}
 	}
@@ -341,17 +341,17 @@ public class ResolverUtil {
      * @param targetType the target type, if the expression's type is null.
      * @throws Exception if unable to set the reference type to the target type.
      */
-    public static void setDesiredType(Expression expression, Class<?> targetType, LanguageObject surroundingExpression) throws Exception {
-        if (expression instanceof Reference) {
-        	Reference ref = (Reference)expression;
+    public static void setDesiredType(BaseExpression expression, Class<?> targetType, BaseLanguageObject surroundingExpression) throws Exception {
+        if (expression instanceof ReferenceImpl) {
+        	ReferenceImpl ref = (ReferenceImpl)expression;
         	if (ref.isPositional() && ref.getType() == null) {
 	        	if (targetType == null) {
 	        		 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30083, surroundingExpression));
 	        	}
 	            ref.setType(targetType);
         	}
-        } else if (expression instanceof Function) {
-        	Function f = (Function)expression;
+        } else if (expression instanceof FunctionImpl) {
+        	FunctionImpl f = (FunctionImpl)expression;
         	if (f.getType() == null) {
 	        	f.setType(targetType);
         	}
@@ -373,16 +373,16 @@ public class ResolverUtil {
 	 * @param metadata
 	 *            IQueryMetadataInterface
 	 */
-    public static void resolveOrderBy(OrderBy orderBy, QueryCommand command, QueryMetadataInterface metadata)
+    public static void resolveOrderBy(OrderByImpl orderBy, QueryCommandImpl command, QueryMetadataInterface metadata)
         throws Exception {
 
-    	List<Expression> knownElements = command.getProjectedQuery().getSelect().getProjectedSymbols();
+    	List<BaseExpression> knownElements = command.getProjectedQuery().getSelect().getProjectedSymbols();
     	
     	boolean isSimpleQuery = false;
-    	List<GroupSymbol> fromClauseGroups = Collections.emptyList();
+    	List<GroupSymbolImpl> fromClauseGroups = Collections.emptyList();
         
-        if (command instanceof Query) {
-        	Query query = (Query)command;
+        if (command instanceof QueryImpl) {
+        	QueryImpl query = (QueryImpl)command;
         	isSimpleQuery = !query.getSelect().isDistinct() && !query.hasAggregates();
         	if (query.getFrom() != null) {
         		fromClauseGroups = query.getFrom().getGroups();
@@ -391,22 +391,22 @@ public class ResolverUtil {
     	
         // Cached state, if needed
         String[] knownShortNames = new String[knownElements.size()];
-        List<Expression> expressions = new ArrayList<Expression>(knownElements.size());
+        List<BaseExpression> expressions = new ArrayList<BaseExpression>(knownElements.size());
 
         for(int i=0; i<knownElements.size(); i++) {
-            Expression knownSymbol = knownElements.get(i);
+            BaseExpression knownSymbol = knownElements.get(i);
             expressions.add(SymbolMap.getExpression(knownSymbol));
-            if (knownSymbol instanceof ElementSymbol || knownSymbol instanceof AliasSymbol) {
-                String name = ((Symbol)knownSymbol).getShortName();
+            if (knownSymbol instanceof ElementSymbolImpl || knownSymbol instanceof AliasSymbolImpl) {
+                String name = ((SymbolImpl)knownSymbol).getShortName();
                 
                 knownShortNames[i] = name;
             }
         }
 
         for (int i = 0; i < orderBy.getVariableCount(); i++) {
-        	Expression sortKey = orderBy.getVariable(i);
-        	if (sortKey instanceof ElementSymbol) {
-        		ElementSymbol symbol = (ElementSymbol)sortKey;
+        	BaseExpression sortKey = orderBy.getVariable(i);
+        	if (sortKey instanceof ElementSymbolImpl) {
+        		ElementSymbolImpl symbol = (ElementSymbolImpl)sortKey;
         		String groupPart = null;
         		if (symbol.getGroupSymbol() != null) {
         			groupPart = symbol.getGroupSymbol().getName();
@@ -415,7 +415,7 @@ public class ResolverUtil {
         		String shortName = symbol.getShortName();
         		if (groupPart == null) {
         			int position = -1;
-    				Expression matchedSymbol = null;
+    				BaseExpression matchedSymbol = null;
     				// walk the SELECT col short names, looking for a match on the current ORDER BY 'short name'
     				for(int j=0; j<knownShortNames.length; j++) {
     					if( !shortName.equalsIgnoreCase( knownShortNames[j] )) {
@@ -441,26 +441,26 @@ public class ResolverUtil {
                         continue;
                     }
         		}
-        	} else if (sortKey instanceof ExpressionSymbol && orderBy.getTeiidVersion().isLessThan(Version.TEIID_8_0.get())) {
+        	} else if (sortKey instanceof ExpressionSymbolImpl && orderBy.getTeiidVersion().isLessThan(Version.TEIID_8_0.get())) {
         	 // check for legacy positional
-                ExpressionSymbol es = (ExpressionSymbol)sortKey;
-        	    if (es.getExpression() instanceof Constant) {
-                    Constant c = (Constant)es.getExpression();
+                ExpressionSymbolImpl es = (ExpressionSymbolImpl)sortKey;
+        	    if (es.getExpression() instanceof ConstantImpl) {
+                    ConstantImpl c = (ConstantImpl)es.getExpression();
                     setExpressionPosition(orderBy, knownElements, i, c);
                     continue;
         	    }
-        	} else if (sortKey instanceof Constant) {
+        	} else if (sortKey instanceof ConstantImpl) {
         		// check for legacy positional
-        		Constant c = (Constant)sortKey;
+        		ConstantImpl c = (ConstantImpl)sortKey;
     		    setExpressionPosition(orderBy, knownElements, i, c);
     		    continue;
         	}
         	//handle order by expressions        	
-        	if (command instanceof SetQuery) {
+        	if (command instanceof SetQueryImpl) {
     			 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30086, sortKey));
     		}
         	ResolverVisitorImpl visitor = new ResolverVisitorImpl(command.getTeiidVersion());
-        	for (ElementSymbol symbol : ElementCollectorVisitorImpl.getElements(sortKey, false)) {
+        	for (ElementSymbolImpl symbol : ElementCollectorVisitorImpl.getElements(sortKey, false)) {
         		try {
         	    	visitor.resolveLanguageObject(symbol, fromClauseGroups, command.getExternalGroupContexts(), metadata);
         	    } catch(Exception e) {
@@ -484,7 +484,7 @@ public class ResolverUtil {
      * @param c
      * @throws QueryResolverException
      */
-    private static void setExpressionPosition(OrderBy orderBy, List<Expression> knownElements, int i, Constant c)
+    private static void setExpressionPosition(OrderByImpl orderBy, List<BaseExpression> knownElements, int i, ConstantImpl c)
         throws QueryResolverException {
         int elementOrder = Integer.valueOf(c.getValue().toString()).intValue();
         // adjust for the 1 based index.
@@ -509,7 +509,7 @@ public class ResolverUtil {
      * @throws Exception
      *
      */
-	public static Expression getDefault(ElementSymbol symbol, QueryMetadataInterface metadata) throws Exception {
+	public static BaseExpression getDefault(ElementSymbolImpl symbol, QueryMetadataInterface metadata) throws Exception {
         //Check if there is a default value, if so use it
 		Object mid = symbol.getMetadataID();
     	Class<?> type = symbol.getType();
@@ -541,11 +541,11 @@ public class ResolverUtil {
      * @throws Exception if TransformationException is encountered
      *
      */
-    private static Constant getProperlyTypedConstant(Object defaultValue, Class<?> parameterType, TeiidClientParser teiidParser)
+    private static ConstantImpl getProperlyTypedConstant(Object defaultValue, Class<?> parameterType, TeiidClientParser teiidParser)
         throws QueryResolverException{
         try {
             Object newValue = DefaultDataTypeManager.getInstance(teiidParser.getVersion()).transformValue(defaultValue, parameterType);
-            Constant constant = teiidParser.createASTNode(ASTNodes.CONSTANT);
+            ConstantImpl constant = teiidParser.createASTNode(ASTNodes.CONSTANT);
             constant.setValue(newValue);
             constant.setType(parameterType);
             return constant;
@@ -559,16 +559,16 @@ public class ResolverUtil {
      * The resolved elements may not contain non-selectable columns depending on the metadata first used for resolving.
      * 
      */
-    public static List<ElementSymbol> resolveElementsInGroup(GroupSymbol group, QueryMetadataInterface metadata)
+    public static List<ElementSymbolImpl> resolveElementsInGroup(GroupSymbolImpl group, QueryMetadataInterface metadata)
     throws Exception {
-        return new ArrayList<ElementSymbol>(getGroupInfo(group, metadata).getSymbolList());
+        return new ArrayList<ElementSymbolImpl>(getGroupInfo(group, metadata).getSymbolList());
     }
     
-    public static void clearGroupInfo(GroupSymbol group, QueryMetadataInterface metadata) throws Exception {
+    public static void clearGroupInfo(GroupSymbolImpl group, QueryMetadataInterface metadata) throws Exception {
     	metadata.addToMetadataCache(group.getMetadataID(), GroupInfo.CACHE_PREFIX + group.getName(), null);
     }
     
-	static GroupInfo getGroupInfo(GroupSymbol group,
+	static GroupInfo getGroupInfo(GroupSymbolImpl group,
 			QueryMetadataInterface metadata)
 			throws Exception {
 		String key = GroupInfo.CACHE_PREFIX + group.getName();
@@ -579,7 +579,7 @@ public class ResolverUtil {
             // get all elements from the metadata
             List elementIDs = metadata.getElementIDsInGroupID(group.getMetadataID());
 
-    		LinkedHashMap<Object, ElementSymbol> symbols = new LinkedHashMap<Object, ElementSymbol>(elementIDs.size());
+    		LinkedHashMap<Object, ElementSymbolImpl> symbols = new LinkedHashMap<Object, ElementSymbolImpl>(elementIDs.size());
 
     		TeiidClientParser parser = group.getTeiidParser();
             for (Object elementID : elementIDs) {
@@ -588,7 +588,7 @@ public class ResolverUtil {
             	Class<?> elementTypeClass = DefaultDataTypeManager.getInstance(group.getTeiidVersion()).getDataTypeClass(elementType);
 
                 // Form an element symbol from the ID
-            	ElementSymbol element = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
+            	ElementSymbolImpl element = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
             	element.setShortName(elementName);
             	element.setGroupSymbol(group);
                 element.setMetadataID(elementID);
@@ -618,7 +618,7 @@ public class ResolverUtil {
 		Iterator i = groups.iterator();
 		while (i.hasNext()){
 		    
-		    GroupSymbol group = (GroupSymbol)i.next();
+		    GroupSymbolImpl group = (GroupSymbolImpl)i.next();
 		    
 		    //Check this group for access pattern(s).
 		    Collection accessPatternIDs = metadata.getAccessPatternsInGroup(group.getMetadataID());
@@ -633,7 +633,7 @@ public class ResolverUtil {
 		        	List result = new ArrayList(elements.size());
 		        	for (Iterator iterator = elements.iterator(); iterator.hasNext();) {
 		    			Object id = iterator.next();
-		    			ElementSymbol symbol = groupInfo.getSymbol(id);
+		    			ElementSymbolImpl symbol = groupInfo.getSymbol(id);
 		    			assert symbol != null;
 		    			result.add(symbol);
 		    		}
@@ -649,14 +649,14 @@ public class ResolverUtil {
 		return accessPatterns;
 	}
 
-    public static void resolveLimit(Limit limit) throws Exception {
+    public static void resolveLimit(LimitImpl limit) throws Exception {
         if (limit.getOffset() != null) {
             setDesiredType(limit.getOffset(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), limit);
         }
         setDesiredType(limit.getRowLimit(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), limit);
     }
     
-    public static void resolveImplicitTempGroup(TempMetadataAdapter metadata, GroupSymbol symbol, List symbols) 
+    public static void resolveImplicitTempGroup(TempMetadataAdapter metadata, GroupSymbolImpl symbol, List symbols) 
         throws Exception {
         
         if (symbol.isImplicitTempGroupSymbol()) {
@@ -668,12 +668,12 @@ public class ResolverUtil {
     }
 
     public static TempMetadataID addTempGroup(TempMetadataAdapter metadata,
-                                    GroupSymbol symbol,
-                                    List<? extends Expression> symbols, boolean tempTable) throws Exception {
+                                    GroupSymbolImpl symbol,
+                                    List<? extends BaseExpression> symbols, boolean tempTable) throws Exception {
         Set<String> names = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        for (Expression ses : symbols) {
-            if (!names.add(Symbol.getShortName(ses))) {
-                 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30091, symbol, Symbol.getShortName(ses)));
+        for (BaseExpression ses : symbols) {
+            if (!names.add(SymbolImpl.getShortName(ses))) {
+                 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30091, symbol, SymbolImpl.getShortName(ses)));
             }
         }
         
@@ -685,8 +685,8 @@ public class ResolverUtil {
     }
     
     public static TempMetadataID addTempTable(TempMetadataAdapter metadata,
-                                     GroupSymbol symbol,
-                                     List<? extends Expression> symbols) throws Exception {
+                                     GroupSymbolImpl symbol,
+                                     List<? extends BaseExpression> symbols) throws Exception {
         return addTempGroup(metadata, symbol, symbols, true);
     }
 
@@ -700,28 +700,28 @@ public class ResolverUtil {
      */
     public static void resolveNullLiterals(List symbols) {
         for (int i = 0; i < symbols.size(); i++) {
-            Expression selectSymbol = (Expression) symbols.get(i);
+            BaseExpression selectSymbol = (BaseExpression) symbols.get(i);
             
             setTypeIfNull(selectSymbol, DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
         }
     }
 
-	public static void setTypeIfNull(Expression symbol,
+	public static void setTypeIfNull(BaseExpression symbol,
 			Class<?> replacement) {
 		if(!DefaultDataTypeManager.DefaultDataTypes.NULL.getTypeClass().equals(symbol.getType()) && symbol.getType() != null) {
             return;
         }
 		symbol = SymbolMap.getExpression(symbol);
-	    if(symbol instanceof Constant) {                	
-	    	((Constant)symbol).setType(replacement);
-	    } else if (symbol instanceof CaseExpression) {
-	        ((CaseExpression)symbol).setType(replacement);
-	    } else if (symbol instanceof SearchedCaseExpression) {
-	        ((SearchedCaseExpression)symbol).setType(replacement);
-	    } else if (symbol instanceof ScalarSubquery) {
-	        ((ScalarSubquery)symbol).setType(replacement);                                        
-	    } else if(symbol instanceof ElementSymbol) {
-		    ElementSymbol elementSymbol = (ElementSymbol)symbol;
+	    if(symbol instanceof ConstantImpl) {                	
+	    	((ConstantImpl)symbol).setType(replacement);
+	    } else if (symbol instanceof CaseExpressionImpl) {
+	        ((CaseExpressionImpl)symbol).setType(replacement);
+	    } else if (symbol instanceof SearchedCaseExpressionImpl) {
+	        ((SearchedCaseExpressionImpl)symbol).setType(replacement);
+	    } else if (symbol instanceof ScalarSubqueryImpl) {
+	        ((ScalarSubqueryImpl)symbol).setType(replacement);                                        
+	    } else if(symbol instanceof ElementSymbolImpl) {
+		    ElementSymbolImpl elementSymbol = (ElementSymbolImpl)symbol;
 	        elementSymbol.setType(replacement);
 		} else {
 	    	try {
@@ -740,20 +740,20 @@ public class ResolverUtil {
      * @return the List of groups that match the given groupContext out of the supplied collection
      * @throws Exception
      */
-    public static List<GroupSymbol> findMatchingGroups(String groupContext,
-                            Collection<GroupSymbol> groups,
+    public static List<GroupSymbolImpl> findMatchingGroups(String groupContext,
+                            Collection<GroupSymbolImpl> groups,
                             QueryMetadataInterface metadata) throws Exception {
 
         if (groups == null) {
             return null;
         }
 
-        LinkedList<GroupSymbol> matchedGroups = new LinkedList<GroupSymbol>();
+        LinkedList<GroupSymbolImpl> matchedGroups = new LinkedList<GroupSymbolImpl>();
 
         if (groupContext == null) {
             matchedGroups.addAll(groups);
         } else {
-        	for (GroupSymbol group : groups) {
+        	for (GroupSymbolImpl group : groups) {
                 String fullName = group.getName();
                 if (nameMatchesGroup(groupContext, matchedGroups, group, fullName)) {
                     if (groupContext.length() == fullName.length()) {
@@ -770,7 +770,7 @@ public class ResolverUtil {
                 String actualVdbName = metadata.getVirtualDatabaseName();
 
                 if (actualVdbName != null) {
-                    fullName = actualVdbName + Symbol.SEPARATOR + fullName;
+                    fullName = actualVdbName + SymbolImpl.SEPARATOR + fullName;
                     if (nameMatchesGroup(groupContext, matchedGroups, group, fullName)
                         && groupContext.length() == fullName.length()) {
                         return matchedGroups;
@@ -796,8 +796,8 @@ public class ResolverUtil {
     }
     
     private static boolean nameMatchesGroup(String groupContext,
-                                            LinkedList<GroupSymbol> matchedGroups,
-                                            GroupSymbol group,
+                                            LinkedList<GroupSymbolImpl> matchedGroups,
+                                            GroupSymbolImpl group,
                                             String fullName) {
         if (nameMatchesGroup(groupContext, fullName)) {
             matchedGroups.add(group);
@@ -819,7 +819,7 @@ public class ResolverUtil {
 	 * @throws Exception if a conversion is necessary but none can
 	 * be found
 	 */
-	static Expression resolveSubqueryPredicateCriteria(Expression expression, SubqueryContainer crit, QueryMetadataInterface metadata)
+	static BaseExpression resolveSubqueryPredicateCriteria(BaseExpression expression, BaseSubqueryContainer crit, QueryMetadataInterface metadata)
 		throws Exception {
 	
 		// Check that type of the expression is same as the type of the
@@ -830,13 +830,13 @@ public class ResolverUtil {
 		}
 		String exprTypeName = DefaultDataTypeManager.getInstance(expression.getTeiidVersion()).getDataTypeName(exprType);
 	
-		Collection<Expression> projectedSymbols = crit.getCommand().getProjectedSymbols();
+		Collection<BaseExpression> projectedSymbols = crit.getCommand().getProjectedSymbols();
 		if (projectedSymbols.size() != 1){
 	         throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30093, crit.getCommand()));
 		}
 		Class<?> subqueryType = projectedSymbols.iterator().next().getType();
 		String subqueryTypeName = DefaultDataTypeManager.getInstance(expression.getTeiidVersion()).getDataTypeName(subqueryType);
-		Expression result = null;
+		BaseExpression result = null;
 	    try {
 	        result = convertExpression(expression, exprTypeName, subqueryTypeName, metadata);
 	    } catch (QueryResolverException qre) {
@@ -845,32 +845,32 @@ public class ResolverUtil {
 	    return result;
 	}
 
-	public static ResolvedLookup resolveLookup(Function lookup, QueryMetadataInterface metadata) throws Exception {
-		Expression[] args = lookup.getArgs();
+	public static ResolvedLookup resolveLookup(FunctionImpl lookup, QueryMetadataInterface metadata) throws Exception {
+		BaseExpression[] args = lookup.getArgs();
 		TeiidClientParser parser = lookup.getTeiidParser();
 
 		ResolvedLookup result = new ResolvedLookup();
 	    // Special code to handle setting return type of the lookup function to match the type of the return element
-	    if( !(args[0] instanceof Constant) || !(args[1] instanceof Constant) || !(args[2] instanceof Constant)) {
+	    if( !(args[0] instanceof ConstantImpl) || !(args[1] instanceof ConstantImpl) || !(args[2] instanceof ConstantImpl)) {
 		     throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30095));
 	    }
         // If code table name in lookup function refers to temp group throw exception
-		GroupSymbol groupSym = parser.createASTNode(ASTNodes.GROUP_SYMBOL);
-		groupSym.setName((String) ((Constant)args[0]).getValue());
+		GroupSymbolImpl groupSym = parser.createASTNode(ASTNodes.GROUP_SYMBOL);
+		groupSym.setName((String) ((ConstantImpl)args[0]).getValue());
 		try {
-			groupSym.setMetadataID(metadata.getGroupID((String) ((Constant)args[0]).getValue()));
+			groupSym.setMetadataID(metadata.getGroupID((String) ((ConstantImpl)args[0]).getValue()));
 			if (groupSym.getMetadataID() instanceof TempMetadataID) {
-				 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30096, ((Constant)args[0]).getValue()));
+				 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30096, ((ConstantImpl)args[0]).getValue()));
 			}
 		} catch(QueryResolverException e) {
-			 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30097, ((Constant)args[0]).getValue()));
+			 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30097, ((ConstantImpl)args[0]).getValue()));
 		}
 		result.setGroup(groupSym);
 		
-		List<GroupSymbol> groups = Arrays.asList(groupSym);
+		List<GroupSymbolImpl> groups = Arrays.asList(groupSym);
 		
-		String returnElementName = (String) ((Constant)args[0]).getValue() + "." + (String) ((Constant)args[1]).getValue(); //$NON-NLS-1$
-		ElementSymbol returnElement = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
+		String returnElementName = (String) ((ConstantImpl)args[0]).getValue() + "." + (String) ((ConstantImpl)args[1]).getValue(); //$NON-NLS-1$
+		ElementSymbolImpl returnElement = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
 		returnElement.setName(returnElementName);
 		ResolverVisitorImpl visitor = new ResolverVisitorImpl(parser.getVersion());
         try {
@@ -880,8 +880,8 @@ public class ResolverUtil {
         }
 		result.setReturnElement(returnElement);
         
-        String keyElementName = (String) ((Constant)args[0]).getValue() + "." + (String) ((Constant)args[2]).getValue(); //$NON-NLS-1$
-        ElementSymbol keyElement = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
+        String keyElementName = (String) ((ConstantImpl)args[0]).getValue() + "." + (String) ((ConstantImpl)args[2]).getValue(); //$NON-NLS-1$
+        ElementSymbolImpl keyElement = parser.createASTNode(ASTNodes.ELEMENT_SYMBOL);
         keyElement.setName(keyElementName);
         try {
             visitor.resolveLanguageObject(keyElement, groups, metadata);
@@ -893,14 +893,14 @@ public class ResolverUtil {
 		return result;
 	}
 
-	private static QueryResolverException handleUnresolvedGroup(GroupSymbol symbol, String description) {
+	private static QueryResolverException handleUnresolvedGroup(GroupSymbolImpl symbol, String description) {
 		UnresolvedSymbolDescription usd = new UnresolvedSymbolDescription(symbol.toString(), description);
 		QueryResolverException e = new QueryResolverException(usd.getDescription()+": "+usd.getSymbol()); //$NON-NLS-1$
         e.setUnresolvedSymbols(Arrays.asList(usd));
         return e;
 	}
 
-	public static void resolveGroup(GroupSymbol symbol, QueryMetadataInterface metadata)
+	public static void resolveGroup(GroupSymbolImpl symbol, QueryMetadataInterface metadata)
 	    throws Exception {
 	
 	    if (symbol.getMetadataID() != null){
@@ -998,7 +998,7 @@ public class ResolverUtil {
 		}
 	}
 	
-	public static void findKeyPreserved(Query query, Set<GroupSymbol> keyPreservingGroups, QueryMetadataInterface metadata)
+	public static void findKeyPreserved(QueryImpl query, Set<GroupSymbolImpl> keyPreservingGroups, QueryMetadataInterface metadata)
 	throws Exception {
 		if (query.getFrom() == null) {
 			return;
@@ -1008,25 +1008,25 @@ public class ResolverUtil {
 			return;
 		}
 		//non-ansi join
-		Set<GroupSymbol> groups = new HashSet<GroupSymbol>(query.getFrom().getGroups());
-		for (GroupSymbol groupSymbol : groups) {
+		Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>(query.getFrom().getGroups());
+		for (GroupSymbolImpl groupSymbol : groups) {
 			if (metadata.getUniqueKeysInGroup(groupSymbol.getMetadataID()).isEmpty()) {
 				return;
 			}
 		}
-		LinkedList<Expression> leftExpressions = new LinkedList<Expression>();
-		LinkedList<Expression> rightExpressions = new LinkedList<Expression>();
-		for (Criteria crit : Criteria.separateCriteriaByAnd(query.getCriteria())) {
-			if (!(crit instanceof CompareCriteria)) {
+		LinkedList<BaseExpression> leftExpressions = new LinkedList<BaseExpression>();
+		LinkedList<BaseExpression> rightExpressions = new LinkedList<BaseExpression>();
+		for (CriteriaImpl crit : CriteriaImpl.separateCriteriaByAnd(query.getCriteria())) {
+			if (!(crit instanceof CompareCriteriaImpl)) {
 				continue;
 			}
-			CompareCriteria cc = (CompareCriteria)crit;
-			if (cc.getOperator() != CompareCriteria.EQ) {
+			CompareCriteriaImpl cc = (CompareCriteriaImpl)crit;
+			if (cc.getOperator() != CompareCriteriaImpl.EQ) {
 				continue;
 			}
-			if (cc.getLeftExpression() instanceof ElementSymbol && cc.getRightExpression() instanceof ElementSymbol) {
-				ElementSymbol left = (ElementSymbol)cc.getLeftExpression();
-				ElementSymbol right = (ElementSymbol)cc.getRightExpression();
+			if (cc.getLeftExpression() instanceof ElementSymbolImpl && cc.getRightExpression() instanceof ElementSymbolImpl) {
+				ElementSymbolImpl left = (ElementSymbolImpl)cc.getLeftExpression();
+				ElementSymbolImpl right = (ElementSymbolImpl)cc.getRightExpression();
 				int compare = left.getGroupSymbol().compareTo(right.getGroupSymbol());
 				if (compare > 0) {
 					leftExpressions.add(left);
@@ -1037,15 +1037,15 @@ public class ResolverUtil {
 				}
 			}
 		}
-		HashMap<List<GroupSymbol>, List<HashSet<Object>>> crits = createGroupMap(leftExpressions, rightExpressions);
-		HashSet<GroupSymbol> tempSet = new HashSet<GroupSymbol>();
-		HashSet<GroupSymbol> nonKeyPreserved = new HashSet<GroupSymbol>();
-		for (GroupSymbol group : groups) {
-			LinkedHashSet<GroupSymbol> visited = new LinkedHashSet<GroupSymbol>();
-			LinkedList<GroupSymbol> toVisit = new LinkedList<GroupSymbol>();
+		HashMap<List<GroupSymbolImpl>, List<HashSet<Object>>> crits = createGroupMap(leftExpressions, rightExpressions);
+		HashSet<GroupSymbolImpl> tempSet = new HashSet<GroupSymbolImpl>();
+		HashSet<GroupSymbolImpl> nonKeyPreserved = new HashSet<GroupSymbolImpl>();
+		for (GroupSymbolImpl group : groups) {
+			LinkedHashSet<GroupSymbolImpl> visited = new LinkedHashSet<GroupSymbolImpl>();
+			LinkedList<GroupSymbolImpl> toVisit = new LinkedList<GroupSymbolImpl>();
 			toVisit.add(group);
 			while (!toVisit.isEmpty()) {
-				GroupSymbol visiting = toVisit.removeLast();
+				GroupSymbolImpl visiting = toVisit.removeLast();
 				if (!visited.add(visiting) || nonKeyPreserved.contains(visiting)) {
 					continue;
 				}
@@ -1074,31 +1074,31 @@ public class ResolverUtil {
 	 * @param crits
 	 * @param nonEquiJoinCriteria
 	 */
-    private static void separateCriteria(Collection<GroupSymbol> leftGroups, Collection<GroupSymbol> rightGroups, List<Expression> leftExpressions, List<Expression> rightExpressions, List<Criteria> crits, List<Criteria> nonEquiJoinCriteria) {
-        for (Criteria theCrit : crits) {
-            Set<GroupSymbol> critGroups = GroupsUsedByElementsVisitorImpl.getGroups(theCrit);
+    private static void separateCriteria(Collection<GroupSymbolImpl> leftGroups, Collection<GroupSymbolImpl> rightGroups, List<BaseExpression> leftExpressions, List<BaseExpression> rightExpressions, List<CriteriaImpl> crits, List<CriteriaImpl> nonEquiJoinCriteria) {
+        for (CriteriaImpl theCrit : crits) {
+            Set<GroupSymbolImpl> critGroups = GroupsUsedByElementsVisitorImpl.getGroups(theCrit);
 
             if (leftGroups.containsAll(critGroups) || rightGroups.containsAll(critGroups)) {
                 nonEquiJoinCriteria.add(theCrit);
                 continue;
             }
 
-            if (!(theCrit instanceof CompareCriteria)) {
+            if (!(theCrit instanceof CompareCriteriaImpl)) {
                 nonEquiJoinCriteria.add(theCrit);
                 continue;
             }
 
-            CompareCriteria crit = (CompareCriteria)theCrit;
-            if (crit.getOperator() != CompareCriteria.EQ) {
+            CompareCriteriaImpl crit = (CompareCriteriaImpl)theCrit;
+            if (crit.getOperator() != CompareCriteriaImpl.EQ) {
                 nonEquiJoinCriteria.add(theCrit);
                 continue;
             }
 
-            Expression leftExpr = crit.getLeftExpression();
-            Expression rightExpr = crit.getRightExpression();
+            BaseExpression leftExpr = crit.getLeftExpression();
+            BaseExpression rightExpr = crit.getRightExpression();
 
-            Set<GroupSymbol> leftExprGroups = GroupsUsedByElementsVisitorImpl.getGroups(leftExpr);
-            Set<GroupSymbol> rightExprGroups = GroupsUsedByElementsVisitorImpl.getGroups(rightExpr);
+            Set<GroupSymbolImpl> leftExprGroups = GroupsUsedByElementsVisitorImpl.getGroups(leftExpr);
+            Set<GroupSymbolImpl> rightExprGroups = GroupsUsedByElementsVisitorImpl.getGroups(rightExpr);
 
             if (leftGroups.isEmpty() || rightGroups.isEmpty()) {
                 nonEquiJoinCriteria.add(theCrit);
@@ -1114,40 +1114,40 @@ public class ResolverUtil {
         }
     }
 	
-	public static void findKeyPreserved(FromClause clause, Set<GroupSymbol> keyPreservingGroups, QueryMetadataInterface metadata)
+	public static void findKeyPreserved(FromClauseImpl clause, Set<GroupSymbolImpl> keyPreservingGroups, QueryMetadataInterface metadata)
 	throws Exception {
-		if (clause instanceof UnaryFromClause) {
-			UnaryFromClause ufc = (UnaryFromClause)clause;
+		if (clause instanceof UnaryFromClauseImpl) {
+			UnaryFromClauseImpl ufc = (UnaryFromClauseImpl)clause;
 		    
 			if (!metadata.getUniqueKeysInGroup(ufc.getGroup().getMetadataID()).isEmpty()) {
 				keyPreservingGroups.add(ufc.getGroup());
 			}
 		} 
-		if (clause instanceof JoinPredicate) {
-			JoinPredicate jp = (JoinPredicate)clause;
-			JoinType joinType = jp.getJoinType();
+		if (clause instanceof JoinPredicateImpl) {
+			JoinPredicateImpl jp = (JoinPredicateImpl)clause;
+			JoinTypeImpl joinType = jp.getJoinType();
 			if (joinType.getKind().equals(Types.JOIN_CROSS) || joinType.getKind().equals(Types.JOIN_FULL_OUTER)) {
 				return;
 			}
-			HashSet<GroupSymbol> leftPk = new HashSet<GroupSymbol>();
+			HashSet<GroupSymbolImpl> leftPk = new HashSet<GroupSymbolImpl>();
 			findKeyPreserved(jp.getLeftClause(), leftPk, metadata);
-			HashSet<GroupSymbol> rightPk = new HashSet<GroupSymbol>();
+			HashSet<GroupSymbolImpl> rightPk = new HashSet<GroupSymbolImpl>();
 			findKeyPreserved(jp.getRightClause(), rightPk, metadata);
 			
 			if (leftPk.isEmpty() && rightPk.isEmpty()) {
 				return;
 			}
 			
-			HashSet<GroupSymbol> leftGroups = new HashSet<GroupSymbol>();
-			HashSet<GroupSymbol> rightGroups = new HashSet<GroupSymbol>();
+			HashSet<GroupSymbolImpl> leftGroups = new HashSet<GroupSymbolImpl>();
+			HashSet<GroupSymbolImpl> rightGroups = new HashSet<GroupSymbolImpl>();
 			jp.getLeftClause().collectGroups(leftGroups);
 			jp.getRightClause().collectGroups(rightGroups);
 			
-			LinkedList<Expression> leftExpressions = new LinkedList<Expression>();
-			LinkedList<Expression> rightExpressions = new LinkedList<Expression>();
-			separateCriteria(leftGroups, rightGroups, leftExpressions, rightExpressions, jp.getJoinCriteria(), new LinkedList<Criteria>());
+			LinkedList<BaseExpression> leftExpressions = new LinkedList<BaseExpression>();
+			LinkedList<BaseExpression> rightExpressions = new LinkedList<BaseExpression>();
+			separateCriteria(leftGroups, rightGroups, leftExpressions, rightExpressions, jp.getJoinCriteria(), new LinkedList<CriteriaImpl>());
 		    
-			HashMap<List<GroupSymbol>, List<HashSet<Object>>> crits = createGroupMap(leftExpressions, rightExpressions);
+			HashMap<List<GroupSymbolImpl>, List<HashSet<Object>>> crits = createGroupMap(leftExpressions, rightExpressions);
 			if (!leftPk.isEmpty() && (joinType.getKind().equals(Types.JOIN_INNER) || joinType.getKind().equals(Types.JOIN_LEFT_OUTER))) {
 				findKeyPreserved(keyPreservingGroups, leftPk, crits, true, metadata, rightPk);
 			} 
@@ -1157,20 +1157,20 @@ public class ResolverUtil {
 		}
 	}
 
-	private static HashMap<List<GroupSymbol>, List<HashSet<Object>>> createGroupMap(
-			LinkedList<Expression> leftExpressions,
-			LinkedList<Expression> rightExpressions) {
-		HashMap<List<GroupSymbol>, List<HashSet<Object>>> crits = new HashMap<List<GroupSymbol>, List<HashSet<Object>>>();
+	private static HashMap<List<GroupSymbolImpl>, List<HashSet<Object>>> createGroupMap(
+			LinkedList<BaseExpression> leftExpressions,
+			LinkedList<BaseExpression> rightExpressions) {
+		HashMap<List<GroupSymbolImpl>, List<HashSet<Object>>> crits = new HashMap<List<GroupSymbolImpl>, List<HashSet<Object>>>();
 		
 		for (int i = 0; i < leftExpressions.size(); i++) {
-			Expression lexpr = leftExpressions.get(i);
-			Expression rexpr = rightExpressions.get(i);
-			if (!(lexpr instanceof ElementSymbol) || !(rexpr instanceof ElementSymbol)) {
+			BaseExpression lexpr = leftExpressions.get(i);
+			BaseExpression rexpr = rightExpressions.get(i);
+			if (!(lexpr instanceof ElementSymbolImpl) || !(rexpr instanceof ElementSymbolImpl)) {
 				continue;
 			}
-			ElementSymbol les = (ElementSymbol)lexpr;
-			ElementSymbol res = (ElementSymbol)rexpr;
-			List<GroupSymbol> tbls = Arrays.asList(les.getGroupSymbol(), res.getGroupSymbol());
+			ElementSymbolImpl les = (ElementSymbolImpl)lexpr;
+			ElementSymbolImpl res = (ElementSymbolImpl)rexpr;
+			List<GroupSymbolImpl> tbls = Arrays.asList(les.getGroupSymbol(), res.getGroupSymbol());
 			List<HashSet<Object>> ids = crits.get(tbls);
 			if (ids == null) {
 				ids = Arrays.asList(new HashSet<Object>(), new HashSet<Object>());
@@ -1185,7 +1185,7 @@ public class ResolverUtil {
 	/**
 	 * Taken from RuleRaiseAccess
 	 */
-    private static boolean matchesForeignKey(QueryMetadataInterface metadata, Collection<Object> leftIds, Collection<Object> rightIds, GroupSymbol leftGroup, boolean exact)
+    private static boolean matchesForeignKey(QueryMetadataInterface metadata, Collection<Object> leftIds, Collection<Object> rightIds, GroupSymbolImpl leftGroup, boolean exact)
         throws Exception {
         Collection fks = metadata.getForeignKeysInGroup(leftGroup.getMetadataID());
         for (Object fk : fks) {
@@ -1206,13 +1206,13 @@ public class ResolverUtil {
         return false;
     }
 
-	static private HashSet<GroupSymbol> findKeyPreserved(Set<GroupSymbol> keyPreservingGroups,
-		Set<GroupSymbol> pk,
-		HashMap<List<GroupSymbol>, List<HashSet<Object>>> crits, boolean left, QueryMetadataInterface metadata, Set<GroupSymbol> otherGroups)
+	static private HashSet<GroupSymbolImpl> findKeyPreserved(Set<GroupSymbolImpl> keyPreservingGroups,
+		Set<GroupSymbolImpl> pk,
+		HashMap<List<GroupSymbolImpl>, List<HashSet<Object>>> crits, boolean left, QueryMetadataInterface metadata, Set<GroupSymbolImpl> otherGroups)
 		throws Exception {
-		HashSet<GroupSymbol> result = new HashSet<GroupSymbol>();
-		for (GroupSymbol gs : pk) {
-			for (Map.Entry<List<GroupSymbol>, List<HashSet<Object>>> entry : crits.entrySet()) {
+		HashSet<GroupSymbolImpl> result = new HashSet<GroupSymbolImpl>();
+		for (GroupSymbolImpl gs : pk) {
+			for (Map.Entry<List<GroupSymbolImpl>, List<HashSet<Object>>> entry : crits.entrySet()) {
 				if (!entry.getKey().get(left?0:1).equals(gs) || !otherGroups.contains(entry.getKey().get(left?1:0))) {
 					continue;
 				}
@@ -1229,9 +1229,9 @@ public class ResolverUtil {
 	 * This method will convert all elements in a command to their fully qualified name.
 	 * @param command Command to convert
 	 */
-	public static void fullyQualifyElements(Command command) {
-	    Collection<ElementSymbol> elements = ElementCollectorVisitorImpl.getElements(command, false, true);
-	    for (ElementSymbol element : elements) {
+	public static void fullyQualifyElements(CommandImpl command) {
+	    Collection<ElementSymbolImpl> elements = ElementCollectorVisitorImpl.getElements(command, false, true);
+	    for (ElementSymbolImpl element : elements) {
 	        element.setDisplayFullyQualified(true);
 	    }
 	}

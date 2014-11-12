@@ -25,14 +25,14 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.sql.lang.Query;
-import org.komodo.modeshape.teiid.sql.lang.Select;
-import org.komodo.modeshape.teiid.sql.symbol.AggregateSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
-import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.WindowFunction;
-import org.komodo.modeshape.teiid.sql.symbol.WindowSpecification;
+import org.komodo.modeshape.teiid.sql.lang.QueryImpl;
+import org.komodo.modeshape.teiid.sql.lang.SelectImpl;
+import org.komodo.modeshape.teiid.sql.symbol.AggregateSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.ElementSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
+import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.WindowFunctionImpl;
+import org.komodo.modeshape.teiid.sql.symbol.WindowSpecificationImpl;
 import org.komodo.modeshape.teiid.sql.v85.TestQuery85Parser;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -58,22 +58,22 @@ public class TestQuery86Parser extends TestQuery85Parser {
         String expectedSql = "SELECT foo(ALL x, y) OVER ()";
 
         try {
-            ElementSymbol x = getFactory().newElementSymbol("x");
-            ElementSymbol y = getFactory().newElementSymbol("y");
-            AggregateSymbol aggSym = getFactory().newAggregateSymbol("foo", false, null);
-            aggSym.setArgs(new Expression[] {x, y});
-            WindowSpecification ws = getFactory().newWindowSpecification();
+            ElementSymbolImpl x = getFactory().newElementSymbol("x");
+            ElementSymbolImpl y = getFactory().newElementSymbol("y");
+            AggregateSymbolImpl aggSym = getFactory().newAggregateSymbol("foo", false, null);
+            aggSym.setArgs(new BaseExpression[] {x, y});
+            WindowSpecificationImpl ws = getFactory().newWindowSpecification();
 
-            WindowFunction wf = getFactory().newWindowFunction("");
+            WindowFunctionImpl wf = getFactory().newWindowFunction("");
             wf.setFunction(aggSym);
             wf.setWindowSpecification(ws);
 
-            ExpressionSymbol es = getFactory().newNode(ASTNodes.EXPRESSION_SYMBOL);
+            ExpressionSymbolImpl es = getFactory().newNode(ASTNodes.EXPRESSION_SYMBOL);
             es.setName("expr1");
             es.setExpression(wf);
 
-            Select select = getFactory().newSelect(Arrays.asList(es));
-            Query query = getFactory().newQuery(select, null);
+            SelectImpl select = getFactory().newSelect(Arrays.asList(es));
+            QueryImpl query = getFactory().newQuery(select, null);
 
             helpTest(sql, expectedSql, query);
         } catch (Exception ex) {

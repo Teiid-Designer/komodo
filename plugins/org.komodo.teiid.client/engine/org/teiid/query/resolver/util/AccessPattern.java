@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 
 
 /**
@@ -38,40 +38,40 @@ import org.teiid.query.sql.symbol.ElementSymbol;
  */
 public class AccessPattern implements Comparable<AccessPattern>, Cloneable {
     
-    private Set<ElementSymbol> unsatisfied = new HashSet<ElementSymbol>();
-    private LinkedList<Collection<ElementSymbol>> history = new LinkedList<Collection<ElementSymbol>>();
+    private Set<ElementSymbolImpl> unsatisfied = new HashSet<ElementSymbolImpl>();
+    private LinkedList<Collection<ElementSymbolImpl>> history = new LinkedList<Collection<ElementSymbolImpl>>();
     
-    public AccessPattern(Collection<ElementSymbol> elements) {
+    public AccessPattern(Collection<ElementSymbolImpl> elements) {
         unsatisfied.addAll(elements);
         history.add(elements);
     }
     
-    public Collection<ElementSymbol> getCurrentElements() {
+    public Collection<ElementSymbolImpl> getCurrentElements() {
         return history.getFirst();
     }
     
-    public void addElementHistory(Collection<ElementSymbol> elements) {
+    public void addElementHistory(Collection<ElementSymbolImpl> elements) {
         this.history.addFirst(elements);
     }
 
     /** 
      * @return Returns the history.
      */
-    public LinkedList<Collection<ElementSymbol>> getHistory() {
+    public LinkedList<Collection<ElementSymbolImpl>> getHistory() {
         return this.history;
     }
         
     /** 
      * @return Returns the unsatisfied.
      */
-    public Set<ElementSymbol> getUnsatisfied() {
+    public Set<ElementSymbolImpl> getUnsatisfied() {
         return this.unsatisfied;
     }
     
     /** 
      * @param unstaisfied The unsatisfied to set.
      */
-    public void setUnsatisfied(Set<ElementSymbol> unstaisfied) {
+    public void setUnsatisfied(Set<ElementSymbolImpl> unstaisfied) {
         this.unsatisfied = unstaisfied;
     }
     

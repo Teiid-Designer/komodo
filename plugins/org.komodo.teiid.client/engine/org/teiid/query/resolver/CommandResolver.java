@@ -27,8 +27,8 @@ import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 
 
 /**
@@ -60,7 +60,7 @@ public abstract class CommandResolver {
         return this.queryResolver.getQueryParser().getTeiidParser();
     }
 
-    protected <T extends LanguageObject> T create(ASTNodes type) {
+    protected <T extends BaseLanguageObject> T create(ASTNodes type) {
         return getTeiidParser().createASTNode(type);
     }
 
@@ -81,7 +81,7 @@ public abstract class CommandResolver {
      * @throws Exception If the query cannot be resolved
      * @throws Exception If there is an internal error     
      */        
-    public abstract void resolveCommand(Command command, TempMetadataAdapter metadata, boolean resolveNullLiterals)
+    public abstract void resolveCommand(CommandImpl command, TempMetadataAdapter metadata, boolean resolveNullLiterals)
     throws Exception;
     
 }

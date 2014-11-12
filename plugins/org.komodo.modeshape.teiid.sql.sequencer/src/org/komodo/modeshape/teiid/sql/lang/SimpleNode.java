@@ -126,7 +126,7 @@ public abstract class SimpleNode implements Node {
         return value;
     }
 
-    protected <T extends LanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
+    protected <T extends BaseLanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
         if (collection == null)
             throw new UnsupportedOperationException();
 
@@ -138,7 +138,7 @@ public abstract class SimpleNode implements Node {
         return cloned;
     }
 
-    protected <T extends LanguageObject> List<T> cloneList(List<T> list) {
+    protected <T extends BaseLanguageObject> List<T> cloneList(List<T> list) {
         if (list == null)
             throw new UnsupportedOperationException();
 

@@ -23,14 +23,14 @@ package org.komodo.spi.validator;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.query.sql.symbol.IElementSymbol;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.query.sql.symbol.ElementSymbol;
 import org.komodo.spi.validator.Validator.IValidatorReport;
 
 /**
  *
  */
-public interface UpdateValidator<C extends ICommand, ES extends IElementSymbol> {
+public interface UpdateValidator<C extends Command, ES extends ElementSymbol> {
 
     /**
      * Update type enumerator

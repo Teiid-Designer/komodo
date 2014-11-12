@@ -23,9 +23,9 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
-import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
+import org.komodo.modeshape.teiid.sql.symbol.GroupSymbolImpl;
 
-public abstract class ProcedureContainer extends Command {
+public abstract class ProcedureContainer extends CommandImpl {
 
     /**
      * @param p teiid parser
@@ -38,6 +38,6 @@ public abstract class ProcedureContainer extends Command {
     /**
      * @return group
      */
-    public abstract GroupSymbol getGroup();
+    public abstract GroupSymbolImpl getGroup();
 
 }

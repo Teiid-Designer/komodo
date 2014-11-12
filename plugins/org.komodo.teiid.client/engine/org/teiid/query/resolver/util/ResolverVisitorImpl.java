@@ -36,7 +36,7 @@ import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.ResolverVisitor;
-import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
+import org.komodo.spi.query.sql.symbol.ElementSymbol.DisplayMode;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.udf.FunctionLibrary;
@@ -53,40 +53,40 @@ import org.teiid.query.metadata.GroupInfo;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.sql.lang.BetweenCriteria;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.ExpressionCriteria;
-import org.teiid.query.sql.lang.GroupContext;
-import org.teiid.query.sql.lang.IsNullCriteria;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.MatchCriteria;
-import org.teiid.query.sql.lang.SetClause;
-import org.teiid.query.sql.lang.SetCriteria;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
+import org.teiid.query.sql.lang.BetweenCriteriaImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.ExpressionCriteriaImpl;
+import org.teiid.query.sql.lang.GroupContextImpl;
+import org.teiid.query.sql.lang.IsNullCriteriaImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.MatchCriteriaImpl;
+import org.teiid.query.sql.lang.SetClauseImpl;
+import org.teiid.query.sql.lang.SetCriteriaImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
 import org.teiid.query.sql.navigator.PostOrderNavigator;
-import org.teiid.query.sql.proc.ExceptionExpression;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.Array;
-import org.teiid.query.sql.symbol.CaseExpression;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.DerivedColumn;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.QueryString;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.SearchedCaseExpression;
-import org.teiid.query.sql.symbol.XMLQuery;
-import org.teiid.query.sql.symbol.XMLSerialize;
-import org.teiid.query.sql.symbol.v7.Aggregate7Symbol;
+import org.teiid.query.sql.proc.ExceptionExpressionImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.ArraySymbolImpl;
+import org.teiid.query.sql.symbol.CaseExpressionImpl;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.DerivedColumnImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.QueryStringImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.SearchedCaseExpressionImpl;
+import org.teiid.query.sql.symbol.XMLQueryImpl;
+import org.teiid.query.sql.symbol.XMLSerializeImpl;
+import org.teiid.query.sql.symbol.v7.Aggregate7SymbolImpl;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
 
 public class ResolverVisitorImpl extends TCLanguageVisitorImpl
-    implements ResolverVisitor<LanguageObject, GroupSymbol> {
+    implements ResolverVisitor<BaseLanguageObject, GroupSymbolImpl> {
     
     public static final String TEIID_PASS_THROUGH_TYPE = "teiid:pass-through-type"; //$NON-NLS-1$
 
@@ -100,15 +100,15 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     	}
     };
 
-    private Collection<GroupSymbol> groups;
-    private GroupContext externalContext;
+    private Collection<GroupSymbolImpl> groups;
+    private GroupContextImpl externalContext;
     protected QueryMetadataInterface metadata;
     private Exception componentException;
     private Exception resolverException;
-    private Map<Function, Exception> unresolvedFunctions;
+    private Map<FunctionImpl, Exception> unresolvedFunctions;
     private boolean findShortName;
-    private List<ElementSymbol> matches = new ArrayList<ElementSymbol>(2);
-    private List<GroupSymbol> groupMatches = new ArrayList<GroupSymbol>(2);
+    private List<ElementSymbolImpl> matches = new ArrayList<ElementSymbolImpl>(2);
+    private List<GroupSymbolImpl> groupMatches = new ArrayList<GroupSymbolImpl>(2);
 	@Since(Version.TEIID_8_6)
     private boolean hasUserDefinedAggregate;
     
@@ -130,7 +130,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
      * @param groups
      * @param externalContext
      */
-    public ResolverVisitorImpl(TeiidVersion teiidVersion, QueryMetadataInterface metadata, Collection<GroupSymbol> internalGroups, GroupContext externalContext) {
+    public ResolverVisitorImpl(TeiidVersion teiidVersion, QueryMetadataInterface metadata, Collection<GroupSymbolImpl> internalGroups, GroupContextImpl externalContext) {
         this(teiidVersion);
 		this.groups = internalGroups;
         this.externalContext = externalContext;
@@ -148,12 +148,12 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	/**
 	 * @param groups
 	 */
-	public void setGroups(Collection<GroupSymbol> groups) {
+	public void setGroups(Collection<GroupSymbolImpl> groups) {
 		this.groups = groups;
 	}
 
     @Override
-    public void visit(ElementSymbol obj) {
+    public void visit(ElementSymbolImpl obj) {
         try {
             resolveElementSymbol(obj);
         } catch(Exception e) {
@@ -161,14 +161,14 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    private QueryResolverException handleUnresolvedElement(ElementSymbol symbol, String description) {
+    private QueryResolverException handleUnresolvedElement(ElementSymbolImpl symbol, String description) {
     	UnresolvedSymbolDescription usd = new UnresolvedSymbolDescription(symbol.toString(), description);
     	QueryResolverException e = new QueryResolverException(usd.getDescription());
         e.setUnresolvedSymbols(Arrays.asList(usd));
         return e;
     }
 
-    private void resolveElementSymbol(ElementSymbol elementSymbol)
+    private void resolveElementSymbol(ElementSymbolImpl elementSymbol)
         throws Exception {
 
         // already resolved
@@ -197,17 +197,17 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
         internalResolveElementSymbol(elementSymbol, groupContext, elementShortName, null);
    }
 
-	private boolean internalResolveElementSymbol(ElementSymbol elementSymbol,
+	private boolean internalResolveElementSymbol(ElementSymbolImpl elementSymbol,
 			String groupContext, String shortCanonicalName, String expectedGroupContext)
 			throws Exception {
 		boolean isExternal = false;
         boolean groupMatched = false;
         
-        GroupContext root = null;
+        GroupContextImpl root = null;
         
         if (groups != null || externalContext != null) {
             if (groups != null) {
-                root = new GroupContext(externalContext, groups);
+                root = new GroupContextImpl(externalContext, groups);
             }
             if (root == null) {
                 isExternal = true;
@@ -215,19 +215,19 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
             }
         } else {
             try {
-                LinkedList<GroupSymbol> matchedGroups = new LinkedList<GroupSymbol>();
+                LinkedList<GroupSymbolImpl> matchedGroups = new LinkedList<GroupSymbolImpl>();
                 
                 if (groupContext != null) {
                     //assume that this is fully qualified
                     Object groupID = this.metadata.getGroupID(groupContext);
                     // No groups specified, so any group is valid
-                    GroupSymbol groupSymbol = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
+                    GroupSymbolImpl groupSymbol = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
                     groupSymbol.setName(groupContext);
                     groupSymbol.setMetadataID(groupID);
                     matchedGroups.add(groupSymbol);
                 }
                 
-                root = new GroupContext(null, matchedGroups);
+                root = new GroupContextImpl(null, matchedGroups);
             } catch(Exception e) {
                 // ignore 
             }
@@ -236,7 +236,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
         matches.clear();
         groupMatches.clear();
         while (root != null) {
-            Collection<GroupSymbol> matchedGroups = ResolverUtil.findMatchingGroups(groupContext, root.getGroups(), metadata);
+            Collection<GroupSymbolImpl> matchedGroups = ResolverUtil.findMatchingGroups(groupContext, root.getGroups(), metadata);
             if (matchedGroups != null && !matchedGroups.isEmpty()) {
                 groupMatched = true;
                     
@@ -262,8 +262,8 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
             throw handleUnresolvedElement(elementSymbol, Messages.gs(Messages.TEIID.TEIID31119, elementSymbol)); 
         }
         //copy the match information
-        ElementSymbol resolvedSymbol = matches.get(0);
-        GroupSymbol resolvedGroup = groupMatches.get(0);
+        ElementSymbolImpl resolvedSymbol = matches.get(0);
+        GroupSymbolImpl resolvedGroup = groupMatches.get(0);
         String oldName = elementSymbol.getOutputName();
         if (expectedGroupContext != null && !ResolverUtil.nameMatchesGroup(expectedGroupContext, resolvedGroup.getName())) {
         	return false;
@@ -280,11 +280,11 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	}
     
     private void resolveAgainstGroups(String elementShortName,
-                                      Collection<GroupSymbol> matchedGroups) throws Exception {
-    	for (GroupSymbol group : matchedGroups) {
+                                      Collection<GroupSymbolImpl> matchedGroups) throws Exception {
+    	for (GroupSymbolImpl group : matchedGroups) {
             GroupInfo groupInfo = ResolverUtil.getGroupInfo(group, metadata);
             
-            ElementSymbol result = groupInfo.getSymbol(elementShortName);
+            ElementSymbolImpl result = groupInfo.getSymbol(elementShortName);
             if (result != null) {
             	matches.add(result);
             	groupMatches.add(group);
@@ -293,7 +293,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
         
     @Override
-    public void visit(BetweenCriteria obj) {
+    public void visit(BetweenCriteriaImpl obj) {
         try {
             resolveBetweenCriteria(obj);
         } catch(Exception e) {
@@ -302,7 +302,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(CompareCriteria obj) {
+    public void visit(CompareCriteriaImpl obj) {
         try {
             resolveCompareCriteria(obj);
         } catch(Exception e) {
@@ -311,7 +311,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(MatchCriteria obj) {
+    public void visit(MatchCriteriaImpl obj) {
         try {
             resolveMatchCriteria(obj);
         } catch(Exception e) {
@@ -320,7 +320,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SetCriteria obj) {
+    public void visit(SetCriteriaImpl obj) {
         try {
             resolveSetCriteria(obj);
         } catch(Exception e) {
@@ -329,7 +329,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SubqueryCompareCriteria obj) {
+    public void visit(SubqueryCompareCriteriaImpl obj) {
         try {
             obj.setLeftExpression(ResolverUtil.resolveSubqueryPredicateCriteria(obj.getLeftExpression(), obj, metadata));
         } catch(Exception e) {
@@ -338,7 +338,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteriaImpl obj) {
         try {
             obj.setExpression(ResolverUtil.resolveSubqueryPredicateCriteria(obj.getExpression(), obj, metadata));
         } catch(Exception e) {
@@ -347,7 +347,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(IsNullCriteria obj) {
+    public void visit(IsNullCriteriaImpl obj) {
         try {
         	setDesiredType(obj.getExpression(), DefaultDataTypes.OBJECT.getTypeClass(), obj);
         } catch(Exception e) {
@@ -356,7 +356,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public void visit(Function obj) {
+    public void visit(FunctionImpl obj) {
         try {
             resolveFunction(obj, (DefaultFunctionLibrary) this.metadata.getFunctionLibrary());
 			if (obj.isAggregate() && isTeiidVersionOrGreater(Version.TEIID_8_6)) {
@@ -366,7 +366,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
             String msg = e.getMessage();
         	if (msg != null && (msg.contains(Messages.TEIID.TEIID30069.name()) || msg.contains(Messages.TEIID.TEIID30067.name()))) {
 	        	if (unresolvedFunctions == null) {
-	        		unresolvedFunctions = new LinkedHashMap<Function, Exception>();
+	        		unresolvedFunctions = new LinkedHashMap<FunctionImpl, Exception>();
 	        	}
 	        	unresolvedFunctions.put(obj, e);
         	} else {
@@ -376,12 +376,12 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public void visit(Array array) {
+    public void visit(ArraySymbolImpl array) {
     	try {
 	    	if (array.getComponentType() != null) {
 	    		String type = getDataTypeManager().getDataTypeName(array.getComponentType());
 	    		for (int i = 0; i < array.getExpressions().size(); i++) {
-	    			Expression expr = array.getExpressions().get(i);
+	    			BaseExpression expr = array.getExpressions().get(i);
 	    			setDesiredType(expr, array.getComponentType(), array);
 	    			if (array.getComponentType() != DefaultDataTypes.OBJECT.getTypeClass()) {
 	    				array.getExpressions().set(i, ResolverUtil.convertExpression(expr, type, metadata));
@@ -390,7 +390,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    	} else {
 	    	    Class<?> type = null;
                 for (int i = 0; i < array.getExpressions().size(); i++) {
-                    Expression expr = array.getExpressions().get(i);
+                    BaseExpression expr = array.getExpressions().get(i);
                     if (type == null) {
                         type = expr.getType();
                     } else if (type != expr.getType()) {
@@ -408,7 +408,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(CaseExpression obj) {
+    public void visit(CaseExpressionImpl obj) {
         try {
             resolveCaseExpression(obj);
         } catch(Exception e) {
@@ -417,7 +417,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public void visit(SearchedCaseExpression obj) {
+    public void visit(SearchedCaseExpressionImpl obj) {
         try {
             resolveSearchedCaseExpression(obj);
         } catch(Exception e) {
@@ -426,7 +426,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public void visit(SetClause obj) {
+    public void visit(SetClauseImpl obj) {
     	String type = getDataTypeManager().getDataTypeName(obj.getSymbol().getType());
     	try {
     		setDesiredType(obj.getValue(), obj.getSymbol().getType(), obj);
@@ -437,7 +437,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public void visit(XMLSerialize obj) {
+    public void visit(XMLSerializeImpl obj) {
     	try {
 			obj.setExpression(ResolverUtil.convertExpression(obj.getExpression(), DefaultDataTypes.XML.getId(), metadata));
 		} catch (Exception e) {
@@ -446,7 +446,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public void visit(XMLQuery obj) {
+    public void visit(XMLQueryImpl obj) {
     	try {
 	    	ResolverUtil.setDesiredType(obj.getPassing(), obj);
 			obj.compileXqueryExpression();
@@ -456,10 +456,10 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public void visit(QueryString obj) {
+    public void visit(QueryStringImpl obj) {
     	try {
 			obj.setPath(ResolverUtil.convertExpression(obj.getPath(), DefaultDataTypes.STRING.getId(), metadata));
-			for (DerivedColumn col : obj.getArgs()) {
+			for (DerivedColumnImpl col : obj.getArgs()) {
 				col.setExpression(ResolverUtil.convertExpression(col.getExpression(), DefaultDataTypes.STRING.getId(), metadata));
 			}
 		} catch (Exception e) {
@@ -468,7 +468,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public void visit(ExpressionCriteria obj) {
+    public void visit(ExpressionCriteriaImpl obj) {
 		try {
 			obj.setExpression(ResolverUtil.convertExpression(obj.getExpression(), DefaultDataTypes.BOOLEAN.getId(), metadata));
 		} catch (Exception e) {
@@ -477,7 +477,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public void visit(ExceptionExpression obj) {
+    public void visit(ExceptionExpressionImpl obj) {
     	try {
     		if (obj.getErrorCode() != null) {
     			obj.setErrorCode(ResolverUtil.convertExpression(obj.getErrorCode(), DefaultDataTypes.INTEGER.getId(), metadata));
@@ -492,13 +492,13 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 		}
     }
 
-	public static void checkException(Expression obj)
+	public static void checkException(BaseExpression obj)
 			throws QueryResolverException {
-		if (obj == null || obj instanceof ExceptionExpression) {
+		if (obj == null || obj instanceof ExceptionExpressionImpl) {
 			return;
 		}
-		if (obj instanceof ElementSymbol) {
-			ElementSymbol es = (ElementSymbol)obj;
+		if (obj instanceof ElementSymbolImpl) {
+			ElementSymbolImpl es = (ElementSymbolImpl)obj;
 			if (!(es.getMetadataID() instanceof TempMetadataID)) {
 				throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID31120, obj));
 			}
@@ -506,8 +506,8 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 			if (tid.getType() != Exception.class) {
 				throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID31120, obj));
 			}
-		} else if (obj instanceof Constant) {
-			Constant c = (Constant)obj;
+		} else if (obj instanceof ConstantImpl) {
+			ConstantImpl c = (ConstantImpl)obj;
 			if (!(c.getValue() instanceof Exception)) {
 				throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID31120, obj));
 			}
@@ -517,7 +517,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	}
     
     @Override
-    public void visit(AggregateSymbol obj) {
+    public void visit(BaseAggregateSymbol obj) {
     	if (obj.getCondition() != null) {
 			try {
 				obj.setCondition(ResolverUtil.convertExpression(obj.getCondition(), DefaultDataTypes.BOOLEAN.getId(), metadata));
@@ -526,14 +526,14 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 			}
     	}
 
-    	if (obj instanceof Aggregate7Symbol)
+    	if (obj instanceof Aggregate7SymbolImpl)
     	    return;
 
     	/* Following does not apply to 7.7.x aggregate symbols */
 
     	switch (obj.getAggregateFunction()) {
     	case USER_DEFINED:
-    		visit((Function)obj);
+    		visit((FunctionImpl)obj);
     		break;
     	case STRING_AGG:
     		try {
@@ -541,8 +541,8 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    			throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID31140, obj));
 	    		}
 	    		if (obj.getType() == null) {
-					Expression arg = obj.getArg(0);
-					Expression arg1 = obj.getArg(1);
+					BaseExpression arg = obj.getArg(0);
+					BaseExpression arg1 = obj.getArg(1);
 					Class<?> type = null;
 					if (isBinary(arg)) {
 						setDesiredType(arg1, DefaultDataTypes.BLOB.getTypeClass(), obj);
@@ -579,12 +579,12 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
     	}
     }
 
-	private boolean isCharacter(Expression arg) {
+	private boolean isCharacter(BaseExpression arg) {
 		return arg.getType() == DefaultDataTypes.STRING.getTypeClass()
 				|| arg.getType() == DefaultDataTypes.CLOB.getTypeClass();
 	}
 
-	private boolean isBinary(Expression arg) {
+	private boolean isBinary(BaseExpression arg) {
 		return arg.getType() == DefaultDataTypes.VARBINARY.getTypeClass()
 				|| arg.getType() == DefaultDataTypes.BLOB.getTypeClass();
 	}
@@ -623,7 +623,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	/**
 	 * Resolve function such that all functions are resolved and type-safe.
 	 */
-	void resolveFunction(Function function, DefaultFunctionLibrary library)
+	void resolveFunction(FunctionImpl function, DefaultFunctionLibrary library)
 	    throws Exception {
 	
 	    // Check whether this function is already resolved
@@ -633,12 +633,12 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	
 	    // Look up types for all args
 	    boolean hasArgWithoutType = false;
-	    Expression[] args = function.getArgs();
+	    BaseExpression[] args = function.getArgs();
 	    Class<?>[] types = new Class[args.length];
 	    for(int i=0; i<args.length; i++) {
 	        types[i] = args[i].getType();
 	        if(types[i] == null) {
-	        	if(!(args[i] instanceof Reference)){
+	        	if(!(args[i] instanceof ReferenceImpl)){
 	                 throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30067, new Object[] {args[i], function}));
 	        	}
 	            hasArgWithoutType = true;
@@ -647,7 +647,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	
 	    //special case handling for convert of an untyped reference
 	    if (DefaultFunctionLibrary.isConvert(function) && hasArgWithoutType) {
-	        Constant constant = (Constant)function.getArg(1);
+	        ConstantImpl constant = (ConstantImpl)function.getArg(1);
 	        Class<?> type = getDataTypeManager().getDataTypeClass((String)constant.getValue());
 	
 	        setDesiredType(function.getArg(0), type, function);
@@ -683,7 +683,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    }
 	    
 	    if(fd.isSystemFunction(FunctionLibrary.FunctionName.CONVERT) || fd.isSystemFunction(FunctionLibrary.FunctionName.CAST)) {
-	        String dataType = (String) ((Constant)args[1]).getValue();
+	        String dataType = (String) ((ConstantImpl)args[1]).getValue();
 	        Class<?> dataTypeClass = getDataTypeManager().getDataTypeClass(dataType);
 	        fd = library.findTypedConversionFunction(args[0].getType(), dataTypeClass);
 	
@@ -733,7 +733,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	 * @throws Exception 
 	 *
 	 */
-	private List<TCFunctionDescriptor> findWithImplicitConversions(DefaultFunctionLibrary library, Function function, Expression[] args, Class<?>[] types, boolean hasArgWithoutType) throws Exception {
+	private List<TCFunctionDescriptor> findWithImplicitConversions(DefaultFunctionLibrary library, FunctionImpl function, BaseExpression[] args, Class<?>[] types, boolean hasArgWithoutType) throws Exception {
 	    
 	    // Try to find implicit conversion path to still perform this function
 	    TCFunctionDescriptor[] conversions;
@@ -785,12 +785,12 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	 * @throws Exception 
 	 * @throws Exception
 	 */
-	void resolveBetweenCriteria(BetweenCriteria criteria)
+	void resolveBetweenCriteria(BetweenCriteriaImpl criteria)
 	    throws Exception {
 	
-	    Expression exp = criteria.getExpression();
-	    Expression lower = criteria.getLowerExpression();
-	    Expression upper = criteria.getUpperExpression();
+	    BaseExpression exp = criteria.getExpression();
+	    BaseExpression lower = criteria.getLowerExpression();
+	    BaseExpression upper = criteria.getUpperExpression();
 	
 	    // invariants: none of the expressions is an aggregate symbol
 	    setDesiredType(exp,
@@ -821,11 +821,11 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    // invariants: exp.getType() == lower.getType() == upper.getType()
 	}
 
-	void resolveCompareCriteria(CompareCriteria ccrit)
+	void resolveCompareCriteria(CompareCriteriaImpl ccrit)
 		throws Exception {
 	
-		Expression leftExpression = ccrit.getLeftExpression();
-		Expression rightExpression = ccrit.getRightExpression();
+		BaseExpression leftExpression = ccrit.getLeftExpression();
+		BaseExpression rightExpression = ccrit.getRightExpression();
 	
 		// Check typing between expressions
 	    setDesiredType(leftExpression, rightExpression.getType(), ccrit);
@@ -840,7 +840,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 		String rightTypeName = getDataTypeManager().getDataTypeName(rightExpression.getType());
 	
 	    // Special cases when right expression is a constant
-	    if(rightExpression instanceof Constant) {
+	    if(rightExpression instanceof ConstantImpl) {
 	        // Auto-convert constant string on right to expected type on left
 	        try {
 	            ccrit.setRightExpression(ResolverUtil.convertExpression(rightExpression, rightTypeName, leftTypeName, metadata));
@@ -851,7 +851,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    } 
 	    
 	    // Special cases when left expression is a constant
-	    if(leftExpression instanceof Constant) {
+	    if(leftExpression instanceof ConstantImpl) {
 	        // Auto-convert constant string on left to expected type on right
 	        try {
 	            ccrit.setLeftExpression(ResolverUtil.convertExpression(leftExpression, leftTypeName, rightTypeName, metadata));
@@ -883,7 +883,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 		ccrit.setRightExpression(ResolverUtil.convertExpression(rightExpression, rightTypeName, commonType, metadata) );
 	}
 
-	void resolveMatchCriteria(MatchCriteria mcrit)
+	void resolveMatchCriteria(MatchCriteriaImpl mcrit)
 	    throws Exception {
 	
 	    setDesiredType(mcrit.getLeftExpression(), mcrit.getRightExpression().getType(), mcrit);
@@ -900,11 +900,11 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	 * @return either 'expr' itself, or a new implicit type conversion wrapping expr
 	 * @throws Exception if no implicit type conversion is available
 	 */
-	Expression resolveMatchCriteriaExpression(MatchCriteria mcrit, Expression expr)
+	BaseExpression resolveMatchCriteriaExpression(MatchCriteriaImpl mcrit, BaseExpression expr)
 	throws Exception {
 	    // Check left expression == string or CLOB
 	    String type = getDataTypeManager().getDataTypeName(expr.getType());
-	    Expression result = expr;
+	    BaseExpression result = expr;
 	    if(type != null) {
 	        if (! type.equals(DefaultDataTypes.STRING) &&
 	            ! type.equals(DefaultDataTypes.CLOB)) {
@@ -925,7 +925,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    return result;
 	}
 
-	void resolveSetCriteria(SetCriteria scrit)
+	void resolveSetCriteria(SetCriteriaImpl scrit)
 	    throws Exception {
 	
 	    // Check that each of the values are the same type as expression
@@ -936,14 +936,14 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	
 	    String exprTypeName = getDataTypeManager().getDataTypeName(exprType);
 	    boolean changed = false;
-	    List<Expression> newVals = new ArrayList<Expression>();
+	    List<BaseExpression> newVals = new ArrayList<BaseExpression>();
 	
 	    boolean convertLeft = false;
 	    Class<?> setType = null;
 	
 	    Iterator valIter = scrit.getValues().iterator();
 	    while(valIter.hasNext()) {
-	        Expression value = (Expression) valIter.next();
+	        BaseExpression value = (BaseExpression) valIter.next();
 	        setDesiredType(value, exprType, scrit);
 	        if(! value.getType().equals(exprType)) {
 	            // try to apply cast
@@ -970,7 +970,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	        if(ResolverUtil.canImplicitlyConvert(getTeiidVersion(), exprTypeName, setTypeName)) {
 	            valIter = scrit.getValues().iterator();
 	            while(valIter.hasNext()) {
-	                Expression value = (Expression) valIter.next();
+	                BaseExpression value = (BaseExpression) valIter.next();
 	                if(value.getType() == null) {
 	                     throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30075, value));
 	                } else if(! value.getType().equals(setType)) {
@@ -991,13 +991,13 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    }
 	}
 
-	void resolveCaseExpression(CaseExpression obj) throws Exception {
+	void resolveCaseExpression(CaseExpressionImpl obj) throws Exception {
 	    // If already resolved, do nothing
 	    if (obj.getType() != null) {
 	        return;
 	    }
 	    final int whenCount = obj.getWhenCount();
-	    Expression expr = obj.getExpression();
+	    BaseExpression expr = obj.getExpression();
 	
 	    Class<?> whenType = null;
 	    Class<?> thenType = null;
@@ -1011,7 +1011,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	        }
 	    }
 	
-	    Expression elseExpr = obj.getElseExpression();
+	    BaseExpression elseExpr = obj.getElseExpression();
 	    if (elseExpr != null) {
 	        if (thenType == null) {
 	            thenType = elseExpr.getType();
@@ -1026,8 +1026,8 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    setDesiredType(expr, whenType, obj);
 	    // Add the expression's type to the WHEN types
 	    whenTypeNames.add(getDataTypeManager().getDataTypeName(expr.getType()));
-	    Expression when = null;
-	    Expression then = null;
+	    BaseExpression when = null;
+	    BaseExpression then = null;
 	    // Set the types of the WHEN and THEN parts
 	    for (int i = 0; i < whenCount; i++) {
 	        when = obj.getWhenExpression(i);
@@ -1063,8 +1063,8 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	         throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30079, "THEN/ELSE", obj));//$NON-NLS-1$
 	    }
 	    obj.setExpression(ResolverUtil.convertExpression(obj.getExpression(), whenTypeName, metadata));
-	    ArrayList<Expression> whens = new ArrayList<Expression>(whenCount);
-	    ArrayList<Expression> thens = new ArrayList<Expression>(whenCount);
+	    ArrayList<BaseExpression> whens = new ArrayList<BaseExpression>(whenCount);
+	    ArrayList<BaseExpression> thens = new ArrayList<BaseExpression>(whenCount);
 	    for (int i = 0; i < whenCount; i++) {
 	        whens.add(ResolverUtil.convertExpression(obj.getWhenExpression(i), whenTypeName, metadata));
 	        thens.add(ResolverUtil.convertExpression(obj.getThenExpression(i), thenTypeName, metadata));
@@ -1077,14 +1077,14 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    obj.setType(getDataTypeManager().getDataTypeClass(thenTypeName));
 	}
 
-	private void setDesiredType(Expression obj, Class<?> type, LanguageObject surrounding) throws Exception {
+	private void setDesiredType(BaseExpression obj, Class<?> type, BaseLanguageObject surrounding) throws Exception {
 		ResolverUtil.setDesiredType(obj, type, surrounding);
 		//second pass resolving for functions
-		if (!(obj instanceof Function)) {
+		if (!(obj instanceof FunctionImpl)) {
 			return;
 		}
 		if (unresolvedFunctions != null) {
-			Function f = (Function)obj;
+			FunctionImpl f = (FunctionImpl)obj;
 			if (f.getFunctionDescriptor() != null) {
 				return;
 			}
@@ -1097,7 +1097,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 		}
 	}
 
-	void resolveSearchedCaseExpression(SearchedCaseExpression obj) throws Exception {
+	void resolveSearchedCaseExpression(SearchedCaseExpressionImpl obj) throws Exception {
 	    // If already resolved, do nothing
 	    if (obj.getType() != null) {
 	        return;
@@ -1113,7 +1113,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	        }
 	    }
 	
-	    Expression elseExpr = obj.getElseExpression();
+	    BaseExpression elseExpr = obj.getElseExpression();
 	    if (elseExpr != null) {
 	        if (thenType == null) {
 	            thenType = elseExpr.getType();
@@ -1124,7 +1124,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    // 2. Attempt to set the target types of all contained expressions,
 	    //    and collect their type names for the next step
 	    ArrayList<String> thenTypeNames = new ArrayList<String>(whenCount + 1);
-	    Expression then = null;
+	    BaseExpression then = null;
 	    // Set the types of the WHEN and THEN parts
 	    for (int i = 0; i < whenCount; i++) {
 	        then = obj.getThenExpression(i);
@@ -1144,7 +1144,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	    if (thenTypeName == null) {
 	         throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30079, "THEN/ELSE", obj)); //$NON-NLS-1$
 	    }
-	    ArrayList<Expression> thens = new ArrayList<Expression>(whenCount);
+	    ArrayList<BaseExpression> thens = new ArrayList<BaseExpression>(whenCount);
 	    for (int i = 0; i < whenCount; i++) {
 	        thens.add(ResolverUtil.convertExpression(obj.getThenExpression(i), thenTypeName, metadata));
 	    }
@@ -1157,13 +1157,13 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	}
 	
     @Override
-    public void resolveLanguageObject(LanguageObject obj, QueryMetadataInterface metadata)
+    public void resolveLanguageObject(BaseLanguageObject obj, QueryMetadataInterface metadata)
     throws Exception {
 	    resolveLanguageObject(obj, null, metadata);
 	}
 	
 	@Override
-    public void resolveLanguageObject(LanguageObject obj, Collection<GroupSymbol> groups, QueryMetadataInterface metadata)
+    public void resolveLanguageObject(BaseLanguageObject obj, Collection<GroupSymbolImpl> groups, QueryMetadataInterface metadata)
 	    throws Exception {
 	    resolveLanguageObject(obj, groups, null, metadata);
 	}
@@ -1175,7 +1175,7 @@ public class ResolverVisitorImpl extends TCLanguageVisitorImpl
 	 * @param metadata
 	 * @throws Exception
 	 */
-	public void resolveLanguageObject(LanguageObject obj, Collection<GroupSymbol> groups, GroupContext externalContext, QueryMetadataInterface metadata)
+	public void resolveLanguageObject(BaseLanguageObject obj, Collection<GroupSymbolImpl> groups, GroupContextImpl externalContext, QueryMetadataInterface metadata)
 	    throws Exception {
 	
 	    if(obj == null) {

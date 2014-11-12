@@ -28,10 +28,10 @@ import org.junit.Test;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestAlterResolving;
 import org.teiid.query.sql.AbstractTestFactory;
-import org.teiid.query.sql.lang.AlterProcedure;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.proc.CreateUpdateProcedureCommand;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.lang.AlterProcedureImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.proc.CreateUpdateProcedureCommandImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 import org.teiid.query.sql.v7.Test7Factory;
 
 /**
@@ -59,13 +59,13 @@ public class Test7AlterResolving extends AbstractTestAlterResolving {
 
     @Test
     public void testAlterProcedure() {
-        AlterProcedure alterProc = (AlterProcedure)helpResolve("alter procedure MMSP5 as begin select param1; end",
+        AlterProcedureImpl alterProc = (AlterProcedureImpl)helpResolve("alter procedure MMSP5 as begin select param1; end",
                                                                getMetadataFactory().exampleBQTCached());
         assertNotNull(alterProc.getTarget().getMetadataID());
-        assertTrue(alterProc.getDefinition() instanceof CreateUpdateProcedureCommand);
+        assertTrue(alterProc.getDefinition() instanceof CreateUpdateProcedureCommandImpl);
 
-        CreateUpdateProcedureCommand command = (CreateUpdateProcedureCommand) alterProc.getDefinition();
-        Query q = (Query) command.getResultsCommand();
-        assertTrue(((ElementSymbol)q.getSelect().getSymbol(0)).isExternalReference());
+        CreateUpdateProcedureCommandImpl command = (CreateUpdateProcedureCommandImpl) alterProc.getDefinition();
+        QueryImpl q = (QueryImpl) command.getResultsCommand();
+        assertTrue(((ElementSymbolImpl)q.getSelect().getSymbol(0)).isExternalReference());
     }
 }

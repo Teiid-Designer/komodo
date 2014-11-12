@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.metadata.QueryNode;
-import org.teiid.query.sql.lang.Command;
+import org.teiid.query.sql.lang.CommandImpl;
 import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
 
 
@@ -46,7 +46,7 @@ public class TCQueryNode implements QueryNode {
 	private String query;
 	private List<String> bindings;     // optional - construct if needed
 	// After parsing and resolution
-	private Command command;
+	private CommandImpl command;
 	private UpdateInfo updateInfo;
 
     /**
@@ -106,7 +106,7 @@ public class TCQueryNode implements QueryNode {
      * during conversion.
      * @param command Command corresponding to query
      */
-    public void setCommand(Command command) {
+    public void setCommand(CommandImpl command) {
         this.command = command;
     }
 
@@ -114,7 +114,7 @@ public class TCQueryNode implements QueryNode {
      * Get command corresponding to query, may be null
      * @return command Command corresponding to query
      */
-    public Command getCommand() {
+    public CommandImpl getCommand() {
         return this.command;
     }
 

@@ -24,7 +24,7 @@ package org.teiid.query.mapping.xml;
 
 import org.komodo.spi.xml.MappingCriteriaNode;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.lang.Criteria;
+import org.teiid.query.sql.lang.CriteriaImpl;
 
 
 
@@ -34,7 +34,7 @@ import org.teiid.query.sql.lang.Criteria;
  */
 public class MappingCriteriaNodeImpl extends MappingBaseNodeImpl implements MappingCriteriaNode<MappingNodeImpl> {
     boolean defalt;
-    Criteria criteriaNode;
+    CriteriaImpl criteriaNode;
     
     public MappingCriteriaNodeImpl(TeiidClientParser teiidParser, String criteria, boolean defalt) {
         super(teiidParser);
@@ -80,11 +80,11 @@ public class MappingCriteriaNodeImpl extends MappingBaseNodeImpl implements Mapp
      * ValidateMappedCriteriaVisitor class during pre planning.
      * @param node
      */
-    public void setCriteriaNode(Criteria node) {
+    public void setCriteriaNode(CriteriaImpl node) {
         this.criteriaNode = node;
     }
     
-    public Criteria getCriteriaNode() {
+    public CriteriaImpl getCriteriaNode() {
         return this.criteriaNode;
     }
     

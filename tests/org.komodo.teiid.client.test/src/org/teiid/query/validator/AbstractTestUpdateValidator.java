@@ -41,10 +41,10 @@ import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
 import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
 import org.teiid.query.validator.DefaultUpdateValidator.UpdateType;
 
@@ -65,10 +65,10 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
 	private DefaultUpdateValidator helpTest(String sql, TransformationMetadata md, boolean failInsert, boolean failUpdate, boolean failDelete) { 	
 		try {
 			String vGroup = "gx";
-			Command command = createView(sql, md, vGroup);
+			CommandImpl command = createView(sql, md, vGroup);
 			
 			DefaultUpdateValidator uv = new DefaultUpdateValidator(md, UpdateType.INHERENT, UpdateType.INHERENT, UpdateType.INHERENT);
-			GroupSymbol gs = getFactory().newGroupSymbol(vGroup);
+			GroupSymbolImpl gs = getFactory().newGroupSymbol(vGroup);
 			ResolverUtil.resolveGroup(gs, md);
 			uv.validate(command, ResolverUtil.resolveElementsInGroup(gs, md));
 			UpdateInfo info = uv.getUpdateInfo();
@@ -81,21 +81,21 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
 		}
 	}
 
-	public Command createView(String sql, TransformationMetadata md, String vGroup)
+	public CommandImpl createView(String sql, TransformationMetadata md, String vGroup)
 			throws Exception {
 		TCQueryNode vm1g1n1 = new TCQueryNode(sql); 
 		Table vm1g1 = getMetadataFactory().createUpdatableVirtualGroup(vGroup, md.getMetadataStore().getSchema("VM1"), vm1g1n1);
 
-		Command command = getQueryParser().parseCommand(sql);
+		CommandImpl command = getQueryParser().parseCommand(sql);
 		TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
 		queryResolver.resolveCommand(command, md);
 
-		List<Expression> symbols = command.getProjectedSymbols();
+		List<BaseExpression> symbols = command.getProjectedSymbols();
 		String[] names = new String[symbols.size()];
 		String[] types = new String[symbols.size()];
 		int i = 0;
-		for (Expression singleElementSymbol : symbols) {
-			names[i] = Symbol.getShortName(singleElementSymbol);
+		for (BaseExpression singleElementSymbol : symbols) {
+			names[i] = SymbolImpl.getShortName(singleElementSymbol);
 			types[i++] = getDataTypeManager().getDataTypeName(singleElementSymbol.getType());
 		}
 		

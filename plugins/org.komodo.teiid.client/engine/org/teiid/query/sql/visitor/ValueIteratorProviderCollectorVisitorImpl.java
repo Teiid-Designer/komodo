@@ -31,18 +31,18 @@ import java.util.List;
 import org.komodo.spi.query.sql.ValueIteratorProviderCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
-import org.teiid.query.sql.lang.ExistsCriteria;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubqueryContainer;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
+import org.teiid.query.sql.lang.ExistsCriteriaImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.BaseSubqueryContainer;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
-import org.teiid.query.sql.symbol.ScalarSubquery;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
 
 
 /**
  * <p>This visitor class will traverse a language object tree and collect all language
- * objects that implement {@link SubqueryContainer}.  
+ * objects that implement {@link BaseSubqueryContainer}.  
  * By default it uses a java.util.ArrayList to collect the objects in the order 
  * they're found.</p>
  * 
@@ -51,9 +51,9 @@ import org.teiid.query.sql.symbol.ScalarSubquery;
  * The public visit() methods should NOT be called directly.</p>
  */
 public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitorImpl
-    implements ValueIteratorProviderCollectorVisitor<LanguageObject, SubqueryContainer> {
+    implements ValueIteratorProviderCollectorVisitor<BaseLanguageObject, BaseSubqueryContainer> {
 
-    private List<SubqueryContainer> valueIteratorProviders;
+    private List<BaseSubqueryContainer> valueIteratorProviders;
     
     /**
      * Construct a new visitor with the default collection type, which is a 
@@ -62,7 +62,7 @@ public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitor
      */
     public ValueIteratorProviderCollectorVisitorImpl(TeiidVersion teiidVersion) {
         super(teiidVersion);
-        this.valueIteratorProviders = new ArrayList<SubqueryContainer>();
+        this.valueIteratorProviders = new ArrayList<BaseSubqueryContainer>();
     }   
 
 	/**
@@ -71,7 +71,7 @@ public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitor
      * @param teiidVersion
 	 * @param valueIteratorProviders Collection to accumulate found 
 	 */
-	ValueIteratorProviderCollectorVisitorImpl(TeiidVersion teiidVersion, List<SubqueryContainer> valueIteratorProviders) {
+	ValueIteratorProviderCollectorVisitorImpl(TeiidVersion teiidVersion, List<BaseSubqueryContainer> valueIteratorProviders) {
 	    super(teiidVersion);
 		this.valueIteratorProviders = valueIteratorProviders;
 	}   
@@ -79,10 +79,10 @@ public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitor
     /**
      * Get the value iterator providers collected by the visitor.  This should best be called 
      * after the visitor has been run on the language object tree.
-     * @return Collection of {@link SubqueryContainer}
+     * @return Collection of {@link BaseSubqueryContainer}
      * (by default, this is a java.util.ArrayList)
      */
-    public List<SubqueryContainer> getValueIteratorProviders() { 
+    public List<BaseSubqueryContainer> getValueIteratorProviders() { 
         return this.valueIteratorProviders;
     }
     
@@ -92,7 +92,7 @@ public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitor
      * @param obj Language object
      */
     @Override
-    public void visit(SubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteriaImpl obj) {
         this.valueIteratorProviders.add(obj);
     }
 
@@ -102,7 +102,7 @@ public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitor
      * @param obj Language object
      */
     @Override
-    public void visit(SubqueryCompareCriteria obj) {
+    public void visit(SubqueryCompareCriteriaImpl obj) {
         this.valueIteratorProviders.add(obj);
     }
 
@@ -112,7 +112,7 @@ public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitor
      * @param obj Language object
      */
     @Override
-    public void visit(ExistsCriteria obj) {
+    public void visit(ExistsCriteriaImpl obj) {
         this.valueIteratorProviders.add(obj);
     }
 
@@ -122,12 +122,12 @@ public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitor
      * @param obj Language object
      */
     @Override
-    public void visit(ScalarSubquery obj) {
+    public void visit(ScalarSubqueryImpl obj) {
         this.valueIteratorProviders.add(obj);
     }
 
     @Override
-    public List<SubqueryContainer> findValueIteratorProviders(LanguageObject obj) {
+    public List<BaseSubqueryContainer> findValueIteratorProviders(BaseLanguageObject obj) {
         PreOrderNavigator.doVisit(obj, this);
         return getValueIteratorProviders();
     }
@@ -137,7 +137,7 @@ public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitor
      * @param obj Language object
      * @return java.util.ArrayList of found ValueIteratorProvider
      */
-    public static final List<SubqueryContainer> getValueIteratorProviders(LanguageObject obj) {
+    public static final List<BaseSubqueryContainer> getValueIteratorProviders(BaseLanguageObject obj) {
         ValueIteratorProviderCollectorVisitorImpl visitor = new ValueIteratorProviderCollectorVisitorImpl(obj.getTeiidVersion());
         return visitor.findValueIteratorProviders(obj);
     }
@@ -146,23 +146,23 @@ public class ValueIteratorProviderCollectorVisitorImpl extends TCLanguageVisitor
 	 * @param obj
 	 * @param valueIteratorProviders
 	 */
-	public static final void getValueIteratorProviders(LanguageObject obj, List<SubqueryContainer> valueIteratorProviders) {
+	public static final void getValueIteratorProviders(BaseLanguageObject obj, List<BaseSubqueryContainer> valueIteratorProviders) {
 		ValueIteratorProviderCollectorVisitorImpl visitor = new ValueIteratorProviderCollectorVisitorImpl(obj.getTeiidVersion(), valueIteratorProviders);
 		visitor.findValueIteratorProviders(obj);
 	}
           	
     /**
      * @param languageObjects
-     * @return list of {@link SubqueryContainer}s
+     * @return list of {@link BaseSubqueryContainer}s
      */
-    public static final List<SubqueryContainer> getValueIteratorProviders(Collection<? extends LanguageObject> languageObjects) {
+    public static final List<BaseSubqueryContainer> getValueIteratorProviders(Collection<? extends BaseLanguageObject> languageObjects) {
     	if (languageObjects == null || languageObjects.isEmpty()) {
     		return Collections.emptyList();
     	}
-    	LanguageObject languageObject = languageObjects.iterator().next();
-    	List<SubqueryContainer> result = new LinkedList<SubqueryContainer>();
+    	BaseLanguageObject languageObject = languageObjects.iterator().next();
+    	List<BaseSubqueryContainer> result = new LinkedList<BaseSubqueryContainer>();
         ValueIteratorProviderCollectorVisitorImpl visitor = new ValueIteratorProviderCollectorVisitorImpl(languageObject.getTeiidVersion(), result);
-        for (LanguageObject obj : languageObjects) {
+        for (BaseLanguageObject obj : languageObjects) {
             visitor.findValueIteratorProviders(obj);
         }
         return result;

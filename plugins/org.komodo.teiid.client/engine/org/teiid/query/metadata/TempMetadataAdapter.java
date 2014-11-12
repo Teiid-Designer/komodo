@@ -40,7 +40,7 @@ import org.teiid.metadata.Procedure;
 import org.teiid.metadata.Table;
 import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TempMetadataID.Type;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.symbol.BaseExpression;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
@@ -867,7 +867,7 @@ public class TempMetadataAdapter extends BasicQueryMetadataWrapper {
     }
     
     @Override
-    public Map<Expression, Integer> getFunctionBasedExpressions(Object metadataID) {
+    public Map<BaseExpression, Integer> getFunctionBasedExpressions(Object metadataID) {
     	if (metadataID instanceof TempMetadataID) {
     		return ((TempMetadataID)metadataID).getTableData().getFunctionBasedExpressions();
     	}

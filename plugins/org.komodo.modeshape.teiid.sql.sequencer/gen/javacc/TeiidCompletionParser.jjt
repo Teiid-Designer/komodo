@@ -67,10 +67,10 @@ import java.util.*;
 import java.util.regex.Matcher;
 import org.komodo.modeshape.teiid.parser.AbstractTeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.ParseInfo;
-import org.komodo.modeshape.teiid.sql.lang.Command;
-import org.komodo.modeshape.teiid.sql.lang.Criteria;
-import org.komodo.modeshape.teiid.sql.proc.Statement;
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.lang.CommandImpl;
+import org.komodo.modeshape.teiid.sql.lang.CriteriaImpl;
+import org.komodo.modeshape.teiid.sql.proc.StatementImpl;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -1365,7 +1365,7 @@ void id() :
 /*
  * Top-Level function so includes try catch
  */
-Command command(ParseInfo info) :
+CommandImpl command(ParseInfo info) :
 {
 	ppSet(bnf.command());
 }
@@ -1408,7 +1408,7 @@ Command command(ParseInfo info) :
 /*
  * Top-Level function so includes try catch
  */
-Command designerCommand(ParseInfo info) :
+CommandImpl designerCommand(ParseInfo info) :
 {
 	ppSet(bnf.designerCommand());
 }
@@ -1628,7 +1628,7 @@ void alter(ParseInfo info) :
 //	{}
 }
 
-Command forEachRowTriggerAction(ParseInfo info) :
+CommandImpl forEachRowTriggerAction(ParseInfo info) :
 {
 	ppAppend(bnf.forEachRowTriggerAction(0));
 }
@@ -1821,7 +1821,7 @@ void exception(ParseInfo info) :
 //	{}
 }
 
-Statement statement(ParseInfo info) :
+StatementImpl statement(ParseInfo info) :
 {
 	ppAppend(bnf.statement(0));
 }
@@ -2345,7 +2345,7 @@ void createProcedure(ParseInfo info) :
 /*
  * Top-Level function so includes try catch
  */
-Command procedureBodyCommand(ParseInfo info) :
+CommandImpl procedureBodyCommand(ParseInfo info) :
 {}
 {
 	try
@@ -3299,7 +3299,7 @@ void selectSymbol(ParseInfo info) :
 //	{}
 }
 
-Expression selectExpression(ParseInfo info) :
+BaseExpression selectExpression(ParseInfo info) :
 {}
 {
 //	try
@@ -4882,7 +4882,7 @@ void where(ParseInfo info) :
 //	{}
 }
 
-Criteria criteria(ParseInfo info) :
+CriteriaImpl criteria(ParseInfo info) :
 {}
 {
 //	try
@@ -5738,7 +5738,7 @@ void option(ParseInfo info) :
 //	{}
 }
 
-Expression expression(ParseInfo info) :
+BaseExpression expression(ParseInfo info) :
 {}
 {
 //	try

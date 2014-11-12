@@ -29,9 +29,9 @@ import org.junit.Test;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.AbstractTestQueryParser;
-import org.teiid.query.sql.lang.Create;
-import org.teiid.query.sql.lang.Drop;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.lang.CreateImpl;
+import org.teiid.query.sql.lang.DropImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test7CreateDrop extends AbstractTestQueryParser {
@@ -55,10 +55,10 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testCreateTempTable1() {
-        Create create = getFactory().newCreate();
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         List columns = new ArrayList();
-        ElementSymbol column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
+        ElementSymbolImpl column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
         column.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c2");//$NON-NLS-1$
@@ -70,10 +70,10 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testCreateTempTable2() {
-        Create create = getFactory().newCreate();
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         List columns = new ArrayList();
-        ElementSymbol column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
+        ElementSymbolImpl column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
         column.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c2");//$NON-NLS-1$
@@ -105,10 +105,10 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testCreateTempTableWithPrimaryKey() {
-        Create create = getFactory().newCreate();
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         List columns = new ArrayList();
-        ElementSymbol column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
+        ElementSymbolImpl column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
         column.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c2");//$NON-NLS-1$
@@ -121,7 +121,7 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testDropTable() {
-        Drop drop = getFactory().newDrop();
+        DropImpl drop = getFactory().newDrop();
         drop.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         helpTest("DROP table tempTable", "DROP TABLE tempTable", drop); //$NON-NLS-1$ //$NON-NLS-2$
     }
@@ -133,10 +133,10 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testTypeAliases() {
-        Create create = getFactory().newCreate();
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         List columns = new ArrayList();
-        ElementSymbol column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
+        ElementSymbolImpl column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
         column.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c2");//$NON-NLS-1$

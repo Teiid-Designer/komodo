@@ -39,7 +39,7 @@ import org.teiid.adminapi.impl.VDBMetaData;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.lang.ISPParameter;
+import org.komodo.spi.query.sql.lang.SPParameter;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.BaseColumn.NullType;
@@ -173,8 +173,8 @@ public class RealMetadataFactory {
         
         // add direct query procedure
         ColumnSet<Procedure> nativeProcResults = createResultSet("bqt1.nativers", new String[] {"tuple"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter nativeparam = createParameter("param", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        ProcedureParameter vardic = createParameter("varag", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()); //$NON-NLS-1$
+        ProcedureParameter nativeparam = createParameter("param", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter vardic = createParameter("varag", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()); //$NON-NLS-1$
         vardic.setVarArg(true);
         Procedure nativeProc = createStoredProcedure("native", bqt1, Arrays.asList(nativeparam,vardic));  //$NON-NLS-1$ //$NON-NLS-2$
         nativeProc.setResultSet(nativeProcResults);        
@@ -284,37 +284,37 @@ public class RealMetadataFactory {
         createElements(bvqtg1, elemNames, elemTypes);        
         createElements(bvqt2g1, elemNames, elemTypes);        
         
-        ProcedureParameter rsp1 = createParameter("ret", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
-        ProcedureParameter rsp2 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter rsp1 = createParameter("ret", SPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rsp2 = createParameter("inkey", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         createVirtualProcedure("v_spTest9", bvqt, Arrays.asList(rsp1, rsp2), new TCQueryNode("ret = call pm4.spTest9(inkey);")); //$NON-NLS-1$ //$NON-NLS-2$
 
      // Add stored procedure
         Schema pm1 = createPhysicalModel("pm1", metadataStore); //$NON-NLS-1$
-        ProcedureParameter rs1p1 = createParameter("intkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());         //$NON-NLS-1$
+        ProcedureParameter rs1p1 = createParameter("intkey", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());         //$NON-NLS-1$
         ColumnSet<Procedure> rs1 = createResultSet("rs1", new String[] { "IntKey", "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure spTest5 = createStoredProcedure("spTest5", pm1, Arrays.asList(rs1p1)); //$NON-NLS-1$ //$NON-NLS-2$
         spTest5.setResultSet(rs1);
 
         Schema pm2 = createPhysicalModel("pm2", metadataStore); //$NON-NLS-1$
-        ProcedureParameter rs2p1 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter rs2p2 = createParameter("outkey", ISPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
+        ProcedureParameter rs2p1 = createParameter("inkey", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter rs2p2 = createParameter("outkey", SPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
         ColumnSet<Procedure> rs2 = createResultSet("rs2", new String[] { "IntKey", "StringKey"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() , DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure spTest8 = createStoredProcedure("spTest8", pm2, Arrays.asList(rs2p1, rs2p2)); //$NON-NLS-1$ //$NON-NLS-2$
         spTest8.setResultSet(rs2);
         
-        ProcedureParameter rs2p2a = createParameter("outkey", ISPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
+        ProcedureParameter rs2p2a = createParameter("outkey", SPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
         ColumnSet<Procedure> rs2a = createResultSet("rs2", new String[] { "IntKey", "StringKey"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() , DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure spTest8a = createStoredProcedure("spTest8a", pm2, Arrays.asList(rs2p2a)); //$NON-NLS-1$ //$NON-NLS-2$
         spTest8a.setResultSet(rs2a);
         
         Schema pm4 = createPhysicalModel("pm4", metadataStore); //$NON-NLS-1$
-        ProcedureParameter rs4p1 = createParameter("ret", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
-        ProcedureParameter rs4p2 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter rs4p1 = createParameter("ret", SPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs4p2 = createParameter("inkey", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         createStoredProcedure("spTest9", pm4, Arrays.asList(rs4p1, rs4p2)); //$NON-NLS-1$ //$NON-NLS-2$
         
         Schema pm3 = createPhysicalModel("pm3", metadataStore); //$NON-NLS-1$
-        ProcedureParameter rs3p1 = createParameter("inkey", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter rs3p2 = createParameter("outkey", ISPParameter.ParameterInfo.INOUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
+        ProcedureParameter rs3p1 = createParameter("inkey", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter rs3p2 = createParameter("outkey", SPParameter.ParameterInfo.INOUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());                 //$NON-NLS-1$
         ColumnSet<Procedure> rs3 = createResultSet("rs3", new String[] { "IntKey", "StringKey"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() , DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure spTest11 = createStoredProcedure("spTest11", pm3, Arrays.asList(rs3p1, rs3p2)); //$NON-NLS-1$ //$NON-NLS-2$
         spTest11.setResultSet(rs3);
@@ -342,36 +342,36 @@ public class RealMetadataFactory {
         vsp4.setResultSet(vsprs4);
         
         ColumnSet<Procedure> vsprs5 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp5p1 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp5p1 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         TCQueryNode vspqn5 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT 0; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp5 = createVirtualProcedure("MMSP5", mmspTest1, Arrays.asList(vsp5p1), vspqn5); //$NON-NLS-1$
         vsp5.setResultSet(vsprs5);
 
         ColumnSet<Procedure> vsprs6 = createResultSet("mmspTest1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp6p1 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp6p1 = createParameter("p1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         TCQueryNode vspqn6 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT p1 as StringKey; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp6 = createVirtualProcedure("MMSP6", mmspTest1, Arrays.asList(vsp6p1), vspqn6); //$NON-NLS-1$
         vsp6.setResultSet(vsprs6);
         
-        createStoredProcedure("spRetOut", pm4, Arrays.asList(createParameter("ret", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()),
-        		createParameter("x", ISPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()))); //$NON-NLS-1$ //$NON-NLS-2$
+        createStoredProcedure("spRetOut", pm4, Arrays.asList(createParameter("ret", SPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()),
+        		createParameter("x", SPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()))); //$NON-NLS-1$ //$NON-NLS-2$
         
         ColumnSet<Procedure> vsprs7 = createResultSet("TEIIDSP7.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp7p1 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp7p1 = createParameter("p1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn7 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN declare integer x; x = exec spTest9(p1); declare integer y; exec spTest11(inkey=>x, outkey=>y) without return; select convert(x, string) || y; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp7 = createVirtualProcedure("TEIIDSP7", mmspTest1, Arrays.asList(vsp7p1), vspqn7); //$NON-NLS-1$
         vsp7.setResultSet(vsprs7);
         
-        ProcedureParameter vsp8p1 = createParameter("r", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter vsp8p2 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp8p1 = createParameter("r", SPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp8p2 = createParameter("p1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn8 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN r = p1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         createVirtualProcedure("TEIIDSP8", mmspTest1, Arrays.asList(vsp8p1, vsp8p2), vspqn8); //$NON-NLS-1$
 
         ColumnSet<Procedure> vsprs9 = createResultSet("TEIIDSP9.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp9p1 = createParameter("r", ISPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp9p1 = createParameter("r", SPParameter.ParameterInfo.RETURN_VALUE, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vsp9p1.setNullType(NullType.No_Nulls);
-        ProcedureParameter vsp9p2 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter vsp9p3 = createParameter("p2", ISPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp9p2 = createParameter("p1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp9p3 = createParameter("p2", SPParameter.ParameterInfo.OUT, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn9 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN if (p1 = 1) begin\n r = 1; end\n p2 = 10; select 'hello'; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp9 = createVirtualProcedure("TEIIDSP9", mmspTest1, Arrays.asList(vsp9p1, vsp9p2, vsp9p3), vspqn9); //$NON-NLS-1$
         vsp9.setResultSet(vsprs9);
@@ -595,7 +595,7 @@ public class RealMetadataFactory {
         
         Schema sp = createVirtualModel("sp", metadataStore); //$NON-NLS-1$
         ColumnSet<Procedure> rs = createResultSet("sp1.vsprs1", new String[] { "StringKey" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter param = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter param = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         param.setNullType(NullType.Nullable);
         TCQueryNode sp1qn = new TCQueryNode("/*+ cache */ CREATE VIRTUAL PROCEDURE BEGIN SELECT x as StringKey from matsrc where x = param1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp5 = createVirtualProcedure("sp1", sp, Arrays.asList(param), sp1qn); //$NON-NLS-1$
@@ -1026,14 +1026,14 @@ public class RealMetadataFactory {
         sq1.setResultSet(rs1);
         
         ColumnSet<Procedure> rs2 = createResultSet("ret", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs2p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs2p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq2n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sq2.in; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq2 = createVirtualProcedure("sq2", pm1, Arrays.asList(rs2p2), sq2n1);  //$NON-NLS-1$
         sq2.setResultSet(rs2);
 
         ColumnSet<Procedure> rs5 = createResultSet("pm1.r5", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs5p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs5p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p3 = createParameter("in2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq3n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sq3.in UNION ALL SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sq3.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq3 = createVirtualProcedure("sq3", pm1, Arrays.asList(rs5p2, rs5p3), sq3n1);  //$NON-NLS-1$
         sq3.setResultSet(rs5);
@@ -1041,8 +1041,8 @@ public class RealMetadataFactory {
         //For defect 8211 - this stored query has two input params, no return param, and
         //the input params are PURPOSELY numbered with indices "1" and "3" - see defect 8211
         ColumnSet<Procedure> rs5a = createResultSet("pm1.r5a", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs5p1a = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs5p2a = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p1a = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p2a = createParameter("in2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq3n1a = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sq3a.in UNION ALL SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sq3a.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq3a = createVirtualProcedure("sq3a", pm1, Arrays.asList(rs5p1a, rs5p2a), sq3n1a);  //$NON-NLS-1$
         sq3a.setResultSet(rs5a);
@@ -1050,9 +1050,9 @@ public class RealMetadataFactory {
         
         //make "in2" parameter optional, make "in3" required but with a default value
         ColumnSet<Procedure> rs5b = createResultSet("pm1.r5b", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs5p2b = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs5p3b = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
-        ProcedureParameter rs5p4b = createParameter("in3", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p2b = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p3b = createParameter("in2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs5p4b = createParameter("in3", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         rs5p3b.setNullType(NullType.Nullable);
         rs5p4b.setDefaultValue("YYZ"); //$NON-NLS-1$
         TCQueryNode sq3n1b = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sq3b.in UNION ALL SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sq3b.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1063,46 +1063,46 @@ public class RealMetadataFactory {
         //Make some parameters required, some optional
         //Also, fully-qualify the param names
         ColumnSet<Procedure> rsDefaults = createResultSet("pm1.rDefaults", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rsDefaultsParameterString = createParameter("inString", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rsDefaultsParameterString = createParameter("inString", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         //rsDefaultsParameterString.setNullType(NullType.Nullable);
         rsDefaultsParameterString.setDefaultValue(new String("x")); //$NON-NLS-1$
-        ProcedureParameter rsParameterBigDecimal = createParameter("inBigDecimal", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterBigDecimal = createParameter("inBigDecimal", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId());  //$NON-NLS-1$
         rsParameterBigDecimal.setNullType(NullType.Nullable);
         rsParameterBigDecimal.setDefaultValue(new String("13.0")); //$NON-NLS-1$
-        ProcedureParameter rsParameterBigInteger = createParameter("inBigInteger", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterBigInteger = createParameter("inBigInteger", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId());  //$NON-NLS-1$
         rsParameterBigInteger.setNullType(NullType.Nullable);
         rsParameterBigInteger.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterBoolean = createParameter("inBoolean", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterBoolean = createParameter("inBoolean", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId());  //$NON-NLS-1$
         rsParameterBoolean.setNullType(NullType.Nullable);
         rsParameterBoolean.setDefaultValue(new String("True")); //$NON-NLS-1$
-        ProcedureParameter rsParameterByte = createParameter("inByte", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BYTE.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterByte = createParameter("inByte", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BYTE.getId());  //$NON-NLS-1$
         rsParameterByte.setNullType(NullType.Nullable);
         rsParameterByte.setDefaultValue(new String("1")); //$NON-NLS-1$
-        ProcedureParameter rsParameterChar = createParameter("inChar", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.CHAR.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterChar = createParameter("inChar", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.CHAR.getId());  //$NON-NLS-1$
         rsParameterChar.setNullType(NullType.Nullable);
         rsParameterChar.setDefaultValue(new String("q")); //$NON-NLS-1$
-        ProcedureParameter rsParameterDate = createParameter("inDate", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.DATE.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterDate = createParameter("inDate", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.DATE.getId());  //$NON-NLS-1$
         rsParameterDate.setNullType(NullType.Nullable);
         rsParameterDate.setDefaultValue(new String("2003-03-20")); //$NON-NLS-1$
-        ProcedureParameter rsParameterDouble = createParameter("inDouble", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterDouble = createParameter("inDouble", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId());  //$NON-NLS-1$
         rsParameterDouble.setNullType(NullType.Nullable);
         rsParameterDouble.setDefaultValue(new String("13.0")); //$NON-NLS-1$
-        ProcedureParameter rsParameterFloat = createParameter("inFloat", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.FLOAT.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterFloat = createParameter("inFloat", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.FLOAT.getId());  //$NON-NLS-1$
         rsParameterFloat.setNullType(NullType.Nullable);
         rsParameterFloat.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterInteger = createParameter("inInteger", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterInteger = createParameter("inInteger", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         rsParameterInteger.setNullType(NullType.Nullable);
         rsParameterInteger.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterLong = createParameter("inLong", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.LONG.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterLong = createParameter("inLong", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.LONG.getId());  //$NON-NLS-1$
         rsParameterLong.setNullType(NullType.Nullable);
         rsParameterLong.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterShort = createParameter("inShort", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.SHORT.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterShort = createParameter("inShort", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.SHORT.getId());  //$NON-NLS-1$
         rsParameterShort.setNullType(NullType.Nullable);
         rsParameterShort.setDefaultValue(new String("13")); //$NON-NLS-1$
-        ProcedureParameter rsParameterTimestamp = createParameter("inTimestamp", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterTimestamp = createParameter("inTimestamp", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId());  //$NON-NLS-1$
         rsParameterTimestamp.setNullType(NullType.Nullable);
         rsParameterTimestamp.setDefaultValue(new String("2003-03-20 21:26:00.000000")); //$NON-NLS-1$
-        ProcedureParameter rsParameterTime = createParameter("inTime", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.TIME.getId());  //$NON-NLS-1$
+        ProcedureParameter rsParameterTime = createParameter("inTime", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.TIME.getId());  //$NON-NLS-1$
         rsParameterTime.setNullType(NullType.Nullable);
         rsParameterTime.setDefaultValue(new String("21:26:00")); //$NON-NLS-1$
         TCQueryNode sqDefaultsNode = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e1=pm1.sqDefaults.inString UNION ALL SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sqDefaults.inInteger; END"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1127,7 +1127,7 @@ public class RealMetadataFactory {
         sqDefaults.setResultSet(rsDefaults);
         
         createResultSet("pm1.rBadDefault", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter paramBadDefaultIn = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter paramBadDefaultIn = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         paramBadDefaultIn.setNullType(NullType.Nullable);
         paramBadDefaultIn.setDefaultValue("Clearly Not An Integer"); //$NON-NLS-1$
         TCQueryNode sqnBadDefault = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e2=pm1.sqBadDefault.in; END"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1136,8 +1136,8 @@ public class RealMetadataFactory {
         //end case 3281
         
         ColumnSet<Procedure> nativeProcResults = createResultSet("pm1.nativers", new String[] {"tuple"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter nativeparam = createParameter("param", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        ProcedureParameter vardic = createParameter("varag", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()); //$NON-NLS-1$
+        ProcedureParameter nativeparam = createParameter("param", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter vardic = createParameter("varag", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()); //$NON-NLS-1$
         vardic.setVarArg(true);
         Procedure nativeProc = createStoredProcedure("native", pm1, Arrays.asList(nativeparam,vardic));  //$NON-NLS-1$ //$NON-NLS-2$
         nativeProc.setResultSet(nativeProcResults);
@@ -1157,7 +1157,7 @@ public class RealMetadataFactory {
         sq4.setResultSet(rs6);
 
         ColumnSet<Procedure> rs7 = createResultSet("pm1.rs7", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs7p2 = createParameter("in1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs7p2 = createParameter("in1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq5n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN EXEC pm1.sq2(pm1.sq5.in1); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq5 = createVirtualProcedure("sq5", pm1, Arrays.asList( rs7p2 ), sq5n1);  //$NON-NLS-1$
         sq5.setResultSet(rs7);
@@ -1173,59 +1173,59 @@ public class RealMetadataFactory {
         sq7.setResultSet(rs9);
 
         ColumnSet<Procedure> rs10 = createResultSet("pm1.rs10", new String[] { "e1"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs10p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs10p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq8n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sq1()) as x WHERE x.e1=pm1.sq8.in; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq8 = createVirtualProcedure("sq8", pm1, Arrays.asList( rs10p2 ), sq8n1);  //$NON-NLS-1$
         sq8.setResultSet(rs10);
 
         ColumnSet<Procedure> rs11 = createResultSet("pm1.rs11", new String[] { "e1"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs11p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs11p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq9n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sq2(pm1.sq9.in)) as x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq9 = createVirtualProcedure("sq9", pm1, Arrays.asList( rs11p2 ), sq9n1);  //$NON-NLS-1$
         sq9.setResultSet(rs11);
 
         ColumnSet<Procedure> rs12 = createResultSet("pm1.rs12", new String[] { "e1"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()}); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs12p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs12p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs12p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs12p3 = createParameter("in2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq10n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sq2(pm1.sq10.in)) as x where e2=pm1.sq10.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq10 = createVirtualProcedure("sq10", pm1, Arrays.asList( rs12p2,  rs12p3), sq10n1);  //$NON-NLS-1$
         sq10.setResultSet(rs12);
 
         ColumnSet<Procedure> rs13 = createResultSet("pm1.rs13", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs13p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs13p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         Procedure sp2 = createStoredProcedure("sp2", pm1, Arrays.asList( rs13p2 ));  //$NON-NLS-1$ //$NON-NLS-2$
         sp2.setResultSet(rs13);
 
         ColumnSet<Procedure> rs14 = createResultSet("pm1.rs14", new String[] { "e1"}, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId()}); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs14p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs14p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs14p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs14p3 = createParameter("in2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq11n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM (EXEC pm1.sp2(?)) as x where e2=pm1.sq11.in; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq11 = createVirtualProcedure("sq11", pm1, Arrays.asList( rs14p2,  rs14p3), sq11n1);  //$NON-NLS-1$
         sq11.setResultSet(rs14);
 
         ColumnSet<Procedure> rs15 = createResultSet("pm1.rs15", new String[] { "count" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs15p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs15p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs15p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs15p3 = createParameter("in2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq12n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN INSERT INTO pm1.g1 ( e1, e2 ) VALUES( pm1.sq12.in, pm1.sq12.in2 ); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq12 = createVirtualProcedure("sq12", pm1, Arrays.asList( rs15p2, rs15p3 ), sq12n1);  //$NON-NLS-1$
         sq12.setResultSet(rs15);
 
         ColumnSet<Procedure> rs16 = createResultSet("pm1.rs16", new String[] { "count" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs16p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs16p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode sq13n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN INSERT INTO pm1.g1 ( e1, e2 ) VALUES( pm1.sq13.in, 2 ); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq13 = createVirtualProcedure("sq13", pm1, Arrays.asList( rs16p2 ), sq13n1);  //$NON-NLS-1$
         sq13.setResultSet(rs16);
 
         ColumnSet<Procedure> rs17 = createResultSet("pm1.rs17", new String[] { "count" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs17p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs17p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs17p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs17p3 = createParameter("in2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq14n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN UPDATE pm1.g1 SET e1 = pm1.sq14.in WHERE e2 = pm1.sq14.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq14 = createVirtualProcedure("sq14", pm1, Arrays.asList( rs17p2, rs17p3 ), sq14n1);  //$NON-NLS-1$
         sq14.setResultSet(rs17);
 
         ColumnSet<Procedure> rs18 = createResultSet("pm1.rs17", new String[] { "count" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter rs18p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-        ProcedureParameter rs18p3 = createParameter("in2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs18p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter rs18p3 = createParameter("in2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId());  //$NON-NLS-1$
         TCQueryNode sq15n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DELETE FROM pm1.g1 WHERE e1 = pm1.sq15.in AND e2 = pm1.sq15.in2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq15 = createVirtualProcedure("sq15", pm1, Arrays.asList( rs18p2, rs18p3 ), sq15n1);  //$NON-NLS-1$
         sq15.setResultSet(rs18);
@@ -1246,13 +1246,13 @@ public class RealMetadataFactory {
         sq18.setResultSet(rs20);
 
         ColumnSet<Procedure> rs21 = createResultSet("pm1.rs21", new String[] { "xml" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter sq19p2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter sq19p2 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         TCQueryNode sq19n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT * FROM xmltest.doc4 WHERE root.node1 = param1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq19 = createVirtualProcedure("sq19", pm1, Arrays.asList( sq19p2 ), sq19n1); //$NON-NLS-1$
         sq19.setResultSet(rs21);
 
         ColumnSet<Procedure> rs22 = createResultSet("pm1.rs13", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs22p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId());  //$NON-NLS-1$
+        ProcedureParameter rs22p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId());  //$NON-NLS-1$
         Procedure sp4 = createStoredProcedure("sp4", pm1, Arrays.asList( rs22p2 ));  //$NON-NLS-1$ //$NON-NLS-2$
         sp4.setResultSet(rs22);
         
@@ -1285,22 +1285,22 @@ public class RealMetadataFactory {
         Procedure vsp6 = createVirtualProcedure("vsp6", pm1, null, vspqn6); //$NON-NLS-1$
         vsp6.setResultSet(vsprs1());
         
-        ProcedureParameter vspp2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp2 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn7 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x=0; WHILE (x < 12) BEGIN x=x+pm1.vsp7.param1; END SELECT e1 FROM pm1.g1 WHERE x=e2; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp7 = createVirtualProcedure("vsp7", pm1, Arrays.asList( vspp2 ), vspqn7); //$NON-NLS-1$
         vsp7.setResultSet(vsprs1());
 
-        ProcedureParameter vspp8 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp8 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn8 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x=0; WHILE (x < 12) BEGIN x=x+pm1.vsp8.param1; END SELECT e1 FROM pm1.g1 WHERE e2 >= param1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp8 = createVirtualProcedure("vsp8", pm1, Arrays.asList( vspp8 ), vspqn8); //$NON-NLS-1$
         vsp8.setResultSet(vsprs1());
         
-        ProcedureParameter vspp9 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp9 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn9 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x=0; WHILE (x < param1) BEGIN x=x+pm1.vsp9.param1; END SELECT e1 FROM pm1.g1 WHERE e2 >= param1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp9 = createVirtualProcedure("vsp9", pm1, Arrays.asList( vspp9 ), vspqn9); //$NON-NLS-1$
         vsp9.setResultSet(vsprs1());
         
-        ProcedureParameter vspp3 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp3 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn10 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; LOOP ON (SELECT e2 FROM pm1.g1 WHERE e2=param1) AS mycursor BEGIN x=mycursor.e2; END END"); //$NON-NLS-1$ //$NON-NLS-2$
         createVirtualProcedure("vsp10", pm1, Arrays.asList( vspp3 ), vspqn10); //$NON-NLS-1$
 
@@ -1349,17 +1349,17 @@ public class RealMetadataFactory {
         Procedure vsp20 = createVirtualProcedure("vsp20", pm1, null, vspqn20); //$NON-NLS-1$
         vsp20.setResultSet(vsprs1());
 
-        ProcedureParameter vspp21 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp21 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn21 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 INTO #temptable FROM pm1.g1; INSERT INTO #temptable(#temptable.e1, e2) VALUES( 'Fourth', param1); SELECT e1, e2 FROM #temptable; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp21 = createVirtualProcedure("vsp21", pm1, Arrays.asList( vspp21 ), vspqn21); //$NON-NLS-1$
         vsp21.setResultSet(vspp4());
 
-        ProcedureParameter vspp22 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp22 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn22 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 INTO #temptable FROM pm1.g1 where e2 > param1; SELECT e1, e2 FROM #temptable; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp22 = createVirtualProcedure("vsp22", pm1, Arrays.asList( vspp22 ), vspqn22); //$NON-NLS-1$
         vsp22.setResultSet(vspp4());
 
-        ProcedureParameter vspp23 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp23 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn23 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; SELECT e1, e2 INTO #temptable FROM pm1.g1 where e2 > param1; x = SELECT e1 FROM #temptable WHERE e2=15; SELECT x, 15; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp23 = createVirtualProcedure("vsp23", pm1, Arrays.asList( vspp23 ), vspqn23); //$NON-NLS-1$
         vsp23.setResultSet(vspp4());
@@ -1390,9 +1390,9 @@ public class RealMetadataFactory {
         vsp30.setResultSet(vsprs30);
 
         ColumnSet<Procedure> vsprs31 = createResultSet("pm1.vsprs31", new String[] { "e1" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp31p2 = createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp31p2 = createParameter("p1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn31 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1 FROM pm1.g1 WHERE e2 = pm1.vsp31.p1; END"); //$NON-NLS-1$ //$NON-NLS-2$
-        Procedure vsp31 = createVirtualProcedure("vsp31", pm1, Arrays.asList(createParameter("p1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId())), vspqn31); //$NON-NLS-1$
+        Procedure vsp31 = createVirtualProcedure("vsp31", pm1, Arrays.asList(createParameter("p1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId())), vspqn31); //$NON-NLS-1$
         vsp31.setResultSet(vsprs31);
 
         TCQueryNode vspqn38 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer VARIABLES.y; VARIABLES.y=5; EXEC pm1.vsp7(VARIABLES.y); END"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1442,9 +1442,9 @@ public class RealMetadataFactory {
         // Virtual group w/ procedure in transformation, optional params, named parameter syntax
         TCQueryNode vspqn47 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN IF (pm1.vsp47.param1 IS NOT NULL) BEGIN SELECT 'FOO' as e1, pm1.vsp47.param1 as e2; END ELSE BEGIN SELECT pm1.vsp47.param2 as e1, 2112 as e2; END END"); //$NON-NLS-1$ //$NON-NLS-2$
         ColumnSet<Procedure> vsprs47 = createResultSet("pm1.vsprs47", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter vspp47_2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp47_2 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         vspp47_2.setNullType(NullType.Nullable);
-        ProcedureParameter vspp47_3 = createParameter("param2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp47_3 = createParameter("param2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         vspp47_3.setNullType(NullType.Nullable);
         Procedure vsp47 = createVirtualProcedure("vsp47", pm1, Arrays.asList( vspp47_2, vspp47_3 ), vspqn47); //$NON-NLS-1$
         vsp47.setResultSet(vsprs47);
@@ -1466,8 +1466,8 @@ public class RealMetadataFactory {
 
         //virtual group with procedure in transformation
         TCQueryNode vspqn26 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1 WHERE e2 >= pm1.vsp26.param1 and e1 = pm1.vsp26.param2; END"); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vspp26_1 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        ProcedureParameter vspp26_2 = createParameter("param2", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp26_1 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp26_2 = createParameter("param2", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         ColumnSet<Procedure> vsprs3 = createResultSet("pm1.vsprs3", new String[] { "e1", "e2" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         Procedure vsp26 = createVirtualProcedure("vsp26", pm1, Arrays.asList( vspp26_1, vspp26_2 ), vspqn26); //$NON-NLS-1$
         vsp26.setResultSet(vsprs3);
@@ -1529,23 +1529,23 @@ public class RealMetadataFactory {
         createElement("e2", vm1g35, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
 		
         ColumnSet<Procedure> vsprs36 = createResultSet("pm1.vsprs36", new String[] { "x" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp36p2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp36p2 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn36 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x = pm1.vsp36.param1 * 2; SELECT x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp36 = createVirtualProcedure("vsp36", pm1, Arrays.asList( vsp36p2 ), vspqn36); //$NON-NLS-1$
         vsp36.setResultSet(vsprs36);
 
         ColumnSet<Procedure> vsprs42 = createResultSet("pm1.vsprs42", new String[] { "x" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId() }); //$NON-NLS-1$ //$NON-NLS-2$
-        ProcedureParameter vsp42p2 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vsp42p2 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn42 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN IF (pm1.vsp42.param1 > 0) SELECT 1 AS x; ELSE SELECT 0 AS x; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp42 = createVirtualProcedure("vsp42", pm1, Arrays.asList( vsp42p2 ), vspqn42); //$NON-NLS-1$
         vsp42.setResultSet(vsprs42);
 
-        ProcedureParameter vspp44 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp44 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn44 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT pm1.vsp44.param1 INTO #temptable; SELECT e1 from pm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$    
         Procedure vsp44 = createVirtualProcedure("vsp44", pm1, Arrays.asList( vspp44 ), vspqn44); //$NON-NLS-1$
         vsp44.setResultSet(vsprs1());
 
-        ProcedureParameter vspp43 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp43 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn43 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN exec pm1.vsp44(pm1.vsp43.param1); END"); //$NON-NLS-1$ //$NON-NLS-2$    
         Procedure vsp43 = createVirtualProcedure("vsp43", pm1, Arrays.asList( vspp43 ), vspqn43); //$NON-NLS-1$
         vsp43.setResultSet(vsprs1());
@@ -1555,7 +1555,7 @@ public class RealMetadataFactory {
         vsp46.setResultSet(vsprs1());
         
         ColumnSet<Procedure> vsp48rs = createResultSet("pm1vsp48.rs", new String[] { "e1" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
-        ProcedureParameter vsp48p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter vsp48p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode vspqn48 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; SELECT e1 FROM (EXEC pm1.sq2(pm1.vsp48.in)) as e; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp48 = createVirtualProcedure("vsp48", pm1, Arrays.asList( vsp48p2 ), vspqn48); //$NON-NLS-1$
         vsp48.setResultSet(vsp48rs);
@@ -1581,18 +1581,18 @@ public class RealMetadataFactory {
         vsp52.setResultSet(vsp52rs);
 
         ColumnSet<Procedure> vsp53rs = createResultSet("pm1vsp53.rs", new String[] { "result" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
-        ProcedureParameter vsp53p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter vsp53p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode vspqn53 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; x = 'b'; LOOP ON (SELECT e1 FROM (EXEC pm1.sq2(pm1.vsp53.in)) as e) AS c BEGIN x = x || 'b'; END SELECT x AS result; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp53 = createVirtualProcedure("vsp53", pm1, Arrays.asList( vsp53p2 ), vspqn53); //$NON-NLS-1$
         vsp53.setResultSet(vsp53rs);
 
         ColumnSet<Procedure> vsp54rs = createResultSet("pm1vsp54.rs", new String[] { "result" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ 
-        ProcedureParameter vsp54p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+        ProcedureParameter vsp54p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
         TCQueryNode vspqn54 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN DECLARE string x; x = 'c'; x = SELECT e1 FROM (EXEC pm1.sq2(pm1.vsp54.in)) as e; SELECT x AS result; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp54 = createVirtualProcedure("vsp54", pm1, Arrays.asList( vsp54p2 ), vspqn54); //$NON-NLS-1$
         vsp54.setResultSet(vsp54rs);
         
-        ProcedureParameter vspp55 = createParameter("param1", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp55 = createParameter("param1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn55 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN select e1, param1 as a from vm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp55 = createVirtualProcedure("vsp55", pm1, Arrays.asList( vspp55 ), vspqn55); //$NON-NLS-1$
         vsp55.setResultSet(vspp4());
@@ -1605,7 +1605,7 @@ public class RealMetadataFactory {
         Procedure vsp57 = createVirtualProcedure("vsp57", pm1, null, vspqn57); //$NON-NLS-1$
         vsp57.setResultSet(vsprs1());
         
-        ProcedureParameter vspp58 = createParameter("inp", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        ProcedureParameter vspp58 = createParameter("inp", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         TCQueryNode vspqn58 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT vsp58.inp; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure vsp58 = createVirtualProcedure("vsp58", pm1, Arrays.asList( vspp58 ), vspqn58); //$NON-NLS-1$
         vsp58.setResultSet(vsprs1());
@@ -1865,7 +1865,7 @@ public class RealMetadataFactory {
     /**
      * Create stored procedure parameter.
      */
-    public ProcedureParameter createParameter(String name, ISPParameter.ParameterInfo direction, String type) {
+    public ProcedureParameter createParameter(String name, SPParameter.ParameterInfo direction, String type) {
         ProcedureParameter param = new ProcedureParameter(teiidVersion);
         param.setName(name);
         switch (direction) {
@@ -2489,7 +2489,7 @@ public class RealMetadataFactory {
 	                                       new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 	    
 	    ColumnSet<Procedure> rs2 = createResultSet("Virt.rs1", new String[] { "a", "b" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	    ProcedureParameter rs2p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+	    ProcedureParameter rs2p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
 	    rs2p2.setNullType(org.teiid.metadata.BaseColumn.NullType.Nullable);
 	    TCQueryNode sq2n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN\n" //$NON-NLS-1$ //$NON-NLS-2$
 	                                    + "execute string 'SELECT a, b FROM MultiModel.Phys where SOURCE_NAME = Virt.sq1.in'; END"); //$NON-NLS-1$ 
@@ -2497,8 +2497,8 @@ public class RealMetadataFactory {
 	    sq1.setResultSet(rs2);
 	
 	    ColumnSet<Procedure> rs3 = createResultSet("MultiModel.rs1", new String[] { "a", "b" }, new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId() }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	    ProcedureParameter rs3p2 = createParameter("in", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
-	    ProcedureParameter rs3p3 = createParameter("source_name", ISPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+	    ProcedureParameter rs3p2 = createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
+	    ProcedureParameter rs3p3 = createParameter("source_name", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId());  //$NON-NLS-1$
 	    rs3p3.setNullType(org.teiid.metadata.BaseColumn.NullType.Nullable);
 	    Procedure sq2 = createStoredProcedure("proc", physModel, Arrays.asList(rs3p2, rs3p3));
 	    sq2.setResultSet(rs3);

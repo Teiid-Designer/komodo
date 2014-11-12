@@ -33,8 +33,8 @@ import org.junit.Test;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.resolver.TCQueryResolver;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 
 @SuppressWarnings( {"nls", "javadoc"} )
@@ -47,8 +47,8 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
         super(teiidVersion);
     }
 
-    private Command helpResolve(String sql, QueryMetadataInterface metadata) {
-        Command command = null;
+    private CommandImpl helpResolve(String sql, QueryMetadataInterface metadata) {
+        CommandImpl command = null;
 
         try {
             command = getQueryParser().parseCommand(sql);
@@ -62,12 +62,12 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
     }
 
     public ValidatorReport helpValidate(String sql, String[] expectedStringArray, QueryMetadataInterface metadata) {
-        Command command = helpResolve(sql, metadata);
+        CommandImpl command = helpResolve(sql, metadata);
 
         return helpRunValidator(command, expectedStringArray, metadata);
     }
 
-    public ValidatorReport helpRunValidator(Command command, String[] expectedStringArray, QueryMetadataInterface metadata) {
+    public ValidatorReport helpRunValidator(CommandImpl command, String[] expectedStringArray, QueryMetadataInterface metadata) {
         try {
             ValidatorReport report = new DefaultValidator().validate(command, metadata);
 
@@ -80,13 +80,13 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
 
     private void examineReport(Object command, String[] expectedStringArray, ValidatorReport report) {
         // Get invalid objects from report
-        Collection<LanguageObject> actualObjs = new ArrayList<LanguageObject>();
+        Collection<BaseLanguageObject> actualObjs = new ArrayList<BaseLanguageObject>();
         report.collectInvalidObjects(actualObjs);
 
         // Compare expected and actual objects
         Set<String> expectedStrings = new HashSet<String>(Arrays.asList(expectedStringArray));
         Set<String> actualStrings = new HashSet<String>();
-        for (LanguageObject obj : actualObjs) {
+        for (BaseLanguageObject obj : actualObjs) {
             actualStrings.add(SQLStringVisitorImpl.getSQLString(obj));
         }
 

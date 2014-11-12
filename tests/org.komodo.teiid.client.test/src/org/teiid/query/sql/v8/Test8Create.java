@@ -33,7 +33,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.AbstractTestQueryParser;
-import org.teiid.query.sql.lang.Create;
+import org.teiid.query.sql.lang.CreateImpl;
 
 @SuppressWarnings( {"javadoc"} )
 public class Test8Create extends AbstractTestQueryParser {
@@ -63,8 +63,8 @@ public class Test8Create extends AbstractTestQueryParser {
 	
 	// ################################## TEST HELPERS ################################	
 
-    public Create sample1() {
-        Create create = getFactory().newCreate();
+    public CreateImpl sample1() {
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("temp_table"));//$NON-NLS-1$
 
         List elements = new ArrayList();
@@ -75,8 +75,8 @@ public class Test8Create extends AbstractTestQueryParser {
         return create;
     }
 
-    public Create sample2() {
-        Create create = getFactory().newCreate();
+    public CreateImpl sample2() {
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("temp_table2"));//$NON-NLS-1$
 
         List elements = new ArrayList();
@@ -92,21 +92,21 @@ public class Test8Create extends AbstractTestQueryParser {
 
     @Test
     public void testSelfEquivalence() {
-        Create c1 = sample1();
+        CreateImpl c1 = sample1();
         assertEquals(c1, c1);
     }
 
     @Test
     public void testEquivalence() {
-        Create c1 = sample1();
-        Create c2 = sample1();
+        CreateImpl c1 = sample1();
+        CreateImpl c2 = sample1();
         assertEquals(c1, c2);
     }
 
     @Test
     public void testNonEquivalence() {
-        Create c1 = sample1();
-        Create c2 = sample2();
+        CreateImpl c1 = sample1();
+        CreateImpl c2 = sample2();
         assertNotEquals(c1, c2);
     }
 }

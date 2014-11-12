@@ -28,32 +28,32 @@ import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.validator.Validator;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataStore;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
 import org.teiid.query.sql.visitor.CommandCollectorVisitorImpl;
 
 
-public class DefaultValidator implements Validator<LanguageObject> {
+public class DefaultValidator implements Validator<BaseLanguageObject> {
 
     @Override
-    public ValidatorReport validate(LanguageObject object, QueryMetadataInterface metadata) throws Exception {
+    public ValidatorReport validate(BaseLanguageObject object, QueryMetadataInterface metadata) throws Exception {
         ValidatorReport report1 = validate(object, metadata, new ValidationVisitorImpl(object.getTeiidVersion()));
         return report1;
     }
 
-    public static final ValidatorReport validate(LanguageObject object, QueryMetadataInterface metadata, AbstractValidationVisitor visitor)
+    public static final ValidatorReport validate(BaseLanguageObject object, QueryMetadataInterface metadata, AbstractValidationVisitor visitor)
         throws Exception {
 
         // Execute on this command
         executeValidation(object, metadata, visitor);
 
         // Construct combined runtime / query metadata if necessary
-        if(object instanceof Command) {                        
+        if(object instanceof CommandImpl) {                        
             // Recursively validate subcommands
-            Iterator<Command> iter = CommandCollectorVisitorImpl.getCommands((Command)object).iterator();
+            Iterator<CommandImpl> iter = CommandCollectorVisitorImpl.getCommands((CommandImpl)object).iterator();
             while(iter.hasNext()) {
-                Command subCommand = iter.next();
+                CommandImpl subCommand = iter.next();
                 validate(subCommand, metadata, visitor);
             }
         }
@@ -62,7 +62,7 @@ public class DefaultValidator implements Validator<LanguageObject> {
         return visitor.getReport();
     }
 
-    private static final void executeValidation(LanguageObject object, final QueryMetadataInterface metadata, final AbstractValidationVisitor visitor) 
+    private static final void executeValidation(BaseLanguageObject object, final QueryMetadataInterface metadata, final AbstractValidationVisitor visitor) 
         throws Exception {
 
         // Reset visitor
@@ -74,7 +74,7 @@ public class DefaultValidator implements Validator<LanguageObject> {
         PreOrderNavigator nav = new PreOrderNavigator(visitor) {
         	
         	@Override
-            protected void visitNode(LanguageObject obj) {
+            protected void visitNode(BaseLanguageObject obj) {
         		QueryMetadataInterface previous = visitor.getMetadata();
         		setTempMetadata(metadata, visitor, obj);
         		super.visitNode(obj);
@@ -82,13 +82,13 @@ public class DefaultValidator implements Validator<LanguageObject> {
         	}
         	
         	@Override
-        	protected void preVisitVisitor(LanguageObject obj) {
+        	protected void preVisitVisitor(BaseLanguageObject obj) {
         		super.preVisitVisitor(obj);
         		visitor.stack.add(obj);
         	}
         	
         	@Override
-        	protected void postVisitVisitor(LanguageObject obj) {
+        	protected void postVisitVisitor(BaseLanguageObject obj) {
         		visitor.stack.pop();
         	}
         	
@@ -104,9 +104,9 @@ public class DefaultValidator implements Validator<LanguageObject> {
     
 	private static void setTempMetadata(final QueryMetadataInterface metadata,
 			final AbstractValidationVisitor visitor,
-			LanguageObject obj) {
-		if (obj instanceof Command) {
-			Command command = (Command)obj;
+			BaseLanguageObject obj) {
+		if (obj instanceof CommandImpl) {
+			CommandImpl command = (CommandImpl)obj;
 			visitor.currentCommand = command;
 			TempMetadataStore tempMetadata = command.getTemporaryMetadata();
             if(tempMetadata != null && !tempMetadata.getData().isEmpty()) {

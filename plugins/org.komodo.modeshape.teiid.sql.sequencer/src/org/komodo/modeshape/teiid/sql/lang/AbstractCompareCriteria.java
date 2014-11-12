@@ -25,12 +25,12 @@ import org.komodo.modeshape.teiid.Messages;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator.Operator;
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
 
 /**
  *
  */
-public abstract class AbstractCompareCriteria extends Criteria implements PredicateCriteria {
+public abstract class AbstractCompareCriteria extends CriteriaImpl implements PredicateCriteria {
 
     /**
      * @param p teiid parser
@@ -81,23 +81,23 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * Get left expression.
      * @return Left expression
      */
-    public Expression getLeftExpression() {
+    public BaseExpression getLeftExpression() {
         return getChildforIdentifierAndRefType(
-                                               TeiidSqlLexicon.AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, Expression.class);
+                                               TeiidSqlLexicon.AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, BaseExpression.class);
     }
 
     /**
      * Set left expression.
      * @param expression Left expression
      */
-    public void setLeftExpression(Expression expression) {
+    public void setLeftExpression(BaseExpression expression) {
         setChild(TeiidSqlLexicon.AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, expression);
     }
 
     /**
      * @return right expression
      */
-    public abstract Expression getRightExpression();
+    public abstract BaseExpression getRightExpression();
 
     @Override
     public int hashCode() {

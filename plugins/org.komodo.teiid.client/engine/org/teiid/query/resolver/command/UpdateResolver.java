@@ -41,13 +41,13 @@ import org.teiid.query.resolver.VariableResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.SetClause;
-import org.teiid.query.sql.lang.Update;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.SetClauseImpl;
+import org.teiid.query.sql.lang.UpdateImpl;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 
 
 /**
@@ -63,20 +63,20 @@ public class UpdateResolver extends ProcedureContainerResolver implements Variab
     }
 
     /** 
-     * @see org.teiid.query.resolver.ProcedureContainerResolver#resolveProceduralCommand(org.teiid.query.sql.lang.Command, org.teiid.query.metadata.TempMetadataAdapter)
+     * @see org.teiid.query.resolver.ProcedureContainerResolver#resolveProceduralCommand(org.teiid.query.sql.lang.CommandImpl, org.teiid.query.metadata.TempMetadataAdapter)
      */
     @Override
-    public void resolveProceduralCommand(Command command, TempMetadataAdapter metadata) 
+    public void resolveProceduralCommand(CommandImpl command, TempMetadataAdapter metadata) 
         throws Exception {
 
         //Cast to known type
-        Update update = (Update) command;
+        UpdateImpl update = (UpdateImpl) command;
 
         // Resolve elements and functions
-        Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+        Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
         groups.add(update.getGroup());
         ResolverVisitorImpl visitor = new ResolverVisitorImpl(command.getTeiidVersion());
-        for (SetClause clause : update.getChangeList().getClauses()) {
+        for (SetClauseImpl clause : update.getChangeList().getClauses()) {
         	visitor.resolveLanguageObject(clause.getSymbol(), groups, null, metadata);
 		}
         getQueryResolver().resolveSubqueries(command, metadata, groups);
@@ -92,28 +92,28 @@ public class UpdateResolver extends ProcedureContainerResolver implements Variab
      */
     @Override
     protected String getPlan(QueryMetadataInterface metadata,
-                           GroupSymbol group) throws Exception {
+                           GroupSymbolImpl group) throws Exception {
         return metadata.getUpdatePlan(group.getMetadataID());
     }
 
     /** 
-     * @see org.teiid.query.resolver.VariableResolver#getVariableValues(Command, boolean, QueryMetadataInterface)
+     * @see org.teiid.query.resolver.VariableResolver#getVariableValues(CommandImpl, boolean, QueryMetadataInterface)
      */
     @Override
-    public Map<ElementSymbol, Expression> getVariableValues(Command command, boolean changingOnly,
+    public Map<ElementSymbolImpl, BaseExpression> getVariableValues(CommandImpl command, boolean changingOnly,
                                  QueryMetadataInterface metadata) throws Exception {
-        Map<ElementSymbol, Expression> result = new HashMap<ElementSymbol, Expression>();
+        Map<ElementSymbolImpl, BaseExpression> result = new HashMap<ElementSymbolImpl, BaseExpression>();
         
-        Update update = (Update) command;
+        UpdateImpl update = (UpdateImpl) command;
         
-        Map<ElementSymbol, Expression> changing = update.getChangeList().getClauseMap();
+        Map<ElementSymbolImpl, BaseExpression> changing = update.getChangeList().getClauseMap();
         
-        for (Entry<ElementSymbol, Expression> entry : changing.entrySet()) {
-        	ElementSymbol leftSymbol = entry.getKey().clone();
+        for (Entry<ElementSymbolImpl, BaseExpression> entry : changing.entrySet()) {
+        	ElementSymbolImpl leftSymbol = entry.getKey().clone();
             leftSymbol.getGroupSymbol().setName(ProcedureReservedWords.CHANGING);
             leftSymbol.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
             
-            Constant constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
+            ConstantImpl constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
             constant.setValue(Boolean.TRUE);
             result.put(leftSymbol, constant);
             if (!changingOnly) {
@@ -123,17 +123,17 @@ public class UpdateResolver extends ProcedureContainerResolver implements Variab
             }
         }
         
-        Collection<ElementSymbol> insertElmnts = ResolverUtil.resolveElementsInGroup(update.getGroup(), metadata);
+        Collection<ElementSymbolImpl> insertElmnts = ResolverUtil.resolveElementsInGroup(update.getGroup(), metadata);
 
         insertElmnts.removeAll(changing.keySet());
 
-        Iterator<ElementSymbol> defaultIter = insertElmnts.iterator();
+        Iterator<ElementSymbolImpl> defaultIter = insertElmnts.iterator();
         while(defaultIter.hasNext()) {
-            ElementSymbol varSymbol = defaultIter.next().clone();
+            ElementSymbolImpl varSymbol = defaultIter.next().clone();
             varSymbol.getGroupSymbol().setName(ProcedureReservedWords.CHANGING);
             varSymbol.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
             
-            Constant constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
+            ConstantImpl constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
             constant.setValue(Boolean.FALSE);
             result.put(varSymbol, constant);
         }

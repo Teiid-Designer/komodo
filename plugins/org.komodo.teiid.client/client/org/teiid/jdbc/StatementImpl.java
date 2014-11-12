@@ -49,7 +49,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.komodo.spi.query.sql.lang.ISPParameter;
+import org.komodo.spi.query.sql.lang.SPParameter;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.utils.KLog;
@@ -398,7 +398,7 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
 		    Iterator iteratorOfParameters = listOfParameters.iterator();
 		    while(iteratorOfParameters.hasNext()){
 		        ParameterInfo parameter = (ParameterInfo)iteratorOfParameters.next();
-		        if(parameter.getType() == ISPParameter.ParameterInfo.RESULT_SET.index()){
+		        if(parameter.getType() == SPParameter.ParameterInfo.RESULT_SET.index()){
 		            resultSetSize = parameter.getNumColumns();
 		            //one ResultSet only
 		            break;
@@ -411,7 +411,7 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
 		    iteratorOfParameters = listOfParameters.iterator();
 		    while(iteratorOfParameters.hasNext()){
 		        ParameterInfo parameter = (ParameterInfo)iteratorOfParameters.next();
-		        if(parameter.getType() == ISPParameter.ParameterInfo.RETURN_VALUE.index()){
+		        if(parameter.getType() == SPParameter.ParameterInfo.RETURN_VALUE.index()){
 		            count++;
 		            index++;
 		            int resultIndex = resultSetSize + count;
@@ -424,9 +424,9 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
 		    iteratorOfParameters = listOfParameters.iterator();
 		    while(iteratorOfParameters.hasNext()){
 		        ParameterInfo parameter = (ParameterInfo)iteratorOfParameters.next();
-		        if(parameter.getType() != ISPParameter.ParameterInfo.RETURN_VALUE.index() && parameter.getType() != ISPParameter.ParameterInfo.RESULT_SET.index()){
+		        if(parameter.getType() != SPParameter.ParameterInfo.RETURN_VALUE.index() && parameter.getType() != SPParameter.ParameterInfo.RESULT_SET.index()){
 		            index++;
-		            if(parameter.getType() == ISPParameter.ParameterInfo.OUT.index() || parameter.getType() == ISPParameter.ParameterInfo.INOUT.index()){
+		            if(parameter.getType() == SPParameter.ParameterInfo.OUT.index() || parameter.getType() == SPParameter.ParameterInfo.INOUT.index()){
 		                count++;
 		                int resultIndex = resultSetSize + count;
 		                outParamIndexMap.put(index, resultIndex);

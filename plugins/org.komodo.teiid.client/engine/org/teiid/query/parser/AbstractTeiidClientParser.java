@@ -54,16 +54,16 @@ import org.teiid.metadata.Table;
 import org.teiid.query.metadata.DDLConstants;
 import org.teiid.query.metadata.SystemMetadata;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.sql.lang.AlterTrigger;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.lang.SourceHint;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.AlterTriggerImpl;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.lang.SourceHintImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
@@ -120,7 +120,7 @@ public abstract class AbstractTeiidClientParser implements TeiidClientParser {
     }
 
     @Override
-    public <T extends LanguageObject> T createASTNode(ASTNodes nodeType) {
+    public <T extends BaseLanguageObject> T createASTNode(ASTNodes nodeType) {
         return TeiidNodeFactory.getInstance().create(this, nodeType);
     };
 
@@ -132,10 +132,10 @@ public abstract class AbstractTeiidClientParser implements TeiidClientParser {
 	}
 
 	@Since(Version.TEIID_8_0)
-	protected void convertToParameters(List<Expression> values, StoredProcedure storedProcedure, int paramIndex) {
-		for (Expression value : values) {
-			SPParameter parameter = new SPParameter(this, paramIndex++, value);
-			parameter.setParameterType(SPParameter.IN);
+	protected void convertToParameters(List<BaseExpression> values, StoredProcedureImpl storedProcedure, int paramIndex) {
+		for (BaseExpression value : values) {
+			SPParameterImpl parameter = new SPParameterImpl(this, paramIndex++, value);
+			parameter.setParameterType(SPParameterImpl.IN);
 			storedProcedure.addParameter(parameter);
 		}
 	}
@@ -335,7 +335,7 @@ public abstract class AbstractTeiidClientParser implements TeiidClientParser {
     }
 
     @Override
-    public Command procedureBodyCommand(ParseInfo parseInfo) throws Exception {
+    public CommandImpl procedureBodyCommand(ParseInfo parseInfo) throws Exception {
         throw new UnsupportedOperationException("Not supported in Teiid Version " + getVersion()); //$NON-NLS-1$
     }
 
@@ -775,8 +775,8 @@ public abstract class AbstractTeiidClientParser implements TeiidClientParser {
 	}	
 	
     @Since(Version.TEIID_8_0)
-	protected void createDDLTrigger(MetadataFactory schema, AlterTrigger trigger) {
-		GroupSymbol group = trigger.getTarget();
+	protected void createDDLTrigger(MetadataFactory schema, AlterTriggerImpl trigger) {
+		GroupSymbolImpl group = trigger.getTarget();
 		
 		Table table = schema.getSchema().getTable(group.getName());
 		if (trigger.getEvent().equals(Table.TriggerEvent.INSERT)) {
@@ -844,14 +844,14 @@ public abstract class AbstractTeiidClientParser implements TeiidClientParser {
 	}
 
     @Since(Version.TEIID_8_0)
-    protected KeyRecord addFBI(MetadataFactory factory, List<Expression> expressions, Table table, String name) {
+    protected KeyRecord addFBI(MetadataFactory factory, List<BaseExpression> expressions, Table table, String name) {
         List<String> columnNames = new ArrayList<String>(expressions.size());
         List<Boolean> nonColumnExpressions = new ArrayList<Boolean>(expressions.size());
         boolean fbi = false;
         for (int i = 0; i < expressions.size(); i++) {
-            Expression ex = expressions.get(i);
-            if (ex instanceof ElementSymbol) {
-                columnNames.add(((ElementSymbol)ex).getName());
+            BaseExpression ex = expressions.get(i);
+            if (ex instanceof ElementSymbolImpl) {
+                columnNames.add(((ElementSymbolImpl)ex).getName());
                 nonColumnExpressions.add(Boolean.FALSE);
             } else {
                 columnNames.add(ex.toString());
@@ -872,21 +872,21 @@ public abstract class AbstractTeiidClientParser implements TeiidClientParser {
     }
 
     @Since(Version.TEIID_8_5)
-    protected void setSourceHint(SourceHint sourceHint, Command command) {
+    protected void setSourceHint(SourceHintImpl sourceHint, CommandImpl command) {
         if (sourceHint == null)
             return;
 
-        if (command instanceof SetQuery) {
-            ((SetQuery)command).getProjectedQuery().setSourceHint(sourceHint);
+        if (command instanceof SetQueryImpl) {
+            ((SetQueryImpl)command).getProjectedQuery().setSourceHint(sourceHint);
         } else {
             command.setSourceHint(sourceHint);
         }
     }
 
     @Since(Version.TEIID_8_5)
-    protected List<Expression> arrayExpressions(List<Expression> expressions, Expression expr) {
+    protected List<BaseExpression> arrayExpressions(List<BaseExpression> expressions, BaseExpression expr) {
         if (expressions == null) {
-            expressions = new ArrayList<Expression>();
+            expressions = new ArrayList<BaseExpression>();
         }
         if (expr != null) {
             expressions.add(expr);

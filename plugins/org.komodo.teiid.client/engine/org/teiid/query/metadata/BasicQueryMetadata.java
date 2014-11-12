@@ -37,8 +37,8 @@ import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.xml.MappingNode;
 import org.teiid.query.eval.TeiidScriptEngine;
 import org.teiid.query.mapping.relational.TCQueryNode;
-import org.teiid.query.sql.lang.ObjectTable;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.lang.ObjectTableImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
 
 
 /**
@@ -588,7 +588,7 @@ public class BasicQueryMetadata implements QueryMetadataInterface {
 
 	@Override
 	public ScriptEngine getScriptEngine(String language) throws Exception {
-		if (language == null || ObjectTable.DEFAULT_LANGUAGE.equals(language)) {
+		if (language == null || ObjectTableImpl.DEFAULT_LANGUAGE.equals(language)) {
 			return new TeiidScriptEngine();
 		}
 		return getScriptEngineDirect(language);
@@ -611,7 +611,7 @@ public class BasicQueryMetadata implements QueryMetadataInterface {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<Expression, Integer> getFunctionBasedExpressions(Object metadataID) {
+	public Map<BaseExpression, Integer> getFunctionBasedExpressions(Object metadataID) {
 		return null;
 	}
 

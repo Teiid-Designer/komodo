@@ -25,13 +25,13 @@ import org.junit.Test;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.sql.lang.Delete;
-import org.teiid.query.sql.proc.AssignmentStatement;
-import org.teiid.query.sql.proc.Block;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateProcedureCommand;
-import org.teiid.query.sql.proc.RaiseStatement;
-import org.teiid.query.sql.proc.Statement;
+import org.teiid.query.sql.lang.DeleteImpl;
+import org.teiid.query.sql.proc.AssignmentStatementImpl;
+import org.teiid.query.sql.proc.BlockImpl;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateProcedureCommandImpl;
+import org.teiid.query.sql.proc.RaiseStatementImpl;
+import org.teiid.query.sql.proc.StatementImpl;
 import org.teiid.query.sql.v8.Test8SQLStringVisitor;
 
 /**
@@ -51,48 +51,48 @@ public class Test85SQLStringVisitor extends Test8SQLStringVisitor {
     @Override
     @Test
     public void testCreateUpdateProcedure1() {
-        Delete d1 = getFactory().newNode(ASTNodes.DELETE);
+        DeleteImpl d1 = getFactory().newNode(ASTNodes.DELETE);
         d1.setGroup(getFactory().newGroupSymbol("g"));
-        CommandStatement cmdStmt = getFactory().newCommandStatement(d1);
-        AssignmentStatement assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
-        RaiseStatement errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
-        Block b = getFactory().newBlock();
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(d1);
+        AssignmentStatementImpl assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
+        RaiseStatementImpl errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
+        BlockImpl b = getFactory().newBlock();
         b.addStatement(cmdStmt);
         b.addStatement(assigStmt);
         b.addStatement(errStmt);
-        CreateProcedureCommand cup = getFactory().newCreateProcedureCommand(b);
+        CreateProcedureCommandImpl cup = getFactory().newCreateProcedureCommand(b);
         helpTest(cup, "BEGIN\nDELETE FROM g;\na = 1;\nRAISE 'My Error';\nEND");
     }
 
     @Override
     @Test
     public void testCreateUpdateProcedure2() {
-        Delete d1 = getFactory().newNode(ASTNodes.DELETE);
+        DeleteImpl d1 = getFactory().newNode(ASTNodes.DELETE);
         d1.setGroup(getFactory().newGroupSymbol("g"));
-        CommandStatement cmdStmt = getFactory().newCommandStatement(d1);
-        AssignmentStatement assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
-        RaiseStatement errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
-        Block b = getFactory().newBlock();
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(d1);
+        AssignmentStatementImpl assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
+        RaiseStatementImpl errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
+        BlockImpl b = getFactory().newBlock();
         b.addStatement(cmdStmt);
         b.addStatement(assigStmt);
         b.addStatement(errStmt);
-        CreateProcedureCommand cup = getFactory().newCreateProcedureCommand(b);
+        CreateProcedureCommandImpl cup = getFactory().newCreateProcedureCommand(b);
         helpTest(cup, "BEGIN\nDELETE FROM g;\na = 1;\nRAISE 'My Error';\nEND");
     }
 
     @Override
     @Test
     public void testCreateUpdateProcedure3() {
-        Delete d1 = getFactory().newNode(ASTNodes.DELETE);
+        DeleteImpl d1 = getFactory().newNode(ASTNodes.DELETE);
         d1.setGroup(getFactory().newGroupSymbol("g"));
-        CommandStatement cmdStmt = getFactory().newCommandStatement(d1);
-        AssignmentStatement assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
-        Statement errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
-        Block b = getFactory().newBlock();
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(d1);
+        AssignmentStatementImpl assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
+        StatementImpl errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
+        BlockImpl b = getFactory().newBlock();
         b.addStatement(cmdStmt);
         b.addStatement(assigStmt);
         b.addStatement(errStmt);
-        CreateProcedureCommand cup = getFactory().newCreateProcedureCommand(b);
+        CreateProcedureCommandImpl cup = getFactory().newCreateProcedureCommand(b);
         helpTest(cup, "BEGIN\nDELETE FROM g;\na = 1;\nRAISE 'My Error';\nEND");
     }
 

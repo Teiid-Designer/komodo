@@ -26,18 +26,18 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.ExistsCriteria;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubqueryFromClause;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
-import org.teiid.query.sql.lang.WithQueryCommand;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.ExistsCriteriaImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.SubqueryFromClauseImpl;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
+import org.teiid.query.sql.lang.WithQueryCommandImpl;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.LoopStatement;
-import org.teiid.query.sql.symbol.ScalarSubquery;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.LoopStatementImpl;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
 
 
 /**
@@ -49,7 +49,7 @@ import org.teiid.query.sql.symbol.ScalarSubquery;
  * The public visit() methods should NOT be called directly.</p>
  */
 public class CommandCollectorVisitorImpl extends TCLanguageVisitorImpl
-    implements org.komodo.spi.query.sql.CommandCollectorVisitor<Command> {
+    implements org.komodo.spi.query.sql.CommandCollectorVisitor<CommandImpl> {
 
     /**
      * @param teiidVersion
@@ -58,32 +58,32 @@ public class CommandCollectorVisitorImpl extends TCLanguageVisitorImpl
         super(teiidVersion);
     }
 
-    private List<Command> commands = new ArrayList<Command>();
+    private List<CommandImpl> commands = new ArrayList<CommandImpl>();
 
     /**
      * Get the commands collected by the visitor.  This should best be called 
      * after the visitor has been run on the language object tree.
-     * @return List of {@link org.teiid.query.sql.lang.Command}
+     * @return List of {@link org.teiid.query.sql.lang.CommandImpl}
      */
-    public List<Command> getCommands() { 
+    public List<CommandImpl> getCommands() { 
         return this.commands;
     }
 
     /**
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.ExistsCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.ExistsCriteriaImpl)
      */
     @Override
-    public void visit(ExistsCriteria obj) {
+    public void visit(ExistsCriteriaImpl obj) {
         this.commands.add(obj.getCommand());
     }
 
     @Override
-    public void visit(ScalarSubquery obj) {
+    public void visit(ScalarSubqueryImpl obj) {
         this.commands.add(obj.getCommand());
     }
 
     @Override
-    public void visit(SubqueryCompareCriteria obj) {
+    public void visit(SubqueryCompareCriteriaImpl obj) {
         this.commands.add(obj.getCommand());
     }
 
@@ -93,7 +93,7 @@ public class CommandCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(SubqueryFromClause obj) {
+    public void visit(SubqueryFromClauseImpl obj) {
         this.commands.add(obj.getCommand());
     }
 
@@ -103,7 +103,7 @@ public class CommandCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(SubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteriaImpl obj) {
         this.commands.add(obj.getCommand());
     }
 
@@ -113,7 +113,7 @@ public class CommandCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(CommandStatement obj) {
+    public void visit(CommandStatementImpl obj) {
         this.commands.add(obj.getCommand());
     }    
 
@@ -123,23 +123,23 @@ public class CommandCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(LoopStatement obj) {
+    public void visit(LoopStatementImpl obj) {
         this.commands.add(obj.getCommand());
     }
 
     @Override
-    public void visit(WithQueryCommand obj) {
+    public void visit(WithQueryCommandImpl obj) {
     	this.commands.add(obj.getCommand());
     }
 
     @Override
-    public List<Command> findCommands(Command command) {
-        final boolean visitCommands = command instanceof SetQuery;
+    public List<CommandImpl> findCommands(CommandImpl command) {
+        final boolean visitCommands = command instanceof SetQueryImpl;
         PreOrderNavigator navigator = new PreOrderNavigator(this) {
 
             @Override
-            protected void visitNode(LanguageObject obj) {
-                if (!visitCommands && obj instanceof Command) {
+            protected void visitNode(BaseLanguageObject obj) {
+                if (!visitCommands && obj instanceof CommandImpl) {
                     return;
                 }
                 super.visitNode(obj);
@@ -155,7 +155,7 @@ public class CommandCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param command
      * @return list of commands
      */
-    public static final List<Command> getCommands(Command command) {
+    public static final List<CommandImpl> getCommands(CommandImpl command) {
         CommandCollectorVisitorImpl visitor = new CommandCollectorVisitorImpl(command.getTeiidVersion());
         return visitor.findCommands(command);
     }

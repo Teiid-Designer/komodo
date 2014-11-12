@@ -26,7 +26,7 @@ import static org.junit.Assert.fail;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.ParseInfo;
-import org.teiid.query.sql.lang.Command;
+import org.teiid.query.sql.lang.CommandImpl;
 import org.teiid.query.sql.v85.TestQuery85Parser;
 
 /**
@@ -47,7 +47,7 @@ public class TestQuery86Parser extends TestQuery85Parser {
     public void testWindowedExpression() {
         String sql = "SELECT foo(x, y) over ()";
         try {
-            Command actualCommand = parser.parseCommand(sql, new ParseInfo());
+            CommandImpl actualCommand = parser.parseCommand(sql, new ParseInfo());
             assertEquals("SELECT foo(ALL x, y) OVER ()", actualCommand.toString());
         } catch (Exception ex) {
             fail(ex.getMessage());

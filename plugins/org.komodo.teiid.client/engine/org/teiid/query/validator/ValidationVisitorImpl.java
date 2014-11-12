@@ -46,11 +46,11 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.metadata.QueryNode;
 import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
-import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.query.sql.lang.SPParameter;
+import org.komodo.spi.query.sql.lang.SetQuery.Operation;
+import org.komodo.spi.query.sql.proc.CreateProcedureCommand;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -70,89 +70,89 @@ import org.teiid.query.resolver.ProcedureContainerResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.sql.ProcedureReservedWords;
-import org.teiid.query.sql.lang.Alter;
-import org.teiid.query.sql.lang.AlterProcedure;
-import org.teiid.query.sql.lang.AlterTrigger;
-import org.teiid.query.sql.lang.AlterView;
-import org.teiid.query.sql.lang.BetweenCriteria;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.CompoundCriteria;
-import org.teiid.query.sql.lang.Create;
-import org.teiid.query.sql.lang.Criteria;
+import org.teiid.query.sql.lang.AlterImpl;
+import org.teiid.query.sql.lang.AlterProcedureImpl;
+import org.teiid.query.sql.lang.AlterTriggerImpl;
+import org.teiid.query.sql.lang.AlterViewImpl;
+import org.teiid.query.sql.lang.BetweenCriteriaImpl;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CompoundCriteriaImpl;
+import org.teiid.query.sql.lang.CreateImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
 import org.teiid.query.sql.lang.CriteriaOperator.Operator;
-import org.teiid.query.sql.lang.Delete;
-import org.teiid.query.sql.lang.Drop;
-import org.teiid.query.sql.lang.DynamicCommand;
-import org.teiid.query.sql.lang.ExistsCriteria;
-import org.teiid.query.sql.lang.GroupBy;
-import org.teiid.query.sql.lang.HasCriteria;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.lang.Into;
-import org.teiid.query.sql.lang.IsNullCriteria;
+import org.teiid.query.sql.lang.DeleteImpl;
+import org.teiid.query.sql.lang.DropImpl;
+import org.teiid.query.sql.lang.DynamicCommandImpl;
+import org.teiid.query.sql.lang.ExistsCriteriaImpl;
+import org.teiid.query.sql.lang.GroupByImpl;
+import org.teiid.query.sql.lang.HasCriteriaImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.lang.IntoImpl;
+import org.teiid.query.sql.lang.IsNullCriteriaImpl;
 import org.teiid.query.sql.lang.Labeled;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.Limit;
-import org.teiid.query.sql.lang.MatchCriteria;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.LimitImpl;
+import org.teiid.query.sql.lang.MatchCriteriaImpl;
 import org.teiid.query.sql.lang.NamespaceItem;
-import org.teiid.query.sql.lang.NotCriteria;
-import org.teiid.query.sql.lang.ObjectColumn;
-import org.teiid.query.sql.lang.ObjectTable;
-import org.teiid.query.sql.lang.Option;
-import org.teiid.query.sql.lang.OrderBy;
-import org.teiid.query.sql.lang.OrderByItem;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.QueryCommand;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.lang.SetClause;
-import org.teiid.query.sql.lang.SetClauseList;
-import org.teiid.query.sql.lang.SetCriteria;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubqueryContainer;
-import org.teiid.query.sql.lang.SubqueryFromClause;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
-import org.teiid.query.sql.lang.TargetedCommand;
-import org.teiid.query.sql.lang.TextColumn;
-import org.teiid.query.sql.lang.TextTable;
-import org.teiid.query.sql.lang.TranslateCriteria;
-import org.teiid.query.sql.lang.Update;
-import org.teiid.query.sql.lang.WithQueryCommand;
-import org.teiid.query.sql.lang.XMLColumn;
-import org.teiid.query.sql.lang.XMLTable;
+import org.teiid.query.sql.lang.NotCriteriaImpl;
+import org.teiid.query.sql.lang.ObjectColumnImpl;
+import org.teiid.query.sql.lang.ObjectTableImpl;
+import org.teiid.query.sql.lang.OptionImpl;
+import org.teiid.query.sql.lang.OrderByImpl;
+import org.teiid.query.sql.lang.OrderByItemImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.QueryCommandImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.lang.SetClauseImpl;
+import org.teiid.query.sql.lang.SetClauseListImpl;
+import org.teiid.query.sql.lang.SetCriteriaImpl;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.BaseSubqueryContainer;
+import org.teiid.query.sql.lang.SubqueryFromClauseImpl;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
+import org.teiid.query.sql.lang.BaseTargetedCommand;
+import org.teiid.query.sql.lang.TextColumnImpl;
+import org.teiid.query.sql.lang.TextTableImpl;
+import org.teiid.query.sql.lang.TranslateCriteriaImpl;
+import org.teiid.query.sql.lang.UpdateImpl;
+import org.teiid.query.sql.lang.WithQueryCommandImpl;
+import org.teiid.query.sql.lang.XMLColumnImpl;
+import org.teiid.query.sql.lang.XMLTableImpl;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
-import org.teiid.query.sql.proc.AssignmentStatement;
-import org.teiid.query.sql.proc.Block;
-import org.teiid.query.sql.proc.BranchingStatement;
-import org.teiid.query.sql.proc.BranchingStatement.BranchingMode;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateProcedureCommand;
-import org.teiid.query.sql.proc.CreateUpdateProcedureCommand;
-import org.teiid.query.sql.proc.LoopStatement;
-import org.teiid.query.sql.proc.WhileStatement;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.DerivedColumn;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.JSONObject;
-import org.teiid.query.sql.symbol.QueryString;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.Reference.Constraint;
-import org.teiid.query.sql.symbol.ScalarSubquery;
-import org.teiid.query.sql.symbol.TextLine;
-import org.teiid.query.sql.symbol.WindowFunction;
-import org.teiid.query.sql.symbol.XMLAttributes;
-import org.teiid.query.sql.symbol.XMLElement;
-import org.teiid.query.sql.symbol.XMLForest;
-import org.teiid.query.sql.symbol.XMLNamespaces;
-import org.teiid.query.sql.symbol.XMLParse;
-import org.teiid.query.sql.symbol.XMLQuery;
-import org.teiid.query.sql.symbol.XMLSerialize;
+import org.teiid.query.sql.proc.AssignmentStatementImpl;
+import org.teiid.query.sql.proc.BlockImpl;
+import org.teiid.query.sql.proc.BranchingStatementImpl;
+import org.teiid.query.sql.proc.BranchingStatementImpl.BranchingMode;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateProcedureCommandImpl;
+import org.teiid.query.sql.proc.CreateUpdateProcedureCommandImpl;
+import org.teiid.query.sql.proc.LoopStatementImpl;
+import org.teiid.query.sql.proc.WhileStatementImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.DerivedColumnImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.JSONObjectImpl;
+import org.teiid.query.sql.symbol.QueryStringImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl.Constraint;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
+import org.teiid.query.sql.symbol.TextLineImpl;
+import org.teiid.query.sql.symbol.BaseWindowFunction;
+import org.teiid.query.sql.symbol.XMLAttributesImpl;
+import org.teiid.query.sql.symbol.XMLElementImpl;
+import org.teiid.query.sql.symbol.XMLForestImpl;
+import org.teiid.query.sql.symbol.XMLNamespacesImpl;
+import org.teiid.query.sql.symbol.XMLParseImpl;
+import org.teiid.query.sql.symbol.XMLQueryImpl;
+import org.teiid.query.sql.symbol.XMLSerializeImpl;
 import org.teiid.query.sql.visitor.AggregateSymbolCollectorVisitorImpl;
 import org.teiid.query.sql.visitor.AggregateSymbolCollectorVisitorImpl.AggregateStopNavigator;
 import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
@@ -173,7 +173,7 @@ import org.teiid.translator.SourceSystemFunctions;
  */
 public class ValidationVisitorImpl extends AbstractValidationVisitor {
 
-    private static final class PositiveIntegerConstraint implements Reference.Constraint {
+    private static final class PositiveIntegerConstraint implements ReferenceImpl.Constraint {
     	
     	private Messages.ValidationVisitor msgKey;
     	
@@ -197,7 +197,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     private boolean inQuery;
 
 	// update procedure being validated
-	private ICreateProcedureCommand<Block, GroupSymbol, Expression, TCLanguageVisitorImpl> createProc;
+	private CreateProcedureCommand<BlockImpl, GroupSymbolImpl, BaseExpression, TCLanguageVisitorImpl> createProc;
 
 	private final DefaultDataTypeManager dataTypeManager;
 
@@ -243,29 +243,29 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 //    }
 
 	@Override
-    public void visit(Delete obj) {
+    public void visit(DeleteImpl obj) {
     	validateNoXMLUpdates(obj);
-        GroupSymbol group = obj.getGroup();
+        GroupSymbolImpl group = obj.getGroup();
         validateGroupSupportsUpdate(group);
         if (obj.getUpdateInfo() != null && obj.getUpdateInfo().isInherentDelete()) {
-        	validateUpdate(obj, ICommand.TYPE_DELETE, obj.getUpdateInfo());
+        	validateUpdate(obj, Command.TYPE_DELETE, obj.getUpdateInfo());
         }
     }
 
     @Override
-    public void visit(GroupBy obj) {
+    public void visit(GroupByImpl obj) {
     	// Get list of all group by IDs
-        List<Expression> groupBySymbols = obj.getSymbols();
+        List<BaseExpression> groupBySymbols = obj.getSymbols();
         validateSortable(groupBySymbols);
-        for (Expression expr : groupBySymbols) {
-            if (!ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(expr).isEmpty() || expr instanceof Constant || expr instanceof Reference) {
+        for (BaseExpression expr : groupBySymbols) {
+            if (!ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(expr).isEmpty() || expr instanceof ConstantImpl || expr instanceof ReferenceImpl) {
             	handleValidationError(Messages.getString(Messages.ValidationVisitor.groupby_subquery, expr), expr);
             }
 		}
     }
     
     @Override
-    public void visit(GroupSymbol obj) {
+    public void visit(GroupSymbolImpl obj) {
     	try {
 			if (this.getMetadata().isScalarGroup(obj.getMetadataID())) {
 			    handleValidationError(Messages.getString(Messages.ValidationVisitor.invalid_scalar_group_reference, obj),obj);    		
@@ -276,7 +276,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 
     @Override
-    public void visit(Insert obj) {
+    public void visit(InsertImpl obj) {
         validateNoXMLUpdates(obj);
         validateGroupSupportsUpdate(obj.getGroup());
         validateInsert(obj);
@@ -288,7 +288,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 					handleValidationError(Messages.gs(Messages.TEIID.TEIID31132, obj.getGroup()), obj);
 				} else {
 					Set<Object> keyCols = new LinkedHashSet<Object>(getMetadata().getElementIDsInKey(keys.iterator().next()));
-					for (ElementSymbol es : obj.getVariables()) {
+					for (ElementSymbolImpl es : obj.getVariables()) {
 						keyCols.remove(es.getMetadataID());
 					}
 					if (!keyCols.isEmpty()) {
@@ -304,7 +304,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         	validateMultisourceInsert(obj.getGroup());
         }
         if (obj.getUpdateInfo() != null && obj.getUpdateInfo().isInherentInsert()) {
-        	validateUpdate(obj, ICommand.TYPE_INSERT, obj.getUpdateInfo());
+        	validateUpdate(obj, Command.TYPE_INSERT, obj.getUpdateInfo());
         	try {
 				if (obj.getUpdateInfo().findInsertUpdateMapping(obj, false) == null) {
 					handleValidationError(Messages.gs(Messages.TEIID.TEIID30376, obj.getVariables()), obj);
@@ -316,12 +316,12 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 
     @Override
-    public void visit(OrderByItem obj) {
+    public void visit(OrderByItemImpl obj) {
     	validateSortable(obj.getSymbol());
     }
     
     @Override
-    public void visit(Query obj) {
+    public void visit(QueryImpl obj) {
         validateHasProjectedSymbols(obj);
         if(isXMLCommand(obj)) {
             //no temp table (Select Into) allowed
@@ -349,7 +349,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 	
 	@Override
-    public void visit(Select obj) {
+    public void visit(SelectImpl obj) {
         validateSelectElements(obj);
         if(obj.isDistinct()) {
             validateSortable(obj.getProjectedSymbols());
@@ -357,14 +357,14 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 
 	@Override
-    public void visit(SubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteriaImpl obj) {
 		validateSubquery(obj);
 		if (isNonComparable(obj.getExpression())) {
 			handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0027, obj),obj);
     	}
         this.validateRowLimitFunctionNotInInvalidCriteria(obj);
         
-		Collection<Expression> projSymbols = obj.getCommand().getProjectedSymbols();
+		Collection<BaseExpression> projSymbols = obj.getCommand().getProjectedSymbols();
 
 		//Subcommand should have one projected symbol (query with one expression
 		//in SELECT or stored procedure execution that returns a single value).
@@ -374,7 +374,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	}
 	
 	@Override
-	public void visit(XMLSerialize obj) {
+	public void visit(XMLSerializeImpl obj) {
 		if (obj.getEncoding() != null ) {
         	try {
 				Charset.forName(obj.getEncoding());
@@ -388,26 +388,26 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	}
 
     @Override
-    public void visit(SetQuery obj) {
+    public void visit(SetQueryImpl obj) {
         validateHasProjectedSymbols(obj);
         validateSetQuery(obj);
     }
     
     @Override
-    public void visit(Update obj) {
+    public void visit(UpdateImpl obj) {
         validateNoXMLUpdates(obj);
         validateGroupSupportsUpdate(obj.getGroup());
         validateUpdate(obj);
     }
 
     @Override
-    public void visit(Into obj) {
-        GroupSymbol target = obj.getGroup();
+    public void visit(IntoImpl obj) {
+        GroupSymbolImpl target = obj.getGroup();
         validateGroupSupportsUpdate(target);
         validateMultisourceInsert(obj.getGroup());
     }
 
-	private void validateMultisourceInsert(GroupSymbol group) {
+	private void validateMultisourceInsert(GroupSymbolImpl group) {
 		try {
 			if (getMetadata().isMultiSource(getMetadata().getModelID(group.getMetadataID()))) {
 				handleValidationError(Messages.getString(Messages.ValidationVisitor.multisource_insert, group), group);
@@ -418,7 +418,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	}
 
     @Override
-    public void visit(Function obj) {
+    public void visit(FunctionImpl obj) {
     	if(FunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(obj.getName())) {
     		try {
 				ResolverUtil.ResolvedLookup resolvedLookup = ResolverUtil.resolveLookup(obj, getMetadata());
@@ -433,12 +433,12 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
                 // can't use this pseudo-function in non-XML queries
                 handleValidationError(Messages.getString(Messages.ValidationVisitor.The_context_function_cannot_be_used_in_a_non_XML_command), obj);
             } else {
-                if (!(obj.getArg(0) instanceof ElementSymbol)){
+                if (!(obj.getArg(0) instanceof ElementSymbolImpl)){
                     handleValidationError(Messages.getString(Messages.ERR.ERR_015_004_0036), obj); 
                 }
                 
-                for (Iterator<Function> functions = FunctionCollectorVisitorImpl.getFunctions(obj.getArg(1), false).iterator(); functions.hasNext();) {
-                    Function function = functions.next();
+                for (Iterator<FunctionImpl> functions = FunctionCollectorVisitorImpl.getFunctions(obj.getArg(1), false).iterator(); functions.hasNext();) {
+                    FunctionImpl function = functions.next();
                     
                     if (FunctionLibrary.FunctionName.CONTEXT.equalsIgnoreCase(function.getName())) {
                         handleValidationError(Messages.getString(Messages.ValidationVisitor.Context_function_nested), obj);
@@ -448,7 +448,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     	} else if (FunctionLibrary.FunctionName.ROWLIMIT.equalsIgnoreCase(obj.getName()) ||
     	            FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.equalsIgnoreCase(obj.getName())) {
             if(isXML) {
-                if (!(obj.getArg(0) instanceof ElementSymbol)) {
+                if (!(obj.getArg(0) instanceof ElementSymbolImpl)) {
                     // Arg must be an element symbol
                     handleValidationError(Messages.getString(Messages.ValidationVisitor.rowlimit2), obj);
                 }
@@ -458,8 +458,8 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
             }
         } else if(obj.getName().equalsIgnoreCase(SourceSystemFunctions.XPATHVALUE)) {
 	        // Validate the xpath value is valid
-	        if(obj.getArgs()[1] instanceof Constant) {
-	            Constant xpathConst = (Constant) obj.getArgs()[1];
+	        if(obj.getArgs()[1] instanceof ConstantImpl) {
+	            ConstantImpl xpathConst = (ConstantImpl) obj.getArgs()[1];
                 try {
                     XMLSystemFunctions.validateXpath((String)xpathConst.getValue());
                 } catch(Exception e) {
@@ -468,15 +468,15 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	        }
         } else if(obj.getName().equalsIgnoreCase(SourceSystemFunctions.TO_BYTES) || obj.getName().equalsIgnoreCase(SourceSystemFunctions.TO_CHARS)) {
         	try {
-        		FunctionMethods.getCharset((String)((Constant)obj.getArg(1)).getValue());
+        		FunctionMethods.getCharset((String)((ConstantImpl)obj.getArg(1)).getValue());
         	} catch (IllegalArgumentException e) {
         		handleValidationError(Messages.getString(Messages.ValidationVisitor.invalid_encoding, obj.getArg(1)), obj);
         	}
         } else if (obj.isAggregate()) {
         	handleValidationError(Messages.getString(Messages.ValidationVisitor.user_defined_aggregate_as_function, obj, obj.getName()), obj);
         } else if (FunctionLibrary.FunctionName.JSONARRAY.equalsIgnoreCase(obj.getName())) {
-        	Expression[] args = obj.getArgs();
-        	for (Expression expression : args) {
+        	BaseExpression[] args = obj.getArgs();
+        	for (BaseExpression expression : args) {
         		validateJSONValue(obj, expression);
 			}
         }
@@ -484,36 +484,36 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 
     // ############### Visitor methods for stored procedure lang objects ##################
 
-    public void visit(AssignmentStatement obj) {
+    public void visit(AssignmentStatementImpl obj) {
     	
-    	ElementSymbol variable = obj.getVariable();
+    	ElementSymbolImpl variable = obj.getVariable();
 
     	validateAssignment(obj, variable);
     }
     
     @Override
-    public void visit(CommandStatement obj) {
+    public void visit(CommandStatementImpl obj) {
         if (getTeiidVersion().isLessThan(Version.TEIID_8_0.get()))
             visit7(obj);
         else
             visit8(obj);
     }
     
-    private void visit7(CommandStatement obj) {
-    	if (obj.getCommand() instanceof StoredProcedure) {
-    		StoredProcedure proc = (StoredProcedure)obj.getCommand();
-    		for (SPParameter param : proc.getParameters()) {
-				if ((param.getParameterType() == SPParameter.RETURN_VALUE 
-						|| param.getParameterType() == SPParameter.OUT) && param.getExpression() instanceof ElementSymbol) {
-					validateAssignment(obj, (ElementSymbol)param.getExpression());
+    private void visit7(CommandStatementImpl obj) {
+    	if (obj.getCommand() instanceof StoredProcedureImpl) {
+    		StoredProcedureImpl proc = (StoredProcedureImpl)obj.getCommand();
+    		for (SPParameterImpl param : proc.getParameters()) {
+				if ((param.getParameterType() == SPParameterImpl.RETURN_VALUE 
+						|| param.getParameterType() == SPParameterImpl.OUT) && param.getExpression() instanceof ElementSymbolImpl) {
+					validateAssignment(obj, (ElementSymbolImpl)param.getExpression());
 				}
 			}
     	}
     }
     
     @Override
-    public void visit(StoredProcedure obj) {
-		for (SPParameter param : obj.getInputParameters()) {
+    public void visit(StoredProcedureImpl obj) {
+		for (SPParameterImpl param : obj.getInputParameters()) {
 			try {
                 if (!getMetadata().elementSupports(param.getMetadataID(), SupportConstants.Element.NULL) && EvaluatableVisitor.isFullyEvaluatable(param.getExpression(), true)) {
                     try {
@@ -539,8 +539,8 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 		}
     }
 
-	private void validateAssignment(LanguageObject obj,
-			ElementSymbol variable) {
+	private void validateAssignment(BaseLanguageObject obj,
+			ElementSymbolImpl variable) {
 		String groupName = variable.getGroupSymbol().getCanonicalName();
 		//This will actually get detected by the resolver, since we inject an automatic declaration.
     	if(groupName.equals(ProcedureReservedWords.CHANGING) || groupName.equals(ProcedureReservedWords.INPUTS)) {
@@ -549,9 +549,9 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	}
     
     @Override
-    public void visit(ScalarSubquery obj) {
+    public void visit(ScalarSubqueryImpl obj) {
     	validateSubquery(obj);
-        Collection<Expression> projSymbols = obj.getCommand().getProjectedSymbols();
+        Collection<BaseExpression> projSymbols = obj.getCommand().getProjectedSymbols();
 
         //Scalar subquery should have one projected symbol (query with one expression
         //in SELECT or stored procedure execution that returns a single value).
@@ -566,18 +566,18 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
      *
      */
     @Removed(Version.TEIID_8_0)
-    protected void validateContainsRowsUpdatedVariable(CreateUpdateProcedureCommand obj) {
-        final Collection<ElementSymbol> assignVars = new ArrayList<ElementSymbol>();
+    protected void validateContainsRowsUpdatedVariable(CreateUpdateProcedureCommandImpl obj) {
+        final Collection<ElementSymbolImpl> assignVars = new ArrayList<ElementSymbolImpl>();
        // Use visitor to find assignment statements
         TCLanguageVisitorImpl visitor = new TCLanguageVisitorImpl(getTeiidVersion()) {
             @Override
-            public void visit(AssignmentStatement stmt) {
+            public void visit(AssignmentStatementImpl stmt) {
                 assignVars.add(stmt.getVariable());
             }
         };
         PreOrderNavigator.doVisit(obj, visitor);
         boolean foundVar = false;
-        for (ElementSymbol variable : assignVars) {
+        for (ElementSymbolImpl variable : assignVars) {
             if(variable.getShortName().equalsIgnoreCase(ProcedureReservedWords.ROWS_UPDATED)) {
                 foundVar = true;
                 break;
@@ -590,7 +590,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 
     @Override
 	@Removed(Version.TEIID_8_0)
-    public void visit(CreateUpdateProcedureCommand obj) {
+    public void visit(CreateUpdateProcedureCommandImpl obj) {
         if(!obj.isUpdateProcedure()){
             
             //check that the procedure does not contain references to itself
@@ -607,9 +607,9 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 
     @Override
-    public void visit(CreateProcedureCommand obj) {
+    public void visit(CreateProcedureCommandImpl obj) {
         //check that the procedure does not contain references to itself
-    	if (obj.getUpdateType() == ICommand.TYPE_UNKNOWN) {
+    	if (obj.getUpdateType() == Command.TYPE_UNKNOWN) {
 	        if (GroupCollectorVisitorImpl.getGroups(obj,true).contains(obj.getVirtualGroup())) {
 	        	handleValidationError(Messages.getString(Messages.ValidationVisitor.Procedure_has_group_self_reference),obj);
 	        }
@@ -624,15 +624,15 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         if (this.createProc == null)
             return false;
 
-        if (!(this.createProc instanceof CreateUpdateProcedureCommand))
+        if (!(this.createProc instanceof CreateUpdateProcedureCommandImpl))
             return false;
 
-        return ((CreateUpdateProcedureCommand) this.createProc).isUpdateProcedure();
+        return ((CreateUpdateProcedureCommandImpl) this.createProc).isUpdateProcedure();
     }
 
     @Override
     @Removed(Version.TEIID_8_0)
-    public void visit(HasCriteria obj) {
+    public void visit(HasCriteriaImpl obj) {
         if (! isUpdateProcedure()) {
             handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0019), obj);
         }
@@ -640,7 +640,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     
     @Override
     @Removed(Version.TEIID_8_0)
-    public void visit(TranslateCriteria obj) {
+    public void visit(TranslateCriteriaImpl obj) {
         if (! isUpdateProcedure()) {
             handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0019), obj);
         }
@@ -651,10 +651,10 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
             }
             Iterator critIter = obj.getTranslations().iterator();
             while(critIter.hasNext()) {
-                CompareCriteria transCrit = (CompareCriteria) critIter.next();
-                Collection<ElementSymbol> leftElmnts = ElementCollectorVisitorImpl.getElements(transCrit.getLeftExpression(), true);
+                CompareCriteriaImpl transCrit = (CompareCriteriaImpl) critIter.next();
+                Collection<ElementSymbolImpl> leftElmnts = ElementCollectorVisitorImpl.getElements(transCrit.getLeftExpression(), true);
                 // there is always only one element
-                ElementSymbol leftExpr = leftElmnts.iterator().next();
+                ElementSymbolImpl leftExpr = leftElmnts.iterator().next();
 
                 if(selectElmnts != null && !selectElmnts.contains(leftExpr)) {
                     handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0021), leftExpr);
@@ -667,12 +667,12 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 
     @Override
-    public void visit(CompoundCriteria obj) {
+    public void visit(CompoundCriteriaImpl obj) {
         // Validate use of 'rowlimit' or 'rowlimitexception' pseudo-function - each occurrence must be in a single
         // CompareCriteria which is entirely it's own conjunct (not OR'ed with anything else)
         if (isXML) {
             // Collect all occurrances of rowlimit and rowlimitexception functions
-            List<Function> rowLimitFunctions = new ArrayList<Function>();
+            List<FunctionImpl> rowLimitFunctions = new ArrayList<FunctionImpl>();
             FunctionCollectorVisitorImpl visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
             PreOrderNavigator.doVisit(obj, visitor); 
             visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
@@ -682,13 +682,13 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
                 
                 // Verify each use of rowlimit function is in a compare criteria that is 
                 // entirely it's own conjunct
-                Iterator<Criteria> conjunctIter = Criteria.separateCriteriaByAnd(obj).iterator();            
+                Iterator<CriteriaImpl> conjunctIter = CriteriaImpl.separateCriteriaByAnd(obj).iterator();            
                 
                 int i = 0;
                 while (conjunctIter.hasNext() && i<functionCount ) {
                     Object conjunct = conjunctIter.next();
-                    if (conjunct instanceof CompareCriteria) {
-                        CompareCriteria crit = (CompareCriteria)conjunct;
+                    if (conjunct instanceof CompareCriteriaImpl) {
+                        CompareCriteriaImpl crit = (CompareCriteriaImpl)conjunct;
                         if ((rowLimitFunctions.contains(crit.getLeftExpression()) && !rowLimitFunctions.contains(crit.getRightExpression())) || 
                             (rowLimitFunctions.contains(crit.getRightExpression()) && !rowLimitFunctions.contains(crit.getLeftExpression()))) {
                         	i++;
@@ -711,7 +711,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
      * the translated criteria.
      */
     @Removed(Version.TEIID_8_0)
-    protected void validateTranslateCriteria(TranslateCriteria obj) {
+    protected void validateTranslateCriteria(TranslateCriteriaImpl obj) {
         if(this.currentCommand == null) {
             return;
         }
@@ -719,21 +719,21 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
             handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0019), obj);
         }
 
-        CreateUpdateProcedureCommand updateProc = (CreateUpdateProcedureCommand) this.createProc;
-        Map<ElementSymbol, Expression> symbolMap = updateProc.getSymbolMap();
-        Command userCommand = updateProc.getUserCommand();
+        CreateUpdateProcedureCommandImpl updateProc = (CreateUpdateProcedureCommandImpl) this.createProc;
+        Map<ElementSymbolImpl, BaseExpression> symbolMap = updateProc.getSymbolMap();
+        CommandImpl userCommand = updateProc.getUserCommand();
         // modeler validation
         if(userCommand == null) {
             return;
         }
-        Criteria userCrit = null;
+        CriteriaImpl userCrit = null;
         int userCmdType = userCommand.getType();
         switch(userCmdType) {
-            case ICommand.TYPE_DELETE:
-                userCrit = ((Delete)userCommand).getCriteria();
+            case Command.TYPE_DELETE:
+                userCrit = ((DeleteImpl)userCommand).getCriteria();
                 break;
-            case ICommand.TYPE_UPDATE:
-                userCrit = ((Update)userCommand).getCriteria();
+            case Command.TYPE_UPDATE:
+                userCrit = ((UpdateImpl)userCommand).getCriteria();
                 break;
             default:
                 break;
@@ -743,42 +743,42 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
             return;
         }
 
-        Collection<ElementSymbol> transleElmnts = ElementCollectorVisitorImpl.getElements(obj, true);
-        Collection<GroupSymbol> groups = GroupCollectorVisitorImpl.getGroups(this.currentCommand, true);
+        Collection<ElementSymbolImpl> transleElmnts = ElementCollectorVisitorImpl.getElements(obj, true);
+        Collection<GroupSymbolImpl> groups = GroupCollectorVisitorImpl.getGroups(this.currentCommand, true);
         Operator selectType = obj.getSelector().getSelectorType();
 
-        for (Criteria predCrit : Criteria.separateCriteriaByAnd(userCrit)) {
+        for (CriteriaImpl predCrit : CriteriaImpl.separateCriteriaByAnd(userCrit)) {
             if(selectType != Operator.NO_TYPE) {
-                if(predCrit instanceof CompareCriteria) {
-                    CompareCriteria ccCrit = (CompareCriteria) predCrit;
+                if(predCrit instanceof CompareCriteriaImpl) {
+                    CompareCriteriaImpl ccCrit = (CompareCriteriaImpl) predCrit;
                     if(selectType.getIndex() != ccCrit.getOperator()) {
                         continue;
                     }
-                } else if(predCrit instanceof MatchCriteria) {
+                } else if(predCrit instanceof MatchCriteriaImpl) {
                     if(selectType != Operator.LIKE) {
                         continue;
                     }
-                } else if(predCrit instanceof IsNullCriteria) {
+                } else if(predCrit instanceof IsNullCriteriaImpl) {
                     if(selectType != Operator.IS_NULL) {
                         continue;
                     }
-                } else if(predCrit instanceof SetCriteria) {
+                } else if(predCrit instanceof SetCriteriaImpl) {
                     if(selectType != Operator.IN) {
                         continue;
                     }
-                } else if(predCrit instanceof BetweenCriteria) {
+                } else if(predCrit instanceof BetweenCriteriaImpl) {
                     if(selectType != Operator.BETWEEN) {
                         continue;
                     }
                 }
             }
-            Iterator<ElementSymbol> critEmlntIter = ElementCollectorVisitorImpl.getElements(predCrit, true).iterator();
+            Iterator<ElementSymbolImpl> critEmlntIter = ElementCollectorVisitorImpl.getElements(predCrit, true).iterator();
             // collect all elements elements on the criteria map to
             while(critEmlntIter.hasNext()) {
-                ElementSymbol criteriaElement = critEmlntIter.next();
+                ElementSymbolImpl criteriaElement = critEmlntIter.next();
                 if(transleElmnts.contains(criteriaElement)) {
-                    Expression mappedExpr = symbolMap.get(criteriaElement);
-                    if(mappedExpr instanceof AggregateSymbol) {
+                    BaseExpression mappedExpr = symbolMap.get(criteriaElement);
+                    if(mappedExpr instanceof BaseAggregateSymbol) {
                         handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0022, criteriaElement), criteriaElement);
                     }
 
@@ -790,14 +790,14 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         }
     }
 
-    protected void validateSelectElements(Select obj) {
+    protected void validateSelectElements(SelectImpl obj) {
     	if(isXML) {
     		return;
     	}
 
-        Collection<ElementSymbol> elements = ElementCollectorVisitorImpl.getElements(obj, true);
+        Collection<ElementSymbolImpl> elements = ElementCollectorVisitorImpl.getElements(obj, true);
         
-        Collection<ElementSymbol> cantSelect = validateElementsSupport(
+        Collection<ElementSymbolImpl> cantSelect = validateElementsSupport(
             elements,
             SupportConstants.Element.SELECT );
 
@@ -806,7 +806,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 		}
     }
 
-    protected void validateHasProjectedSymbols(Command obj) {
+    protected void validateHasProjectedSymbols(CommandImpl obj) {
         if(obj.getProjectedSymbols().size() == 0) {
             handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0025), obj);
         }
@@ -817,13 +817,13 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
      * and ORDER BY.
      * @param symbols List of SingleElementSymbol
      */
-    protected void validateSortable(List<? extends Expression> symbols) {
-    	for (Expression expression : symbols) {
+    protected void validateSortable(List<? extends BaseExpression> symbols) {
+    	for (BaseExpression expression : symbols) {
             validateSortable(expression);
         }
     }
 
-	private void validateSortable(Expression symbol) {
+	private void validateSortable(BaseExpression symbol) {
 		if (isNonComparable(symbol)) {
 		    handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0026, symbol), symbol);
 		}
@@ -833,7 +833,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
      * @param symbol
      * @return whether symbol type is non-comparable
      */
-    public static boolean isNonComparable(Expression symbol) {
+    public static boolean isNonComparable(BaseExpression symbol) {
         DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(symbol.getTeiidVersion());
         return dataTypeManager.isNonComparable(dataTypeManager.getDataTypeName(symbol.getType()));
     }
@@ -842,7 +842,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	 * This method can be used to validate Update commands cannot be
 	 * executed against XML documents.
 	 */
-    protected void validateNoXMLUpdates(Command obj) {
+    protected void validateNoXMLUpdates(CommandImpl obj) {
      	if(isXMLCommand(obj)) {
             handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0029), obj);
      	}
@@ -852,13 +852,13 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	 * This method can be used to validate commands used in the stored
 	 * procedure languge cannot be executed against XML documents.
 	 */
-    protected void validateNoXMLProcedures(Command obj) {
+    protected void validateNoXMLProcedures(CommandImpl obj) {
      	if(isXMLCommand(obj)) {
             handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0030), obj);
      	}
     }
 
-    private void validateXMLQuery(Query obj) {
+    private void validateXMLQuery(QueryImpl obj) {
         if(obj.getGroupBy() != null) {
             handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0031), obj);
         }
@@ -869,16 +869,16 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
             handleValidationError(Messages.getString(Messages.ValidationVisitor.limit_not_valid_for_xml), obj);
         }
         if (obj.getOrderBy() != null) {
-        	OrderBy orderBy = obj.getOrderBy();
-        	for (OrderByItem item : orderBy.getOrderByItems()) {
-				if (!(item.getSymbol() instanceof ElementSymbol)) {
+        	OrderByImpl orderBy = obj.getOrderBy();
+        	for (OrderByItemImpl item : orderBy.getOrderByItems()) {
+				if (!(item.getSymbol() instanceof ElementSymbolImpl)) {
 					handleValidationError(Messages.getString(Messages.ValidationVisitor.orderby_expression_xml), obj);
 				}
 			}
          }
     }
     
-    protected void validateGroupSupportsUpdate(GroupSymbol groupSymbol) {
+    protected void validateGroupSupportsUpdate(GroupSymbolImpl groupSymbol) {
     	try {
 	    	if(! getMetadata().groupSupports(groupSymbol.getMetadataID(), SupportConstants.Group.UPDATE)) {
 	            handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0033, 
@@ -889,14 +889,14 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	    }
     }
     
-    protected void validateSetQuery(SetQuery query) {
+    protected void validateSetQuery(SetQueryImpl query) {
         // Walk through sub queries - validate each one separately and
         // also check the columns of each for comparability
-        for (QueryCommand subQuery : query.getQueryCommands()) {
+        for (QueryCommandImpl subQuery : query.getQueryCommands()) {
             if(isXMLCommand(subQuery)) {
                 handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0034), query);
             }
-            if (subQuery instanceof Query && ((Query)subQuery).getInto() != null) {
+            if (subQuery instanceof QueryImpl && ((QueryImpl)subQuery).getInto() != null) {
             	handleValidationError(Messages.getString(Messages.ValidationVisitor.union_insert), query);
             }
         }
@@ -910,12 +910,12 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         }
     }
 
-    private void validateAggregates(Query query) {
-        Select select = query.getSelect();
-        GroupBy groupBy = query.getGroupBy();
-        Criteria having = query.getHaving();
+    private void validateAggregates(QueryImpl query) {
+        SelectImpl select = query.getSelect();
+        GroupByImpl groupBy = query.getGroupBy();
+        CriteriaImpl having = query.getHaving();
         validateNoAggsInClause(groupBy);
-        List<GroupSymbol> correlationGroups = null;
+        List<GroupSymbolImpl> correlationGroups = null;
         validateNoAggsInClause(query.getCriteria());
         if (query.getFrom() == null) {
         	validateNoAggsInClause(select);
@@ -925,21 +925,21 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         	correlationGroups = query.getFrom().getGroups();
         }
         
-        Set<Expression> groupSymbols = null;
+        Set<BaseExpression> groupSymbols = null;
         boolean hasAgg = false;
         if (groupBy != null) {
-            groupSymbols = new HashSet<Expression>(groupBy.getSymbols());
+            groupSymbols = new HashSet<BaseExpression>(groupBy.getSymbols());
             hasAgg = true;
         }
-        LinkedHashSet<Expression> invalid = new LinkedHashSet<Expression>();
-        LinkedHashSet<Expression> invalidWindowFunctions = new LinkedHashSet<Expression>();
-        LinkedList<AggregateSymbol> aggs = new LinkedList<AggregateSymbol>();
+        LinkedHashSet<BaseExpression> invalid = new LinkedHashSet<BaseExpression>();
+        LinkedHashSet<BaseExpression> invalidWindowFunctions = new LinkedHashSet<BaseExpression>();
+        LinkedList<BaseAggregateSymbol> aggs = new LinkedList<BaseAggregateSymbol>();
         if (having != null) {
             validateCorrelatedReferences(query, correlationGroups, groupSymbols, having, invalid);
         	AggregateSymbolCollectorVisitorImpl.getAggregates(having, aggs, invalid, null, invalidWindowFunctions, groupSymbols);
         	hasAgg = true;
         }
-        for (Expression symbol : select.getProjectedSymbols()) {
+        for (BaseExpression symbol : select.getProjectedSymbols()) {
         	if (hasAgg || !aggs.isEmpty()) {
         		validateCorrelatedReferences(query, correlationGroups, groupSymbols, symbol, invalid);
         	}
@@ -957,14 +957,14 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
      * This validation is more convoluted than needed since it is being run before rewrite/planning.
      * Ideally we would already have correlated references set on the subqueries.
      */
-	private void validateCorrelatedReferences(Query query,
-			final List<GroupSymbol> correlationGroups, final Set<Expression> groupingSymbols, LanguageObject object, LinkedHashSet<Expression> invalid) {
+	private void validateCorrelatedReferences(QueryImpl query,
+			final List<GroupSymbolImpl> correlationGroups, final Set<BaseExpression> groupingSymbols, BaseLanguageObject object, LinkedHashSet<BaseExpression> invalid) {
 		if (query.getFrom() == null) {
 			return;
 		}
 		ElementCollectorVisitorImpl ecv = new ElementCollectorVisitorImpl(getTeiidVersion(), invalid) {
 			@Override
-            public void visit(ElementSymbol obj) {
+            public void visit(ElementSymbolImpl obj) {
 				if (obj.isExternalReference() && correlationGroups.contains(obj.getGroupSymbol())
 						 && (groupingSymbols == null || !groupingSymbols.contains(obj))) {
 					super.visit(obj);
@@ -975,27 +975,27 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 		object.acceptVisitor(asn);
 	}
 
-	private void validateNoAggsInClause(LanguageObject clause) {
+	private void validateNoAggsInClause(BaseLanguageObject clause) {
 		if (clause == null) {
         	return;
         }
-		LinkedHashSet<Expression> aggs = new LinkedHashSet<Expression>();
+		LinkedHashSet<BaseExpression> aggs = new LinkedHashSet<BaseExpression>();
 		AggregateSymbolCollectorVisitorImpl.getAggregates(clause, aggs, null, null, aggs, null);
 		if (!aggs.isEmpty()) {
 			handleValidationError(Messages.getString(Messages.TeiidParser.Aggregate_only_top_level, aggs), aggs);
 		}
 	}
     
-    protected void validateInsert(Insert obj) {
-        Collection<ElementSymbol> vars = obj.getVariables();
-        Iterator<ElementSymbol> varIter = vars.iterator();
+    protected void validateInsert(InsertImpl obj) {
+        Collection<ElementSymbolImpl> vars = obj.getVariables();
+        Iterator<ElementSymbolImpl> varIter = vars.iterator();
         Collection values = obj.getValues();
         Iterator valIter = values.iterator();
-        GroupSymbol insertGroup = obj.getGroup();
+        GroupSymbolImpl insertGroup = obj.getGroup();
         try {
             boolean multiSource = getMetadata().isMultiSource(getMetadata().getModelID(insertGroup.getMetadataID()));
             // Validate that all elements in variable list are updatable
-        	for (ElementSymbol insertElem : vars) {
+        	for (ElementSymbolImpl insertElem : vars) {
                 if(! getMetadata().elementSupports(insertElem.getMetadataID(), SupportConstants.Element.UPDATE)) {
                     handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0052, insertElem), insertElem);
                 }
@@ -1008,12 +1008,12 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         	}
 
             // Get elements in the group.
-    		Collection<ElementSymbol> insertElmnts = new LinkedList<ElementSymbol>(ResolverUtil.resolveElementsInGroup(insertGroup, getMetadata()));
+    		Collection<ElementSymbolImpl> insertElmnts = new LinkedList<ElementSymbolImpl>(ResolverUtil.resolveElementsInGroup(insertGroup, getMetadata()));
 
     		// remove all elements specified in insert to get the ignored elements
     		insertElmnts.removeAll(vars);
 
-    		for (ElementSymbol nextElmnt : insertElmnts) {
+    		for (ElementSymbolImpl nextElmnt : insertElmnts) {
 				if(!getMetadata().elementSupports(nextElmnt.getMetadataID(), SupportConstants.Element.DEFAULT_VALUE) &&
 					!getMetadata().elementSupports(nextElmnt.getMetadataID(), SupportConstants.Element.NULL) &&
                     !getMetadata().elementSupports(nextElmnt.getMetadataID(), SupportConstants.Element.AUTO_INCREMENT)) {
@@ -1024,8 +1024,8 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
             //check to see if the elements support nulls in metadata,
             // if any of the value present in the insert are null
             while(valIter.hasNext() && varIter.hasNext()) {
-                Expression nextValue = (Expression) valIter.next();
-                ElementSymbol nextVar = varIter.next();
+                BaseExpression nextValue = (BaseExpression) valIter.next();
+                ElementSymbolImpl nextVar = varIter.next();
                 if (EvaluatableVisitor.isFullyEvaluatable(nextValue, true)) {
                     try {
                         // If nextValue is an expression, evaluate it before checking for null
@@ -1043,11 +1043,11 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         } 
     }
     
-    protected void validateSetClauseList(SetClauseList list) {
-    	Set<ElementSymbol> dups = new HashSet<ElementSymbol>();
-	    HashSet<ElementSymbol> changeVars = new HashSet<ElementSymbol>();
-	    for (SetClause clause : list.getClauses()) {
-	    	ElementSymbol elementID = clause.getSymbol();
+    protected void validateSetClauseList(SetClauseListImpl list) {
+    	Set<ElementSymbolImpl> dups = new HashSet<ElementSymbolImpl>();
+	    HashSet<ElementSymbolImpl> changeVars = new HashSet<ElementSymbolImpl>();
+	    for (SetClauseImpl clause : list.getClauses()) {
+	    	ElementSymbolImpl elementID = clause.getSymbol();
 	        if (!changeVars.add(elementID)) {
 	        	dups.add(elementID);
 	        }
@@ -1057,13 +1057,13 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	    }
     }
     
-    protected void validateUpdate(Update update) {
+    protected void validateUpdate(UpdateImpl update) {
         try {
             UpdateInfo info = update.getUpdateInfo();
 
             // list of elements that are being updated
-		    for (SetClause entry : update.getChangeList().getClauses()) {
-        	    ElementSymbol elementID = entry.getSymbol();
+		    for (SetClauseImpl entry : update.getChangeList().getClauses()) {
+        	    ElementSymbolImpl elementID = entry.getSymbol();
 
                 // Check that left side element is updatable
                 if(! getMetadata().elementSupports(elementID.getMetadataID(), SupportConstants.Element.UPDATE)) {
@@ -1076,26 +1076,26 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
                 }
 
 			    // Check that right expression is a constant and is non-null
-                Expression value = entry.getValue();    
+                BaseExpression value = entry.getValue();    
                 if (EvaluatableVisitor.isFullyEvaluatable(value, true)) {
                     try {
-                        Constant c = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
+                        ConstantImpl c = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
                         c.setValue(Evaluator.assess(value));
                         value = c;
                     } catch (Exception err) {
                     }
                 }
                 
-                if(value instanceof Constant) {
+                if(value instanceof ConstantImpl) {
     			    // If value is null, check that element supports this as a nullable column
-                    if(((Constant)value).getValue() == null && ! getMetadata().elementSupports(elementID.getMetadataID(), SupportConstants.Element.NULL)) {
+                    if(((ConstantImpl)value).getValue() == null && ! getMetadata().elementSupports(elementID.getMetadataID(), SupportConstants.Element.NULL)) {
                         handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0060, SQLStringVisitorImpl.getSQLString(elementID)), elementID);
                     }// end of if
                 } 
 		    }
             if (info != null && info.isInherentUpdate()) {
-            	validateUpdate(update, ICommand.TYPE_UPDATE, info);
-            	Set<ElementSymbol> updateCols = update.getChangeList().getClauseMap().keySet();
+            	validateUpdate(update, Command.TYPE_UPDATE, info);
+            	Set<ElementSymbolImpl> updateCols = update.getChangeList().getClauseMap().keySet();
             	if (!info.hasValidUpdateMapping(updateCols)) {
             		handleValidationError(Messages.gs(Messages.TEIID.TEIID30376, updateCols), update);
             	}
@@ -1107,7 +1107,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         validateSetClauseList(update.getChangeList());
     }
 
-	private void validateUpdate(TargetedCommand update, int type, UpdateInfo info) {
+	private void validateUpdate(BaseTargetedCommand update, int type, UpdateInfo info) {
 		String error = ProcedureContainerResolver.validateUpdateInfo(update.getGroup(), type, info);
 		if (error != null) {
 			handleValidationError(error, update.getGroup());
@@ -1119,15 +1119,15 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
      * @param query
      *
      */
-    protected void validateSelectInto(Query query) {
-        List<Expression> symbols = query.getSelect().getProjectedSymbols();
-        GroupSymbol intoGroup = query.getInto().getGroup();
+    protected void validateSelectInto(QueryImpl query) {
+        List<BaseExpression> symbols = query.getSelect().getProjectedSymbols();
+        GroupSymbolImpl intoGroup = query.getInto().getGroup();
         validateInto(query, symbols, intoGroup);
     }
 
-    private void validateInto(LanguageObject query,
-                                List<Expression> symbols,
-                                GroupSymbol intoGroup) {
+    private void validateInto(BaseLanguageObject query,
+                                List<BaseExpression> symbols,
+                                GroupSymbolImpl intoGroup) {
         try {
             List elementIDs = getMetadata().getElementIDsInGroupID(intoGroup.getMetadataID());
             
@@ -1138,7 +1138,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
             }
 
             for (int symbolNum = 0; symbolNum < symbols.size(); symbolNum++) {
-                Expression symbol = symbols.get(symbolNum);
+                BaseExpression symbol = symbols.get(symbolNum);
                 Object elementID = elementIDs.get(symbolNum);
                 // Check if supports updates
                 if (!getMetadata().elementSupports(elementID, SupportConstants.Element.UPDATE)) {
@@ -1162,9 +1162,9 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         } 
     }
     
-    private void validateRowLimitFunctionNotInInvalidCriteria(Criteria obj) {
+    private void validateRowLimitFunctionNotInInvalidCriteria(CriteriaImpl obj) {
         // Collect all occurrances of rowlimit and rowlimitexception functions
-        List<Function> rowLimitFunctions = new ArrayList<Function>();
+        List<FunctionImpl> rowLimitFunctions = new ArrayList<FunctionImpl>();
         FunctionCollectorVisitorImpl visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMIT.text());
         PreOrderNavigator.doVisit(obj, visitor);      
         visitor = new FunctionCollectorVisitorImpl(getTeiidVersion(), rowLimitFunctions, FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.text());
@@ -1175,11 +1175,11 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.BetweenCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.BetweenCriteriaImpl)
      *
      */
     @Override
-    public void visit(BetweenCriteria obj) {
+    public void visit(BetweenCriteriaImpl obj) {
     	if (isNonComparable(obj.getExpression())) {
     		handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0027, obj),obj);    		
     	}
@@ -1187,38 +1187,38 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.IsNullCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.IsNullCriteriaImpl)
      *
      */
     @Override
-    public void visit(IsNullCriteria obj) {
+    public void visit(IsNullCriteriaImpl obj) {
         this.validateRowLimitFunctionNotInInvalidCriteria(obj);
     }
 
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.MatchCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.MatchCriteriaImpl)
      *
      */
     @Override
-    public void visit(MatchCriteria obj) {
+    public void visit(MatchCriteriaImpl obj) {
         this.validateRowLimitFunctionNotInInvalidCriteria(obj);
     }
 
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.NotCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.NotCriteriaImpl)
      *
      */
     @Override
-    public void visit(NotCriteria obj) {
+    public void visit(NotCriteriaImpl obj) {
         this.validateRowLimitFunctionNotInInvalidCriteria(obj);
     }
 
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SetCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SetCriteriaImpl)
      *
      */
     @Override
-    public void visit(SetCriteria obj) {
+    public void visit(SetCriteriaImpl obj) {
     	if (isNonComparable(obj.getExpression())) {
     		handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0027, obj),obj);    		
     	}
@@ -1226,11 +1226,11 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SubqueryCompareCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl)
      *
      */
     @Override
-    public void visit(SubqueryCompareCriteria obj) {
+    public void visit(SubqueryCompareCriteriaImpl obj) {
     	validateSubquery(obj);
     	if (isNonComparable(obj.getLeftExpression())) {
     		handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0027, obj),obj);    		
@@ -1239,7 +1239,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(Option obj) {
+    public void visit(OptionImpl obj) {
         List<String> dep = obj.getDependentGroups();
         List<String> notDep = obj.getNotDependentGroups();
         if (dep != null && !dep.isEmpty()
@@ -1260,10 +1260,10 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.DynamicCommand)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.DynamicCommandImpl)
      */
     @Override
-    public void visit(DynamicCommand obj) {
+    public void visit(DynamicCommandImpl obj) {
         if (obj.getIntoGroup() != null) {
             validateInto(obj, obj.getAsColumns(), obj.getIntoGroup());
         }
@@ -1273,7 +1273,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(Create obj) {
+    public void visit(CreateImpl obj) {
     	if (!obj.getPrimaryKey().isEmpty()) {
     		validateSortable(obj.getPrimaryKey());
     	}
@@ -1286,10 +1286,10 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.Drop)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.DropImpl)
      */
     @Override
-    public void visit(Drop drop) {
+    public void visit(DropImpl drop) {
         if (!drop.getTable().isTempTable()) {
             handleValidationError(Messages.getString(Messages.ValidationVisitor.drop_of_nontemptable, drop.getTable()), drop);
         }
@@ -1303,7 +1303,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(CompareCriteria obj) {
+    public void visit(CompareCriteriaImpl obj) {
     	if (isNonComparable(obj.getLeftExpression())) {
     		handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0027, obj),obj);    		
     	}
@@ -1319,10 +1319,10 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         PreOrderNavigator.doVisit(obj, visitor);            
         final int functionCount = rowLimitFunctions.size();
         if (functionCount > 0) {
-            Function function = null;
-            Expression expr = null;
-            if (obj.getLeftExpression() instanceof Function) {
-                Function leftExpr = (Function)obj.getLeftExpression();
+            FunctionImpl function = null;
+            BaseExpression expr = null;
+            if (obj.getLeftExpression() instanceof FunctionImpl) {
+                FunctionImpl leftExpr = (FunctionImpl)obj.getLeftExpression();
                 
                 if (FunctionLibrary.FunctionName.ROWLIMIT.equalsIgnoreCase(leftExpr.getName()) ||
                     FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.equalsIgnoreCase(leftExpr.getName())) {
@@ -1330,8 +1330,8 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
                     expr = obj.getRightExpression();
                 }
             } 
-            if (function == null && obj.getRightExpression() instanceof Function) {
-                Function rightExpr = (Function)obj.getRightExpression();
+            if (function == null && obj.getRightExpression() instanceof FunctionImpl) {
+                FunctionImpl rightExpr = (FunctionImpl)obj.getRightExpression();
                 
                 if (FunctionLibrary.FunctionName.ROWLIMIT.equalsIgnoreCase(rightExpr.getName()) ||
                 FunctionLibrary.FunctionName.ROWLIMITEXCEPTION.equalsIgnoreCase(rightExpr.getName())) {
@@ -1343,8 +1343,8 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
                 // must be nested, which is invalid
                 handleValidationError(Messages.getString(Messages.ValidationVisitor.rowlimit0), obj);
             } else {
-                if (expr instanceof Constant) {
-                    Constant constant = (Constant)expr;
+                if (expr instanceof ConstantImpl) {
+                    ConstantImpl constant = (ConstantImpl)expr;
                     if (constant.getValue() instanceof Integer) {
                         Integer integer = (Integer)constant.getValue();
                         if (integer.intValue() < 0) {
@@ -1353,8 +1353,8 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
                     } else {
                         handleValidationError(Messages.getString(Messages.ValidationVisitor.rowlimit1), obj);
                     }
-                } else if (expr instanceof Reference) {
-                	((Reference)expr).setConstraint(new PositiveIntegerConstraint(Messages.ValidationVisitor.rowlimit1));
+                } else if (expr instanceof ReferenceImpl) {
+                	((ReferenceImpl)expr).setConstraint(new PositiveIntegerConstraint(Messages.ValidationVisitor.rowlimit1));
                 } else {
                     handleValidationError(Messages.getString(Messages.ValidationVisitor.rowlimit1), obj);
                 }
@@ -1363,20 +1363,20 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(Limit obj) {
+    public void visit(LimitImpl obj) {
         validateLimitExpression(obj, obj.getOffset());
         validateLimitExpression(obj, obj.getRowLimit());
     }
 
-	private void validateLimitExpression(Limit obj, Expression limitExpr) {
+	private void validateLimitExpression(LimitImpl obj, BaseExpression limitExpr) {
 		if (limitExpr != null) {
-	        if (limitExpr instanceof Constant) {
-	            Integer limit = (Integer)((Constant)limitExpr).getValue();
+	        if (limitExpr instanceof ConstantImpl) {
+	            Integer limit = (Integer)((ConstantImpl)limitExpr).getValue();
 	            if (limit.intValue() < 0) {
 	                handleValidationError(Messages.getString(Messages.ValidationVisitor.badlimit2), obj);
 	            }
-	        } else if (limitExpr instanceof Reference) {
-	        	((Reference)limitExpr).setConstraint(LIMIT_CONSTRAINT); 
+	        } else if (limitExpr instanceof ReferenceImpl) {
+	        	((ReferenceImpl)limitExpr).setConstraint(LIMIT_CONSTRAINT); 
 	        } else if (!EvaluatableVisitor.willBecomeConstant(limitExpr)) {
 	        	handleValidationError(Messages.getString(Messages.ValidationVisitor.badlimit1), obj);
 	        }
@@ -1384,9 +1384,9 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	}
     
     @Override
-    public void visit(XMLForest obj) {
+    public void visit(XMLForestImpl obj) {
     	validateDerivedColumnNames(obj, obj.getArgs());
-    	for (DerivedColumn dc : obj.getArgs()) {
+    	for (DerivedColumnImpl dc : obj.getArgs()) {
 			if (dc.getAlias() == null) {
 				continue;
 			}
@@ -1397,15 +1397,15 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     
     @Override
 	@Since(Version.TEIID_8_0)
-    public void visit(JSONObject obj) {
-    	for (DerivedColumn dc : obj.getArgs()) {
+    public void visit(JSONObjectImpl obj) {
+    	for (DerivedColumnImpl dc : obj.getArgs()) {
     		validateJSONValue(obj, dc.getExpression());
 		}
     }
     
     @Override
-    public void visit(WindowFunction windowFunction) {
-    	AggregateSymbol.Type type = windowFunction.getFunction().getAggregateFunction();
+    public void visit(BaseWindowFunction windowFunction) {
+    	BaseAggregateSymbol.Type type = windowFunction.getFunction().getAggregateFunction();
     	switch (type) {
     	case RANK:
     	case DENSE_RANK:
@@ -1436,7 +1436,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(AggregateSymbol obj) {
+    public void visit(BaseAggregateSymbol obj) {
     	if (!inQuery) {
     		handleValidationError(Messages.getString(Messages.TeiidParser.Aggregate_only_top_level, obj), obj);
     		return;
@@ -1454,17 +1454,17 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     		}
     	}
     	if (obj.getCondition() != null) {
-    		Expression condition = obj.getCondition();
+    		BaseExpression condition = obj.getCondition();
     		validateNoSubqueriesOrOuterReferences(condition);
     	}
 
-        Expression aggExp = null;
+        BaseExpression aggExp = null;
         if (getTeiidVersion().isLessThan(Version.TEIID_8_0.get())) {
             aggExp = obj.getExpression();
             validateNoNestedAggs(aggExp);
         } else {
-            Expression[] aggExps = obj.getArgs();
-            for (Expression expression : aggExps) {
+            BaseExpression[] aggExps = obj.getArgs();
+            for (BaseExpression expression : aggExps) {
                 validateNoNestedAggs(expression);
             }
             if (aggExps.length > 0)
@@ -1475,21 +1475,21 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         validateNoNestedAggs(obj.getCondition());
         
         // Verify data type of aggregate expression
-        IAggregateSymbol.Type aggregateFunction = obj.getAggregateFunction();
-        if((aggregateFunction == IAggregateSymbol.Type.SUM || aggregateFunction == IAggregateSymbol.Type.AVG) && obj.getType() == null) {
+        AggregateSymbol.Type aggregateFunction = obj.getAggregateFunction();
+        if((aggregateFunction == AggregateSymbol.Type.SUM || aggregateFunction == AggregateSymbol.Type.AVG) && obj.getType() == null) {
             handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0041, new Object[] {aggregateFunction, obj}), obj);
         } else if (obj.getType() != DefaultDataTypeManager.DefaultDataTypes.NULL.getTypeClass()) {
-        	if (aggregateFunction == IAggregateSymbol.Type.XMLAGG && aggExp.getType() != DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass()) {
+        	if (aggregateFunction == AggregateSymbol.Type.XMLAGG && aggExp.getType() != DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass()) {
         		handleValidationError(Messages.getString(Messages.ValidationVisitor.non_xml, new Object[] {aggregateFunction, obj}), obj);
         	} else if (obj.isBoolean() && aggExp.getType() != DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass()) {
         		handleValidationError(Messages.getString(Messages.ValidationVisitor.non_boolean, new Object[] {aggregateFunction, obj}), obj);
-        	} else if (aggregateFunction == IAggregateSymbol.Type.JSONARRAY_AGG) {
+        	} else if (aggregateFunction == AggregateSymbol.Type.JSONARRAY_AGG) {
 				validateJSONValue(obj, aggExp);
         	}
         }
         if((obj.isDistinct() ||
-            aggregateFunction == IAggregateSymbol.Type.MIN ||
-            aggregateFunction == IAggregateSymbol.Type.MAX) &&
+            aggregateFunction == AggregateSymbol.Type.MIN ||
+            aggregateFunction == AggregateSymbol.Type.MAX) &&
             dataTypeManager.isNonComparable(dataTypeManager.getDataTypeName(aggExp.getType()))) {
     		handleValidationError(Messages.getString(Messages.ValidationVisitor.non_comparable, new Object[] {aggregateFunction, obj}), obj);
         }
@@ -1501,14 +1501,14 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         		handleValidationError(Messages.getString(Messages.ValidationVisitor.invalid_distinct, new Object[] {aggregateFunction, obj}), obj);
         	}
         }
-    	if (obj.getAggregateFunction() != IAggregateSymbol.Type.TEXTAGG) {
+    	if (obj.getAggregateFunction() != AggregateSymbol.Type.TEXTAGG) {
     		return;
     	}
-    	TextLine tl = (TextLine)aggExp;
+    	TextLineImpl tl = (TextLineImpl)aggExp;
     	if (tl.isIncludeHeader()) {
     		validateDerivedColumnNames(obj, tl.getExpressions());
     	}
-    	for (DerivedColumn dc : tl.getExpressions()) {
+    	for (DerivedColumnImpl dc : tl.getExpressions()) {
 			validateXMLContentTypes(dc.getExpression(), obj);
 		}
     	validateTextOptions(obj, tl.getDelimiter(), tl.getQuote());
@@ -1522,7 +1522,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 
 	@Since(Version.TEIID_8_0)
-	private void validateJSONValue(LanguageObject obj, Expression expr) {
+	private void validateJSONValue(BaseLanguageObject obj, BaseExpression expr) {
 		if (expr.getType() != DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()
 		    && !dataTypeManager.isTransformable(
 		                                               expr.getType(),
@@ -1531,21 +1531,21 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 		}
 	}
 
-	private void validateNoSubqueriesOrOuterReferences(Expression expr) {
+	private void validateNoSubqueriesOrOuterReferences(BaseExpression expr) {
 		if (!ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(expr).isEmpty()) {
 			handleValidationError(Messages.getString(Messages.ValidationVisitor.filter_subquery, expr), expr);
 		}
-		for (ElementSymbol es : ElementCollectorVisitorImpl.getElements(expr, false)) {
+		for (ElementSymbolImpl es : ElementCollectorVisitorImpl.getElements(expr, false)) {
 			if (es.isExternalReference()) {
 				handleValidationError(Messages.getString(Messages.ValidationVisitor.filter_subquery, es), es);
 			}
 		}
 	}
     
-	private void validateNoNestedAggs(LanguageObject aggExp) {
+	private void validateNoNestedAggs(BaseLanguageObject aggExp) {
 		// Check for any nested aggregates (which are not allowed)
         if(aggExp != null) {
-        	HashSet<Expression> nestedAggs = new LinkedHashSet<Expression>();
+        	HashSet<BaseExpression> nestedAggs = new LinkedHashSet<BaseExpression>();
             AggregateSymbolCollectorVisitorImpl.getAggregates(aggExp, nestedAggs, null, null, nestedAggs, null);
             if(!nestedAggs.isEmpty()) {
                 handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0039, nestedAggs), nestedAggs);
@@ -1553,7 +1553,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         }
 	}
     
-	private String[] validateQName(LanguageObject obj, String name) {
+	private String[] validateQName(BaseLanguageObject obj, String name) {
 		try {
 			return Name11Checker.getInstance().getQNameParts(name);
 		} catch (QNameException e) {
@@ -1562,18 +1562,18 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 		return null;
 	}
 
-	private void validateDerivedColumnNames(LanguageObject obj, List<DerivedColumn> cols) {
-		for (DerivedColumn dc : cols) {
-    		if (dc.getAlias() == null && !(dc.getExpression() instanceof ElementSymbol)) {
+	private void validateDerivedColumnNames(BaseLanguageObject obj, List<DerivedColumnImpl> cols) {
+		for (DerivedColumnImpl dc : cols) {
+    		if (dc.getAlias() == null && !(dc.getExpression() instanceof ElementSymbolImpl)) {
     			handleValidationError(Messages.getString(Messages.ValidationVisitor.expression_requires_name), obj);
         	} 
 		}
 	}
     
     @Override
-    public void visit(XMLAttributes obj) {
+    public void visit(XMLAttributesImpl obj) {
     	validateDerivedColumnNames(obj, obj.getArgs());
-    	for (DerivedColumn dc : obj.getArgs()) {
+    	for (DerivedColumnImpl dc : obj.getArgs()) {
 			if (dc.getAlias() == null) {
 				continue;
 			}
@@ -1591,8 +1591,8 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(XMLElement obj) {
-    	for (Expression expression : obj.getContent()) {
+    public void visit(XMLElementImpl obj) {
+    	for (BaseExpression expression : obj.getContent()) {
     		validateXMLContentTypes(expression, obj);
     	}
     	validateQName(obj, obj.getName());
@@ -1602,23 +1602,23 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
      * @param expression
      * @param parent
      */
-    public void validateXMLContentTypes(Expression expression, LanguageObject parent) {
+    public void validateXMLContentTypes(BaseExpression expression, BaseLanguageObject parent) {
 		if (expression.getType() == DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass() || expression.getType() == DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass()) {
 			handleValidationError(Messages.getString(Messages.ValidationVisitor.xml_content_type, expression), parent);
 		}
     }
     
     @Override
-    public void visit(QueryString obj) {
+    public void visit(QueryStringImpl obj) {
     	validateDerivedColumnNames(obj, obj.getArgs());
     }
     
     @Override
-    public void visit(XMLTable obj) {
-    	List<DerivedColumn> passing = obj.getPassing();
+    public void visit(XMLTableImpl obj) {
+    	List<DerivedColumnImpl> passing = obj.getPassing();
     	validatePassing(obj, obj.getXQueryExpression(), passing);
     	boolean hasOrdinal = false;
-    	for (XMLColumn xc : obj.getColumns()) {
+    	for (XMLColumnImpl xc : obj.getColumns()) {
 			if (!xc.isOrdinal()) {
 				if (xc.getDefaultExpression() != null && !EvaluatableVisitor.isFullyEvaluatable(xc.getDefaultExpression(), false)) {
 					handleValidationError(Messages.getString(Messages.ValidationVisitor.invalid_default, xc.getDefaultExpression()), obj);
@@ -1635,10 +1635,10 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     
     @Override
 	@Since(Version.TEIID_8_0)
-    public void visit(ObjectTable obj) {
-    	List<DerivedColumn> passing = obj.getPassing();
+    public void visit(ObjectTableImpl obj) {
+    	List<DerivedColumnImpl> passing = obj.getPassing();
     	TreeSet<String> names = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-    	for (DerivedColumn dc : passing) {
+    	for (DerivedColumnImpl dc : passing) {
     		if (dc.getAlias() == null) {
 				handleValidationError(Messages.getString(Messages.ValidationVisitor.context_item_not_allowed), obj);
         	} else if (!names.add(dc.getAlias())) {
@@ -1658,7 +1658,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 			handleValidationError(e.getMessage(), obj);
 		}
 
-    	for (ObjectColumn xc : obj.getColumns()) {
+    	for (ObjectColumnImpl xc : obj.getColumns()) {
     		if (scriptCompiler != null) {
     			try {
 					xc.setCompiledScript(scriptCompiler.compile(xc.getPath()));
@@ -1673,15 +1673,15 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(XMLQuery obj) {
+    public void visit(XMLQueryImpl obj) {
     	validatePassing(obj, obj.getXQueryExpression(), obj.getPassing());
     }
 
-	private void validatePassing(LanguageObject obj, SaxonXQueryExpression xqe, List<DerivedColumn> passing) {
+	private void validatePassing(BaseLanguageObject obj, SaxonXQueryExpression xqe, List<DerivedColumnImpl> passing) {
 		boolean context = false;
     	boolean hadError = false;
     	TreeSet<String> names = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-    	for (DerivedColumn dc : passing) {
+    	for (DerivedColumnImpl dc : passing) {
     		if (dc.getAlias() == null) {
     			Class<?> type = dc.getExpression().getType();
     			if (type != DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass()) {
@@ -1705,7 +1705,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	}
     
     @Override
-    public void visit(XMLNamespaces obj) {
+    public void visit(XMLNamespacesImpl obj) {
     	boolean hasDefault = false;
     	for (NamespaceItem item : obj.getNamespaceItems()) {
 			if (item.getPrefix() != null) {
@@ -1728,12 +1728,12 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(TextTable obj) {
+    public void visit(TextTableImpl obj) {
     	boolean widthSet = false;
     	Character delimiter = null;
     	Character quote = null;
     	boolean usingSelector = false;
-    	for (TextColumn column : obj.getColumns()) {
+    	for (TextColumnImpl column : obj.getColumns()) {
     	    if (column.isOrdinal())
                 continue;
 
@@ -1778,7 +1778,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     	}
     }
 
-	private void validateTextOptions(LanguageObject obj, Character delimiter,
+	private void validateTextOptions(BaseLanguageObject obj, Character delimiter,
 			Character quote) {
 		if (quote == null) {
 			quote = '"';
@@ -1796,7 +1796,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	}
     
     @Override
-    public void visit(XMLParse obj) {
+    public void visit(XMLParseImpl obj) {
     	if (obj.getExpression().getType() != DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass() && 
     			obj.getExpression().getType() != DefaultDataTypeManager.DefaultDataTypes.CLOB.getTypeClass() &&
     			obj.getExpression().getType() != DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass()) {
@@ -1805,27 +1805,27 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(ExistsCriteria obj) {
+    public void visit(ExistsCriteriaImpl obj) {
     	validateSubquery(obj);
     }
     
     @Override
-    public void visit(SubqueryFromClause obj) {
+    public void visit(SubqueryFromClauseImpl obj) {
     	validateSubquery(obj);
     }
     
     @Override
-    public void visit(LoopStatement obj) {
+    public void visit(LoopStatementImpl obj) {
     	validateSubquery(obj);
     }
     
     @Override
-    public void visit(WithQueryCommand obj) {
+    public void visit(WithQueryCommandImpl obj) {
     	validateSubquery(obj);
     }
     
     @Override
-    public void visit(AlterView obj) {
+    public void visit(AlterViewImpl obj) {
     	try {
     	    TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
             queryResolver.validateProjectedSymbols(obj.getTarget(), getMetadata(), obj.getDefinition());
@@ -1838,15 +1838,15 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
         }
     }
 
-	private void validateAlterTarget(Alter<?> obj) {
+	private void validateAlterTarget(AlterImpl<?> obj) {
 		if (getMetadata().getImportedModels().contains(obj.getTarget().getSchema())) {
 			handleValidationError(Messages.getString(Messages.ValidationVisitor.invalid_alter, obj.getTarget()), obj.getTarget());
 		}
 	}
 
     @Override
-    public void visit(AlterProcedure obj) {
-    	GroupSymbol gs = obj.getTarget();
+    public void visit(AlterProcedureImpl obj) {
+    	GroupSymbolImpl gs = obj.getTarget();
     	validateAlterTarget(obj);
     	try {
 	    	if (!gs.isProcedure() || !getMetadata().isVirtualModel(getMetadata().getModelID(gs.getMetadataID()))) {
@@ -1855,30 +1855,30 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 	    	}
 	    	DefaultValidator.validate(obj.getDefinition(), getMetadata(), this);
 	    	TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
-	    	StoredProcedureInfo<ISPParameter, QueryNode> info = getMetadata().getStoredProcedureInfoForProcedure(gs.getName());
-	    	for (ISPParameter param : info.getParameters()) {
-	    		if (param.getParameterType() == SPParameter.RESULT_SET) {
+	    	StoredProcedureInfo<SPParameter, QueryNode> info = getMetadata().getStoredProcedureInfoForProcedure(gs.getName());
+	    	for (SPParameter param : info.getParameters()) {
+	    		if (param.getParameterType() == SPParameterImpl.RESULT_SET) {
 	    	    	queryResolver.validateProjectedSymbols(gs, param.getResultSetColumns(), obj.getDefinition().getProjectedSymbols());
 	    	    	break;
 	    		}
 	    	}
     	} catch (QueryValidatorException e) {
-            Command command = obj.getDefinition();
-            if (command instanceof CreateUpdateProcedureCommand)
-                handleValidationError(e.getMessage(), ((CreateUpdateProcedureCommand) command).getBlock());
-            else if (command instanceof CreateProcedureCommand)
-                handleValidationError(e.getMessage(), ((CreateProcedureCommand) command).getBlock());
+            CommandImpl command = obj.getDefinition();
+            if (command instanceof CreateUpdateProcedureCommandImpl)
+                handleValidationError(e.getMessage(), ((CreateUpdateProcedureCommandImpl) command).getBlock());
+            else if (command instanceof CreateProcedureCommandImpl)
+                handleValidationError(e.getMessage(), ((CreateProcedureCommandImpl) command).getBlock());
         } catch (Exception e) {
             handleException(e);
         }
     }
     
     @Override
-    public void visit(Block obj) {
+    public void visit(BlockImpl obj) {
     	if (obj.getLabel() == null) {
     		return;
     	}
-		for (LanguageObject lo : stack) {
+		for (BaseLanguageObject lo : stack) {
 			if (lo instanceof Labeled) {
 				Labeled labeled = (Labeled)lo;
 	    		if (obj.getLabel().equalsIgnoreCase(labeled.getLabel())) {
@@ -1888,13 +1888,13 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
 		}
     }
 
-    private void visit8(CommandStatement obj) {
+    private void visit8(CommandStatementImpl obj) {
     	if (this.createProc == null || this.createProc.getResultSetColumns().isEmpty() || !obj.isReturnable() || !obj.getCommand().returnsResultSet()) {
     		return;
     	}
-		List<? extends Expression> symbols = obj.getCommand().getResultSetColumns();
-		if (symbols == null && obj.getCommand() instanceof DynamicCommand) {
-			DynamicCommand cmd = (DynamicCommand)obj.getCommand();
+		List<? extends BaseExpression> symbols = obj.getCommand().getResultSetColumns();
+		if (symbols == null && obj.getCommand() instanceof DynamicCommandImpl) {
+			DynamicCommandImpl cmd = (DynamicCommandImpl)obj.getCommand();
 			cmd.setAsColumns(this.createProc.getResultSetColumns());
 			return;
 		}
@@ -1907,17 +1907,17 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(BranchingStatement obj) {
+    public void visit(BranchingStatementImpl obj) {
 		boolean matchedLabel = false;
 		boolean inLoop = false;
-		for (LanguageObject lo : stack) {
-			if (lo instanceof LoopStatement || lo instanceof WhileStatement) {
+		for (BaseLanguageObject lo : stack) {
+			if (lo instanceof LoopStatementImpl || lo instanceof WhileStatementImpl) {
 				inLoop = true;
 				if (obj.getLabel() == null) {
 					break;
 				}
 				matchedLabel |= obj.getLabel().equalsIgnoreCase(((Labeled)lo).getLabel());
-			} else if (obj.getLabel() != null && lo instanceof Block && obj.getLabel().equalsIgnoreCase(((Block)lo).getLabel())) {
+			} else if (obj.getLabel() != null && lo instanceof BlockImpl && obj.getLabel().equalsIgnoreCase(((BlockImpl)lo).getLabel())) {
 				matchedLabel = true;
 				if (obj.getMode() != BranchingMode.LEAVE) {
 					handleValidationError(Messages.getString(Messages.ValidationVisitor.invalid_label, obj.getLabel()), obj);
@@ -1933,7 +1933,7 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
     
     @Override
-    public void visit(AlterTrigger obj) {
+    public void visit(AlterTriggerImpl obj) {
     	validateAlterTarget(obj);
     	validateGroupSupportsUpdate(obj.getTarget());
 		try {
@@ -1946,8 +1946,8 @@ public class ValidationVisitorImpl extends AbstractValidationVisitor {
     }
 
     //TODO: it may be simpler to catch this in the parser
-    private void validateSubquery(SubqueryContainer<?> subQuery) {
-    	if (subQuery.getCommand() instanceof Query && ((Query)subQuery.getCommand()).getInto() != null) {
+    private void validateSubquery(BaseSubqueryContainer<?> subQuery) {
+    	if (subQuery.getCommand() instanceof QueryImpl && ((QueryImpl)subQuery.getCommand()).getInto() != null) {
         	handleValidationError(Messages.getString(Messages.ValidationVisitor.subquery_insert), subQuery.getCommand());
         }
     }

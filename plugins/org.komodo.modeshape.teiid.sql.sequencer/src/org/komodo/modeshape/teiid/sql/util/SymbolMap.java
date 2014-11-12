@@ -29,17 +29,17 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.komodo.modeshape.teiid.sql.symbol.AliasSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
-import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbol;
+import org.komodo.modeshape.teiid.sql.symbol.AliasSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.ElementSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
+import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbolImpl;
 import org.komodo.utils.ArgCheck;
 
 
 public class SymbolMap {
 
-    private LinkedHashMap<ElementSymbol, Expression> map = new LinkedHashMap<ElementSymbol, Expression>();
-    private Map<ElementSymbol, Expression> unmodifiableMap = Collections.unmodifiableMap(map);
+    private LinkedHashMap<ElementSymbolImpl, BaseExpression> map = new LinkedHashMap<ElementSymbolImpl, BaseExpression>();
+    private Map<ElementSymbolImpl, BaseExpression> unmodifiableMap = Collections.unmodifiableMap(map);
 
     public SymbolMap() {
 	}
@@ -47,15 +47,15 @@ public class SymbolMap {
     @Override
     public SymbolMap clone() {
     	SymbolMap clonedMap = new SymbolMap();
-    	for (Map.Entry<ElementSymbol, Expression> entry : map.entrySet()) {
+    	for (Map.Entry<ElementSymbolImpl, BaseExpression> entry : map.entrySet()) {
 			clonedMap.addMapping(entry.getKey().clone(), entry.getValue().clone());
 		}
     	return clonedMap;
     }
     
-    public Map<Expression, ElementSymbol> inserseMapping() {
-    	HashMap<Expression, ElementSymbol> inverseMap = new HashMap<Expression, ElementSymbol>();
-		for (Map.Entry<ElementSymbol, Expression> entry : this.map.entrySet()) {
+    public Map<BaseExpression, ElementSymbolImpl> inserseMapping() {
+    	HashMap<BaseExpression, ElementSymbolImpl> inverseMap = new HashMap<BaseExpression, ElementSymbolImpl>();
+		for (Map.Entry<ElementSymbolImpl, BaseExpression> entry : this.map.entrySet()) {
 			inverseMap.put(entry.getValue(), entry.getKey());
 		}
 		return inverseMap;
@@ -64,50 +64,50 @@ public class SymbolMap {
     /**
      * @return true if the map did not already contained the given symbol
      */
-    public boolean addMapping(ElementSymbol symbol,
-                              Expression expression) {
+    public boolean addMapping(ElementSymbolImpl symbol,
+                              BaseExpression expression) {
         return map.put(symbol, getExpression(expression)) == null;
     }
 
-    public static final Expression getExpression(Expression symbol) {
-        if (symbol instanceof AliasSymbol) {
-            symbol = ((AliasSymbol)symbol).getSymbol();
+    public static final BaseExpression getExpression(BaseExpression symbol) {
+        if (symbol instanceof AliasSymbolImpl) {
+            symbol = ((AliasSymbolImpl)symbol).getSymbol();
         }
 
-        if (symbol instanceof ExpressionSymbol) {
-            ExpressionSymbol exprSymbol = (ExpressionSymbol)symbol;
+        if (symbol instanceof ExpressionSymbolImpl) {
+            ExpressionSymbolImpl exprSymbol = (ExpressionSymbolImpl)symbol;
             return exprSymbol.getExpression();
         }
 
         return symbol;
     }
 
-    public Expression getMappedExpression(ElementSymbol symbol) {
+    public BaseExpression getMappedExpression(ElementSymbolImpl symbol) {
         return map.get(symbol);
     }
     
-    public Map<ElementSymbol, Expression> asUpdatableMap() {
+    public Map<ElementSymbolImpl, BaseExpression> asUpdatableMap() {
     	return this.map;
     }
 
-    public Map<ElementSymbol, Expression> asMap() {
+    public Map<ElementSymbolImpl, BaseExpression> asMap() {
         return unmodifiableMap;
     }
 
-    public List<ElementSymbol> getKeys() {
-        return new ArrayList<ElementSymbol>(map.keySet());
+    public List<ElementSymbolImpl> getKeys() {
+        return new ArrayList<ElementSymbolImpl>(map.keySet());
     }
     
-    public List<Expression> getValues() {
-        return new ArrayList<Expression>(map.values());
+    public List<BaseExpression> getValues() {
+        return new ArrayList<BaseExpression>(map.values());
     }
 
-    public static final SymbolMap createSymbolMap(List<ElementSymbol> virtualElements,
-                                                  List<? extends Expression> mappedCols) {
+    public static final SymbolMap createSymbolMap(List<ElementSymbolImpl> virtualElements,
+                                                  List<? extends BaseExpression> mappedCols) {
         ArgCheck.isTrue(virtualElements.size() == mappedCols.size(), "elements must match columns"); //$NON-NLS-1$
         SymbolMap symbolMap = new SymbolMap();
-        Iterator<ElementSymbol> keyIter = virtualElements.iterator();
-        for (Expression symbol : mappedCols) {
+        Iterator<ElementSymbolImpl> keyIter = virtualElements.iterator();
+        for (BaseExpression symbol : mappedCols) {
             symbolMap.addMapping(keyIter.next(), symbol);
         }
 

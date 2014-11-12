@@ -34,8 +34,8 @@ import org.komodo.spi.query.metadata.MetadataID;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.core.util.LRUCache;
 import org.teiid.query.mapping.relational.TCQueryNode;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.SymbolImpl;
 
 /**
  * This class represents a temporary metadata ID.  A temporary metadata ID 
@@ -65,7 +65,7 @@ public class TempMetadataID implements Serializable, MetadataID<TempMetadataID> 
 		volatile long lastDataModification;
 		volatile long lastModified = System.currentTimeMillis();
 		int modCount;
-		private LinkedHashMap<Expression, Integer> functionBasedExpressions;
+		private LinkedHashMap<BaseExpression, Integer> functionBasedExpressions;
 		private Object model;
 		
 		public long getLastDataModification() {
@@ -94,11 +94,11 @@ public class TempMetadataID implements Serializable, MetadataID<TempMetadataID> 
 		}
 
 		public void setFunctionBasedExpressions(
-				LinkedHashMap<Expression, Integer> newExprs) {
+				LinkedHashMap<BaseExpression, Integer> newExprs) {
 			this.functionBasedExpressions = newExprs;
 		}
 		
-		public LinkedHashMap<Expression, Integer> getFunctionBasedExpressions() {
+		public LinkedHashMap<BaseExpression, Integer> getFunctionBasedExpressions() {
 			return functionBasedExpressions;
 		}
 
@@ -426,7 +426,7 @@ public class TempMetadataID implements Serializable, MetadataID<TempMetadataID> 
 
 	public String getName() {
 		if (this.name == null) {
-			this.name = Symbol.getShortName(this.ID);
+			this.name = SymbolImpl.getShortName(this.ID);
 		}
 		return this.name;
 	}

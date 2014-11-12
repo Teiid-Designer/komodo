@@ -23,12 +23,12 @@ package org.komodo.spi.query.sql;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.lang.ICommand;
+import org.komodo.spi.query.sql.lang.Command;
 
 /**
  *
  */
-public interface CommandCollectorVisitor<C extends ICommand> {
+public interface CommandCollectorVisitor<C extends Command> {
 
     /**
      * Retrieve the commands from the given command

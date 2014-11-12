@@ -32,11 +32,11 @@ import java.util.List;
 import org.komodo.spi.query.sql.ElementCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.MultipleElementSymbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.MultipleElementSymbolImpl;
 import org.teiid.runtime.client.Messages;
 
 
@@ -51,9 +51,9 @@ import org.teiid.runtime.client.Messages;
  * The public visit() methods should NOT be called directly.</p>
  */
 public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
-    implements ElementCollectorVisitor<LanguageObject, ElementSymbol> {
+    implements ElementCollectorVisitor<BaseLanguageObject, ElementSymbolImpl> {
 
-    private Collection<? super ElementSymbol> elements;
+    private Collection<? super ElementSymbolImpl> elements;
     private boolean aggsOnly;
 
     /**
@@ -62,7 +62,7 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param removeDuplicates 
      */
     public ElementCollectorVisitorImpl(TeiidVersion teiidVersion, boolean removeDuplicates) {
-        this(teiidVersion, removeDuplicates ? new HashSet<ElementSymbol>() : new ArrayList<ElementSymbol>());
+        this(teiidVersion, removeDuplicates ? new HashSet<ElementSymbolImpl>() : new ArrayList<ElementSymbolImpl>());
     }
 
     /**
@@ -72,7 +72,7 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param elements Collection to use for elements
      * @throws IllegalArgumentException If elements is null
      */
-	public ElementCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<? super ElementSymbol> elements) {
+	public ElementCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<? super ElementSymbolImpl> elements) {
 	    super(teiidVersion);
         if(elements == null) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0021));
@@ -86,7 +86,7 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(ElementSymbol obj) {
+    public void visit(ElementSymbolImpl obj) {
     	if (!aggsOnly || obj.isAggregate()) {
             this.elements.add(obj);
     	}
@@ -98,8 +98,8 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(MultipleElementSymbol obj) {
-        List<ElementSymbol> elementSymbols = obj.getElementSymbols();
+    public void visit(MultipleElementSymbolImpl obj) {
+        List<ElementSymbolImpl> elementSymbols = obj.getElementSymbols();
 		if(elementSymbols != null) {
         	for (int i = 0; i < elementSymbols.size(); i++) {
 				visit(elementSymbols.get(i));
@@ -112,7 +112,7 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      * @param elements Collection to collect elements in
      */
-    public static final void getElements(LanguageObject obj, Collection<? super ElementSymbol> elements) {
+    public static final void getElements(BaseLanguageObject obj, Collection<? super ElementSymbolImpl> elements) {
     	if(obj == null) {
     		return;
     	}
@@ -124,14 +124,14 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param objs
      * @param elements
      */
-    public static final void getElements(Collection<? extends LanguageObject> objs, Collection<ElementSymbol> elements) {
+    public static final void getElements(Collection<? extends BaseLanguageObject> objs, Collection<ElementSymbolImpl> elements) {
     	if(objs == null) {
     		return;
     	}
 
-    	LanguageObject obj = objs.iterator().next();
+    	BaseLanguageObject obj = objs.iterator().next();
         ElementCollectorVisitorImpl visitor = new ElementCollectorVisitorImpl(obj.getTeiidVersion(), elements);
-        for (LanguageObject object : objs) {
+        for (BaseLanguageObject object : objs) {
             PreOrderNavigator.doVisit(object, visitor);
 		}
     }
@@ -142,9 +142,9 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * filtered out.
      * @param obj Language object
      * @param removeDuplicates True to remove duplicates
-     * @return Collection of {@link ElementSymbol}
+     * @return Collection of {@link ElementSymbolImpl}
      */
-    public static final Collection<ElementSymbol> getElements(LanguageObject obj, boolean removeDuplicates) {
+    public static final Collection<ElementSymbolImpl> getElements(BaseLanguageObject obj, boolean removeDuplicates) {
         return ElementCollectorVisitorImpl.getElements(obj, removeDuplicates, false);
     }
 
@@ -156,9 +156,9 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param removeDuplicates True to remove duplicates
      * @param useDeepIteration indicates whether or not to iterate into nested
      * subqueries of the query 
-     * @return Collection of {@link ElementSymbol}
+     * @return Collection of {@link ElementSymbolImpl}
      */
-    public static final Collection<ElementSymbol> getElements(LanguageObject obj, boolean removeDuplicates, boolean useDeepIteration) {
+    public static final Collection<ElementSymbolImpl> getElements(BaseLanguageObject obj, boolean removeDuplicates, boolean useDeepIteration) {
     	return getElements(obj, removeDuplicates, useDeepIteration, false);
     }
     
@@ -167,17 +167,17 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param removeDuplicates
      * @param useDeepIteration
      * @param aggsOnly
-     * @return Collection of {@link ElementSymbol}
+     * @return Collection of {@link ElementSymbolImpl}
      */
-    public static final Collection<ElementSymbol> getElements(LanguageObject obj, boolean removeDuplicates, boolean useDeepIteration, boolean aggsOnly) {
+    public static final Collection<ElementSymbolImpl> getElements(BaseLanguageObject obj, boolean removeDuplicates, boolean useDeepIteration, boolean aggsOnly) {
         if(obj == null) {
             return Collections.emptyList();
         }
-        Collection<ElementSymbol> elements = null;
+        Collection<ElementSymbolImpl> elements = null;
         if(removeDuplicates) {
-            elements = new LinkedHashSet<ElementSymbol>();
+            elements = new LinkedHashSet<ElementSymbolImpl>();
         } else {
-            elements = new ArrayList<ElementSymbol>();
+            elements = new ArrayList<ElementSymbolImpl>();
         }
         ElementCollectorVisitorImpl visitor = new ElementCollectorVisitorImpl(obj.getTeiidVersion(), elements);
         visitor.aggsOnly = aggsOnly;
@@ -195,22 +195,22 @@ public class ElementCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param removeDuplicates
      * @return aggregates from given object
      */
-    public static final Collection<ElementSymbol> getAggregates(LanguageObject obj, boolean removeDuplicates) {
+    public static final Collection<ElementSymbolImpl> getAggregates(BaseLanguageObject obj, boolean removeDuplicates) {
     	return getElements(obj, removeDuplicates, false, true);
     }
     
     @Override
-    public Collection<? super ElementSymbol> findElements(LanguageObject obj) {
+    public Collection<? super ElementSymbolImpl> findElements(BaseLanguageObject obj) {
         return findElements(obj, false);
     }
 
     @Override
-    public Collection<? super ElementSymbol> findElements(LanguageObject obj, boolean useDeepIteration) {
+    public Collection<? super ElementSymbolImpl> findElements(BaseLanguageObject obj, boolean useDeepIteration) {
         return findElements(obj, useDeepIteration, false);
     }
     
     @Override
-    public Collection<? super ElementSymbol>  findElements(LanguageObject obj, boolean useDeepIteration, boolean aggsOnly) {
+    public Collection<? super ElementSymbolImpl>  findElements(BaseLanguageObject obj, boolean useDeepIteration, boolean aggsOnly) {
         this.aggsOnly = aggsOnly;
         if (useDeepIteration){
             DeepPreOrderNavigator.doVisit(obj, this);

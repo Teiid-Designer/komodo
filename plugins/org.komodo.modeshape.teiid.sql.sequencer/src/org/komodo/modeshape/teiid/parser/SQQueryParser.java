@@ -33,9 +33,9 @@ import org.komodo.modeshape.teiid.Messages;
 import org.komodo.modeshape.teiid.TeiidClientException;
 import org.komodo.modeshape.teiid.parser.AbstractTeiidSeqParser.ParsingError;
 import org.komodo.modeshape.teiid.parser.completion.TeiidCompletionParser;
-import org.komodo.modeshape.teiid.sql.lang.Command;
-import org.komodo.modeshape.teiid.sql.lang.Criteria;
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.lang.CommandImpl;
+import org.komodo.modeshape.teiid.sql.lang.CriteriaImpl;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.QueryParser;
@@ -117,12 +117,12 @@ public class SQQueryParser implements QueryParser, StringConstants {
 	 * @throws Exception if failure to parse correctly
 	 */
 	@Since(Version.TEIID_8_0)
-	public Command parseProcedure(String sql, boolean update) throws Exception {
+	public CommandImpl parseProcedure(String sql, boolean update) throws Exception {
         try{
             if (update) {
                 return getTeiidParser(sql).forEachRowTriggerAction(new ParseInfo());
             }
-            Command result = getTeiidParser(sql).procedureBodyCommand(new ParseInfo());
+            CommandImpl result = getTeiidParser(sql).procedureBodyCommand(new ParseInfo());
             return result;
         } catch(Exception pe) {
             throw convertParserException(pe);
@@ -140,7 +140,7 @@ public class SQQueryParser implements QueryParser, StringConstants {
 	 * @throws IllegalArgumentException if sql is null
 	 */	
 	@Override
-    public Command parseCommand(String sql) throws Exception {
+    public CommandImpl parseCommand(String sql) throws Exception {
 	    return parseCommand(sql, new ParseInfo(), false);
 	}
 
@@ -154,7 +154,7 @@ public class SQQueryParser implements QueryParser, StringConstants {
      * @throws Exception if parsing fails
      * @throws IllegalArgumentException if sql is null
      */ 
-    public Command parseCommand(String sql, ParseInfo parseInfo) throws Exception {
+    public CommandImpl parseCommand(String sql, ParseInfo parseInfo) throws Exception {
         return parseCommand(sql, parseInfo, false);
     }
 
@@ -168,16 +168,16 @@ public class SQQueryParser implements QueryParser, StringConstants {
      * @throws IllegalArgumentException if sql is null
      */
     @Override
-    public Command parseDesignerCommand(String sql) throws Exception {
+    public CommandImpl parseDesignerCommand(String sql) throws Exception {
         return parseCommand(sql, new ParseInfo(), true);
     }
 
-	private Command parseCommand(String sql, ParseInfo parseInfo, boolean designerCommands) throws Exception {
+	private CommandImpl parseCommand(String sql, ParseInfo parseInfo, boolean designerCommands) throws Exception {
         if(sql == null || sql.length() == 0) {
             throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30377));
         }
         
-    	Command result = null;
+    	CommandImpl result = null;
         try{
             TeiidSeqParser teiidParser = getTeiidParser(sql);
             if (designerCommands) {
@@ -228,14 +228,14 @@ public class SQQueryParser implements QueryParser, StringConstants {
      * @throws TeiidClientException if sql is null
      */
     @Override
-    public Criteria parseCriteria(String sql) throws Exception {
+    public CriteriaImpl parseCriteria(String sql) throws Exception {
         if(sql == null) {
             throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30377));
         }
 
         ParseInfo dummyInfo = new ParseInfo();
 
-        Criteria result = null;
+        CriteriaImpl result = null;
         try{
             TeiidSeqParser teiidParser = getTeiidParser(sql);
             result = teiidParser.criteria(dummyInfo);
@@ -256,14 +256,14 @@ public class SQQueryParser implements QueryParser, StringConstants {
      * @throws IllegalArgumentException if sql is null
      */
     @Override
-    public Expression parseExpression(String sql) throws Exception {
+    public BaseExpression parseExpression(String sql) throws Exception {
         if(sql == null) {
             throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30377));
         }
 
         ParseInfo dummyInfo = new ParseInfo();
 
-        Expression result = null;
+        BaseExpression result = null;
         try{
             TeiidSeqParser teiidParser = getTeiidParser(sql);
             result = teiidParser.expression(dummyInfo);
@@ -280,14 +280,14 @@ public class SQQueryParser implements QueryParser, StringConstants {
      * @return Expression representing sql
      * @throws Exception if parsing fails
      */
-    public Expression parseSelectExpression(String sql) throws Exception {
+    public BaseExpression parseSelectExpression(String sql) throws Exception {
         if (sql == null) {
             throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30377));
         }
 
         ParseInfo dummyInfo = new ParseInfo();
 
-        Expression result = null;
+        BaseExpression result = null;
         try {
             TeiidSeqParser teiidParser = getTeiidParser(sql);
             result = teiidParser.selectExpression(dummyInfo);

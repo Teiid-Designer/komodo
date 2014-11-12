@@ -69,9 +69,9 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinType;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.UnaryFromClause;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.query.sql.lang.JoinType.Types;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.utils.KLog;
@@ -81,7 +81,6 @@ import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.observation.Event;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
 import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
-
 /**
  * Class which serves as base for various sequencer unit tests. In addition to this, it uses the sequencing events fired by
  * ModeShape's {@link javax.jcr.observation.ObservationManager} to perform various assertions and therefore, acts as a test for
@@ -451,7 +450,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         return verify(parentNode, relativePath, -1, mixinType);
     }
 
-    protected void verifyJoin(Node joinPredicate, IJoinType.Types joinType) throws Exception {
+    protected void verifyJoin(Node joinPredicate, Types joinType) throws Exception {
         Node joinNode = verify(joinPredicate, JoinPredicate.JOIN_TYPE_REF_NAME, JoinType.ID);
         verifyProperty(joinNode, TeiidSqlLexicon.JoinType.KIND_PROP_NAME, joinType.name());
     }

@@ -36,12 +36,12 @@ import org.teiid.query.resolver.CommandResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitorImpl;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.Create;
-import org.teiid.query.sql.lang.Drop;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CreateImpl;
+import org.teiid.query.sql.lang.DropImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
 import org.teiid.runtime.client.Messages;
 
 
@@ -59,17 +59,17 @@ public class TempTableResolver extends CommandResolver {
     }
 
     /** 
-     * @see org.teiid.query.resolver.CommandResolver#resolveCommand(org.teiid.query.sql.lang.Command, org.teiid.query.metadata.TempMetadataAdapter, boolean)
+     * @see org.teiid.query.resolver.CommandResolver#resolveCommand(org.teiid.query.sql.lang.CommandImpl, org.teiid.query.metadata.TempMetadataAdapter, boolean)
      */
-    public void resolveCommand(Command command, TempMetadataAdapter metadata, boolean resolveNullLiterals) 
+    public void resolveCommand(CommandImpl command, TempMetadataAdapter metadata, boolean resolveNullLiterals) 
         throws Exception {
         
-        if(command.getType() == Command.TYPE_CREATE) {
-            Create create = (Create)command;
-            GroupSymbol group = create.getTable();
+        if(command.getType() == CommandImpl.TYPE_CREATE) {
+            CreateImpl create = (CreateImpl)command;
+            GroupSymbolImpl group = create.getTable();
             
             //assuming that all temp table creates are local, the user must use a local name
-            if (group.getName().indexOf(Symbol.SEPARATOR) != -1) {
+            if (group.getName().indexOf(SymbolImpl.SEPARATOR) != -1) {
                  throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30117, group.getName()));
             }
 
@@ -92,7 +92,7 @@ public class TempTableResolver extends CommandResolver {
             //exception at runtime if the user has not dropped the previous table yet
             TempMetadataID tempTable = ResolverUtil.addTempTable(metadata, group, create.getColumnSymbols());
             ResolverUtil.resolveGroup(create.getTable(), metadata);
-            Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+            Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
             groups.add(create.getTable());
             ResolverVisitorImpl visitor = new ResolverVisitorImpl(command.getTeiidVersion());
             visitor.resolveLanguageObject(command, groups, metadata);
@@ -111,15 +111,15 @@ public class TempTableResolver extends CommandResolver {
 				create.getTableMetadata().setParent((Schema)mid);
 	            tempTable.getTableData().setModel(mid);
             }
-        } else if(command.getType() == Command.TYPE_DROP) {
-            ResolverUtil.resolveGroup(((Drop)command).getTable(), metadata);
+        } else if(command.getType() == CommandImpl.TYPE_DROP) {
+            ResolverUtil.resolveGroup(((DropImpl)command).getTable(), metadata);
         }
     }
 
-	public static void addAdditionalMetadata(Create create, TempMetadataID tempTable) {
+	public static void addAdditionalMetadata(CreateImpl create, TempMetadataID tempTable) {
 		if (!create.getPrimaryKey().isEmpty()) {
 			ArrayList<TempMetadataID> primaryKey = new ArrayList<TempMetadataID>(create.getPrimaryKey().size());
-			for (ElementSymbol symbol : create.getPrimaryKey()) {
+			for (ElementSymbolImpl symbol : create.getPrimaryKey()) {
 				primaryKey.add((TempMetadataID) symbol.getMetadataID());
 			}
 			tempTable.setPrimaryKey(primaryKey);

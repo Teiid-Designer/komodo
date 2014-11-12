@@ -29,13 +29,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.sql.SQLStringVisitor;
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type;
-import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol.Type;
+import org.komodo.spi.query.sql.symbol.ElementSymbol.DisplayMode;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.core.types.ArrayImpl;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
@@ -53,111 +53,111 @@ import org.teiid.metadata.Table;
 import org.teiid.query.metadata.DDLConstants;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.sql.lang.AlterProcedure;
-import org.teiid.query.sql.lang.AlterTrigger;
-import org.teiid.query.sql.lang.AlterView;
-import org.teiid.query.sql.lang.ArrayTable;
-import org.teiid.query.sql.lang.BetweenCriteria;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.CompoundCriteria;
-import org.teiid.query.sql.lang.Create;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.lang.CriteriaSelector;
-import org.teiid.query.sql.lang.Delete;
-import org.teiid.query.sql.lang.Drop;
-import org.teiid.query.sql.lang.DynamicCommand;
-import org.teiid.query.sql.lang.ExistsCriteria;
-import org.teiid.query.sql.lang.ExpressionCriteria;
-import org.teiid.query.sql.lang.From;
-import org.teiid.query.sql.lang.FromClause;
-import org.teiid.query.sql.lang.GroupBy;
-import org.teiid.query.sql.lang.HasCriteria;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.lang.Into;
-import org.teiid.query.sql.lang.IsNullCriteria;
-import org.teiid.query.sql.lang.JoinPredicate;
-import org.teiid.query.sql.lang.JoinType;
+import org.teiid.query.sql.lang.AlterProcedureImpl;
+import org.teiid.query.sql.lang.AlterTriggerImpl;
+import org.teiid.query.sql.lang.AlterViewImpl;
+import org.teiid.query.sql.lang.ArrayTableImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.BetweenCriteriaImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CompoundCriteriaImpl;
+import org.teiid.query.sql.lang.CreateImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
+import org.teiid.query.sql.lang.CriteriaSelectorImpl;
+import org.teiid.query.sql.lang.DeleteImpl;
+import org.teiid.query.sql.lang.DropImpl;
+import org.teiid.query.sql.lang.DynamicCommandImpl;
+import org.teiid.query.sql.lang.ExistsCriteriaImpl;
+import org.teiid.query.sql.lang.ExpressionCriteriaImpl;
+import org.teiid.query.sql.lang.FromClauseImpl;
+import org.teiid.query.sql.lang.FromImpl;
+import org.teiid.query.sql.lang.GroupByImpl;
+import org.teiid.query.sql.lang.HasCriteriaImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.lang.IntoImpl;
+import org.teiid.query.sql.lang.IsNullCriteriaImpl;
+import org.teiid.query.sql.lang.JoinPredicateImpl;
+import org.teiid.query.sql.lang.JoinTypeImpl;
 import org.teiid.query.sql.lang.Labeled;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.Limit;
-import org.teiid.query.sql.lang.MatchCriteria;
+import org.teiid.query.sql.lang.LimitImpl;
+import org.teiid.query.sql.lang.MatchCriteriaImpl;
 import org.teiid.query.sql.lang.NamespaceItem;
-import org.teiid.query.sql.lang.NotCriteria;
-import org.teiid.query.sql.lang.ObjectColumn;
-import org.teiid.query.sql.lang.ObjectTable;
-import org.teiid.query.sql.lang.Option;
-import org.teiid.query.sql.lang.Option.MakeDep;
-import org.teiid.query.sql.lang.OrderBy;
-import org.teiid.query.sql.lang.OrderByItem;
+import org.teiid.query.sql.lang.NotCriteriaImpl;
+import org.teiid.query.sql.lang.ObjectColumnImpl;
+import org.teiid.query.sql.lang.ObjectTableImpl;
+import org.teiid.query.sql.lang.OptionImpl;
+import org.teiid.query.sql.lang.OptionImpl.MakeDep;
+import org.teiid.query.sql.lang.OrderByImpl;
+import org.teiid.query.sql.lang.OrderByItemImpl;
 import org.teiid.query.sql.lang.PredicateCriteria;
-import org.teiid.query.sql.lang.ProjectedColumn;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.QueryCommand;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.lang.SetClause;
-import org.teiid.query.sql.lang.SetClauseList;
-import org.teiid.query.sql.lang.SetCriteria;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.lang.SourceHint;
-import org.teiid.query.sql.lang.SourceHint.SpecificHint;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubqueryFromClause;
+import org.teiid.query.sql.lang.ProjectedColumnImpl;
+import org.teiid.query.sql.lang.QueryCommandImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.lang.SetClauseImpl;
+import org.teiid.query.sql.lang.SetClauseListImpl;
+import org.teiid.query.sql.lang.SetCriteriaImpl;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.lang.SourceHintImpl;
+import org.teiid.query.sql.lang.SourceHintImpl.SpecificHint;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.SubqueryFromClauseImpl;
 import org.teiid.query.sql.lang.SubqueryHint;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
-import org.teiid.query.sql.lang.TextColumn;
-import org.teiid.query.sql.lang.TextTable;
-import org.teiid.query.sql.lang.TranslateCriteria;
-import org.teiid.query.sql.lang.UnaryFromClause;
-import org.teiid.query.sql.lang.Update;
-import org.teiid.query.sql.lang.WithQueryCommand;
-import org.teiid.query.sql.lang.XMLColumn;
-import org.teiid.query.sql.lang.XMLTable;
-import org.teiid.query.sql.proc.AssignmentStatement;
-import org.teiid.query.sql.proc.Block;
-import org.teiid.query.sql.proc.BranchingStatement;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateProcedureCommand;
-import org.teiid.query.sql.proc.CreateUpdateProcedureCommand;
-import org.teiid.query.sql.proc.DeclareStatement;
-import org.teiid.query.sql.proc.ExceptionExpression;
-import org.teiid.query.sql.proc.IfStatement;
-import org.teiid.query.sql.proc.LoopStatement;
-import org.teiid.query.sql.proc.RaiseErrorStatement;
-import org.teiid.query.sql.proc.RaiseStatement;
-import org.teiid.query.sql.proc.ReturnStatement;
-import org.teiid.query.sql.proc.Statement;
-import org.teiid.query.sql.proc.TriggerAction;
-import org.teiid.query.sql.proc.WhileStatement;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.AliasSymbol;
-import org.teiid.query.sql.symbol.Array;
-import org.teiid.query.sql.symbol.CaseExpression;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.DerivedColumn;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.ExpressionSymbol;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.JSONObject;
-import org.teiid.query.sql.symbol.MultipleElementSymbol;
-import org.teiid.query.sql.symbol.QueryString;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.ScalarSubquery;
-import org.teiid.query.sql.symbol.SearchedCaseExpression;
-import org.teiid.query.sql.symbol.Symbol;
-import org.teiid.query.sql.symbol.TextLine;
-import org.teiid.query.sql.symbol.WindowFunction;
-import org.teiid.query.sql.symbol.WindowSpecification;
-import org.teiid.query.sql.symbol.XMLAttributes;
-import org.teiid.query.sql.symbol.XMLElement;
-import org.teiid.query.sql.symbol.XMLForest;
-import org.teiid.query.sql.symbol.XMLNamespaces;
-import org.teiid.query.sql.symbol.XMLParse;
-import org.teiid.query.sql.symbol.XMLQuery;
-import org.teiid.query.sql.symbol.XMLSerialize;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
+import org.teiid.query.sql.lang.TextColumnImpl;
+import org.teiid.query.sql.lang.TextTableImpl;
+import org.teiid.query.sql.lang.TranslateCriteriaImpl;
+import org.teiid.query.sql.lang.UnaryFromClauseImpl;
+import org.teiid.query.sql.lang.UpdateImpl;
+import org.teiid.query.sql.lang.WithQueryCommandImpl;
+import org.teiid.query.sql.lang.XMLColumnImpl;
+import org.teiid.query.sql.lang.XMLTableImpl;
+import org.teiid.query.sql.proc.AssignmentStatementImpl;
+import org.teiid.query.sql.proc.BlockImpl;
+import org.teiid.query.sql.proc.BranchingStatementImpl;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateProcedureCommandImpl;
+import org.teiid.query.sql.proc.CreateUpdateProcedureCommandImpl;
+import org.teiid.query.sql.proc.DeclareStatementImpl;
+import org.teiid.query.sql.proc.ExceptionExpressionImpl;
+import org.teiid.query.sql.proc.IfStatementImpl;
+import org.teiid.query.sql.proc.LoopStatementImpl;
+import org.teiid.query.sql.proc.RaiseErrorStatementImpl;
+import org.teiid.query.sql.proc.RaiseStatementImpl;
+import org.teiid.query.sql.proc.ReturnStatementImpl;
+import org.teiid.query.sql.proc.StatementImpl;
+import org.teiid.query.sql.proc.TriggerActionImpl;
+import org.teiid.query.sql.proc.WhileStatementImpl;
+import org.teiid.query.sql.symbol.AliasSymbolImpl;
+import org.teiid.query.sql.symbol.ArraySymbolImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.BaseWindowFunction;
+import org.teiid.query.sql.symbol.CaseExpressionImpl;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.DerivedColumnImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.ExpressionSymbolImpl;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.JSONObjectImpl;
+import org.teiid.query.sql.symbol.MultipleElementSymbolImpl;
+import org.teiid.query.sql.symbol.QueryStringImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
+import org.teiid.query.sql.symbol.SearchedCaseExpressionImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
+import org.teiid.query.sql.symbol.TextLineImpl;
+import org.teiid.query.sql.symbol.WindowSpecificationImpl;
+import org.teiid.query.sql.symbol.XMLAttributesImpl;
+import org.teiid.query.sql.symbol.XMLElementImpl;
+import org.teiid.query.sql.symbol.XMLForestImpl;
+import org.teiid.query.sql.symbol.XMLNamespacesImpl;
+import org.teiid.query.sql.symbol.XMLParseImpl;
+import org.teiid.query.sql.symbol.XMLQueryImpl;
+import org.teiid.query.sql.symbol.XMLSerializeImpl;
 import org.teiid.translator.SourceSystemFunctions;
 
 /**
@@ -166,7 +166,7 @@ import org.teiid.translator.SourceSystemFunctions;
  * </p>
  */
 public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
-    implements SQLConstants.Reserved, SQLConstants.NonReserved, SQLConstants.Tokens, DDLConstants, SQLStringVisitor<LanguageObject> {
+    implements SQLConstants.Reserved, SQLConstants.NonReserved, SQLConstants.Tokens, DDLConstants, SQLStringVisitor<BaseLanguageObject> {
 
     @Since(Version.TEIID_8_0)
     private final static Map<String, String> BUILTIN_PREFIXES = new HashMap<String, String>();
@@ -221,7 +221,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
      *
      * @return String SQL String for obj
      */
-    public static final String getSQLString(LanguageObject obj) {
+    public static final String getSQLString(BaseLanguageObject obj) {
         if (obj == null) {
             return UNDEFINED;
         }
@@ -232,10 +232,10 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
 
     /**
      * @param languageObject
-     * @return sql representation of {@link LanguageObject}
+     * @return sql representation of {@link BaseLanguageObject}
      */
     @Override
-    public String returnSQLString(LanguageObject languageObject) {
+    public String returnSQLString(BaseLanguageObject languageObject) {
         if (languageObject == null) {
             return UNDEFINED;
         }
@@ -274,7 +274,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         this.shortNameOnly = shortNameOnly;
     }
 
-    protected void visitNode(LanguageObject obj) {
+    protected void visitNode(BaseLanguageObject obj) {
         if (obj == null) {
             append(UNDEFINED);
             return;
@@ -291,8 +291,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         append(SPACE);
     }
 
-    private Constant newConstant(Object value) {
-        Constant constant = createNode(ASTNodes.CONSTANT);
+    private ConstantImpl newConstant(Object value) {
+        ConstantImpl constant = createNode(ASTNodes.CONSTANT);
         constant.setValue(value);
         return constant;
     }
@@ -300,7 +300,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     // ############ Visitor methods for language objects ####################
 
     @Override
-    public void visit(BetweenCriteria obj) {
+    public void visit(BetweenCriteriaImpl obj) {
         visitNode(obj.getExpression());
         append(SPACE);
 
@@ -319,7 +319,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(CaseExpression obj) {
+    public void visit(CaseExpressionImpl obj) {
         append(CASE);
         append(SPACE);
         visitNode(obj.getExpression());
@@ -346,42 +346,42 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(CompareCriteria obj) {
-        Expression leftExpression = obj.getLeftExpression();
+    public void visit(CompareCriteriaImpl obj) {
+        BaseExpression leftExpression = obj.getLeftExpression();
         visitNode(leftExpression);
         append(SPACE);
         append(obj.getOperatorAsString());
         append(SPACE);
-        Expression rightExpression = obj.getRightExpression();
+        BaseExpression rightExpression = obj.getRightExpression();
         visitNode(rightExpression);
     }
 
     @Override
-    public void visit(CompoundCriteria obj) {
+    public void visit(CompoundCriteriaImpl obj) {
         // Get operator string
         int operator = obj.getOperator();
         String operatorStr = ""; //$NON-NLS-1$
-        if (operator == CompoundCriteria.AND) {
+        if (operator == CompoundCriteriaImpl.AND) {
             operatorStr = AND;
-        } else if (operator == CompoundCriteria.OR) {
+        } else if (operator == CompoundCriteriaImpl.OR) {
             operatorStr = OR;
         }
 
         // Get criteria
-        List<Criteria> subCriteria = obj.getCriteria();
+        List<CriteriaImpl> subCriteria = obj.getCriteria();
 
         // Build parts
         if (subCriteria.size() == 1) {
             // Special case - should really never happen, but we are tolerant
-            Criteria firstChild = subCriteria.get(0);
+            CriteriaImpl firstChild = subCriteria.get(0);
             visitNode(firstChild);
         } else {
             // Add first criteria
-            Iterator<Criteria> iter = subCriteria.iterator();
+            Iterator<CriteriaImpl> iter = subCriteria.iterator();
 
             while (iter.hasNext()) {
                 // Add criteria
-                Criteria crit = iter.next();
+                CriteriaImpl crit = iter.next();
                 append(Tokens.LPAREN);
                 visitNode(crit);
                 append(Tokens.RPAREN);
@@ -397,7 +397,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Delete obj) {
+    public void visit(DeleteImpl obj) {
         // add delete clause
         append(DELETE);
         addSourceHint(obj.getSourceHint());
@@ -421,14 +421,14 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(From obj) {
+    public void visit(FromImpl obj) {
         append(FROM);
         beginClause(1);
         registerNodes(obj.getClauses(), 0);
     }
 
     @Override
-    public void visit(GroupBy obj) {
+    public void visit(GroupByImpl obj) {
         append(GROUP);
         append(SPACE);
         append(BY);
@@ -444,7 +444,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Insert obj) {
+    public void visit(InsertImpl obj) {
         if (isTeiid8OrGreater() && obj.isMerge()) {
             append(MERGE);
         } else {
@@ -460,7 +460,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             beginClause(2);
 
             // Columns clause
-            List<ElementSymbol> vars = obj.getVariables();
+            List<ElementSymbolImpl> vars = obj.getVariables();
             if (vars != null) {
                 append("("); //$NON-NLS-1$
                 setShortNameOnly(true);
@@ -490,7 +490,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    private void visit7( Create obj ) {
+    private void visit7( CreateImpl obj ) {
         append(CREATE);
         append(SPACE);
         append(LOCAL);
@@ -530,7 +530,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             append(" "); //$NON-NLS-1$
             append(NonReserved.KEY);
             append(Tokens.LPAREN);
-            Iterator<ElementSymbol> pkiter = obj.getPrimaryKey().iterator();
+            Iterator<ElementSymbolImpl> pkiter = obj.getPrimaryKey().iterator();
             while (pkiter.hasNext()) {
                 outputShortName(pkiter.next());
                 if (pkiter.hasNext()) {
@@ -597,7 +597,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             append(REFERENCES);
             if (key.getReferenceTableName() != null) {
                 append(SPACE);
-                GroupSymbol gs = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
+                GroupSymbolImpl gs = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
                 gs.setName(key.getReferenceTableName());
                 append(gs.getName());
             }
@@ -846,7 +846,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             sb.append(COMMA).append(SPACE);
         }
 
-        Constant c = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
+        ConstantImpl c = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
         c.setValue(value);
         value = c;
 
@@ -904,7 +904,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         return name;
     }
 
-    private void visit8( Create obj ) {
+    private void visit8( CreateImpl obj ) {
         append(CREATE);
         append(SPACE);
         if (obj.getTableMetadata() != null) {
@@ -961,7 +961,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             append(" "); //$NON-NLS-1$
             append(NonReserved.KEY);
             append(Tokens.LPAREN);
-            Iterator<ElementSymbol> pkiter = obj.getPrimaryKey().iterator();
+            Iterator<ElementSymbolImpl> pkiter = obj.getPrimaryKey().iterator();
             while (pkiter.hasNext()) {
                 outputShortName(pkiter.next());
                 if (pkiter.hasNext()) {
@@ -974,7 +974,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Create obj) {
+    public void visit(CreateImpl obj) {
         if (isTeiid8OrGreater())
             visit8(obj);
         else
@@ -982,7 +982,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Drop obj) {
+    public void visit(DropImpl obj) {
         append(DROP);
         append(SPACE);
         append(TABLE);
@@ -991,8 +991,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(IsNullCriteria obj) {
-        Expression expr = obj.getExpression();
+    public void visit(IsNullCriteriaImpl obj) {
+        BaseExpression expr = obj.getExpression();
         if (isTeiid8OrGreater())
             appendNested(expr);
         else
@@ -1009,7 +1009,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(JoinPredicate obj) {
+    public void visit(JoinPredicateImpl obj) {
         addHintComment(obj);
 
         if (obj.hasHint()) {
@@ -1017,8 +1017,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
 
         // left clause
-        FromClause leftClause = obj.getLeftClause();
-        if (leftClause instanceof JoinPredicate && !((JoinPredicate)leftClause).hasHint()) {
+        FromClauseImpl leftClause = obj.getLeftClause();
+        if (leftClause instanceof JoinPredicateImpl && !((JoinPredicateImpl)leftClause).hasHint()) {
             append("("); //$NON-NLS-1$
             visitNode(leftClause);
             append(")"); //$NON-NLS-1$
@@ -1032,8 +1032,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         append(SPACE);
 
         // right clause
-        FromClause rightClause = obj.getRightClause();
-        if (rightClause instanceof JoinPredicate && !((JoinPredicate)rightClause).hasHint()) {
+        FromClauseImpl rightClause = obj.getRightClause();
+        if (rightClause instanceof JoinPredicateImpl && !((JoinPredicateImpl)rightClause).hasHint()) {
             append("("); //$NON-NLS-1$
             visitNode(rightClause);
             append(")"); //$NON-NLS-1$
@@ -1049,8 +1049,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             append(SPACE);
             Iterator critIter = joinCriteria.iterator();
             while (critIter.hasNext()) {
-                Criteria crit = (Criteria)critIter.next();
-                if (crit instanceof PredicateCriteria || crit instanceof NotCriteria) {
+                CriteriaImpl crit = (CriteriaImpl)critIter.next();
+                if (crit instanceof PredicateCriteria || crit instanceof NotCriteriaImpl) {
                     visitNode(crit);
                 } else {
                     append("("); //$NON-NLS-1$
@@ -1073,24 +1073,24 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         addMakeDep(obj);
     }
 
-    private void addHintComment(FromClause obj) {
+    private void addHintComment(FromClauseImpl obj) {
         if (obj.hasHint()) {
             append(BEGIN_HINT);
             append(SPACE);
             if (obj.isOptional()) {
-                append(Option.OPTIONAL);
+                append(OptionImpl.OPTIONAL);
                 append(SPACE);
             }
             if (obj.getMakeDep() != null && obj.getMakeDep().isSimple()) {
-                append(Option.MAKEDEP);
+                append(OptionImpl.MAKEDEP);
                 append(SPACE);
             }
             if (obj.isMakeNotDep()) {
-                append(Option.MAKENOTDEP);
+                append(OptionImpl.MAKENOTDEP);
                 append(SPACE);
             }
             if (obj.isMakeInd()) {
-                append(FromClause.MAKEIND);
+                append(FromClauseImpl.MAKEIND);
                 append(SPACE);
             }
             if (obj.isNoUnnest()) {
@@ -1099,7 +1099,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             }
 
             if (isTeiid8OrGreater() && obj.isPreserve()) {
-                append(FromClause.PRESERVE);
+                append(FromClauseImpl.PRESERVE);
                 append(SPACE);
             }
             append(END_HINT);
@@ -1108,7 +1108,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(JoinType obj) {
+    public void visit(JoinTypeImpl obj) {
         String[] output = null;
         switch (obj.getKind()) {
             case JOIN_ANTI_SEMI:
@@ -1145,7 +1145,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(MatchCriteria obj) {
+    public void visit(MatchCriteriaImpl obj) {
         visitNode(obj.getLeftExpression());
 
         append(SPACE);
@@ -1170,7 +1170,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
 
         visitNode(obj.getRightExpression());
 
-        if (obj.getEscapeChar() != MatchCriteria.NULL_ESCAPE_CHAR) {
+        if (obj.getEscapeChar() != MatchCriteriaImpl.NULL_ESCAPE_CHAR) {
             append(SPACE);
             append(ESCAPE);
             if (isTeiid8OrGreater()) {
@@ -1185,7 +1185,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(NotCriteria obj) {
+    public void visit(NotCriteriaImpl obj) {
         append(NOT);
         append(" ("); //$NON-NLS-1$
         visitNode(obj.getCriteria());
@@ -1193,7 +1193,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Option obj) {
+    public void visit(OptionImpl obj) {
         append(OPTION);
 
         Collection<String> groups = obj.getDependentGroups();
@@ -1294,7 +1294,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(OrderBy obj) {
+    public void visit(OrderByImpl obj) {
         append(ORDER);
         append(SPACE);
         append(BY);
@@ -1303,10 +1303,10 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(OrderByItem obj) {
-        Expression ses = obj.getSymbol();
-        if (ses instanceof AliasSymbol) {
-            AliasSymbol as = (AliasSymbol)ses;
+    public void visit(OrderByItemImpl obj) {
+        BaseExpression ses = obj.getSymbol();
+        if (ses instanceof AliasSymbolImpl) {
+            AliasSymbolImpl as = (AliasSymbolImpl)ses;
             outputDisplayName(as.getOutputName());
         } else {
             visitNode(ses);
@@ -1324,7 +1324,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(DynamicCommand obj) {
+    public void visit(DynamicCommandImpl obj) {
         append(EXECUTE);
         append(SPACE);
         append(IMMEDIATE);
@@ -1336,7 +1336,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             append(AS);
             append(SPACE);
             for (int i = 0; i < obj.getAsColumns().size(); i++) {
-                ElementSymbol symbol = (ElementSymbol)obj.getAsColumns().get(i);
+                ElementSymbolImpl symbol = (ElementSymbolImpl)obj.getAsColumns().get(i);
                 outputShortName(symbol);
                 append(SPACE);
                 append(getDataTypeManager().getDataTypeName(symbol.getType()));
@@ -1373,9 +1373,9 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SetClauseList obj) {
-        for (Iterator<SetClause> iterator = obj.getClauses().iterator(); iterator.hasNext();) {
-            SetClause clause = iterator.next();
+    public void visit(SetClauseListImpl obj) {
+        for (Iterator<SetClauseImpl> iterator = obj.getClauses().iterator(); iterator.hasNext();) {
+            SetClauseImpl clause = iterator.next();
             visitNode(clause);
             if (iterator.hasNext()) {
                 append(", "); //$NON-NLS-1$
@@ -1384,15 +1384,15 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SetClause obj) {
-        ElementSymbol symbol = obj.getSymbol();
+    public void visit(SetClauseImpl obj) {
+        ElementSymbolImpl symbol = obj.getSymbol();
         outputShortName(symbol);
         append(" = "); //$NON-NLS-1$
         visitNode(obj.getValue());
     }
 
     @Override
-    public void visit(WithQueryCommand obj) {
+    public void visit(WithQueryCommandImpl obj) {
         visitNode(obj.getGroupSymbol());
         append(SPACE);
         if (obj.getColumns() != null && !obj.getColumns().isEmpty()) {
@@ -1415,11 +1415,11 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Query obj) {
+    public void visit(QueryImpl obj) {
         addWithClause(obj);
         append(SELECT);
 
-        SourceHint sh = obj.getSourceHint();
+        SourceHintImpl sh = obj.getSourceHint();
         addSourceHint(sh);
         if (obj.getSelect() != null) {
             visitNode(obj.getSelect());
@@ -1471,7 +1471,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    private void addSourceHint(SourceHint sh) {
+    private void addSourceHint(SourceHintImpl sh) {
         if (sh != null) {
             append(SPACE);
             append(BEGIN_HINT);
@@ -1502,7 +1502,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    private void addWithClause(QueryCommand obj) {
+    private void addWithClause(QueryCommandImpl obj) {
         if (obj.getWith() != null) {
             append(WITH);
             append(SPACE);
@@ -1511,14 +1511,14 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    protected void visitCriteria(String keyWord, Criteria crit) {
+    protected void visitCriteria(String keyWord, CriteriaImpl crit) {
         append(keyWord);
         append(SPACE);
         visitNode(crit);
     }
 
     @Override
-    public void visit(SearchedCaseExpression obj) {
+    public void visit(SearchedCaseExpressionImpl obj) {
         append(CASE);
         for (int i = 0; i < obj.getWhenCount(); i++) {
             append(SPACE);
@@ -1541,16 +1541,16 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Select obj) {
+    public void visit(SelectImpl obj) {
         if (obj.isDistinct()) {
             append(SPACE);
             append(DISTINCT);
         }
         beginClause(2);
 
-        Iterator<Expression> iter = obj.getSymbols().iterator();
+        Iterator<BaseExpression> iter = obj.getSymbols().iterator();
         while (iter.hasNext()) {
-            Expression symbol = iter.next();
+            BaseExpression symbol = iter.next();
             visitNode(symbol);
             if (iter.hasNext()) {
                 append(", "); //$NON-NLS-1$
@@ -1567,7 +1567,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SetCriteria obj) {
+    public void visit(SetCriteriaImpl obj) {
         // variable
 
         if (isTeiid8OrGreater())
@@ -1589,14 +1589,14 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         int size = vals.size();
         if (size == 1) {
             Iterator iter = vals.iterator();
-            Expression expr = (Expression)iter.next();
+            BaseExpression expr = (BaseExpression)iter.next();
             visitNode(expr);
         } else if (size > 1) {
             Iterator iter = vals.iterator();
-            Expression expr = (Expression)iter.next();
+            BaseExpression expr = (BaseExpression)iter.next();
             visitNode(expr);
             while (iter.hasNext()) {
-                expr = (Expression)iter.next();
+                expr = (BaseExpression)iter.next();
                 append(", "); //$NON-NLS-1$
                 visitNode(expr);
             }
@@ -1609,8 +1609,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
      * @param ex
      */
     @Since(Version.TEIID_8_0)
-    private void appendNested(Expression ex) {
-        boolean useParens = ex instanceof Criteria;
+    private void appendNested(BaseExpression ex) {
+        boolean useParens = ex instanceof CriteriaImpl;
         if (useParens) {
             append(Tokens.LPAREN);
         }
@@ -1621,9 +1621,9 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SetQuery obj) {
+    public void visit(SetQueryImpl obj) {
         addWithClause(obj);
-        QueryCommand query = obj.getLeftQuery();
+        QueryCommandImpl query = obj.getLeftQuery();
         appendSetQuery(obj, query, false);
 
         beginClause(0);
@@ -1653,10 +1653,10 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    protected void appendSetQuery(SetQuery parent, QueryCommand obj, boolean right) {
+    protected void appendSetQuery(SetQueryImpl parent, QueryCommandImpl obj, boolean right) {
         if (obj.getLimit() != null
             || obj.getOrderBy() != null
-            || (right && ((obj instanceof SetQuery && ((parent.isAll() && !((SetQuery)obj).isAll()) || parent.getOperation() != ((SetQuery)obj).getOperation()))))) {
+            || (right && ((obj instanceof SetQueryImpl && ((parent.isAll() && !((SetQueryImpl)obj).isAll()) || parent.getOperation() != ((SetQueryImpl)obj).getOperation()))))) {
             append(Tokens.LPAREN);
             visitNode(obj);
             append(Tokens.RPAREN);
@@ -1666,10 +1666,10 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(StoredProcedure obj) {
+    public void visit(StoredProcedureImpl obj) {
         if (obj.isCalledWithReturn()) {
-            for (SPParameter param : obj.getParameters()) {
-                if (param.getParameterType() == SPParameter.RETURN_VALUE) {
+            for (SPParameterImpl param : obj.getParameters()) {
+                if (param.getParameterType() == SPParameterImpl.RETURN_VALUE) {
                     if (param.getExpression() == null) {
                         append("?"); //$NON-NLS-1$
                     } else {
@@ -1687,9 +1687,9 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         append(obj.getProcedureName());
         append("("); //$NON-NLS-1$
         boolean first = true;
-        for (SPParameter param : obj.getParameters()) {
-            if (param.isUsingDefault() || param.getParameterType() == SPParameter.RETURN_VALUE
-                || param.getParameterType() == SPParameter.RESULT_SET || param.getExpression() == null) {
+        for (SPParameterImpl param : obj.getParameters()) {
+            if (param.isUsingDefault() || param.getParameterType() == SPParameterImpl.RETURN_VALUE
+                || param.getParameterType() == SPParameterImpl.RESULT_SET || param.getExpression() == null) {
                 continue;
             }
             if (first) {
@@ -1698,11 +1698,11 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
                 append(", "); //$NON-NLS-1$
             }
             if (obj.isDisplayNamedParameters()) {
-                append(escapeSinglePart(Symbol.getShortName(param.getParameterSymbol().getOutputName())));
+                append(escapeSinglePart(SymbolImpl.getShortName(param.getParameterSymbol().getOutputName())));
                 append(" => "); //$NON-NLS-1$
             }
 
-            boolean addParens = !obj.isDisplayNamedParameters() && param.getExpression() instanceof CompareCriteria;
+            boolean addParens = !obj.isDisplayNamedParameters() && param.getExpression() instanceof CompareCriteriaImpl;
             if (addParens) {
                 append(Tokens.LPAREN);
             }
@@ -1721,7 +1721,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SubqueryFromClause obj) {
+    public void visit(SubqueryFromClauseImpl obj) {
         addHintComment(obj);
         if (obj.isTable()) {
             append(TABLE);
@@ -1731,7 +1731,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         append(")");//$NON-NLS-1$
         append(" AS ");//$NON-NLS-1$
 
-        GroupSymbol groupSymbol = obj.getGroupSymbol();
+        GroupSymbolImpl groupSymbol = obj.getGroupSymbol();
         if (isTeiid8OrGreater())
             append(escapeSinglePart(groupSymbol.getOutputName()));
         else
@@ -1741,7 +1741,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteriaImpl obj) {
         // variable
         visitNode(obj.getExpression());
 
@@ -1759,14 +1759,14 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(UnaryFromClause obj) {
+    public void visit(UnaryFromClauseImpl obj) {
         addHintComment(obj);
         visitNode(obj.getGroup());
         addMakeDep(obj);
     }
 
     @Override
-    public void visit(Update obj) {
+    public void visit(UpdateImpl obj) {
         // Update clause
         append(UPDATE);
         addSourceHint(obj.getSourceHint());
@@ -1792,7 +1792,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Into obj) {
+    public void visit(IntoImpl obj) {
         append(INTO);
         append(SPACE);
         visitNode(obj.getGroup());
@@ -1801,7 +1801,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     // ############ Visitor methods for symbol objects ####################
 
     @Override
-    public void visit(AggregateSymbol obj) {
+    public void visit(BaseAggregateSymbol obj) {
         if (isTeiid8OrGreater())
             append(obj.getName());
         else
@@ -1845,7 +1845,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(AliasSymbol obj) {
+    public void visit(AliasSymbolImpl obj) {
         visitNode(obj.getSymbol());
         append(SPACE);
         append(AS);
@@ -1854,7 +1854,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(MultipleElementSymbol obj) {
+    public void visit(MultipleElementSymbolImpl obj) {
         if (obj.getGroup() == null) {
             append(Tokens.ALL_COLS);
         } else {
@@ -1864,7 +1864,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    private void visit7(Constant obj) {
+    private void visit7(ConstantImpl obj) {
         Class<?> type = obj.getType();
         String[] constantParts = null;
         if (obj.isMultiValued()) {
@@ -1953,7 +1953,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    private void visit8(Constant obj) {
+    private void visit8(ConstantImpl obj) {
         Class<?> type = obj.getType();
         boolean multiValued = obj.isMultiValued();
         Object value = obj.getValue();
@@ -1961,7 +1961,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Constant obj) {
+    public void visit(ConstantImpl obj) {
         if (isTeiid8OrGreater())
             visit8(obj);
         else
@@ -1979,41 +1979,41 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(ElementSymbol obj) {
-        if (obj.getDisplayMode().equals(ElementSymbol.DisplayMode.SHORT_OUTPUT_NAME) ||isShortNameOnly()) {
+    public void visit(ElementSymbolImpl obj) {
+        if (obj.getDisplayMode().equals(DisplayMode.SHORT_OUTPUT_NAME) ||isShortNameOnly()) {
             outputShortName(obj);
             return;
         }
         String name = obj.getOutputName();
-        if (obj.getDisplayMode().equals(ElementSymbol.DisplayMode.FULLY_QUALIFIED)) {
+        if (obj.getDisplayMode().equals(DisplayMode.FULLY_QUALIFIED)) {
             name = obj.getName();
         }
         outputDisplayName(name);
     }
 
-    private void outputShortName(ElementSymbol obj) {
-        outputDisplayName(Symbol.getShortName(obj.getOutputName()));
+    private void outputShortName(ElementSymbolImpl obj) {
+        outputDisplayName(SymbolImpl.getShortName(obj.getOutputName()));
     }
 
     private void outputDisplayName(String name) {
         String[] pathParts = name.split("\\."); //$NON-NLS-1$
         for (int i = 0; i < pathParts.length; i++) {
             if (i > 0) {
-                append(Symbol.SEPARATOR);
+                append(SymbolImpl.SEPARATOR);
             }
             append(escapeSinglePart(pathParts[i]));
         }
     }
 
     @Override
-    public void visit(ExpressionSymbol obj) {
+    public void visit(ExpressionSymbolImpl obj) {
         visitNode(obj.getExpression());
     }
 
     @Override
-    public void visit(Function obj) {
+    public void visit(FunctionImpl obj) {
         String name = obj.getName();
-        Expression[] args = obj.getArgs();
+        BaseExpression[] args = obj.getArgs();
         if (obj.isImplicit()) {
             // Hide this function, which is implicit
             visitNode(args[0]);
@@ -2033,10 +2033,10 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
                     append(" "); //$NON-NLS-1$
                 }
 
-                if (args.length < 2 || args[1] == null || !(args[1] instanceof Constant)) {
+                if (args.length < 2 || args[1] == null || !(args[1] instanceof ConstantImpl)) {
                     append(UNDEFINED);
                 } else {
-                    append(((Constant)args[1]).getValue());
+                    append(((ConstantImpl)args[1]).getValue());
                 }
             }
             append(")"); //$NON-NLS-1$
@@ -2061,7 +2061,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             append("("); //$NON-NLS-1$
 
             if (args != null && args.length > 0) {
-                append(((Constant)args[0]).getValue());
+                append(((ConstantImpl)args[0]).getValue());
                 registerNodes(args, 1);
             }
             append(")"); //$NON-NLS-1$
@@ -2069,15 +2069,15 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         } else if (name.equalsIgnoreCase(SourceSystemFunctions.XMLPI)) {
             append(name);
             append("(NAME "); //$NON-NLS-1$
-            outputDisplayName((String)((Constant)args[0]).getValue());
+            outputDisplayName((String)((ConstantImpl)args[0]).getValue());
             registerNodes(args, 1);
             append(")"); //$NON-NLS-1$
         } else if (name.equalsIgnoreCase(SourceSystemFunctions.TRIM)) {
             append(name);
             append(SQLConstants.Tokens.LPAREN);
-            String value = (String)((Constant)args[0]).getValue();
+            String value = (String)((ConstantImpl)args[0]).getValue();
             if (!value.equalsIgnoreCase(BOTH)) {
-                append(((Constant)args[0]).getValue());
+                append(((ConstantImpl)args[0]).getValue());
                 append(" "); //$NON-NLS-1$
             }
             append(args[1]);
@@ -2094,11 +2094,11 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    private void registerNodes(LanguageObject[] objects, int begin) {
+    private void registerNodes(BaseLanguageObject[] objects, int begin) {
         registerNodes(Arrays.asList(objects), begin);
     }
 
-    private void registerNodes(List<? extends LanguageObject> objects, int begin) {
+    private void registerNodes(List<? extends BaseLanguageObject> objects, int begin) {
         for (int i = begin; i < objects.size(); i++) {
             if (i > 0) {
                 append(", "); //$NON-NLS-1$
@@ -2108,7 +2108,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(GroupSymbol obj) {
+    public void visit(GroupSymbolImpl obj) {
         String alias = null;
         String fullGroup = obj.getOutputName();
         if (obj.getOutputDefinition() != null) {
@@ -2127,7 +2127,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Reference obj) {
+    public void visit(ReferenceImpl obj) {
         if (!obj.isPositional() && obj.getExpression() != null) {
             visitNode(obj.getExpression());
         } else {
@@ -2137,9 +2137,9 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
 
     // ############ Visitor methods for storedprocedure language objects ####################
 
-    private void visit7(Block obj) {
+    private void visit7(BlockImpl obj) {
         addLabel(obj);
-        List<Statement> statements = obj.getStatements();
+        List<StatementImpl> statements = obj.getStatements();
         // Add first clause
         append(BEGIN);
         if (obj.isAtomic()) {
@@ -2147,7 +2147,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             append(ATOMIC);
         }
         append("\n"); //$NON-NLS-1$
-        Iterator<Statement> stmtIter = statements.iterator();
+        Iterator<StatementImpl> stmtIter = statements.iterator();
         while (stmtIter.hasNext()) {
             // Add each statement
             addTabs(1);
@@ -2158,8 +2158,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         append(END);
     }
 
-    private void addStatements(List<Statement> statements) {
-        Iterator<Statement> stmtIter = statements.iterator();
+    private void addStatements(List<StatementImpl> statements) {
+        Iterator<StatementImpl> stmtIter = statements.iterator();
         while (stmtIter.hasNext()) {
             // Add each statement
             addTabs(1);
@@ -2169,9 +2169,9 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         addTabs(0);
     }
 
-    private void visit8(Block obj) {
+    private void visit8(BlockImpl obj) {
         addLabel(obj);
-        List<Statement> statements = obj.getStatements();
+        List<StatementImpl> statements = obj.getStatements();
         // Add first clause
         append(BEGIN);
         if (obj.isAtomic()) {
@@ -2193,7 +2193,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Block block) {
+    public void visit(BlockImpl block) {
         if (isTeiid8OrGreater())
             visit8(block);
         else
@@ -2216,7 +2216,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(CommandStatement obj) {
+    public void visit(CommandStatementImpl obj) {
         visitNode(obj.getCommand());
         if (isTeiid8OrGreater() && !obj.isReturnable()) {
             append(SPACE);
@@ -2229,7 +2229,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
 
     @Override
     @Removed(Version.TEIID_8_0)
-    public void visit(CreateUpdateProcedureCommand obj) {
+    public void visit(CreateUpdateProcedureCommandImpl obj) {
         append(CREATE);
         append(SPACE);
         if (!obj.isUpdateProcedure()) {
@@ -2243,7 +2243,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(CreateProcedureCommand obj) {
+    public void visit(CreateProcedureCommandImpl obj) {
         if (isLessThanTeiidVersion(Version.TEIID_8_4)) {
             append(CREATE);
             append(SPACE);
@@ -2257,7 +2257,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(DeclareStatement obj) {
+    public void visit(DeclareStatementImpl obj) {
         append(DECLARE);
         append(SPACE);
         append(obj.getVariableType());
@@ -2269,7 +2269,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
      * @param obj
      * @param parts
      */
-    private void createAssignment(AssignmentStatement obj) {
+    private void createAssignment(AssignmentStatementImpl obj) {
         visitNode(obj.getVariable());
         if (obj.getExpression() != null) {
             append(" = "); //$NON-NLS-1$
@@ -2279,7 +2279,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(IfStatement obj) {
+    public void visit(IfStatementImpl obj) {
         append(IF);
         append("("); //$NON-NLS-1$
         visitNode(obj.getCondition());
@@ -2297,12 +2297,12 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(AssignmentStatement obj) {
+    public void visit(AssignmentStatementImpl obj) {
         createAssignment(obj);
     }
 
     @Override
-    public void visit(RaiseStatement obj) {
+    public void visit(RaiseStatementImpl obj) {
         append(NonReserved.RAISE);
         append(SPACE);
         if (obj.isWarning()) {
@@ -2314,14 +2314,14 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(HasCriteria obj) {
+    public void visit(HasCriteriaImpl obj) {
         append(HAS);
         append(SPACE);
         visitNode(obj.getSelector());
     }
 
     @Override
-    public void visit(TranslateCriteria obj) {
+    public void visit(TranslateCriteriaImpl obj) {
         append(TRANSLATE);
         append(SPACE);
         visitNode(obj.getSelector());
@@ -2334,7 +2334,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             Iterator critIter = obj.getTranslations().iterator();
 
             while (critIter.hasNext()) {
-                visitNode((Criteria)critIter.next());
+                visitNode((CriteriaImpl)critIter.next());
                 if (critIter.hasNext()) {
                     append(", "); //$NON-NLS-1$
                 }
@@ -2346,7 +2346,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(CriteriaSelector obj) {
+    public void visit(CriteriaSelectorImpl obj) {
         switch (obj.getSelectorType()) {
             case EQ:
                 append("= "); //$NON-NLS-1$
@@ -2399,7 +2399,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
 
             Iterator elmtIter = obj.getElements().iterator();
             while (elmtIter.hasNext()) {
-                visitNode((ElementSymbol)elmtIter.next());
+                visitNode((ElementSymbolImpl)elmtIter.next());
                 if (elmtIter.hasNext()) {
                     append(", "); //$NON-NLS-1$
                 }
@@ -2409,7 +2409,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(RaiseErrorStatement obj) {
+    public void visit(RaiseErrorStatementImpl obj) {
         append(ERROR);
         append(SPACE);
         visitNode(obj.getExpression());
@@ -2417,7 +2417,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(ExceptionExpression exceptionExpression) {
+    public void visit(ExceptionExpressionImpl exceptionExpression) {
         append(SQLEXCEPTION);
         append(SPACE);
         visitNode(exceptionExpression.getMessage());
@@ -2441,7 +2441,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(ReturnStatement obj) {
+    public void visit(ReturnStatementImpl obj) {
         append(RETURN);
         if (obj.getExpression() != null) {
             append(SPACE);
@@ -2451,7 +2451,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(BranchingStatement obj) {
+    public void visit(BranchingStatementImpl obj) {
         switch (obj.getMode()) {
             case CONTINUE:
                 append(CONTINUE);
@@ -2471,7 +2471,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(LoopStatement obj) {
+    public void visit(LoopStatementImpl obj) {
         addLabel(obj);
         append(LOOP);
         append(" "); //$NON-NLS-1$
@@ -2492,7 +2492,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(WhileStatement obj) {
+    public void visit(WhileStatementImpl obj) {
         addLabel(obj);
         append(WHILE);
         append("("); //$NON-NLS-1$
@@ -2503,7 +2503,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(ExistsCriteria obj) {
+    public void visit(ExistsCriteriaImpl obj) {
         if (obj.isNegated()) {
             append(NOT);
             append(SPACE);
@@ -2541,8 +2541,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(SubqueryCompareCriteria obj) {
-        Expression leftExpression = obj.getLeftExpression();
+    public void visit(SubqueryCompareCriteriaImpl obj) {
+        BaseExpression leftExpression = obj.getLeftExpression();
         visitNode(leftExpression);
 
         String operator = obj.getOperatorAsString();
@@ -2559,7 +2559,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(ScalarSubquery obj) {
+    public void visit(ScalarSubqueryImpl obj) {
         // operator and beginning of list
         append("("); //$NON-NLS-1$
         visitNode(obj.getCommand());
@@ -2567,7 +2567,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(XMLAttributes obj) {
+    public void visit(XMLAttributesImpl obj) {
         append(XMLATTRIBUTES);
         append("("); //$NON-NLS-1$
         registerNodes(obj.getArgs(), 0);
@@ -2575,7 +2575,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(XMLElement obj) {
+    public void visit(XMLElementImpl obj) {
         append(XMLELEMENT);
         append("(NAME "); //$NON-NLS-1$
         outputDisplayName(obj.getName());
@@ -2595,7 +2595,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(XMLForest obj) {
+    public void visit(XMLForestImpl obj) {
         append(XMLFOREST);
         append("("); //$NON-NLS-1$
         if (obj.getNamespaces() != null) {
@@ -2607,7 +2607,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(JSONObject obj) {
+    public void visit(JSONObjectImpl obj) {
         append(NonReserved.JSONOBJECT);
         append("("); //$NON-NLS-1$
         registerNodes(obj.getArgs(), 0);
@@ -2615,7 +2615,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(TextLine obj) {
+    public void visit(TextLineImpl obj) {
         append(FOR);
         append(SPACE);
         registerNodes(obj.getExpressions(), 0);
@@ -2645,7 +2645,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(XMLNamespaces obj) {
+    public void visit(XMLNamespacesImpl obj) {
         append(XMLNAMESPACES);
         append("("); //$NON-NLS-1$
         for (Iterator<NamespaceItem> items = obj.getNamespaceItems().iterator(); items.hasNext();) {
@@ -2670,11 +2670,11 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Limit obj) {
+    public void visit(LimitImpl obj) {
         if (!obj.isStrict()) {
             append(BEGIN_HINT);
             append(SPACE);
-            append(Limit.NON_STRICT);
+            append(LimitImpl.NON_STRICT);
             append(SPACE);
             append(END_HINT);
             append(SPACE);
@@ -2698,7 +2698,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(TextTable obj) {
+    public void visit(TextTableImpl obj) {
         addHintComment(obj);
         append("TEXTTABLE("); //$NON-NLS-1$
         visitNode(obj.getFile());
@@ -2711,8 +2711,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         append(SPACE);
         append(NonReserved.COLUMNS);
 
-        for (Iterator<TextColumn> cols = obj.getColumns().iterator(); cols.hasNext();) {
-            TextColumn col = cols.next();
+        for (Iterator<TextColumnImpl> cols = obj.getColumns().iterator(); cols.hasNext();) {
+            TextColumnImpl col = cols.next();
             append(SPACE);
             outputDisplayName(col.getName());
             append(SPACE);
@@ -2795,7 +2795,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(XMLTable obj) {
+    public void visit(XMLTableImpl obj) {
         addHintComment(obj);
         append("XMLTABLE("); //$NON-NLS-1$
         if (obj.getNamespaces() != null) {
@@ -2815,8 +2815,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
             || (!isTeiid8OrGreater() && !obj.getColumns().isEmpty())) {
             append(SPACE);
             append(NonReserved.COLUMNS);
-            for (Iterator<XMLColumn> cols = obj.getColumns().iterator(); cols.hasNext();) {
-                XMLColumn col = cols.next();
+            for (Iterator<XMLColumnImpl> cols = obj.getColumns().iterator(); cols.hasNext();) {
+                XMLColumnImpl col = cols.next();
                 append(SPACE);
                 outputDisplayName(col.getName());
                 append(SPACE);
@@ -2853,7 +2853,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(ObjectTable obj) {
+    public void visit(ObjectTableImpl obj) {
         addHintComment(obj);
         append("OBJECTTABLE("); //$NON-NLS-1$
         if (obj.getScriptingLanguage() != null) {
@@ -2871,8 +2871,8 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
         append(SPACE);
         append(NonReserved.COLUMNS);
-        for (Iterator<ObjectColumn> cols = obj.getColumns().iterator(); cols.hasNext();) {
-            ObjectColumn col = cols.next();
+        for (Iterator<ObjectColumnImpl> cols = obj.getColumns().iterator(); cols.hasNext();) {
+            ObjectColumnImpl col = cols.next();
             append(SPACE);
             outputDisplayName(col.getName());
             append(SPACE);
@@ -2898,7 +2898,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(XMLQuery obj) {
+    public void visit(XMLQueryImpl obj) {
         append("XMLQUERY("); //$NON-NLS-1$
         if (obj.getNamespaces() != null) {
             visitNode(obj.getNamespaces());
@@ -2928,7 +2928,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(DerivedColumn obj) {
+    public void visit(DerivedColumnImpl obj) {
         visitNode(obj.getExpression());
         if (obj.getAlias() != null) {
             append(SPACE);
@@ -2939,7 +2939,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(XMLSerialize obj) {
+    public void visit(XMLSerializeImpl obj) {
         append(XMLSERIALIZE);
         append(Tokens.LPAREN);
         if (obj.getDocument() != null) {
@@ -2985,7 +2985,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(QueryString obj) {
+    public void visit(QueryStringImpl obj) {
         append(NonReserved.QUERYSTRING);
         append("("); //$NON-NLS-1$
         visitNode(obj.getPath());
@@ -2998,7 +2998,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(XMLParse obj) {
+    public void visit(XMLParseImpl obj) {
         append(XMLPARSE);
         append(Tokens.LPAREN);
         if (obj.isDocument()) {
@@ -3016,12 +3016,12 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(ExpressionCriteria obj) {
+    public void visit(ExpressionCriteriaImpl obj) {
         visitNode(obj.getExpression());
     }
 
     @Override
-    public void visit(TriggerAction obj) {
+    public void visit(TriggerActionImpl obj) {
         append(FOR);
         append(SPACE);
         append(EACH);
@@ -3033,15 +3033,15 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(ArrayTable obj) {
+    public void visit(ArrayTableImpl obj) {
         addHintComment(obj);
         append("ARRAYTABLE("); //$NON-NLS-1$
         visitNode(obj.getArrayValue());
         append(SPACE);
         append(NonReserved.COLUMNS);
 
-        for (Iterator<ProjectedColumn> cols = obj.getColumns().iterator(); cols.hasNext();) {
-            ProjectedColumn col = cols.next();
+        for (Iterator<ProjectedColumnImpl> cols = obj.getColumns().iterator(); cols.hasNext();) {
+            ProjectedColumnImpl col = cols.next();
             append(SPACE);
             outputDisplayName(col.getName());
             append(SPACE);
@@ -3059,7 +3059,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         addMakeDep(obj);
     }
 
-    private void addMakeDep(FromClause obj) {
+    private void addMakeDep(FromClauseImpl obj) {
         if (isLessThanTeiidVersion(Version.TEIID_8_5))
             return;
 
@@ -3071,7 +3071,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         }
     }
 
-    private void visit7(AlterProcedure<CreateUpdateProcedureCommand> obj) {
+    private void visit7(AlterProcedureImpl<CreateUpdateProcedureCommandImpl> obj) {
         append(ALTER);
         append(SPACE);
         append(PROCEDURE);
@@ -3082,7 +3082,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
         append(obj.getDefinition().getBlock());
     }
 
-    private void visit8(AlterProcedure<CreateProcedureCommand> obj) {
+    private void visit8(AlterProcedureImpl<CreateProcedureCommandImpl> obj) {
         append(ALTER);
         append(SPACE);
         append(PROCEDURE);
@@ -3094,7 +3094,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(AlterProcedure obj) {
+    public void visit(AlterProcedureImpl obj) {
         if (isTeiid8OrGreater())
             visit8(obj);
         else
@@ -3102,7 +3102,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(AlterTrigger obj) {
+    public void visit(AlterTriggerImpl obj) {
         if (obj.isCreate()) {
             append(CREATE);
         } else {
@@ -3133,7 +3133,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(AlterView obj) {
+    public void visit(AlterViewImpl obj) {
         append(ALTER);
         append(SPACE);
         append(NonReserved.VIEW);
@@ -3147,7 +3147,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(WindowFunction windowFunction) {
+    public void visit(BaseWindowFunction windowFunction) {
         append(windowFunction.getFunction());
         append(SPACE);
         append(OVER);
@@ -3156,7 +3156,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(WindowSpecification windowSpecification) {
+    public void visit(WindowSpecificationImpl windowSpecification) {
         append(Tokens.LPAREN);
         boolean needsSpace = false;
         if (windowSpecification.getPartition() != null) {
@@ -3177,7 +3177,7 @@ public class SQLStringVisitorImpl extends TCLanguageVisitorImpl
     }
 
     @Override
-    public void visit(Array array) {
+    public void visit(ArraySymbolImpl array) {
         if (!array.isImplicit()) {
             append(Tokens.LPAREN);
         }

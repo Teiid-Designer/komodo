@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.lang.ICommand;
+import org.komodo.spi.query.sql.lang.Command;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.ModelMetaData.Message.Severity;
@@ -60,14 +60,14 @@ import org.teiid.query.report.ReportItem;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitorImpl;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.QueryCommand;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.QueryCommandImpl;
 import org.teiid.query.sql.navigator.PostOrderNavigator;
 import org.teiid.query.sql.navigator.PreOrPostOrderNavigator;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
 import org.teiid.query.sql.visitor.EvaluatableVisitor;
 import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
 import org.teiid.query.validator.DefaultValidator;
@@ -98,7 +98,7 @@ public class MetadataValidator {
         this(teiidVersion, SystemMetadata.getInstance(teiidVersion).getRuntimeTypeMap());
     }
 
-	private <T extends LanguageObject> T createASTNode(ASTNodes nodeType) {
+	private <T extends BaseLanguageObject> T createASTNode(ASTNodes nodeType) {
 	    return queryParser.getTeiidParser().createASTNode(nodeType);
 	}
 
@@ -273,30 +273,30 @@ public class MetadataValidator {
     	try {
     		if (record instanceof Procedure) {
     			Procedure p = (Procedure)record;
-    			Command command = queryParser.parseProcedure(p.getQueryPlan(), false);
-                GroupSymbol gs = createASTNode(ASTNodes.GROUP_SYMBOL);
+    			CommandImpl command = queryParser.parseProcedure(p.getQueryPlan(), false);
+                GroupSymbolImpl gs = createASTNode(ASTNodes.GROUP_SYMBOL);
     			gs.setName(p.getFullName());
     			TCQueryResolver resolver = new TCQueryResolver(queryParser);
-    			resolver.resolveCommand(command, gs, ICommand.TYPE_STORED_PROCEDURE, metadata, false);
+    			resolver.resolveCommand(command, gs, Command.TYPE_STORED_PROCEDURE, metadata, false);
     			DefaultValidator validator = new DefaultValidator();
     			resolverReport =  validator.validate(command, metadata);
     		} else if (record instanceof Table) {
     			Table t = (Table)record;
     			
-    			GroupSymbol symbol = createASTNode(ASTNodes.GROUP_SYMBOL); 
+    			GroupSymbolImpl symbol = createASTNode(ASTNodes.GROUP_SYMBOL); 
     			symbol.setName(t.getFullName());
     			ResolverUtil.resolveGroup(symbol, metadata);
     			if (t.isVirtual() && (t.getColumns() == null || t.getColumns().isEmpty())) {
-    				QueryCommand command = (QueryCommand) queryParser.parseCommand(t.getSelectTransformation());
+    				QueryCommandImpl command = (QueryCommandImpl) queryParser.parseCommand(t.getSelectTransformation());
     				TCQueryResolver resolver = new TCQueryResolver(queryParser);
     				resolver.resolveCommand(command, metadata);
     				DefaultValidator validator = new DefaultValidator();
     				resolverReport =  validator.validate(command, metadata);
     				if(!resolverReport.hasItems()) {
-    					List<Expression> symbols = command.getProjectedSymbols();
-    					for (Expression column:symbols) {
+    					List<BaseExpression> symbols = command.getProjectedSymbols();
+    					for (BaseExpression column:symbols) {
     						try {
-								addColumn(Symbol.getShortName(column), column.getType(), t, mf);
+								addColumn(SymbolImpl.getShortName(column), column.getType(), t, mf);
 							} catch (Exception e) {
 								log(report, model, e.getMessage());
 							}
@@ -306,7 +306,7 @@ public class MetadataValidator {
     			
     			if (t.isMaterialized() && t.getMaterializedTable() == null) {
 	    			List<KeyRecord> fbis = t.getFunctionBasedIndexes();
-	    			List<GroupSymbol> groups = Arrays.asList(symbol);
+	    			List<GroupSymbolImpl> groups = Arrays.asList(symbol);
 					if (fbis != null && !fbis.isEmpty()) {
 						for (KeyRecord fbi : fbis) {
 	    					for (int j = 0; j < fbi.getColumns().size(); j++) {
@@ -316,7 +316,7 @@ public class MetadataValidator {
 	    						}
 	    						String exprString = c.getNameInSource();
 	    						try {
-		    						Expression ex = queryParser.parseExpression(exprString);
+		    						BaseExpression ex = queryParser.parseExpression(exprString);
 		    						ResolverVisitorImpl resolverVisitor = new ResolverVisitorImpl(teiidVersion);
 									resolverVisitor.resolveLanguageObject(ex, groups, metadata);
 									if (!ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(ex).isEmpty()) {

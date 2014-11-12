@@ -4,14 +4,14 @@ package org.teiid.query.sql.lang;
 
 import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.symbol.BaseExpression;
 
 /**
  *
  */
-public abstract class AbstractSetCriteria extends Criteria implements PredicateCriteria {
+public abstract class AbstractSetCriteria extends CriteriaImpl implements PredicateCriteria {
 
-    private Expression expression;
+    private BaseExpression expression;
 
     /** Negation flag. Indicates whether the criteria expression contains a NOT. */
     private boolean negated = false;
@@ -27,14 +27,14 @@ public abstract class AbstractSetCriteria extends Criteria implements PredicateC
     /**
      * @return the expression
      */
-    public Expression getExpression() {
+    public BaseExpression getExpression() {
         return this.expression;
     }
 
     /**
      * @param expression the expression to set
      */
-    public void setExpression(Expression expression) {
+    public void setExpression(BaseExpression expression) {
         this.expression = expression;
     }
 

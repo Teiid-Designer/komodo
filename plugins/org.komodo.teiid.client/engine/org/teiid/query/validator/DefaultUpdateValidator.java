@@ -36,15 +36,15 @@ import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
 import org.komodo.spi.validator.UpdateValidator;
 import org.teiid.query.optimizer.relational.PartitionAnalyzer;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.lang.UnaryFromClause;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.lang.UnaryFromClauseImpl;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 import org.teiid.query.sql.util.SymbolMap;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -55,7 +55,7 @@ import org.teiid.runtime.client.TeiidClientException;
  * this <code>Query</code> and verifies if the virtual group definition will allows it to be
  * updated.</p>
  */
-public class DefaultUpdateValidator implements UpdateValidator<Command, ElementSymbol> {
+public class DefaultUpdateValidator implements UpdateValidator<CommandImpl, ElementSymbolImpl> {
 	
 	public enum UpdateType {
 		/**
@@ -69,13 +69,13 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 	}
 	
 	public static class UpdateMapping {
-		private GroupSymbol group;
-		private GroupSymbol correlatedName;
-		private Map<ElementSymbol, ElementSymbol> updatableViewSymbols = new HashMap<ElementSymbol, ElementSymbol>();
+		private GroupSymbolImpl group;
+		private GroupSymbolImpl correlatedName;
+		private Map<ElementSymbolImpl, ElementSymbolImpl> updatableViewSymbols = new HashMap<ElementSymbolImpl, ElementSymbolImpl>();
 		private boolean insertAllowed = false;
 		private boolean updateAllowed = false;
 		
-		public Map<ElementSymbol, ElementSymbol> getUpdatableViewSymbols() {
+		public Map<ElementSymbolImpl, ElementSymbolImpl> getUpdatableViewSymbols() {
 			return updatableViewSymbols;
 		}
 		
@@ -87,11 +87,11 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 			return updateAllowed;
 		}
 		
-		public GroupSymbol getGroup() {
+		public GroupSymbolImpl getGroup() {
 			return group;
 		}
 		
-		public GroupSymbol getCorrelatedName() {
+		public GroupSymbolImpl getCorrelatedName() {
 			return correlatedName;
 		}
 	}
@@ -106,11 +106,11 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 		private String deleteValidationError;
 		private UpdateType insertType;
 		private String insertValidationError;
-		private Query view;
-		private Map<ElementSymbol, List<Set<Constant>>> partitionInfo;
+		private QueryImpl view;
+		private Map<ElementSymbolImpl, List<Set<ConstantImpl>>> partitionInfo;
 		private List<UpdateInfo> unionBranches = new LinkedList<UpdateInfo>();
 		
-		public Map<ElementSymbol, List<Set<Constant>>> getPartitionInfo() {
+		public Map<ElementSymbolImpl, List<Set<ConstantImpl>>> getPartitionInfo() {
 			return partitionInfo;
 		}
 		 
@@ -142,7 +142,7 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 			return deleteType;
 		}
 		
-		public boolean hasValidUpdateMapping(Collection<ElementSymbol> updateCols) {
+		public boolean hasValidUpdateMapping(Collection<ElementSymbolImpl> updateCols) {
 			if (findUpdateMapping(updateCols, false) == null) {
 				return false;
 			}
@@ -154,7 +154,7 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 			return true;
 		}
 		
-		public UpdateMapping findUpdateMapping(Collection<ElementSymbol> updateCols, boolean insert) {
+		public UpdateMapping findUpdateMapping(Collection<ElementSymbolImpl> updateCols, boolean insert) {
 			if (updateCols.isEmpty() && this.updatableGroups.size() > 1) {
 				return null;
 			}
@@ -166,7 +166,7 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 			return null;
 		}
 		
-		public UpdateMapping findInsertUpdateMapping(Insert insert, boolean rewrite) throws Exception {
+		public UpdateMapping findInsertUpdateMapping(InsertImpl insert, boolean rewrite) throws Exception {
 			if (getUnionBranches().isEmpty()) {
 				return findUpdateMapping(insert.getVariables(), true);	
 			}
@@ -175,14 +175,14 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 				 throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30239, insert.getGroup()));
 			}
 			int partition = -1;
-			List<ElementSymbol> filteredColumns = new LinkedList<ElementSymbol>();
-			for (Map.Entry<ElementSymbol, List<Set<Constant>>> entry : partitionInfo.entrySet()) {
+			List<ElementSymbolImpl> filteredColumns = new LinkedList<ElementSymbolImpl>();
+			for (Map.Entry<ElementSymbolImpl, List<Set<ConstantImpl>>> entry : partitionInfo.entrySet()) {
 				int index = insert.getVariables().indexOf(entry.getKey());
 				if (index == -1) {
 					continue;
 				}
-				Expression value = (Expression)insert.getValues().get(index);
-				if (!(value instanceof Constant)) {
+				BaseExpression value = (BaseExpression)insert.getValues().get(index);
+				if (!(value instanceof ConstantImpl)) {
 					continue;
 				}
 				for (int i = 0; i < entry.getValue().size(); i++) {
@@ -205,11 +205,11 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 			if (partition > 0) {
 				info = info.getUnionBranches().get(partition - 1);
 			}
-			List<ElementSymbol> variables = new ArrayList<ElementSymbol>(insert.getVariables());
+			List<ElementSymbolImpl> variables = new ArrayList<ElementSymbolImpl>(insert.getVariables());
 			variables.removeAll(filteredColumns);
 			UpdateMapping mapping = info.findUpdateMapping(variables, true);
 			if (rewrite && mapping != null && !filteredColumns.isEmpty()) {
-				for (ElementSymbol elementSymbol : filteredColumns) {
+				for (ElementSymbolImpl elementSymbol : filteredColumns) {
 					if (mapping.getUpdatableViewSymbols().containsKey(elementSymbol)) {
 						continue;
 					}
@@ -223,7 +223,7 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 			return mapping;
 		}
 		
-		public Query getViewDefinition() {
+		public QueryImpl getViewDefinition() {
 			return view;
 		}
 		
@@ -320,28 +320,28 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 		}
 	}
 	
-    public void validate(Command command, List<ElementSymbol> viewSymbols) throws Exception {
+    public void validate(CommandImpl command, List<ElementSymbolImpl> viewSymbols) throws Exception {
     	if (this.updateInfo.deleteType != UpdateType.INHERENT && this.updateInfo.updateType != UpdateType.INHERENT && this.updateInfo.insertType != UpdateType.INHERENT) {
     		return;
     	}
-    	if (command instanceof SetQuery) {
-    		SetQuery setQuery = (SetQuery)command;
+    	if (command instanceof SetQueryImpl) {
+    		SetQueryImpl setQuery = (SetQueryImpl)command;
         	if (setQuery.getLimit() != null) {
         		handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0013), true, true, true);
         		return;
         	}
-    		LinkedList<Query> queries = new LinkedList<Query>();
-    		if (!PartitionAnalyzer.extractQueries((SetQuery)command, queries)) {
+    		LinkedList<QueryImpl> queries = new LinkedList<QueryImpl>();
+    		if (!PartitionAnalyzer.extractQueries((SetQueryImpl)command, queries)) {
     			handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0001), true, true, true);
         		return;    			
     		}
-        	Map<ElementSymbol, List<Set<Constant>>> partitions = PartitionAnalyzer.extractPartionInfo((SetQuery)command, viewSymbols);
+        	Map<ElementSymbolImpl, List<Set<ConstantImpl>>> partitions = PartitionAnalyzer.extractPartionInfo((SetQueryImpl)command, viewSymbols);
         	this.updateInfo.partitionInfo = partitions;
         	if (partitions.isEmpty()) {
         		handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0018), false, true, false);
         	}
         	boolean first = true;
-        	for (Query query : queries) {
+        	for (QueryImpl query : queries) {
         		UpdateInfo ui = this.updateInfo;
         		if (!first) {
 	        		this.updateInfo = new UpdateInfo();
@@ -384,13 +384,13 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
     	}
     }
 	
-    private void internalValidate(Command command, List<ElementSymbol> viewSymbols) throws Exception {
-    	if (!(command instanceof Query)) {
+    private void internalValidate(CommandImpl command, List<ElementSymbolImpl> viewSymbols) throws Exception {
+    	if (!(command instanceof QueryImpl)) {
     		handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0001), true, true, true);
     		return;
         }
     	
-    	Query query = (Query)command;
+    	QueryImpl query = (QueryImpl)command;
 
     	if (query.getFrom() == null || query.getInto() != null) {
     		handleValidationError(Messages.getString(Messages.ERR.ERR_015_012_0001), true, true, true);
@@ -421,21 +421,21 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
     	
     	updateInfo.view = query;
     	
-    	List<Expression> projectedSymbols = query.getSelect().getProjectedSymbols();
+    	List<BaseExpression> projectedSymbols = query.getSelect().getProjectedSymbols();
     	
     	for (int i = 0; i < projectedSymbols.size(); i++) {
-            Expression symbol = projectedSymbols.get(i);
-            Expression ex = SymbolMap.getExpression(symbol);
+            BaseExpression symbol = projectedSymbols.get(i);
+            BaseExpression ex = SymbolMap.getExpression(symbol);
             
             if (!metadata.elementSupports(viewSymbols.get(i).getMetadataID(), SupportConstants.Element.UPDATE)) {
             	continue;
             }
-            if (ex instanceof ElementSymbol) {
-            	ElementSymbol es = (ElementSymbol)ex;
+            if (ex instanceof ElementSymbolImpl) {
+            	ElementSymbolImpl es = (ElementSymbolImpl)ex;
             	String groupName = es.getGroupSymbol().getName();
         		UpdateMapping info = updateInfo.updatableGroups.get(groupName);
         		if (es.getGroupSymbol().getDefinition() != null) {
-            		ElementSymbol clone = es.clone();
+            		ElementSymbolImpl clone = es.clone();
             		clone.setOutputName(null);
             		clone.getGroupSymbol().setName(clone.getGroupSymbol().getNonCorrelationName());
             		clone.getGroupSymbol().setDefinition(null);
@@ -444,7 +444,7 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
             	if (info == null) {
             		info = new UpdateMapping();
             		info.group = es.getGroupSymbol();
-            		info.correlatedName = ((ElementSymbol)ex).getGroupSymbol();
+            		info.correlatedName = ((ElementSymbolImpl)ex).getGroupSymbol();
             		updateInfo.updatableGroups.put(groupName, info);
             	}
             	//TODO: warn if mapped twice
@@ -456,18 +456,18 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
             }
     	}
     	
-    	if (query.getFrom().getClauses().size() > 1 || (!(query.getFrom().getClauses().get(0) instanceof UnaryFromClause))) {
+    	if (query.getFrom().getClauses().size() > 1 || (!(query.getFrom().getClauses().get(0) instanceof UnaryFromClauseImpl))) {
     	    String warning = Messages.getString(Messages.ERR.ERR_015_012_0009, query.getFrom());
     		updateReport.handleValidationWarning(warning); 
     		deleteReport.handleValidationWarning(warning);
     		updateInfo.isSimple = false;
     	}
-    	List<? extends GroupSymbol> allGroups = query.getFrom().getGroups();
-    	HashSet<GroupSymbol> keyPreservingGroups = new HashSet<GroupSymbol>();
+    	List<? extends GroupSymbolImpl> allGroups = query.getFrom().getGroups();
+    	HashSet<GroupSymbolImpl> keyPreservingGroups = new HashSet<GroupSymbolImpl>();
     	
 		ResolverUtil.findKeyPreserved(query, keyPreservingGroups, metadata);
     	
-		for (GroupSymbol groupSymbol : keyPreservingGroups) {
+		for (GroupSymbolImpl groupSymbol : keyPreservingGroups) {
 			setUpdateFlags(groupSymbol);
 		}
 
@@ -477,7 +477,7 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 				setUpdateFlags(allGroups.iterator().next());
 			}
 		} else {
-			for (GroupSymbol groupSymbol : allGroups) {
+			for (GroupSymbolImpl groupSymbol : allGroups) {
 				UpdateMapping info = updateInfo.updatableGroups.get(groupSymbol.getName());
 				if (info == null) {
 					continue; // not projected
@@ -516,7 +516,7 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
     	}
     }
 
-    private void setUpdateFlags(GroupSymbol groupSymbol) throws Exception {
+    private void setUpdateFlags(GroupSymbolImpl groupSymbol) throws Exception {
     	UpdateMapping info = updateInfo.updatableGroups.get(groupSymbol.getName());
 
 		if (info == null) {
@@ -529,7 +529,7 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 		}
 
 		info.insertAllowed = true;
-		for (ElementSymbol es : ResolverUtil.resolveElementsInGroup(info.group, metadata)) {
+		for (ElementSymbolImpl es : ResolverUtil.resolveElementsInGroup(info.group, metadata)) {
 			if (!info.updatableViewSymbols.values().contains(es) && !validateInsertElement(es)) {
 				info.insertAllowed = false;
 			}
@@ -544,7 +544,7 @@ public class DefaultUpdateValidator implements UpdateValidator<Command, ElementS
 	 * @throws Exception 
 	 * @throws Exception 
 	 */
-	private boolean validateInsertElement(ElementSymbol element) throws Exception {
+	private boolean validateInsertElement(ElementSymbolImpl element) throws Exception {
 		// checking if the elements not specified in the query are required.
 		if(metadata.elementSupports(element.getMetadataID(), SupportConstants.Element.NULL) 
 			|| metadata.elementSupports(element.getMetadataID(), SupportConstants.Element.DEFAULT_VALUE) 

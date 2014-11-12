@@ -29,7 +29,7 @@ import java.util.Properties;
 
 import org.komodo.spi.xml.MappingElement;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 
 
 
@@ -40,7 +40,7 @@ public class MappingElementImpl extends MappingBaseNodeImpl
     implements MappingElement<MappingAttributeImpl, MappingNodeImpl> {
 
     // Element symbol in the resultset source
-    ElementSymbol symbol;
+    ElementSymbolImpl symbol;
     
     Namespace namespace;
     
@@ -304,11 +304,11 @@ public class MappingElementImpl extends MappingBaseNodeImpl
         return true;
     }    
     
-    public void setElementSymbol(ElementSymbol symbol) {
+    public void setElementSymbol(ElementSymbolImpl symbol) {
         this.symbol = symbol;
     }
 
-    public ElementSymbol getElementSymbol() {
+    public ElementSymbolImpl getElementSymbol() {
         return this.symbol;
     }
     

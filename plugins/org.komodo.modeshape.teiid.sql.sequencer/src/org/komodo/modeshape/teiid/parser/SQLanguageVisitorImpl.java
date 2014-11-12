@@ -26,183 +26,183 @@ import java.util.HashMap;
 import java.util.Map;
 import org.komodo.modeshape.teiid.Messages;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.sql.lang.AlterProcedure;
-import org.komodo.modeshape.teiid.sql.lang.AlterTrigger;
-import org.komodo.modeshape.teiid.sql.lang.AlterView;
-import org.komodo.modeshape.teiid.sql.lang.ArrayTable;
-import org.komodo.modeshape.teiid.sql.lang.BetweenCriteria;
-import org.komodo.modeshape.teiid.sql.lang.Command;
-import org.komodo.modeshape.teiid.sql.lang.CompareCriteria;
-import org.komodo.modeshape.teiid.sql.lang.CompoundCriteria;
-import org.komodo.modeshape.teiid.sql.lang.Criteria;
-import org.komodo.modeshape.teiid.sql.lang.Delete;
-import org.komodo.modeshape.teiid.sql.lang.DynamicCommand;
-import org.komodo.modeshape.teiid.sql.lang.ExistsCriteria;
-import org.komodo.modeshape.teiid.sql.lang.ExpressionCriteria;
-import org.komodo.modeshape.teiid.sql.lang.From;
-import org.komodo.modeshape.teiid.sql.lang.FromClause;
-import org.komodo.modeshape.teiid.sql.lang.GroupBy;
-import org.komodo.modeshape.teiid.sql.lang.Insert;
-import org.komodo.modeshape.teiid.sql.lang.Into;
-import org.komodo.modeshape.teiid.sql.lang.IsNullCriteria;
-import org.komodo.modeshape.teiid.sql.lang.JoinPredicate;
-import org.komodo.modeshape.teiid.sql.lang.JoinType;
-import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
-import org.komodo.modeshape.teiid.sql.lang.Limit;
-import org.komodo.modeshape.teiid.sql.lang.MatchCriteria;
-import org.komodo.modeshape.teiid.sql.lang.NotCriteria;
-import org.komodo.modeshape.teiid.sql.lang.ObjectColumn;
-import org.komodo.modeshape.teiid.sql.lang.ObjectTable;
-import org.komodo.modeshape.teiid.sql.lang.Option;
-import org.komodo.modeshape.teiid.sql.lang.OrderBy;
-import org.komodo.modeshape.teiid.sql.lang.OrderByItem;
-import org.komodo.modeshape.teiid.sql.lang.ProjectedColumn;
-import org.komodo.modeshape.teiid.sql.lang.Query;
-import org.komodo.modeshape.teiid.sql.lang.QueryCommand;
-import org.komodo.modeshape.teiid.sql.lang.Select;
-import org.komodo.modeshape.teiid.sql.lang.SetClause;
-import org.komodo.modeshape.teiid.sql.lang.SetClauseList;
-import org.komodo.modeshape.teiid.sql.lang.SetCriteria;
-import org.komodo.modeshape.teiid.sql.lang.SetQuery;
-import org.komodo.modeshape.teiid.sql.lang.StoredProcedure;
-import org.komodo.modeshape.teiid.sql.lang.SubqueryCompareCriteria;
-import org.komodo.modeshape.teiid.sql.lang.SubqueryFromClause;
-import org.komodo.modeshape.teiid.sql.lang.SubquerySetCriteria;
-import org.komodo.modeshape.teiid.sql.lang.TextColumn;
-import org.komodo.modeshape.teiid.sql.lang.TextTable;
-import org.komodo.modeshape.teiid.sql.lang.UnaryFromClause;
-import org.komodo.modeshape.teiid.sql.lang.Update;
-import org.komodo.modeshape.teiid.sql.lang.WithQueryCommand;
-import org.komodo.modeshape.teiid.sql.lang.XMLColumn;
-import org.komodo.modeshape.teiid.sql.lang.XMLTable;
-import org.komodo.modeshape.teiid.sql.proc.AssignmentStatement;
-import org.komodo.modeshape.teiid.sql.proc.Block;
-import org.komodo.modeshape.teiid.sql.proc.BranchingStatement;
-import org.komodo.modeshape.teiid.sql.proc.CommandStatement;
-import org.komodo.modeshape.teiid.sql.proc.CreateProcedureCommand;
-import org.komodo.modeshape.teiid.sql.proc.DeclareStatement;
-import org.komodo.modeshape.teiid.sql.proc.ExceptionExpression;
-import org.komodo.modeshape.teiid.sql.proc.IfStatement;
-import org.komodo.modeshape.teiid.sql.proc.LoopStatement;
-import org.komodo.modeshape.teiid.sql.proc.RaiseStatement;
-import org.komodo.modeshape.teiid.sql.proc.ReturnStatement;
-import org.komodo.modeshape.teiid.sql.proc.Statement;
-import org.komodo.modeshape.teiid.sql.proc.TriggerAction;
-import org.komodo.modeshape.teiid.sql.proc.WhileStatement;
-import org.komodo.modeshape.teiid.sql.symbol.AggregateSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.AliasSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.Array;
-import org.komodo.modeshape.teiid.sql.symbol.CaseExpression;
-import org.komodo.modeshape.teiid.sql.symbol.Constant;
-import org.komodo.modeshape.teiid.sql.symbol.DerivedColumn;
-import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.Function;
-import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.JSONObject;
-import org.komodo.modeshape.teiid.sql.symbol.MultipleElementSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.QueryString;
-import org.komodo.modeshape.teiid.sql.symbol.Reference;
-import org.komodo.modeshape.teiid.sql.symbol.ScalarSubquery;
-import org.komodo.modeshape.teiid.sql.symbol.SearchedCaseExpression;
-import org.komodo.modeshape.teiid.sql.symbol.TextLine;
-import org.komodo.modeshape.teiid.sql.symbol.WindowFunction;
-import org.komodo.modeshape.teiid.sql.symbol.WindowSpecification;
-import org.komodo.modeshape.teiid.sql.symbol.XMLAttributes;
-import org.komodo.modeshape.teiid.sql.symbol.XMLElement;
-import org.komodo.modeshape.teiid.sql.symbol.XMLForest;
-import org.komodo.modeshape.teiid.sql.symbol.XMLNamespaces;
-import org.komodo.modeshape.teiid.sql.symbol.XMLParse;
-import org.komodo.modeshape.teiid.sql.symbol.XMLQuery;
-import org.komodo.modeshape.teiid.sql.symbol.XMLSerialize;
+import org.komodo.modeshape.teiid.sql.lang.AlterProcedureImpl;
+import org.komodo.modeshape.teiid.sql.lang.AlterTriggerImpl;
+import org.komodo.modeshape.teiid.sql.lang.AlterViewImpl;
+import org.komodo.modeshape.teiid.sql.lang.ArrayTableImpl;
+import org.komodo.modeshape.teiid.sql.lang.BetweenCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.CommandImpl;
+import org.komodo.modeshape.teiid.sql.lang.CompareCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.CompoundCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.CriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.DeleteImpl;
+import org.komodo.modeshape.teiid.sql.lang.DynamicCommandImpl;
+import org.komodo.modeshape.teiid.sql.lang.ExistsCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.ExpressionCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.FromImpl;
+import org.komodo.modeshape.teiid.sql.lang.FromClauseImpl;
+import org.komodo.modeshape.teiid.sql.lang.GroupByImpl;
+import org.komodo.modeshape.teiid.sql.lang.InsertImpl;
+import org.komodo.modeshape.teiid.sql.lang.IntoImpl;
+import org.komodo.modeshape.teiid.sql.lang.IsNullCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.JoinPredicateImpl;
+import org.komodo.modeshape.teiid.sql.lang.JoinTypeImpl;
+import org.komodo.modeshape.teiid.sql.lang.BaseLanguageObject;
+import org.komodo.modeshape.teiid.sql.lang.LimitImpl;
+import org.komodo.modeshape.teiid.sql.lang.MatchCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.NotCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.ObjectColumnImpl;
+import org.komodo.modeshape.teiid.sql.lang.ObjectTableImpl;
+import org.komodo.modeshape.teiid.sql.lang.OptionImpl;
+import org.komodo.modeshape.teiid.sql.lang.OrderByImpl;
+import org.komodo.modeshape.teiid.sql.lang.OrderByItemImpl;
+import org.komodo.modeshape.teiid.sql.lang.ProjectedColumnImpl;
+import org.komodo.modeshape.teiid.sql.lang.QueryImpl;
+import org.komodo.modeshape.teiid.sql.lang.QueryCommandImpl;
+import org.komodo.modeshape.teiid.sql.lang.SelectImpl;
+import org.komodo.modeshape.teiid.sql.lang.SetClauseImpl;
+import org.komodo.modeshape.teiid.sql.lang.SetClauseListImpl;
+import org.komodo.modeshape.teiid.sql.lang.SetCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.SetQueryImpl;
+import org.komodo.modeshape.teiid.sql.lang.StoredProcedureImpl;
+import org.komodo.modeshape.teiid.sql.lang.SubqueryCompareCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.SubqueryFromClauseImpl;
+import org.komodo.modeshape.teiid.sql.lang.SubquerySetCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.TextColumnImpl;
+import org.komodo.modeshape.teiid.sql.lang.TextTableImpl;
+import org.komodo.modeshape.teiid.sql.lang.UnaryFromClauseImpl;
+import org.komodo.modeshape.teiid.sql.lang.UpdateImpl;
+import org.komodo.modeshape.teiid.sql.lang.WithQueryCommandImpl;
+import org.komodo.modeshape.teiid.sql.lang.XMLColumnImpl;
+import org.komodo.modeshape.teiid.sql.lang.XMLTableImpl;
+import org.komodo.modeshape.teiid.sql.proc.AssignmentStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.BlockImpl;
+import org.komodo.modeshape.teiid.sql.proc.BranchingStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.CommandStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.CreateProcedureCommandImpl;
+import org.komodo.modeshape.teiid.sql.proc.DeclareStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.ExceptionExpressionImpl;
+import org.komodo.modeshape.teiid.sql.proc.IfStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.LoopStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.RaiseStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.ReturnStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.StatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.TriggerActionImpl;
+import org.komodo.modeshape.teiid.sql.proc.WhileStatementImpl;
+import org.komodo.modeshape.teiid.sql.symbol.AggregateSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.AliasSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.ArraySymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.CaseExpressionImpl;
+import org.komodo.modeshape.teiid.sql.symbol.ConstantImpl;
+import org.komodo.modeshape.teiid.sql.symbol.DerivedColumnImpl;
+import org.komodo.modeshape.teiid.sql.symbol.ElementSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.ExpressionSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.FunctionImpl;
+import org.komodo.modeshape.teiid.sql.symbol.GroupSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.JSONObjectImpl;
+import org.komodo.modeshape.teiid.sql.symbol.MultipleElementSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.QueryStringImpl;
+import org.komodo.modeshape.teiid.sql.symbol.ReferenceImpl;
+import org.komodo.modeshape.teiid.sql.symbol.ScalarSubqueryImpl;
+import org.komodo.modeshape.teiid.sql.symbol.SearchedCaseExpressionImpl;
+import org.komodo.modeshape.teiid.sql.symbol.TextLineImpl;
+import org.komodo.modeshape.teiid.sql.symbol.WindowFunctionImpl;
+import org.komodo.modeshape.teiid.sql.symbol.WindowSpecificationImpl;
+import org.komodo.modeshape.teiid.sql.symbol.XMLAttributesImpl;
+import org.komodo.modeshape.teiid.sql.symbol.XMLElementImpl;
+import org.komodo.modeshape.teiid.sql.symbol.XMLForestImpl;
+import org.komodo.modeshape.teiid.sql.symbol.XMLNamespacesImpl;
+import org.komodo.modeshape.teiid.sql.symbol.XMLParseImpl;
+import org.komodo.modeshape.teiid.sql.symbol.XMLQueryImpl;
+import org.komodo.modeshape.teiid.sql.symbol.XMLSerializeImpl;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.query.AbstractLanguageVisitor;
-import org.komodo.spi.query.sql.lang.IAlterProcedure;
-import org.komodo.spi.query.sql.lang.IAlterTrigger;
-import org.komodo.spi.query.sql.lang.IAlterView;
-import org.komodo.spi.query.sql.lang.IArrayTable;
-import org.komodo.spi.query.sql.lang.IBetweenCriteria;
-import org.komodo.spi.query.sql.lang.ICompareCriteria;
-import org.komodo.spi.query.sql.lang.ICompoundCriteria;
-import org.komodo.spi.query.sql.lang.ICreate;
-import org.komodo.spi.query.sql.lang.IDelete;
-import org.komodo.spi.query.sql.lang.IDrop;
-import org.komodo.spi.query.sql.lang.IDynamicCommand;
-import org.komodo.spi.query.sql.lang.IExistsCriteria;
-import org.komodo.spi.query.sql.lang.IExpressionCriteria;
-import org.komodo.spi.query.sql.lang.IFrom;
-import org.komodo.spi.query.sql.lang.IGroupBy;
-import org.komodo.spi.query.sql.lang.IInsert;
-import org.komodo.spi.query.sql.lang.IInto;
-import org.komodo.spi.query.sql.lang.IIsNullCriteria;
-import org.komodo.spi.query.sql.lang.IJoinPredicate;
-import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.lang.ILimit;
-import org.komodo.spi.query.sql.lang.IMatchCriteria;
-import org.komodo.spi.query.sql.lang.INotCriteria;
-import org.komodo.spi.query.sql.lang.IObjectTable;
-import org.komodo.spi.query.sql.lang.IOption;
-import org.komodo.spi.query.sql.lang.IOrderBy;
-import org.komodo.spi.query.sql.lang.IOrderByItem;
-import org.komodo.spi.query.sql.lang.IQuery;
-import org.komodo.spi.query.sql.lang.ISelect;
-import org.komodo.spi.query.sql.lang.ISetClause;
-import org.komodo.spi.query.sql.lang.ISetClauseList;
-import org.komodo.spi.query.sql.lang.ISetCriteria;
-import org.komodo.spi.query.sql.lang.ISetQuery;
-import org.komodo.spi.query.sql.lang.IStoredProcedure;
-import org.komodo.spi.query.sql.lang.ISubqueryCompareCriteria;
-import org.komodo.spi.query.sql.lang.ISubqueryFromClause;
-import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
-import org.komodo.spi.query.sql.lang.ITextTable;
-import org.komodo.spi.query.sql.lang.IUnaryFromClause;
-import org.komodo.spi.query.sql.lang.IUpdate;
-import org.komodo.spi.query.sql.lang.IWithQueryCommand;
-import org.komodo.spi.query.sql.lang.IXMLTable;
-import org.komodo.spi.query.sql.proc.IAssignmentStatement;
-import org.komodo.spi.query.sql.proc.IBlock;
-import org.komodo.spi.query.sql.proc.IBranchingStatement;
-import org.komodo.spi.query.sql.proc.ICommandStatement;
-import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
-import org.komodo.spi.query.sql.proc.ICriteriaSelector;
-import org.komodo.spi.query.sql.proc.IDeclareStatement;
-import org.komodo.spi.query.sql.proc.IExceptionExpression;
-import org.komodo.spi.query.sql.proc.IHasCriteria;
-import org.komodo.spi.query.sql.proc.IIfStatement;
-import org.komodo.spi.query.sql.proc.ILoopStatement;
-import org.komodo.spi.query.sql.proc.IRaiseStatement;
-import org.komodo.spi.query.sql.proc.IReturnStatement;
-import org.komodo.spi.query.sql.proc.ITranslateCriteria;
-import org.komodo.spi.query.sql.proc.ITriggerAction;
-import org.komodo.spi.query.sql.proc.IWhileStatement;
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
-import org.komodo.spi.query.sql.symbol.IAliasSymbol;
-import org.komodo.spi.query.sql.symbol.IArray;
-import org.komodo.spi.query.sql.symbol.ICaseExpression;
-import org.komodo.spi.query.sql.symbol.IConstant;
-import org.komodo.spi.query.sql.symbol.IDerivedColumn;
-import org.komodo.spi.query.sql.symbol.IElementSymbol;
-import org.komodo.spi.query.sql.symbol.IExpressionSymbol;
-import org.komodo.spi.query.sql.symbol.IFunction;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
-import org.komodo.spi.query.sql.symbol.IMultipleElementSymbol;
-import org.komodo.spi.query.sql.symbol.IQueryString;
-import org.komodo.spi.query.sql.symbol.IReference;
-import org.komodo.spi.query.sql.symbol.IScalarSubquery;
-import org.komodo.spi.query.sql.symbol.ISearchedCaseExpression;
-import org.komodo.spi.query.sql.symbol.ITextLine;
-import org.komodo.spi.query.sql.symbol.IWindowFunction;
-import org.komodo.spi.query.sql.symbol.IWindowSpecification;
-import org.komodo.spi.query.sql.symbol.IXMLAttributes;
-import org.komodo.spi.query.sql.symbol.IXMLElement;
-import org.komodo.spi.query.sql.symbol.IXMLForest;
-import org.komodo.spi.query.sql.symbol.IXMLNamespaces;
-import org.komodo.spi.query.sql.symbol.IXMLParse;
-import org.komodo.spi.query.sql.symbol.IXMLQuery;
-import org.komodo.spi.query.sql.symbol.IXMLSerialize;
+import org.komodo.spi.query.sql.lang.AlterProcedure;
+import org.komodo.spi.query.sql.lang.AlterTrigger;
+import org.komodo.spi.query.sql.lang.AlterView;
+import org.komodo.spi.query.sql.lang.ArrayTable;
+import org.komodo.spi.query.sql.lang.BetweenCriteria;
+import org.komodo.spi.query.sql.lang.CompareCriteria;
+import org.komodo.spi.query.sql.lang.CompoundCriteria;
+import org.komodo.spi.query.sql.lang.Create;
+import org.komodo.spi.query.sql.lang.Delete;
+import org.komodo.spi.query.sql.lang.Drop;
+import org.komodo.spi.query.sql.lang.DynamicCommand;
+import org.komodo.spi.query.sql.lang.ExistsCriteria;
+import org.komodo.spi.query.sql.lang.ExpressionCriteria;
+import org.komodo.spi.query.sql.lang.From;
+import org.komodo.spi.query.sql.lang.GroupBy;
+import org.komodo.spi.query.sql.lang.Insert;
+import org.komodo.spi.query.sql.lang.Into;
+import org.komodo.spi.query.sql.lang.IsNullCriteria;
+import org.komodo.spi.query.sql.lang.JoinPredicate;
+import org.komodo.spi.query.sql.lang.JoinType;
+import org.komodo.spi.query.sql.lang.LanguageObject;
+import org.komodo.spi.query.sql.lang.Limit;
+import org.komodo.spi.query.sql.lang.MatchCriteria;
+import org.komodo.spi.query.sql.lang.NotCriteria;
+import org.komodo.spi.query.sql.lang.ObjectTable;
+import org.komodo.spi.query.sql.lang.Option;
+import org.komodo.spi.query.sql.lang.OrderBy;
+import org.komodo.spi.query.sql.lang.OrderByItem;
+import org.komodo.spi.query.sql.lang.Query;
+import org.komodo.spi.query.sql.lang.Select;
+import org.komodo.spi.query.sql.lang.SetClause;
+import org.komodo.spi.query.sql.lang.SetClauseList;
+import org.komodo.spi.query.sql.lang.SetCriteria;
+import org.komodo.spi.query.sql.lang.SetQuery;
+import org.komodo.spi.query.sql.lang.StoredProcedure;
+import org.komodo.spi.query.sql.lang.SubqueryCompareCriteria;
+import org.komodo.spi.query.sql.lang.SubqueryFromClause;
+import org.komodo.spi.query.sql.lang.SubquerySetCriteria;
+import org.komodo.spi.query.sql.lang.TextTable;
+import org.komodo.spi.query.sql.lang.UnaryFromClause;
+import org.komodo.spi.query.sql.lang.Update;
+import org.komodo.spi.query.sql.lang.WithQueryCommand;
+import org.komodo.spi.query.sql.lang.XMLTable;
+import org.komodo.spi.query.sql.proc.AssignmentStatement;
+import org.komodo.spi.query.sql.proc.Block;
+import org.komodo.spi.query.sql.proc.BranchingStatement;
+import org.komodo.spi.query.sql.proc.CommandStatement;
+import org.komodo.spi.query.sql.proc.CreateProcedureCommand;
+import org.komodo.spi.query.sql.proc.CriteriaSelector;
+import org.komodo.spi.query.sql.proc.DeclareStatement;
+import org.komodo.spi.query.sql.proc.ExceptionExpression;
+import org.komodo.spi.query.sql.proc.HasCriteria;
+import org.komodo.spi.query.sql.proc.IfStatement;
+import org.komodo.spi.query.sql.proc.LoopStatement;
+import org.komodo.spi.query.sql.proc.RaiseStatement;
+import org.komodo.spi.query.sql.proc.ReturnStatement;
+import org.komodo.spi.query.sql.proc.TranslateCriteria;
+import org.komodo.spi.query.sql.proc.TriggerAction;
+import org.komodo.spi.query.sql.proc.WhileStatement;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol;
+import org.komodo.spi.query.sql.symbol.AliasSymbol;
+import org.komodo.spi.query.sql.symbol.Array;
+import org.komodo.spi.query.sql.symbol.CaseExpression;
+import org.komodo.spi.query.sql.symbol.Constant;
+import org.komodo.spi.query.sql.symbol.DerivedColumn;
+import org.komodo.spi.query.sql.symbol.ElementSymbol;
+import org.komodo.spi.query.sql.symbol.ExpressionSymbol;
+import org.komodo.spi.query.sql.symbol.Function;
+import org.komodo.spi.query.sql.symbol.GroupSymbol;
+import org.komodo.spi.query.sql.symbol.MultipleElementSymbol;
+import org.komodo.spi.query.sql.symbol.QueryString;
+import org.komodo.spi.query.sql.symbol.Reference;
+import org.komodo.spi.query.sql.symbol.ScalarSubquery;
+import org.komodo.spi.query.sql.symbol.SearchedCaseExpression;
+import org.komodo.spi.query.sql.symbol.TextLine;
+import org.komodo.spi.query.sql.symbol.WindowFunction;
+import org.komodo.spi.query.sql.symbol.WindowSpecification;
+import org.komodo.spi.query.sql.symbol.XMLAttributes;
+import org.komodo.spi.query.sql.symbol.XMLElement;
+import org.komodo.spi.query.sql.symbol.XMLForest;
+import org.komodo.spi.query.sql.symbol.XMLNamespaces;
+import org.komodo.spi.query.sql.symbol.XMLParse;
+import org.komodo.spi.query.sql.symbol.XMLQuery;
+import org.komodo.spi.query.sql.symbol.XMLSerialize;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
@@ -235,7 +235,7 @@ public abstract class SQLanguageVisitorImpl extends AbstractLanguageVisitor {
                 continue;
 
             for (Class<?> param : params) {
-                if (LanguageObject.class.isAssignableFrom(param)) {
+                if (BaseLanguageObject.class.isAssignableFrom(param)) {
                     methodCache.put(param, method);
                 }
             }
@@ -292,7 +292,7 @@ public abstract class SQLanguageVisitorImpl extends AbstractLanguageVisitor {
         return parser.getTeiidParser();
     }
 
-    protected <T extends LanguageObject> T createNode(ASTNodes nodeType) {
+    protected <T extends BaseLanguageObject> T createNode(ASTNodes nodeType) {
         return getTeiidParser().createASTNode(nodeType);
     }
 
@@ -337,7 +337,7 @@ public abstract class SQLanguageVisitorImpl extends AbstractLanguageVisitor {
         return null;
     }
 
-    protected void isApplicable(ILanguageObject node) {
+    protected void isApplicable(LanguageObject node) {
         Method method = searchMethodCache(node.getClass());
         if (method == null) {
             throw new RuntimeException("No visit method for " + node.getClass()); //$NON-NLS-1$
@@ -359,784 +359,784 @@ public abstract class SQLanguageVisitorImpl extends AbstractLanguageVisitor {
         }
     }
 
-    public void visit(LanguageObject node) {
+    public void visit(BaseLanguageObject node) {
         isApplicable(node);
     }
 
-    public void visit(Command node) {
+    public void visit(CommandImpl node) {
         isApplicable(node);
     }
 
-    public void visit(AlterView node) {
+    public void visit(AlterViewImpl node) {
         isApplicable(node);
     }
 
-    public void visit(AlterTrigger node) {
+    public void visit(AlterTriggerImpl node) {
         isApplicable(node);
     }
 
-    public void visit(AlterProcedure node) {
+    public void visit(AlterProcedureImpl node) {
         isApplicable(node);
     }
 
-    public void visit(TriggerAction node) {
-        isApplicable(node);
-    }
-
-    @Since(Version.TEIID_8_0)
-    public void visit(RaiseStatement node) {
+    public void visit(TriggerActionImpl node) {
         isApplicable(node);
     }
 
     @Since(Version.TEIID_8_0)
-    public void visit(ExceptionExpression node) {
-        isApplicable(node);
-    }
-
-    public void visit(Statement node) {
-        isApplicable(node);
-    }
-
-    public void visit(BranchingStatement node) {
+    public void visit(RaiseStatementImpl node) {
         isApplicable(node);
     }
 
     @Since(Version.TEIID_8_0)
-    public void visit(ReturnStatement node) {
+    public void visit(ExceptionExpressionImpl node) {
         isApplicable(node);
     }
 
-    public void visit(WhileStatement node) {
+    public void visit(StatementImpl node) {
         isApplicable(node);
     }
 
-    public void visit(LoopStatement node) {
-        isApplicable(node);
-    }
-
-    public void visit(IfStatement node) {
-        isApplicable(node);
-    }
-
-    public void visit(DeclareStatement node) {
-        isApplicable(node);
-    }
-
-    public void visit(CommandStatement node) {
+    public void visit(BranchingStatementImpl node) {
         isApplicable(node);
     }
 
     @Since(Version.TEIID_8_0)
-    public void visit(CreateProcedureCommand node) {
+    public void visit(ReturnStatementImpl node) {
         isApplicable(node);
     }
 
-    public void visit(DynamicCommand node) {
+    public void visit(WhileStatementImpl node) {
         isApplicable(node);
     }
 
-    public void visit(SetClauseList node) {
+    public void visit(LoopStatementImpl node) {
         isApplicable(node);
     }
 
-    public void visit(SetClause node) {
+    public void visit(IfStatementImpl node) {
         isApplicable(node);
     }
 
-    public void visit(ProjectedColumn node) {
+    public void visit(DeclareStatementImpl node) {
         isApplicable(node);
     }
 
-    public void visit(StoredProcedure node) {
-        isApplicable(node);
-    }
-
-    public void visit(Insert node) {
-        isApplicable(node);
-    }
-
-    public void visit(Update node) {
-        isApplicable(node);
-    }
-
-    public void visit(Delete node) {
-        isApplicable(node);
-    }
-
-    public void visit(QueryCommand node) {
-        isApplicable(node);
-    }
-
-    public void visit(WithQueryCommand node) {
-        isApplicable(node);
-    }
-
-    public void visit(SetQuery node) {
-        isApplicable(node);
-    }
-
-    public void visit(Query node) {
-        isApplicable(node);
-    }
-
-    public void visit(Into node) {
-        isApplicable(node);
-    }
-
-    public void visit(Select node) {
-        isApplicable(node);
-    }
-
-    public void visit(ExpressionSymbol node) {
-        isApplicable(node);
-    }
-
-    public void visit(DerivedColumn node) {
-        isApplicable(node);
-    }
-
-    public void visit(MultipleElementSymbol node) {
-        isApplicable(node);
-    }
-
-    public void visit(From node) {
-        isApplicable(node);
-    }
-
-    public void visit(FromClause node) {
-        isApplicable(node);
-    }
-
-    public void visit(JoinPredicate node) {
-        isApplicable(node);
-    }
-
-    public void visit(JoinType node) {
-        isApplicable(node);
-    }
-
-    public void visit(XMLSerialize node) {
-        isApplicable(node);
-    }
-
-    public void visit(ArrayTable node) {
-        isApplicable(node);
-    }
-
-    public void visit(TextTable node) {
-        isApplicable(node);
-    }
-
-    public void visit(TextColumn node) {
-        isApplicable(node);
-    }
-
-    public void visit(XMLQuery node) {
+    public void visit(CommandStatementImpl node) {
         isApplicable(node);
     }
 
     @Since(Version.TEIID_8_0)
-    public void visit(ObjectTable node) {
+    public void visit(CreateProcedureCommandImpl node) {
         isApplicable(node);
     }
 
-    public void visit(ObjectColumn node) {
+    public void visit(DynamicCommandImpl node) {
         isApplicable(node);
     }
 
-    public void visit(XMLTable node) {
+    public void visit(SetClauseListImpl node) {
         isApplicable(node);
     }
 
-    public void visit(XMLColumn node) {
+    public void visit(SetClauseImpl node) {
         isApplicable(node);
     }
 
-    public void visit(SubqueryFromClause node) {
+    public void visit(ProjectedColumnImpl node) {
         isApplicable(node);
     }
 
-    public void visit(UnaryFromClause node) {
+    public void visit(StoredProcedureImpl node) {
         isApplicable(node);
     }
 
-    public void visit(Criteria node) {
+    public void visit(InsertImpl node) {
         isApplicable(node);
     }
 
-    public void visit(CompoundCriteria node) {
+    public void visit(UpdateImpl node) {
         isApplicable(node);
     }
 
-    public void visit(NotCriteria node) {
+    public void visit(DeleteImpl node) {
         isApplicable(node);
     }
 
-    public void visit(CompareCriteria node) {
+    public void visit(QueryCommandImpl node) {
         isApplicable(node);
     }
 
-    public void visit(SubqueryCompareCriteria node) {
+    public void visit(WithQueryCommandImpl node) {
         isApplicable(node);
     }
 
-    public void visit(MatchCriteria node) {
+    public void visit(SetQueryImpl node) {
         isApplicable(node);
     }
 
-    public void visit(BetweenCriteria node) {
+    public void visit(QueryImpl node) {
         isApplicable(node);
     }
 
-    public void visit(IsNullCriteria node) {
+    public void visit(IntoImpl node) {
         isApplicable(node);
     }
 
-    public void visit(SubquerySetCriteria node) {
+    public void visit(SelectImpl node) {
         isApplicable(node);
     }
 
-    public void visit(SetCriteria node) {
+    public void visit(ExpressionSymbolImpl node) {
         isApplicable(node);
     }
 
-    public void visit(ExistsCriteria node) {
+    public void visit(DerivedColumnImpl node) {
         isApplicable(node);
     }
 
-    public void visit(GroupBy node) {
+    public void visit(MultipleElementSymbolImpl node) {
         isApplicable(node);
     }
 
-    public void visit(OrderBy node) {
+    public void visit(FromImpl node) {
         isApplicable(node);
     }
 
-    public void visit(OrderByItem node) {
+    public void visit(FromClauseImpl node) {
         isApplicable(node);
     }
 
-    public void visit(Limit node) {
+    public void visit(JoinPredicateImpl node) {
         isApplicable(node);
     }
 
-    public void visit(Option node) {
+    public void visit(JoinTypeImpl node) {
         isApplicable(node);
     }
 
-    public void visit(Reference node) {
+    public void visit(XMLSerializeImpl node) {
         isApplicable(node);
     }
 
-    public void visit(CaseExpression node) {
+    public void visit(ArrayTableImpl node) {
         isApplicable(node);
     }
 
-    public void visit(SearchedCaseExpression node) {
+    public void visit(TextTableImpl node) {
         isApplicable(node);
     }
 
-    public void visit(Function node) {
+    public void visit(TextColumnImpl node) {
         isApplicable(node);
     }
 
-    public void visit(XMLParse node) {
-        isApplicable(node);
-    }
-
-    public void visit(QueryString node) {
-        isApplicable(node);
-    }
-
-    public void visit(XMLElement node) {
-        isApplicable(node);
-    }
-
-    public void visit(XMLAttributes node) {
+    public void visit(XMLQueryImpl node) {
         isApplicable(node);
     }
 
     @Since(Version.TEIID_8_0)
-    public void visit(JSONObject node) {
+    public void visit(ObjectTableImpl node) {
         isApplicable(node);
     }
 
-    public void visit(XMLForest node) {
+    public void visit(ObjectColumnImpl node) {
         isApplicable(node);
     }
 
-    public void visit(XMLNamespaces node) {
+    public void visit(XMLTableImpl node) {
         isApplicable(node);
     }
 
-    public void visit(AssignmentStatement node) {
+    public void visit(XMLColumnImpl node) {
         isApplicable(node);
     }
 
-    public void visit(ScalarSubquery node) {
+    public void visit(SubqueryFromClauseImpl node) {
         isApplicable(node);
     }
 
-    public void visit(GroupSymbol node) {
+    public void visit(UnaryFromClauseImpl node) {
         isApplicable(node);
     }
 
-    public void visit(Constant node) {
+    public void visit(CriteriaImpl node) {
         isApplicable(node);
     }
 
-    public void visit(ElementSymbol node) {
+    public void visit(CompoundCriteriaImpl node) {
         isApplicable(node);
     }
 
-    public void visit(Block node) {
+    public void visit(NotCriteriaImpl node) {
         isApplicable(node);
     }
 
-    public void visit(ExpressionCriteria node) {
+    public void visit(CompareCriteriaImpl node) {
         isApplicable(node);
     }
 
-    public void visit(AliasSymbol node) {
+    public void visit(SubqueryCompareCriteriaImpl node) {
         isApplicable(node);
     }
 
-    public void visit(AggregateSymbol node) {
+    public void visit(MatchCriteriaImpl node) {
         isApplicable(node);
     }
 
-    public void visit(WindowFunction node) {
+    public void visit(BetweenCriteriaImpl node) {
         isApplicable(node);
     }
 
-    public void visit(WindowSpecification node) {
+    public void visit(IsNullCriteriaImpl node) {
         isApplicable(node);
     }
 
-    public void visit(TextLine node) {
+    public void visit(SubquerySetCriteriaImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(SetCriteriaImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(ExistsCriteriaImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(GroupByImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(OrderByImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(OrderByItemImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(LimitImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(OptionImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(ReferenceImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(CaseExpressionImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(SearchedCaseExpressionImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(FunctionImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(XMLParseImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(QueryStringImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(XMLElementImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(XMLAttributesImpl node) {
         isApplicable(node);
     }
 
     @Since(Version.TEIID_8_0)
-    public void visit(Array node) {
+    public void visit(JSONObjectImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(XMLForestImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(XMLNamespacesImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(AssignmentStatementImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(ScalarSubqueryImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(GroupSymbolImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(ConstantImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(ElementSymbolImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(BlockImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(ExpressionCriteriaImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(AliasSymbolImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(AggregateSymbolImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(WindowFunctionImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(WindowSpecificationImpl node) {
+        isApplicable(node);
+    }
+
+    public void visit(TextLineImpl node) {
+        isApplicable(node);
+    }
+
+    @Since(Version.TEIID_8_0)
+    public void visit(ArraySymbolImpl node) {
         isApplicable(node);
     }
 
     // Visitor methods for language objects
     @Override
-    public void visit(IBetweenCriteria obj) {
-        visit((BetweenCriteria) obj);
+    public void visit(BetweenCriteria obj) {
+        visit((BetweenCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(ICaseExpression obj) {
-        visit((CaseExpression) obj);
+    public void visit(CaseExpression obj) {
+        visit((CaseExpressionImpl) obj);
     }
 
     @Override
-    public void visit(ICompareCriteria obj) {
-        visit((CompareCriteria) obj);
+    public void visit(CompareCriteria obj) {
+        visit((CompareCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(ICompoundCriteria obj) {
-        visit((CompoundCriteria) obj);
+    public void visit(CompoundCriteria obj) {
+        visit((CompoundCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(IDelete obj) {
-        visit((Delete) obj);
+    public void visit(Delete obj) {
+        visit((DeleteImpl) obj);
     }
 
     @Override
-    public void visit(IExistsCriteria obj) {
-        visit((ExistsCriteria) obj);
+    public void visit(ExistsCriteria obj) {
+        visit((ExistsCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(IFrom obj) {
-        visit((From) obj);
+    public void visit(From obj) {
+        visit((FromImpl) obj);
     }
 
     @Override
-    public void visit(IGroupBy obj) {
-        visit((GroupBy) obj);
+    public void visit(GroupBy obj) {
+        visit((GroupByImpl) obj);
     }
 
     @Override
-    public void visit(IInsert obj) {
-        visit((Insert) obj);
+    public void visit(Insert obj) {
+        visit((InsertImpl) obj);
     }
 
     @Override
-    public void visit(IIsNullCriteria obj) {
-        visit((IsNullCriteria) obj);
+    public void visit(IsNullCriteria obj) {
+        visit((IsNullCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(IJoinPredicate obj) {
-        visit((JoinPredicate) obj);
+    public void visit(JoinPredicate obj) {
+        visit((JoinPredicateImpl) obj);
     }
 
     @Override
-    public void visit(IJoinType obj) {
-        visit((JoinType) obj);
+    public void visit(JoinType obj) {
+        visit((JoinTypeImpl) obj);
     }
 
     @Override
-    public void visit(ILimit obj) {
-        visit((Limit) obj);
+    public void visit(Limit obj) {
+        visit((LimitImpl) obj);
     }
 
     @Override
-    public void visit(IMatchCriteria obj) {
-        visit((MatchCriteria) obj);
+    public void visit(MatchCriteria obj) {
+        visit((MatchCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(INotCriteria obj) {
-        visit((NotCriteria) obj);
+    public void visit(NotCriteria obj) {
+        visit((NotCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(IOption obj) {
-        visit((Option) obj);
+    public void visit(Option obj) {
+        visit((OptionImpl) obj);
     }
 
     @Override
-    public void visit(IOrderBy obj) {
-        visit((OrderBy) obj);
+    public void visit(OrderBy obj) {
+        visit((OrderByImpl) obj);
     }
 
     @Override
-    public void visit(IQuery obj) {
-        visit((Query) obj);
+    public void visit(Query obj) {
+        visit((QueryImpl) obj);
     }
 
     @Override
-    public void visit(ISearchedCaseExpression obj) {
-        visit((SearchedCaseExpression) obj);
+    public void visit(SearchedCaseExpression obj) {
+        visit((SearchedCaseExpressionImpl) obj);
     }
 
     @Override
-    public void visit(ISelect obj) {
-        visit((Select) obj);
+    public void visit(Select obj) {
+        visit((SelectImpl) obj);
     }
 
     @Override
-    public void visit(ISetCriteria obj) {
-        visit((SetCriteria) obj);
+    public void visit(SetCriteria obj) {
+        visit((SetCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(ISetQuery obj) {
-        visit((SetQuery) obj);
+    public void visit(SetQuery obj) {
+        visit((SetQueryImpl) obj);
     }
 
     @Override
-    public void visit(IStoredProcedure obj) {
-        visit((StoredProcedure) obj);
+    public void visit(StoredProcedure obj) {
+        visit((StoredProcedureImpl) obj);
     }
 
     @Override
-    public void visit(ISubqueryCompareCriteria obj) {
-        visit((SubqueryCompareCriteria) obj);
+    public void visit(SubqueryCompareCriteria obj) {
+        visit((SubqueryCompareCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(ISubqueryFromClause obj) {
-        visit((SubqueryFromClause) obj);
+    public void visit(SubqueryFromClause obj) {
+        visit((SubqueryFromClauseImpl) obj);
     }
 
     @Override
-    public void visit(ISubquerySetCriteria obj) {
-        visit((SubquerySetCriteria) obj);
+    public void visit(SubquerySetCriteria obj) {
+        visit((SubquerySetCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(IUnaryFromClause obj) {
-        visit((UnaryFromClause) obj);
+    public void visit(UnaryFromClause obj) {
+        visit((UnaryFromClauseImpl) obj);
     }
 
     @Override
-    public void visit(IUpdate obj) {
-        visit((Update) obj);
+    public void visit(Update obj) {
+        visit((UpdateImpl) obj);
     }
 
     @Override
-    public void visit(IInto obj) {
-        visit((Into) obj);
+    public void visit(Into obj) {
+        visit((IntoImpl) obj);
     }
 
     @Override
-    public void visit(ICreate obj) {
+    public void visit(Create obj) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void visit(IDrop obj) {
+    public void visit(Drop obj) {
         throw new UnsupportedOperationException();
     }
 
     // Visitor methods for symbol objects
     @Override
-    public void visit(IAggregateSymbol obj) {
-        visit((AggregateSymbol) obj);
+    public void visit(AggregateSymbol obj) {
+        visit((AggregateSymbolImpl) obj);
     }
 
     @Override
-    public void visit(IAliasSymbol obj) {
-        visit((AliasSymbol) obj);
+    public void visit(AliasSymbol obj) {
+        visit((AliasSymbolImpl) obj);
     }
 
     @Override
-    public void visit(IMultipleElementSymbol obj) {
-        visit((MultipleElementSymbol) obj);
+    public void visit(MultipleElementSymbol obj) {
+        visit((MultipleElementSymbolImpl) obj);
     }
 
     @Override
-    public void visit(IConstant obj) {
-        visit((Constant) obj);
+    public void visit(Constant obj) {
+        visit((ConstantImpl) obj);
     }
 
     @Override
-    public void visit(IElementSymbol obj) {
-        visit((ElementSymbol) obj);
+    public void visit(ElementSymbol obj) {
+        visit((ElementSymbolImpl) obj);
     }
 
     @Override
-    public void visit(IExpressionSymbol obj) {
-        visit((ExpressionSymbol) obj);
+    public void visit(ExpressionSymbol obj) {
+        visit((ExpressionSymbolImpl) obj);
     }
 
     @Override
-    public void visit(IFunction obj) {
-        visit((Function) obj);
+    public void visit(Function obj) {
+        visit((FunctionImpl) obj);
     }
 
     @Override
-    public void visit(IGroupSymbol obj) {
-        visit((GroupSymbol) obj);
+    public void visit(GroupSymbol obj) {
+        visit((GroupSymbolImpl) obj);
     }
 
     @Override
-    public void visit(IReference obj) {
-        visit((Reference) obj);
+    public void visit(Reference obj) {
+        visit((ReferenceImpl) obj);
     }
 
     @Override
-    public void visit(IScalarSubquery obj) {
-        visit((ScalarSubquery) obj);
+    public void visit(ScalarSubquery obj) {
+        visit((ScalarSubqueryImpl) obj);
     }
 
     // Visitor methods for procedure language objects    
     @Override
-    public void visit(IAssignmentStatement obj) {
+    public void visit(AssignmentStatement obj) {
+        visit((AssignmentStatementImpl) obj);
+    }
+
+    @Override
+    public void visit(Block obj) {
+        visit((BlockImpl) obj);
+    }
+
+    @Override
+    public void visit(CommandStatement obj) {
+        visit((CommandStatementImpl) obj);
+    }
+
+    @Override
+    public void visit(CreateProcedureCommand obj) {
+        visit((CreateProcedureCommandImpl) obj);
+    }
+
+    @Override
+    public void visit(CriteriaSelector obj) {
+        throw new UnsupportedOperationException(Messages.getString(Messages.TeiidParser.teiid_version_failure));
+    }
+
+    @Override
+    public void visit(DeclareStatement obj) {
         visit((AssignmentStatement) obj);
     }
 
     @Override
-    public void visit(IBlock obj) {
-        visit((Block) obj);
-    }
-
-    @Override
-    public void visit(ICommandStatement obj) {
-        visit((CommandStatement) obj);
-    }
-
-    @Override
-    public void visit(ICreateProcedureCommand obj) {
-        visit((CreateProcedureCommand) obj);
-    }
-
-    @Override
-    public void visit(ICriteriaSelector obj) {
+    public void visit(HasCriteria obj) {
         throw new UnsupportedOperationException(Messages.getString(Messages.TeiidParser.teiid_version_failure));
     }
 
     @Override
-    public void visit(IDeclareStatement obj) {
-        visit((IAssignmentStatement) obj);
+    public void visit(IfStatement obj) {
+        visit((IfStatementImpl) obj);
     }
 
     @Override
-    public void visit(IHasCriteria obj) {
+    public void visit(RaiseStatement obj) {
+        visit((RaiseStatementImpl) obj);
+    }
+
+    @Override
+    public void visit(BranchingStatement obj) {
+        visit((BranchingStatementImpl) obj);
+    }
+
+    @Override
+    public void visit(TranslateCriteria obj) {
         throw new UnsupportedOperationException(Messages.getString(Messages.TeiidParser.teiid_version_failure));
     }
 
     @Override
-    public void visit(IIfStatement obj) {
-        visit((IfStatement) obj);
+    public void visit(WhileStatement obj) {
+        visit((WhileStatementImpl) obj);
     }
 
     @Override
-    public void visit(IRaiseStatement obj) {
-        visit((RaiseStatement) obj);
+    public void visit(LoopStatement obj) {
+        visit((LoopStatementImpl) obj);
     }
 
     @Override
-    public void visit(IBranchingStatement obj) {
-        visit((BranchingStatement) obj);
+    public void visit(DynamicCommand obj) {
+        visit((DynamicCommandImpl) obj);
     }
 
     @Override
-    public void visit(ITranslateCriteria obj) {
-        throw new UnsupportedOperationException(Messages.getString(Messages.TeiidParser.teiid_version_failure));
+    public void visit(SetClauseList obj) {
+        visit((SetClauseListImpl) obj);
     }
 
     @Override
-    public void visit(IWhileStatement obj) {
-        visit((WhileStatement) obj);
+    public void visit(SetClause obj) {
+        visit((SetClauseImpl) obj);
     }
 
     @Override
-    public void visit(ILoopStatement obj) {
-        visit((LoopStatement) obj);
+    public void visit(OrderByItem obj) {
+        visit((OrderByItemImpl) obj);
     }
 
     @Override
-    public void visit(IDynamicCommand obj) {
-        visit((DynamicCommand) obj);
+    public void visit(XMLElement obj) {
+        visit((XMLElementImpl) obj);
     }
 
     @Override
-    public void visit(ISetClauseList obj) {
-        visit((SetClauseList) obj);
+    public void visit(XMLAttributes obj) {
+        visit((XMLAttributesImpl) obj);
     }
 
     @Override
-    public void visit(ISetClause obj) {
-        visit((SetClause) obj);
+    public void visit(XMLForest obj) {
+        visit((XMLForestImpl) obj);
     }
 
     @Override
-    public void visit(IOrderByItem obj) {
-        visit((OrderByItem) obj);
+    public void visit(XMLNamespaces obj) {
+        visit((XMLNamespacesImpl) obj);
     }
 
     @Override
-    public void visit(IXMLElement obj) {
-        visit((XMLElement) obj);
+    public void visit(TextTable obj) {
+        visit((TextTableImpl) obj);
     }
 
     @Override
-    public void visit(IXMLAttributes obj) {
-        visit((XMLAttributes) obj);
+    public void visit(TextLine obj) {
+        visit((TextLineImpl) obj);
     }
 
     @Override
-    public void visit(IXMLForest obj) {
-        visit((XMLForest) obj);
+    public void visit(XMLTable obj) {
+        visit((XMLTableImpl) obj);
     }
 
     @Override
-    public void visit(IXMLNamespaces obj) {
-        visit((XMLNamespaces) obj);
+    public void visit(DerivedColumn obj) {
+        visit((DerivedColumnImpl) obj);
     }
 
     @Override
-    public void visit(ITextTable obj) {
-        visit((TextTable) obj);
+    public void visit(XMLSerialize obj) {
+        visit((XMLSerializeImpl) obj);
     }
 
     @Override
-    public void visit(ITextLine obj) {
-        visit((TextLine) obj);
+    public void visit(XMLQuery obj) {
+        visit((XMLQueryImpl) obj);
     }
 
     @Override
-    public void visit(IXMLTable obj) {
-        visit((XMLTable) obj);
+    public void visit(QueryString obj) {
+        visit((QueryStringImpl) obj);
     }
 
     @Override
-    public void visit(IDerivedColumn obj) {
-        visit((DerivedColumn) obj);
+    public void visit(XMLParse obj) {
+        visit((XMLParseImpl) obj);
     }
 
     @Override
-    public void visit(IXMLSerialize obj) {
-        visit((XMLSerialize) obj);
+    public void visit(ExpressionCriteria obj) {
+        visit((ExpressionCriteriaImpl) obj);
     }
 
     @Override
-    public void visit(IXMLQuery obj) {
-        visit((XMLQuery) obj);
+    public void visit(WithQueryCommand obj) {
+        visit((WithQueryCommandImpl) obj);
     }
 
     @Override
-    public void visit(IQueryString obj) {
-        visit((QueryString) obj);
+    public void visit(TriggerAction obj) {
+        visit((TriggerActionImpl) obj);
     }
 
     @Override
-    public void visit(IXMLParse obj) {
-        visit((XMLParse) obj);
+    public void visit(ObjectTable obj) {
+        visit((ObjectTableImpl) obj);
     }
 
     @Override
-    public void visit(IExpressionCriteria obj) {
-        visit((ExpressionCriteria) obj);
+    public void visit(ArrayTable obj) {
+        visit((ArrayTableImpl) obj);
     }
 
     @Override
-    public void visit(IWithQueryCommand obj) {
-        visit((WithQueryCommand) obj);
+    public void visit(AlterView obj) {
+        visit((AlterViewImpl) obj);
     }
 
     @Override
-    public void visit(ITriggerAction obj) {
-        visit((TriggerAction) obj);
+    public void visit(AlterProcedure obj) {
+        visit((AlterProcedureImpl) obj);
     }
 
     @Override
-    public void visit(IObjectTable obj) {
-        visit((ObjectTable) obj);
+    public void visit(AlterTrigger obj) {
+        visit((AlterTriggerImpl) obj);
     }
 
     @Override
-    public void visit(IArrayTable obj) {
-        visit((ArrayTable) obj);
+    public void visit(WindowFunction obj) {
+        visit((WindowFunctionImpl) obj);
     }
 
     @Override
-    public void visit(IAlterView obj) {
-        visit((AlterView) obj);
+    public void visit(WindowSpecification obj) {
+        visit((WindowSpecificationImpl) obj);
     }
 
     @Override
-    public void visit(IAlterProcedure obj) {
-        visit((AlterProcedure) obj);
+    public void visit(ExceptionExpression obj) {
+        visit((ExceptionExpressionImpl) obj);
     }
 
     @Override
-    public void visit(IAlterTrigger obj) {
-        visit((AlterTrigger) obj);
+    public void visit(ReturnStatement obj) {
+        visit((ReturnStatementImpl) obj);
     }
 
     @Override
-    public void visit(IWindowFunction obj) {
-        visit((WindowFunction) obj);
-    }
-
-    @Override
-    public void visit(IWindowSpecification obj) {
-        visit((WindowSpecification) obj);
-    }
-
-    @Override
-    public void visit(IExceptionExpression obj) {
-        visit((ExceptionExpression) obj);
-    }
-
-    @Override
-    public void visit(IReturnStatement obj) {
-        visit((ReturnStatement) obj);
-    }
-
-    @Override
-    public void visit(IArray obj) {
-        visit((Array) obj);
+    public void visit(Array obj) {
+        visit((ArraySymbolImpl) obj);
     }
 }

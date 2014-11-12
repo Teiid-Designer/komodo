@@ -23,13 +23,13 @@ package org.komodo.spi.query.sql;
 
 import java.util.Collection;
 
-import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.symbol.IFunction;
+import org.komodo.spi.query.sql.lang.LanguageObject;
+import org.komodo.spi.query.sql.symbol.Function;
 
 /**
  *
  */
-public interface FunctionCollectorVisitor<LO extends ILanguageObject, F extends IFunction> {
+public interface FunctionCollectorVisitor<LO extends LanguageObject, F extends Function> {
 
     /**
      * Get the functions from the given language object

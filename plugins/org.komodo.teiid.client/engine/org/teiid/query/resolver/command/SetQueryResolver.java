@@ -32,12 +32,12 @@ import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.CommandResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.OrderBy;
-import org.teiid.query.sql.lang.OrderByItem;
-import org.teiid.query.sql.lang.QueryCommand;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.OrderByImpl;
+import org.teiid.query.sql.lang.OrderByItemImpl;
+import org.teiid.query.sql.lang.QueryCommandImpl;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
 import org.teiid.runtime.client.Messages;
 
 
@@ -51,28 +51,28 @@ public class SetQueryResolver extends CommandResolver {
     }
 
     /**
-     * @see org.teiid.query.resolver.CommandResolver#resolveCommand(org.teiid.query.sql.lang.Command, TempMetadataAdapter, boolean)
+     * @see org.teiid.query.resolver.CommandResolver#resolveCommand(org.teiid.query.sql.lang.CommandImpl, TempMetadataAdapter, boolean)
      */
-    public void resolveCommand(Command command, TempMetadataAdapter metadata, boolean resolveNullLiterals)
+    public void resolveCommand(CommandImpl command, TempMetadataAdapter metadata, boolean resolveNullLiterals)
         throws Exception {
 
-        SetQuery setQuery = (SetQuery) command;
+        SetQueryImpl setQuery = (SetQueryImpl) command;
         
         SimpleQueryResolver simpleQueryResolver = new SimpleQueryResolver(getQueryResolver());
         simpleQueryResolver.resolveWith(metadata, setQuery);
 
-        QueryCommand firstCommand = setQuery.getLeftQuery();
+        QueryCommandImpl firstCommand = setQuery.getLeftQuery();
         
         getQueryResolver().setChildMetadata(firstCommand, setQuery);
         getQueryResolver().resolveCommand(firstCommand, metadata.getMetadata(), false);
 
-        List<Expression> firstProject = firstCommand.getProjectedSymbols();
+        List<BaseExpression> firstProject = firstCommand.getProjectedSymbols();
         List<Class<?>> firstProjectTypes = new ArrayList<Class<?>>();
-        for (Expression symbol : firstProject) {
+        for (BaseExpression symbol : firstProject) {
             firstProjectTypes.add(symbol.getType());
         }
 
-        QueryCommand rightCommand = setQuery.getRightQuery();
+        QueryCommandImpl rightCommand = setQuery.getRightQuery();
         
         getQueryResolver().setChildMetadata(rightCommand, setQuery);
         getQueryResolver().resolveCommand(rightCommand, metadata.getMetadata(), false);
@@ -109,17 +109,17 @@ public class SetQueryResolver extends CommandResolver {
         setQuery.setTemporaryMetadata(firstCommand.getTemporaryMetadata().clone());
     }
 
-    private void setProjectedTypes(SetQuery setQuery,
+    private void setProjectedTypes(SetQueryImpl setQuery,
                                    List<Class<?>> firstProjectTypes, QueryMetadataInterface metadata) throws Exception {
-        for (QueryCommand subCommand : setQuery.getQueryCommands()) {
-            if (!(subCommand instanceof SetQuery)) {
+        for (QueryCommandImpl subCommand : setQuery.getQueryCommands()) {
+            if (!(subCommand instanceof SetQueryImpl)) {
                 continue;
             }
-            SetQuery child = (SetQuery)subCommand;
+            SetQueryImpl child = (SetQueryImpl)subCommand;
             List projectedSymbols = child.getProjectedSymbols();
             if (child.getOrderBy() != null) {
                 for (int j = 0; j < projectedSymbols.size(); j++) {
-                    Expression ses = (Expression)projectedSymbols.get(j);
+                    BaseExpression ses = (BaseExpression)projectedSymbols.get(j);
                     Class<?> targetType = firstProjectTypes.get(j);
                     if (ses.getType() != targetType && orderByContainsVariable(child.getOrderBy(), ses, j)) {
                         DefaultDataTypeManager dataTypeManager = getDataTypeManager();
@@ -140,8 +140,8 @@ public class SetQueryResolver extends CommandResolver {
      * @param position 0-based index of the variable
      * @return True if the ORDER BY contains the element
      */
-    public static boolean orderByContainsVariable(OrderBy orderBy, Expression ses, int position) {
-    	for (OrderByItem item : orderBy.getOrderByItems()) {
+    public static boolean orderByContainsVariable(OrderByImpl orderBy, BaseExpression ses, int position) {
+    	for (OrderByItemImpl item : orderBy.getOrderByItems()) {
 			if (item.getExpressionPosition() == position) {
 				return true;
 			}
@@ -152,7 +152,7 @@ public class SetQueryResolver extends CommandResolver {
 	private void checkSymbolTypes(List firstProjectTypes, List projSymbols) {
         for(int j=0; j<projSymbols.size(); j++){
             Class firstProjType = (Class)firstProjectTypes.get(j);
-    		Expression projSymbol = (Expression)projSymbols.get(j);
+    		BaseExpression projSymbol = (BaseExpression)projSymbols.get(j);
             Class projType = projSymbol.getType();
             
             if(firstProjType.equals(projType)){

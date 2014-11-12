@@ -29,8 +29,8 @@ import org.komodo.spi.query.QueryFactory;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 
 
 /** 
@@ -128,14 +128,14 @@ public class MappingSourceNodeImpl extends MappingBaseNodeImpl {
     public void updateSymbolMapDependentValues() {
         // based on the symbol map modify the getalias name
         if (getAliasResultName() != null) {
-            GroupSymbol groupSymbol = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
+            GroupSymbolImpl groupSymbol = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
             groupSymbol.setName(getActualResultSetName());
 
-            GroupSymbol newGroup = getMappedSymbol(groupSymbol);
+            GroupSymbolImpl newGroup = getMappedSymbol(groupSymbol);
             setAliasResultName(newGroup.getName());
         }
         
-        ElementSymbol mappingClassSymbol = this.getResultSetInfo().getMappingClassSymbol();
+        ElementSymbolImpl mappingClassSymbol = this.getResultSetInfo().getMappingClassSymbol();
         
         if (mappingClassSymbol != null) {
             this.getResultSetInfo().setMappingClassSymbol(getMappedSymbol(mappingClassSymbol));
@@ -143,10 +143,10 @@ public class MappingSourceNodeImpl extends MappingBaseNodeImpl {
     }
     
     public String getActualResultSetName() {
-        GroupSymbol groupSymbol = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
+        GroupSymbolImpl groupSymbol = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
         groupSymbol.setName(getResultName());
 
-        GroupSymbol group = getMappedSymbol(groupSymbol);
+        GroupSymbolImpl group = getMappedSymbol(groupSymbol);
         return group.getName();
     }
     
@@ -161,8 +161,8 @@ public class MappingSourceNodeImpl extends MappingBaseNodeImpl {
         return map;
     }
     
-    public ElementSymbol getMappedSymbol(ElementSymbol symbol) {
-        ElementSymbol mappedSymbol = (ElementSymbol)symbolMap.get(symbol);
+    public ElementSymbolImpl getMappedSymbol(ElementSymbolImpl symbol) {
+        ElementSymbolImpl mappedSymbol = (ElementSymbolImpl)symbolMap.get(symbol);
         if (mappedSymbol == null) {
             ArgCheck.isTrue(symbol.getGroupSymbol() == null || !symbolMap.containsKey(symbol.getGroupSymbol()), "invalid symbol " + symbol); //$NON-NLS-1$
 
@@ -179,8 +179,8 @@ public class MappingSourceNodeImpl extends MappingBaseNodeImpl {
         return mappedSymbol;
     }
 
-    public GroupSymbol getMappedSymbol(GroupSymbol symbol) {
-        GroupSymbol mappedSymbol = (GroupSymbol)symbolMap.get(symbol);
+    public GroupSymbolImpl getMappedSymbol(GroupSymbolImpl symbol) {
+        GroupSymbolImpl mappedSymbol = (GroupSymbolImpl)symbolMap.get(symbol);
         if (mappedSymbol == null) {
             MappingSourceNodeImpl parentSourceNode = getParentSourceNode();
             if (parentSourceNode != null) {

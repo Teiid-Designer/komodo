@@ -27,26 +27,26 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.komodo.spi.query.sql.GroupsUsedByElementsVisitor;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 
 
 /**
  * groups used by elements visitor
  */
 public class GroupsUsedByElementsVisitorImpl
-    implements GroupsUsedByElementsVisitor<LanguageObject, GroupSymbol> {
+    implements GroupsUsedByElementsVisitor<BaseLanguageObject, GroupSymbolImpl> {
 
     /**
      * Helper to quickly get the groups from obj in the elements collection
      * @param obj Language object
      * @param groups Collection to collect groups in
      */
-    public static final void getGroups(LanguageObject obj, Collection<GroupSymbol> groups) {
-        Collection<ElementSymbol> elements = ElementCollectorVisitorImpl.getElements(obj, true);
+    public static final void getGroups(BaseLanguageObject obj, Collection<GroupSymbolImpl> groups) {
+        Collection<ElementSymbolImpl> elements = ElementCollectorVisitorImpl.getElements(obj, true);
 
-        for (ElementSymbol elementSymbol : elements) {
+        for (ElementSymbolImpl elementSymbol : elements) {
         	if (elementSymbol.getGroupSymbol() != null) {
         		groups.add(elementSymbol.getGroupSymbol());  
         	}
@@ -57,10 +57,10 @@ public class GroupsUsedByElementsVisitorImpl
      * Helper to quickly get the groups from obj in a collection.  Duplicates
      * are removed.
      * @param obj Language object
-     * @return Collection of {@link org.teiid.query.sql.symbol.GroupSymbol}
+     * @return Collection of {@link org.teiid.query.sql.symbol.GroupSymbolImpl}
      */
-    public static final Set<GroupSymbol> getGroups(LanguageObject obj) {
-        Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+    public static final Set<GroupSymbolImpl> getGroups(BaseLanguageObject obj) {
+        Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
         getGroups(obj, groups);
         return groups;
     }
@@ -69,8 +69,8 @@ public class GroupsUsedByElementsVisitorImpl
      * @param objects
      * @return set of group symbols
      */
-    public static Set<GroupSymbol> getGroups(Collection<? extends LanguageObject> objects) {
-        Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+    public static Set<GroupSymbolImpl> getGroups(Collection<? extends BaseLanguageObject> objects) {
+        Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
         getGroups(objects, groups);
         return groups;
     }
@@ -79,11 +79,11 @@ public class GroupsUsedByElementsVisitorImpl
      * @param objects
      * @param groups
      */
-    public static void getGroups(Collection<? extends LanguageObject> objects, Set<GroupSymbol> groups) {
+    public static void getGroups(Collection<? extends BaseLanguageObject> objects, Set<GroupSymbolImpl> groups) {
         // Get groups from elements     
-        for (LanguageObject languageObject : objects) {
-            if (languageObject instanceof ElementSymbol) {
-                ElementSymbol elem = (ElementSymbol) languageObject;
+        for (BaseLanguageObject languageObject : objects) {
+            if (languageObject instanceof ElementSymbolImpl) {
+                ElementSymbolImpl elem = (ElementSymbolImpl) languageObject;
                 groups.add(elem.getGroupSymbol());
             } else {
                 GroupsUsedByElementsVisitorImpl.getGroups(languageObject, groups);
@@ -95,11 +95,11 @@ public class GroupsUsedByElementsVisitorImpl
      * @param objects
      * @param groups
      */
-    public void findGroups(Collection<? extends LanguageObject> objects, Set<GroupSymbol> groups) {
+    public void findGroups(Collection<? extends BaseLanguageObject> objects, Set<GroupSymbolImpl> groups) {
         // Get groups from elements     
-        for (LanguageObject languageObject : objects) {
-            if (languageObject instanceof ElementSymbol) {
-                ElementSymbol elem = (ElementSymbol) languageObject;
+        for (BaseLanguageObject languageObject : objects) {
+            if (languageObject instanceof ElementSymbolImpl) {
+                ElementSymbolImpl elem = (ElementSymbolImpl) languageObject;
                 groups.add(elem.getGroupSymbol());
             } else {
                 GroupsUsedByElementsVisitorImpl.getGroups(languageObject, groups);
@@ -111,10 +111,10 @@ public class GroupsUsedByElementsVisitorImpl
      * @param obj
      * @param groups
      */
-    public void findGroups(LanguageObject obj, Collection<GroupSymbol> groups) {
-        Collection<ElementSymbol> elements = ElementCollectorVisitorImpl.getElements(obj, true);
+    public void findGroups(BaseLanguageObject obj, Collection<GroupSymbolImpl> groups) {
+        Collection<ElementSymbolImpl> elements = ElementCollectorVisitorImpl.getElements(obj, true);
 
-        for (ElementSymbol elementSymbol : elements) {
+        for (ElementSymbolImpl elementSymbol : elements) {
             if (elementSymbol.getGroupSymbol() != null) {
                 groups.add(elementSymbol.getGroupSymbol());  
             }
@@ -122,15 +122,15 @@ public class GroupsUsedByElementsVisitorImpl
     }
     
     @Override
-    public Set<GroupSymbol> findGroups(LanguageObject obj) {
-        Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+    public Set<GroupSymbolImpl> findGroups(BaseLanguageObject obj) {
+        Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
         findGroups(obj, groups);
         return groups;
     }
 
     @Override
-    public <T extends LanguageObject> Set<GroupSymbol> findGroups(Collection<T> objects) {
-        Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+    public <T extends BaseLanguageObject> Set<GroupSymbolImpl> findGroups(Collection<T> objects) {
+        Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
         findGroups(objects, groups);
         return groups;
     }

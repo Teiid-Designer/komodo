@@ -31,25 +31,25 @@ import java.util.Stack;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 
 
 public class AbstractValidationVisitor extends TCLanguageVisitorImpl {
     
     // Exception handling
     private Exception exception;
-    private LanguageObject exceptionObject;
+    private BaseLanguageObject exceptionObject;
         
     // Validation error handling
     protected ValidatorReport report;
     
     private QueryMetadataInterface metadata;
     
-    protected Command currentCommand;
-    protected Stack<LanguageObject> stack = new Stack<LanguageObject>();
+    protected CommandImpl currentCommand;
+    protected Stack<BaseLanguageObject> stack = new Stack<BaseLanguageObject>();
     
     /**
      * @param teiidVersion
@@ -82,7 +82,7 @@ public class AbstractValidationVisitor extends TCLanguageVisitorImpl {
         this.report.addItem(new ValidatorFailure(message));
     }
 
-    protected void handleValidationError(String message, LanguageObject invalidObj) {
+    protected void handleValidationError(String message, BaseLanguageObject invalidObj) {
         this.report.addItem(new ValidatorFailure(message, invalidObj));
     }
 
@@ -94,7 +94,7 @@ public class AbstractValidationVisitor extends TCLanguageVisitorImpl {
         handleException(e, null);
     }
 
-    protected void handleException(Exception e, LanguageObject obj) { 
+    protected void handleException(Exception e, BaseLanguageObject obj) { 
         // Store exception information
         this.exceptionObject = obj;
         this.exception = e;
@@ -109,7 +109,7 @@ public class AbstractValidationVisitor extends TCLanguageVisitorImpl {
         return this.exception;
     }
     
-    public LanguageObject getExceptionObject() { 
+    public BaseLanguageObject getExceptionObject() { 
         return this.exceptionObject;
     }
     
@@ -122,25 +122,25 @@ public class AbstractValidationVisitor extends TCLanguageVisitorImpl {
 	 * Check to verify if the query would return XML results.
      * @param query the query to check
 	 */
-	protected boolean isXMLCommand(Command command) {
-		if (command instanceof Query) {
-		    return ((Query)command).getIsXML();
+	protected boolean isXMLCommand(CommandImpl command) {
+		if (command instanceof QueryImpl) {
+		    return ((QueryImpl)command).getIsXML();
         }
         return false;
 	}   
 	
-    protected Collection<ElementSymbol> validateElementsSupport(Collection<ElementSymbol> elements, int supportsFlag) {
+    protected Collection<ElementSymbolImpl> validateElementsSupport(Collection<ElementSymbolImpl> elements, int supportsFlag) {
 	    // Collect any identifiers not supporting flag
-	    List<ElementSymbol> dontSupport = null;  
-        ElementSymbol symbol = null;              
+	    List<ElementSymbolImpl> dontSupport = null;  
+        ElementSymbolImpl symbol = null;              
 
         try {
-	        Iterator<ElementSymbol> elemIter = elements.iterator();
+	        Iterator<ElementSymbolImpl> elemIter = elements.iterator();
             while(elemIter.hasNext()) {
 		    symbol = elemIter.next();
                if(! getMetadata().elementSupports(symbol.getMetadataID(), supportsFlag)) {
                     if(dontSupport == null) { 
-                        dontSupport = new ArrayList<ElementSymbol>();
+                        dontSupport = new ArrayList<ElementSymbolImpl>();
                     } 
                     dontSupport.add(symbol);    
                 }            

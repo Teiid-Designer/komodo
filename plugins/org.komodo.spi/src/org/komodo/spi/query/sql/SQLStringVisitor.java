@@ -21,12 +21,12 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql;
 
-import org.komodo.spi.query.sql.lang.ILanguageObject;
+import org.komodo.spi.query.sql.lang.LanguageObject;
 
 /**
  *
  */
-public interface SQLStringVisitor<LO extends ILanguageObject> extends LanguageVisitor {
+public interface SQLStringVisitor<LO extends LanguageObject> extends LanguageVisitor {
 
     /**
      * Should the visitor fail to evaluate then this

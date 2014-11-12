@@ -43,10 +43,10 @@ import org.komodo.spi.query.sql.ResolverVisitor;
 import org.komodo.spi.query.sql.SQLStringVisitor;
 import org.komodo.spi.query.sql.SQLStringVisitorCallback;
 import org.komodo.spi.query.sql.ValueIteratorProviderCollectorVisitor;
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.query.sql.lang.IExpression;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
-import org.komodo.spi.query.sql.symbol.ISymbol;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.query.sql.lang.Expression;
+import org.komodo.spi.query.sql.symbol.GroupSymbol;
+import org.komodo.spi.query.sql.symbol.Symbol;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.udf.FunctionMethodDescriptor;
@@ -70,8 +70,8 @@ import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 import org.teiid.query.sql.visitor.CallbackSQLStringVisitor;
 import org.teiid.query.sql.visitor.CommandCollectorVisitorImpl;
 import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
@@ -102,7 +102,7 @@ public class TCQueryService implements QueryService {
     private SyntaxFactory factory;
 
     /**
-     * @param teiidVersion
+     * @param teiidVersion teiid version
      */
     public TCQueryService(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
@@ -209,9 +209,9 @@ public class TCQueryService implements QueryService {
     }
 
     @Override
-    public String getSymbolName(IExpression expression) {
-        if (expression instanceof ISymbol) {
-            return ((ISymbol)expression).getName();
+    public String getSymbolName(Expression expression) {
+        if (expression instanceof Symbol) {
+            return ((Symbol)expression).getName();
         }
 
         return "expr"; //$NON-NLS-1$
@@ -219,7 +219,7 @@ public class TCQueryService implements QueryService {
 
     @Override
     public String getSymbolShortName(String name) {
-        int index = name.lastIndexOf(ISymbol.SEPARATOR);
+        int index = name.lastIndexOf(Symbol.SEPARATOR);
         if (index >= 0) {
             return name.substring(index + 1);
         }
@@ -227,9 +227,9 @@ public class TCQueryService implements QueryService {
     }
 
     @Override
-    public String getSymbolShortName(IExpression expression) {
-        if (expression instanceof ISymbol) {
-            return ((ISymbol)expression).getShortName();
+    public String getSymbolShortName(Expression expression) {
+        if (expression instanceof Symbol) {
+            return ((Symbol)expression).getShortName();
         }
         return "expr"; //$NON-NLS-1$
     }
@@ -305,13 +305,13 @@ public class TCQueryService implements QueryService {
     }
 
     @Override
-    public void resolveGroup(IGroupSymbol groupSymbol, QueryMetadataInterface metadata) throws Exception {
-        ResolverUtil.resolveGroup((GroupSymbol)groupSymbol, metadata);
+    public void resolveGroup(GroupSymbol groupSymbol, QueryMetadataInterface metadata) throws Exception {
+        ResolverUtil.resolveGroup((GroupSymbolImpl)groupSymbol, metadata);
     }
 
     @Override
-    public void fullyQualifyElements(ICommand command) {
-        ResolverUtil.fullyQualifyElements((Command)command);
+    public void fullyQualifyElements(Command command) {
+        ResolverUtil.fullyQualifyElements((CommandImpl)command);
     }
 
     @Override

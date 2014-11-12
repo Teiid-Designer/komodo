@@ -40,7 +40,7 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinPredicate;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.MultipleElementSymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
-import org.komodo.spi.query.sql.lang.IJoinType;
+import org.komodo.spi.query.sql.lang.JoinType;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.modeshape.jcr.api.observation.Event;
 
@@ -240,7 +240,7 @@ public abstract class AbstractTestSequencers extends AbstractSequencerTest {
         verifyAliasSymbol(selectNode, Select.SYMBOLS_REF_NAME, 3, "amount", ElementSymbol.ID);
         fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
         Node fromClause = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(fromClause, IJoinType.Types.JOIN_INNER);
+        verifyJoin(fromClause, JoinType.Types.JOIN_INNER);
         criteriaNode = verify(fromClause, JoinPredicate.JOIN_CRITERIA_REF_NAME, CompareCriteria.ID);
         verifyElementSymbol(criteriaNode, CompareCriteria.RIGHT_EXPRESSION_REF_NAME, "o.customerid");
         verifyElementSymbol(criteriaNode, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, "c.id");

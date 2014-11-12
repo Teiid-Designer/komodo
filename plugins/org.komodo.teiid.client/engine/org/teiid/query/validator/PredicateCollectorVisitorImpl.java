@@ -28,17 +28,17 @@ import java.util.Collection;
 import org.komodo.spi.query.sql.PredicateCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
-import org.teiid.query.sql.lang.BetweenCriteria;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.lang.ExistsCriteria;
-import org.teiid.query.sql.lang.IsNullCriteria;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.MatchCriteria;
+import org.teiid.query.sql.lang.BetweenCriteriaImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
+import org.teiid.query.sql.lang.ExistsCriteriaImpl;
+import org.teiid.query.sql.lang.IsNullCriteriaImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.MatchCriteriaImpl;
 import org.teiid.query.sql.lang.PredicateCriteria;
-import org.teiid.query.sql.lang.SetCriteria;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
+import org.teiid.query.sql.lang.SetCriteriaImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
 
 
@@ -47,17 +47,17 @@ import org.teiid.query.sql.navigator.PreOrderNavigator;
  * A predicate criteria is of the following types: </p>
  *
  * <ul>
- * <li>{@link CompareCriteria} CompareCriteria</li>
- * <li>{@link MatchCriteria} MatchCriteria</li>
- * <li>{@link SetCriteria} SetCriteria</li>
- * <li>{@link SubquerySetCriteria} SubquerySetCriteria</li>
- * <li>{@link IsNullCriteria} IsNullCriteria</li>
+ * <li>{@link CompareCriteriaImpl} CompareCriteria</li>
+ * <li>{@link MatchCriteriaImpl} MatchCriteria</li>
+ * <li>{@link SetCriteriaImpl} SetCriteria</li>
+ * <li>{@link SubquerySetCriteriaImpl} SubquerySetCriteria</li>
+ * <li>{@link IsNullCriteriaImpl} IsNullCriteria</li>
  * </ul>
  */
 public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
-    implements PredicateCollectorVisitor<LanguageObject, Criteria> {
+    implements PredicateCollectorVisitor<BaseLanguageObject, CriteriaImpl> {
 
-    private Collection<Criteria> predicates;
+    private Collection<CriteriaImpl> predicates;
 
     /**
      * Construct a new visitor with the default collection type, which is a
@@ -66,7 +66,7 @@ public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
      */
     public PredicateCollectorVisitorImpl(TeiidVersion teiidVersion) {
         super(teiidVersion);
-        this.predicates = new ArrayList<Criteria>();
+        this.predicates = new ArrayList<CriteriaImpl>();
     }
 
     /**
@@ -75,17 +75,7 @@ public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(BetweenCriteria obj) {
-        this.predicates.add(obj);
-    }
-
-    /**
-     * Visit a language object and collect criteria.  This method should <b>NOT</b> be
-     * called directly.
-     * @param obj Language object
-     */
-    @Override
-    public void visit(CompareCriteria obj) {
+    public void visit(BetweenCriteriaImpl obj) {
         this.predicates.add(obj);
     }
 
@@ -95,7 +85,7 @@ public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(IsNullCriteria obj) {
+    public void visit(CompareCriteriaImpl obj) {
         this.predicates.add(obj);
     }
 
@@ -105,7 +95,7 @@ public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(MatchCriteria obj) {
+    public void visit(IsNullCriteriaImpl obj) {
         this.predicates.add(obj);
     }
 
@@ -115,23 +105,33 @@ public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(SetCriteria obj) {
+    public void visit(MatchCriteriaImpl obj) {
         this.predicates.add(obj);
     }
 
     /**
-     * @see TCLanguageVisitorImpl#visit(ExistsCriteria)
+     * Visit a language object and collect criteria.  This method should <b>NOT</b> be
+     * called directly.
+     * @param obj Language object
      */
     @Override
-    public void visit(ExistsCriteria obj) {
+    public void visit(SetCriteriaImpl obj) {
         this.predicates.add(obj);
     }
 
     /**
-     * @see TCLanguageVisitorImpl#visit(SubqueryCompareCriteria)
+     * @see TCLanguageVisitorImpl#visit(ExistsCriteriaImpl)
      */
     @Override
-    public void visit(SubqueryCompareCriteria obj) {
+    public void visit(ExistsCriteriaImpl obj) {
+        this.predicates.add(obj);
+    }
+
+    /**
+     * @see TCLanguageVisitorImpl#visit(SubqueryCompareCriteriaImpl)
+     */
+    @Override
+    public void visit(SubqueryCompareCriteriaImpl obj) {
         this.predicates.add(obj);
     }
 
@@ -141,7 +141,7 @@ public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
 	 * @param obj Language object
 	 */
 	@Override
-    public void visit(SubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteriaImpl obj) {
 		this.predicates.add(obj);
 	}
 
@@ -149,12 +149,12 @@ public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
      * Get a collection of predicates discovered while visiting.
      * @return Collection of {@link PredicateCriteria} subclasses.
      */
-    public Collection<Criteria> getPredicates() {
+    public Collection<CriteriaImpl> getPredicates() {
         return this.predicates;
     }
 
     @Override
-    public Collection<Criteria> findPredicates(LanguageObject obj) {
+    public Collection<CriteriaImpl> findPredicates(BaseLanguageObject obj) {
         if(obj != null) {
             PreOrderNavigator.doVisit(obj, this);
         }
@@ -164,9 +164,9 @@ public class PredicateCollectorVisitorImpl extends TCLanguageVisitorImpl
     /**
      * Helper to quickly get the predicates from obj
      * @param obj Language object
-     * @return collection of {@link Criteria} objects
+     * @return collection of {@link CriteriaImpl} objects
      */
-    public static final Collection<Criteria> getPredicates(LanguageObject obj) {
+    public static final Collection<CriteriaImpl> getPredicates(BaseLanguageObject obj) {
         PredicateCollectorVisitorImpl visitor = new PredicateCollectorVisitorImpl(obj.getTeiidVersion());
         return visitor.findPredicates(obj);
     }

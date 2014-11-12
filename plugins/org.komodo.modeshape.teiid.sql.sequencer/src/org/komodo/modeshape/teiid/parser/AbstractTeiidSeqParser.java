@@ -32,13 +32,13 @@ import java.util.regex.Pattern;
 import org.komodo.modeshape.teiid.Messages;
 import org.komodo.modeshape.teiid.TeiidClientException;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
-import org.komodo.modeshape.teiid.sql.lang.Command;
-import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
-import org.komodo.modeshape.teiid.sql.lang.SPParameter;
-import org.komodo.modeshape.teiid.sql.lang.SetQuery;
-import org.komodo.modeshape.teiid.sql.lang.SourceHint;
-import org.komodo.modeshape.teiid.sql.lang.StoredProcedure;
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.lang.CommandImpl;
+import org.komodo.modeshape.teiid.sql.lang.BaseLanguageObject;
+import org.komodo.modeshape.teiid.sql.lang.SPParameterImpl;
+import org.komodo.modeshape.teiid.sql.lang.SetQueryImpl;
+import org.komodo.modeshape.teiid.sql.lang.SourceHintImpl;
+import org.komodo.modeshape.teiid.sql.lang.StoredProcedureImpl;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
@@ -184,7 +184,7 @@ public abstract class AbstractTeiidSeqParser implements TeiidSeqParser {
     }
 
     @Override
-    public <T extends LanguageObject> T createASTNode(ASTNodes nodeType) {
+    public <T extends BaseLanguageObject> T createASTNode(ASTNodes nodeType) {
         return TeiidNodeFactory.getInstance().create(this, nodeType);
     }
 
@@ -196,12 +196,12 @@ public abstract class AbstractTeiidSeqParser implements TeiidSeqParser {
 	}
 
 	@Since(Version.TEIID_8_0)
-	protected void convertToParameters(List<Expression> values, StoredProcedure storedProcedure, int paramIndex) {
-		for (Expression value : values) {
-			SPParameter parameter = createASTNode(ASTNodes.SP_PARAMETER); 
+	protected void convertToParameters(List<BaseExpression> values, StoredProcedureImpl storedProcedure, int paramIndex) {
+		for (BaseExpression value : values) {
+			SPParameterImpl parameter = createASTNode(ASTNodes.SP_PARAMETER); 
 			parameter.setIndex(paramIndex++);
 			parameter.setExpression(value);
-			parameter.setParameterType(SPParameter.IN);
+			parameter.setParameterType(SPParameterImpl.IN);
 			storedProcedure.addParameter(parameter);
 		}
 	}
@@ -405,7 +405,7 @@ public abstract class AbstractTeiidSeqParser implements TeiidSeqParser {
     }
 
     @Override
-    public Command procedureBodyCommand(ParseInfo parseInfo) throws Exception {
+    public CommandImpl procedureBodyCommand(ParseInfo parseInfo) throws Exception {
         throw new UnsupportedOperationException("Not supported in Teiid Version " + getVersion()); //$NON-NLS-1$
     }
 
@@ -415,21 +415,21 @@ public abstract class AbstractTeiidSeqParser implements TeiidSeqParser {
     }    
 
     @Since(Version.TEIID_8_5)
-    protected void setSourceHint(SourceHint sourceHint, Command command) {
+    protected void setSourceHint(SourceHintImpl sourceHint, CommandImpl command) {
         if (sourceHint == null)
             return;
 
-        if (command instanceof SetQuery) {
-            ((SetQuery)command).getProjectedQuery().setSourceHint(sourceHint);
+        if (command instanceof SetQueryImpl) {
+            ((SetQueryImpl)command).getProjectedQuery().setSourceHint(sourceHint);
         } else {
             command.setSourceHint(sourceHint);
         }
     }
 
     @Since(Version.TEIID_8_5)
-    protected List<Expression> arrayExpressions(List<Expression> expressions, Expression expr) {
+    protected List<BaseExpression> arrayExpressions(List<BaseExpression> expressions, BaseExpression expr) {
         if (expressions == null) {
-            expressions = new ArrayList<Expression>();
+            expressions = new ArrayList<BaseExpression>();
         }
         if (expr != null) {
             expressions.add(expr);

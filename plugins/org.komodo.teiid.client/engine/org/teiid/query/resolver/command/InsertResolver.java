@@ -44,16 +44,16 @@ import org.teiid.query.resolver.VariableResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
 import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.GroupContext;
-import org.teiid.query.sql.lang.Insert;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.GroupContextImpl;
+import org.teiid.query.sql.lang.InsertImpl;
 import org.teiid.query.sql.lang.ProcedureContainer;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
 import org.teiid.query.sql.util.SymbolMap;
 import org.teiid.runtime.client.Messages;
 
@@ -72,14 +72,14 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
 
     /**
      * Resolve an INSERT.  Need to resolve elements, constants, types, etc.
-     * @see org.teiid.query.resolver.ProcedureContainerResolver#resolveProceduralCommand(org.teiid.query.sql.lang.Command, org.teiid.query.metadata.TempMetadataAdapter)
+     * @see org.teiid.query.resolver.ProcedureContainerResolver#resolveProceduralCommand(org.teiid.query.sql.lang.CommandImpl, org.teiid.query.metadata.TempMetadataAdapter)
      */
     @Override
-    public void resolveProceduralCommand(Command command, TempMetadataAdapter metadata) 
+    public void resolveProceduralCommand(CommandImpl command, TempMetadataAdapter metadata) 
         throws Exception {
 
         // Cast to known type
-        Insert insert = (Insert) command;
+        InsertImpl insert = (InsertImpl) command;
         
         if (insert.getValues() != null) {
         	getQueryResolver().resolveSubqueries(command, metadata, null);
@@ -93,7 +93,7 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
             getQueryResolver().resolveCommand(insert.getQueryExpression(), metadata.getMetadata(), false);
         }
 
-        Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+        Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
         groups.add(insert.getGroup());
         
      // resolve any functions in the values
@@ -106,16 +106,16 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
         
         if (insert.getVariables().isEmpty()) {
             if (insert.getGroup().isResolved()) {
-                List<ElementSymbol> variables = ResolverUtil.resolveElementsInGroup(insert.getGroup(), metadata);
-                for (Iterator<ElementSymbol> i = variables.iterator(); i.hasNext();) {
+                List<ElementSymbolImpl> variables = ResolverUtil.resolveElementsInGroup(insert.getGroup(), metadata);
+                for (Iterator<ElementSymbolImpl> i = variables.iterator(); i.hasNext();) {
                     insert.addVariable(i.next().clone());
                 }
             } else {
                 for (int i = 0; i < values.size(); i++) {
-                    ElementSymbol es = getTeiidParser().createASTNode(ASTNodes.ELEMENT_SYMBOL);
+                    ElementSymbolImpl es = getTeiidParser().createASTNode(ASTNodes.ELEMENT_SYMBOL);
                 	if (usingQuery) {
-                		Expression ses = (Expression)values.get(i);
-                    	es.setName(Symbol.getShortName(ses));
+                		BaseExpression ses = (BaseExpression)values.get(i);
+                    	es.setName(SymbolImpl.getShortName(ses));
                     	es.setType(ses.getType());
                     	insert.addVariable(es);
                     } else {
@@ -139,9 +139,9 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
         }
         
         if (insert.getQueryExpression() != null && metadata.isVirtualGroup(insert.getGroup().getMetadataID())) {
-        	List<Reference> references = new ArrayList<Reference>(insert.getVariables().size());
+        	List<ReferenceImpl> references = new ArrayList<ReferenceImpl>(insert.getVariables().size());
         	for (int i = 0; i < insert.getVariables().size(); i++) {
-        	    Reference ref = getTeiidParser().createASTNode(ASTNodes.REFERENCE);
+        	    ReferenceImpl ref = getTeiidParser().createASTNode(ASTNodes.REFERENCE);
         	    ref.setIndex(i);
         	    ref.setPositional(true);
         		ref.setType(insert.getVariables().get(i).getType());
@@ -152,8 +152,8 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
     }
 
     private void resolveVariables(TempMetadataAdapter metadata,
-                                  Insert insert,
-                                  Set<GroupSymbol> groups) throws Exception {
+                                  InsertImpl insert,
+                                  Set<GroupSymbolImpl> groups) throws Exception {
         try {
             resolveList(insert.getVariables(), metadata, null, groups);
         } catch (QueryResolverException e) {
@@ -161,14 +161,14 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
         }
     }
 
-    private void resolveList(Collection<? extends Expression> elements, TempMetadataAdapter metadata,
-                                  GroupContext externalGroups, Set<GroupSymbol> groups) throws QueryResolverException, Exception {
+    private void resolveList(Collection<? extends BaseExpression> elements, TempMetadataAdapter metadata,
+                                  GroupContextImpl externalGroups, Set<GroupSymbolImpl> groups) throws QueryResolverException, Exception {
         if (elements == null || elements.isEmpty())
             return;
 
         ResolverVisitorImpl visitor = new ResolverVisitorImpl(elements.iterator().next().getTeiidVersion());
-        for (Iterator<? extends Expression> i = elements.iterator(); i.hasNext();) {
-            Expression expr = i.next();
+        for (Iterator<? extends BaseExpression> i = elements.iterator(); i.hasNext();) {
+            BaseExpression expr = i.next();
             visitor.resolveLanguageObject(expr, groups, externalGroups, metadata);
         }
     }
@@ -180,7 +180,7 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
      * @param usingQuery 
      * @throws Exception
      */
-    public void resolveTypes(Insert insert, TempMetadataAdapter metadata, List values, boolean usingQuery) throws Exception {
+    public void resolveTypes(InsertImpl insert, TempMetadataAdapter metadata, List values, boolean usingQuery) throws Exception {
         
         List newValues = new ArrayList(values.size());
         
@@ -190,11 +190,11 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
         }
         
         Iterator valueIter = values.iterator();
-        Iterator<ElementSymbol> varIter = insert.getVariables().iterator();
+        Iterator<ElementSymbolImpl> varIter = insert.getVariables().iterator();
         while(valueIter.hasNext()) {
             // Walk through both elements and expressions, which should match up
-			Expression expression = (Expression) valueIter.next();
-			ElementSymbol element = varIter.next();
+			BaseExpression expression = (BaseExpression) valueIter.next();
+			ElementSymbolImpl element = varIter.next();
 			
 			if (expression.getType() == null) {
 				ResolverUtil.setDesiredType(SymbolMap.getExpression(expression), element.getType(), insert);
@@ -232,7 +232,7 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
      */
     @Override
     protected String getPlan(QueryMetadataInterface metadata,
-                           GroupSymbol group) throws Exception {
+                           GroupSymbolImpl group) throws Exception {
         return metadata.getInsertPlan(group.getMetadataID());
     }
     
@@ -251,15 +251,15 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
      * @throws Exception
      */
     @Override
-    public Map<ElementSymbol, Expression> getVariableValues(Command command, boolean changingOnly,
+    public Map<ElementSymbolImpl, BaseExpression> getVariableValues(CommandImpl command, boolean changingOnly,
                                  QueryMetadataInterface metadata) throws Exception {
         
-        Insert insert = (Insert) command;
+        InsertImpl insert = (InsertImpl) command;
         
-        Map<ElementSymbol, Expression> result = new HashMap<ElementSymbol, Expression>();
+        Map<ElementSymbolImpl, BaseExpression> result = new HashMap<ElementSymbolImpl, BaseExpression>();
         
         // iterate over the variables and values they should be the same number
-        Iterator<ElementSymbol> varIter = insert.getVariables().iterator();
+        Iterator<ElementSymbolImpl> varIter = insert.getVariables().iterator();
         Iterator valIter = null;
         if (insert.getQueryExpression() != null) {
         	valIter = insert.getQueryExpression().getProjectedSymbols().iterator();
@@ -267,37 +267,37 @@ public class InsertResolver extends ProcedureContainerResolver implements Variab
             valIter = insert.getValues().iterator();
         }
         while (varIter.hasNext()) {
-            ElementSymbol next = varIter.next();
-			ElementSymbol varSymbol = next.clone();
+            ElementSymbolImpl next = varIter.next();
+			ElementSymbolImpl varSymbol = next.clone();
             varSymbol.getGroupSymbol().setName(ProcedureReservedWords.CHANGING);
             varSymbol.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
             
-            Constant constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
+            ConstantImpl constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
             constant.setValue(Boolean.TRUE);
             if (!changingOnly) {
             	varSymbol = next.clone();
             	varSymbol.getGroupSymbol().setName(SQLConstants.Reserved.NEW);
-            	result.put(varSymbol, (Expression)valIter.next());
+            	result.put(varSymbol, (BaseExpression)valIter.next());
             }
         }
         
-        Collection<ElementSymbol> insertElmnts = ResolverUtil.resolveElementsInGroup(insert.getGroup(), metadata);
+        Collection<ElementSymbolImpl> insertElmnts = ResolverUtil.resolveElementsInGroup(insert.getGroup(), metadata);
 
         insertElmnts.removeAll(insert.getVariables());
 
-        Iterator<ElementSymbol> defaultIter = insertElmnts.iterator();
+        Iterator<ElementSymbolImpl> defaultIter = insertElmnts.iterator();
         while(defaultIter.hasNext()) {
-        	ElementSymbol next = defaultIter.next();
- 			ElementSymbol varSymbol = next.clone();
+        	ElementSymbolImpl next = defaultIter.next();
+ 			ElementSymbolImpl varSymbol = next.clone();
             varSymbol.getGroupSymbol().setName(ProcedureReservedWords.CHANGING);
             varSymbol.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
             
-            Constant constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
+            ConstantImpl constant = getTeiidParser().createASTNode(ASTNodes.CONSTANT);
             constant.setValue(Boolean.FALSE);
             result.put(varSymbol, constant);
             if (!changingOnly) {
             	varSymbol = next.clone();
-            	Expression value = ResolverUtil.getDefault(varSymbol, metadata);
+            	BaseExpression value = ResolverUtil.getDefault(varSymbol, metadata);
             	varSymbol.getGroupSymbol().setName(SQLConstants.Reserved.NEW);
             	result.put(varSymbol, value);
             }

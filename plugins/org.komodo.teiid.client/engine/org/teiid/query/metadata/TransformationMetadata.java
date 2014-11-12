@@ -80,8 +80,8 @@ import org.teiid.query.mapping.xml.MappingDocumentImpl;
 import org.teiid.query.mapping.xml.MappingLoaderImpl;
 import org.teiid.query.mapping.xml.MappingNodeImpl;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.lang.ObjectTable;
-import org.teiid.query.sql.lang.SPParameter;
+import org.teiid.query.sql.lang.ObjectTableImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
@@ -409,7 +409,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
                     String runtimeType = paramRecord.getRuntimeType();
                     int direction = this.convertParamRecordTypeToStoredProcedureType(paramRecord.getType());
                     // create a parameter and add it to the procedure object
-                    SPParameter spParam = new SPParameter(getTeiidParser(), paramRecord.getPosition(), direction, paramRecord.getFullName());
+                    SPParameterImpl spParam = new SPParameterImpl(getTeiidParser(), paramRecord.getPosition(), direction, paramRecord.getFullName());
                     spParam.setMetadataID(paramRecord);
                     spParam.setClassType(getDataTypeManager().getDataTypeClass(runtimeType));
                     if (paramRecord.isVarArg()) {
@@ -424,7 +424,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
                     ColumnSet<Procedure> resultRecord = procRecord.getResultSet();
                     // resultSet is the last parameter in the procedure
                     int lastParamIndex = procInfo.getParameters().size() + 1;
-                    SPParameter param = new SPParameter(getTeiidParser(), lastParamIndex, SPParameter.RESULT_SET, resultRecord.getFullName());
+                    SPParameterImpl param = new SPParameterImpl(getTeiidParser(), lastParamIndex, SPParameterImpl.RESULT_SET, resultRecord.getFullName());
                     param.setClassType(java.sql.ResultSet.class);
                     param.setMetadataID(resultRecord);
 
@@ -471,10 +471,10 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
      */
     private int convertParamRecordTypeToStoredProcedureType(final ProcedureParameter.Type parameterType) {
         switch (parameterType) {
-            case In : return SPParameter.IN;
-            case Out : return SPParameter.OUT;
-            case InOut : return SPParameter.INOUT;
-            case ReturnValue : return SPParameter.RETURN_VALUE;
+            case In : return SPParameterImpl.IN;
+            case Out : return SPParameterImpl.OUT;
+            case InOut : return SPParameterImpl.INOUT;
+            case ReturnValue : return SPParameterImpl.RETURN_VALUE;
             default : 
                 return -1;
         }
@@ -1167,7 +1167,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 			if (allowedLanguages != null) {
 				names.retainAll(allowedLanguages);
 			}
-			names.add(ObjectTable.DEFAULT_LANGUAGE);
+			names.add(ObjectTableImpl.DEFAULT_LANGUAGE);
 			throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID31109, language, names));
 		}
 		this.scriptEngineFactories.put(language, engine.getFactory());

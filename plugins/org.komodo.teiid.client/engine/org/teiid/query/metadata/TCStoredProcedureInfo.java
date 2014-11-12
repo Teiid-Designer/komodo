@@ -27,35 +27,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.spi.query.metadata.StoredProcedureInfo;
-import org.komodo.spi.query.sql.lang.ISPParameter;
+import org.komodo.spi.query.sql.lang.SPParameter;
 import org.teiid.query.mapping.relational.TCQueryNode;
-import org.teiid.query.sql.lang.SPParameter;
+import org.teiid.query.sql.lang.SPParameterImpl;
 
 /**
 * This class encapsulates everything needed to pass between runtime metadata
 * and the QueryResolver via the facades
 */
 
-public class TCStoredProcedureInfo implements Serializable, StoredProcedureInfo<SPParameter, TCQueryNode> {
+public class TCStoredProcedureInfo implements Serializable, StoredProcedureInfo<SPParameterImpl, TCQueryNode> {
 
     /** Constant identifying an IN parameter */
-    public static final int IN = ISPParameter.ParameterInfo.IN.index();
+    public static final int IN = SPParameter.ParameterInfo.IN.index();
     
     /** Constant identifying an OUT parameter */
-    public static final int OUT = ISPParameter.ParameterInfo.OUT.index();
+    public static final int OUT = SPParameter.ParameterInfo.OUT.index();
 
     /** Constant identifying an INOUT parameter */
-    public static final int INOUT = ISPParameter.ParameterInfo.INOUT.index();
+    public static final int INOUT = SPParameter.ParameterInfo.INOUT.index();
 
     /** Constant identifying a RETURN parameter */
-    public static final int RETURN_VALUE = ISPParameter.ParameterInfo.RETURN_VALUE.index();
+    public static final int RETURN_VALUE = SPParameter.ParameterInfo.RETURN_VALUE.index();
 
     /** Constant identifying a RESULT SET parameter */
-    public static final int RESULT_SET = ISPParameter.ParameterInfo.RESULT_SET.index();
+    public static final int RESULT_SET = SPParameter.ParameterInfo.RESULT_SET.index();
 
     private Object modelID;
     private Object procedureID;
-    private List<SPParameter> parameters = new ArrayList<SPParameter>();
+    private List<SPParameterImpl> parameters = new ArrayList<SPParameterImpl>();
     private String callableName;
     private TCQueryNode query;
     private int updateCount = -1;
@@ -78,14 +78,14 @@ public class TCStoredProcedureInfo implements Serializable, StoredProcedureInfo<
     public void setProcedureID(Object procedureID){
         this.procedureID = procedureID;
     }
-    public List<SPParameter> getParameters(){
+    public List<SPParameterImpl> getParameters(){
         return this.parameters;
     }
-    public void setParameters(List<SPParameter> parameters){
+    public void setParameters(List<SPParameterImpl> parameters){
         this.parameters = parameters;
     }
     
-    public void addParameter(SPParameter parameter){
+    public void addParameter(SPParameterImpl parameter){
         this.parameters.add(parameter);
     }
            
@@ -97,8 +97,8 @@ public class TCStoredProcedureInfo implements Serializable, StoredProcedureInfo<
     }
 
 	public boolean returnsResultSet() {
-		for (SPParameter parameter : parameters) {
-			if (parameter.getParameterType() == ISPParameter.ParameterInfo.RESULT_SET.index()) {
+		for (SPParameterImpl parameter : parameters) {
+			if (parameter.getParameterType() == SPParameter.ParameterInfo.RESULT_SET.index()) {
 				return true;
 			}
 		}
@@ -106,8 +106,8 @@ public class TCStoredProcedureInfo implements Serializable, StoredProcedureInfo<
 	}
 
 	public boolean returnsResultParameter() {
-		for (SPParameter parameter : parameters) {
-			if (parameter.getParameterType() == ISPParameter.ParameterInfo.RETURN_VALUE.index()) {
+		for (SPParameterImpl parameter : parameters) {
+			if (parameter.getParameterType() == SPParameter.ParameterInfo.RETURN_VALUE.index()) {
 				return true;
 			}
 		}

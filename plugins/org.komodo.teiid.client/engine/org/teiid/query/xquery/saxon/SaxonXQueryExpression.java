@@ -75,9 +75,9 @@ import org.teiid.core.types.XMLType;
 import org.teiid.core.types.XMLType.Type;
 import org.teiid.query.function.source.XMLSystemFunctions;
 import org.teiid.query.sql.lang.NamespaceItem;
-import org.teiid.query.sql.lang.XMLColumn;
-import org.teiid.query.sql.symbol.DerivedColumn;
-import org.teiid.query.sql.symbol.XMLNamespaces;
+import org.teiid.query.sql.lang.XMLColumnImpl;
+import org.teiid.query.sql.symbol.DerivedColumnImpl;
+import org.teiid.query.sql.symbol.XMLNamespacesImpl;
 import org.teiid.runtime.client.Messages;
 
 @SuppressWarnings("serial")
@@ -200,7 +200,7 @@ public class SaxonXQueryExpression {
 	PathMapRoot contextRoot;
 	String streamingPath;
 
-    public SaxonXQueryExpression(String xQueryString, XMLNamespaces namespaces, List<DerivedColumn> passing, List<XMLColumn> columns) 
+    public SaxonXQueryExpression(String xQueryString, XMLNamespacesImpl namespaces, List<DerivedColumnImpl> passing, List<XMLColumnImpl> columns) 
     throws QueryResolverException {
         config.setErrorListener(ERROR_LISTENER);
         this.xQueryString = xQueryString;
@@ -226,7 +226,7 @@ public class SaxonXQueryExpression {
 			}
         }
         namespaceMap.put(DEFAULT_PREFIX, namespaceMap.get(EMPTY_STRING));
-        for (DerivedColumn derivedColumn : passing) {
+        for (DerivedColumnImpl derivedColumn : passing) {
         	if (derivedColumn.getAlias() == null) {
         		continue;
         	}
@@ -266,7 +266,7 @@ public class SaxonXQueryExpression {
     	return this.xQuery.usesContextItem();
     }
 
-	public void useDocumentProjection(List<XMLColumn> columns) {
+	public void useDocumentProjection(List<XMLColumnImpl> columns) {
 	    try {
             streamingPath = StreamingUtils.getStreamingPath(xQueryString, namespaceMap);
         } catch (IllegalArgumentException e) {
@@ -332,8 +332,8 @@ public class SaxonXQueryExpression {
         false,          // PRECEDING_OR_ANCESTOR;
     };
 
-	private PathMapRoot projectColumns(PathMapRoot parentRoot, List<XMLColumn> columns, PathMapNode finalNode) {
-		for (XMLColumn xmlColumn : columns) {
+	private PathMapRoot projectColumns(PathMapRoot parentRoot, List<XMLColumnImpl> columns, PathMapNode finalNode) {
+		for (XMLColumnImpl xmlColumn : columns) {
 			if (xmlColumn.isOrdinal()) {
 				continue;
 			}
@@ -385,7 +385,7 @@ public class SaxonXQueryExpression {
 		return newMap.reduceToDownwardsAxes(newRoot);
 	}
 
-	private boolean validateColumnForStreaming(XMLColumn xmlColumn, PathMapArc arc) {
+	private boolean validateColumnForStreaming(XMLColumnImpl xmlColumn, PathMapArc arc) {
 		boolean ancestor = false;
 		LinkedList<PathMapArc> arcStack = new LinkedList<PathMapArc>();
 		arcStack.add(arc);
@@ -420,7 +420,7 @@ public class SaxonXQueryExpression {
 		return true;
 	}
 
-	private void addReturnedArcs(XMLColumn xmlColumn, PathMapNode subNode) {
+	private void addReturnedArcs(XMLColumnImpl xmlColumn, PathMapNode subNode) {
 		if (xmlColumn.getSymbol().getType() == DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass()) {
 			subNode.createArc(new AxisExpression(Axis.DESCENDANT_OR_SELF, AnyNodeTest.getInstance()));
 		} else {
@@ -439,14 +439,14 @@ public class SaxonXQueryExpression {
 		}
 	}
 
-	private void processColumns(List<XMLColumn> columns, IndependentContext ic)
+	private void processColumns(List<XMLColumnImpl> columns, IndependentContext ic)
 			throws QueryResolverException {
 		if (columns == null) {
 			return;
 		}
         XPathEvaluator eval = new XPathEvaluator(config);
     	eval.setStaticContext(ic);
-		for (XMLColumn xmlColumn : columns) {
+		for (XMLColumnImpl xmlColumn : columns) {
         	if (xmlColumn.isOrdinal()) {
         		continue;
         	}

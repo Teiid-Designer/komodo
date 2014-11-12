@@ -31,30 +31,30 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.v7.Teiid7ClientParser;
 import org.teiid.query.sql.AbstractTestQueryParser;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.Criteria;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
 import org.teiid.query.sql.lang.CriteriaOperator;
 import org.teiid.query.sql.lang.CriteriaOperator.Operator;
-import org.teiid.query.sql.lang.CriteriaSelector;
-import org.teiid.query.sql.lang.Drop;
-import org.teiid.query.sql.lang.From;
-import org.teiid.query.sql.lang.HasCriteria;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.lang.TranslateCriteria;
-import org.teiid.query.sql.proc.AssignmentStatement;
-import org.teiid.query.sql.proc.Block;
-import org.teiid.query.sql.proc.BranchingStatement.BranchingMode;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateUpdateProcedureCommand;
-import org.teiid.query.sql.proc.IfStatement;
-import org.teiid.query.sql.proc.LoopStatement;
-import org.teiid.query.sql.proc.RaiseErrorStatement;
-import org.teiid.query.sql.proc.Statement;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.CriteriaSelectorImpl;
+import org.teiid.query.sql.lang.DropImpl;
+import org.teiid.query.sql.lang.FromImpl;
+import org.teiid.query.sql.lang.HasCriteriaImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.lang.TranslateCriteriaImpl;
+import org.teiid.query.sql.proc.AssignmentStatementImpl;
+import org.teiid.query.sql.proc.BlockImpl;
+import org.teiid.query.sql.proc.BranchingStatementImpl.BranchingMode;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateUpdateProcedureCommandImpl;
+import org.teiid.query.sql.proc.IfStatementImpl;
+import org.teiid.query.sql.proc.LoopStatementImpl;
+import org.teiid.query.sql.proc.RaiseErrorStatementImpl;
+import org.teiid.query.sql.proc.StatementImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 
 /**
  * Unit testing for the Query Parser for teiid version 7
@@ -79,25 +79,25 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
         return factory;
     }
 
-    private void helpCriteriaSelectorTest(String selector, String expectedString, CriteriaSelector expectedSelector)
+    private void helpCriteriaSelectorTest(String selector, String expectedString, CriteriaSelectorImpl expectedSelector)
         throws Exception {
         // Don't use query parser as criteriaSelector is not part of the interface
         Teiid7ClientParser teiid7Parser = new Teiid7ClientParser(new StringReader(selector));
-        CriteriaSelector actualSelector = teiid7Parser.criteriaSelector();
+        CriteriaSelectorImpl actualSelector = teiid7Parser.criteriaSelector();
         assertEquals("CriteriaSelector does not match: ", expectedSelector, actualSelector);
     }
 
     /** SELECT 1.3e8 FROM a.g1 */
     @Test
     public void testFloatWithE() {
-        GroupSymbol g = getFactory().newGroupSymbol("a.g1");
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("a.g1");
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Select select = getFactory().newSelect();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().wrapExpression(getFactory().newConstant(new Double(1.3e8))));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
 
         helpTest("SELECT 1.3e8 FROM a.g1",
                  "SELECT 1.3E8 FROM a.g1",
@@ -107,14 +107,14 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /** SELECT -1.3e-6 FROM a.g1 */
     @Test
     public void testFloatWithMinusE() {
-        GroupSymbol g = getFactory().newGroupSymbol("a.g1");
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("a.g1");
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Select select = getFactory().newSelect();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().wrapExpression(getFactory().newConstant(new Double(-1.3e-6))));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
 
         helpTest("SELECT -1.3e-6 FROM a.g1",
                  "SELECT -1.3E-6 FROM a.g1",
@@ -124,14 +124,14 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /** SELECT -1.3e+8 FROM a.g1 */
     @Test
     public void testFloatWithPlusE() {
-        GroupSymbol g = getFactory().newGroupSymbol("a.g1");
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("a.g1");
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Select select = getFactory().newSelect();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().wrapExpression(getFactory().newConstant(new Double(-1.3e+8))));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
 
         helpTest("SELECT -1.3e+8 FROM a.g1",
                  "SELECT -1.3E8 FROM a.g1",
@@ -155,7 +155,7 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testErrorStatement() throws Exception {
-        RaiseErrorStatement errStmt = getFactory().newNode(ASTNodes.RAISE_ERROR_STATEMENT);
+        RaiseErrorStatementImpl errStmt = getFactory().newNode(ASTNodes.RAISE_ERROR_STATEMENT);
         errStmt.setExpression(getFactory().newConstant("Test only"));
 
         helpStmtTest("ERROR 'Test only';", "ERROR 'Test only';",
@@ -164,9 +164,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector0() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.IS_NULL);
         critSelector.addElement(a);
 
@@ -175,9 +175,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector1() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.EQ);
         critSelector.addElement(a);
 
@@ -186,9 +186,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector2() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.NE);
         critSelector.addElement(a);
 
@@ -197,9 +197,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector3() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.LT);
         critSelector.addElement(a);
 
@@ -208,9 +208,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector4() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.GT);
         critSelector.addElement(a);
 
@@ -219,9 +219,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector5() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.GE);
         critSelector.addElement(a);
 
@@ -230,9 +230,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector6() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.LE);
         critSelector.addElement(a);
 
@@ -241,9 +241,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector7() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.LIKE);
         critSelector.addElement(a);
 
@@ -252,9 +252,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector8() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.IN);
         critSelector.addElement(a);
 
@@ -265,7 +265,7 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     public void testCriteriaSelector9() throws Exception {
         //ElementSymbol a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         //critSelector.setSelectorType(Operator.IS_NULL);
         //critSelector.addElement(a);        
 
@@ -274,9 +274,9 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testCriteriaSelector10() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.BETWEEN);
         critSelector.addElement(a);
 
@@ -286,15 +286,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /**HAS IS NULL CRITERIA ON (a)*/
     @Test
     public void testHasIsNullCriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.IS_NULL);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS IS NULL CRITERIA ON (a)", "HAS IS NULL CRITERIA ON (a)",
                          hasSelector);
@@ -303,15 +303,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /**HAS LIKE CRITERIA ON (a)*/
     @Test
     public void testHasLikeCriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.LIKE);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS LIKE CRITERIA ON (a)", "HAS LIKE CRITERIA ON (a)",
                          hasSelector);
@@ -319,15 +319,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testHasEQCriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
-        List<ElementSymbol> elements = new ArrayList<ElementSymbol>();
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
+        List<ElementSymbolImpl> elements = new ArrayList<ElementSymbolImpl>();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.EQ);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS = CRITERIA ON (a)", "HAS = CRITERIA ON (a)",
                          hasSelector);
@@ -335,15 +335,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testHasNECriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.NE);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS <> CRITERIA ON (a)", "HAS <> CRITERIA ON (a)",
                          hasSelector);
@@ -352,15 +352,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /**HAS IN CRITERIA ON (a)*/
     @Test
     public void testHasInCriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
-        List<ElementSymbol> elements = new ArrayList<ElementSymbol>();
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
+        List<ElementSymbolImpl> elements = new ArrayList<ElementSymbolImpl>();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.IN);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS IN CRITERIA ON (a)", "HAS IN CRITERIA ON (a)",
                          hasSelector);
@@ -369,15 +369,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /**HAS COMPARE_LT CRITERIA ON (a)*/
     @Test
     public void testHasLTCriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
-        List<ElementSymbol> elements = new ArrayList<ElementSymbol>();
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
+        List<ElementSymbolImpl> elements = new ArrayList<ElementSymbolImpl>();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.LT);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS < CRITERIA ON (a)", "HAS < CRITERIA ON (a)",
                          hasSelector);
@@ -386,15 +386,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /**HAS COMPARE_LE CRITERIA ON (a)*/
     @Test
     public void testHasLECriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
-        List<ElementSymbol> elements = new ArrayList<ElementSymbol>();
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
+        List<ElementSymbolImpl> elements = new ArrayList<ElementSymbolImpl>();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.LE);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS <= CRITERIA ON (a)", "HAS <= CRITERIA ON (a)",
                          hasSelector);
@@ -403,15 +403,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /**HAS COMPARE_GT CRITERIA ON (a)*/
     @Test
     public void testHasGTCriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.GT);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS > CRITERIA ON (a)", "HAS > CRITERIA ON (a)",
                          hasSelector);
@@ -420,15 +420,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /**HAS COMPARE_GE CRITERIA ON (a)*/
     @Test
     public void testHasGECriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.GE);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS >= CRITERIA ON (a)", "HAS >= CRITERIA ON (a)",
                          hasSelector);
@@ -437,15 +437,15 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     /**HAS BETWEEN CRITERIA ON (a)*/
     @Test
     public void testHasBetweenCriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.BETWEEN);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
         helpCriteriaTest("HAS BETWEEN CRITERIA ON (a)", "HAS BETWEEN CRITERIA ON (a)",
                          hasSelector);
@@ -453,19 +453,19 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testTranslateCriteria() throws Exception {
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        Criteria crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
+        CriteriaImpl crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
         List critList = new ArrayList();
         critList.add(crit);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.IS_NULL);
         critSelector.setElements(elements);
 
-        TranslateCriteria transCriteria = getFactory().newTranslateCriteria(critSelector, critList);
+        TranslateCriteriaImpl transCriteria = getFactory().newTranslateCriteria(critSelector, critList);
 
         helpCriteriaTest("TRANSLATE IS NULL CRITERIA ON (a) WITH (a = 5)",
                          "TRANSLATE IS NULL CRITERIA ON (a) WITH (a = 5)",
@@ -513,43 +513,43 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     private void helpTestCreateUpdateProcedureCommandCase3025(String procedureString) {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
-        List<ElementSymbol> symbols = new ArrayList<ElementSymbol>();
+        List<ElementSymbolImpl> symbols = new ArrayList<ElementSymbolImpl>();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
-        List<ElementSymbol> elseSymbols = new ArrayList<ElementSymbol>();
+        List<ElementSymbolImpl> elseSymbols = new ArrayList<ElementSymbolImpl>();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
         elseQuery.setCriteria(criteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
@@ -557,24 +557,24 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
         elseBlock.setStatements(elseStmts);
 
         //has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.IS_NULL);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
 
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest(procedureString, "CREATE PROCEDURE" + "\n" + "BEGIN" + "\n" + "DECLARE short var1;" + "\n" + 
@@ -629,38 +629,38 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
                                 "var2 = (SELECT b1 FROM g WHERE a2 = 5);" + "\n" + "END" + "\n" + "END";
 
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
-        Expression[] args = new Expression[] {getFactory().newConstant("x"), getFactory().newConstant("y")};
-        Function function = getFactory().newFunction("concat", args);
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, function);
+        BaseExpression[] args = new BaseExpression[] {getFactory().newConstant("x"), getFactory().newConstant("y")};
+        FunctionImpl function = getFactory().newFunction("concat", args);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, function);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
-        List<ElementSymbol> elseSymbols = new ArrayList<ElementSymbol>();
+        List<ElementSymbolImpl> elseSymbols = new ArrayList<ElementSymbolImpl>();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
         elseQuery.setCriteria(criteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
@@ -668,24 +668,24 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
         elseBlock.setStatements(elseStmts);
 
         //has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.IS_NULL);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
 
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest(procedureString, expectedString, cmd);
@@ -695,43 +695,43 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand1() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
         elseQuery.setCriteria(criteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
@@ -739,22 +739,22 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
         elseBlock.setStatements(elseStmts);
 
         //has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -769,43 +769,43 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand0() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
         elseQuery.setCriteria(criteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
@@ -813,22 +813,22 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
         elseBlock.setStatements(elseStmts);
 
         //has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         //critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -844,43 +844,43 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand2() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
         elseQuery.setCriteria(criteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
@@ -888,23 +888,23 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
         elseBlock.setStatements(elseStmts);
 
         //has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.LIKE);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -921,43 +921,43 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand3() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
         elseQuery.setCriteria(criteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
@@ -965,23 +965,23 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
         elseBlock.setStatements(elseStmts);
 
         //has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.IN);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -997,43 +997,43 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand4() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
         elseQuery.setCriteria(criteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
@@ -1041,23 +1041,23 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
         elseBlock.setStatements(elseStmts);
 
         //has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
         critSelector.setSelectorType(Operator.NE);
         critSelector.setElements(elements);
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -1073,74 +1073,74 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand5() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         //element for has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
 
-        CriteriaSelector critSelector2 = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector2 = getFactory().newCriteriaSelector();
         //critSelector2.setSelectorType(Operator.NE);
         critSelector2.setElements(elements);
 
-        HasCriteria hasSelector2 = getFactory().newHasCriteria(critSelector2);
+        HasCriteriaImpl hasSelector2 = getFactory().newHasCriteria(critSelector2);
         //has criteria for else block
         elseQuery.setCriteria(hasSelector2);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
 
         elseBlock.setStatements(elseStmts);
 
-        CriteriaSelector critSelector1 = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector1 = getFactory().newCriteriaSelector();
         critSelector1.setSelectorType(Operator.NE);
         critSelector1.setElements(elements);
 
-        HasCriteria hasSelector1 = getFactory().newHasCriteria(critSelector1);
+        HasCriteriaImpl hasSelector1 = getFactory().newHasCriteria(critSelector1);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -1156,77 +1156,77 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand7() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         //element for has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
 
-        Criteria crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
+        CriteriaImpl crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
         List critList = new ArrayList();
         critList.add(crit);
 
-        CriteriaSelector critSelector2 = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector2 = getFactory().newCriteriaSelector();
         //critSelector2.setSelectorType(Operator.IS_NULL);
         critSelector2.setElements(elements);
 
-        TranslateCriteria transCriteria = getFactory().newTranslateCriteria(critSelector2, critList);
+        TranslateCriteriaImpl transCriteria = getFactory().newTranslateCriteria(critSelector2, critList);
         elseQuery.setCriteria(transCriteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
 
         elseBlock.setStatements(elseStmts);
 
-        CriteriaSelector critSelector1 = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector1 = getFactory().newCriteriaSelector();
         critSelector1.setSelectorType(Operator.NE);
         critSelector1.setElements(elements);
 
-        HasCriteria hasSelector1 = getFactory().newHasCriteria(critSelector1);
+        HasCriteriaImpl hasSelector1 = getFactory().newHasCriteria(critSelector1);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -1243,77 +1243,77 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand9() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         //element for has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
 
-        Criteria crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
+        CriteriaImpl crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
         List critList = new ArrayList();
         critList.add(crit);
 
-        CriteriaSelector critSelector2 = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector2 = getFactory().newCriteriaSelector();
         critSelector2.setSelectorType(Operator.IS_NULL);
         critSelector2.setElements(elements);
 
-        TranslateCriteria transCriteria = getFactory().newTranslateCriteria(critSelector2, critList);
+        TranslateCriteriaImpl transCriteria = getFactory().newTranslateCriteria(critSelector2, critList);
         elseQuery.setCriteria(transCriteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
 
         elseBlock.setStatements(elseStmts);
 
-        CriteriaSelector critSelector1 = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector1 = getFactory().newCriteriaSelector();
         critSelector1.setSelectorType(Operator.NE);
         critSelector1.setElements(elements);
 
-        HasCriteria hasSelector1 = getFactory().newHasCriteria(critSelector1);
+        HasCriteriaImpl hasSelector1 = getFactory().newHasCriteria(critSelector1);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -1332,77 +1332,77 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand10() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         //element for has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
 
-        Criteria crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
+        CriteriaImpl crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
         List critList = new ArrayList();
         critList.add(crit);
 
-        TranslateCriteria transCriteria = getFactory().newTranslateCriteria();
-        CriteriaSelector critSelector2 = getFactory().newCriteriaSelector();
+        TranslateCriteriaImpl transCriteria = getFactory().newTranslateCriteria();
+        CriteriaSelectorImpl critSelector2 = getFactory().newCriteriaSelector();
         transCriteria.setTranslations(critList);
         transCriteria.setSelector(critSelector2);
 
         elseQuery.setCriteria(transCriteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
 
         elseBlock.setStatements(elseStmts);
 
-        CriteriaSelector critSelector1 = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector1 = getFactory().newCriteriaSelector();
         critSelector1.setSelectorType(Operator.NE);
         critSelector1.setElements(elements);
 
-        HasCriteria hasSelector1 = getFactory().newHasCriteria(critSelector1);
+        HasCriteriaImpl hasSelector1 = getFactory().newHasCriteria(critSelector1);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -1418,80 +1418,80 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand12() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         //element for has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
 
-        Criteria crit1 = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
-        ElementSymbol m = getFactory().newElementSymbol("m");
-        Criteria crit2 = getFactory().newCompareCriteria(m, Operator.EQ, getFactory().newConstant(new Integer(6)));
+        CriteriaImpl crit1 = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
+        ElementSymbolImpl m = getFactory().newElementSymbol("m");
+        CriteriaImpl crit2 = getFactory().newCompareCriteria(m, Operator.EQ, getFactory().newConstant(new Integer(6)));
         List critList = new ArrayList();
         critList.add(crit1);
         critList.add(crit2);
 
-        TranslateCriteria transCriteria = getFactory().newTranslateCriteria();
-        CriteriaSelector critSelector2 = getFactory().newCriteriaSelector();
+        TranslateCriteriaImpl transCriteria = getFactory().newTranslateCriteria();
+        CriteriaSelectorImpl critSelector2 = getFactory().newCriteriaSelector();
         transCriteria.setTranslations(critList);
         transCriteria.setSelector(critSelector2);
 
         elseQuery.setCriteria(transCriteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
 
         elseBlock.setStatements(elseStmts);
 
-        CriteriaSelector critSelector1 = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector1 = getFactory().newCriteriaSelector();
         critSelector1.setSelectorType(Operator.NE);
         critSelector1.setElements(elements);
 
-        HasCriteria hasSelector1 = getFactory().newHasCriteria(critSelector1);
+        HasCriteriaImpl hasSelector1 = getFactory().newHasCriteria(critSelector1);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -1509,76 +1509,76 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand11() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         //element for has criteria
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         List elements = new ArrayList();
         elements.add(a);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
 
-        Criteria crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
+        CriteriaImpl crit = getFactory().newCompareCriteria(a, Operator.EQ, getFactory().newConstant(new Integer(5)));
         List critList = new ArrayList();
         critList.add(crit);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
-        TranslateCriteria transCrit = getFactory().newTranslateCriteria();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
+        TranslateCriteriaImpl transCrit = getFactory().newTranslateCriteria();
         transCrit.setSelector(critSelector);
 
         elseQuery.setCriteria(transCrit);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
 
         elseBlock.setStatements(elseStmts);
 
-        CriteriaSelector critSelector1 = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector1 = getFactory().newCriteriaSelector();
         critSelector1.setSelectorType(Operator.NE);
         critSelector1.setElements(elements);
 
-        HasCriteria hasSelector1 = getFactory().newHasCriteria(critSelector1);
+        HasCriteriaImpl hasSelector1 = getFactory().newHasCriteria(critSelector1);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector1);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -1594,60 +1594,60 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
     @Test
     public void testCreateUpdateProcedureCommand8() {
         //declare var1
-        ElementSymbol var1 = getFactory().newElementSymbol("var1");
+        ElementSymbolImpl var1 = getFactory().newElementSymbol("var1");
         String shortType = new String("short");
-        Statement declStmt = getFactory().newDeclareStatement(var1, shortType);
+        StatementImpl declStmt = getFactory().newDeclareStatement(var1, shortType);
 
         //ifblock
         List symbols = new ArrayList();
         symbols.add(getFactory().newElementSymbol("a1"));
-        Select select = getFactory().newSelect(symbols);
+        SelectImpl select = getFactory().newSelect(symbols);
 
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
 
-        Criteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
+        CriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("a2"), Operator.EQ,
                                                getFactory().newConstant(new Integer(5)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(criteria);
 
-        AssignmentStatement queryStmt = getFactory().newAssignmentStatement(var1, query);
+        AssignmentStatementImpl queryStmt = getFactory().newAssignmentStatement(var1, query);
 
-        Block ifBlock = getFactory().newBlock();
+        BlockImpl ifBlock = getFactory().newBlock();
         ifBlock.addStatement(queryStmt);
 
         //else block 
-        ElementSymbol var2 = getFactory().newElementSymbol("var2");
-        Statement elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
+        ElementSymbolImpl var2 = getFactory().newElementSymbol("var2");
+        StatementImpl elseDeclStmt = getFactory().newDeclareStatement(var2, shortType);
 
         List elseSymbols = new ArrayList();
         elseSymbols.add(getFactory().newElementSymbol("b1"));
-        Select elseSelect = getFactory().newSelect(elseSymbols);
+        SelectImpl elseSelect = getFactory().newSelect(elseSymbols);
 
-        Query elseQuery = getFactory().newQuery(elseSelect, from);
+        QueryImpl elseQuery = getFactory().newQuery(elseSelect, from);
         elseQuery.setCriteria(criteria);
 
-        AssignmentStatement elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
+        AssignmentStatementImpl elseQueryStmt = getFactory().newAssignmentStatement(var2, elseQuery);
 
-        Block elseBlock = getFactory().newBlock();
+        BlockImpl elseBlock = getFactory().newBlock();
         List elseStmts = new ArrayList();
         elseStmts.add(elseDeclStmt);
         elseStmts.add(elseQueryStmt);
 
         elseBlock.setStatements(elseStmts);
 
-        CriteriaSelector critSelector = getFactory().newCriteriaSelector();
+        CriteriaSelectorImpl critSelector = getFactory().newCriteriaSelector();
 
-        HasCriteria hasSelector = getFactory().newHasCriteria(critSelector);
+        HasCriteriaImpl hasSelector = getFactory().newHasCriteria(critSelector);
 
-        IfStatement stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
+        IfStatementImpl stmt = getFactory().newIfStatement(ifBlock, elseBlock, hasSelector);
 
-        Block block = getFactory().newBlock();
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(declStmt);
         block.addStatement(stmt);
 
-        CreateUpdateProcedureCommand cmd = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl cmd = getFactory().newCreateUpdateProcedureCommand();
         cmd.setBlock(block);
 
         helpTest("CREATE PROCEDURE BEGIN DECLARE short var1;" +
@@ -1661,44 +1661,44 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testVirtualProcedure() {
-        ElementSymbol x = getFactory().newElementSymbol("x");
+        ElementSymbolImpl x = getFactory().newElementSymbol("x");
         String intType = new String("integer");
-        Statement dStmt = getFactory().newDeclareStatement(x, intType);
+        StatementImpl dStmt = getFactory().newDeclareStatement(x, intType);
 
-        GroupSymbol g = getFactory().newGroupSymbol("m.g");
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("m.g");
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Select select = getFactory().newSelect();
-        ElementSymbol c1 = getFactory().newElementSymbol("c1");
+        SelectImpl select = getFactory().newSelect();
+        ElementSymbolImpl c1 = getFactory().newElementSymbol("c1");
         select.addSymbol(c1);
         select.addSymbol(getFactory().newElementSymbol("c2"));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
 
         x = getFactory().newElementSymbol("x");
         c1 = getFactory().newElementSymbol("mycursor.c1");
-        Statement assignmentStmt = getFactory().newAssignmentStatement(x, c1);
-        Block block = getFactory().newBlock();
+        StatementImpl assignmentStmt = getFactory().newAssignmentStatement(x, c1);
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(assignmentStmt);
 
-        Block ifBlock = getFactory().newBlock();
-        Statement continueStmt = getFactory().newBranchingStatement(BranchingMode.CONTINUE);
+        BlockImpl ifBlock = getFactory().newBlock();
+        StatementImpl continueStmt = getFactory().newBranchingStatement(BranchingMode.CONTINUE);
         ifBlock.addStatement(continueStmt);
-        Criteria crit = getFactory().newCompareCriteria(x, Operator.GT, getFactory().newConstant(new Integer(5)));
-        IfStatement ifStmt = getFactory().newIfStatement(crit, ifBlock);
+        CriteriaImpl crit = getFactory().newCompareCriteria(x, Operator.GT, getFactory().newConstant(new Integer(5)));
+        IfStatementImpl ifStmt = getFactory().newIfStatement(crit, ifBlock);
         block.addStatement(ifStmt);
 
         String cursor = "mycursor";
-        LoopStatement loopStmt = getFactory().newLoopStatement(block, query, cursor);
+        LoopStatementImpl loopStmt = getFactory().newLoopStatement(block, query, cursor);
 
         block = getFactory().newBlock();
         block.addStatement(dStmt);
         block.addStatement(loopStmt);
-        CommandStatement cmdStmt = getFactory().newCommandStatement(query);
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(query);
         block.addStatement(cmdStmt);
 
-        CreateUpdateProcedureCommand virtualProcedureCommand = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl virtualProcedureCommand = getFactory().newCreateUpdateProcedureCommand();
         virtualProcedureCommand.setBlock(block);
         virtualProcedureCommand.setUpdateProcedure(false);
 
@@ -1712,7 +1712,7 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
 
     @Test
     public void testDropTable() {
-        Drop drop = getFactory().newNode(ASTNodes.DROP);
+        DropImpl drop = getFactory().newNode(ASTNodes.DROP);
         drop.setTable(getFactory().newGroupSymbol("tempTable"));
         helpTest("DROP table tempTable", "DROP TABLE tempTable", drop);
     }
@@ -1727,26 +1727,26 @@ public class TestQuery7Parser extends AbstractTestQueryParser {
         String sql = "CREATE PROCEDURE BEGIN IF (x > 1) select 1; IF (x > 1) select 1; ELSE select 1; END"; //$NON-NLS-1$
         String expected = "CREATE PROCEDURE\nBEGIN\nIF(x > 1)\nBEGIN\nSELECT 1;\nEND\nIF(x > 1)\nBEGIN\nSELECT 1;\nEND\nELSE\nBEGIN\nSELECT 1;\nEND\nEND"; //$NON-NLS-1$
 
-        Query query = getFactory().newQuery();
-        Expression expr = getFactory().wrapExpression(getFactory().newConstant(1));
+        QueryImpl query = getFactory().newQuery();
+        BaseExpression expr = getFactory().wrapExpression(getFactory().newConstant(1));
         query.setSelect(getFactory().newSelect(Arrays.asList(expr))); //$NON-NLS-1$
 
-        CommandStatement commandStmt = getFactory().newCommandStatement(query);
-        CompareCriteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("x"), CriteriaOperator.Operator.GT, getFactory().newConstant(1)); //$NON-NLS-1$
-        Block block = getFactory().newBlock();
+        CommandStatementImpl commandStmt = getFactory().newCommandStatement(query);
+        CompareCriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("x"), CriteriaOperator.Operator.GT, getFactory().newConstant(1)); //$NON-NLS-1$
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(commandStmt);
         
-        IfStatement ifStmt = getFactory().newIfStatement(criteria, block);
-        IfStatement ifStmt1 = ifStmt.clone();
+        IfStatementImpl ifStmt = getFactory().newIfStatement(criteria, block);
+        IfStatementImpl ifStmt1 = ifStmt.clone();
         
-        Block block2 = getFactory().newBlock();
+        BlockImpl block2 = getFactory().newBlock();
         block2.addStatement(commandStmt);
         ifStmt1.setElseBlock(block2);
-        Block block3 = getFactory().newBlock();
+        BlockImpl block3 = getFactory().newBlock();
         block3.addStatement(ifStmt);
         block3.addStatement(ifStmt1);
         
-        CreateUpdateProcedureCommand command = getFactory().newCreateUpdateProcedureCommand();
+        CreateUpdateProcedureCommandImpl command = getFactory().newCreateUpdateProcedureCommand();
         command.setBlock(block3);
         helpTest(sql, expected, command);
     }

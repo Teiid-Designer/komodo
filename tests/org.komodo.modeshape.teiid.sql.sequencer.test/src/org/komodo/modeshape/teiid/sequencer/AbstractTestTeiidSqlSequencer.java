@@ -79,8 +79,8 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLAttributes;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLElement;
 import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
-import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.query.sql.lang.ISetQuery;
+import org.komodo.spi.query.sql.lang.JoinType;
+import org.komodo.spi.query.sql.lang.SetQuery.Operation;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.modeshape.jcr.api.JcrConstants;
@@ -135,7 +135,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
 
         // JoinPredicate should have a JOIN
-        verifyJoin(jpNode, IJoinType.Types.JOIN_INNER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_INNER);
 
         // Join Predicate should have a left clause
         // UnaryFromClause should have a group
@@ -167,7 +167,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
@@ -188,7 +188,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, 1, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
@@ -212,10 +212,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
 
         Node jpNode2 = verify(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
@@ -239,13 +239,13 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
 
         Node jpNode2 = verify(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
 
         Node jpNode3 = verify(jpNode1, JoinPredicate.RIGHT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode3, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode3, JoinType.Types.JOIN_CROSS);
         
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
@@ -270,10 +270,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
         
         Node jpNode2 = verify(jpNode1, JoinPredicate.RIGHT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
         
         verifyUnaryFromClauseGroup(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
 
@@ -297,10 +297,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
 
         Node jpNode2 = verify(jpNode1, JoinPredicate.RIGHT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g2");
@@ -325,12 +325,12 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, 1, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         
         Node jpNode2 = verify(jpNode1, JoinPredicate.RIGHT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
         
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g2");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g3");
@@ -338,7 +338,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 2, "g4");
 
         Node jpNode3 = verify(fromNode, From.CLAUSES_REF_NAME, 3, JoinPredicate.ID);
-        verifyJoin(jpNode3, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode3, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode3, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g5");
         verifyUnaryFromClauseGroup(jpNode3, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g6");
@@ -363,7 +363,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g1");
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, 2, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_INNER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_INNER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g2");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g3");
@@ -395,7 +395,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_RIGHT_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_RIGHT_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -427,7 +427,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_RIGHT_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_RIGHT_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -459,7 +459,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_LEFT_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_LEFT_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -491,7 +491,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_LEFT_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_LEFT_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -523,7 +523,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_FULL_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_FULL_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -555,7 +555,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_FULL_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_FULL_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -1624,7 +1624,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node unionQueryNode = verify(criteriaNode, SubqueryContainer.COMMAND_REF_NAME, SetQuery.ID);
         verifyProperty(unionQueryNode, SetQuery.ALL_PROP_NAME, true);
-        verifyProperty(unionQueryNode, SetQuery.OPERATION_PROP_NAME, ISetQuery.Operation.UNION.name());
+        verifyProperty(unionQueryNode, SetQuery.OPERATION_PROP_NAME, Operation.UNION.name());
 
         Node u1QueryNode = verify(unionQueryNode, SetQuery.LEFT_QUERY_REF_NAME, Query.ID);
         Node u1SelectNode = verify(u1QueryNode, Query.SELECT_REF_NAME, Select.ID);

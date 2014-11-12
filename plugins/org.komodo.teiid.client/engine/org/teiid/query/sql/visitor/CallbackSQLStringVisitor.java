@@ -23,8 +23,8 @@ package org.teiid.query.sql.visitor;
 
 import org.komodo.spi.query.sql.SQLStringVisitorCallback;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.CriteriaImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 
 /**
  *
@@ -43,7 +43,7 @@ public class CallbackSQLStringVisitor extends SQLStringVisitorImpl {
     }
 
     @Override
-    protected void visitNode(LanguageObject languageObject) {
+    protected void visitNode(BaseLanguageObject languageObject) {
         callback.visitNode(languageObject);
     }
 
@@ -53,7 +53,7 @@ public class CallbackSQLStringVisitor extends SQLStringVisitorImpl {
     }
 
     @Override
-    protected void visitCriteria(String keyWord, Criteria criteria) {
+    protected void visitCriteria(String keyWord, CriteriaImpl criteria) {
         callback.visitCriteria(keyWord, criteria);
     }
 

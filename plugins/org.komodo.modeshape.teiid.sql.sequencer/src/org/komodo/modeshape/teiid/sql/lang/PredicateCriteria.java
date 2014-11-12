@@ -21,11 +21,11 @@
  ************************************************************************************/
 package org.komodo.modeshape.teiid.sql.lang;
 
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
 
 /**
  * Tagging interface for predicate criteria objects
  */
-public interface PredicateCriteria extends Expression {
+public interface PredicateCriteria extends BaseExpression {
     // No methods required
 }

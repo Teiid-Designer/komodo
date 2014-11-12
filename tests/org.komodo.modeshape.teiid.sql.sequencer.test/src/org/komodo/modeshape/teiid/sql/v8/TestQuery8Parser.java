@@ -26,30 +26,30 @@ import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.AbstractTestQueryParser;
-import org.komodo.modeshape.teiid.sql.lang.CompareCriteria;
-import org.komodo.modeshape.teiid.sql.lang.Criteria;
+import org.komodo.modeshape.teiid.sql.lang.CompareCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.CriteriaImpl;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator.Operator;
-import org.komodo.modeshape.teiid.sql.lang.From;
-import org.komodo.modeshape.teiid.sql.lang.MatchCriteria;
-import org.komodo.modeshape.teiid.sql.lang.Query;
-import org.komodo.modeshape.teiid.sql.lang.Select;
-import org.komodo.modeshape.teiid.sql.proc.AssignmentStatement;
-import org.komodo.modeshape.teiid.sql.proc.Block;
-import org.komodo.modeshape.teiid.sql.proc.BranchingStatement.BranchingMode;
-import org.komodo.modeshape.teiid.sql.proc.CommandStatement;
-import org.komodo.modeshape.teiid.sql.proc.CreateProcedureCommand;
-import org.komodo.modeshape.teiid.sql.proc.ExceptionExpression;
-import org.komodo.modeshape.teiid.sql.proc.IfStatement;
-import org.komodo.modeshape.teiid.sql.proc.LoopStatement;
-import org.komodo.modeshape.teiid.sql.proc.RaiseStatement;
-import org.komodo.modeshape.teiid.sql.proc.Statement;
-import org.komodo.modeshape.teiid.sql.symbol.ElementSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
-import org.komodo.modeshape.teiid.sql.symbol.Function;
-import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
-import org.komodo.modeshape.teiid.sql.symbol.JSONObject;
-import org.komodo.modeshape.teiid.sql.symbol.XMLSerialize;
+import org.komodo.modeshape.teiid.sql.lang.FromImpl;
+import org.komodo.modeshape.teiid.sql.lang.MatchCriteriaImpl;
+import org.komodo.modeshape.teiid.sql.lang.QueryImpl;
+import org.komodo.modeshape.teiid.sql.lang.SelectImpl;
+import org.komodo.modeshape.teiid.sql.proc.AssignmentStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.BlockImpl;
+import org.komodo.modeshape.teiid.sql.proc.BranchingStatementImpl.BranchingMode;
+import org.komodo.modeshape.teiid.sql.proc.CommandStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.CreateProcedureCommandImpl;
+import org.komodo.modeshape.teiid.sql.proc.ExceptionExpressionImpl;
+import org.komodo.modeshape.teiid.sql.proc.IfStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.LoopStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.RaiseStatementImpl;
+import org.komodo.modeshape.teiid.sql.proc.StatementImpl;
+import org.komodo.modeshape.teiid.sql.symbol.ElementSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
+import org.komodo.modeshape.teiid.sql.symbol.FunctionImpl;
+import org.komodo.modeshape.teiid.sql.symbol.GroupSymbolImpl;
+import org.komodo.modeshape.teiid.sql.symbol.JSONObjectImpl;
+import org.komodo.modeshape.teiid.sql.symbol.XMLSerializeImpl;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
@@ -79,30 +79,30 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testBasicSelect() {
-        GroupSymbol g = getFactory().newGroupSymbol("m.g");
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("m.g");
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Select select = getFactory().newSelect();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().newElementSymbol("a"));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         helpTest("SELECT a FROM m.g", "SELECT a FROM m.g", query);
     }
 
     @Test
     public void testSignedExpression() {
-        GroupSymbol g = getFactory().newGroupSymbol("g");
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("g");
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Function f = getFactory().newFunction("*", new Expression[] {getFactory().newConstant(-1), getFactory().newElementSymbol("x")});
-        Select select = getFactory().newSelect();
+        FunctionImpl f = getFactory().newFunction("*", new BaseExpression[] {getFactory().newConstant(-1), getFactory().newElementSymbol("x")});
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(f);
         select.addSymbol(getFactory().newElementSymbol("x"));
         select.addSymbol(getFactory().newConstant(5));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         helpTest("SELECT -x, +x, +5 FROM g",
                  "SELECT (-1 * x), x, 5 FROM g",
                  query);
@@ -110,16 +110,16 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testFloatWithE() {
-        GroupSymbol g = getFactory().newGroupSymbol("a.g1");
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("a.g1");
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Select select = getFactory().newSelect();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().newConstant(new Double(1.3e8)));
         select.addSymbol(getFactory().newConstant(new Double(-1.3e+8)));
         select.addSymbol(getFactory().newConstant(new Double(+1.3e-8)));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
 
         helpTest("SELECT 1.3e8, -1.3e+8, +1.3e-8 FROM a.g1",
                  "SELECT 1.3E8, -1.3E8, 1.3E-8 FROM a.g1",
@@ -128,18 +128,18 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testPgLike() {
-        GroupSymbol g = getFactory().newGroupSymbol("db.g");
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("db.g");
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Select select = getFactory().newSelect();
-        ElementSymbol a = getFactory().newElementSymbol("a");
+        SelectImpl select = getFactory().newSelect();
+        ElementSymbolImpl a = getFactory().newElementSymbol("a");
         select.addSymbol(a);
 
-        Expression string1 = getFactory().newConstant("\\_aString");
-        MatchCriteria crit = getFactory().newMatchCriteria(getFactory().newElementSymbol("b"), string1, '\\');
+        BaseExpression string1 = getFactory().newConstant("\\_aString");
+        MatchCriteriaImpl crit = getFactory().newMatchCriteria(getFactory().newElementSymbol("b"), string1, '\\');
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
         query.setCriteria(crit);
         helpTest("SELECT a FROM db.g WHERE b LIKE E'\\\\_aString'",
                  "SELECT a FROM db.g WHERE b LIKE '\\_aString' ESCAPE '\\'",
@@ -154,9 +154,9 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testErrorStatement() throws Exception {
-        ExceptionExpression ee = getFactory().newExceptionExpression();
+        ExceptionExpressionImpl ee = getFactory().newExceptionExpression();
         ee.setMessage(getFactory().newConstant("Test only"));
-        RaiseStatement errStmt = getFactory().newNode(ASTNodes.RAISE_STATEMENT);
+        RaiseStatementImpl errStmt = getFactory().newNode(ASTNodes.RAISE_STATEMENT);
         errStmt.setExpression(ee);
 
         helpStmtTest("ERROR 'Test only';", "RAISE SQLEXCEPTION 'Test only';",
@@ -165,11 +165,11 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testRaiseErrorStatement() throws Exception {
-        ExceptionExpression ee = getFactory().newExceptionExpression();
+        ExceptionExpressionImpl ee = getFactory().newExceptionExpression();
         ee.setMessage(getFactory().newConstant("Test only"));
         ee.setSqlState(getFactory().newConstant("100"));
         ee.setParentExpression(getFactory().newElementSymbol("e"));
-        RaiseStatement errStmt = getFactory().newNode(ASTNodes.RAISE_STATEMENT);
+        RaiseStatementImpl errStmt = getFactory().newNode(ASTNodes.RAISE_STATEMENT);
         errStmt.setExpression(ee);
         errStmt.setWarning(true);
 
@@ -179,7 +179,7 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testXmlSerialize2() throws Exception {
-        XMLSerialize f = getFactory().newXMLSerialize();
+        XMLSerializeImpl f = getFactory().newXMLSerialize();
         f.setExpression(getFactory().newElementSymbol("x"));
         f.setTypeString("BLOB");
         f.setDeclaration(Boolean.TRUE);
@@ -224,17 +224,17 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testBlockExceptionHandling() throws Exception {
-        Select select = getFactory().newSelectWithMultileElementSymbol();
-        From from = getFactory().newFrom();
+        SelectImpl select = getFactory().newSelectWithMultileElementSymbol();
+        FromImpl from = getFactory().newFrom();
         from.setClauses(Arrays.asList(getFactory().newUnaryFromClause("x")));
-        Query query = getFactory().newQuery(select, from);
-        CommandStatement cmdStmt = getFactory().newCommandStatement(query);
-        AssignmentStatement assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
-        RaiseStatement errStmt = getFactory().newNode(ASTNodes.RAISE_STATEMENT);
-        ExceptionExpression ee = getFactory().newExceptionExpression();
+        QueryImpl query = getFactory().newQuery(select, from);
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(query);
+        AssignmentStatementImpl assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
+        RaiseStatementImpl errStmt = getFactory().newNode(ASTNodes.RAISE_STATEMENT);
+        ExceptionExpressionImpl ee = getFactory().newExceptionExpression();
         ee.setMessage(getFactory().newConstant("My Error"));
         errStmt.setExpression(ee);
-        Block b = getFactory().newBlock();
+        BlockImpl b = getFactory().newBlock();
         b.setExceptionGroup("e");
         b.addStatement(cmdStmt);
         b.addStatement(assigStmt);
@@ -244,50 +244,50 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
 
     @Test
     public void testJSONObject() throws Exception {
-        JSONObject f = getFactory().newJSONObject(Arrays.asList(getFactory().newDerivedColumn("table", getFactory().newElementSymbol("a"))));
+        JSONObjectImpl f = getFactory().newJSONObject(Arrays.asList(getFactory().newDerivedColumn("table", getFactory().newElementSymbol("a"))));
         helpTestExpression("jsonObject(a as \"table\")", "JSONOBJECT(a AS \"table\")", f);
     }
 
     @Test
     public void testVirtualProcedure(){        
-        ElementSymbol x = getFactory().newElementSymbol("x");
+        ElementSymbolImpl x = getFactory().newElementSymbol("x");
         String intType = new String("integer");
-        Statement dStmt = getFactory().newDeclareStatement(x, intType);
+        StatementImpl dStmt = getFactory().newDeclareStatement(x, intType);
         
-        GroupSymbol g = getFactory().newGroupSymbol("m.g");
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("m.g");
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
         
-        Select select = getFactory().newSelect();
-        ElementSymbol c1 = getFactory().newElementSymbol("c1");
+        SelectImpl select = getFactory().newSelect();
+        ElementSymbolImpl c1 = getFactory().newElementSymbol("c1");
         select.addSymbol(c1);
         select.addSymbol(getFactory().newElementSymbol("c2"));
 
-        Query query = getFactory().newQuery(select, from);
+        QueryImpl query = getFactory().newQuery(select, from);
 
         x = getFactory().newElementSymbol("x");
         c1 = getFactory().newElementSymbol("mycursor.c1");
-        Statement assignmentStmt = getFactory().newAssignmentStatement(x, c1);
-        Block block = getFactory().newBlock();
+        StatementImpl assignmentStmt = getFactory().newAssignmentStatement(x, c1);
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(assignmentStmt);
         
-        Block ifBlock = getFactory().newBlock();
-        Statement continueStmt = getFactory().newBranchingStatement(BranchingMode.CONTINUE);
+        BlockImpl ifBlock = getFactory().newBlock();
+        StatementImpl continueStmt = getFactory().newBranchingStatement(BranchingMode.CONTINUE);
         ifBlock.addStatement(continueStmt);
-        Criteria crit = getFactory().newCompareCriteria(getFactory().newObject(x), Operator.GT,  getFactory().newConstant(new Integer(5)));
-        IfStatement ifStmt = getFactory().newIfStatement(crit, ifBlock);
+        CriteriaImpl crit = getFactory().newCompareCriteria(getFactory().newObject(x), Operator.GT,  getFactory().newConstant(new Integer(5)));
+        IfStatementImpl ifStmt = getFactory().newIfStatement(crit, ifBlock);
         block.addStatement(ifStmt);
         
         String cursor = "mycursor";
-        LoopStatement loopStmt = getFactory().newLoopStatement(block, query, cursor);
+        LoopStatementImpl loopStmt = getFactory().newLoopStatement(block, query, cursor);
         
         block = getFactory().newBlock();
         block.addStatement(dStmt);
         block.addStatement(loopStmt);
-        CommandStatement cmdStmt = getFactory().newCommandStatement(getFactory().newObject(query));
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(getFactory().newObject(query));
         block.addStatement(cmdStmt);
         
-        CreateProcedureCommand virtualProcedureCommand = getFactory().newCreateProcedureCommand();
+        CreateProcedureCommandImpl virtualProcedureCommand = getFactory().newCreateProcedureCommand();
         virtualProcedureCommand.setBlock(block);
         
         helpTest("CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; LOOP ON (SELECT c1, c2 FROM m.g) AS mycursor BEGIN x=mycursor.c1; IF(x > 5) BEGIN CONTINUE; END END SELECT c1, c2 FROM m.g; END",
@@ -303,26 +303,26 @@ public class TestQuery8Parser extends AbstractTestQueryParser {
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN IF (x > 1) select 1; IF (x > 1) select 1; ELSE select 1; END"; //$NON-NLS-1$
         String expected = "CREATE VIRTUAL PROCEDURE\nBEGIN\nIF(x > 1)\nBEGIN\nSELECT 1;\nEND\nIF(x > 1)\nBEGIN\nSELECT 1;\nEND\nELSE\nBEGIN\nSELECT 1;\nEND\nEND"; //$NON-NLS-1$
 
-        Query query = getFactory().newQuery();
-        Expression expr = getFactory().wrapExpression(getFactory().newConstant(1));
+        QueryImpl query = getFactory().newQuery();
+        BaseExpression expr = getFactory().wrapExpression(getFactory().newConstant(1));
         query.setSelect(getFactory().newSelect(Arrays.asList(expr))); 
 
-        CommandStatement commandStmt = getFactory().newCommandStatement(query);
-        CompareCriteria criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("x"), CriteriaOperator.Operator.GT, getFactory().newConstant(1)); //$NON-NLS-1$
-        Block block = getFactory().newBlock();
+        CommandStatementImpl commandStmt = getFactory().newCommandStatement(query);
+        CompareCriteriaImpl criteria = getFactory().newCompareCriteria(getFactory().newElementSymbol("x"), CriteriaOperator.Operator.GT, getFactory().newConstant(1)); //$NON-NLS-1$
+        BlockImpl block = getFactory().newBlock();
         block.addStatement(commandStmt);
         
-        IfStatement ifStmt = getFactory().newIfStatement(criteria, block);
-        IfStatement ifStmt1 = getFactory().newObject(ifStmt);
+        IfStatementImpl ifStmt = getFactory().newIfStatement(criteria, block);
+        IfStatementImpl ifStmt1 = getFactory().newObject(ifStmt);
         
-        Block block2 = getFactory().newBlock();
+        BlockImpl block2 = getFactory().newBlock();
         block2.addStatement(getFactory().newObject(commandStmt));
         ifStmt1.setElseBlock(block2);
-        Block block3 = getFactory().newBlock();
+        BlockImpl block3 = getFactory().newBlock();
         block3.addStatement(ifStmt);
         block3.addStatement(ifStmt1);
         
-        CreateProcedureCommand command = getFactory().newCreateProcedureCommand();
+        CreateProcedureCommandImpl command = getFactory().newCreateProcedureCommand();
         command.setBlock(block3);
         helpTest(sql, expected, command);
     }

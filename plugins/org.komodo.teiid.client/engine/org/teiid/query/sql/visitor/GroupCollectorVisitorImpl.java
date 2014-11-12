@@ -29,13 +29,13 @@ import java.util.HashSet;
 import org.komodo.spi.query.sql.GroupCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
-import org.teiid.query.sql.lang.Into;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.lang.SubqueryFromClause;
+import org.teiid.query.sql.lang.IntoImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.lang.SubqueryFromClauseImpl;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 import org.teiid.runtime.client.Messages;
 
 
@@ -50,15 +50,15 @@ import org.teiid.runtime.client.Messages;
  * The public visit() methods should NOT be called directly.</p>
  */
 public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
-    implements GroupCollectorVisitor<LanguageObject, GroupSymbol> {
+    implements GroupCollectorVisitor<BaseLanguageObject, GroupSymbolImpl> {
 
-    private Collection<GroupSymbol> groups;
+    private Collection<GroupSymbolImpl> groups;
 
     private boolean isIntoClauseGroup;
        
     // In some cases, set a flag to ignore groups created by a subquery from clause
     private boolean ignoreInlineViewGroups = false;
-    private Collection<GroupSymbol> inlineViewGroups;    // groups defined by a SubqueryFromClause
+    private Collection<GroupSymbolImpl> inlineViewGroups;    // groups defined by a SubqueryFromClause
 
     /**
      * Construct a new visitor with a default returning collection
@@ -67,7 +67,7 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param removeDuplicates 
      */
     public GroupCollectorVisitorImpl(TeiidVersion teiidVersion, boolean removeDuplicates) {
-        this(teiidVersion, removeDuplicates ? new HashSet<GroupSymbol>() : new ArrayList<GroupSymbol>());
+        this(teiidVersion, removeDuplicates ? new HashSet<GroupSymbolImpl>() : new ArrayList<GroupSymbolImpl>());
     }
     
     /**
@@ -77,7 +77,7 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param groups Collection to use for groups
      * @throws IllegalArgumentException If groups is null
      */
-	public GroupCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<GroupSymbol> groups) {
+	public GroupCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<GroupSymbolImpl> groups) {
 	    super(teiidVersion);
         if(groups == null) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0023));
@@ -88,13 +88,13 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
     /**
      * Get the groups collected by the visitor.  This should best be called
      * after the visitor has been run on the language object tree.
-     * @return Collection of {@link org.teiid.query.sql.symbol.GroupSymbol}
+     * @return Collection of {@link org.teiid.query.sql.symbol.GroupSymbolImpl}
      */
-    public Collection<GroupSymbol> getGroups() {
+    public Collection<GroupSymbolImpl> getGroups() {
         return this.groups;
     }
     
-    public Collection<GroupSymbol> getInlineViewGroups() {
+    public Collection<GroupSymbolImpl> getInlineViewGroups() {
         return this.inlineViewGroups;
     }
     
@@ -107,7 +107,7 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
      * called directly.
      * @param obj Language object
      */
-    public void visit(GroupSymbol obj) {
+    public void visit(GroupSymbolImpl obj) {
         if(this.isIntoClauseGroup){
             if (!obj.isTempGroupSymbol()) {
                 // This is a physical group. Collect it.
@@ -124,19 +124,19 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
      * called directly.
      * @param obj Language object
      */
-    public void visit(StoredProcedure obj) {
+    public void visit(StoredProcedureImpl obj) {
         this.groups.add(obj.getGroup());
     }
 
-    public void visit(Into obj) {
+    public void visit(IntoImpl obj) {
         this.isIntoClauseGroup = true;
     }
     
     
-    public void visit(SubqueryFromClause obj) {
+    public void visit(SubqueryFromClauseImpl obj) {
         if(this.ignoreInlineViewGroups) {
             if(this.inlineViewGroups == null) { 
-                this.inlineViewGroups = new ArrayList<GroupSymbol>();
+                this.inlineViewGroups = new ArrayList<GroupSymbolImpl>();
             }
             this.inlineViewGroups.add(obj.getGroupSymbol());
         }
@@ -147,7 +147,7 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      * @param elements Collection to collect groups in
      */
-    public static void getGroups(LanguageObject obj, Collection<GroupSymbol> groups) {
+    public static void getGroups(BaseLanguageObject obj, Collection<GroupSymbolImpl> groups) {
         GroupCollectorVisitorImpl visitor = new GroupCollectorVisitorImpl(obj.getTeiidVersion(), groups);
         PreOrderNavigator.doVisit(obj, visitor);
     }
@@ -158,14 +158,14 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
      * filtered out.
      * @param obj Language object
      * @param removeDuplicates True to remove duplicates
-     * @return Collection of {@link org.teiid.query.sql.symbol.GroupSymbol}
+     * @return Collection of {@link org.teiid.query.sql.symbol.GroupSymbolImpl}
      */
-    public static Collection<GroupSymbol> getGroups(LanguageObject obj, boolean removeDuplicates) {
-        Collection<GroupSymbol> groups = null;
+    public static Collection<GroupSymbolImpl> getGroups(BaseLanguageObject obj, boolean removeDuplicates) {
+        Collection<GroupSymbolImpl> groups = null;
         if(removeDuplicates) {
-            groups = new HashSet<GroupSymbol>();
+            groups = new HashSet<GroupSymbolImpl>();
         } else {
-            groups = new ArrayList<GroupSymbol>();
+            groups = new ArrayList<GroupSymbolImpl>();
         }
         GroupCollectorVisitorImpl visitor = new GroupCollectorVisitorImpl(obj.getTeiidVersion(), groups);
         PreOrderNavigator.doVisit(obj, visitor);
@@ -177,7 +177,7 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      * @param elements Collection to collect groups in
      */
-    public static void getGroupsIgnoreInlineViews(LanguageObject obj, Collection<GroupSymbol> groups) {
+    public static void getGroupsIgnoreInlineViews(BaseLanguageObject obj, Collection<GroupSymbolImpl> groups) {
         GroupCollectorVisitorImpl visitor = new GroupCollectorVisitorImpl(obj.getTeiidVersion(), groups);
         visitor.setIgnoreInlineViewGroups(true);
         DeepPreOrderNavigator.doVisit(obj, visitor);  
@@ -193,14 +193,14 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
      * filtered out.
      * @param obj Language object
      * @param removeDuplicates True to remove duplicates
-     * @return Collection of {@link org.teiid.query.sql.symbol.GroupSymbol}
+     * @return Collection of {@link org.teiid.query.sql.symbol.GroupSymbolImpl}
      */
-    public static Collection<GroupSymbol> getGroupsIgnoreInlineViews(LanguageObject obj, boolean removeDuplicates) {
-        Collection<GroupSymbol> groups = null;
+    public static Collection<GroupSymbolImpl> getGroupsIgnoreInlineViews(BaseLanguageObject obj, boolean removeDuplicates) {
+        Collection<GroupSymbolImpl> groups = null;
         if(removeDuplicates) { 
-            groups = new HashSet<GroupSymbol>();
+            groups = new HashSet<GroupSymbolImpl>();
         } else {
-            groups = new ArrayList<GroupSymbol>();
+            groups = new ArrayList<GroupSymbolImpl>();
         }    
         GroupCollectorVisitorImpl visitor = new GroupCollectorVisitorImpl(obj.getTeiidVersion(), groups);
         visitor.setIgnoreInlineViewGroups(true);
@@ -214,13 +214,13 @@ public class GroupCollectorVisitorImpl extends TCLanguageVisitorImpl
     }
     
     @Override
-    public Collection<GroupSymbol> findGroups(LanguageObject obj) {
+    public Collection<GroupSymbolImpl> findGroups(BaseLanguageObject obj) {
         PreOrderNavigator.doVisit(obj, this);
         return groups;
     }
     
     @Override
-    public Collection<GroupSymbol> findGroupsIgnoreInlineViews(LanguageObject obj) {
+    public Collection<GroupSymbolImpl> findGroupsIgnoreInlineViews(BaseLanguageObject obj) {
         setIgnoreInlineViewGroups(true);
         DeepPreOrderNavigator.doVisit(obj, this);  
         

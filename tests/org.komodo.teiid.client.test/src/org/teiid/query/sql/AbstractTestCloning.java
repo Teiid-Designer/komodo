@@ -25,14 +25,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.ParseInfo;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.proc.Statement;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.proc.StatementImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
 
 @SuppressWarnings( {"nls", "javadoc"} )
-public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
+public abstract class AbstractTestCloning extends AbstractTest<BaseLanguageObject> {
 
     /**
      * @param teiidVersion 
@@ -41,16 +41,16 @@ public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
         super(teiidVersion);
     }
 
-    protected void helpTest(String sql, LanguageObject expectedNode) {
+    protected void helpTest(String sql, BaseLanguageObject expectedNode) {
         helpTest(sql, sql, expectedNode);
     }
 
-    protected void helpTest(String sql, String expectedSql, LanguageObject expectedNode) {
+    protected void helpTest(String sql, String expectedSql, BaseLanguageObject expectedNode) {
         helpTest(sql, expectedSql, expectedNode, new ParseInfo());
     }
 
-    protected void helpTest(String sql, String expectedSql, LanguageObject expectedNode, ParseInfo info) {
-        LanguageObject clonedNode = null;
+    protected void helpTest(String sql, String expectedSql, BaseLanguageObject expectedNode, ParseInfo info) {
+        BaseLanguageObject clonedNode = null;
         try {
             clonedNode = expectedNode.clone();
         } catch (Throwable e) {
@@ -61,20 +61,20 @@ public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
     }
 
     protected void helpTestLiteral(Boolean expected, Class<?> expectedType, String sql, String expectedSql) {
-        Select select = getFactory().newSelect();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().wrapExpression(getFactory().newConstant(expected, expectedType)));
 
-        Query query = getFactory().newQuery();
+        QueryImpl query = getFactory().newQuery();
         query.setSelect(select);
 
         helpTest(sql, expectedSql, query);
     }
 
-    protected void helpTestExpression(String sql, String expectedString, Expression expected) throws Exception {
+    protected void helpTestExpression(String sql, String expectedString, BaseExpression expected) throws Exception {
         helpTest(sql, expectedString, expected);
     }
 
-    protected void helpStmtTest(String stmt, String expectedString, Statement expectedStmt) throws Exception {
+    protected void helpStmtTest(String stmt, String expectedString, StatementImpl expectedStmt) throws Exception {
         helpTest(stmt, expectedString, expectedStmt);
     }
 }

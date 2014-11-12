@@ -30,7 +30,7 @@ import org.teiid.query.eval.Evaluator;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.resolver.v8.Test8FunctionResolving;
-import org.teiid.query.sql.symbol.Function;
+import org.teiid.query.sql.symbol.FunctionImpl;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test85FunctionResolving extends Test8FunctionResolving {
@@ -58,7 +58,7 @@ public class Test85FunctionResolving extends Test8FunctionResolving {
 
         String sql = "func(('a', 'b'))";
 
-        Function func = (Function)getQueryParser().parseExpression(sql);
+        FunctionImpl func = (FunctionImpl)getQueryParser().parseExpression(sql);
         ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
         visitor.resolveLanguageObject(func, tm);
         assertEquals(1, func.getArgs().length);

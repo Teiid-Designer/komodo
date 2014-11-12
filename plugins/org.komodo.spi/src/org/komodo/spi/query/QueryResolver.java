@@ -24,14 +24,14 @@ package org.komodo.spi.query;
 import java.util.List;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.query.sql.lang.IExpression;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.query.sql.lang.Expression;
+import org.komodo.spi.query.sql.symbol.GroupSymbol;
 
 /**
  *
  */
-public interface QueryResolver<C extends ICommand, GS extends IGroupSymbol, E extends IExpression> {
+public interface QueryResolver<C extends Command, GS extends GroupSymbol, E extends Expression> {
 
     /**
      * @param command

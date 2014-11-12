@@ -28,9 +28,9 @@ import java.util.List;
 import org.komodo.spi.query.sql.ReferenceCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
-import org.teiid.query.sql.symbol.Reference;
+import org.teiid.query.sql.symbol.ReferenceImpl;
 
 
 /**
@@ -42,9 +42,9 @@ import org.teiid.query.sql.symbol.Reference;
  * The public visit() methods should NOT be called directly.</p>
  */
 public class ReferenceCollectorVisitorImpl extends TCLanguageVisitorImpl
-    implements ReferenceCollectorVisitor<LanguageObject, Reference> {
+    implements ReferenceCollectorVisitor<BaseLanguageObject, ReferenceImpl> {
 
-    private List<Reference> references = new ArrayList<Reference>();
+    private List<ReferenceImpl> references = new ArrayList<ReferenceImpl>();
 
     /**
      * @param teiidVersion
@@ -56,9 +56,9 @@ public class ReferenceCollectorVisitorImpl extends TCLanguageVisitorImpl
     /**
      * Get the references collected by the visitor.  This should best be called
      * after the visitor has been run on the language object tree.
-     * @return Collection of {@link org.teiid.query.sql.symbol.ElementSymbol}
+     * @return Collection of {@link org.teiid.query.sql.symbol.ElementSymbolImpl}
      */
-    public List<Reference> getReferences() {
+    public List<ReferenceImpl> getReferences() {
         return this.references;
     }
 
@@ -68,12 +68,12 @@ public class ReferenceCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(Reference obj) {
+    public void visit(ReferenceImpl obj) {
         this.references.add(obj);
     }
 
     @Override
-    public List<Reference> findReferences(LanguageObject obj) {
+    public List<ReferenceImpl> findReferences(BaseLanguageObject obj) {
         DeepPreOrderNavigator.doVisit(obj, this);
         return getReferences();
     }
@@ -81,9 +81,9 @@ public class ReferenceCollectorVisitorImpl extends TCLanguageVisitorImpl
     /**
      * Helper to quickly get the references from obj in a collection.
      * @param obj Language object
-     * @return List of {@link org.teiid.query.sql.symbol.Reference}
+     * @return List of {@link org.teiid.query.sql.symbol.ReferenceImpl}
      */
-    public static List<Reference> getReferences(LanguageObject obj) {
+    public static List<ReferenceImpl> getReferences(BaseLanguageObject obj) {
         ReferenceCollectorVisitorImpl visitor = new ReferenceCollectorVisitorImpl(obj.getTeiidVersion());
         return visitor.findReferences(obj);
     }

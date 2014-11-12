@@ -32,8 +32,8 @@ import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.metadata.Table;
 import org.teiid.query.metadata.TempMetadataAdapter;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.lang.ProcedureContainer;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.runtime.client.TeiidClientException;
@@ -48,7 +48,7 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
         super(teiidVersion);
     }
 
-    protected Command resolveProcedure(String userUpdateStr, QueryMetadataInterface metadata) throws Exception {
+    protected CommandImpl resolveProcedure(String userUpdateStr, QueryMetadataInterface metadata) throws Exception {
         ProcedureContainer userCommand = (ProcedureContainer)getQueryParser().parseCommand(userUpdateStr);
         TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(userCommand, metadata);
@@ -56,7 +56,7 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
         return queryResolver.expandCommand(userCommand, metadata);
     }
 
-    protected Command helpResolve(Command command, QueryMetadataInterface queryMetadataInterface) {       
+    protected CommandImpl helpResolve(CommandImpl command, QueryMetadataInterface queryMetadataInterface) {       
         // resolve
         try { 
             TCQueryResolver resolver = new TCQueryResolver(getTeiidVersion());
@@ -67,13 +67,13 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
 
         CheckSymbolsAreResolvedVisitor vis = new CheckSymbolsAreResolvedVisitor(getTeiidVersion());
         DeepPreOrderNavigator.doVisit(command, vis);
-        Collection<LanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
+        Collection<BaseLanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
         assertTrue("Found unresolved symbols: " + unresolvedSymbols, unresolvedSymbols.isEmpty()); //$NON-NLS-1$
         return command; 
     }
 
-    protected Command helpResolve(String sql, QueryMetadataInterface queryMetadata) throws Exception {
-        Command command = getQueryParser().parseCommand(sql);
+    protected CommandImpl helpResolve(String sql, QueryMetadataInterface queryMetadata) throws Exception {
+        CommandImpl command = getQueryParser().parseCommand(sql);
         return helpResolve(command, queryMetadata);
     }
 
@@ -90,7 +90,7 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
         helpFailUpdateProcedure(procedure, userUpdateStr, procedureType, null);
     }
 
-    protected abstract Command helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType)
+    protected abstract CommandImpl helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType)
         throws Exception;
 
     protected void helpFailUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType, String msg) {

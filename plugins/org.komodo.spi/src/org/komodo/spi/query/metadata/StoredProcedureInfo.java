@@ -23,14 +23,14 @@ package org.komodo.spi.query.metadata;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.lang.ISPParameter;
+import org.komodo.spi.query.sql.lang.SPParameter;
 
 /**
 * This class encapsulates everything needed to pass between runtime metadata
 * and the QueryResolver via the facades
 */
 
-public interface StoredProcedureInfo<P extends ISPParameter, Q extends QueryNode> {
+public interface StoredProcedureInfo<P extends SPParameter, Q extends QueryNode> {
 
     String getProcedureCallableName();
     

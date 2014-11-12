@@ -30,11 +30,11 @@ import org.komodo.spi.query.sql.FunctionCollectorVisitor;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.metadata.FunctionMethod.Determinism;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Function;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.FunctionImpl;
 import org.teiid.runtime.client.Messages;
 
 
@@ -51,9 +51,9 @@ import org.teiid.runtime.client.Messages;
  * The public visit() methods should NOT be called directly.</p>
  */
 public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
-    implements FunctionCollectorVisitor<LanguageObject, Function> {    
+    implements FunctionCollectorVisitor<BaseLanguageObject, FunctionImpl> {    
 
-    private Collection<Function> functions;
+    private Collection<FunctionImpl> functions;
     
     private String functionName;
 
@@ -64,7 +64,7 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param removeDuplicates 
      */
     public FunctionCollectorVisitorImpl(TeiidVersion teiidVersion, boolean removeDuplicates) {
-        this(teiidVersion, removeDuplicates ? new HashSet<Function>() : new ArrayList<Function>());
+        this(teiidVersion, removeDuplicates ? new HashSet<FunctionImpl>() : new ArrayList<FunctionImpl>());
     }
     
     /**
@@ -75,7 +75,7 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param functions
      * @throws IllegalArgumentException If elements is null
      */
-	public FunctionCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<Function> functions) {
+	public FunctionCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<FunctionImpl> functions) {
         this(teiidVersion, functions, null);
 	}
 
@@ -89,7 +89,7 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
      *
      * @throws IllegalArgumentException If elements is null
      */
-    public FunctionCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<Function> functions, String functionName) {
+    public FunctionCollectorVisitorImpl(TeiidVersion teiidVersion, Collection<FunctionImpl> functions, String functionName) {
         super(teiidVersion);
         if(functions == null) {
             throw new IllegalArgumentException(Messages.getString(Messages.ERR.ERR_015_010_0022));
@@ -101,9 +101,9 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
     /**
      * Get the elements collected by the visitor.  This should best be called
      * after the visitor has been run on the language object tree.
-     * @return Collection of {@link ElementSymbol}
+     * @return Collection of {@link ElementSymbolImpl}
      */
-    public Collection<Function> getFunctions() {
+    public Collection<FunctionImpl> getFunctions() {
         return this.functions;
     }
 
@@ -113,14 +113,14 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      */
     @Override
-    public void visit(Function obj) {
+    public void visit(FunctionImpl obj) {
         if (this.functionName == null || obj.getName().equalsIgnoreCase(this.functionName)) {
             this.functions.add(obj);
         }
     }
     
     @Override
-    public Collection<Function> findFunctions(LanguageObject obj, boolean deep) {
+    public Collection<FunctionImpl> findFunctions(BaseLanguageObject obj, boolean deep) {
         if (!deep) {
             PreOrderNavigator.doVisit(obj, this);
         } else {
@@ -135,7 +135,7 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj Language object
      * @param functions Collection to collect elements in
      */
-    public static final void getFunctions(LanguageObject obj, Collection<Function> functions) {
+    public static final void getFunctions(BaseLanguageObject obj, Collection<FunctionImpl> functions) {
         getFunctions(obj, functions, false);
     }
     
@@ -146,7 +146,7 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param functions Collection to collect elements in
      * @param deep
      */
-    public static final void getFunctions(LanguageObject obj, Collection<Function> functions, boolean deep) {
+    public static final void getFunctions(BaseLanguageObject obj, Collection<FunctionImpl> functions, boolean deep) {
         FunctionCollectorVisitorImpl visitor = new FunctionCollectorVisitorImpl(obj.getTeiidVersion(), functions);
         visitor.findFunctions(obj, deep);
     }
@@ -158,9 +158,9 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
      *
      * @param obj Language object
      * @param removeDuplicates True to remove duplicates
-     * @return Collection of {@link ElementSymbol}
+     * @return Collection of {@link ElementSymbolImpl}
      */
-    public static final Collection<Function> getFunctions(LanguageObject obj, boolean removeDuplicates) {
+    public static final Collection<FunctionImpl> getFunctions(BaseLanguageObject obj, boolean removeDuplicates) {
         return getFunctions(obj, removeDuplicates, false);
     }
 
@@ -172,14 +172,14 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
      * @param obj
      * @param removeDuplicates
      * @param deep
-     * @return Collection of {@link ElementSymbol}
+     * @return Collection of {@link ElementSymbolImpl}
      */
-    public static final Collection<Function> getFunctions(LanguageObject obj, boolean removeDuplicates, boolean deep) {
-        Collection<Function> functions = null;
+    public static final Collection<FunctionImpl> getFunctions(BaseLanguageObject obj, boolean removeDuplicates, boolean deep) {
+        Collection<FunctionImpl> functions = null;
         if(removeDuplicates) {
-            functions = new HashSet<Function>();
+            functions = new HashSet<FunctionImpl>();
         } else {
-            functions = new ArrayList<Function>();
+            functions = new ArrayList<FunctionImpl>();
         }
         getFunctions(obj, functions, deep);
         return functions;
@@ -189,9 +189,9 @@ public class FunctionCollectorVisitorImpl extends TCLanguageVisitorImpl
 	 * @param ex
 	 * @return true if non deterministic
 	 */
-	public static boolean isNonDeterministic(LanguageObject ex) {
-		Collection<Function> functions = FunctionCollectorVisitorImpl.getFunctions(ex, true, false);
-		for (Function function : functions) {
+	public static boolean isNonDeterministic(BaseLanguageObject ex) {
+		Collection<FunctionImpl> functions = FunctionCollectorVisitorImpl.getFunctions(ex, true, false);
+		for (FunctionImpl function : functions) {
 			if ( function.getFunctionDescriptor().getDeterministic() == Determinism.NONDETERMINISTIC) {
 				return true;
 			}

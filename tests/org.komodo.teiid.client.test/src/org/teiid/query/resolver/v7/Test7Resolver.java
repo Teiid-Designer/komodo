@@ -36,16 +36,16 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestResolver;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.ProcedureReservedWords;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateUpdateProcedureCommand;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateUpdateProcedureCommandImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.SymbolImpl;
 import org.teiid.query.sql.v7.Test7Factory;
 
 /**
@@ -73,7 +73,7 @@ public class Test7Resolver extends AbstractTestResolver {
 
     @Test
     public void testSelectExpressions() {
-        Query resolvedQuery = (Query)helpResolve("SELECT e1, concat(e1, 's'), concat(e1, 's') as c FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT e1, concat(e1, 's'), concat(e1, 's') as c FROM pm1.g1"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1", "expr", "c"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1", "pm1.g1.e1", "pm1.g1.e1"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -82,7 +82,7 @@ public class Test7Resolver extends AbstractTestResolver {
 
     @Test
     public void testSelectCountStar() {
-        Query resolvedQuery = (Query)helpResolve("SELECT count(*) FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT count(*) FROM pm1.g1"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"count"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {}, new String[] {});
@@ -99,7 +99,7 @@ public class Test7Resolver extends AbstractTestResolver {
         bindings.add("pm1.g2.e1"); //$NON-NLS-1$
         bindings.add("pm1.g2.e2"); //$NON-NLS-1$
 
-        Query resolvedQuery = (Query)helpResolveWithBindings("SELECT pm1.g1.e1, ? FROM pm1.g1 WHERE pm1.g1.e1 = ?", metadata, bindings); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolveWithBindings("SELECT pm1.g1.e1, ? FROM pm1.g1 WHERE pm1.g1.e1 = ?", metadata, bindings); //$NON-NLS-1$
 
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1", "expr"}); //$NON-NLS-1$ //$NON-NLS-2$
@@ -110,22 +110,22 @@ public class Test7Resolver extends AbstractTestResolver {
 
     @Test
     public void testStoredQuery1() {
-        StoredProcedure proc = (StoredProcedure)helpResolve("EXEC pm1.sq2('abc')"); //$NON-NLS-1$
+        StoredProcedureImpl proc = (StoredProcedureImpl)helpResolve("EXEC pm1.sq2('abc')"); //$NON-NLS-1$
 
         // Check number of resolved parameters
-        Collection<SPParameter> params = proc.getParameters();
+        Collection<SPParameterImpl> params = proc.getParameters();
         assertEquals("Did not get expected parameter count", 2, proc.getParameterCount()); //$NON-NLS-1$
 
         // Check resolved parameters
-        Iterator<SPParameter> iterator = params.iterator();
-        SPParameter param1 = iterator.next();
+        Iterator<SPParameterImpl> iterator = params.iterator();
+        SPParameterImpl param1 = iterator.next();
         helpCheckParameter(param1,
-                           SPParameter.IN,
+                           SPParameterImpl.IN,
                            1,
                            "pm1.sq2.in", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), getFactory().newConstant("abc")); //$NON-NLS-1$ //$NON-NLS-2$
 
-        SPParameter param2 = iterator.next();
-        helpCheckParameter(param2, SPParameter.RESULT_SET, 2, "pm1.sq2.ret", java.sql.ResultSet.class, null); //$NON-NLS-1$
+        SPParameterImpl param2 = iterator.next();
+        helpCheckParameter(param2, SPParameterImpl.RESULT_SET, 2, "pm1.sq2.ret", java.sql.ResultSet.class, null); //$NON-NLS-1$
     }
 
     /**
@@ -139,23 +139,23 @@ public class Test7Resolver extends AbstractTestResolver {
      */
     @Test
     public void testStoredQueryParamOrdering_8211() {
-        StoredProcedure proc = (StoredProcedure)helpResolve("EXEC pm1.sq3a('abc', 123)"); //$NON-NLS-1$
+        StoredProcedureImpl proc = (StoredProcedureImpl)helpResolve("EXEC pm1.sq3a('abc', 123)"); //$NON-NLS-1$
 
      // Check number of resolved parameters
-        Collection<SPParameter> params = proc.getParameters();
+        Collection<SPParameterImpl> params = proc.getParameters();
         assertEquals("Did not get expected parameter count", 3, params.size()); //$NON-NLS-1$
 
         // Check resolved parameters
-        Iterator<SPParameter> parameters = params.iterator();
-        SPParameter param1 = parameters.next();
+        Iterator<SPParameterImpl> parameters = params.iterator();
+        SPParameterImpl param1 = parameters.next();
         helpCheckParameter(param1,
-                           SPParameter.IN,
+                           SPParameterImpl.IN,
                            1,
                            "pm1.sq3a.in", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), getFactory().newConstant("abc")); //$NON-NLS-1$ //$NON-NLS-2$
 
-        SPParameter param2 = parameters.next();
+        SPParameterImpl param2 = parameters.next();
         helpCheckParameter(param2,
-                           SPParameter.IN,
+                           SPParameterImpl.IN,
                            2,
                            "pm1.sq3a.in2", DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), getFactory().newConstant(new Integer(123))); //$NON-NLS-1$
     }
@@ -170,7 +170,7 @@ public class Test7Resolver extends AbstractTestResolver {
 
         String userUpdateStr = "UPDATE vm1.g1 SET e2=40"; //$NON-NLS-1$
 
-        Command command = helpResolveUpdateProcedure(procedure, userUpdateStr);
+        CommandImpl command = helpResolveUpdateProcedure(procedure, userUpdateStr);
         assertEquals("CREATE PROCEDURE\nBEGIN\nDECLARE integer var1;\nROWS_UPDATED = (SELECT pm1.g1.e2 FROM pm1.g1 WHERE e2 = INPUTS.e2);\nEND",
                      command.toString());
     }
@@ -178,7 +178,7 @@ public class Test7Resolver extends AbstractTestResolver {
     @Test
     public void testCaseOverInlineView() throws Exception {
         String sql = "SELECT CASE WHEN x > 0 THEN 1.0 ELSE 2.0 END FROM (SELECT e2 AS x FROM pm1.g1) AS g"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
         verifyProjectedTypes(c, new Class[] {Double.class});
     }
@@ -191,14 +191,14 @@ public class Test7Resolver extends AbstractTestResolver {
                      + "select * from xmltest.doc1 where node1 = x; " //$NON-NLS-1$
                      + "end "; //$NON-NLS-1$
 
-        CreateUpdateProcedureCommand command = (CreateUpdateProcedureCommand)helpResolve(sql);
+        CreateUpdateProcedureCommandImpl command = (CreateUpdateProcedureCommandImpl)helpResolve(sql);
 
-        CommandStatement cmdStmt = (CommandStatement)command.getBlock().getStatements().get(1);
+        CommandStatementImpl cmdStmt = (CommandStatementImpl)command.getBlock().getStatements().get(1);
 
-        CompareCriteria criteria = (CompareCriteria)((Query)cmdStmt.getCommand()).getCriteria();
+        CompareCriteriaImpl criteria = (CompareCriteriaImpl)((QueryImpl)cmdStmt.getCommand()).getCriteria();
 
         assertEquals(ProcedureReservedWords.VARIABLES,
-                     ((ElementSymbol)criteria.getRightExpression()).getGroupSymbol().getCanonicalName());
+                     ((ElementSymbolImpl)criteria.getRightExpression()).getGroupSymbol().getCanonicalName());
     }
 
     @Test
@@ -243,7 +243,7 @@ public class Test7Resolver extends AbstractTestResolver {
         .append("\n  insert into #matt values (1);") //$NON-NLS-1$
         .append("\nEND"); //$NON-NLS-1$
 
-        Command cmd = helpResolve(proc.toString());
+        CommandImpl cmd = helpResolve(proc.toString());
 
         String sExpected = "CREATE VIRTUAL PROCEDURE\nBEGIN\nCREATE LOCAL TEMPORARY TABLE #matt (x integer);\nINSERT INTO #matt (#matt.x) VALUES (1);\nEND\n\tCREATE LOCAL TEMPORARY TABLE #matt (x integer)\n\tINSERT INTO #matt (#matt.x) VALUES (1)\n"; //$NON-NLS-1$
         String sActual = cmd.printCommandTree();
@@ -253,12 +253,12 @@ public class Test7Resolver extends AbstractTestResolver {
     //return should be first, then out
     @Test
     public void testParamOrder() {
-        Query resolvedQuery = (Query)helpResolve("SELECT * FROM (exec pm4.spRetOut()) as a", getMetadataFactory().exampleBQTCached()); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT * FROM (exec pm4.spRetOut()) as a", getMetadataFactory().exampleBQTCached()); //$NON-NLS-1$
 
-        List<Expression> projectedSymbols = resolvedQuery.getProjectedSymbols();
+        List<BaseExpression> projectedSymbols = resolvedQuery.getProjectedSymbols();
         assertFalse(projectedSymbols.isEmpty());
-        Expression symbol = projectedSymbols.get(0);
-        assertTrue(symbol instanceof Symbol);
-        assertEquals("a.ret", ((Symbol) symbol).getName());
+        BaseExpression symbol = projectedSymbols.get(0);
+        assertTrue(symbol instanceof SymbolImpl);
+        assertEquals("a.ret", ((SymbolImpl) symbol).getName());
     }
 }

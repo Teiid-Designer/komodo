@@ -54,7 +54,7 @@ public class TeiidNodeFactory {
 	 *
 	 * @generated
 	 */
-	public static LanguageObject jjtCreate(TeiidSeqParser teiidParser, int nodeType) {
+	public static BaseLanguageObject jjtCreate(TeiidSeqParser teiidParser, int nodeType) {
 		return getInstance().create(teiidParser, nodeType);
 	}
 
@@ -68,7 +68,7 @@ public class TeiidNodeFactory {
 	 *
 	 * @generated
 	 */
-	public <T extends LanguageObject> T create(TeiidSeqParser teiidParser, ASTNodes nodeType) {
+	public <T extends BaseLanguageObject> T create(TeiidSeqParser teiidParser, ASTNodes nodeType) {
 
 		for (int i = 0; i < TeiidSequencingParserTreeConstants.jjtNodeName.length; ++i) {
 			String constantName = TeiidSequencingParserTreeConstants.jjtNodeName[i];
@@ -90,409 +90,409 @@ public class TeiidNodeFactory {
 		 * TriggerAction
 		 * @generated
 		 */
-		TRIGGER_ACTION("TriggerAction"), //$NON-NLS-1$
+		TRIGGER_ACTION("TriggerActionImpl"), //$NON-NLS-1$
 
 		/**
 		 * RaiseStatement
 		 * @generated
 		 */
-		RAISE_STATEMENT("RaiseStatement"), //$NON-NLS-1$
+		RAISE_STATEMENT("RaiseStatementImpl"), //$NON-NLS-1$
 
 		/**
 		 * ExceptionExpression
 		 * @generated
 		 */
-		EXCEPTION_EXPRESSION("ExceptionExpression"), //$NON-NLS-1$
+		EXCEPTION_EXPRESSION("ExceptionExpressionImpl"), //$NON-NLS-1$
 
 		/**
 		 * BranchingStatement
 		 * @generated
 		 */
-		BRANCHING_STATEMENT("BranchingStatement"), //$NON-NLS-1$
+		BRANCHING_STATEMENT("BranchingStatementImpl"), //$NON-NLS-1$
 
 		/**
 		 * ReturnStatement
 		 * @generated
 		 */
-		RETURN_STATEMENT("ReturnStatement"), //$NON-NLS-1$
+		RETURN_STATEMENT("ReturnStatementImpl"), //$NON-NLS-1$
 
 		/**
 		 * WhileStatement
 		 * @generated
 		 */
-		WHILE_STATEMENT("WhileStatement"), //$NON-NLS-1$
+		WHILE_STATEMENT("WhileStatementImpl"), //$NON-NLS-1$
 
 		/**
 		 * LoopStatement
 		 * @generated
 		 */
-		LOOP_STATEMENT("LoopStatement"), //$NON-NLS-1$
+		LOOP_STATEMENT("LoopStatementImpl"), //$NON-NLS-1$
 
 		/**
 		 * IfStatement
 		 * @generated
 		 */
-		IF_STATEMENT("IfStatement"), //$NON-NLS-1$
+		IF_STATEMENT("IfStatementImpl"), //$NON-NLS-1$
 
 		/**
 		 * DeclareStatement
 		 * @generated
 		 */
-		DECLARE_STATEMENT("DeclareStatement"), //$NON-NLS-1$
+		DECLARE_STATEMENT("DeclareStatementImpl"), //$NON-NLS-1$
 
 		/**
 		 * CommandStatement
 		 * @generated
 		 */
-		COMMAND_STATEMENT("CommandStatement"), //$NON-NLS-1$
+		COMMAND_STATEMENT("CommandStatementImpl"), //$NON-NLS-1$
 
 		/**
 		 * CreateProcedureCommand
 		 * @generated
 		 */
-		CREATE_PROCEDURE_COMMAND("CreateProcedureCommand"), //$NON-NLS-1$
+		CREATE_PROCEDURE_COMMAND("CreateProcedureCommandImpl"), //$NON-NLS-1$
 
 		/**
 		 * DynamicCommand
 		 * @generated
 		 */
-		DYNAMIC_COMMAND("DynamicCommand"), //$NON-NLS-1$
+		DYNAMIC_COMMAND("DynamicCommandImpl"), //$NON-NLS-1$
 
 		/**
 		 * SetClauseList
 		 * @generated
 		 */
-		SET_CLAUSE_LIST("SetClauseList"), //$NON-NLS-1$
+		SET_CLAUSE_LIST("SetClauseListImpl"), //$NON-NLS-1$
 
 		/**
 		 * SetClause
 		 * @generated
 		 */
-		SET_CLAUSE("SetClause"), //$NON-NLS-1$
+		SET_CLAUSE("SetClauseImpl"), //$NON-NLS-1$
 
 		/**
 		 * ProjectedColumn
 		 * @generated
 		 */
-		PROJECTED_COLUMN("ProjectedColumn"), //$NON-NLS-1$
+		PROJECTED_COLUMN("ProjectedColumnImpl"), //$NON-NLS-1$
 
 		/**
 		 * StoredProcedure
 		 * @generated
 		 */
-		STORED_PROCEDURE("StoredProcedure"), //$NON-NLS-1$
+		STORED_PROCEDURE("StoredProcedureImpl"), //$NON-NLS-1$
 
 		/**
 		 * Insert
 		 * @generated
 		 */
-		INSERT("Insert"), //$NON-NLS-1$
+		INSERT("InsertImpl"), //$NON-NLS-1$
 
 		/**
 		 * Update
 		 * @generated
 		 */
-		UPDATE("Update"), //$NON-NLS-1$
+		UPDATE("UpdateImpl"), //$NON-NLS-1$
 
 		/**
 		 * Delete
 		 * @generated
 		 */
-		DELETE("Delete"), //$NON-NLS-1$
+		DELETE("DeleteImpl"), //$NON-NLS-1$
 
 		/**
 		 * WithQueryCommand
 		 * @generated
 		 */
-		WITH_QUERY_COMMAND("WithQueryCommand"), //$NON-NLS-1$
+		WITH_QUERY_COMMAND("WithQueryCommandImpl"), //$NON-NLS-1$
 
 		/**
 		 * SetQuery
 		 * @generated
 		 */
-		SET_QUERY("SetQuery"), //$NON-NLS-1$
+		SET_QUERY("SetQueryImpl"), //$NON-NLS-1$
 
 		/**
 		 * Query
 		 * @generated
 		 */
-		QUERY("Query"), //$NON-NLS-1$
+		QUERY("QueryImpl"), //$NON-NLS-1$
 
 		/**
 		 * Into
 		 * @generated
 		 */
-		INTO("Into"), //$NON-NLS-1$
+		INTO("IntoImpl"), //$NON-NLS-1$
 
 		/**
 		 * Select
 		 * @generated
 		 */
-		SELECT("Select"), //$NON-NLS-1$
+		SELECT("SelectImpl"), //$NON-NLS-1$
 
 		/**
 		 * ExpressionSymbol
 		 * @generated
 		 */
-		EXPRESSION_SYMBOL("ExpressionSymbol"), //$NON-NLS-1$
+		EXPRESSION_SYMBOL("ExpressionSymbolImpl"), //$NON-NLS-1$
 
 		/**
 		 * DerivedColumn
 		 * @generated
 		 */
-		DERIVED_COLUMN("DerivedColumn"), //$NON-NLS-1$
+		DERIVED_COLUMN("DerivedColumnImpl"), //$NON-NLS-1$
 
 		/**
 		 * MultipleElementSymbol
 		 * @generated
 		 */
-		MULTIPLE_ELEMENT_SYMBOL("MultipleElementSymbol"), //$NON-NLS-1$
+		MULTIPLE_ELEMENT_SYMBOL("MultipleElementSymbolImpl"), //$NON-NLS-1$
 
 		/**
 		 * From
 		 * @generated
 		 */
-		FROM("From"), //$NON-NLS-1$
+		FROM("FromImpl"), //$NON-NLS-1$
 
 		/**
 		 * JoinPredicate
 		 * @generated
 		 */
-		JOIN_PREDICATE("JoinPredicate"), //$NON-NLS-1$
+		JOIN_PREDICATE("JoinPredicateImpl"), //$NON-NLS-1$
 
 		/**
 		 * JoinType
 		 * @generated
 		 */
-		JOIN_TYPE("JoinType"), //$NON-NLS-1$
+		JOIN_TYPE("JoinTypeImpl"), //$NON-NLS-1$
 
 		/**
 		 * XMLSerialize
 		 * @generated
 		 */
-		XML_SERIALIZE("XMLSerialize"), //$NON-NLS-1$
+		XML_SERIALIZE("XMLSerializeImpl"), //$NON-NLS-1$
 
 		/**
 		 * ArrayTable
 		 * @generated
 		 */
-		ARRAY_TABLE("ArrayTable"), //$NON-NLS-1$
+		ARRAY_TABLE("ArrayTableImpl"), //$NON-NLS-1$
 
 		/**
 		 * TextTable
 		 * @generated
 		 */
-		TEXT_TABLE("TextTable"), //$NON-NLS-1$
+		TEXT_TABLE("TextTableImpl"), //$NON-NLS-1$
 
 		/**
 		 * TextColumn
 		 * @generated
 		 */
-		TEXT_COLUMN("TextColumn"), //$NON-NLS-1$
+		TEXT_COLUMN("TextColumnImpl"), //$NON-NLS-1$
 
 		/**
 		 * XMLQuery
 		 * @generated
 		 */
-		XML_QUERY("XMLQuery"), //$NON-NLS-1$
+		XML_QUERY("XMLQueryImpl"), //$NON-NLS-1$
 
 		/**
 		 * ObjectTable
 		 * @generated
 		 */
-		OBJECT_TABLE("ObjectTable"), //$NON-NLS-1$
+		OBJECT_TABLE("ObjectTableImpl"), //$NON-NLS-1$
 
 		/**
 		 * ObjectColumn
 		 * @generated
 		 */
-		OBJECT_COLUMN("ObjectColumn"), //$NON-NLS-1$
+		OBJECT_COLUMN("ObjectColumnImpl"), //$NON-NLS-1$
 
 		/**
 		 * XMLTable
 		 * @generated
 		 */
-		XML_TABLE("XMLTable"), //$NON-NLS-1$
+		XML_TABLE("XMLTableImpl"), //$NON-NLS-1$
 
 		/**
 		 * XMLColumn
 		 * @generated
 		 */
-		XML_COLUMN("XMLColumn"), //$NON-NLS-1$
+		XML_COLUMN("XMLColumnImpl"), //$NON-NLS-1$
 
 		/**
 		 * SubqueryFromClause
 		 * @generated
 		 */
-		SUBQUERY_FROM_CLAUSE("SubqueryFromClause"), //$NON-NLS-1$
+		SUBQUERY_FROM_CLAUSE("SubqueryFromClauseImpl"), //$NON-NLS-1$
 
 		/**
 		 * UnaryFromClause
 		 * @generated
 		 */
-		UNARY_FROM_CLAUSE("UnaryFromClause"), //$NON-NLS-1$
+		UNARY_FROM_CLAUSE("UnaryFromClauseImpl"), //$NON-NLS-1$
 
 		/**
 		 * Criteria
 		 * @generated
 		 */
-		CRITERIA("Criteria"), //$NON-NLS-1$
+		CRITERIA("CriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * CompoundCriteria
 		 * @generated
 		 */
-		COMPOUND_CRITERIA("CompoundCriteria"), //$NON-NLS-1$
+		COMPOUND_CRITERIA("CompoundCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * NotCriteria
 		 * @generated
 		 */
-		NOT_CRITERIA("NotCriteria"), //$NON-NLS-1$
+		NOT_CRITERIA("NotCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * CompareCriteria
 		 * @generated
 		 */
-		COMPARE_CRITERIA("CompareCriteria"), //$NON-NLS-1$
+		COMPARE_CRITERIA("CompareCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * SubqueryCompareCriteria
 		 * @generated
 		 */
-		SUBQUERY_COMPARE_CRITERIA("SubqueryCompareCriteria"), //$NON-NLS-1$
+		SUBQUERY_COMPARE_CRITERIA("SubqueryCompareCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * MatchCriteria
 		 * @generated
 		 */
-		MATCH_CRITERIA("MatchCriteria"), //$NON-NLS-1$
+		MATCH_CRITERIA("MatchCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * BetweenCriteria
 		 * @generated
 		 */
-		BETWEEN_CRITERIA("BetweenCriteria"), //$NON-NLS-1$
+		BETWEEN_CRITERIA("BetweenCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * IsNullCriteria
 		 * @generated
 		 */
-		IS_NULL_CRITERIA("IsNullCriteria"), //$NON-NLS-1$
+		IS_NULL_CRITERIA("IsNullCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * SubquerySetCriteria
 		 * @generated
 		 */
-		SUBQUERY_SET_CRITERIA("SubquerySetCriteria"), //$NON-NLS-1$
+		SUBQUERY_SET_CRITERIA("SubquerySetCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * SetCriteria
 		 * @generated
 		 */
-		SET_CRITERIA("SetCriteria"), //$NON-NLS-1$
+		SET_CRITERIA("SetCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * ExistsCriteria
 		 * @generated
 		 */
-		EXISTS_CRITERIA("ExistsCriteria"), //$NON-NLS-1$
+		EXISTS_CRITERIA("ExistsCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * GroupBy
 		 * @generated
 		 */
-		GROUP_BY("GroupBy"), //$NON-NLS-1$
+		GROUP_BY("GroupByImpl"), //$NON-NLS-1$
 
 		/**
 		 * OrderBy
 		 * @generated
 		 */
-		ORDER_BY("OrderBy"), //$NON-NLS-1$
+		ORDER_BY("OrderByImpl"), //$NON-NLS-1$
 
 		/**
 		 * OrderByItem
 		 * @generated
 		 */
-		ORDER_BY_ITEM("OrderByItem"), //$NON-NLS-1$
+		ORDER_BY_ITEM("OrderByItemImpl"), //$NON-NLS-1$
 
 		/**
 		 * Limit
 		 * @generated
 		 */
-		LIMIT("Limit"), //$NON-NLS-1$
+		LIMIT("LimitImpl"), //$NON-NLS-1$
 
 		/**
 		 * Option
 		 * @generated
 		 */
-		OPTION("Option"), //$NON-NLS-1$
+		OPTION("OptionImpl"), //$NON-NLS-1$
 
 		/**
 		 * Reference
 		 * @generated
 		 */
-		REFERENCE("Reference"), //$NON-NLS-1$
+		REFERENCE("ReferenceImpl"), //$NON-NLS-1$
 
 		/**
 		 * CaseExpression
 		 * @generated
 		 */
-		CASE_EXPRESSION("CaseExpression"), //$NON-NLS-1$
+		CASE_EXPRESSION("CaseExpressionImpl"), //$NON-NLS-1$
 
 		/**
 		 * SearchedCaseExpression
 		 * @generated
 		 */
-		SEARCHED_CASE_EXPRESSION("SearchedCaseExpression"), //$NON-NLS-1$
+		SEARCHED_CASE_EXPRESSION("SearchedCaseExpressionImpl"), //$NON-NLS-1$
 
 		/**
 		 * Function
 		 * @generated
 		 */
-		FUNCTION("Function"), //$NON-NLS-1$
+		FUNCTION("FunctionImpl"), //$NON-NLS-1$
 
 		/**
 		 * XMLParse
 		 * @generated
 		 */
-		XML_PARSE("XMLParse"), //$NON-NLS-1$
+		XML_PARSE("XMLParseImpl"), //$NON-NLS-1$
 
 		/**
 		 * QueryString
 		 * @generated
 		 */
-		QUERY_STRING("QueryString"), //$NON-NLS-1$
+		QUERY_STRING("QueryStringImpl"), //$NON-NLS-1$
 
 		/**
 		 * XMLElement
 		 * @generated
 		 */
-		XML_ELEMENT("XMLElement"), //$NON-NLS-1$
+		XML_ELEMENT("XMLElementImpl"), //$NON-NLS-1$
 
 		/**
 		 * XMLAttributes
 		 * @generated
 		 */
-		XML_ATTRIBUTES("XMLAttributes"), //$NON-NLS-1$
+		XML_ATTRIBUTES("XMLAttributesImpl"), //$NON-NLS-1$
 
 		/**
 		 * JSONObject
 		 * @generated
 		 */
-		JSON_OBJECT("JSONObject"), //$NON-NLS-1$
+		JSON_OBJECT("JSONObjectImpl"), //$NON-NLS-1$
 
 		/**
 		 * XMLForest
 		 * @generated
 		 */
-		XML_FOREST("XMLForest"), //$NON-NLS-1$
+		XML_FOREST("XMLForestImpl"), //$NON-NLS-1$
 
 		/**
 		 * XMLNamespaces
 		 * @generated
 		 */
-		XML_NAMESPACES("XMLNamespaces"), //$NON-NLS-1$
+		XML_NAMESPACES("XMLNamespacesImpl"), //$NON-NLS-1$
 
 		/**
 		 * NamespaceItem
@@ -504,109 +504,109 @@ public class TeiidNodeFactory {
 		 * AssignmentStatement
 		 * @generated
 		 */
-		ASSIGNMENT_STATEMENT("AssignmentStatement"), //$NON-NLS-1$
+		ASSIGNMENT_STATEMENT("AssignmentStatementImpl"), //$NON-NLS-1$
 
 		/**
 		 * ScalarSubquery
 		 * @generated
 		 */
-		SCALAR_SUBQUERY("ScalarSubquery"), //$NON-NLS-1$
+		SCALAR_SUBQUERY("ScalarSubqueryImpl"), //$NON-NLS-1$
 
 		/**
 		 * GroupSymbol
 		 * @generated
 		 */
-		GROUP_SYMBOL("GroupSymbol"), //$NON-NLS-1$
+		GROUP_SYMBOL("GroupSymbolImpl"), //$NON-NLS-1$
 
 		/**
 		 * Constant
 		 * @generated
 		 */
-		CONSTANT("Constant"), //$NON-NLS-1$
+		CONSTANT("ConstantImpl"), //$NON-NLS-1$
 
 		/**
 		 * ElementSymbol
 		 * @generated
 		 */
-		ELEMENT_SYMBOL("ElementSymbol"), //$NON-NLS-1$
+		ELEMENT_SYMBOL("ElementSymbolImpl"), //$NON-NLS-1$
 
 		/**
 		 * Block
 		 * @generated
 		 */
-		BLOCK("Block"), //$NON-NLS-1$
+		BLOCK("BlockImpl"), //$NON-NLS-1$
 
 		/**
 		 * ExpressionCriteria
 		 * @generated
 		 */
-		EXPRESSION_CRITERIA("ExpressionCriteria"), //$NON-NLS-1$
+		EXPRESSION_CRITERIA("ExpressionCriteriaImpl"), //$NON-NLS-1$
 
 		/**
 		 * AliasSymbol
 		 * @generated
 		 */
-		ALIAS_SYMBOL("AliasSymbol"), //$NON-NLS-1$
+		ALIAS_SYMBOL("AliasSymbolImpl"), //$NON-NLS-1$
 
 		/**
 		 * AggregateSymbol
 		 * @generated
 		 */
-		AGGREGATE_SYMBOL("AggregateSymbol"), //$NON-NLS-1$
+		AGGREGATE_SYMBOL("AggregateSymbolImpl"), //$NON-NLS-1$
 
 		/**
 		 * WindowFunction
 		 * @generated
 		 */
-		WINDOW_FUNCTION("WindowFunction"), //$NON-NLS-1$
+		WINDOW_FUNCTION("WindowFunctionImpl"), //$NON-NLS-1$
 
 		/**
 		 * WindowSpecification
 		 * @generated
 		 */
-		WINDOW_SPECIFICATION("WindowSpecification"), //$NON-NLS-1$
+		WINDOW_SPECIFICATION("WindowSpecificationImpl"), //$NON-NLS-1$
 
 		/**
 		 * TextLine
 		 * @generated
 		 */
-		TEXT_LINE("TextLine"), //$NON-NLS-1$
+		TEXT_LINE("TextLineImpl"), //$NON-NLS-1$
 
 		/**
 		 * AlterTrigger
 		 * @generated
 		 */
-		ALTER_TRIGGER("AlterTrigger"), //$NON-NLS-1$
+		ALTER_TRIGGER("AlterTriggerImpl"), //$NON-NLS-1$
 
 		/**
 		 * AlterProcedure
 		 * @generated
 		 */
-		ALTER_PROCEDURE("AlterProcedure"), //$NON-NLS-1$
+		ALTER_PROCEDURE("AlterProcedureImpl"), //$NON-NLS-1$
 
 		/**
 		 * AlterView
 		 * @generated
 		 */
-		ALTER_VIEW("AlterView"), //$NON-NLS-1$
+		ALTER_VIEW("AlterViewImpl"), //$NON-NLS-1$
 
 		/**
-		 * Array
+		 * ArraySymbol
 		 * @generated
 		 */
-		ARRAY("Array"), //$NON-NLS-1$
+		ARRAY_SYMBOL("ArraySymbolImpl"), //$NON-NLS-1$
 
 		/**
 		 * SPParameter
 		 * @generated
 		 */
-		SP_PARAMETER("SPParameter"), //$NON-NLS-1$
+		SP_PARAMETER("SPParameterImpl"), //$NON-NLS-1$
 
 		/**
 		 * SourceHint
 		 * @generated
 		 */
-		SOURCE_HINT("SourceHint"), //$NON-NLS-1$
+		SOURCE_HINT("SourceHintImpl"), //$NON-NLS-1$
 
 		/**
 		 * SpecificHint
@@ -647,8 +647,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private TriggerAction createTriggerAction(TeiidSeqParser teiidParser, int nodeType) {
-		return new TriggerAction(teiidParser, nodeType);
+	private TriggerActionImpl createTriggerActionImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new TriggerActionImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -659,8 +659,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private RaiseStatement createRaiseStatement(TeiidSeqParser teiidParser, int nodeType) {
-		return new RaiseStatement(teiidParser, nodeType);
+	private RaiseStatementImpl createRaiseStatementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new RaiseStatementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -671,8 +671,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ExceptionExpression createExceptionExpression(TeiidSeqParser teiidParser, int nodeType) {
-		return new ExceptionExpression(teiidParser, nodeType);
+	private ExceptionExpressionImpl createExceptionExpressionImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ExceptionExpressionImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -683,8 +683,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private BranchingStatement createBranchingStatement(TeiidSeqParser teiidParser, int nodeType) {
-		return new BranchingStatement(teiidParser, nodeType);
+	private BranchingStatementImpl createBranchingStatementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new BranchingStatementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -695,8 +695,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ReturnStatement createReturnStatement(TeiidSeqParser teiidParser, int nodeType) {
-		return new ReturnStatement(teiidParser, nodeType);
+	private ReturnStatementImpl createReturnStatementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ReturnStatementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -707,8 +707,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private WhileStatement createWhileStatement(TeiidSeqParser teiidParser, int nodeType) {
-		return new WhileStatement(teiidParser, nodeType);
+	private WhileStatementImpl createWhileStatementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new WhileStatementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -719,8 +719,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private LoopStatement createLoopStatement(TeiidSeqParser teiidParser, int nodeType) {
-		return new LoopStatement(teiidParser, nodeType);
+	private LoopStatementImpl createLoopStatementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new LoopStatementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -731,8 +731,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private IfStatement createIfStatement(TeiidSeqParser teiidParser, int nodeType) {
-		return new IfStatement(teiidParser, nodeType);
+	private IfStatementImpl createIfStatementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new IfStatementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -743,8 +743,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private DeclareStatement createDeclareStatement(TeiidSeqParser teiidParser, int nodeType) {
-		return new DeclareStatement(teiidParser, nodeType);
+	private DeclareStatementImpl createDeclareStatementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new DeclareStatementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -755,8 +755,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private CommandStatement createCommandStatement(TeiidSeqParser teiidParser, int nodeType) {
-		return new CommandStatement(teiidParser, nodeType);
+	private CommandStatementImpl createCommandStatementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new CommandStatementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -767,8 +767,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private CreateProcedureCommand createCreateProcedureCommand(TeiidSeqParser teiidParser, int nodeType) {
-		return new CreateProcedureCommand(teiidParser, nodeType);
+	private CreateProcedureCommandImpl createCreateProcedureCommandImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new CreateProcedureCommandImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -779,8 +779,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private DynamicCommand createDynamicCommand(TeiidSeqParser teiidParser, int nodeType) {
-		return new DynamicCommand(teiidParser, nodeType);
+	private DynamicCommandImpl createDynamicCommandImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new DynamicCommandImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -791,8 +791,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SetClauseList createSetClauseList(TeiidSeqParser teiidParser, int nodeType) {
-		return new SetClauseList(teiidParser, nodeType);
+	private SetClauseListImpl createSetClauseListImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SetClauseListImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -803,8 +803,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SetClause createSetClause(TeiidSeqParser teiidParser, int nodeType) {
-		return new SetClause(teiidParser, nodeType);
+	private SetClauseImpl createSetClauseImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SetClauseImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -815,8 +815,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ProjectedColumn createProjectedColumn(TeiidSeqParser teiidParser, int nodeType) {
-		return new ProjectedColumn(teiidParser, nodeType);
+	private ProjectedColumnImpl createProjectedColumnImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ProjectedColumnImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -827,8 +827,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private StoredProcedure createStoredProcedure(TeiidSeqParser teiidParser, int nodeType) {
-		return new StoredProcedure(teiidParser, nodeType);
+	private StoredProcedureImpl createStoredProcedureImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new StoredProcedureImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -839,8 +839,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Insert createInsert(TeiidSeqParser teiidParser, int nodeType) {
-		return new Insert(teiidParser, nodeType);
+	private InsertImpl createInsertImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new InsertImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -851,8 +851,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Update createUpdate(TeiidSeqParser teiidParser, int nodeType) {
-		return new Update(teiidParser, nodeType);
+	private UpdateImpl createUpdateImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new UpdateImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -863,8 +863,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Delete createDelete(TeiidSeqParser teiidParser, int nodeType) {
-		return new Delete(teiidParser, nodeType);
+	private DeleteImpl createDeleteImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new DeleteImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -875,8 +875,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private WithQueryCommand createWithQueryCommand(TeiidSeqParser teiidParser, int nodeType) {
-		return new WithQueryCommand(teiidParser, nodeType);
+	private WithQueryCommandImpl createWithQueryCommandImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new WithQueryCommandImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -887,8 +887,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SetQuery createSetQuery(TeiidSeqParser teiidParser, int nodeType) {
-		return new SetQuery(teiidParser, nodeType);
+	private SetQueryImpl createSetQueryImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SetQueryImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -899,8 +899,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Query createQuery(TeiidSeqParser teiidParser, int nodeType) {
-		return new Query(teiidParser, nodeType);
+	private QueryImpl createQueryImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new QueryImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -911,8 +911,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Into createInto(TeiidSeqParser teiidParser, int nodeType) {
-		return new Into(teiidParser, nodeType);
+	private IntoImpl createIntoImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new IntoImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -923,8 +923,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Select createSelect(TeiidSeqParser teiidParser, int nodeType) {
-		return new Select(teiidParser, nodeType);
+	private SelectImpl createSelectImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SelectImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -935,8 +935,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ExpressionSymbol createExpressionSymbol(TeiidSeqParser teiidParser, int nodeType) {
-		return new ExpressionSymbol(teiidParser, nodeType);
+	private ExpressionSymbolImpl createExpressionSymbolImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ExpressionSymbolImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -947,8 +947,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private DerivedColumn createDerivedColumn(TeiidSeqParser teiidParser, int nodeType) {
-		return new DerivedColumn(teiidParser, nodeType);
+	private DerivedColumnImpl createDerivedColumnImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new DerivedColumnImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -959,8 +959,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private MultipleElementSymbol createMultipleElementSymbol(TeiidSeqParser teiidParser, int nodeType) {
-		return new MultipleElementSymbol(teiidParser, nodeType);
+	private MultipleElementSymbolImpl createMultipleElementSymbolImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new MultipleElementSymbolImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -971,8 +971,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private From createFrom(TeiidSeqParser teiidParser, int nodeType) {
-		return new From(teiidParser, nodeType);
+	private FromImpl createFromImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new FromImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -983,8 +983,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private JoinPredicate createJoinPredicate(TeiidSeqParser teiidParser, int nodeType) {
-		return new JoinPredicate(teiidParser, nodeType);
+	private JoinPredicateImpl createJoinPredicateImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new JoinPredicateImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -995,8 +995,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private JoinType createJoinType(TeiidSeqParser teiidParser, int nodeType) {
-		return new JoinType(teiidParser, nodeType);
+	private JoinTypeImpl createJoinTypeImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new JoinTypeImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1007,8 +1007,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private XMLSerialize createXMLSerialize(TeiidSeqParser teiidParser, int nodeType) {
-		return new XMLSerialize(teiidParser, nodeType);
+	private XMLSerializeImpl createXMLSerializeImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new XMLSerializeImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1019,8 +1019,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ArrayTable createArrayTable(TeiidSeqParser teiidParser, int nodeType) {
-		return new ArrayTable(teiidParser, nodeType);
+	private ArrayTableImpl createArrayTableImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ArrayTableImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1031,8 +1031,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private TextTable createTextTable(TeiidSeqParser teiidParser, int nodeType) {
-		return new TextTable(teiidParser, nodeType);
+	private TextTableImpl createTextTableImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new TextTableImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1043,8 +1043,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private TextColumn createTextColumn(TeiidSeqParser teiidParser, int nodeType) {
-		return new TextColumn(teiidParser, nodeType);
+	private TextColumnImpl createTextColumnImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new TextColumnImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1055,8 +1055,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private XMLQuery createXMLQuery(TeiidSeqParser teiidParser, int nodeType) {
-		return new XMLQuery(teiidParser, nodeType);
+	private XMLQueryImpl createXMLQueryImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new XMLQueryImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1067,8 +1067,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ObjectTable createObjectTable(TeiidSeqParser teiidParser, int nodeType) {
-		return new ObjectTable(teiidParser, nodeType);
+	private ObjectTableImpl createObjectTableImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ObjectTableImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1079,8 +1079,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ObjectColumn createObjectColumn(TeiidSeqParser teiidParser, int nodeType) {
-		return new ObjectColumn(teiidParser, nodeType);
+	private ObjectColumnImpl createObjectColumnImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ObjectColumnImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1091,8 +1091,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private XMLTable createXMLTable(TeiidSeqParser teiidParser, int nodeType) {
-		return new XMLTable(teiidParser, nodeType);
+	private XMLTableImpl createXMLTableImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new XMLTableImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1103,8 +1103,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private XMLColumn createXMLColumn(TeiidSeqParser teiidParser, int nodeType) {
-		return new XMLColumn(teiidParser, nodeType);
+	private XMLColumnImpl createXMLColumnImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new XMLColumnImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1115,8 +1115,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SubqueryFromClause createSubqueryFromClause(TeiidSeqParser teiidParser, int nodeType) {
-		return new SubqueryFromClause(teiidParser, nodeType);
+	private SubqueryFromClauseImpl createSubqueryFromClauseImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SubqueryFromClauseImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1127,8 +1127,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private UnaryFromClause createUnaryFromClause(TeiidSeqParser teiidParser, int nodeType) {
-		return new UnaryFromClause(teiidParser, nodeType);
+	private UnaryFromClauseImpl createUnaryFromClauseImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new UnaryFromClauseImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1139,8 +1139,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Criteria createCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new Criteria(teiidParser, nodeType);
+	private CriteriaImpl createCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new CriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1151,8 +1151,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private CompoundCriteria createCompoundCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new CompoundCriteria(teiidParser, nodeType);
+	private CompoundCriteriaImpl createCompoundCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new CompoundCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1163,8 +1163,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private NotCriteria createNotCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new NotCriteria(teiidParser, nodeType);
+	private NotCriteriaImpl createNotCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new NotCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1175,8 +1175,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private CompareCriteria createCompareCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new CompareCriteria(teiidParser, nodeType);
+	private CompareCriteriaImpl createCompareCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new CompareCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1187,8 +1187,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SubqueryCompareCriteria createSubqueryCompareCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new SubqueryCompareCriteria(teiidParser, nodeType);
+	private SubqueryCompareCriteriaImpl createSubqueryCompareCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SubqueryCompareCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1199,8 +1199,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private MatchCriteria createMatchCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new MatchCriteria(teiidParser, nodeType);
+	private MatchCriteriaImpl createMatchCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new MatchCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1211,8 +1211,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private BetweenCriteria createBetweenCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new BetweenCriteria(teiidParser, nodeType);
+	private BetweenCriteriaImpl createBetweenCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new BetweenCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1223,8 +1223,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private IsNullCriteria createIsNullCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new IsNullCriteria(teiidParser, nodeType);
+	private IsNullCriteriaImpl createIsNullCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new IsNullCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1235,8 +1235,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SubquerySetCriteria createSubquerySetCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new SubquerySetCriteria(teiidParser, nodeType);
+	private SubquerySetCriteriaImpl createSubquerySetCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SubquerySetCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1247,8 +1247,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SetCriteria createSetCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new SetCriteria(teiidParser, nodeType);
+	private SetCriteriaImpl createSetCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SetCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1259,8 +1259,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ExistsCriteria createExistsCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new ExistsCriteria(teiidParser, nodeType);
+	private ExistsCriteriaImpl createExistsCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ExistsCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1271,8 +1271,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private GroupBy createGroupBy(TeiidSeqParser teiidParser, int nodeType) {
-		return new GroupBy(teiidParser, nodeType);
+	private GroupByImpl createGroupByImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new GroupByImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1283,8 +1283,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private OrderBy createOrderBy(TeiidSeqParser teiidParser, int nodeType) {
-		return new OrderBy(teiidParser, nodeType);
+	private OrderByImpl createOrderByImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new OrderByImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1295,8 +1295,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private OrderByItem createOrderByItem(TeiidSeqParser teiidParser, int nodeType) {
-		return new OrderByItem(teiidParser, nodeType);
+	private OrderByItemImpl createOrderByItemImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new OrderByItemImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1307,8 +1307,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Limit createLimit(TeiidSeqParser teiidParser, int nodeType) {
-		return new Limit(teiidParser, nodeType);
+	private LimitImpl createLimitImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new LimitImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1319,8 +1319,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Option createOption(TeiidSeqParser teiidParser, int nodeType) {
-		return new Option(teiidParser, nodeType);
+	private OptionImpl createOptionImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new OptionImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1331,8 +1331,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Reference createReference(TeiidSeqParser teiidParser, int nodeType) {
-		return new Reference(teiidParser, nodeType);
+	private ReferenceImpl createReferenceImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ReferenceImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1343,8 +1343,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private CaseExpression createCaseExpression(TeiidSeqParser teiidParser, int nodeType) {
-		return new CaseExpression(teiidParser, nodeType);
+	private CaseExpressionImpl createCaseExpressionImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new CaseExpressionImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1355,8 +1355,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SearchedCaseExpression createSearchedCaseExpression(TeiidSeqParser teiidParser, int nodeType) {
-		return new SearchedCaseExpression(teiidParser, nodeType);
+	private SearchedCaseExpressionImpl createSearchedCaseExpressionImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SearchedCaseExpressionImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1367,8 +1367,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Function createFunction(TeiidSeqParser teiidParser, int nodeType) {
-		return new Function(teiidParser, nodeType);
+	private FunctionImpl createFunctionImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new FunctionImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1379,8 +1379,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private XMLParse createXMLParse(TeiidSeqParser teiidParser, int nodeType) {
-		return new XMLParse(teiidParser, nodeType);
+	private XMLParseImpl createXMLParseImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new XMLParseImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1391,8 +1391,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private QueryString createQueryString(TeiidSeqParser teiidParser, int nodeType) {
-		return new QueryString(teiidParser, nodeType);
+	private QueryStringImpl createQueryStringImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new QueryStringImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1403,8 +1403,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private XMLElement createXMLElement(TeiidSeqParser teiidParser, int nodeType) {
-		return new XMLElement(teiidParser, nodeType);
+	private XMLElementImpl createXMLElementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new XMLElementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1415,8 +1415,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private XMLAttributes createXMLAttributes(TeiidSeqParser teiidParser, int nodeType) {
-		return new XMLAttributes(teiidParser, nodeType);
+	private XMLAttributesImpl createXMLAttributesImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new XMLAttributesImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1427,8 +1427,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private JSONObject createJSONObject(TeiidSeqParser teiidParser, int nodeType) {
-		return new JSONObject(teiidParser, nodeType);
+	private JSONObjectImpl createJSONObjectImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new JSONObjectImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1439,8 +1439,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private XMLForest createXMLForest(TeiidSeqParser teiidParser, int nodeType) {
-		return new XMLForest(teiidParser, nodeType);
+	private XMLForestImpl createXMLForestImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new XMLForestImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1451,8 +1451,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private XMLNamespaces createXMLNamespaces(TeiidSeqParser teiidParser, int nodeType) {
-		return new XMLNamespaces(teiidParser, nodeType);
+	private XMLNamespacesImpl createXMLNamespacesImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new XMLNamespacesImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1475,8 +1475,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private AssignmentStatement createAssignmentStatement(TeiidSeqParser teiidParser, int nodeType) {
-		return new AssignmentStatement(teiidParser, nodeType);
+	private AssignmentStatementImpl createAssignmentStatementImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new AssignmentStatementImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1487,8 +1487,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ScalarSubquery createScalarSubquery(TeiidSeqParser teiidParser, int nodeType) {
-		return new ScalarSubquery(teiidParser, nodeType);
+	private ScalarSubqueryImpl createScalarSubqueryImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ScalarSubqueryImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1499,8 +1499,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private GroupSymbol createGroupSymbol(TeiidSeqParser teiidParser, int nodeType) {
-		return new GroupSymbol(teiidParser, nodeType);
+	private GroupSymbolImpl createGroupSymbolImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new GroupSymbolImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1511,8 +1511,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Constant createConstant(TeiidSeqParser teiidParser, int nodeType) {
-		return new Constant(teiidParser, nodeType);
+	private ConstantImpl createConstantImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ConstantImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1523,8 +1523,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ElementSymbol createElementSymbol(TeiidSeqParser teiidParser, int nodeType) {
-		return new ElementSymbol(teiidParser, nodeType);
+	private ElementSymbolImpl createElementSymbolImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ElementSymbolImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1535,8 +1535,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Block createBlock(TeiidSeqParser teiidParser, int nodeType) {
-		return new Block(teiidParser, nodeType);
+	private BlockImpl createBlockImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new BlockImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1547,8 +1547,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private ExpressionCriteria createExpressionCriteria(TeiidSeqParser teiidParser, int nodeType) {
-		return new ExpressionCriteria(teiidParser, nodeType);
+	private ExpressionCriteriaImpl createExpressionCriteriaImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ExpressionCriteriaImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1559,8 +1559,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private AliasSymbol createAliasSymbol(TeiidSeqParser teiidParser, int nodeType) {
-		return new AliasSymbol(teiidParser, nodeType);
+	private AliasSymbolImpl createAliasSymbolImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new AliasSymbolImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1571,8 +1571,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private AggregateSymbol createAggregateSymbol(TeiidSeqParser teiidParser, int nodeType) {
-		return new AggregateSymbol(teiidParser, nodeType);
+	private AggregateSymbolImpl createAggregateSymbolImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new AggregateSymbolImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1583,8 +1583,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private WindowFunction createWindowFunction(TeiidSeqParser teiidParser, int nodeType) {
-		return new WindowFunction(teiidParser, nodeType);
+	private WindowFunctionImpl createWindowFunctionImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new WindowFunctionImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1595,8 +1595,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private WindowSpecification createWindowSpecification(TeiidSeqParser teiidParser, int nodeType) {
-		return new WindowSpecification(teiidParser, nodeType);
+	private WindowSpecificationImpl createWindowSpecificationImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new WindowSpecificationImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1607,8 +1607,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private TextLine createTextLine(TeiidSeqParser teiidParser, int nodeType) {
-		return new TextLine(teiidParser, nodeType);
+	private TextLineImpl createTextLineImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new TextLineImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1619,8 +1619,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private AlterTrigger createAlterTrigger(TeiidSeqParser teiidParser, int nodeType) {
-		return new AlterTrigger(teiidParser, nodeType);
+	private AlterTriggerImpl createAlterTriggerImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new AlterTriggerImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1631,8 +1631,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private AlterProcedure createAlterProcedure(TeiidSeqParser teiidParser, int nodeType) {
-		return new AlterProcedure(teiidParser, nodeType);
+	private AlterProcedureImpl createAlterProcedureImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new AlterProcedureImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1643,8 +1643,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private AlterView createAlterView(TeiidSeqParser teiidParser, int nodeType) {
-		return new AlterView(teiidParser, nodeType);
+	private AlterViewImpl createAlterViewImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new AlterViewImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1655,8 +1655,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private Array createArray(TeiidSeqParser teiidParser, int nodeType) {
-		return new Array(teiidParser, nodeType);
+	private ArraySymbolImpl createArraySymbolImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new ArraySymbolImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1667,8 +1667,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SPParameter createSPParameter(TeiidSeqParser teiidParser, int nodeType) {
-		return new SPParameter(teiidParser, nodeType);
+	private SPParameterImpl createSPParameterImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SPParameterImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1679,8 +1679,8 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return
 	 */
-	private SourceHint createSourceHint(TeiidSeqParser teiidParser, int nodeType) {
-		return new SourceHint(teiidParser, nodeType);
+	private SourceHintImpl createSourceHintImpl(TeiidSeqParser teiidParser, int nodeType) {
+		return new SourceHintImpl(teiidParser, nodeType);
 	}
 
 	/**
@@ -1728,182 +1728,182 @@ public class TeiidNodeFactory {
 	 * @param nodeType
 	 * @return teiid parser node
 	 */
-	protected <T extends LanguageObject> T create(TeiidSeqParser teiidParser, int nodeType) {
+	protected <T extends BaseLanguageObject> T create(TeiidSeqParser teiidParser, int nodeType) {
 		switch (nodeType) {
-			case TeiidSequencingParserTreeConstants.JJTTRIGGERACTION:
-				return (T) createTriggerAction(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTRAISESTATEMENT:
-				return (T) createRaiseStatement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTEXCEPTIONEXPRESSION:
-				return (T) createExceptionExpression(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTBRANCHINGSTATEMENT:
-				return (T) createBranchingStatement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTRETURNSTATEMENT:
-				return (T) createReturnStatement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTWHILESTATEMENT:
-				return (T) createWhileStatement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTLOOPSTATEMENT:
-				return (T) createLoopStatement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTIFSTATEMENT:
-				return (T) createIfStatement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTDECLARESTATEMENT:
-				return (T) createDeclareStatement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTCOMMANDSTATEMENT:
-				return (T) createCommandStatement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTCREATEPROCEDURECOMMAND:
-				return (T) createCreateProcedureCommand(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTDYNAMICCOMMAND:
-				return (T) createDynamicCommand(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSETCLAUSELIST:
-				return (T) createSetClauseList(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSETCLAUSE:
-				return (T) createSetClause(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTPROJECTEDCOLUMN:
-				return (T) createProjectedColumn(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSTOREDPROCEDURE:
-				return (T) createStoredProcedure(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTINSERT:
-				return (T) createInsert(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTUPDATE:
-				return (T) createUpdate(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTDELETE:
-				return (T) createDelete(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTWITHQUERYCOMMAND:
-				return (T) createWithQueryCommand(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSETQUERY:
-				return (T) createSetQuery(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTQUERY:
-				return (T) createQuery(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTINTO:
-				return (T) createInto(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSELECT:
-				return (T) createSelect(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTEXPRESSIONSYMBOL:
-				return (T) createExpressionSymbol(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTDERIVEDCOLUMN:
-				return (T) createDerivedColumn(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTMULTIPLEELEMENTSYMBOL:
-				return (T) createMultipleElementSymbol(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTFROM:
-				return (T) createFrom(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTJOINPREDICATE:
-				return (T) createJoinPredicate(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTJOINTYPE:
-				return (T) createJoinType(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTXMLSERIALIZE:
-				return (T) createXMLSerialize(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTARRAYTABLE:
-				return (T) createArrayTable(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTTEXTTABLE:
-				return (T) createTextTable(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTTEXTCOLUMN:
-				return (T) createTextColumn(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTXMLQUERY:
-				return (T) createXMLQuery(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTOBJECTTABLE:
-				return (T) createObjectTable(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTOBJECTCOLUMN:
-				return (T) createObjectColumn(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTXMLTABLE:
-				return (T) createXMLTable(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTXMLCOLUMN:
-				return (T) createXMLColumn(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSUBQUERYFROMCLAUSE:
-				return (T) createSubqueryFromClause(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTUNARYFROMCLAUSE:
-				return (T) createUnaryFromClause(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTCRITERIA:
-				return (T) createCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTCOMPOUNDCRITERIA:
-				return (T) createCompoundCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTNOTCRITERIA:
-				return (T) createNotCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTCOMPARECRITERIA:
-				return (T) createCompareCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSUBQUERYCOMPARECRITERIA:
-				return (T) createSubqueryCompareCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTMATCHCRITERIA:
-				return (T) createMatchCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTBETWEENCRITERIA:
-				return (T) createBetweenCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTISNULLCRITERIA:
-				return (T) createIsNullCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSUBQUERYSETCRITERIA:
-				return (T) createSubquerySetCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSETCRITERIA:
-				return (T) createSetCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTEXISTSCRITERIA:
-				return (T) createExistsCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTGROUPBY:
-				return (T) createGroupBy(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTORDERBY:
-				return (T) createOrderBy(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTORDERBYITEM:
-				return (T) createOrderByItem(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTLIMIT:
-				return (T) createLimit(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTOPTION:
-				return (T) createOption(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTREFERENCE:
-				return (T) createReference(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTCASEEXPRESSION:
-				return (T) createCaseExpression(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSEARCHEDCASEEXPRESSION:
-				return (T) createSearchedCaseExpression(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTFUNCTION:
-				return (T) createFunction(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTXMLPARSE:
-				return (T) createXMLParse(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTQUERYSTRING:
-				return (T) createQueryString(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTXMLELEMENT:
-				return (T) createXMLElement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTXMLATTRIBUTES:
-				return (T) createXMLAttributes(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTJSONOBJECT:
-				return (T) createJSONObject(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTXMLFOREST:
-				return (T) createXMLForest(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTXMLNAMESPACES:
-				return (T) createXMLNamespaces(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTTRIGGERACTIONIMPL:
+				return (T) createTriggerActionImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTRAISESTATEMENTIMPL:
+				return (T) createRaiseStatementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTEXCEPTIONEXPRESSIONIMPL:
+				return (T) createExceptionExpressionImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTBRANCHINGSTATEMENTIMPL:
+				return (T) createBranchingStatementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTRETURNSTATEMENTIMPL:
+				return (T) createReturnStatementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTWHILESTATEMENTIMPL:
+				return (T) createWhileStatementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTLOOPSTATEMENTIMPL:
+				return (T) createLoopStatementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTIFSTATEMENTIMPL:
+				return (T) createIfStatementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTDECLARESTATEMENTIMPL:
+				return (T) createDeclareStatementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTCOMMANDSTATEMENTIMPL:
+				return (T) createCommandStatementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTCREATEPROCEDURECOMMANDIMPL:
+				return (T) createCreateProcedureCommandImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTDYNAMICCOMMANDIMPL:
+				return (T) createDynamicCommandImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSETCLAUSELISTIMPL:
+				return (T) createSetClauseListImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSETCLAUSEIMPL:
+				return (T) createSetClauseImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTPROJECTEDCOLUMNIMPL:
+				return (T) createProjectedColumnImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSTOREDPROCEDUREIMPL:
+				return (T) createStoredProcedureImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTINSERTIMPL:
+				return (T) createInsertImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTUPDATEIMPL:
+				return (T) createUpdateImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTDELETEIMPL:
+				return (T) createDeleteImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTWITHQUERYCOMMANDIMPL:
+				return (T) createWithQueryCommandImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSETQUERYIMPL:
+				return (T) createSetQueryImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTQUERYIMPL:
+				return (T) createQueryImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTINTOIMPL:
+				return (T) createIntoImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSELECTIMPL:
+				return (T) createSelectImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTEXPRESSIONSYMBOLIMPL:
+				return (T) createExpressionSymbolImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTDERIVEDCOLUMNIMPL:
+				return (T) createDerivedColumnImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTMULTIPLEELEMENTSYMBOLIMPL:
+				return (T) createMultipleElementSymbolImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTFROMIMPL:
+				return (T) createFromImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTJOINPREDICATEIMPL:
+				return (T) createJoinPredicateImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTJOINTYPEIMPL:
+				return (T) createJoinTypeImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTXMLSERIALIZEIMPL:
+				return (T) createXMLSerializeImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTARRAYTABLEIMPL:
+				return (T) createArrayTableImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTTEXTTABLEIMPL:
+				return (T) createTextTableImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTTEXTCOLUMNIMPL:
+				return (T) createTextColumnImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTXMLQUERYIMPL:
+				return (T) createXMLQueryImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTOBJECTTABLEIMPL:
+				return (T) createObjectTableImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTOBJECTCOLUMNIMPL:
+				return (T) createObjectColumnImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTXMLTABLEIMPL:
+				return (T) createXMLTableImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTXMLCOLUMNIMPL:
+				return (T) createXMLColumnImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSUBQUERYFROMCLAUSEIMPL:
+				return (T) createSubqueryFromClauseImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTUNARYFROMCLAUSEIMPL:
+				return (T) createUnaryFromClauseImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTCRITERIAIMPL:
+				return (T) createCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTCOMPOUNDCRITERIAIMPL:
+				return (T) createCompoundCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTNOTCRITERIAIMPL:
+				return (T) createNotCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTCOMPARECRITERIAIMPL:
+				return (T) createCompareCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSUBQUERYCOMPARECRITERIAIMPL:
+				return (T) createSubqueryCompareCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTMATCHCRITERIAIMPL:
+				return (T) createMatchCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTBETWEENCRITERIAIMPL:
+				return (T) createBetweenCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTISNULLCRITERIAIMPL:
+				return (T) createIsNullCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSUBQUERYSETCRITERIAIMPL:
+				return (T) createSubquerySetCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSETCRITERIAIMPL:
+				return (T) createSetCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTEXISTSCRITERIAIMPL:
+				return (T) createExistsCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTGROUPBYIMPL:
+				return (T) createGroupByImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTORDERBYIMPL:
+				return (T) createOrderByImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTORDERBYITEMIMPL:
+				return (T) createOrderByItemImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTLIMITIMPL:
+				return (T) createLimitImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTOPTIONIMPL:
+				return (T) createOptionImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTREFERENCEIMPL:
+				return (T) createReferenceImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTCASEEXPRESSIONIMPL:
+				return (T) createCaseExpressionImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSEARCHEDCASEEXPRESSIONIMPL:
+				return (T) createSearchedCaseExpressionImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTFUNCTIONIMPL:
+				return (T) createFunctionImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTXMLPARSEIMPL:
+				return (T) createXMLParseImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTQUERYSTRINGIMPL:
+				return (T) createQueryStringImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTXMLELEMENTIMPL:
+				return (T) createXMLElementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTXMLATTRIBUTESIMPL:
+				return (T) createXMLAttributesImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTJSONOBJECTIMPL:
+				return (T) createJSONObjectImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTXMLFORESTIMPL:
+				return (T) createXMLForestImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTXMLNAMESPACESIMPL:
+				return (T) createXMLNamespacesImpl(teiidParser, nodeType);
 			case TeiidSequencingParserTreeConstants.JJTNAMESPACEITEM:
 				return (T) createNamespaceItem(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTASSIGNMENTSTATEMENT:
-				return (T) createAssignmentStatement(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSCALARSUBQUERY:
-				return (T) createScalarSubquery(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTGROUPSYMBOL:
-				return (T) createGroupSymbol(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTCONSTANT:
-				return (T) createConstant(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTELEMENTSYMBOL:
-				return (T) createElementSymbol(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTBLOCK:
-				return (T) createBlock(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTEXPRESSIONCRITERIA:
-				return (T) createExpressionCriteria(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTALIASSYMBOL:
-				return (T) createAliasSymbol(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTAGGREGATESYMBOL:
-				return (T) createAggregateSymbol(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTWINDOWFUNCTION:
-				return (T) createWindowFunction(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTWINDOWSPECIFICATION:
-				return (T) createWindowSpecification(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTTEXTLINE:
-				return (T) createTextLine(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTALTERTRIGGER:
-				return (T) createAlterTrigger(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTALTERPROCEDURE:
-				return (T) createAlterProcedure(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTALTERVIEW:
-				return (T) createAlterView(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTARRAY:
-				return (T) createArray(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSPPARAMETER:
-				return (T) createSPParameter(teiidParser, nodeType);
-			case TeiidSequencingParserTreeConstants.JJTSOURCEHINT:
-				return (T) createSourceHint(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTASSIGNMENTSTATEMENTIMPL:
+				return (T) createAssignmentStatementImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSCALARSUBQUERYIMPL:
+				return (T) createScalarSubqueryImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTGROUPSYMBOLIMPL:
+				return (T) createGroupSymbolImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTCONSTANTIMPL:
+				return (T) createConstantImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTELEMENTSYMBOLIMPL:
+				return (T) createElementSymbolImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTBLOCKIMPL:
+				return (T) createBlockImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTEXPRESSIONCRITERIAIMPL:
+				return (T) createExpressionCriteriaImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTALIASSYMBOLIMPL:
+				return (T) createAliasSymbolImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTAGGREGATESYMBOLIMPL:
+				return (T) createAggregateSymbolImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTWINDOWFUNCTIONIMPL:
+				return (T) createWindowFunctionImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTWINDOWSPECIFICATIONIMPL:
+				return (T) createWindowSpecificationImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTTEXTLINEIMPL:
+				return (T) createTextLineImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTALTERTRIGGERIMPL:
+				return (T) createAlterTriggerImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTALTERPROCEDUREIMPL:
+				return (T) createAlterProcedureImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTALTERVIEWIMPL:
+				return (T) createAlterViewImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTARRAYSYMBOLIMPL:
+				return (T) createArraySymbolImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSPPARAMETERIMPL:
+				return (T) createSPParameterImpl(teiidParser, nodeType);
+			case TeiidSequencingParserTreeConstants.JJTSOURCEHINTIMPL:
+				return (T) createSourceHintImpl(teiidParser, nodeType);
 			case TeiidSequencingParserTreeConstants.JJTSPECIFICHINT:
 				return (T) createSpecificHint(teiidParser, nodeType);
 			case TeiidSequencingParserTreeConstants.JJTSUBQUERYHINT:

@@ -23,13 +23,13 @@ package org.komodo.spi.query.sql;
 
 import java.util.Collection;
 
-import org.komodo.spi.query.sql.lang.ICriteria;
-import org.komodo.spi.query.sql.lang.ILanguageObject;
+import org.komodo.spi.query.sql.lang.Criteria;
+import org.komodo.spi.query.sql.lang.LanguageObject;
 
 /**
  *
  */
-public interface PredicateCollectorVisitor<LO extends ILanguageObject, C extends ICriteria> {
+public interface PredicateCollectorVisitor<LO extends LanguageObject, C extends Criteria> {
     
     /**
      * Get the predicates from obj

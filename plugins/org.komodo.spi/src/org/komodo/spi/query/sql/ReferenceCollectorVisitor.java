@@ -23,20 +23,20 @@ package org.komodo.spi.query.sql;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.symbol.IReference;
+import org.komodo.spi.query.sql.lang.LanguageObject;
+import org.komodo.spi.query.sql.symbol.Reference;
 
 /**
  *
  */
-public interface ReferenceCollectorVisitor<LO extends ILanguageObject, R extends IReference> {
+public interface ReferenceCollectorVisitor<LO extends LanguageObject, R extends Reference> {
 
     /**
      * Get the references from obj in a collection.
      * 
      * @param obj Language object
      * 
-     * @return List of {@link IReference}
+     * @return List of {@link Reference}
      */
     List<R> findReferences(LO obj);
 }

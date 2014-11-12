@@ -23,13 +23,13 @@ package org.komodo.spi.query.sql;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.lang.ISubqueryContainer;
+import org.komodo.spi.query.sql.lang.LanguageObject;
+import org.komodo.spi.query.sql.lang.SubqueryContainer;
 
 /**
  *
  */
-public interface ValueIteratorProviderCollectorVisitor<LO extends ILanguageObject, SC extends ISubqueryContainer<?>> {
+public interface ValueIteratorProviderCollectorVisitor<LO extends LanguageObject, SC extends SubqueryContainer<?>> {
 
     /**
      * Get the ValueIteratorProvider instances from obj

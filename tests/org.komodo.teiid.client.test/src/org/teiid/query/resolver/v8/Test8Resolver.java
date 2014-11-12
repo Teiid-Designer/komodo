@@ -35,14 +35,14 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestResolver;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.ProcedureReservedWords;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateProcedureCommand;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateProcedureCommandImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 import org.teiid.query.sql.v8.Test8Factory;
 
 /**
@@ -71,7 +71,7 @@ public class Test8Resolver extends AbstractTestResolver {
 
     @Test
     public void testSelectExpressions() {
-        Query resolvedQuery = (Query)helpResolve("SELECT e1, concat(e1, 's'), concat(e1, 's') as c FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT e1, concat(e1, 's'), concat(e1, 's') as c FROM pm1.g1"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1", "expr2", "c"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1", "pm1.g1.e1", "pm1.g1.e1"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -80,7 +80,7 @@ public class Test8Resolver extends AbstractTestResolver {
 
     @Test
     public void testSelectCountStar() {
-        Query resolvedQuery = (Query)helpResolve("SELECT count(*) FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT count(*) FROM pm1.g1"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"expr1"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {}, new String[] {});
@@ -97,7 +97,7 @@ public class Test8Resolver extends AbstractTestResolver {
         bindings.add("pm1.g2.e1"); //$NON-NLS-1$
         bindings.add("pm1.g2.e2"); //$NON-NLS-1$
 
-        Query resolvedQuery = (Query)helpResolveWithBindings("SELECT pm1.g1.e1, ? FROM pm1.g1 WHERE pm1.g1.e1 = ?", metadata, bindings); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolveWithBindings("SELECT pm1.g1.e1, ? FROM pm1.g1 WHERE pm1.g1.e1 = ?", metadata, bindings); //$NON-NLS-1$
 
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1", "expr2"}); //$NON-NLS-1$ //$NON-NLS-2$
@@ -108,18 +108,18 @@ public class Test8Resolver extends AbstractTestResolver {
 
     @Test
     public void testStoredQuery1() {
-        StoredProcedure proc = (StoredProcedure)helpResolve("EXEC pm1.sq2('abc')"); //$NON-NLS-1$
+        StoredProcedureImpl proc = (StoredProcedureImpl)helpResolve("EXEC pm1.sq2('abc')"); //$NON-NLS-1$
 
         // Check number of resolved parameters
         assertEquals("Did not get expected parameter count", 2, proc.getParameterCount()); //$NON-NLS-1$
 
         // Check resolved parameters
-        SPParameter param1 = proc.getParameter(2);
-        helpCheckParameter(param1, SPParameter.RESULT_SET, 2, "pm1.sq2.ret", java.sql.ResultSet.class, null); //$NON-NLS-1$
+        SPParameterImpl param1 = proc.getParameter(2);
+        helpCheckParameter(param1, SPParameterImpl.RESULT_SET, 2, "pm1.sq2.ret", java.sql.ResultSet.class, null); //$NON-NLS-1$
 
-        SPParameter param2 = proc.getParameter(1);
+        SPParameterImpl param2 = proc.getParameter(1);
         helpCheckParameter(param2,
-                           SPParameter.IN,
+                           SPParameterImpl.IN,
                            1,
                            "pm1.sq2.in", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), getFactory().newConstant("abc")); //$NON-NLS-1$ //$NON-NLS-2$
     }
@@ -135,21 +135,21 @@ public class Test8Resolver extends AbstractTestResolver {
      */
     @Test
     public void testStoredQueryParamOrdering_8211() {
-        StoredProcedure proc = (StoredProcedure)helpResolve("EXEC pm1.sq3a('abc', 123)"); //$NON-NLS-1$
+        StoredProcedureImpl proc = (StoredProcedureImpl)helpResolve("EXEC pm1.sq3a('abc', 123)"); //$NON-NLS-1$
 
         // Check number of resolved parameters
         assertEquals("Did not get expected parameter count", 3, proc.getParameterCount()); //$NON-NLS-1$
 
         // Check resolved parameters
-        SPParameter param1 = proc.getParameter(1);
+        SPParameterImpl param1 = proc.getParameter(1);
         helpCheckParameter(param1,
-                           SPParameter.IN,
+                           SPParameterImpl.IN,
                            1,
                            "pm1.sq3a.in", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), getFactory().newConstant("abc")); //$NON-NLS-1$ //$NON-NLS-2$
 
-        SPParameter param2 = proc.getParameter(2);
+        SPParameterImpl param2 = proc.getParameter(2);
         helpCheckParameter(param2,
-                           SPParameter.IN,
+                           SPParameterImpl.IN,
                            2,
                            "pm1.sq3a.in2", DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), getFactory().newConstant(new Integer(123))); //$NON-NLS-1$
     }
@@ -157,7 +157,7 @@ public class Test8Resolver extends AbstractTestResolver {
     @Test
     public void testCaseOverInlineView() throws Exception {
         String sql = "SELECT CASE WHEN x > 0 THEN 1.0 ELSE 2.0 END FROM (SELECT e2 AS x FROM pm1.g1) AS g"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
         verifyProjectedTypes(c, new Class[] {BigDecimal.class});
     }
@@ -170,13 +170,13 @@ public class Test8Resolver extends AbstractTestResolver {
                      + "select * from xmltest.doc1 where node1 = x; " //$NON-NLS-1$
                      + "end "; //$NON-NLS-1$
 
-        CreateProcedureCommand command = (CreateProcedureCommand)helpResolve(sql);
+        CreateProcedureCommandImpl command = (CreateProcedureCommandImpl)helpResolve(sql);
 
-        CommandStatement cmdStmt = (CommandStatement)command.getBlock().getStatements().get(1);
+        CommandStatementImpl cmdStmt = (CommandStatementImpl)command.getBlock().getStatements().get(1);
 
-        CompareCriteria criteria = (CompareCriteria)((Query)cmdStmt.getCommand()).getCriteria();
+        CompareCriteriaImpl criteria = (CompareCriteriaImpl)((QueryImpl)cmdStmt.getCommand()).getCriteria();
 
-        assertEquals(ProcedureReservedWords.VARIABLES, ((ElementSymbol)criteria.getRightExpression()).getGroupSymbol().getName());
+        assertEquals(ProcedureReservedWords.VARIABLES, ((ElementSymbolImpl)criteria.getRightExpression()).getGroupSymbol().getName());
     }
 
     @Test
@@ -194,7 +194,7 @@ public class Test8Resolver extends AbstractTestResolver {
         .append("\n  insert into #matt values (1);") //$NON-NLS-1$
         .append("\nEND"); //$NON-NLS-1$
 
-        Command cmd = helpResolve(proc.toString());
+        CommandImpl cmd = helpResolve(proc.toString());
 
         String sExpected = "CREATE VIRTUAL PROCEDURE\nBEGIN\nCREATE LOCAL TEMPORARY TABLE #matt (x integer);\nINSERT INTO #matt (x) VALUES (1);\nEND\n\tCREATE LOCAL TEMPORARY TABLE #matt (x integer)\n\tINSERT INTO #matt (x) VALUES (1)\n"; //$NON-NLS-1$
         String sActual = cmd.printCommandTree();
@@ -204,7 +204,7 @@ public class Test8Resolver extends AbstractTestResolver {
     //return should be first, then out
     @Test
     public void testParamOrder() {
-        Query resolvedQuery = (Query)helpResolve("SELECT * FROM (exec pm4.spRetOut()) as a", getMetadataFactory().exampleBQTCached()); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT * FROM (exec pm4.spRetOut()) as a", getMetadataFactory().exampleBQTCached()); //$NON-NLS-1$
 
         assertEquals("a.ret", resolvedQuery.getProjectedSymbols().get(0).toString()); //$NON-NLS-1$
     }
@@ -216,13 +216,13 @@ public class Test8Resolver extends AbstractTestResolver {
 
     @Test
     public void testArrayCase() {
-        Command c = helpResolve("select case when e1 is null then array_agg(e4) when e2 is null then array_agg(e4+1) end from pm1.g1 group by e1, e2"); //$NON-NLS-1$
+        CommandImpl c = helpResolve("select case when e1 is null then array_agg(e4) when e2 is null then array_agg(e4+1) end from pm1.g1 group by e1, e2"); //$NON-NLS-1$
         assertTrue(c.getProjectedSymbols().get(0).getType().isArray());
     }
 
     @Test
     public void testArrayCase1() {
-        Command c = helpResolve("select case when e1 is null then array_agg(e1) when e2 is null then array_agg(e4+1) end from pm1.g1 group by e1, e2"); //$NON-NLS-1$
+        CommandImpl c = helpResolve("select case when e1 is null then array_agg(e1) when e2 is null then array_agg(e4+1) end from pm1.g1 group by e1, e2"); //$NON-NLS-1$
         assertTrue(c.getProjectedSymbols().get(0).getType().isArray());
     }
 

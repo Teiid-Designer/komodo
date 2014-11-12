@@ -24,15 +24,15 @@ package org.komodo.modeshape.teiid.sql;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.komodo.modeshape.teiid.parser.ParseInfo;
-import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
-import org.komodo.modeshape.teiid.sql.lang.Query;
-import org.komodo.modeshape.teiid.sql.lang.Select;
-import org.komodo.modeshape.teiid.sql.proc.Statement;
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.sql.lang.BaseLanguageObject;
+import org.komodo.modeshape.teiid.sql.lang.QueryImpl;
+import org.komodo.modeshape.teiid.sql.lang.SelectImpl;
+import org.komodo.modeshape.teiid.sql.proc.StatementImpl;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
 import org.komodo.spi.runtime.version.TeiidVersion;
 
 @SuppressWarnings( {"nls", "javadoc"} )
-public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
+public abstract class AbstractTestCloning extends AbstractTest<BaseLanguageObject> {
 
     /**
      * @param teiidVersion 
@@ -41,16 +41,16 @@ public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
         super(teiidVersion);
     }
 
-    protected void helpTest(String sql, LanguageObject expectedNode) {
+    protected void helpTest(String sql, BaseLanguageObject expectedNode) {
         helpTest(sql, sql, expectedNode);
     }
 
-    protected void helpTest(String sql, String expectedSql, LanguageObject expectedNode) {
+    protected void helpTest(String sql, String expectedSql, BaseLanguageObject expectedNode) {
         helpTest(sql, expectedSql, expectedNode, new ParseInfo());
     }
 
-    protected void helpTest(String sql, String expectedSql, LanguageObject expectedNode, ParseInfo info) {
-        LanguageObject clonedNode = null;
+    protected void helpTest(String sql, String expectedSql, BaseLanguageObject expectedNode, ParseInfo info) {
+        BaseLanguageObject clonedNode = null;
         try {
             clonedNode = expectedNode.clone();
         } catch (Throwable e) {
@@ -61,20 +61,20 @@ public abstract class AbstractTestCloning extends AbstractTest<LanguageObject> {
     }
 
     protected void helpTestLiteral(Boolean expected, Class<?> expectedType, String sql, String expectedSql) {
-        Select select = getFactory().newSelect();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().wrapExpression(getFactory().newConstant(expected, expectedType)));
 
-        Query query = getFactory().newQuery();
+        QueryImpl query = getFactory().newQuery();
         query.setSelect(select);
 
         helpTest(sql, expectedSql, query);
     }
 
-    protected void helpTestExpression(String sql, String expectedString, Expression expected) throws Exception {
+    protected void helpTestExpression(String sql, String expectedString, BaseExpression expected) throws Exception {
         helpTest(sql, expectedString, expected);
     }
 
-    protected void helpStmtTest(String stmt, String expectedString, Statement expectedStmt) throws Exception {
+    protected void helpStmtTest(String stmt, String expectedString, StatementImpl expectedStmt) throws Exception {
         helpTest(stmt, expectedString, expectedStmt);
     }
 }

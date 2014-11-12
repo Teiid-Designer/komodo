@@ -22,90 +22,90 @@
 package org.komodo.spi.query;
 
 import org.komodo.spi.query.sql.LanguageVisitor;
-import org.komodo.spi.query.sql.lang.IAlterProcedure;
-import org.komodo.spi.query.sql.lang.IAlterTrigger;
-import org.komodo.spi.query.sql.lang.IAlterView;
-import org.komodo.spi.query.sql.lang.IArrayTable;
-import org.komodo.spi.query.sql.lang.IBetweenCriteria;
-import org.komodo.spi.query.sql.lang.ICompareCriteria;
-import org.komodo.spi.query.sql.lang.ICompoundCriteria;
-import org.komodo.spi.query.sql.lang.ICreate;
-import org.komodo.spi.query.sql.lang.IDelete;
-import org.komodo.spi.query.sql.lang.IDrop;
-import org.komodo.spi.query.sql.lang.IDynamicCommand;
-import org.komodo.spi.query.sql.lang.IExistsCriteria;
-import org.komodo.spi.query.sql.lang.IExpressionCriteria;
-import org.komodo.spi.query.sql.lang.IFrom;
-import org.komodo.spi.query.sql.lang.IGroupBy;
-import org.komodo.spi.query.sql.lang.IInsert;
-import org.komodo.spi.query.sql.lang.IInto;
-import org.komodo.spi.query.sql.lang.IIsNullCriteria;
-import org.komodo.spi.query.sql.lang.IJoinPredicate;
-import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.query.sql.lang.ILimit;
-import org.komodo.spi.query.sql.lang.IMatchCriteria;
-import org.komodo.spi.query.sql.lang.INotCriteria;
-import org.komodo.spi.query.sql.lang.IObjectTable;
-import org.komodo.spi.query.sql.lang.IOption;
-import org.komodo.spi.query.sql.lang.IOrderBy;
-import org.komodo.spi.query.sql.lang.IOrderByItem;
-import org.komodo.spi.query.sql.lang.IProcedureContainer;
-import org.komodo.spi.query.sql.lang.IQuery;
-import org.komodo.spi.query.sql.lang.ISelect;
-import org.komodo.spi.query.sql.lang.ISetClause;
-import org.komodo.spi.query.sql.lang.ISetClauseList;
-import org.komodo.spi.query.sql.lang.ISetCriteria;
-import org.komodo.spi.query.sql.lang.ISetQuery;
-import org.komodo.spi.query.sql.lang.IStoredProcedure;
-import org.komodo.spi.query.sql.lang.ISubqueryCompareCriteria;
-import org.komodo.spi.query.sql.lang.ISubqueryFromClause;
-import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
-import org.komodo.spi.query.sql.lang.ITextTable;
-import org.komodo.spi.query.sql.lang.IUnaryFromClause;
-import org.komodo.spi.query.sql.lang.IUpdate;
-import org.komodo.spi.query.sql.lang.IWithQueryCommand;
-import org.komodo.spi.query.sql.lang.IXMLTable;
-import org.komodo.spi.query.sql.proc.IAssignmentStatement;
-import org.komodo.spi.query.sql.proc.IBlock;
-import org.komodo.spi.query.sql.proc.IBranchingStatement;
-import org.komodo.spi.query.sql.proc.ICommandStatement;
-import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
-import org.komodo.spi.query.sql.proc.ICriteriaSelector;
-import org.komodo.spi.query.sql.proc.IDeclareStatement;
-import org.komodo.spi.query.sql.proc.IExceptionExpression;
-import org.komodo.spi.query.sql.proc.IHasCriteria;
-import org.komodo.spi.query.sql.proc.IIfStatement;
-import org.komodo.spi.query.sql.proc.ILoopStatement;
-import org.komodo.spi.query.sql.proc.IRaiseStatement;
-import org.komodo.spi.query.sql.proc.IReturnStatement;
-import org.komodo.spi.query.sql.proc.ITranslateCriteria;
-import org.komodo.spi.query.sql.proc.ITriggerAction;
-import org.komodo.spi.query.sql.proc.IWhileStatement;
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
-import org.komodo.spi.query.sql.symbol.IAliasSymbol;
-import org.komodo.spi.query.sql.symbol.IArray;
-import org.komodo.spi.query.sql.symbol.ICaseExpression;
-import org.komodo.spi.query.sql.symbol.IConstant;
-import org.komodo.spi.query.sql.symbol.IDerivedColumn;
-import org.komodo.spi.query.sql.symbol.IElementSymbol;
-import org.komodo.spi.query.sql.symbol.IExpressionSymbol;
-import org.komodo.spi.query.sql.symbol.IFunction;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
-import org.komodo.spi.query.sql.symbol.IMultipleElementSymbol;
-import org.komodo.spi.query.sql.symbol.IQueryString;
-import org.komodo.spi.query.sql.symbol.IReference;
-import org.komodo.spi.query.sql.symbol.IScalarSubquery;
-import org.komodo.spi.query.sql.symbol.ISearchedCaseExpression;
-import org.komodo.spi.query.sql.symbol.ITextLine;
-import org.komodo.spi.query.sql.symbol.IWindowFunction;
-import org.komodo.spi.query.sql.symbol.IWindowSpecification;
-import org.komodo.spi.query.sql.symbol.IXMLAttributes;
-import org.komodo.spi.query.sql.symbol.IXMLElement;
-import org.komodo.spi.query.sql.symbol.IXMLForest;
-import org.komodo.spi.query.sql.symbol.IXMLNamespaces;
-import org.komodo.spi.query.sql.symbol.IXMLParse;
-import org.komodo.spi.query.sql.symbol.IXMLQuery;
-import org.komodo.spi.query.sql.symbol.IXMLSerialize;
+import org.komodo.spi.query.sql.lang.AlterProcedure;
+import org.komodo.spi.query.sql.lang.AlterTrigger;
+import org.komodo.spi.query.sql.lang.AlterView;
+import org.komodo.spi.query.sql.lang.ArrayTable;
+import org.komodo.spi.query.sql.lang.BetweenCriteria;
+import org.komodo.spi.query.sql.lang.CompareCriteria;
+import org.komodo.spi.query.sql.lang.CompoundCriteria;
+import org.komodo.spi.query.sql.lang.Create;
+import org.komodo.spi.query.sql.lang.Delete;
+import org.komodo.spi.query.sql.lang.Drop;
+import org.komodo.spi.query.sql.lang.DynamicCommand;
+import org.komodo.spi.query.sql.lang.ExistsCriteria;
+import org.komodo.spi.query.sql.lang.ExpressionCriteria;
+import org.komodo.spi.query.sql.lang.From;
+import org.komodo.spi.query.sql.lang.GroupBy;
+import org.komodo.spi.query.sql.lang.Insert;
+import org.komodo.spi.query.sql.lang.Into;
+import org.komodo.spi.query.sql.lang.IsNullCriteria;
+import org.komodo.spi.query.sql.lang.JoinPredicate;
+import org.komodo.spi.query.sql.lang.JoinType;
+import org.komodo.spi.query.sql.lang.Limit;
+import org.komodo.spi.query.sql.lang.MatchCriteria;
+import org.komodo.spi.query.sql.lang.NotCriteria;
+import org.komodo.spi.query.sql.lang.ObjectTable;
+import org.komodo.spi.query.sql.lang.Option;
+import org.komodo.spi.query.sql.lang.OrderBy;
+import org.komodo.spi.query.sql.lang.OrderByItem;
+import org.komodo.spi.query.sql.lang.ProcedureContainer;
+import org.komodo.spi.query.sql.lang.Query;
+import org.komodo.spi.query.sql.lang.Select;
+import org.komodo.spi.query.sql.lang.SetClause;
+import org.komodo.spi.query.sql.lang.SetClauseList;
+import org.komodo.spi.query.sql.lang.SetCriteria;
+import org.komodo.spi.query.sql.lang.SetQuery;
+import org.komodo.spi.query.sql.lang.StoredProcedure;
+import org.komodo.spi.query.sql.lang.SubqueryCompareCriteria;
+import org.komodo.spi.query.sql.lang.SubqueryFromClause;
+import org.komodo.spi.query.sql.lang.SubquerySetCriteria;
+import org.komodo.spi.query.sql.lang.TextTable;
+import org.komodo.spi.query.sql.lang.UnaryFromClause;
+import org.komodo.spi.query.sql.lang.Update;
+import org.komodo.spi.query.sql.lang.WithQueryCommand;
+import org.komodo.spi.query.sql.lang.XMLTable;
+import org.komodo.spi.query.sql.proc.AssignmentStatement;
+import org.komodo.spi.query.sql.proc.Block;
+import org.komodo.spi.query.sql.proc.BranchingStatement;
+import org.komodo.spi.query.sql.proc.CommandStatement;
+import org.komodo.spi.query.sql.proc.CreateProcedureCommand;
+import org.komodo.spi.query.sql.proc.CriteriaSelector;
+import org.komodo.spi.query.sql.proc.DeclareStatement;
+import org.komodo.spi.query.sql.proc.ExceptionExpression;
+import org.komodo.spi.query.sql.proc.HasCriteria;
+import org.komodo.spi.query.sql.proc.IfStatement;
+import org.komodo.spi.query.sql.proc.LoopStatement;
+import org.komodo.spi.query.sql.proc.RaiseStatement;
+import org.komodo.spi.query.sql.proc.ReturnStatement;
+import org.komodo.spi.query.sql.proc.TranslateCriteria;
+import org.komodo.spi.query.sql.proc.TriggerAction;
+import org.komodo.spi.query.sql.proc.WhileStatement;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol;
+import org.komodo.spi.query.sql.symbol.AliasSymbol;
+import org.komodo.spi.query.sql.symbol.Array;
+import org.komodo.spi.query.sql.symbol.CaseExpression;
+import org.komodo.spi.query.sql.symbol.Constant;
+import org.komodo.spi.query.sql.symbol.DerivedColumn;
+import org.komodo.spi.query.sql.symbol.ElementSymbol;
+import org.komodo.spi.query.sql.symbol.ExpressionSymbol;
+import org.komodo.spi.query.sql.symbol.Function;
+import org.komodo.spi.query.sql.symbol.GroupSymbol;
+import org.komodo.spi.query.sql.symbol.MultipleElementSymbol;
+import org.komodo.spi.query.sql.symbol.QueryString;
+import org.komodo.spi.query.sql.symbol.Reference;
+import org.komodo.spi.query.sql.symbol.ScalarSubquery;
+import org.komodo.spi.query.sql.symbol.SearchedCaseExpression;
+import org.komodo.spi.query.sql.symbol.TextLine;
+import org.komodo.spi.query.sql.symbol.WindowFunction;
+import org.komodo.spi.query.sql.symbol.WindowSpecification;
+import org.komodo.spi.query.sql.symbol.XMLAttributes;
+import org.komodo.spi.query.sql.symbol.XMLElement;
+import org.komodo.spi.query.sql.symbol.XMLForest;
+import org.komodo.spi.query.sql.symbol.XMLNamespaces;
+import org.komodo.spi.query.sql.symbol.XMLParse;
+import org.komodo.spi.query.sql.symbol.XMLQuery;
+import org.komodo.spi.query.sql.symbol.XMLSerialize;
 
 /**
  * An implementation of a {@link LanguageVisitor language object visitor} that does nothing.
@@ -113,422 +113,422 @@ import org.komodo.spi.query.sql.symbol.IXMLSerialize;
 public abstract class AbstractLanguageVisitor implements LanguageVisitor {
 
     @Override
-    public void visit(IBetweenCriteria obj) {
+    public void visit(BetweenCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ICaseExpression obj) {
+    public void visit(CaseExpression obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ICompareCriteria obj) {
+    public void visit(CompareCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ICompoundCriteria obj) {
+    public void visit(CompoundCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ICreate obj) {
+    public void visit(Create obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IDelete obj) {
+    public void visit(Delete obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IExistsCriteria obj) {
+    public void visit(ExistsCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IFrom obj) {
+    public void visit(From obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IGroupBy obj) {
+    public void visit(GroupBy obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IInsert obj) {
+    public void visit(Insert obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IIsNullCriteria obj) {
+    public void visit(IsNullCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IJoinPredicate obj) {
+    public void visit(JoinPredicate obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IJoinType obj) {
+    public void visit(JoinType obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ILimit obj) {
+    public void visit(Limit obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IMatchCriteria obj) {
+    public void visit(MatchCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(INotCriteria obj) {
+    public void visit(NotCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IOption obj) {
+    public void visit(Option obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IOrderBy obj) {
+    public void visit(OrderBy obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IQuery obj) {
+    public void visit(Query obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ISearchedCaseExpression obj) {
+    public void visit(SearchedCaseExpression obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ISelect obj) {
+    public void visit(Select obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ISetCriteria obj) {
+    public void visit(SetCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ISetQuery obj) {
+    public void visit(SetQuery obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IStoredProcedure obj) {
+    public void visit(StoredProcedure obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ISubqueryCompareCriteria obj) {
+    public void visit(SubqueryCompareCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ISubqueryFromClause obj) {
+    public void visit(SubqueryFromClause obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ISubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IUnaryFromClause obj) {
+    public void visit(UnaryFromClause obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IUpdate obj) {
+    public void visit(Update obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IInto obj) {
+    public void visit(Into obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IDrop obj) {
+    public void visit(Drop obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IAggregateSymbol obj) {
+    public void visit(AggregateSymbol obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IAliasSymbol obj) {
+    public void visit(AliasSymbol obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IMultipleElementSymbol obj) {
+    public void visit(MultipleElementSymbol obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IConstant obj) {
+    public void visit(Constant obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IElementSymbol obj) {
+    public void visit(ElementSymbol obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IExpressionSymbol obj) {
+    public void visit(ExpressionSymbol obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IFunction obj) {
+    public void visit(Function obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IGroupSymbol obj) {
+    public void visit(GroupSymbol obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IReference obj) {
+    public void visit(Reference obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IScalarSubquery obj) {
+    public void visit(ScalarSubquery obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IAssignmentStatement obj) {
+    public void visit(AssignmentStatement obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IBlock obj) {
+    public void visit(Block obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ICommandStatement obj) {
+    public void visit(CommandStatement obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ICreateProcedureCommand obj) {
+    public void visit(CreateProcedureCommand obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ICriteriaSelector obj) {
+    public void visit(CriteriaSelector obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IDeclareStatement obj) {
+    public void visit(DeclareStatement obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IHasCriteria obj) {
+    public void visit(HasCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IIfStatement obj) {
+    public void visit(IfStatement obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IRaiseStatement obj) {
+    public void visit(RaiseStatement obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ITranslateCriteria obj) {
+    public void visit(TranslateCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IBranchingStatement obj) {
+    public void visit(BranchingStatement obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IWhileStatement obj) {
+    public void visit(WhileStatement obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ILoopStatement obj) {
+    public void visit(LoopStatement obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IDynamicCommand obj) {
+    public void visit(DynamicCommand obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IProcedureContainer obj) {
+    public void visit(ProcedureContainer obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ISetClauseList obj) {
+    public void visit(SetClauseList obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ISetClause obj) {
+    public void visit(SetClause obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IOrderByItem obj) {
+    public void visit(OrderByItem obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IXMLElement obj) {
+    public void visit(XMLElement obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IXMLAttributes obj) {
+    public void visit(XMLAttributes obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IXMLForest obj) {
+    public void visit(XMLForest obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IXMLNamespaces obj) {
+    public void visit(XMLNamespaces obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ITextTable obj) {
+    public void visit(TextTable obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ITextLine obj) {
+    public void visit(TextLine obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IXMLTable obj) {
+    public void visit(XMLTable obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IDerivedColumn obj) {
+    public void visit(DerivedColumn obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IXMLSerialize obj) {
+    public void visit(XMLSerialize obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IXMLQuery obj) {
+    public void visit(XMLQuery obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IQueryString obj) {
+    public void visit(QueryString obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IXMLParse obj) {
+    public void visit(XMLParse obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IExpressionCriteria obj) {
+    public void visit(ExpressionCriteria obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IWithQueryCommand obj) {
+    public void visit(WithQueryCommand obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(ITriggerAction obj) {
+    public void visit(TriggerAction obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IArrayTable obj) {
+    public void visit(ArrayTable obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IObjectTable objectTable) {
+    public void visit(ObjectTable objectTable) {
         // nothing to do
     }
 
     @Override
-    public void visit(IAlterView obj) {
+    public void visit(AlterView obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IAlterProcedure obj) {
+    public void visit(AlterProcedure obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IAlterTrigger obj) {
+    public void visit(AlterTrigger obj) {
         // nothing to do
     }
 
     @Override
-    public void visit(IWindowFunction windowFunction) {
+    public void visit(WindowFunction windowFunction) {
         // nothing to do
     }
 
     @Override
-    public void visit(IArray array) {
+    public void visit(Array array) {
         // nothing to do
     }
 
     @Override
-    public void visit(IExceptionExpression exceptionExpression) {
+    public void visit(ExceptionExpression exceptionExpression) {
         // nothing to do
     }
 
     @Override
-    public void visit(IReturnStatement returnStatement) {
+    public void visit(ReturnStatement returnStatement) {
         // nothing to do
     }
 
     @Override
-    public void visit(IWindowSpecification windowSpecification) {
+    public void visit(WindowSpecification windowSpecification) {
         // nothing to do
     }
 }

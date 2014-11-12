@@ -25,13 +25,13 @@ import java.util.Collection;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.sql.LanguageVisitor;
-import org.komodo.spi.query.sql.lang.ILanguageObject;
+import org.komodo.spi.query.sql.lang.LanguageObject;
 
 /**
  *
  * @param <L> 
  */
-public interface Validator<L extends ILanguageObject<? extends LanguageVisitor>> {
+public interface Validator<L extends LanguageObject<? extends LanguageVisitor>> {
     
     /**
      *

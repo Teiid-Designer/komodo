@@ -23,7 +23,7 @@ package org.komodo.spi.query.metadata;
 
 import java.util.List;
 
-import org.komodo.spi.query.sql.lang.ICommand;
+import org.komodo.spi.query.sql.lang.Command;
 
 
 /**
@@ -44,7 +44,7 @@ public interface QueryNode {
     /**
      * @return command
      */
-    ICommand getCommand();
+    Command getCommand();
 
     /**
      * @return sql of the query

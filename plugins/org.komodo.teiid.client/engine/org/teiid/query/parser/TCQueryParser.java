@@ -36,9 +36,9 @@ import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.MetadataFactory;
 import org.teiid.query.parser.v7.Teiid7ClientParser;
 import org.teiid.query.parser.v8.Teiid8ClientParser;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
@@ -113,13 +113,13 @@ public class TCQueryParser implements QueryParser {
 
 	@Deprecated
 	@Removed(Version.TEIID_8_0)
-	private Command parseUpdateProcedure(String sql) throws Exception {
+	private CommandImpl parseUpdateProcedure(String sql) throws Exception {
         try{
             TeiidClientParser teiidParser = getTeiidParser(sql);
             if (!(teiidParser instanceof Teiid7ClientParser))
                 throw new IllegalStateException();
 
-            Command result = ((Teiid7ClientParser) teiidParser).updateProcedure(new ParseInfo());
+            CommandImpl result = ((Teiid7ClientParser) teiidParser).updateProcedure(new ParseInfo());
             return result;
         } catch(Exception pe) {
             throw convertParserException(pe);
@@ -136,7 +136,7 @@ public class TCQueryParser implements QueryParser {
 	 * @throws Exception
 	 */
 	@Since(Version.TEIID_8_0)
-	public Command parseProcedure(String sql, boolean update) throws Exception {
+	public CommandImpl parseProcedure(String sql, boolean update) throws Exception {
         try{
             if (teiidVersion.isLessThan(Version.TEIID_8_0.get()))
                 return parseUpdateProcedure(sql);
@@ -144,7 +144,7 @@ public class TCQueryParser implements QueryParser {
             if (update) {
                 return getTeiidParser(sql).forEachRowTriggerAction(new ParseInfo());
             }
-            Command result = getTeiidParser(sql).procedureBodyCommand(new ParseInfo());
+            CommandImpl result = getTeiidParser(sql).procedureBodyCommand(new ParseInfo());
             return result;
         } catch(Exception pe) {
             throw convertParserException(pe);
@@ -162,7 +162,7 @@ public class TCQueryParser implements QueryParser {
 	 * @throws IllegalArgumentException if sql is null
 	 */	
 	@Override
-    public Command parseCommand(String sql) throws Exception {
+    public CommandImpl parseCommand(String sql) throws Exception {
 	    return parseCommand(sql, new ParseInfo(), false);
 	}
 
@@ -176,7 +176,7 @@ public class TCQueryParser implements QueryParser {
      * @throws Exception if parsing fails
      * @throws IllegalArgumentException if sql is null
      */ 
-    public Command parseCommand(String sql, ParseInfo parseInfo) throws Exception {
+    public CommandImpl parseCommand(String sql, ParseInfo parseInfo) throws Exception {
         return parseCommand(sql, parseInfo, false);
     }
 
@@ -190,16 +190,16 @@ public class TCQueryParser implements QueryParser {
      * @throws IllegalArgumentException if sql is null
      */
     @Override
-    public Command parseDesignerCommand(String sql) throws Exception {
+    public CommandImpl parseDesignerCommand(String sql) throws Exception {
         return parseCommand(sql, new ParseInfo(), true);
     }
 
-	private Command parseCommand(String sql, ParseInfo parseInfo, boolean designerCommands) throws Exception {
+	private CommandImpl parseCommand(String sql, ParseInfo parseInfo, boolean designerCommands) throws Exception {
         if(sql == null || sql.length() == 0) {
             throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30377));
         }
         
-    	Command result = null;
+    	CommandImpl result = null;
         try{
             if (designerCommands) {
                 result = getTeiidParser(sql).designerCommand(parseInfo);
@@ -231,14 +231,14 @@ public class TCQueryParser implements QueryParser {
      * @throws TeiidClientException if sql is null
      */
     @Override
-    public Criteria parseCriteria(String sql) throws Exception {
+    public CriteriaImpl parseCriteria(String sql) throws Exception {
         if(sql == null) {
             throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30377));
         }
 
         ParseInfo dummyInfo = new ParseInfo();
 
-        Criteria result = null;
+        CriteriaImpl result = null;
         try{
             result = getTeiidParser(sql).criteria(dummyInfo);
 
@@ -258,14 +258,14 @@ public class TCQueryParser implements QueryParser {
      * @throws IllegalArgumentException if sql is null
      */
     @Override
-    public Expression parseExpression(String sql) throws Exception {
+    public BaseExpression parseExpression(String sql) throws Exception {
         if(sql == null) {
             throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30377));
         }
 
         ParseInfo dummyInfo = new ParseInfo();
 
-        Expression result = null;
+        BaseExpression result = null;
         try{
             result = getTeiidParser(sql).expression(dummyInfo);
         } catch (Exception e) {
@@ -280,14 +280,14 @@ public class TCQueryParser implements QueryParser {
      * @return Expression representing sql
      * @throws Exception
      */
-    public Expression parseSelectExpression(String sql) throws Exception {
+    public BaseExpression parseSelectExpression(String sql) throws Exception {
         if (sql == null) {
             throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30377));
         }
 
         ParseInfo dummyInfo = new ParseInfo();
 
-        Expression result = null;
+        BaseExpression result = null;
         try {
             result = getTeiidParser(sql).selectExpression(dummyInfo);
 

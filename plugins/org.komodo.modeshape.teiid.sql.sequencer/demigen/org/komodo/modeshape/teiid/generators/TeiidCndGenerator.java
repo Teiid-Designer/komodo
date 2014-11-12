@@ -44,16 +44,16 @@ import org.komodo.modeshape.teiid.generators.CTree.CTreeCallback;
 import org.komodo.modeshape.teiid.generators.CTree.INode;
 import org.komodo.modeshape.teiid.generators.CTree.Node;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
+import org.komodo.modeshape.teiid.sql.lang.BaseLanguageObject;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
-import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
-import org.komodo.modeshape.teiid.sql.proc.Block;
-import org.komodo.modeshape.teiid.sql.symbol.Symbol;
+import org.komodo.modeshape.teiid.sql.proc.BlockImpl;
+import org.komodo.modeshape.teiid.sql.symbol.SymbolImpl;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.value.Reference;
 
@@ -89,8 +89,8 @@ public class TeiidCndGenerator implements GeneratorConstants {
 
     private static final Package[] SQL_PACKAGES = {
         ASTNode.class.getPackage(), // lang package
-        Block.class.getPackage(), // proc package
-        Symbol.class.getPackage() //symbol package
+        BlockImpl.class.getPackage(), // proc package
+        SymbolImpl.class.getPackage() //symbol package
     };
 
     private static final String TSQL_PREFIX = "tsql";
@@ -250,7 +250,10 @@ public class TeiidCndGenerator implements GeneratorConstants {
 
         @Override
         public String getTypeName() {
-            return klazz.getSimpleName();
+            String name = klazz.getSimpleName();
+            name = name.replaceAll(GeneratorConstants.LANG_OBJECT_PREFIX, EMPTY_STRING);
+            name = name.replaceAll(GeneratorConstants.LANG_OBJECT_POSTFIX, EMPTY_STRING);
+            return name;
         }
 
         @Override
@@ -469,7 +472,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
         CTreeCallback callback = new CTreeCallback() {
             @Override
             public void run(Node node) throws Exception {
-                String name = node.klazz().getSimpleName();
+                String name = node.getName();
                 
                 // TODO Ugly hack but not sure what else to do!!
                 String terminator = COMMA;
@@ -538,7 +541,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
         CTreeCallback callback = new CTreeCallback() {
             @Override
             public void run(Node node) throws Exception {
-                String name = node.klazz().getSimpleName();
+                String name = node.getName();
                 lexBuffer.append(TAB + TAB + "astIndex.put(" + name + ".class.getSimpleName()")
                               .append(COMMA + SPACE + "LexTokens." + camelCaseToUnderscores(name))
                               .append(CLOSE_BRACKET + SEMI_COLON + NEW_LINE);
@@ -552,6 +555,10 @@ public class TeiidCndGenerator implements GeneratorConstants {
         lexBuffer.append(NEW_LINE)
                       .append(TAB + PUBLIC + SPACE + STATIC)
                       .append(" String getTypeId(Class<? extends ASTNode> astNodeClass) {" + NEW_LINE)
+                      .append(TAB + TAB + "String name = astNodeClass.getSimpleName();" + NEW_LINE)
+                      .append(TAB + TAB + "if (! name.startsWith(\"Base\")) " + OPEN_BRACE + NEW_LINE)
+                      .append(TAB + TAB + TAB + "name = name.replaceAll(\"" + LANG_OBJECT_POSTFIX + "\", EMPTY_STRING);" + NEW_LINE)
+                      .append(TAB + TAB + CLOSE_BRACE + NEW_LINE)
                       .append(TAB + TAB + "LexTokens lexToken = astIndex.get(astNodeClass.getSimpleName());")
                       .append(NEW_LINE)
                       .append(TAB + TAB + "return lexToken.getId();" + NEW_LINE)
@@ -583,7 +590,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
                 if (Modifier.isAbstract(node.klazz().getModifiers()))
                     return;
 
-                String name = node.klazz().getSimpleName();
+                String name = node.getName();
                 lexBuffer.append(NEW_LINE)
                               .append(TAB + TAB + "Object " + toLowerCamelCase(name) + OPEN_BRACKET)
                               .append("TeiidSqlContext context" + CLOSE_BRACKET + SPACE) 
@@ -618,7 +625,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
                 if (Modifier.isAbstract(node.klazz().getModifiers()))
                     return;
 
-                String name = node.klazz().getSimpleName();
+                String name = node.getName();
                 lexBuffer.append(NEW_LINE)
                               .append(TAB + TAB + TAB + "case " + camelCaseToUnderscores(name) + COLON + NEW_LINE)
                               .append(TAB + TAB + TAB + TAB + "callback." + toLowerCamelCase(name))
@@ -755,9 +762,9 @@ public class TeiidCndGenerator implements GeneratorConstants {
      * @return generated name
      * @throws Exception
      */
-    private String nodeName(Class<?> data) throws Exception {
+    private String nodeName(Node node) throws Exception {
         StringBuffer buf = new StringBuffer();
-        String name = data.getSimpleName();
+        String name = node.getName();
         name = toLowerCamelCase(name);
 
         buf.append(TSQL_PREFIX).append(COLON).append(name);
@@ -802,8 +809,8 @@ public class TeiidCndGenerator implements GeneratorConstants {
     private void writeParentList(Iterator<? extends CTree.Node> parentIter) throws Exception {
         while(parentIter.hasNext()) {
             CTree.Node parentNode = parentIter.next();
-            cnd(nodeName(parentNode.klazz()));
-            lex(parentNode.klazz().getSimpleName());
+            cnd(nodeName(parentNode));
+            lex(parentNode.getName());
 
             if (parentIter.hasNext()) {
                 cnd(COMMA);
@@ -822,13 +829,13 @@ public class TeiidCndGenerator implements GeneratorConstants {
      */
     private void writeNodeDeclaration(CTree.Node node) throws Exception {
         cnd(OPEN_SQUARE_BRACKET);
-        cnd(nodeName(node.klazz()));
+        cnd(nodeName(node));
         cnd(CLOSE_SQUARE_BRACKET);
 
         lex(TAB + "/**" + NEW_LINE);
-        lex(TAB + " * " + nodeName(node.klazz()) + NEW_LINE);
+        lex(TAB + " * " + nodeName(node) + NEW_LINE);
         lex(TAB + " */" + NEW_LINE);
-        lex(TAB + PUBLIC + SPACE + INTERFACE + SPACE + node.klazz().getSimpleName());
+        lex(TAB + PUBLIC + SPACE + INTERFACE + SPACE + node.getName());
         
         Iterator<CTree.Node> parentIter = createParentIterator(node);
         if (parentIter.hasNext()) {
@@ -1128,7 +1135,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
         
         lexBuf.append(TAB).append(TAB)
                  .append("Class<?> ").append(varName).append("_REF_TYPE").append(" = ")
-                 .append(SPACE).append(aspect.getTypeClass().getSimpleName()).append(DOT).append(CLASS)
+                 .append(SPACE).append(aspect.getTypeName()).append(DOT).append(CLASS)
                  .append(SEMI_COLON).append(NEW_LINE).append(NEW_LINE);
 
         lexBuf.append(TAB).append(TAB)
@@ -1264,9 +1271,9 @@ public class TeiidCndGenerator implements GeneratorConstants {
             } else if (isSetter(method)) {
                 Class<?>[] parameterTypes = method.getParameterTypes();
                 if (parameterTypes.length > 1)
-                    throw new Exception("The class " + node.klazz().getSimpleName() + " has the setter method '" + method.getName() + "' with multiple parameters");
+                    throw new Exception("The class " + node.getName() + " has the setter method '" + method.getName() + "' with multiple parameters");
                 else if (parameterTypes.length == 0)
-                    throw new Exception("The class " + node.klazz().getSimpleName() + " has the setter method '" + method.getName() + "' with no parameters");
+                    throw new Exception("The class " + node.getName() + " has the setter method '" + method.getName() + "' with no parameters");
 
                 Method deMethod = dedupedMethods.get(method.getName());
                 if (deMethod != null) {
@@ -1385,7 +1392,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
      */
     private void lexId(Node node) throws Exception {
         
-        String name = node.klazz().getSimpleName();
+        String name = node.getName();
         name = toLowerCamelCase(name);
         
         lex(NEW_LINE);
@@ -1525,7 +1532,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
                 if (isEnum(objClass))
                     continue; // Ignore enums
 
-                if (! assignable(objClass, LanguageObject.class))
+                if (! assignable(objClass, BaseLanguageObject.class))
                     continue; // Must be at least a language object
 
                 if (isRootClass(objClass)) {

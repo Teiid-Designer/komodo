@@ -21,8 +21,8 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql;
 
-import org.komodo.spi.query.sql.lang.ICriteria;
-import org.komodo.spi.query.sql.lang.ILanguageObject;
+import org.komodo.spi.query.sql.lang.Criteria;
+import org.komodo.spi.query.sql.lang.LanguageObject;
 
 
 /**
@@ -33,7 +33,7 @@ public interface SQLStringVisitorCallback {
     /**
      * @param obj
      */
-    void visitNode(ILanguageObject obj);
+    void visitNode(LanguageObject obj);
     
     /**
      * @param obj
@@ -52,7 +52,7 @@ public interface SQLStringVisitorCallback {
      * @param keyWord
      * @param crit
      */
-    void visitCriteria(String keyWord, ICriteria crit);
+    void visitCriteria(String keyWord, Criteria crit);
 
     /**
      * @param level

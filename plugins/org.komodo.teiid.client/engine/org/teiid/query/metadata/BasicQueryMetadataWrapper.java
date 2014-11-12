@@ -36,7 +36,7 @@ import org.komodo.spi.query.metadata.StoredProcedureInfo;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.xml.MappingNode;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.symbol.BaseExpression;
 
 
 /**
@@ -474,7 +474,7 @@ public class BasicQueryMetadataWrapper implements QueryMetadataInterface {
 	}
 	
 	@Override
-	public Map<Expression, Integer> getFunctionBasedExpressions(Object metadataID) {
+	public Map<BaseExpression, Integer> getFunctionBasedExpressions(Object metadataID) {
 		return actualMetadata.getFunctionBasedExpressions(metadataID);
 	}
 

@@ -36,15 +36,15 @@ import org.komodo.spi.query.sql.ResolverVisitor;
 import org.komodo.spi.query.sql.SQLStringVisitor;
 import org.komodo.spi.query.sql.SQLStringVisitorCallback;
 import org.komodo.spi.query.sql.ValueIteratorProviderCollectorVisitor;
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.query.sql.lang.ICompareCriteria;
-import org.komodo.spi.query.sql.lang.IExpression;
-import org.komodo.spi.query.sql.lang.IIsNullCriteria;
-import org.komodo.spi.query.sql.lang.IMatchCriteria;
-import org.komodo.spi.query.sql.lang.ISetCriteria;
-import org.komodo.spi.query.sql.lang.ISubqueryContainer;
-import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.query.sql.lang.CompareCriteria;
+import org.komodo.spi.query.sql.lang.Expression;
+import org.komodo.spi.query.sql.lang.IsNullCriteria;
+import org.komodo.spi.query.sql.lang.MatchCriteria;
+import org.komodo.spi.query.sql.lang.SetCriteria;
+import org.komodo.spi.query.sql.lang.SubqueryContainer;
+import org.komodo.spi.query.sql.lang.SubquerySetCriteria;
+import org.komodo.spi.query.sql.symbol.GroupSymbol;
 import org.komodo.spi.udf.FunctionMethodDescriptor;
 import org.komodo.spi.udf.FunctionLibrary;
 import org.komodo.spi.validator.UpdateValidator;
@@ -145,7 +145,7 @@ public interface QueryService {
      * 
      * @return name of given expression
      */
-    String getSymbolName(IExpression expression);
+    String getSymbolName(Expression expression);
 
     /**
      * Get the symbol short name version of the
@@ -165,7 +165,7 @@ public interface QueryService {
      * 
      * @return short name of given expression
      */
-    String getSymbolShortName(IExpression expression);
+    String getSymbolShortName(Expression expression);
 
     /**
      * Get the visitor that converts SQL objects into their
@@ -244,11 +244,11 @@ public interface QueryService {
      * A predicate criteria is of the following types: </p>
      *
      * <ul>
-     * <li>{@link ICompareCriteria} CompareCriteria</li>
-     * <li>{@link IMatchCriteria} MatchCriteria</li>
-     * <li>{@link ISetCriteria} SetCriteria</li>
-     * <li>{@link ISubquerySetCriteria} SubquerySetCriteria</li>
-     * <li>{@link IIsNullCriteria} IsNullCriteria</li>
+     * <li>{@link CompareCriteria} CompareCriteria</li>
+     * <li>{@link MatchCriteria} MatchCriteria</li>
+     * <li>{@link SetCriteria} SetCriteria</li>
+     * <li>{@link SubquerySetCriteria} SubquerySetCriteria</li>
+     * <li>{@link IsNullCriteria} IsNullCriteria</li>
      * </ul>
      * 
      * @return instance of {@link PredicateCollectorVisitor} 
@@ -265,7 +265,7 @@ public interface QueryService {
     
     /**
      * This visitor class will traverse a language object tree and collect all language
-     * objects that implement {@link ISubqueryContainer}.
+     * objects that implement {@link SubqueryContainer}.
      * 
      * @return instance of {@link ValueIteratorProviderCollectorVisitor}
      */
@@ -304,14 +304,14 @@ public interface QueryService {
      * @param metadata
      * @throws Exception 
      */
-    void resolveGroup(IGroupSymbol groupSymbol, QueryMetadataInterface metadata) throws Exception;
+    void resolveGroup(GroupSymbol groupSymbol, QueryMetadataInterface metadata) throws Exception;
 
     /**
      * Convert all elements in a command to their fully qualified names.
      * 
      * @param command Command to convert
      */
-    void fullyQualifyElements(ICommand command);
+    void fullyQualifyElements(Command command);
 
     /**
      * Get the query resolver

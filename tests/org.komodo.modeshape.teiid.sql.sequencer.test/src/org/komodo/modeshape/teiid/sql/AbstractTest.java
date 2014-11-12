@@ -22,12 +22,12 @@
 package org.komodo.modeshape.teiid.sql;
 
 import org.komodo.modeshape.teiid.parser.SQQueryParser;
-import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
+import org.komodo.modeshape.teiid.sql.lang.BaseLanguageObject;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 
 @SuppressWarnings( {"javadoc"} )
-public abstract class AbstractTest<T extends LanguageObject> {
+public abstract class AbstractTest<T extends BaseLanguageObject> {
 
     protected TeiidVersion teiidVersion;
 

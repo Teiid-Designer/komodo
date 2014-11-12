@@ -26,73 +26,73 @@ import java.util.List;
 import org.komodo.spi.query.metadata.MetadataID;
 import org.komodo.spi.query.metadata.QueryNode;
 import org.komodo.spi.query.metadata.StoredProcedureInfo;
-import org.komodo.spi.query.sql.lang.IBetweenCriteria;
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.query.sql.lang.ICompareCriteria;
-import org.komodo.spi.query.sql.lang.ICompoundCriteria;
-import org.komodo.spi.query.sql.lang.ICriteria;
-import org.komodo.spi.query.sql.lang.IDelete;
-import org.komodo.spi.query.sql.lang.IExistsCriteria;
-import org.komodo.spi.query.sql.lang.IExpression;
-import org.komodo.spi.query.sql.lang.IFrom;
-import org.komodo.spi.query.sql.lang.IFromClause;
-import org.komodo.spi.query.sql.lang.IGroupBy;
-import org.komodo.spi.query.sql.lang.IInsert;
-import org.komodo.spi.query.sql.lang.IIsNullCriteria;
-import org.komodo.spi.query.sql.lang.IJoinPredicate;
-import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.lang.IMatchCriteria;
-import org.komodo.spi.query.sql.lang.INotCriteria;
-import org.komodo.spi.query.sql.lang.IOption;
-import org.komodo.spi.query.sql.lang.IOrderBy;
-import org.komodo.spi.query.sql.lang.IQuery;
-import org.komodo.spi.query.sql.lang.IQueryCommand;
-import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.query.sql.lang.ISelect;
-import org.komodo.spi.query.sql.lang.ISetCriteria;
-import org.komodo.spi.query.sql.lang.ISetQuery;
-import org.komodo.spi.query.sql.lang.IStoredProcedure;
-import org.komodo.spi.query.sql.lang.ISubqueryCompareCriteria;
-import org.komodo.spi.query.sql.lang.ISubqueryFromClause;
-import org.komodo.spi.query.sql.lang.ISubquerySetCriteria;
-import org.komodo.spi.query.sql.lang.IUnaryFromClause;
-import org.komodo.spi.query.sql.lang.IUpdate;
-import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
-import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
-import org.komodo.spi.query.sql.proc.IAssignmentStatement;
-import org.komodo.spi.query.sql.proc.IBlock;
-import org.komodo.spi.query.sql.proc.ICommandStatement;
-import org.komodo.spi.query.sql.proc.ICreateProcedureCommand;
-import org.komodo.spi.query.sql.proc.IDeclareStatement;
-import org.komodo.spi.query.sql.proc.IRaiseStatement;
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
-import org.komodo.spi.query.sql.symbol.IAliasSymbol;
-import org.komodo.spi.query.sql.symbol.IConstant;
-import org.komodo.spi.query.sql.symbol.IElementSymbol;
-import org.komodo.spi.query.sql.symbol.IExpressionSymbol;
-import org.komodo.spi.query.sql.symbol.IFunction;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
-import org.komodo.spi.query.sql.symbol.IMultipleElementSymbol;
-import org.komodo.spi.query.sql.symbol.IReference;
-import org.komodo.spi.query.sql.symbol.IScalarSubquery;
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol.Type;
+import org.komodo.spi.query.sql.lang.BetweenCriteria;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.query.sql.lang.CompareCriteria;
+import org.komodo.spi.query.sql.lang.CompoundCriteria;
+import org.komodo.spi.query.sql.lang.Criteria;
+import org.komodo.spi.query.sql.lang.Delete;
+import org.komodo.spi.query.sql.lang.ExistsCriteria;
+import org.komodo.spi.query.sql.lang.Expression;
+import org.komodo.spi.query.sql.lang.From;
+import org.komodo.spi.query.sql.lang.FromClause;
+import org.komodo.spi.query.sql.lang.GroupBy;
+import org.komodo.spi.query.sql.lang.Insert;
+import org.komodo.spi.query.sql.lang.IsNullCriteria;
+import org.komodo.spi.query.sql.lang.JoinPredicate;
+import org.komodo.spi.query.sql.lang.JoinType;
+import org.komodo.spi.query.sql.lang.LanguageObject;
+import org.komodo.spi.query.sql.lang.MatchCriteria;
+import org.komodo.spi.query.sql.lang.NotCriteria;
+import org.komodo.spi.query.sql.lang.Option;
+import org.komodo.spi.query.sql.lang.OrderBy;
+import org.komodo.spi.query.sql.lang.Query;
+import org.komodo.spi.query.sql.lang.QueryCommand;
+import org.komodo.spi.query.sql.lang.SPParameter;
+import org.komodo.spi.query.sql.lang.Select;
+import org.komodo.spi.query.sql.lang.SetCriteria;
+import org.komodo.spi.query.sql.lang.SetQuery;
+import org.komodo.spi.query.sql.lang.StoredProcedure;
+import org.komodo.spi.query.sql.lang.SubqueryCompareCriteria;
+import org.komodo.spi.query.sql.lang.SubqueryFromClause;
+import org.komodo.spi.query.sql.lang.SubquerySetCriteria;
+import org.komodo.spi.query.sql.lang.UnaryFromClause;
+import org.komodo.spi.query.sql.lang.Update;
+import org.komodo.spi.query.sql.lang.SPParameter.ParameterInfo;
+import org.komodo.spi.query.sql.lang.SetQuery.Operation;
+import org.komodo.spi.query.sql.proc.AssignmentStatement;
+import org.komodo.spi.query.sql.proc.Block;
+import org.komodo.spi.query.sql.proc.CommandStatement;
+import org.komodo.spi.query.sql.proc.CreateProcedureCommand;
+import org.komodo.spi.query.sql.proc.DeclareStatement;
+import org.komodo.spi.query.sql.proc.RaiseStatement;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol;
+import org.komodo.spi.query.sql.symbol.AliasSymbol;
+import org.komodo.spi.query.sql.symbol.Constant;
+import org.komodo.spi.query.sql.symbol.ElementSymbol;
+import org.komodo.spi.query.sql.symbol.ExpressionSymbol;
+import org.komodo.spi.query.sql.symbol.Function;
+import org.komodo.spi.query.sql.symbol.GroupSymbol;
+import org.komodo.spi.query.sql.symbol.MultipleElementSymbol;
+import org.komodo.spi.query.sql.symbol.Reference;
+import org.komodo.spi.query.sql.symbol.ScalarSubquery;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol.Type;
 
 /**
  *
  */
-public interface QueryFactory<E extends IExpression, 
-                                                      SES extends IExpression /* SingleElementSymbol */,
-                                                      F extends IFromClause,
-                                                      ES extends IElementSymbol,
-                                                      C extends ICommand,
-                                                      QC extends IQueryCommand,
-                                                      CR extends ICriteria,
-                                                      CO extends IConstant,
-                                                      B extends IBlock,
-                                                      SS extends ILanguageObject /* SelectSymbol */,
-                                                      GS extends IGroupSymbol,
-                                                      JT extends IJoinType> {
+public interface QueryFactory<E extends Expression, 
+                                                      SES extends Expression /* SingleElementSymbol */,
+                                                      F extends FromClause,
+                                                      ES extends ElementSymbol,
+                                                      C extends Command,
+                                                      QC extends QueryCommand,
+                                                      CR extends Criteria,
+                                                      CO extends Constant,
+                                                      B extends Block,
+                                                      SS extends LanguageObject /* SelectSymbol */,
+                                                      GS extends GroupSymbol,
+                                                      JT extends JoinType> {
     
     /**
      * Create a new function
@@ -100,9 +100,9 @@ public interface QueryFactory<E extends IExpression,
      * @param name
      * @param arguments
      * 
-     * @return instance of {@link IFunction}
+     * @return instance of {@link Function}
      */
-    IFunction createFunction(String name, List<? extends E> arguments);
+    Function createFunction(String name, List<? extends E> arguments);
     
     /**
      * Create a new aggregate symbol
@@ -112,18 +112,18 @@ public interface QueryFactory<E extends IExpression,
      * @param isDistinct 
      * @param expression
      * 
-     * @return instance of {@link IAggregateSymbol}
+     * @return instance of {@link AggregateSymbol}
      */
-    IAggregateSymbol createAggregateSymbol(String functionName, Type functionType, boolean isDistinct, E expression);
+    AggregateSymbol createAggregateSymbol(String functionName, Type functionType, boolean isDistinct, E expression);
     
     /**
      * Create a new element symbol
      * 
      * @param name
      * 
-     * @return instance of {@link IElementSymbol}
+     * @return instance of {@link ElementSymbol}
      */
-    IElementSymbol createElementSymbol(String name);
+    ElementSymbol createElementSymbol(String name);
 
     /**
      * Create a new element symbol
@@ -131,9 +131,9 @@ public interface QueryFactory<E extends IExpression,
      * @param name
      * @param displayFullyQualified True if should display fully qualified
      * 
-     * @return instance of {@link IElementSymbol}
+     * @return instance of {@link ElementSymbol}
      */
-    IElementSymbol createElementSymbol(String name, boolean displayFullyQualified);
+    ElementSymbol createElementSymbol(String name, boolean displayFullyQualified);
     
     /**
      * Create an alias symbol
@@ -141,18 +141,18 @@ public interface QueryFactory<E extends IExpression,
      * @param name
      * @param symbol
      * 
-     * @return instance of {@link IAliasSymbol}
+     * @return instance of {@link AliasSymbol}
      */
-    IAliasSymbol createAliasSymbol(String name, SES symbol);
+    AliasSymbol createAliasSymbol(String name, SES symbol);
     
     /**
      * Create a new group symbol
      * 
      * @param name
      * 
-     * @return instance of {@link IGroupSymbol}
+     * @return instance of {@link GroupSymbol}
      */
-    IGroupSymbol createGroupSymbol(String name);
+    GroupSymbol createGroupSymbol(String name);
     
     /**
      * Create a new group symbol
@@ -160,9 +160,9 @@ public interface QueryFactory<E extends IExpression,
      * @param name
      * @param definition
      * 
-     * @return instance of {@link IGroupSymbol}
+     * @return instance of {@link GroupSymbol}
      */
-    IGroupSymbol createGroupSymbol(String name, String definition);
+    GroupSymbol createGroupSymbol(String name, String definition);
     
     /**
      * Create an expression symbol
@@ -170,25 +170,25 @@ public interface QueryFactory<E extends IExpression,
      * @param name
      * @param expression
      * 
-     * @return instance of {@link IExpressionSymbol}
+     * @return instance of {@link ExpressionSymbol}
      */
-    IExpressionSymbol createExpressionSymbol(String name, E expression);
+    ExpressionSymbol createExpressionSymbol(String name, E expression);
     
     /**
      * Create an multiple element symbol
      * 
-     * @return instance of {@link IMultipleElementSymbol}
+     * @return instance of {@link MultipleElementSymbol}
      */
-    IMultipleElementSymbol createMultipleElementSymbol();
+    MultipleElementSymbol createMultipleElementSymbol();
     
     /**
      * Create a new constant
      * 
      * @param value
      * 
-     * @return instance of {@link IConstant}
+     * @return instance of {@link Constant}
      */
-    IConstant createConstant(Object value);
+    Constant createConstant(Object value);
 
     /**
      * Create a new declare statement.
@@ -196,34 +196,34 @@ public interface QueryFactory<E extends IExpression,
      * @param variable The <code>ElementSymbol</code> object that is the variable
      * @param valueType The type of this variable
      * 
-     * @return instance of  {@link IDeclareStatement}
+     * @return instance of  {@link DeclareStatement}
      */
-    IDeclareStatement createDeclareStatement(ES variable, String valueType);
+    DeclareStatement createDeclareStatement(ES variable, String valueType);
     
     /**
      * Create a command statement
      * 
      * @param command
      * 
-     * @return instance of {@link ICommandStatement}
+     * @return instance of {@link CommandStatement}
      */
-    ICommandStatement createCommandStatement(C command);
+    CommandStatement createCommandStatement(C command);
     
     /**
      * Create a raise statement
      * 
      * @param expression
      * 
-     * @return instance of {@link IRaiseStatement}
+     * @return instance of {@link RaiseStatement}
      */
-    IRaiseStatement createRaiseStatement(E expression);
+    RaiseStatement createRaiseStatement(E expression);
     
     /**
      * Create a query
      * 
-     * @return instance of {@link IQuery}
+     * @return instance of {@link Query}
      */
-    IQuery createQuery();
+    Query createQuery();
 
     /**
      * Create a set query
@@ -233,9 +233,9 @@ public interface QueryFactory<E extends IExpression,
      * @param leftQuery 
      * @param rightQuery 
      * 
-     * @return instance of {@link ISetQuery}
+     * @return instance of {@link SetQuery}
      */
-    ISetQuery createSetQuery(Operation operation, 
+    SetQuery createSetQuery(Operation operation, 
                                               boolean all, 
                                               QC leftQuery, 
                                               QC rightQuery);
@@ -245,16 +245,16 @@ public interface QueryFactory<E extends IExpression,
      * 
      * @param operation
      * 
-     * @return instance of {@link ISetQuery}
+     * @return instance of {@link SetQuery}
      */
-    ISetQuery createSetQuery(Operation operation);
+    SetQuery createSetQuery(Operation operation);
     
     /**
      * Create a compare criteria
      * 
-     * @return instance of {@link ICompareCriteria}
+     * @return instance of {@link CompareCriteria}
      */
-    ICompareCriteria createCompareCriteria();
+    CompareCriteria createCompareCriteria();
 
     /**
      * Create a compare criteria
@@ -263,64 +263,64 @@ public interface QueryFactory<E extends IExpression,
      * @param operator
      * @param expression2
      * 
-     * @return instance of {@link ICompareCriteria}
+     * @return instance of {@link CompareCriteria}
      */
-    ICompareCriteria createCompareCriteria(E expression1, 
+    CompareCriteria createCompareCriteria(E expression1, 
                                                                    int operator, 
                                                                    E expression2);
     
     /**
      * Create an is null criteria
      * 
-     * @return instance of {@link IIsNullCriteria}
+     * @return instance of {@link IsNullCriteria}
      */
-    IIsNullCriteria createIsNullCriteria();
+    IsNullCriteria createIsNullCriteria();
 
     /**
      * Create an is null criteria
      * 
      * @param expression 
      * 
-     * @return instance of {@link IIsNullCriteria}
+     * @return instance of {@link IsNullCriteria}
      */
-    IIsNullCriteria createIsNullCriteria(E expression);
+    IsNullCriteria createIsNullCriteria(E expression);
     
     /**
      * Create a not criteria
      * 
-     * @return instance of {@link INotCriteria}
+     * @return instance of {@link NotCriteria}
      */
-    INotCriteria createNotCriteria();
+    NotCriteria createNotCriteria();
     
     /**
      * Create a not criteria
      * 
      * @param criteria 
      * 
-     * @return instance of {@link INotCriteria}
+     * @return instance of {@link NotCriteria}
      */
-    INotCriteria createNotCriteria(CR criteria);
+    NotCriteria createNotCriteria(CR criteria);
     
     /**
      * Create a match criteria
      * 
-     * @return instance of {@link IMatchCriteria}
+     * @return instance of {@link MatchCriteria}
      */
-    IMatchCriteria createMatchCriteria();
+    MatchCriteria createMatchCriteria();
 
     /**
      * Create a set criteria
      * 
-     * @return instance of {@link ISetCriteria}
+     * @return instance of {@link SetCriteria}
      */
-    ISetCriteria createSetCriteria();
+    SetCriteria createSetCriteria();
 
     /**
      * Create a subquery set criteria
      * 
-     * @return instance of {@link ISubquerySetCriteria}
+     * @return instance of {@link SubquerySetCriteria}
      */
-    ISubquerySetCriteria createSubquerySetCriteria();
+    SubquerySetCriteria createSubquerySetCriteria();
 
     /**
      * Create a subquery set criteria
@@ -328,9 +328,9 @@ public interface QueryFactory<E extends IExpression,
      * @param expression 
      * @param command 
      * 
-     * @return instance of {@link ISubquerySetCriteria}
+     * @return instance of {@link SubquerySetCriteria}
      */
-    ISubquerySetCriteria createSubquerySetCriteria(E expression, QC command);
+    SubquerySetCriteria createSubquerySetCriteria(E expression, QC command);
     
     /**
      * Create a subquery compare criteria
@@ -340,18 +340,18 @@ public interface QueryFactory<E extends IExpression,
      * @param operator
      * @param predicateQuantifier
      * 
-     * @return instance of {@link ISubqueryCompareCriteria}
+     * @return instance of {@link SubqueryCompareCriteria}
      */
-    ISubqueryCompareCriteria createSubqueryCompareCriteria(E leftExpression, QC command, int operator, int predicateQuantifier);
+    SubqueryCompareCriteria createSubqueryCompareCriteria(E leftExpression, QC command, int operator, int predicateQuantifier);
     
     /**
      * Create a scalar sub query
      * 
      * @param queryCommand
      * 
-     * @return instance of {@link IScalarSubquery}
+     * @return instance of {@link ScalarSubquery}
      */
-    IScalarSubquery createScalarSubquery(QC queryCommand);
+    ScalarSubquery createScalarSubquery(QC queryCommand);
     
     /**
      * Create an in-between criteria
@@ -360,9 +360,9 @@ public interface QueryFactory<E extends IExpression,
      * @param constant1
      * @param constant2
      * 
-     * @return instance of {@link IBetweenCriteria}
+     * @return instance of {@link BetweenCriteria}
      */
-    IBetweenCriteria createBetweenCriteria(ES elementSymbol,
+    BetweenCriteria createBetweenCriteria(ES elementSymbol,
                                                                    CO constant1,
                                                                    CO constant2);
 
@@ -372,34 +372,34 @@ public interface QueryFactory<E extends IExpression,
      * @param operator
      * @param criteria
      * 
-     * @return instance of {@link ICompoundCriteria}
+     * @return instance of {@link CompoundCriteria}
      */
-    ICompoundCriteria createCompoundCriteria(int operator, List<? extends CR> criteria);
+    CompoundCriteria createCompoundCriteria(int operator, List<? extends CR> criteria);
 
     /**
      * Create an exists criteria
      * 
      * @param queryCommand
      * 
-     * @return instance of {@link IExistsCriteria}
+     * @return instance of {@link ExistsCriteria}
      */
-    IExistsCriteria createExistsCriteria(QC queryCommand);
+    ExistsCriteria createExistsCriteria(QC queryCommand);
     
     /**
      * Create a block
      * 
-     * @return instance of {@link IBlock}
+     * @return instance of {@link Block}
      */
-    IBlock createBlock();
+    Block createBlock();
 
     /**
      * Create a create-procedure statement
      * 
      * @param block
      * 
-     * @return instance of {@link ICreateProcedureCommand}
+     * @return instance of {@link CreateProcedureCommand}
      */
-    ICreateProcedureCommand createCreateProcedureCommand(B block);
+    CreateProcedureCommand createCreateProcedureCommand(B block);
 
     /**
      * Create an assignment statement
@@ -407,9 +407,9 @@ public interface QueryFactory<E extends IExpression,
      * @param elementSymbol 
      * @param expression
      * 
-     * @return instance of {@link IAssignmentStatement}
+     * @return instance of {@link AssignmentStatement}
      */
-    IAssignmentStatement createAssignmentStatement(ES elementSymbol, E expression);
+    AssignmentStatement createAssignmentStatement(ES elementSymbol, E expression);
 
     /**
      * Create an assignment statement
@@ -417,50 +417,50 @@ public interface QueryFactory<E extends IExpression,
      * @param elementSymbol 
      * @param queryCommand
      * 
-     * @return instance of {@link IAssignmentStatement}
+     * @return instance of {@link AssignmentStatement}
      */
-    IAssignmentStatement createAssignmentStatement(ES elementSymbol, QC queryCommand);
+    AssignmentStatement createAssignmentStatement(ES elementSymbol, QC queryCommand);
 
     /**
      * Create a select
      * 
-     * @return instance of {@link ISelect}
+     * @return instance of {@link Select}
      */
-    ISelect createSelect();
+    Select createSelect();
     
     /**
      * Create a select
      * 
      * @param symbols
      * 
-     * @return instance of {@link ISelect}
+     * @return instance of {@link Select}
      */
-    ISelect createSelect(List<? extends SS> symbols);
+    Select createSelect(List<? extends SS> symbols);
 
     /**
      * Create a from
      * 
-     * @return instance of {@link IFrom}
+     * @return instance of {@link From}
      */
-    IFrom createFrom();
+    From createFrom();
 
     /**
      * Create a from
      * 
      * @param fromClauses
      * 
-     * @return instance of {@link IFrom}
+     * @return instance of {@link From}
      */
-    IFrom createFrom(List<? extends F> fromClauses);
+    From createFrom(List<? extends F> fromClauses);
     
     /**
      * Create a unary from clause
      * 
      * @param symbol
      * 
-     * @return instance of {@link IUnaryFromClause}
+     * @return instance of {@link UnaryFromClause}
      */
-    IUnaryFromClause createUnaryFromClause(GS symbol);
+    UnaryFromClause createUnaryFromClause(GS symbol);
 
     /**
      * Create a subquery from clause
@@ -468,9 +468,9 @@ public interface QueryFactory<E extends IExpression,
      * @param name
      * @param command
      * 
-     * @return instance of {@link ISubqueryFromClause}
+     * @return instance of {@link SubqueryFromClause}
      */
-    ISubqueryFromClause createSubqueryFromClause(String name, QC command);
+    SubqueryFromClause createSubqueryFromClause(String name, QC command);
 
 
     /**
@@ -478,9 +478,9 @@ public interface QueryFactory<E extends IExpression,
      * 
      * @param joinType 
      * 
-     * @return instance of {@link IJoinType}
+     * @return instance of {@link JoinType}
      */
-    IJoinType getJoinType(IJoinType.Types joinType);
+    JoinType getJoinType(JoinType.Types joinType);
     
     /**
      * Create a join predicate
@@ -489,9 +489,9 @@ public interface QueryFactory<E extends IExpression,
      * @param rightClause 
      * @param joinType
      * 
-     * @return instance of {@link IJoinPredicate}
+     * @return instance of {@link JoinPredicate}
      */
-    IJoinPredicate createJoinPredicate(F leftClause,
+    JoinPredicate createJoinPredicate(F leftClause,
                                                          F rightClause, 
                                                          JT joinType);
     /**
@@ -502,9 +502,9 @@ public interface QueryFactory<E extends IExpression,
      * @param joinType
      * @param criteria 
      * 
-     * @return instance of {@link IJoinPredicate}
+     * @return instance of {@link JoinPredicate}
      */    
-    IJoinPredicate createJoinPredicate(F leftClause, 
+    JoinPredicate createJoinPredicate(F leftClause, 
                                                          F rightClause,
                                                          JT joinType,
                                                          List<CR> criteria);
@@ -512,51 +512,51 @@ public interface QueryFactory<E extends IExpression,
     /**
      * Create a group by
      * 
-     * @return instance of {@link IGroupBy}
+     * @return instance of {@link GroupBy}
      */
-    IGroupBy createGroupBy();
+    GroupBy createGroupBy();
 
     /**
      * Create an order by
      * 
-     * @return instance of {@link IOrderBy}
+     * @return instance of {@link OrderBy}
      */
-    IOrderBy createOrderBy();
+    OrderBy createOrderBy();
     
     /**
      * Create an option
      * 
-     * @return instance of {@link IOption}
+     * @return instance of {@link Option}
      */
-    IOption createOption();
+    Option createOption();
     
     /**
      * Create an update
      * 
-     * @return instance of {@link IUpdate}
+     * @return instance of {@link Update}
      */
-    IUpdate createUpdate();
+    Update createUpdate();
     
     /**
      * Create a delete     
      * 
-     * @return instance of {@link IDelete}
+     * @return instance of {@link Delete}
      */
-    IDelete createDelete();
+    Delete createDelete();
     
     /**
      * Create an insert     
      * 
-     * @return instance of {@link IInsert}
+     * @return instance of {@link Insert}
      */
-    IInsert createInsert();
+    Insert createInsert();
     
     /**
      * Create a stored procedure
      * 
-     * @return instance of {@link IStoredProcedure}
+     * @return instance of {@link StoredProcedure}
      */
-    IStoredProcedure createStoredProcedure();
+    StoredProcedure createStoredProcedure();
 
     /**
      * Create a stored procedure parameter
@@ -564,9 +564,9 @@ public interface QueryFactory<E extends IExpression,
      * @param index
      * @param expression
      * 
-     * @return instance of {@link ISPParameter}
+     * @return instance of {@link SPParameter}
      */
-    ISPParameter createSPParameter(int index, E expression);
+    SPParameter createSPParameter(int index, E expression);
 
     /**
      * Create a stored procedure parameter
@@ -575,18 +575,18 @@ public interface QueryFactory<E extends IExpression,
      * @param parameterType 
      * @param name
      * 
-     * @return instance of {@link ISPParameter}
+     * @return instance of {@link SPParameter}
      */
-    ISPParameter createSPParameter(int index, ParameterInfo parameterType, String name);
+    SPParameter createSPParameter(int index, ParameterInfo parameterType, String name);
     
     /**
      * Create a reference
      * 
      * @param index
      * 
-     * @return instance of {@link IReference}
+     * @return instance of {@link Reference}
      */
-    IReference createReference(int index);
+    Reference createReference(int index);
 
     /**
      * Create a metadata id

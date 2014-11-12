@@ -38,15 +38,8 @@
 //==================================================
 //  Derived from Language Object Interfaces
 //==================================================
-[tsql:labeled] mixin
-	- tsql:label (string)
-
 [tsql:targetedCommand] mixin
 	+ tsql:group (tsql:groupSymbol)
-
-[tsql:expressionStatement] mixin
-	- tsql:expectedTypeClass (string)
-	+ tsql:expression (tsql:expression)
 
 [tsql:languageObject] mixin
 	- tsql:teiidVersion (string)
@@ -58,6 +51,13 @@
 
 [tsql:subqueryContainer]	>	tsql:languageObject mixin
 	+ tsql:command (tsql:command)
+
+[tsql:expressionStatement] mixin
+	- tsql:expectedTypeClass (string)
+	+ tsql:expression (tsql:expression)
+
+[tsql:labeled] mixin
+	- tsql:label (string)
 
 //==================================================
 //  Derived from Language Object Classes
@@ -287,11 +287,11 @@
 	+ tsql:defaultExpression (tsql:expression)
 
 [tsql:textColumn]	>	tsql:projectedColumn mixin
-	- tsql:ordinal (boolean)
 	- tsql:selector (string)
+	- tsql:ordinal (boolean)
 	- tsql:position (long)
-	- tsql:width (long)
 	- tsql:noTrim (boolean)
+	- tsql:width (long)
 
 [tsql:xmlColumn]	>	tsql:projectedColumn mixin
 	- tsql:ordinal (boolean)
@@ -400,8 +400,8 @@
 [tsql:exceptionExpression]	>	tsql:expression mixin
 	+ tsql:errorCode (tsql:expression)
 	+ tsql:message (tsql:expression)
-	+ tsql:sqlState (tsql:expression)
 	+ tsql:parentExpression (tsql:expression)
+	+ tsql:sqlState (tsql:expression)
 
 [tsql:function]	>	tsql:expression mixin
 	- tsql:arrayType (boolean)
@@ -441,7 +441,7 @@
 	- tsql:procedure (boolean)
 	- tsql:definition (string)
 
-[tsql:array]	>	tsql:expression mixin
+[tsql:arraySymbol]	>	tsql:expression mixin
 	- tsql:implicit (boolean)
 	+ tsql:expressions (tsql:expression) sns
 

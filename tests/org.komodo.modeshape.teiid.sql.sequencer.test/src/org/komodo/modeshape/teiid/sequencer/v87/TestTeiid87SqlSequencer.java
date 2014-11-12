@@ -30,8 +30,8 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SPParameter;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.StoredProcedure;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SubqueryContainer;
 import org.komodo.modeshape.teiid.sequencer.v86.TestTeiid86SqlSequencer;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  *

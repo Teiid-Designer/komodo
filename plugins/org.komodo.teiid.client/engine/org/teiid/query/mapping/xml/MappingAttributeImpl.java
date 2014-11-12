@@ -27,7 +27,7 @@ import org.komodo.spi.annotation.Since;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.xml.MappingAttribute;
 import org.teiid.query.parser.TeiidClientParser;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 
 
 /** 
@@ -35,7 +35,7 @@ import org.teiid.query.sql.symbol.ElementSymbol;
  */
 public class MappingAttributeImpl extends MappingNodeImpl implements MappingAttribute {
     // Element symbol in the resultset source
-    ElementSymbol symbol;
+    ElementSymbolImpl symbol;
     
     // namespace of the attribute
     Namespace namespace;
@@ -164,11 +164,11 @@ public class MappingAttributeImpl extends MappingNodeImpl implements MappingAttr
         return (String) getProperty(MappingNodeConstants.Properties.RESULT_SET_NAME);
     }    
     
-    public void setElementSymbol(ElementSymbol symbol) {
+    public void setElementSymbol(ElementSymbolImpl symbol) {
         this.symbol = symbol;
     }
 
-    public ElementSymbol getElementSymbol() {
+    public ElementSymbolImpl getElementSymbol() {
         return this.symbol;
     }
     

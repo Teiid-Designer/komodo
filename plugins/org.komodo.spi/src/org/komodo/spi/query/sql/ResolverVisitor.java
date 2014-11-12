@@ -24,13 +24,13 @@ package org.komodo.spi.query.sql;
 import java.util.Collection;
 
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.lang.ILanguageObject;
-import org.komodo.spi.query.sql.symbol.IGroupSymbol;
+import org.komodo.spi.query.sql.lang.LanguageObject;
+import org.komodo.spi.query.sql.symbol.GroupSymbol;
 
 /**
  *
  */
-public interface ResolverVisitor<LO extends ILanguageObject, GS extends IGroupSymbol> {
+public interface ResolverVisitor<LO extends LanguageObject, GS extends GroupSymbol> {
     
     public static final String SHORT_NAME = "shortName"; //$NON-NLS-1$
 

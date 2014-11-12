@@ -101,7 +101,7 @@ import org.teiid.json.simple.ParseException;
 import org.teiid.query.eval.Evaluator;
 import org.teiid.query.eval.Evaluator.NameValuePair;
 import org.teiid.query.function.CharsetUtils;
-import org.teiid.query.sql.symbol.XMLSerialize;
+import org.teiid.query.sql.symbol.XMLSerializeImpl;
 import org.teiid.query.util.CommandContext;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -1032,7 +1032,7 @@ public class XMLSystemFunctions {
         }
     }
 
-	public static Object serialize(XMLSerialize xs, XMLType value) throws Exception {
+	public static Object serialize(XMLSerializeImpl xs, XMLType value) throws Exception {
 		Type type = value.getType();
 		final Charset encoding;
 		if (xs.getEncoding() != null) {

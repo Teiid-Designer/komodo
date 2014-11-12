@@ -16,7 +16,7 @@ import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 /**
  * Base class for AST Nodes
  */
-public class SimpleNode implements Node, LanguageObject {
+public class SimpleNode implements Node, BaseLanguageObject {
 
     protected Node parent;
     protected Node[] children;
@@ -172,7 +172,7 @@ public class SimpleNode implements Node, LanguageObject {
         return clone;
     }
 
-    protected <T extends LanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
+    protected <T extends BaseLanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
         if (collection == null)
             return null;
 
@@ -184,7 +184,7 @@ public class SimpleNode implements Node, LanguageObject {
         return cloned;
     }
 
-    protected <T extends LanguageObject> List<T> cloneList(List<T> list) {
+    protected <T extends BaseLanguageObject> List<T> cloneList(List<T> list) {
         if (list == null)
             return null;
 

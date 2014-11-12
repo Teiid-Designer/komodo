@@ -35,49 +35,49 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.sql.lang.BetweenCriteria;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.DynamicCommand;
-import org.teiid.query.sql.lang.ExpressionCriteria;
-import org.teiid.query.sql.lang.GroupBy;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.lang.IsNullCriteria;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.Limit;
-import org.teiid.query.sql.lang.MatchCriteria;
-import org.teiid.query.sql.lang.ObjectColumn;
-import org.teiid.query.sql.lang.ObjectTable;
-import org.teiid.query.sql.lang.OrderByItem;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.lang.SetClause;
-import org.teiid.query.sql.lang.SetCriteria;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
-import org.teiid.query.sql.lang.XMLColumn;
-import org.teiid.query.sql.lang.XMLTable;
+import org.teiid.query.sql.lang.BetweenCriteriaImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.DynamicCommandImpl;
+import org.teiid.query.sql.lang.ExpressionCriteriaImpl;
+import org.teiid.query.sql.lang.GroupByImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.lang.IsNullCriteriaImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.LimitImpl;
+import org.teiid.query.sql.lang.MatchCriteriaImpl;
+import org.teiid.query.sql.lang.ObjectColumnImpl;
+import org.teiid.query.sql.lang.ObjectTableImpl;
+import org.teiid.query.sql.lang.OrderByItemImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.lang.SetClauseImpl;
+import org.teiid.query.sql.lang.SetCriteriaImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
+import org.teiid.query.sql.lang.XMLColumnImpl;
+import org.teiid.query.sql.lang.XMLTableImpl;
 import org.teiid.query.sql.navigator.PreOrPostOrderNavigator;
-import org.teiid.query.sql.proc.AssignmentStatement;
-import org.teiid.query.sql.proc.ExceptionExpression;
-import org.teiid.query.sql.proc.ReturnStatement;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.AliasSymbol;
-import org.teiid.query.sql.symbol.Array;
-import org.teiid.query.sql.symbol.CaseExpression;
-import org.teiid.query.sql.symbol.DerivedColumn;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.ExpressionSymbol;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.MultipleElementSymbol;
-import org.teiid.query.sql.symbol.QueryString;
-import org.teiid.query.sql.symbol.SearchedCaseExpression;
-import org.teiid.query.sql.symbol.Symbol;
-import org.teiid.query.sql.symbol.WindowSpecification;
-import org.teiid.query.sql.symbol.XMLElement;
-import org.teiid.query.sql.symbol.XMLParse;
-import org.teiid.query.sql.symbol.XMLSerialize;
+import org.teiid.query.sql.proc.AssignmentStatementImpl;
+import org.teiid.query.sql.proc.ExceptionExpressionImpl;
+import org.teiid.query.sql.proc.ReturnStatementImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.AliasSymbolImpl;
+import org.teiid.query.sql.symbol.ArraySymbolImpl;
+import org.teiid.query.sql.symbol.CaseExpressionImpl;
+import org.teiid.query.sql.symbol.DerivedColumnImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.ExpressionSymbolImpl;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.MultipleElementSymbolImpl;
+import org.teiid.query.sql.symbol.QueryStringImpl;
+import org.teiid.query.sql.symbol.SearchedCaseExpressionImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
+import org.teiid.query.sql.symbol.WindowSpecificationImpl;
+import org.teiid.query.sql.symbol.XMLElementImpl;
+import org.teiid.query.sql.symbol.XMLParseImpl;
+import org.teiid.query.sql.symbol.XMLSerializeImpl;
 
 
 /**
@@ -116,16 +116,16 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }
     
     @Override
-    public void visit(Select obj) {
-    	List<Expression> symbols = obj.getSymbols();
+    public void visit(SelectImpl obj) {
+    	List<BaseExpression> symbols = obj.getSymbols();
     	for (int i = 0; i < symbols.size(); i++) {
-            Expression symbol = symbols.get(i);
+            BaseExpression symbol = symbols.get(i);
             
-            if (symbol instanceof MultipleElementSymbol) {
+            if (symbol instanceof MultipleElementSymbolImpl) {
             	continue;
             }
             
-            Expression replacmentSymbol = replaceSymbol(symbol, true);
+            BaseExpression replacmentSymbol = replaceSymbol(symbol, true);
             
             symbols.set(i, replacmentSymbol);
         }
@@ -146,18 +146,18 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
 	}
     
     @Override
-    public void visit(DerivedColumn obj) {
-    	Expression original = obj.getExpression();
+    public void visit(DerivedColumnImpl obj) {
+    	BaseExpression original = obj.getExpression();
     	obj.setExpression(replaceExpression(original));
-    	if (obj.isPropagateName() && obj.getAlias() == null && !(obj.getExpression() instanceof ElementSymbol) && original instanceof ElementSymbol) {
-    		obj.setAlias(((ElementSymbol)original).getShortName());
+    	if (obj.isPropagateName() && obj.getAlias() == null && !(obj.getExpression() instanceof ElementSymbolImpl) && original instanceof ElementSymbolImpl) {
+    		obj.setAlias(((ElementSymbolImpl)original).getShortName());
     	}
     }
     
     @Override
-    public void visit(XMLTable obj) {
-    	for (XMLColumn col : obj.getColumns()) {
-    		Expression exp = col.getDefaultExpression();
+    public void visit(XMLTableImpl obj) {
+    	for (XMLColumnImpl col : obj.getColumns()) {
+    		BaseExpression exp = col.getDefaultExpression();
     		if (exp != null) {
     			col.setDefaultExpression(replaceExpression(exp));
     		}
@@ -165,9 +165,9 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }
     
     @Override
-    public void visit(ObjectTable obj) {
-    	for (ObjectColumn col : obj.getColumns()) {
-    		Expression exp = col.getDefaultExpression();
+    public void visit(ObjectTableImpl obj) {
+    	for (ObjectColumnImpl col : obj.getColumns()) {
+    		BaseExpression exp = col.getDefaultExpression();
     		if (exp != null) {
     			col.setDefaultExpression(replaceExpression(exp));
     		}
@@ -175,31 +175,31 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }
     
     @Override
-    public void visit(XMLSerialize obj) {
+    public void visit(XMLSerializeImpl obj) {
     	obj.setExpression(replaceExpression(obj.getExpression()));
     }
     
     @Override
-    public void visit(XMLParse obj) {
+    public void visit(XMLParseImpl obj) {
     	obj.setExpression(replaceExpression(obj.getExpression()));
     }
     
-	private Expression replaceSymbol(Expression ses,
+	private BaseExpression replaceSymbol(BaseExpression ses,
 			boolean alias) {
-		Expression expr = ses;
-		String name = Symbol.getShortName(ses);
-		if (ses instanceof ExpressionSymbol) {
-		    expr = ((ExpressionSymbol)ses).getExpression();
+		BaseExpression expr = ses;
+		String name = SymbolImpl.getShortName(ses);
+		if (ses instanceof ExpressionSymbolImpl) {
+		    expr = ((ExpressionSymbolImpl)ses).getExpression();
 		}
 		
-		Expression replacementSymbol = replaceExpression(expr);
+		BaseExpression replacementSymbol = replaceExpression(expr);
 		
-		if (!(replacementSymbol instanceof Symbol)) {
+		if (!(replacementSymbol instanceof SymbolImpl)) {
 		    replacementSymbol = getTeiidParser().createASTNode(ASTNodes.EXPRESSION_SYMBOL);
-		    ((ExpressionSymbol) replacementSymbol).setName(name);
-		    ((ExpressionSymbol) replacementSymbol).setExpression(replacementSymbol);
-		} else if (alias && createAliases() && !Symbol.getShortName(replacementSymbol).equals(name)) {
-		    AliasSymbol aliasSymbol = getTeiidParser().createASTNode(ASTNodes.ALIAS_SYMBOL);
+		    ((ExpressionSymbolImpl) replacementSymbol).setName(name);
+		    ((ExpressionSymbolImpl) replacementSymbol).setExpression(replacementSymbol);
+		} else if (alias && createAliases() && !SymbolImpl.getShortName(replacementSymbol).equals(name)) {
+		    AliasSymbolImpl aliasSymbol = getTeiidParser().createASTNode(ASTNodes.ALIAS_SYMBOL);
 		    aliasSymbol.setName(name);
             aliasSymbol.setSymbol(replacementSymbol);
             replacementSymbol = aliasSymbol;
@@ -208,31 +208,31 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
 	}
     
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.symbol.AliasSymbol)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.symbol.AliasSymbolImpl)
      */
     @Override
-    public void visit(AliasSymbol obj) {
-        Expression replacement = replaceExpression(obj.getSymbol());
+    public void visit(AliasSymbolImpl obj) {
+        BaseExpression replacement = replaceExpression(obj.getSymbol());
         obj.setSymbol(replacement);
     }
     
     @Override
-    public void visit(ExpressionSymbol expr) {
+    public void visit(ExpressionSymbolImpl expr) {
         expr.setExpression(replaceExpression(expr.getExpression()));
     }
     
     /**
-     * @see TCLanguageVisitorImpl#visit(BetweenCriteria)
+     * @see TCLanguageVisitorImpl#visit(BetweenCriteriaImpl)
      */
     @Override
-    public void visit(BetweenCriteria obj) {
+    public void visit(BetweenCriteriaImpl obj) {
         obj.setExpression( replaceExpression(obj.getExpression()) );
         obj.setLowerExpression( replaceExpression(obj.getLowerExpression()) );
         obj.setUpperExpression( replaceExpression(obj.getUpperExpression()) );
     }
     
     @Override
-    public void visit(CaseExpression obj) {
+    public void visit(CaseExpressionImpl obj) {
         obj.setExpression(replaceExpression(obj.getExpression()));
         final int whenCount = obj.getWhenCount();
         ArrayList whens = new ArrayList(whenCount);
@@ -248,20 +248,20 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }
 
     /**
-     * @see TCLanguageVisitorImpl#visit(CompareCriteria)
+     * @see TCLanguageVisitorImpl#visit(CompareCriteriaImpl)
      */
     @Override
-    public void visit(CompareCriteria obj) {
+    public void visit(CompareCriteriaImpl obj) {
         obj.setLeftExpression( replaceExpression(obj.getLeftExpression()) );
         obj.setRightExpression( replaceExpression(obj.getRightExpression()) );
     }
 
     /**
-     * @see TCLanguageVisitorImpl#visit(Function)
+     * @see TCLanguageVisitorImpl#visit(FunctionImpl)
      */
     @Override
-    public void visit(Function obj) {
-        Expression[] args = obj.getArgs();
+    public void visit(FunctionImpl obj) {
+        BaseExpression[] args = obj.getArgs();
         if(args != null && args.length > 0) {
             for(int i=0; i<args.length; i++) {
                 args[i] = replaceExpression(args[i]);
@@ -270,26 +270,26 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }
 
     /**
-     * @see TCLanguageVisitorImpl#visit(IsNullCriteria)
+     * @see TCLanguageVisitorImpl#visit(IsNullCriteriaImpl)
      */
     @Override
-    public void visit(IsNullCriteria obj) {
+    public void visit(IsNullCriteriaImpl obj) {
         obj.setExpression( replaceExpression(obj.getExpression()) );
     }
 
     /**
-     * @see TCLanguageVisitorImpl#visit(MatchCriteria)
+     * @see TCLanguageVisitorImpl#visit(MatchCriteriaImpl)
      */
     @Override
-    public void visit(MatchCriteria obj) {
+    public void visit(MatchCriteriaImpl obj) {
         obj.setLeftExpression( replaceExpression(obj.getLeftExpression()) );
         obj.setRightExpression( replaceExpression(obj.getRightExpression()) );
     }
 
     @Override
-    public void visit(SearchedCaseExpression obj) {
+    public void visit(SearchedCaseExpressionImpl obj) {
         int whenCount = obj.getWhenCount();
-        ArrayList<Expression> thens = new ArrayList<Expression>(whenCount);
+        ArrayList<BaseExpression> thens = new ArrayList<BaseExpression>(whenCount);
         for (int i = 0; i < whenCount; i++) {
             thens.add(replaceExpression(obj.getThenExpression(i)));
         }
@@ -300,10 +300,10 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }
 
     /**
-     * @see TCLanguageVisitorImpl#visit(SetCriteria)
+     * @see TCLanguageVisitorImpl#visit(SetCriteriaImpl)
      */
     @Override
-    public void visit(SetCriteria obj) {
+    public void visit(SetCriteriaImpl obj) {
         obj.setExpression( replaceExpression(obj.getExpression()) );
         
         if (obj.isAllConstants()) {
@@ -313,25 +313,25 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
         Collection newValues = new ArrayList(obj.getValues().size());        
         Iterator valueIter = obj.getValues().iterator();
         while(valueIter.hasNext()) {
-            newValues.add( replaceExpression( (Expression) valueIter.next() ) );
+            newValues.add( replaceExpression( (BaseExpression) valueIter.next() ) );
         }
         
         obj.setValues(newValues);                    
     }
 
     /**
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SubqueryCompareCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl)
      */
     @Override
-    public void visit(SubqueryCompareCriteria obj) {
+    public void visit(SubqueryCompareCriteriaImpl obj) {
         obj.setLeftExpression( replaceExpression(obj.getLeftExpression()) );
     }
     
     /**
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SubquerySetCriteria)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.SubquerySetCriteriaImpl)
      */
     @Override
-    public void visit(SubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteriaImpl obj) {
         obj.setExpression( replaceExpression(obj.getExpression()) );
     }    
     
@@ -342,11 +342,11 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
      * @param element
      * @return new expression
      */
-    public Expression replaceExpression(Expression element) {
-    	if (elementSymbolsOnly && !(element instanceof ElementSymbol)) {
+    public BaseExpression replaceExpression(BaseExpression element) {
+    	if (elementSymbolsOnly && !(element instanceof ElementSymbolImpl)) {
     		return element;
     	}
-        Expression mapped = (Expression) this.symbolMap.get(element);
+        BaseExpression mapped = (BaseExpression) this.symbolMap.get(element);
         if(mapped != null) {
         	if (clone) {
         		return mapped.clone();
@@ -357,17 +357,17 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }
     
     @Override
-    public void visit(StoredProcedure obj) {
-    	for (Iterator<SPParameter> paramIter = obj.getInputParameters().iterator(); paramIter.hasNext();) {
-			SPParameter param = paramIter.next();
-            Expression expr = param.getExpression();
+    public void visit(StoredProcedureImpl obj) {
+    	for (Iterator<SPParameterImpl> paramIter = obj.getInputParameters().iterator(); paramIter.hasNext();) {
+			SPParameterImpl param = paramIter.next();
+            BaseExpression expr = param.getExpression();
             param.setExpression(replaceExpression(expr));
         }
     }
     
     @Override
-    public void visit(AggregateSymbol obj) {
-    	visit((Function)obj);
+    public void visit(BaseAggregateSymbol obj) {
+    	visit((FunctionImpl)obj);
     	if (obj.getCondition() != null) { 
     		obj.setCondition(replaceExpression(obj.getCondition()));
     	}
@@ -378,21 +378,21 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
      * @param obj Object to remap
      */
     @Override
-    public void visit(GroupBy obj) {        
-    	List<Expression> symbols = obj.getSymbols();
+    public void visit(GroupByImpl obj) {        
+    	List<BaseExpression> symbols = obj.getSymbols();
 		for (int i = 0; i < symbols.size(); i++) {
-            Expression symbol = symbols.get(i);
+            BaseExpression symbol = symbols.get(i);
             symbols.set(i, replaceExpression(symbol));
         }
     }
     
     @Override
-    public void visit(OrderByItem obj) {
+    public void visit(OrderByItemImpl obj) {
     	obj.setSymbol(replaceSymbol(obj.getSymbol(), obj.getExpressionPosition() != -1));
     }
     
     @Override
-    public void visit(Limit obj) {
+    public void visit(LimitImpl obj) {
         if (obj.getOffset() != null) {
             obj.setOffset(replaceExpression(obj.getOffset()));
         }
@@ -400,27 +400,27 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }
        
     @Override
-    public void visit(DynamicCommand obj) {
+    public void visit(DynamicCommandImpl obj) {
         obj.setSql(replaceExpression(obj.getSql()));
         if (obj.getUsing() != null) {
-	        for (SetClause clause : obj.getUsing().getClauses()) {
+	        for (SetClauseImpl clause : obj.getUsing().getClauses()) {
 				visit(clause);
 			}
         }
     }
     
     @Override
-    public void visit(SetClause obj) {
+    public void visit(SetClauseImpl obj) {
     	obj.setValue(replaceExpression(obj.getValue()));
     }
     
     @Override
-    public void visit(QueryString obj) {
+    public void visit(QueryStringImpl obj) {
     	obj.setPath(replaceExpression(obj.getPath()));
     }
     
     @Override
-    public void visit(ExpressionCriteria obj) {
+    public void visit(ExpressionCriteriaImpl obj) {
     	obj.setExpression(replaceExpression(obj.getExpression()));
     }
     
@@ -429,7 +429,7 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
      * @param obj Language object
      * @param exprMap Expression map, Expression to Expression
      */
-    public static void mapExpressions(LanguageObject obj, Map<? extends Expression, ? extends Expression> exprMap) {
+    public static void mapExpressions(BaseLanguageObject obj, Map<? extends BaseExpression, ? extends BaseExpression> exprMap) {
         mapExpressions(obj, exprMap, false);
     }
     
@@ -438,7 +438,7 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
      * @param obj Language object
      * @param exprMap Expression map, Expression to Expression
      */
-    public static void mapExpressions(LanguageObject obj, Map<? extends Expression, ? extends Expression> exprMap, boolean deep) {
+    public static void mapExpressions(BaseLanguageObject obj, Map<? extends BaseExpression, ? extends BaseExpression> exprMap, boolean deep) {
         if(obj == null || exprMap == null || exprMap.isEmpty()) { 
             return;
         }
@@ -447,15 +447,15 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
         visitor.elementSymbolsOnly = true;
         boolean preOrder = true;
         boolean useReverseMapping = true;
-        for (Map.Entry<? extends Expression, ? extends Expression> entry : exprMap.entrySet()) {
-        	if (!(entry.getKey() instanceof ElementSymbol)) {
+        for (Map.Entry<? extends BaseExpression, ? extends BaseExpression> entry : exprMap.entrySet()) {
+        	if (!(entry.getKey() instanceof ElementSymbolImpl)) {
         		visitor.elementSymbolsOnly = false;
         		break;
         	}
 		}
         if (!visitor.elementSymbolsOnly) {
-        	for (Map.Entry<? extends Expression, ? extends Expression> entry : exprMap.entrySet()) {
-            	if (!(entry.getValue() instanceof ElementSymbol)) {
+        	for (Map.Entry<? extends BaseExpression, ? extends BaseExpression> entry : exprMap.entrySet()) {
+            	if (!(entry.getValue() instanceof ElementSymbolImpl)) {
             		useReverseMapping = !Collections.disjoint(GroupsUsedByElementsVisitorImpl.getGroups(exprMap.keySet()),
                     		GroupsUsedByElementsVisitorImpl.getGroups(exprMap.values()));
             		break;
@@ -467,11 +467,11 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
         }
         
         if (useReverseMapping) {
-	        final Set<Expression> reverseSet = new HashSet<Expression>(exprMap.values());
+	        final Set<BaseExpression> reverseSet = new HashSet<BaseExpression>(exprMap.values());
 	        PreOrPostOrderNavigator pon = new PreOrPostOrderNavigator(visitor, PreOrPostOrderNavigator.PRE_ORDER, deep) {
 	        	@Override
-	        	protected void visitNode(LanguageObject obj) {
-	        		if (!(obj instanceof Expression) || !reverseSet.contains(obj)) {
+	        	protected void visitNode(BaseLanguageObject obj) {
+	        		if (!(obj instanceof BaseExpression) || !reverseSet.contains(obj)) {
 	            		super.visitNode(obj);
 	        		}
 	        	}
@@ -491,53 +491,53 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }    
     
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.proc.AssignmentStatement)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.proc.AssignmentStatementImpl)
      *
      */
     @Override
-    public void visit(AssignmentStatement obj) {
+    public void visit(AssignmentStatementImpl obj) {
         obj.setExpression(replaceExpression(obj.getExpression()));
     }
     
     /** 
-     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.Insert)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.InsertImpl)
      *
      */
     @Override
-    public void visit(Insert obj) {
+    public void visit(InsertImpl obj) {
         for (int i = 0; i < obj.getValues().size(); i++) {
             obj.getValues().set(i, replaceExpression(obj.getValues().get(i)));
         }
     }
     
     @Override
-    public void visit(XMLElement obj) {
+    public void visit(XMLElementImpl obj) {
     	for (int i = 0; i < obj.getContent().size(); i++) {
     		obj.getContent().set(i, replaceExpression(obj.getContent().get(i)));
     	}
     }
     
     @Override
-    public void visit(WindowSpecification windowSpecification) {
+    public void visit(WindowSpecificationImpl windowSpecification) {
     	if (windowSpecification.getPartition() == null) {
     		return;
     	}
-    	List<Expression> partition = windowSpecification.getPartition();
+    	List<BaseExpression> partition = windowSpecification.getPartition();
 		for (int i = 0; i < partition.size(); i++) {
     		partition.set(i, replaceExpression(partition.get(i)));
     	}
     }
 
     @Override
-    public void visit(Array array) {
-        List<Expression> exprs = array.getExpressions();
+    public void visit(ArraySymbolImpl array) {
+        List<BaseExpression> exprs = array.getExpressions();
         for (int i = 0; i < exprs.size(); i++) {
             exprs.set(i, replaceExpression(exprs.get(i)));
         }
     }
 
     @Override
-    public void visit(ExceptionExpression exceptionExpression) {
+    public void visit(ExceptionExpressionImpl exceptionExpression) {
     	if (exceptionExpression.getMessage() != null) {
     		exceptionExpression.setMessage(replaceExpression(exceptionExpression.getMessage()));
     	}
@@ -553,7 +553,7 @@ public class ExpressionMappingVisitor extends TCLanguageVisitorImpl {
     }
     
     @Override
-    public void visit(ReturnStatement obj) {
+    public void visit(ReturnStatementImpl obj) {
     	if (obj.getExpression() != null) {
     		obj.setExpression(replaceExpression(obj.getExpression()));
     	}

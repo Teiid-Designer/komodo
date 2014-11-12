@@ -28,11 +28,11 @@ import java.util.Set;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.lang.OrderBy;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.lang.OrderByImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 
 
 /** 
@@ -45,7 +45,7 @@ public class ResultSetInfo {
     private String resultSetName;
     
     // The result set command
-    private Command rsCommand;
+    private CommandImpl rsCommand;
     
     // The processor plan output for the result set
     // TODO do we need the processor plan??
@@ -57,15 +57,15 @@ public class ResultSetInfo {
     // whether or not to throw exception on row limit
     private boolean exceptionOnRowLimit = false;
            
-    private OrderBy orderBy;
+    private OrderByImpl orderBy;
     
-    private Criteria criteria;
+    private CriteriaImpl criteria;
     
     private Set<MappingSourceNodeImpl> criteriaResultSets = new HashSet<MappingSourceNodeImpl>();
     
     private boolean criteriaRaised = false;
     
-    private ElementSymbol mappingClassSymbol;
+    private ElementSymbolImpl mappingClassSymbol;
 	private boolean inputSet;
 	@Removed(Version.TEIID_8_0)
 	private boolean isCritNullDependent;
@@ -73,11 +73,11 @@ public class ResultSetInfo {
 	//auto-staging related info
 	private String stagingRoot;
 	private String tempTable;
-	private Command tempSelect;
-	private Insert tempInsert;
-	private Command tempDrop;
+	private CommandImpl tempSelect;
+	private InsertImpl tempInsert;
+	private CommandImpl tempDrop;
 	private boolean isAutoStaged;
-	private Set<List<ElementSymbol>> fkColumns;
+	private Set<List<ElementSymbolImpl>> fkColumns;
     
     public ResultSetInfo(String resultName) {
         this.resultSetName = resultName;
@@ -87,11 +87,11 @@ public class ResultSetInfo {
         return this.resultSetName;
     }
     
-    public Command getCommand() {
+    public CommandImpl getCommand() {
         return this.rsCommand;
     }
     
-    public void setCommand(Command cmd) {
+    public void setCommand(CommandImpl cmd) {
         this.rsCommand = cmd;
     }
 //        TODO Do we need the processor plan??
@@ -116,19 +116,19 @@ public class ResultSetInfo {
         return exceptionOnRowLimit;
     }
     
-    public Criteria getCriteria() {
+    public CriteriaImpl getCriteria() {
         return this.criteria;
     }
 
-    public void setCriteria(Criteria criteria) {
+    public void setCriteria(CriteriaImpl criteria) {
         this.criteria = criteria;
     }
     
-    public OrderBy getOrderBy() {
+    public OrderByImpl getOrderBy() {
         return this.orderBy;
     }
 
-    public void setOrderBy(OrderBy orderBy) {
+    public void setOrderBy(OrderByImpl orderBy) {
         this.orderBy = orderBy;
     }
     
@@ -154,7 +154,7 @@ public class ResultSetInfo {
 //        clone.rsPlan = this.rsPlan;
         clone.userRowLimit = this.userRowLimit;
         clone.exceptionOnRowLimit = this.exceptionOnRowLimit;
-        clone.rsCommand = (Command)this.rsCommand.clone();
+        clone.rsCommand = (CommandImpl)this.rsCommand.clone();
         clone.criteriaRaised = this.criteriaRaised;
         clone.mappingClassSymbol = this.mappingClassSymbol;
         clone.tempInsert = this.tempInsert;
@@ -170,11 +170,11 @@ public class ResultSetInfo {
         return resultSetName + ", resultSetObject " + rsCommand; //$NON-NLS-1$
     }
 
-    public ElementSymbol getMappingClassSymbol() {
+    public ElementSymbolImpl getMappingClassSymbol() {
         return this.mappingClassSymbol;
     }
 
-    public void setMappingClassSymbol(ElementSymbol mappingClassSymbol) {
+    public void setMappingClassSymbol(ElementSymbolImpl mappingClassSymbol) {
         this.mappingClassSymbol = mappingClassSymbol;
     }
 
@@ -204,27 +204,27 @@ public class ResultSetInfo {
 		this.stagingRoot = stagingRoot;
 	}
 
-	public void setTempSelect(Command tempSelect) {
+	public void setTempSelect(CommandImpl tempSelect) {
 		this.tempSelect = tempSelect;
 	}
 	
-	public Command getTempSelect() {
+	public CommandImpl getTempSelect() {
 		return tempSelect;
 	}
 	
-	public void setTempInsert(Insert tempInsert) {
+	public void setTempInsert(InsertImpl tempInsert) {
 		this.tempInsert = tempInsert;
 	}
 	
-	public Insert getTempInsert() {
+	public InsertImpl getTempInsert() {
 		return tempInsert;
 	}
 	
-	public Command getTempDrop() {
+	public CommandImpl getTempDrop() {
 		return tempDrop;
 	}
 	
-	public void setTempDrop(Command tempDrop) {
+	public void setTempDrop(CommandImpl tempDrop) {
 		this.tempDrop = tempDrop;
 	}
 
@@ -244,14 +244,14 @@ public class ResultSetInfo {
 		this.isAutoStaged = isAutoStaged;
 	}
 
-	public void addFkColumns(List<ElementSymbol> cols) {
+	public void addFkColumns(List<ElementSymbolImpl> cols) {
 		if (this.fkColumns == null) {
-			this.fkColumns = new HashSet<List<ElementSymbol>>();
+			this.fkColumns = new HashSet<List<ElementSymbolImpl>>();
 		}
 		this.fkColumns.add(cols);
 	}
 
-	public Set<List<ElementSymbol>> getFkColumns() {
+	public Set<List<ElementSymbolImpl>> getFkColumns() {
 		return this.fkColumns;
 	}
 }

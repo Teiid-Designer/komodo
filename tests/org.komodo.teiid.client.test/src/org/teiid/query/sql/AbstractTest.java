@@ -23,10 +23,10 @@ package org.teiid.query.sql;
 
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.parser.TCQueryParser;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 
 @SuppressWarnings( {"javadoc"} )
-public abstract class AbstractTest<T extends LanguageObject> {
+public abstract class AbstractTest<T extends BaseLanguageObject> {
 
     protected TeiidVersion teiidVersion;
 

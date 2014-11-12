@@ -25,14 +25,14 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
-import org.komodo.spi.query.sql.lang.ICommand;
+import org.komodo.spi.query.sql.lang.Command;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.Table;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.AbstractTestFactory;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 import org.teiid.query.sql.v8.Test8Factory;
 import org.teiid.query.validator.AbstractTestValidator;
 
@@ -280,10 +280,10 @@ public class Test8Validator extends AbstractTestValidator {
         // SQL is same as pm1.vsp36() in example1 
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN select 1, 2; END";        
         QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
-        Command command = getQueryParser().parseCommand(sql);
-        GroupSymbol group = getFactory().newGroupSymbol("pm1.vsp36");
+        CommandImpl command = getQueryParser().parseCommand(sql);
+        GroupSymbolImpl group = getFactory().newGroupSymbol("pm1.vsp36");
         TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
-        queryResolver.resolveCommand(command, group, ICommand.TYPE_STORED_PROCEDURE, metadata, true);
+        queryResolver.resolveCommand(command, group, Command.TYPE_STORED_PROCEDURE, metadata, true);
 
         assertEquals(2, command.getResultSetColumns().size());
     }

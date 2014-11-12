@@ -30,9 +30,9 @@ import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.ProcedureContainerResolver;
 import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverVisitorImpl;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.Delete;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.DeleteImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 
 
 /**
@@ -48,16 +48,16 @@ public class DeleteResolver extends ProcedureContainerResolver {
     }
 
     /** 
-     * @see org.teiid.query.resolver.ProcedureContainerResolver#resolveProceduralCommand(org.teiid.query.sql.lang.Command, org.teiid.query.metadata.TempMetadataAdapter)
+     * @see org.teiid.query.resolver.ProcedureContainerResolver#resolveProceduralCommand(org.teiid.query.sql.lang.CommandImpl, org.teiid.query.metadata.TempMetadataAdapter)
      */
     @Override
-    public void resolveProceduralCommand(Command command, TempMetadataAdapter metadata) 
+    public void resolveProceduralCommand(CommandImpl command, TempMetadataAdapter metadata) 
         throws Exception {
 
         //Cast to known type
-        Delete delete = (Delete) command;
+        DeleteImpl delete = (DeleteImpl) command;
 
-        Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+        Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
         groups.add(delete.getGroup());
         getQueryResolver().resolveSubqueries(command, metadata, groups);
         ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidParser().getVersion());
@@ -73,7 +73,7 @@ public class DeleteResolver extends ProcedureContainerResolver {
      */
     @Override
     protected String getPlan(QueryMetadataInterface metadata,
-                           GroupSymbol group) throws Exception {
+                           GroupSymbolImpl group) throws Exception {
         return metadata.getDeletePlan(group.getMetadataID());
     }
     
