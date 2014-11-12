@@ -22,7 +22,7 @@
 
 package org.teiid.core.types;
 
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
@@ -35,12 +35,12 @@ import org.teiid.runtime.client.TeiidClientException;
  */
 public abstract class Transform {
 
-    protected final DataTypeManagerService dataTypeManager;
+    protected final DefaultDataTypeManager dataTypeManager;
 
     /**
      * @param dataTypeManager
      */
-    public Transform(DataTypeManagerService dataTypeManager) {
+    public Transform(DefaultDataTypeManager dataTypeManager) {
         this.dataTypeManager = dataTypeManager;
     }
 

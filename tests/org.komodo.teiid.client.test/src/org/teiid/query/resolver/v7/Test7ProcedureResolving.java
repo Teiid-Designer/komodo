@@ -25,26 +25,26 @@ package org.teiid.query.resolver.v7;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.Table;
 import org.teiid.query.resolver.AbstractTestProcedureResolving;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.ProcedureReservedWords;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.proc.AssignmentStatement;
-import org.teiid.query.sql.proc.Block;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateUpdateProcedureCommand;
-import org.teiid.query.sql.proc.LoopStatement;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.proc.AssignmentStatementImpl;
+import org.teiid.query.sql.proc.BlockImpl;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateUpdateProcedureCommandImpl;
+import org.teiid.query.sql.proc.LoopStatementImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 import org.teiid.query.sql.v7.Test7Factory;
-import org.teiid.query.sql.visitor.ElementCollectorVisitor;
+import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
 
 @SuppressWarnings( {"javadoc"} )
 public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
@@ -67,9 +67,9 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
     }
 
     @Override
-    protected CreateUpdateProcedureCommand helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType) throws Exception {
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
-        return (CreateUpdateProcedureCommand) resolveProcedure(userUpdateStr, metadata);
+    protected CreateUpdateProcedureCommandImpl helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType) throws Exception {
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
+        return (CreateUpdateProcedureCommandImpl) resolveProcedure(userUpdateStr, metadata);
     }
 
     /**
@@ -77,13 +77,13 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
      */
     @Test
     public void testDefect23257() throws Exception {
-        CreateUpdateProcedureCommand command = (CreateUpdateProcedureCommand) resolveProcedure("EXEC pm6.vsp59()", getMetadataFactory().example1Cached()); //$NON-NLS-1$
+        CreateUpdateProcedureCommandImpl command = (CreateUpdateProcedureCommandImpl) resolveProcedure("EXEC pm6.vsp59()", getMetadataFactory().example1Cached()); //$NON-NLS-1$
 
-        CommandStatement cs = (CommandStatement)command.getBlock().getStatements().get(1);
+        CommandStatementImpl cs = (CommandStatementImpl)command.getBlock().getStatements().get(1);
 
-        Insert insert = (Insert)cs.getCommand();
+        InsertImpl insert = (InsertImpl)cs.getCommand();
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass(), insert.getValues().get(1).getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass(), insert.getValues().get(1).getType());
     }
 
     @Test
@@ -102,22 +102,22 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
 
         String userUpdateStr = "UPDATE vm1.g1 SET e1='x'"; //$NON-NLS-1$
 
-        CreateUpdateProcedureCommand command = helpResolveUpdateProcedure(proc.toString(),
+        CreateUpdateProcedureCommandImpl command = helpResolveUpdateProcedure(proc.toString(),
                                                                           userUpdateStr,
                                                                           Table.TriggerEvent.UPDATE);
 
-        Block block = command.getBlock();
+        BlockImpl block = command.getBlock();
 
-        AssignmentStatement assStmt = (AssignmentStatement)block.getStatements().get(1);
+        AssignmentStatementImpl assStmt = (AssignmentStatementImpl)block.getStatements().get(1);
         assertEquals(ProcedureReservedWords.VARIABLES, assStmt.getVariable().getGroupSymbol().getCanonicalName());
         assertEquals(ProcedureReservedWords.VARIABLES,
-                     ((ElementSymbol)assStmt.getExpression()).getGroupSymbol().getCanonicalName());
+                     ((ElementSymbolImpl)assStmt.getExpression()).getGroupSymbol().getCanonicalName());
 
-        Block inner = ((LoopStatement)block.getStatements().get(2)).getBlock();
+        BlockImpl inner = ((LoopStatementImpl)block.getStatements().get(2)).getBlock();
 
-        assStmt = (AssignmentStatement)inner.getStatements().get(0);
+        assStmt = (AssignmentStatementImpl)inner.getStatements().get(0);
 
-        ElementSymbol value = ElementCollectorVisitor.getElements(assStmt.getExpression(), false).iterator().next();
+        ElementSymbolImpl value = ElementCollectorVisitorImpl.getElements(assStmt.getExpression(), false).iterator().next();
 
         assertEquals("LOOPCURSOR", value.getGroupSymbol().getCanonicalName()); //$NON-NLS-1$
     }
@@ -741,13 +741,13 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
         //        procedure = procedure + "UPDATE pm1.g1 SET pm1.g1.e1 = INPUTS.e1, pm1.g1.e2 = INPUTS.e2;\n";
         procedure = procedure + "END\n"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.UPDATE, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.UPDATE, procedure);
 
-        Command procCommand = getQueryParser().parseCommand(procedure);
-        GroupSymbol virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
+        CommandImpl procCommand = getQueryParser().parseCommand(procedure);
+        GroupSymbolImpl virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
         virtualGroup.setMetadataID(metadata.getGroupID("vm1.g1")); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
-        queryResolver.resolveCommand(procCommand, virtualGroup, ICommand.TYPE_UPDATE, metadata);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
+        queryResolver.resolveCommand(procCommand, virtualGroup, Command.TYPE_UPDATE, metadata);
     }
 
     // special variable CHANGING compared against integer no implicit conversion available
@@ -777,15 +777,15 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
         procedure = procedure + "END\n"; //$NON-NLS-1$
         procedure = procedure + "END\n"; //$NON-NLS-1$
 
-        Command procCommand = getQueryParser().parseCommand(procedure);
+        CommandImpl procCommand = getQueryParser().parseCommand(procedure);
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.INSERT, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.INSERT, procedure);
 
-        GroupSymbol virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
+        GroupSymbolImpl virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
         virtualGroup.setMetadataID(metadata.getGroupID("vm1.g1")); //$NON-NLS-1$
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
-        queryResolver.resolveCommand(procCommand, virtualGroup, ICommand.TYPE_INSERT, metadata);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
+        queryResolver.resolveCommand(procCommand, virtualGroup, Command.TYPE_INSERT, metadata);
     }
 
     // special variable CHANGING compared against integer no implicit conversion available
@@ -796,15 +796,15 @@ public class Test7ProcedureResolving extends AbstractTestProcedureResolving {
         procedure = procedure + "UPDATE pm1.g1 SET pm1.g1.e1 = INPUTS.e1;\n"; //$NON-NLS-1$
         procedure = procedure + "END\n"; //$NON-NLS-1$
 
-        Command procCommand = getQueryParser().parseCommand(procedure);
+        CommandImpl procCommand = getQueryParser().parseCommand(procedure);
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.UPDATE, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(Table.TriggerEvent.UPDATE, procedure);
 
-        GroupSymbol virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
+        GroupSymbolImpl virtualGroup = getFactory().newGroupSymbol("vm1.g1"); //$NON-NLS-1$
         virtualGroup.setMetadataID(metadata.getGroupID("vm1.g1")); //$NON-NLS-1$
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
-        queryResolver.resolveCommand(procCommand, virtualGroup, ICommand.TYPE_UPDATE, metadata);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
+        queryResolver.resolveCommand(procCommand, virtualGroup, Command.TYPE_UPDATE, metadata);
     }
 
     // TranslateCriteria on criteria of the if statement

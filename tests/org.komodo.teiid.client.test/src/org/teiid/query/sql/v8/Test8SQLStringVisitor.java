@@ -25,28 +25,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.language.SQLConstants.NonReserved;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.AbstractTestSQLStringVisitor;
-import org.teiid.query.sql.lang.Delete;
-import org.teiid.query.sql.lang.From;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.proc.AssignmentStatement;
-import org.teiid.query.sql.proc.Block;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateProcedureCommand;
-import org.teiid.query.sql.proc.RaiseStatement;
-import org.teiid.query.sql.proc.Statement;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.Array;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.lang.DeleteImpl;
+import org.teiid.query.sql.lang.FromImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.proc.AssignmentStatementImpl;
+import org.teiid.query.sql.proc.BlockImpl;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateProcedureCommandImpl;
+import org.teiid.query.sql.proc.RaiseStatementImpl;
+import org.teiid.query.sql.proc.StatementImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.ArraySymbolImpl;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
 
 /**
  *
@@ -56,7 +56,7 @@ public class Test8SQLStringVisitor extends AbstractTestSQLStringVisitor {
 
     private Test8Factory factory;
 
-    protected Test8SQLStringVisitor(ITeiidVersion teiidVersion) {
+    protected Test8SQLStringVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -75,15 +75,15 @@ public class Test8SQLStringVisitor extends AbstractTestSQLStringVisitor {
 
     @Test
     public void testMerge1() {
-        Insert insert = getFactory().newInsert();
+        InsertImpl insert = getFactory().newInsert();
         insert.setMerge(true);
         insert.setGroup(getFactory().newGroupSymbol("m.g1"));
 
-        List<ElementSymbol> vars = new ArrayList<ElementSymbol>();
+        List<ElementSymbolImpl> vars = new ArrayList<ElementSymbolImpl>();
         vars.add(getFactory().newElementSymbol("e1"));
         vars.add(getFactory().newElementSymbol("e2"));
         insert.setVariables(vars);
-        List<Constant> values = new ArrayList<Constant>();
+        List<ConstantImpl> values = new ArrayList<ConstantImpl>();
         values.add(getFactory().newConstant(new Integer(5)));
         values.add(getFactory().newConstant("abc"));
         insert.setValues(values);
@@ -93,81 +93,81 @@ public class Test8SQLStringVisitor extends AbstractTestSQLStringVisitor {
 
     @Test
     public void testAggregateSymbol1() {
-        AggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.COUNT, false, getFactory().newConstant("abc"));
+        BaseAggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.COUNT, false, getFactory().newConstant("abc"));
         helpTest(agg, "COUNT('abc')");
     }
 
     @Test
     public void testAggregateSymbol2() {
-        AggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.COUNT, true, getFactory().newConstant("abc"));
+        BaseAggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.COUNT, true, getFactory().newConstant("abc"));
         helpTest(agg, "COUNT(DISTINCT 'abc')");
     }
 
     @Test
     public void testAggregateSymbol3() {
-        AggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.COUNT, false, null);
+        BaseAggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.COUNT, false, null);
         helpTest(agg, "COUNT(*)");
     }
 
     @Test
     public void testAggregateSymbol4() {
-        AggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.AVG, false, getFactory().newConstant("abc"));
+        BaseAggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.AVG, false, getFactory().newConstant("abc"));
         helpTest(agg, "AVG('abc')");
     }
 
     @Test
     public void testAggregateSymbol5() {
-        AggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.SUM, false, getFactory().newConstant("abc"));
+        BaseAggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.SUM, false, getFactory().newConstant("abc"));
         helpTest(agg, "SUM('abc')");
     }
 
     @Test
     public void testAggregateSymbol6() {
-        AggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.MIN, false, getFactory().newConstant("abc"));
+        BaseAggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.MIN, false, getFactory().newConstant("abc"));
         helpTest(agg, "MIN('abc')");
     }
 
     @Test
     public void testAggregateSymbol7() {
-        AggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.MAX, false, getFactory().newConstant("abc"));
+        BaseAggregateSymbol agg = getFactory().newAggregateSymbol(NonReserved.MAX, false, getFactory().newConstant("abc"));
         helpTest(agg, "MAX('abc')");
     }
 
     @Test
     public void testRaiseErrorStatement() {
-        Statement errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
+        StatementImpl errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
         helpTest(errStmt, "RAISE 'My Error';");
     }
 
     @Test
     public void testRaiseErrorStatementWithExpression() {
-        Statement errStmt = getFactory().newRaiseStatement(getFactory().newElementSymbol("a"));
+        StatementImpl errStmt = getFactory().newRaiseStatement(getFactory().newElementSymbol("a"));
         helpTest(errStmt, "RAISE a;");
     }
 
     @Test
     public void testCommandStatement1a() {
-        Query q1 = getFactory().newQuery();
-        Select select = getFactory().newSelect();
+        QueryImpl q1 = getFactory().newQuery();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().newElementSymbol("x"));
         q1.setSelect(select);
-        From from = getFactory().newFrom();
+        FromImpl from = getFactory().newFrom();
         from.addGroup(getFactory().newGroupSymbol("g"));
         q1.setFrom(from);
 
-        CommandStatement cmdStmt = getFactory().newCommandStatement(q1);
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(q1);
         cmdStmt.setReturnable(false);
         helpTest(cmdStmt, "SELECT x FROM g WITHOUT RETURN;");
     }
 
     @Test
     public void testBlock1() {
-        Delete d1 = getFactory().newNode(ASTNodes.DELETE);
+        DeleteImpl d1 = getFactory().newNode(ASTNodes.DELETE);
         d1.setGroup(getFactory().newGroupSymbol("g"));
-        CommandStatement cmdStmt = getFactory().newCommandStatement(d1);
-        AssignmentStatement assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
-        Statement errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
-        Block b = getFactory().newBlock();
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(d1);
+        AssignmentStatementImpl assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
+        StatementImpl errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
+        BlockImpl b = getFactory().newBlock();
         b.addStatement(cmdStmt);
         b.addStatement(assigStmt);
         b.addStatement(errStmt);
@@ -176,56 +176,56 @@ public class Test8SQLStringVisitor extends AbstractTestSQLStringVisitor {
 
     @Test
     public void testCreateUpdateProcedure1() {
-        Delete d1 = getFactory().newNode(ASTNodes.DELETE);
+        DeleteImpl d1 = getFactory().newNode(ASTNodes.DELETE);
         d1.setGroup(getFactory().newGroupSymbol("g"));
-        CommandStatement cmdStmt = getFactory().newCommandStatement(d1);
-        AssignmentStatement assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
-        RaiseStatement errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
-        Block b = getFactory().newBlock();
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(d1);
+        AssignmentStatementImpl assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
+        RaiseStatementImpl errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
+        BlockImpl b = getFactory().newBlock();
         b.addStatement(cmdStmt);
         b.addStatement(assigStmt);
         b.addStatement(errStmt);
-        CreateProcedureCommand cup = getFactory().newCreateProcedureCommand(b);
+        CreateProcedureCommandImpl cup = getFactory().newCreateProcedureCommand(b);
         helpTest(cup, "CREATE VIRTUAL PROCEDURE\nBEGIN\nDELETE FROM g;\na = 1;\nRAISE 'My Error';\nEND");
     }
 
     @Test
     public void testCreateUpdateProcedure2() {
-        Delete d1 = getFactory().newNode(ASTNodes.DELETE);
+        DeleteImpl d1 = getFactory().newNode(ASTNodes.DELETE);
         d1.setGroup(getFactory().newGroupSymbol("g"));
-        CommandStatement cmdStmt = getFactory().newCommandStatement(d1);
-        AssignmentStatement assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
-        RaiseStatement errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
-        Block b = getFactory().newBlock();
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(d1);
+        AssignmentStatementImpl assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
+        RaiseStatementImpl errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
+        BlockImpl b = getFactory().newBlock();
         b.addStatement(cmdStmt);
         b.addStatement(assigStmt);
         b.addStatement(errStmt);
-        CreateProcedureCommand cup = getFactory().newCreateProcedureCommand(b);
+        CreateProcedureCommandImpl cup = getFactory().newCreateProcedureCommand(b);
         helpTest(cup, "CREATE VIRTUAL PROCEDURE\nBEGIN\nDELETE FROM g;\na = 1;\nRAISE 'My Error';\nEND");
     }
 
     @Test
     public void testCreateUpdateProcedure3() {
-        Delete d1 = getFactory().newNode(ASTNodes.DELETE);
+        DeleteImpl d1 = getFactory().newNode(ASTNodes.DELETE);
         d1.setGroup(getFactory().newGroupSymbol("g"));
-        CommandStatement cmdStmt = getFactory().newCommandStatement(d1);
-        AssignmentStatement assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
-        Statement errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
-        Block b = getFactory().newBlock();
+        CommandStatementImpl cmdStmt = getFactory().newCommandStatement(d1);
+        AssignmentStatementImpl assigStmt = getFactory().newAssignmentStatement(getFactory().newElementSymbol("a"), getFactory().newConstant(new Integer(1)));
+        StatementImpl errStmt = getFactory().newRaiseStatement(getFactory().newConstant("My Error"));
+        BlockImpl b = getFactory().newBlock();
         b.addStatement(cmdStmt);
         b.addStatement(assigStmt);
         b.addStatement(errStmt);
-        CreateProcedureCommand cup = getFactory().newCreateProcedureCommand(b);
+        CreateProcedureCommandImpl cup = getFactory().newCreateProcedureCommand(b);
         helpTest(cup, "CREATE VIRTUAL PROCEDURE\nBEGIN\nDELETE FROM g;\na = 1;\nRAISE 'My Error';\nEND");
     }
 
     @Test
     public void testArray() {
-        List<Expression> expr = new ArrayList<Expression>();
+        List<BaseExpression> expr = new ArrayList<BaseExpression>();
         expr.add(getFactory().newElementSymbol("e1"));
         expr.add(getFactory().newConstant(1));
-        Array array = getFactory().newArray(
-                                            DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        ArraySymbolImpl array = getFactory().newArray(
+                                            DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                                             expr);
         helpTest(array, "(e1, 1)");
     }

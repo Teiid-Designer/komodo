@@ -21,8 +21,8 @@
 */
 package org.komodo.modeshape.teiid.sql.v87;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.modeshape.teiid.sql.v85.Test85Cloning;
 
 /**
@@ -31,7 +31,7 @@ import org.komodo.modeshape.teiid.sql.v85.Test85Cloning;
 @SuppressWarnings( "javadoc" )
 public class Test87Cloning extends Test85Cloning {
 
-    protected Test87Cloning(ITeiidVersion teiidVersion) {
+    protected Test87Cloning(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
  

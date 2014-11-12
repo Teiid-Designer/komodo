@@ -34,7 +34,7 @@ import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.core.RelationalObjectValidator;
 import org.komodo.relational.core.RelationalValidator;
 import org.komodo.relational.extension.RelationalModelExtensionConstants;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.HashCodeUtils;
@@ -71,7 +71,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     
     private int processType;
     
-    protected IOutcome currentOutcome;
+    protected Outcome currentOutcome;
     
     private boolean isChecked = true;
     
@@ -408,7 +408,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     /**
      * @return the current status
      */
-    public IOutcome getOutcome() {
+    public Outcome getOutcome() {
     	return this.currentOutcome;
     }
 
@@ -436,7 +436,7 @@ public abstract class RelationalObject implements RelationalConstants, Relationa
     /**
      * @return the validation status
      */
-    public IOutcome validate() {
+    public Outcome validate() {
     	return getValidator().validate(this);
     }
     

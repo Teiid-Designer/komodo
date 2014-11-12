@@ -27,9 +27,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.komodo.repository.LocalRepository;
-import org.komodo.spi.repository.IRepository;
-import org.komodo.spi.repository.IRepositoryClient;
-import org.komodo.spi.repository.IRepositoryObserver;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.RepositoryClient;
+import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.spi.repository.RepositoryClientEvent;
 
 /**
@@ -43,7 +43,7 @@ public class TestLocalRepository {
         LocalRepository localRepo = LocalRepository.getInstance();
 
         final CountDownLatch updateLatch = new CountDownLatch(1);
-        IRepositoryObserver observer = new IRepositoryObserver() {
+        RepositoryObserver observer = new RepositoryObserver() {
             
             @Override
             public void stateChanged() {
@@ -53,7 +53,7 @@ public class TestLocalRepository {
         localRepo.addObserver(observer);
 
         // Try and start the repository
-        IRepositoryClient client = mock(IRepositoryClient.class);
+        RepositoryClient client = mock(RepositoryClient.class);
         RepositoryClientEvent event = RepositoryClientEvent.createStartedEvent(client);
         localRepo.notify(event);
 
@@ -61,6 +61,6 @@ public class TestLocalRepository {
         updateLatch.await(3, TimeUnit.MINUTES);
 
         // Assert the repository has started and is reachable
-        assertEquals(IRepository.State.REACHABLE, localRepo.getState());
+        assertEquals(Repository.State.REACHABLE, localRepo.getState());
     }
 }

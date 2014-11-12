@@ -29,20 +29,20 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.Criteria;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
 import org.teiid.query.sql.lang.CriteriaOperator.Operator;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.Query;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.QueryImpl;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public abstract class AbstractTestXMLResolver extends AbstractTest {
@@ -50,11 +50,11 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestXMLResolver(ITeiidVersion teiidVersion) {
+    public AbstractTestXMLResolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
-    protected Command helpParse(String sql) {
+    protected CommandImpl helpParse(String sql) {
         try {
             return getQueryParser().parseCommand(sql);
         } catch (Exception e) {
@@ -62,10 +62,10 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
         }
     }
 
-    protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {
+    protected CommandImpl helpResolve(CommandImpl command, QueryMetadataInterface queryMetadataInterface) {
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadataInterface);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -73,29 +73,29 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
 
         CheckSymbolsAreResolvedVisitor vis = new CheckSymbolsAreResolvedVisitor(getTeiidVersion());
         DeepPreOrderNavigator.doVisit(command, vis);
-        Collection<LanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
+        Collection<BaseLanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
         assertTrue("Found unresolved symbols: " + unresolvedSymbols, unresolvedSymbols.isEmpty()); //$NON-NLS-1$
         return command;
     }
 
-    protected Command helpResolve(String sql, IQueryMetadataInterface queryMetadata) {
+    protected CommandImpl helpResolve(String sql, QueryMetadataInterface queryMetadata) {
         return helpResolve(helpParse(sql), queryMetadata);
     }
 
-    protected Command helpResolve(String sql) {
-        Command cmd = helpResolve(sql, getMetadataFactory().example1Cached());
+    protected CommandImpl helpResolve(String sql) {
+        CommandImpl cmd = helpResolve(sql, getMetadataFactory().example1Cached());
         ResolverUtil.fullyQualifyElements(cmd);
         return cmd;
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
 
         // parse
-        Command command = helpParse(sql);
+        CommandImpl command = helpParse(sql);
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadata);
             fail("Expected exception for resolving " + sql); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -107,7 +107,7 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
         }
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata) {
         helpResolveException(sql, queryMetadata, null);
     }
 
@@ -121,56 +121,56 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
 
     @Test
     public void testXMLCriteriaShortElement() {
-        GroupSymbol gs = getFactory().newGroupSymbol("xmltest.doc1");
-        ElementSymbol es = getFactory().newElementSymbol("root.node1", gs);
-        CompareCriteria expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
+        GroupSymbolImpl gs = getFactory().newGroupSymbol("xmltest.doc1");
+        ElementSymbolImpl es = getFactory().newElementSymbol("root.node1", gs);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
 
-        Query query = (Query)helpResolve("select * from xmltest.doc1 where node1 = 'yyz'");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc1 where node1 = 'yyz'");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected, actual);
     }
 
     @Test
     public void testXMLCriteriaLongElement1() {
-        GroupSymbol gs = getFactory().newGroupSymbol("xmltest.doc1");
-        ElementSymbol es = getFactory().newElementSymbol("root.node1", gs);
-        CompareCriteria expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
+        GroupSymbolImpl gs = getFactory().newGroupSymbol("xmltest.doc1");
+        ElementSymbolImpl es = getFactory().newElementSymbol("root.node1", gs);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
 
-        Query query = (Query)helpResolve("select * from xmltest.doc1 where root.node1 = 'yyz'");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc1 where root.node1 = 'yyz'");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected, actual);
     }
 
     @Test
     public void testXMLCriteriaLongElement2() {
-        GroupSymbol gs = getFactory().newGroupSymbol("xmltest.doc4");
-        ElementSymbol es1 = getFactory().newElementSymbol("root.node1", gs);
-        CompareCriteria expected1 = getFactory().newCompareCriteria(es1, Operator.EQ, getFactory().newConstant("xyz"));
+        GroupSymbolImpl gs = getFactory().newGroupSymbol("xmltest.doc4");
+        ElementSymbolImpl es1 = getFactory().newElementSymbol("root.node1", gs);
+        CompareCriteriaImpl expected1 = getFactory().newCompareCriteria(es1, Operator.EQ, getFactory().newConstant("xyz"));
         
-        Query query = (Query)helpResolve("select * from xmltest.doc4 where root.node1 = 'xyz'");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc4 where root.node1 = 'xyz'");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected1, actual);
     }
 
     @Test
     public void testXMLCriteriaLongElement3() {
-        GroupSymbol gs = getFactory().newGroupSymbol("xmltest.doc4");
-        ElementSymbol es2 = getFactory().newElementSymbol("root.node1.@node2", gs);
-        CompareCriteria expected2 = getFactory().newCompareCriteria(es2, Operator.EQ, getFactory().newConstant("xyz"));
+        GroupSymbolImpl gs = getFactory().newGroupSymbol("xmltest.doc4");
+        ElementSymbolImpl es2 = getFactory().newElementSymbol("root.node1.@node2", gs);
+        CompareCriteriaImpl expected2 = getFactory().newCompareCriteria(es2, Operator.EQ, getFactory().newConstant("xyz"));
 
-        Query query = (Query)helpResolve("select * from xmltest.doc4 where root.node1.@node2 = 'xyz'");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc4 where root.node1.@node2 = 'xyz'");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected2, actual);
     }
 
     @Test
     public void testXMLCriteriaLongElement4() {
-        GroupSymbol gs = getFactory().newGroupSymbol("xmltest.doc4");
-        ElementSymbol es3 = getFactory().newElementSymbol("root.node3", gs);
-        CompareCriteria expected3 = getFactory().newCompareCriteria(es3, Operator.EQ, getFactory().newConstant("xyz"));
+        GroupSymbolImpl gs = getFactory().newGroupSymbol("xmltest.doc4");
+        ElementSymbolImpl es3 = getFactory().newElementSymbol("root.node3", gs);
+        CompareCriteriaImpl expected3 = getFactory().newCompareCriteria(es3, Operator.EQ, getFactory().newConstant("xyz"));
         
-        Query query = (Query)helpResolve("select * from xmltest.doc4 where root.node3 = 'xyz'");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc4 where root.node3 = 'xyz'");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected3, actual);
     }
 
@@ -262,12 +262,12 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
 
     @Test
     public void testXMLCriteriaLongElementInAnonymous() {
-        GroupSymbol gs = getFactory().newGroupSymbol("xmltest.doc2");
-        ElementSymbol es = getFactory().newElementSymbol("root.node1.node3", gs);
-        CompareCriteria expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
+        GroupSymbolImpl gs = getFactory().newGroupSymbol("xmltest.doc2");
+        ElementSymbolImpl es = getFactory().newElementSymbol("root.node1.node3", gs);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
         
-        Query query = (Query)helpResolve("select * from xmltest.doc2 where root.node1.node3 = 'yyz'");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc2 where root.node1.node3 = 'yyz'");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected, actual);
     }
 
@@ -387,44 +387,44 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
 
     @Test
     public void testContext() {
-        GroupSymbol gs1 = getFactory().newGroupSymbol("xmltest.doc1");
-        ElementSymbol es1 = getFactory().newElementSymbol("root.node1.node2.node3", gs1);
-        ElementSymbol es2 = getFactory().newElementSymbol("root.node1", gs1);
-        Expression[] exprs = new Expression[] {es1, es2};
+        GroupSymbolImpl gs1 = getFactory().newGroupSymbol("xmltest.doc1");
+        ElementSymbolImpl es1 = getFactory().newElementSymbol("root.node1.node2.node3", gs1);
+        ElementSymbolImpl es2 = getFactory().newElementSymbol("root.node1", gs1);
+        BaseExpression[] exprs = new BaseExpression[] {es1, es2};
 
-        Function context = getFactory().newFunction("context", exprs);
-        CompareCriteria expected = getFactory().newCompareCriteria(context, Operator.EQ, getFactory().newConstant("yyz"));
+        FunctionImpl context = getFactory().newFunction("context", exprs);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(context, Operator.EQ, getFactory().newConstant("yyz"));
 
-        Query query = (Query)helpResolve("select * from xmltest.doc1 where context(node3, node1) = 'yyz'");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc1 where context(node3, node1) = 'yyz'");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected, actual);
     }
 
     @Test
     public void testRowLimit() {
-        GroupSymbol gs1 = getFactory().newGroupSymbol("xmltest.doc1");
-        ElementSymbol es1 = getFactory().newElementSymbol("root.node1.node2.node3", gs1);
-        Expression[] exprs = new Expression[] {es1};
+        GroupSymbolImpl gs1 = getFactory().newGroupSymbol("xmltest.doc1");
+        ElementSymbolImpl es1 = getFactory().newElementSymbol("root.node1.node2.node3", gs1);
+        BaseExpression[] exprs = new BaseExpression[] {es1};
 
-        Function context = getFactory().newFunction("rowlimit", exprs);
-        CompareCriteria expected = getFactory().newCompareCriteria(context, Operator.EQ, getFactory().newConstant(new Integer(2)));
+        FunctionImpl context = getFactory().newFunction("rowlimit", exprs);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(context, Operator.EQ, getFactory().newConstant(new Integer(2)));
 
-        Query query = (Query)helpResolve("select * from xmltest.doc1 where rowlimit(node3) = 2");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc1 where rowlimit(node3) = 2");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected, actual);
     }
 
     @Test
     public void testRowLimitException() {
-        GroupSymbol gs1 = getFactory().newGroupSymbol("xmltest.doc1");
-        ElementSymbol es1 = getFactory().newElementSymbol("root.node1.node2.node3", gs1);
-        Expression[] exprs = new Expression[] {es1};
+        GroupSymbolImpl gs1 = getFactory().newGroupSymbol("xmltest.doc1");
+        ElementSymbolImpl es1 = getFactory().newElementSymbol("root.node1.node2.node3", gs1);
+        BaseExpression[] exprs = new BaseExpression[] {es1};
 
-        Function context = getFactory().newFunction("rowlimitexception", exprs);
-        CompareCriteria expected = getFactory().newCompareCriteria(context, Operator.EQ, getFactory().newConstant(new Integer(2)));
+        FunctionImpl context = getFactory().newFunction("rowlimitexception", exprs);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(context, Operator.EQ, getFactory().newConstant(new Integer(2)));
 
-        Query query = (Query)helpResolve("select * from xmltest.doc1 where rowlimitexception(node3) = 2");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc1 where rowlimitexception(node3) = 2");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected, actual);
     }
 
@@ -451,34 +451,34 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
     @Test
     public void testConversionInXML() {
         // Expected left expression
-        GroupSymbol gs1 = getFactory().newGroupSymbol("xmltest.doc1");
-        ElementSymbol es1 = getFactory().newElementSymbol("root.node1", gs1);
+        GroupSymbolImpl gs1 = getFactory().newGroupSymbol("xmltest.doc1");
+        ElementSymbolImpl es1 = getFactory().newElementSymbol("root.node1", gs1);
         // Expected right expression
-        Function convert = getFactory().newFunction("convert",
-                                                    new Expression[] {
+        FunctionImpl convert = getFactory().newFunction("convert",
+                                                    new BaseExpression[] {
                                                         getFactory().newConstant(new Integer(5)),
                                                         getFactory().newConstant("string")}); //$NON-NLS-2$
 
         // Expected criteria
-        CompareCriteria expected = getFactory().newCompareCriteria(es1, Operator.EQ, convert);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(es1, Operator.EQ, convert);
 
         // Resolve the query and check against expected objects
-        Query query = (Query)helpResolve("select * from xmltest.doc1 where node1 = convert(5, string)");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select * from xmltest.doc1 where node1 = convert(5, string)");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected, actual);
-        Function actualRightExpr = (Function)((CompareCriteria)actual).getRightExpression();
+        FunctionImpl actualRightExpr = (FunctionImpl)((CompareCriteriaImpl)actual).getRightExpression();
         assertNotNull("Failed to resolve function", actualRightExpr.getFunctionDescriptor());
     }
 
     @Test
     public void testXMLWithSelect1() throws Exception {
-        GroupSymbol gs = getFactory().newGroupSymbol("xmltest.doc1");
-        ElementSymbol es = getFactory().newElementSymbol("root.node1", gs);
-        CompareCriteria expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
+        GroupSymbolImpl gs = getFactory().newGroupSymbol("xmltest.doc1");
+        ElementSymbolImpl es = getFactory().newElementSymbol("root.node1", gs);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
 
-        Query query = (Query)helpResolve(getQueryParser().parseCommand("select \"xml\" from xmltest.doc1 where node1 = 'yyz'"),
+        QueryImpl query = (QueryImpl)helpResolve(getQueryParser().parseCommand("select \"xml\" from xmltest.doc1 where node1 = 'yyz'"),
                                                               getMetadataFactory().example1Cached());
-        Criteria actual = query.getCriteria();
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected, actual);
     }
 
@@ -489,12 +489,12 @@ public abstract class AbstractTestXMLResolver extends AbstractTest {
 
     @Test
     public void testXMLWithSelect2() {
-        GroupSymbol gs = getFactory().newGroupSymbol("xmltest.doc1");
-        ElementSymbol es = getFactory().newElementSymbol("root.node1", gs);
-        CompareCriteria expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
+        GroupSymbolImpl gs = getFactory().newGroupSymbol("xmltest.doc1");
+        ElementSymbolImpl es = getFactory().newElementSymbol("root.node1", gs);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(es, Operator.EQ, getFactory().newConstant("yyz"));
 
-        Query query = (Query)helpResolve("select xmltest.doc1.xml from xmltest.doc1 where node1 = 'yyz'");
-        Criteria actual = query.getCriteria();
+        QueryImpl query = (QueryImpl)helpResolve("select xmltest.doc1.xml from xmltest.doc1 where node1 = 'yyz'");
+        CriteriaImpl actual = query.getCriteria();
         assertEquals("Did not match expected criteria", expected, actual);
     }
 

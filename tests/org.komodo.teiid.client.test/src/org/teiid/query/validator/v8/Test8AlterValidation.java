@@ -22,8 +22,8 @@
 package org.teiid.query.validator.v8;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.v8.Test8Factory;
 import org.teiid.query.validator.AbstractTestAlterValidation;
@@ -36,7 +36,7 @@ public class Test8AlterValidation extends AbstractTestAlterValidation {
 
     private Test8Factory factory;
 
-    protected Test8AlterValidation(ITeiidVersion teiidVersion) {
+    protected Test8AlterValidation(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

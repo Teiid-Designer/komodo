@@ -29,7 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 
 
 public class GroupInfo implements Serializable {
@@ -38,28 +38,28 @@ public class GroupInfo implements Serializable {
 
 	public static final String CACHE_PREFIX = "groupinfo/"; //$NON-NLS-1$
 	
-	private Map<Object, ElementSymbol> idToSymbolMap;
-	private List<ElementSymbol> symbolList;
-	private Map<String, ElementSymbol> shortNameToSymbolMap; 
+	private Map<Object, ElementSymbolImpl> idToSymbolMap;
+	private List<ElementSymbolImpl> symbolList;
+	private Map<String, ElementSymbolImpl> shortNameToSymbolMap; 
 	
-	public GroupInfo(LinkedHashMap<Object, ElementSymbol> symbols) {
+	public GroupInfo(LinkedHashMap<Object, ElementSymbolImpl> symbols) {
 		this.idToSymbolMap = symbols;
-		this.symbolList = Collections.unmodifiableList(new ArrayList<ElementSymbol>(symbols.values()));
-		this.shortNameToSymbolMap = new TreeMap<String, ElementSymbol>(String.CASE_INSENSITIVE_ORDER);
-		for (ElementSymbol symbol : symbolList) {
+		this.symbolList = Collections.unmodifiableList(new ArrayList<ElementSymbolImpl>(symbols.values()));
+		this.shortNameToSymbolMap = new TreeMap<String, ElementSymbolImpl>(String.CASE_INSENSITIVE_ORDER);
+		for (ElementSymbolImpl symbol : symbolList) {
 			shortNameToSymbolMap.put(symbol.getShortName(), symbol);
 		}
 	}
 	
-	public List<ElementSymbol> getSymbolList() {
+	public List<ElementSymbolImpl> getSymbolList() {
 		return symbolList;
 	}
 	
-	public ElementSymbol getSymbol(Object metadataID) {
+	public ElementSymbolImpl getSymbol(Object metadataID) {
 		return idToSymbolMap.get(metadataID);
 	}
 	
-	public ElementSymbol getSymbol(String shortCanonicalName) {
+	public ElementSymbolImpl getSymbol(String shortCanonicalName) {
 		return shortNameToSymbolMap.get(shortCanonicalName);
 	}
 

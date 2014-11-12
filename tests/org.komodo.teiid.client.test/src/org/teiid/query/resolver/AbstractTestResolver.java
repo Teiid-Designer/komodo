@@ -44,11 +44,11 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.sql.lang.SPParameter;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.metadata.ColumnSet;
 import org.teiid.metadata.MetadataStore;
 import org.teiid.metadata.Procedure;
@@ -56,59 +56,59 @@ import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
 import org.teiid.metadata.Table.TriggerEvent;
-import org.teiid.query.function.FunctionDescriptor;
-import org.teiid.query.function.FunctionLibrary;
+import org.teiid.query.function.TCFunctionDescriptor;
+import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.function.FunctionTree;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.optimizer.FakeFunctionMetadataSource;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.Criteria;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CriteriaImpl;
 import org.teiid.query.sql.lang.CriteriaOperator;
 import org.teiid.query.sql.lang.CriteriaOperator.Operator;
-import org.teiid.query.sql.lang.From;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.OrderBy;
+import org.teiid.query.sql.lang.FromImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.OrderByImpl;
 import org.teiid.query.sql.lang.ProcedureContainer;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.lang.SetCriteria;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.lang.SubqueryFromClause;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
-import org.teiid.query.sql.lang.Update;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.lang.SetCriteriaImpl;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.lang.SubqueryFromClauseImpl;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
+import org.teiid.query.sql.lang.UpdateImpl;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.Symbol;
-import org.teiid.query.sql.symbol.XMLQuery;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
+import org.teiid.query.sql.symbol.XMLQueryImpl;
 import org.teiid.query.sql.util.SymbolMap;
-import org.teiid.query.sql.visitor.CommandCollectorVisitor;
-import org.teiid.query.sql.visitor.ElementCollectorVisitor;
-import org.teiid.query.sql.visitor.FunctionCollectorVisitor;
-import org.teiid.query.sql.visitor.GroupCollectorVisitor;
+import org.teiid.query.sql.visitor.CommandCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.ElementCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.FunctionCollectorVisitorImpl;
+import org.teiid.query.sql.visitor.GroupCollectorVisitorImpl;
 import org.teiid.query.unittest.TimestampUtil;
 import org.teiid.runtime.client.TeiidClientException;
 
 @SuppressWarnings( {"nls" , "javadoc"})
 public abstract class AbstractTestResolver extends AbstractTest {
 
-    protected IQueryMetadataInterface metadata;
+    protected QueryMetadataInterface metadata;
 
     /**
      * @param teiidVersion
      */
-    public AbstractTestResolver(ITeiidVersion teiidVersion) {
+    public AbstractTestResolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -119,7 +119,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     // ################################## TEST HELPERS ################################
 
-    protected Command helpParse(String sql) {
+    protected CommandImpl helpParse(String sql) {
         try {
             return getQueryParser().parseCommand(sql);
         } catch (Exception e) {
@@ -135,32 +135,32 @@ public abstract class AbstractTestResolver extends AbstractTest {
      * @param variableNames expected element symbol variable names, in order
      * @return parsed and resolved Query
      */
-    private Command helpResolveSubquery(String sql, String[] variableNames) {
-        Query query = (Query)helpResolve(sql);
-        Collection<ElementSymbol> variables = getVariables(query);
+    private CommandImpl helpResolveSubquery(String sql, String[] variableNames) {
+        QueryImpl query = (QueryImpl)helpResolve(sql);
+        Collection<ElementSymbolImpl> variables = getVariables(query);
 
         assertTrue("Expected variables size " + variableNames.length + " but was " + variables.size(), //$NON-NLS-1$ //$NON-NLS-2$
                    variables.size() == variableNames.length);
-        Iterator<ElementSymbol> variablesIter = variables.iterator();
+        Iterator<ElementSymbolImpl> variablesIter = variables.iterator();
         for (int i = 0; variablesIter.hasNext(); i++) {
-            ElementSymbol variable = variablesIter.next();
+            ElementSymbolImpl variable = variablesIter.next();
             assertTrue("Expected variable name " + variableNames[i] + " but was " + variable.getName(), //$NON-NLS-1$ //$NON-NLS-2$
                        variable.getName().equalsIgnoreCase(variableNames[i]));
         }
 
         if (variableNames.length == 0) {
             //There should be no TempMetadataIDs
-            Collection<Symbol> symbols = CheckNoTempMetadataIDsVisitor.checkSymbols(query);
+            Collection<SymbolImpl> symbols = CheckNoTempMetadataIDsVisitor.checkSymbols(query);
             assertTrue("Expected no symbols with temp metadataIDs, but got " + symbols, symbols.isEmpty()); //$NON-NLS-1$
         }
 
         return query;
     }
 
-    public Collection<ElementSymbol> getVariables(LanguageObject languageObject) {
-        Collection<ElementSymbol> variables = ElementCollectorVisitor.getElements(languageObject, false, true);
-        for (Iterator<ElementSymbol> iterator = variables.iterator(); iterator.hasNext();) {
-            ElementSymbol elementSymbol = iterator.next();
+    public Collection<ElementSymbolImpl> getVariables(BaseLanguageObject languageObject) {
+        Collection<ElementSymbolImpl> variables = ElementCollectorVisitorImpl.getElements(languageObject, false, true);
+        for (Iterator<ElementSymbolImpl> iterator = variables.iterator(); iterator.hasNext();) {
+            ElementSymbolImpl elementSymbol = iterator.next();
             if (!elementSymbol.isExternalReference()) {
                 iterator.remove();
             }
@@ -168,22 +168,22 @@ public abstract class AbstractTestResolver extends AbstractTest {
         return variables;
     }
 
-    protected Command helpResolve(String sql, IQueryMetadataInterface queryMetadata) {
+    protected CommandImpl helpResolve(String sql, QueryMetadataInterface queryMetadata) {
         return helpResolve(helpParse(sql), queryMetadata);
     }
 
-    protected Command helpResolve(String sql) {
+    protected CommandImpl helpResolve(String sql) {
         return helpResolve(helpParse(sql));
     }
 
-    protected Command helpResolve(Command command) {
+    protected CommandImpl helpResolve(CommandImpl command) {
         return helpResolve(command, this.metadata);
     }
 
-    protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {
+    protected CommandImpl helpResolve(CommandImpl command, QueryMetadataInterface queryMetadataInterface) {
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadataInterface);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -191,13 +191,13 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         CheckSymbolsAreResolvedVisitor vis = new CheckSymbolsAreResolvedVisitor(getTeiidVersion());
         DeepPreOrderNavigator.doVisit(command, vis);
-        Collection<LanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
+        Collection<BaseLanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
         assertTrue("Found unresolved symbols: " + unresolvedSymbols, unresolvedSymbols.isEmpty()); //$NON-NLS-1$
         return command;
     }
 
-    protected Criteria helpResolveCriteria(String sql) {
-        Criteria criteria = null;
+    protected CriteriaImpl helpResolveCriteria(String sql) {
+        CriteriaImpl criteria = null;
 
         // parse
         try {
@@ -209,7 +209,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCriteria(criteria, metadata);
         } catch (Exception e) {
             e.printStackTrace();
@@ -218,42 +218,42 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         CheckSymbolsAreResolvedVisitor vis = new CheckSymbolsAreResolvedVisitor(getTeiidVersion());
         DeepPreOrderNavigator.doVisit(criteria, vis);
-        Collection<LanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
+        Collection<BaseLanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
         assertTrue("Found unresolved symbols: " + unresolvedSymbols, unresolvedSymbols.isEmpty()); //$NON-NLS-1$
         return criteria;
     }
 
-    protected Command helpResolveWithBindings(String sql, IQueryMetadataInterface metadata, List bindings) throws Exception {
+    protected CommandImpl helpResolveWithBindings(String sql, QueryMetadataInterface metadata, List bindings) throws Exception {
 
         // parse
-        Command command = helpParse(sql);
+        CommandImpl command = helpParse(sql);
 
-        QueryNode qn = new QueryNode(sql);
+        TCQueryNode qn = new TCQueryNode(sql);
         qn.setBindings(bindings);
         // resolve
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveWithBindingMetadata(command, metadata, qn, true);
 
         CheckSymbolsAreResolvedVisitor vis = new CheckSymbolsAreResolvedVisitor(getTeiidVersion());
         DeepPreOrderNavigator.doVisit(command, vis);
 
-        Collection<LanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
+        Collection<BaseLanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
         assertTrue("Found unresolved symbols: " + unresolvedSymbols, unresolvedSymbols.isEmpty()); //$NON-NLS-1$
         return command;
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata) {
         helpResolveException(sql, queryMetadata, null);
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
 
         // parse
-        Command command = helpParse(sql);
+        CommandImpl command = helpParse(sql);
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadata);
             fail("Expected exception for resolving " + sql); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -271,40 +271,40 @@ public abstract class AbstractTestResolver extends AbstractTest {
         helpResolveException(sql, this.metadata);
     }
 
-    protected void helpCheckFrom(Query query, String[] groupIDs) {
-        From from = query.getFrom();
-        List<GroupSymbol> groups = from.getGroups();
+    protected void helpCheckFrom(QueryImpl query, String[] groupIDs) {
+        FromImpl from = query.getFrom();
+        List<GroupSymbolImpl> groups = from.getGroups();
         assertEquals("Wrong number of group IDs: ", groupIDs.length, groups.size()); //$NON-NLS-1$
 
         for (int i = 0; i < groups.size(); i++) {
-            GroupSymbol group = groups.get(i);
+            GroupSymbolImpl group = groups.get(i);
             assertNotNull(group.getMetadataID());
             assertEquals("Group ID does not match: ", groupIDs[i].toUpperCase(), group.getNonCorrelationName().toUpperCase()); //$NON-NLS-1$
         }
     }
 
-    protected void helpCheckSelect(Query query, String[] elementNames) {
-        Select select = query.getSelect();
-        List<Expression> elements = select.getProjectedSymbols();
+    protected void helpCheckSelect(QueryImpl query, String[] elementNames) {
+        SelectImpl select = query.getSelect();
+        List<BaseExpression> elements = select.getProjectedSymbols();
         assertEquals("Wrong number of select symbols: ", elementNames.length, elements.size()); //$NON-NLS-1$
 
         for (int i = 0; i < elements.size(); i++) {
-            Expression symbol = elements.get(i);
-            String name = Symbol.getShortName(symbol);
-            if (symbol instanceof ElementSymbol) {
-                name = ((ElementSymbol)symbol).getName();
+            BaseExpression symbol = elements.get(i);
+            String name = SymbolImpl.getShortName(symbol);
+            if (symbol instanceof ElementSymbolImpl) {
+                name = ((ElementSymbolImpl)symbol).getName();
             }
             assertEquals("Element name does not match: ", elementNames[i].toUpperCase(), name.toString().toUpperCase()); //$NON-NLS-1$
         }
     }
 
-    protected void helpCheckElements(LanguageObject langObj, String[] elementNames, String[] elementIDs) {
-        List<ElementSymbol> elements = new ArrayList<ElementSymbol>();
-        ElementCollectorVisitor.getElements(langObj, elements);
+    protected void helpCheckElements(BaseLanguageObject langObj, String[] elementNames, String[] elementIDs) {
+        List<ElementSymbolImpl> elements = new ArrayList<ElementSymbolImpl>();
+        ElementCollectorVisitorImpl.getElements(langObj, elements);
         assertEquals("Wrong number of elements: ", elementNames.length, elements.size()); //$NON-NLS-1$
 
         for (int i = 0; i < elements.size(); i++) {
-            ElementSymbol symbol = elements.get(i);
+            ElementSymbolImpl symbol = elements.get(i);
             assertEquals("Element name does not match: ", elementNames[i].toUpperCase(), symbol.getName().toUpperCase()); //$NON-NLS-1$
 
             Object elementID = symbol.getMetadataID();
@@ -320,10 +320,10 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     protected void helpTestIsXMLQuery(String sql, boolean isXML) throws Exception {
         // parse
-        Query query = (Query)helpParse(sql);
+        QueryImpl query = (QueryImpl)helpParse(sql);
 
         // check whether it's xml
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         boolean actual = queryResolver.isXMLQuery(query, metadata);
         assertEquals("Wrong answer for isXMLQuery", isXML, actual); //$NON-NLS-1$
     }
@@ -335,16 +335,16 @@ public abstract class AbstractTestResolver extends AbstractTest {
      * @param expectedParameterExpressions
      * @since 4.3
      */
-    protected StoredProcedure helpResolveExec(String sql, Object[] expectedParameterExpressions) {
+    protected StoredProcedureImpl helpResolveExec(String sql, Object[] expectedParameterExpressions) {
 
-        StoredProcedure proc = (StoredProcedure)helpResolve(sql);
+        StoredProcedureImpl proc = (StoredProcedureImpl)helpResolve(sql);
 
-        Collection<SPParameter> params = proc.getParameters();
+        Collection<SPParameterImpl> params = proc.getParameters();
 
         // Check remaining params against expected expressions
         int i = 0;
-        for (SPParameter param : params) {
-            if (param.getParameterType() != SPParameter.IN && param.getParameterType() != SPParameter.INOUT) {
+        for (SPParameterImpl param : params) {
+            if (param.getParameterType() != SPParameterImpl.IN && param.getParameterType() != SPParameterImpl.INOUT) {
                 continue;
             }
             if (expectedParameterExpressions[i] == null) {
@@ -359,13 +359,13 @@ public abstract class AbstractTestResolver extends AbstractTest {
         return proc;
     }
 
-    protected Command helpResolveUpdateProcedure(String procedure, String userUpdateStr) throws Exception {
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(TriggerEvent.UPDATE, procedure);
+    protected CommandImpl helpResolveUpdateProcedure(String procedure, String userUpdateStr) throws Exception {
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(TriggerEvent.UPDATE, procedure);
 
-        Command userCommand = getQueryParser().parseCommand(userUpdateStr);
+        CommandImpl userCommand = getQueryParser().parseCommand(userUpdateStr);
         assertTrue(userCommand instanceof ProcedureContainer);
 
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(userCommand, metadata);
         return queryResolver.expandCommand((ProcedureContainer) userCommand, metadata);
     }
@@ -375,7 +375,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testElementSymbolForms() {
         String sql = "SELECT pm1.g1.e1, e2, pm1.g1.e3 AS a, e4 AS b FROM pm1.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1", "pm1.g1.e2", "a", "b"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1", "pm1.g1.e2", "pm1.g1.e3", "pm1.g1.e4"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -386,7 +386,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testElementSymbolFormsWithAliasedGroup() {
         String sql = "SELECT x.e1, e2, x.e3 AS a, e4 AS b FROM pm1.g1 AS x"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"x.e1", "x.e2", "a", "b"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"x.e1", "x.e2", "x.e3", "x.e4"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -397,7 +397,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testGroupWithVDB() {
         String sql = "SELECT e1 FROM example1.pm1.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         assertEquals("Resolved string form was incorrect ", sql, resolvedQuery.toString()); //$NON-NLS-1$
     }
@@ -405,7 +405,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testAliasedGroupWithVDB() {
         String sql = "SELECT e1 FROM example1.pm1.g1 AS x"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         assertEquals("Resolved string form was incorrect ", sql, resolvedQuery.toString()); //$NON-NLS-1$
     }
@@ -414,7 +414,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedGroup1() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT e1 FROM cat2.cat3.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.cat1.cat2.cat3.g1"}); //$NON-NLS-1$
     }
 
@@ -422,7 +422,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedGroup2() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT e1 FROM cat1.g2"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.cat1.g2"}); //$NON-NLS-1$
     }
 
@@ -430,7 +430,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedGroup3() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT e1 FROM cat1.cat2.cat3.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.cat1.cat2.cat3.g1"}); //$NON-NLS-1$
     }
 
@@ -438,7 +438,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedGroup4() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT e1 FROM cat2.g2"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm2.cat2.g2"}); //$NON-NLS-1$
     }
 
@@ -446,7 +446,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedGroup5() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT e1 FROM cat2.g3"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.cat2.g3"}); //$NON-NLS-1$
     }
 
@@ -454,7 +454,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedGroup6() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT e1 FROM cat1.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm2.cat1.g1"}); //$NON-NLS-1$
     }
 
@@ -462,7 +462,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedGroup7() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT e1 FROM g4"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm3.g4"}); //$NON-NLS-1$
     }
 
@@ -470,7 +470,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedGroup8() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT e1 FROM pm2.g3"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm2.g3"}); //$NON-NLS-1$
     }
 
@@ -478,7 +478,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedGroupWithAlias() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT X.e1 FROM cat2.cat3.g1 as X"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.cat1.cat2.cat3.g1"}); //$NON-NLS-1$
     }
 
@@ -486,7 +486,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedElement1() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT cat2.cat3.g1.e1 FROM cat2.cat3.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckSelect(resolvedQuery, new String[] {"pm1.cat1.cat2.cat3.g1.e1"}); //$NON-NLS-1$
     }
 
@@ -495,7 +495,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedElement2() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT cat3.g1.e1 FROM cat2.cat3.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckSelect(resolvedQuery, new String[] {"pm1.cat1.cat2.cat3.g1.e1"}); //$NON-NLS-1$
     }
 
@@ -504,7 +504,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedElement3() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT cat3.g1.e1 FROM cat2.cat3.g1, cat1.g2"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckSelect(resolvedQuery, new String[] {"pm1.cat1.cat2.cat3.g1.e1"}); //$NON-NLS-1$
     }
 
@@ -513,7 +513,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedElement4() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT cat3.g1.e1, cat1.g2.e1 FROM cat2.cat3.g1, cat1.g2"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckSelect(resolvedQuery, new String[] {"pm1.cat1.cat2.cat3.g1.e1", "pm1.cat1.g2.e1"}); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
@@ -521,7 +521,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedElement5() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT cat3.g1.e1, cat1.g2.e1 FROM example3.pm1.cat1.cat2.cat3.g1, pm1.cat1.g2"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckSelect(resolvedQuery, new String[] {"pm1.cat1.cat2.cat3.g1.e1", "pm1.cat1.g2.e1"}); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
@@ -530,7 +530,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedElement6() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT cat3.g1.e1, e2 FROM cat2.cat3.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckSelect(resolvedQuery, new String[] {"pm1.cat1.cat2.cat3.g1.e1", "pm1.cat1.cat2.cat3.g1.e2"}); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
@@ -538,7 +538,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testPartiallyQualifiedElement7() {
         metadata = getMetadataFactory().example3();
         String sql = "SELECT cat3.g1.e1, cat2.cat3.g1.e2, g1.e3 FROM pm1.cat1.cat2.cat3.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckSelect(resolvedQuery, new String[] {
             "pm1.cat1.cat2.cat3.g1.e1", "pm1.cat1.cat2.cat3.g1.e2", "pm1.cat1.cat2.cat3.g1.e3"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
@@ -606,7 +606,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testElementWithVDB() {
         String sql = "SELECT example1.pm1.g1.e1 FROM pm1.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1"}, //$NON-NLS-1$
                           new String[] {"pm1.g1.e1"}); //$NON-NLS-1$
@@ -615,7 +615,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testAliasedElementWithVDB() {
-        Query resolvedQuery = (Query)helpResolve("SELECT example1.pm1.g1.e1 AS x FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT example1.pm1.g1.e1 AS x FROM pm1.g1"); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"x"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1"}, //$NON-NLS-1$
                           new String[] {"pm1.g1.e1"}); //$NON-NLS-1$
@@ -623,7 +623,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testSelectStar() {
-        Query resolvedQuery = (Query)helpResolve("SELECT * FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT * FROM pm1.g1"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1", "pm1.g1.e2", "pm1.g1.e3", "pm1.g1.e4"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                           new String[] {"pm1.g1.e1", "pm1.g1.e2", "pm1.g1.e3", "pm1.g1.e4"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -631,7 +631,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testSelectStarFromAliasedGroup() {
-        Query resolvedQuery = (Query)helpResolve("SELECT * FROM pm1.g1 as x"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT * FROM pm1.g1 as x"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"x.e1", "x.e2", "x.e3", "x.e4"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                           new String[] {"pm1.g1.e1", "pm1.g1.e2", "pm1.g1.e3", "pm1.g1.e4"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -639,7 +639,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testSelectStarFromMultipleAliasedGroups() {
-        Query resolvedQuery = (Query)helpResolve("SELECT * FROM pm1.g1 as x, pm1.g1 as y"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT * FROM pm1.g1 as x, pm1.g1 as y"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1", "pm1.g1"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckElements(resolvedQuery.getSelect(),
                           new String[] {"x.e1", "x.e2", "x.e3", "x.e4", "y.e1", "y.e2", "y.e3", "y.e4"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
@@ -649,7 +649,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testSelectStarWhereSomeElementsAreNotSelectable() {
-        Query resolvedQuery = (Query)helpResolve("SELECT * FROM pm1.g4"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT * FROM pm1.g4"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g4"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g4.e1", "pm1.g4.e3"}, //$NON-NLS-1$ //$NON-NLS-2$
                           new String[] {"pm1.g4.e1", "pm1.g4.e3"}); //$NON-NLS-1$ //$NON-NLS-2$
@@ -657,7 +657,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testSelectGroupStarWhereSomeElementsAreNotSelectable() {
-        Query resolvedQuery = (Query)helpResolve("SELECT pm1.g4.* FROM pm1.g4"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT pm1.g4.* FROM pm1.g4"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g4"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g4.e1", "pm1.g4.e3"}, //$NON-NLS-1$ //$NON-NLS-2$
                           new String[] {"pm1.g4.e1", "pm1.g4.e3"}); //$NON-NLS-1$ //$NON-NLS-2$
@@ -665,7 +665,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testFullyQualifiedSelectStar() {
-        Query resolvedQuery = (Query)helpResolve("SELECT pm1.g1.* FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT pm1.g1.* FROM pm1.g1"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1", "pm1.g1.e2", "pm1.g1.e3", "pm1.g1.e4"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                           new String[] {"pm1.g1.e1", "pm1.g1.e2", "pm1.g1.e3", "pm1.g1.e4"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -673,7 +673,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testSelectAllInAliasedGroup() {
-        Query resolvedQuery = (Query)helpResolve("SELECT x.* FROM pm1.g1 as x"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT x.* FROM pm1.g1 as x"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"x.e1", "x.e2", "x.e3", "x.e4"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                           new String[] {"pm1.g1.e1", "pm1.g1.e2", "pm1.g1.e3", "pm1.g1.e4"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -681,7 +681,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testMultipleIdenticalElements() {
-        Query resolvedQuery = (Query)helpResolve("SELECT e1, e1 FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT e1, e1 FROM pm1.g1"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1", "pm1.g1.e1"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1", "pm1.g1.e1"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -690,7 +690,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testMultipleIdenticalElements2() {
-        Query resolvedQuery = (Query)helpResolve("SELECT e1, pm1.g1.e1 FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT e1, pm1.g1.e1 FROM pm1.g1"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1", "pm1.g1.e1"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1", "pm1.g1.e1"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -699,7 +699,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testMultipleIdenticalElements3() {
-        Query resolvedQuery = (Query)helpResolve("SELECT e1, e1 as x FROM pm1.g1"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT e1, e1 as x FROM pm1.g1"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1", "x"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1", "pm1.g1.e1"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -708,7 +708,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testDifferentElementsSameName() {
-        Query resolvedQuery = (Query)helpResolve("SELECT e1 as x, e2 as x FROM pm1.g2"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT e1 as x, e2 as x FROM pm1.g2"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g2"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"x", "x"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g2.e1", "pm1.g2.e2"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -717,7 +717,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testDifferentConstantsSameName() {
-        Query resolvedQuery = (Query)helpResolve("SELECT 1 as x, 2 as x FROM pm1.g2"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT 1 as x, 2 as x FROM pm1.g2"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g2"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"x", "x"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {}, new String[] {});
@@ -782,7 +782,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testComplicatedQuery() {
-        Query resolvedQuery = (Query)helpResolve("SELECT pm1.g1.e2 as y, pm1.g1.E3 as z, CONVERT(pm1.g1.e1, integer) * 1000 as w  FROM pm1.g1 WHERE e1 <> 'x'"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT pm1.g1.e2 as y, pm1.g1.E3 as z, CONVERT(pm1.g1.e1, integer) * 1000 as w  FROM pm1.g1 WHERE e1 <> 'x'"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"y", "z", "w"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         helpCheckElements(resolvedQuery, new String[] {"pm1.g1.e2", "pm1.g1.e3", "pm1.g1.e1", "pm1.g1.e1"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -791,7 +791,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testJoinQuery() {
-        Query resolvedQuery = (Query)helpResolve("SELECT pm3.g1.e2, pm3.g2.e2 FROM pm3.g1, pm3.g2 WHERE pm3.g1.e2=pm3.g2.e2"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT pm3.g1.e2, pm3.g2.e2 FROM pm3.g1, pm3.g2 WHERE pm3.g1.e2=pm3.g2.e2"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm3.g1", "pm3.g2"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckSelect(resolvedQuery, new String[] {"pm3.g1.e2", "pm3.g2.e2"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckElements(resolvedQuery, new String[] {"pm3.g1.e2", "pm3.g2.e2", "pm3.g1.e2", "pm3.g2.e2"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -826,7 +826,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testCaseInGroupBy() {
         String sql = "SELECT SUM(e2) FROM pm1.g1 GROUP BY CASE WHEN e2 = 0 THEN 1 ELSE 2 END"; //$NON-NLS-1$
-        Command command = helpResolve(sql);
+        CommandImpl command = helpResolve(sql);
         assertEquals(sql, command.toString());
 
         helpCheckElements(command, new String[] {"pm1.g1.e2", "pm1.g1.e2"}, new String[] {"pm1.g1.e2", "pm1.g1.e2"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
@@ -835,7 +835,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testFunctionInGroupBy() {
         String sql = "SELECT SUM(e2) FROM pm1.g1 GROUP BY (e2 + 1)"; //$NON-NLS-1$
-        Command command = helpResolve(sql);
+        CommandImpl command = helpResolve(sql);
         assertEquals(sql, command.toString());
 
         helpCheckElements(command, new String[] {"pm1.g1.e2", "pm1.g1.e2"}, new String[] {"pm1.g1.e2", "pm1.g1.e2"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
@@ -857,8 +857,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testResolveParametersExec() throws Exception {
         List<String> bindings = Arrays.asList("pm1.g2.e1"); //$NON-NLS-1$
 
-        Query resolvedQuery = (Query)helpResolveWithBindings("SELECT * FROM (exec pm1.sq2(?)) as a", metadata, bindings); //$NON-NLS-1$
-        StoredProcedure sp = (StoredProcedure)((SubqueryFromClause)resolvedQuery.getFrom().getClauses().get(0)).getCommand();
+        QueryImpl resolvedQuery = (QueryImpl)helpResolveWithBindings("SELECT * FROM (exec pm1.sq2(?)) as a", metadata, bindings); //$NON-NLS-1$
+        StoredProcedureImpl sp = (StoredProcedureImpl)((SubqueryFromClauseImpl)resolvedQuery.getFrom().getClauses().get(0)).getCommand();
         assertEquals(String.class, sp.getInputParameters().get(0).getExpression().getType());
     }
 
@@ -876,22 +876,22 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testCriteria1() {
-        ElementSymbol es = getFactory().newElementSymbol("pm1.g1.e1"); //$NON-NLS-1$
-        es.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
-        GroupSymbol gs = getFactory().newGroupSymbol("pm1.g1"); //$NON-NLS-1$
+        ElementSymbolImpl es = getFactory().newElementSymbol("pm1.g1.e1"); //$NON-NLS-1$
+        es.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
+        GroupSymbolImpl gs = getFactory().newGroupSymbol("pm1.g1"); //$NON-NLS-1$
         es.setGroupSymbol(gs);
 
-        Constant abc = getFactory().newConstant("abc"); //$NON-NLS-1$
-        CompareCriteria expected = getFactory().newCompareCriteria(es, CriteriaOperator.Operator.EQ, abc);
+        ConstantImpl abc = getFactory().newConstant("abc"); //$NON-NLS-1$
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(es, CriteriaOperator.Operator.EQ, abc);
 
-        Criteria actual = helpResolveCriteria("pm1.g1.e1 = 'abc'"); //$NON-NLS-1$
+        CriteriaImpl actual = helpResolveCriteria("pm1.g1.e1 = 'abc'"); //$NON-NLS-1$
 
         assertEquals("Did not match expected criteria", expected, actual); //$NON-NLS-1$
     }
 
     @Test
     public void testSubquery1() {
-        Query resolvedQuery = (Query)helpResolve("SELECT e1 FROM pm1.g1, (SELECT pm1.g2.e1 AS x FROM pm1.g2) AS y WHERE e1 = x"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT e1 FROM pm1.g1, (SELECT pm1.g2.e1 AS x FROM pm1.g2) AS y WHERE e1 = x"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1", "y"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckSelect(resolvedQuery, new String[] {"pm1.g1.e1"}); //$NON-NLS-1$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"pm1.g1.e1"}, //$NON-NLS-1$
@@ -899,7 +899,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     }
 
-    protected void helpCheckParameter(SPParameter param, int paramType, int index, String name, Class<?> type, Expression expr) {
+    protected void helpCheckParameter(SPParameterImpl param, int paramType, int index, String name, Class<?> type, BaseExpression expr) {
         assertEquals("Did not get expected parameter type", paramType, param.getParameterType()); //$NON-NLS-1$
         assertEquals("Did not get expected index for param", index, param.getIndex()); //$NON-NLS-1$
         assertEquals("Did not get expected name for param", name, param.getName()); //$NON-NLS-1$
@@ -909,50 +909,50 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testStoredSubQuery1() {
-        Query resolvedQuery = (Query)helpResolve("select x.e1 from (EXEC pm1.sq1()) as x"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("select x.e1 from (EXEC pm1.sq1()) as x"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"x"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"x.e1"}); //$NON-NLS-1$
     }
 
     @Test
     public void testStoredSubQuery2() {
-        Query resolvedQuery = (Query)helpResolve("select x.e1 from (EXEC pm1.sq3('abc', 5)) as x"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("select x.e1 from (EXEC pm1.sq3('abc', 5)) as x"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"x"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"x.e1"}); //$NON-NLS-1$
     }
 
     @Test
     public void testStoredSubQuery3() {
-        Query resolvedQuery = (Query)helpResolve("select * from (EXEC pm1.sq2('abc')) as x"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("select * from (EXEC pm1.sq2('abc')) as x"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"x"}); //$NON-NLS-1$
 
-        List<ElementSymbol> elements = (List<ElementSymbol>)ElementCollectorVisitor.getElements(resolvedQuery.getSelect(), false);
+        List<ElementSymbolImpl> elements = (List<ElementSymbolImpl>)ElementCollectorVisitorImpl.getElements(resolvedQuery.getSelect(), false);
 
-        ElementSymbol elem1 = elements.get(0);
+        ElementSymbolImpl elem1 = elements.get(0);
         assertEquals("Did not get expected element", "x.e1", elem1.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-        assertEquals("Did not get expected type", DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), elem1.getType()); //$NON-NLS-1$
+        assertEquals("Did not get expected type", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), elem1.getType()); //$NON-NLS-1$
 
-        ElementSymbol elem2 = elements.get(1);
+        ElementSymbolImpl elem2 = elements.get(1);
         assertEquals("Did not get expected element", "x.e2", elem2.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-        assertEquals("Did not get expected type", DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(), elem2.getType()); //$NON-NLS-1$
+        assertEquals("Did not get expected type", DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(), elem2.getType()); //$NON-NLS-1$
     }
 
     @Test
     public void testStoredQueryTransformationWithVariable4() throws Exception {
-        Command command = getQueryParser().parseCommand("EXEC pm1.sq2(pm1.sq2.in)"); //$NON-NLS-1$
+        CommandImpl command = getQueryParser().parseCommand("EXEC pm1.sq2(pm1.sq2.in)"); //$NON-NLS-1$
 
         // resolve
         try {
             // Construct command metadata
-            GroupSymbol sqGroup = getFactory().newGroupSymbol("pm1.sq5"); //$NON-NLS-1$
+            GroupSymbolImpl sqGroup = getFactory().newGroupSymbol("pm1.sq5"); //$NON-NLS-1$
             ArrayList sqParams = new ArrayList();
-            ElementSymbol in = getFactory().newElementSymbol("pm1.sq5.in1"); //$NON-NLS-1$
-            in.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+            ElementSymbolImpl in = getFactory().newElementSymbol("pm1.sq5.in1"); //$NON-NLS-1$
+            in.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
             sqParams.add(in);
             Map externalMetadata = new HashMap();
             externalMetadata.put(sqGroup, sqParams);
 
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, metadata);
 
             fail("Expected exception on invalid variable pm1.sq2.in"); //$NON-NLS-1$
@@ -1017,7 +1017,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testExecNamedParamsOmitRequiredParamWithDefaultValue() {
         Object[] expectedParameterExpressions = new Object[] {
             getFactory().newConstant("xyz"), getFactory().newConstant(new Integer(666)), getFactory().newConstant("YYZ")};//$NON-NLS-1$ //$NON-NLS-2$
-        StoredProcedure sp = helpResolveExec("EXEC pm1.sq3b(\"in\" = 'xyz', in2 = 666)", expectedParameterExpressions);//$NON-NLS-1$
+        StoredProcedureImpl sp = helpResolveExec("EXEC pm1.sq3b(\"in\" = 'xyz', in2 = 666)", expectedParameterExpressions);//$NON-NLS-1$
         assertEquals("EXEC pm1.sq3b(\"in\" => 'xyz', in2 => 666)", sp.toString());
     }
 
@@ -1126,26 +1126,26 @@ public abstract class AbstractTestResolver extends AbstractTest {
         //select e1 from pm1.g1 where e2 in (select e2 from pm4.g1)
 
         //sub command
-        Select innerSelect = getFactory().newSelect();
-        ElementSymbol e2inner = getFactory().newElementSymbol("e2"); //$NON-NLS-1$
+        SelectImpl innerSelect = getFactory().newSelect();
+        ElementSymbolImpl e2inner = getFactory().newElementSymbol("e2"); //$NON-NLS-1$
         innerSelect.addSymbol(e2inner);
-        From innerFrom = getFactory().newFrom();
-        GroupSymbol pm4g1 = getFactory().newGroupSymbol("pm4.g1"); //$NON-NLS-1$
+        FromImpl innerFrom = getFactory().newFrom();
+        GroupSymbolImpl pm4g1 = getFactory().newGroupSymbol("pm4.g1"); //$NON-NLS-1$
         innerFrom.addGroup(pm4g1);
-        Query innerQuery = getFactory().newQuery();
+        QueryImpl innerQuery = getFactory().newQuery();
         innerQuery.setSelect(innerSelect);
         innerQuery.setFrom(innerFrom);
 
         //outer command
-        Select outerSelect = getFactory().newSelect();
-        ElementSymbol e1 = getFactory().newElementSymbol("e1"); //$NON-NLS-1$
+        SelectImpl outerSelect = getFactory().newSelect();
+        ElementSymbolImpl e1 = getFactory().newElementSymbol("e1"); //$NON-NLS-1$
         outerSelect.addSymbol(e1);
-        From outerFrom = getFactory().newFrom();
-        GroupSymbol pm1g1 = getFactory().newGroupSymbol("pm1.g1"); //$NON-NLS-1$
+        FromImpl outerFrom = getFactory().newFrom();
+        GroupSymbolImpl pm1g1 = getFactory().newGroupSymbol("pm1.g1"); //$NON-NLS-1$
         outerFrom.addGroup(pm1g1);
-        ElementSymbol e2outer = getFactory().newElementSymbol("e2"); //$NON-NLS-1$
-        SubquerySetCriteria crit = getFactory().newSubquerySetCriteria(e2outer, innerQuery);
-        Query outerQuery = getFactory().newQuery();
+        ElementSymbolImpl e2outer = getFactory().newElementSymbol("e2"); //$NON-NLS-1$
+        SubquerySetCriteriaImpl crit = getFactory().newSubquerySetCriteria(e2outer, innerQuery);
+        QueryImpl outerQuery = getFactory().newQuery();
         outerQuery.setSelect(outerSelect);
         outerQuery.setFrom(outerFrom);
         outerQuery.setCriteria(crit);
@@ -1176,26 +1176,26 @@ public abstract class AbstractTestResolver extends AbstractTest {
         //select e1 from pm1.g1 where e2 in (select e1 from pm4.g1)
 
         //sub command
-        Select innerSelect = getFactory().newSelect();
-        ElementSymbol e1inner = getFactory().newElementSymbol("e1"); //$NON-NLS-1$
+        SelectImpl innerSelect = getFactory().newSelect();
+        ElementSymbolImpl e1inner = getFactory().newElementSymbol("e1"); //$NON-NLS-1$
         innerSelect.addSymbol(e1inner);
-        From innerFrom = getFactory().newFrom();
-        GroupSymbol pm4g1 = getFactory().newGroupSymbol("pm4.g1"); //$NON-NLS-1$
+        FromImpl innerFrom = getFactory().newFrom();
+        GroupSymbolImpl pm4g1 = getFactory().newGroupSymbol("pm4.g1"); //$NON-NLS-1$
         innerFrom.addGroup(pm4g1);
-        Query innerQuery = getFactory().newQuery();
+        QueryImpl innerQuery = getFactory().newQuery();
         innerQuery.setSelect(innerSelect);
         innerQuery.setFrom(innerFrom);
 
         //outer command
-        Select outerSelect = getFactory().newSelect();
-        ElementSymbol e1 = getFactory().newElementSymbol("e1"); //$NON-NLS-1$
+        SelectImpl outerSelect = getFactory().newSelect();
+        ElementSymbolImpl e1 = getFactory().newElementSymbol("e1"); //$NON-NLS-1$
         outerSelect.addSymbol(e1);
-        From outerFrom = getFactory().newFrom();
-        GroupSymbol pm1g1 = getFactory().newGroupSymbol("pm1.g1"); //$NON-NLS-1$
+        FromImpl outerFrom = getFactory().newFrom();
+        GroupSymbolImpl pm1g1 = getFactory().newGroupSymbol("pm1.g1"); //$NON-NLS-1$
         outerFrom.addGroup(pm1g1);
-        ElementSymbol e2 = getFactory().newElementSymbol("e2"); //$NON-NLS-1$
-        SubquerySetCriteria crit = getFactory().newSubquerySetCriteria(e2, innerQuery);
-        Query outerQuery = getFactory().newQuery();
+        ElementSymbolImpl e2 = getFactory().newElementSymbol("e2"); //$NON-NLS-1$
+        SubquerySetCriteriaImpl crit = getFactory().newSubquerySetCriteria(e2, innerQuery);
+        QueryImpl outerQuery = getFactory().newQuery();
         outerQuery.setSelect(outerSelect);
         outerQuery.setFrom(outerFrom);
         outerQuery.setCriteria(crit);
@@ -1216,13 +1216,13 @@ public abstract class AbstractTestResolver extends AbstractTest {
         assertEquals("Resolved string form was incorrect ", sql, outerQuery.toString()); //$NON-NLS-1$
 
         //make sure there is a convert function wrapping the criteria left expression
-        Collection functions = FunctionCollectorVisitor.getFunctions(outerQuery, true);
+        Collection functions = FunctionCollectorVisitorImpl.getFunctions(outerQuery, true);
         assertTrue(functions.size() == 1);
-        Function function = (Function)functions.iterator().next();
-        assertTrue(function.getName().equals(IFunctionLibrary.FunctionName.CONVERT.text()));
-        Expression[] args = function.getArgs();
+        FunctionImpl function = (FunctionImpl)functions.iterator().next();
+        assertTrue(function.getName().equals(FunctionLibrary.FunctionName.CONVERT.text()));
+        BaseExpression[] args = function.getArgs();
         assertSame(e2, args[0]);
-        assertTrue(args[1] instanceof Constant);
+        assertTrue(args[1] instanceof ConstantImpl);
     }
 
     /**
@@ -1298,10 +1298,10 @@ public abstract class AbstractTestResolver extends AbstractTest {
      */
     @Test
     public void testIsXMLQueryFail4() throws Exception {
-        Query query = (Query)helpParse("SELECT * FROM docA"); //$NON-NLS-1$
+        QueryImpl query = (QueryImpl)helpParse("SELECT * FROM docA"); //$NON-NLS-1$
 
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.isXMLQuery(query, metadata);
             fail("expected exception"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -1312,29 +1312,29 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testStringConversion1() {
         // Expected left expression
-        ElementSymbol e1 = getFactory().newElementSymbol("pm3.g1.e2"); //$NON-NLS-1$
-        e1.setType(DataTypeManagerService.DefaultDataTypes.DATE.getTypeClass());
+        ElementSymbolImpl e1 = getFactory().newElementSymbol("pm3.g1.e2"); //$NON-NLS-1$
+        e1.setType(DefaultDataTypeManager.DefaultDataTypes.DATE.getTypeClass());
 
         // Expected right expression
-        Class srcType = DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass();
-        String tgtTypeName = DataTypeManagerService.DefaultDataTypes.DATE.getId();
-        Expression expression = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
+        Class srcType = DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass();
+        String tgtTypeName = DefaultDataTypeManager.DefaultDataTypes.DATE.getId();
+        BaseExpression expression = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
 
-        FunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
-        FunctionDescriptor fd = library.findFunction(IFunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
-            DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()});
+        DefaultFunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
+        TCFunctionDescriptor fd = library.findFunction(FunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
+            DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()});
 
-        Function conversion = getFactory().newFunction(fd.getName(),
-                                                       new Expression[] {expression, getFactory().newConstant(tgtTypeName)});
+        FunctionImpl conversion = getFactory().newFunction(fd.getName(),
+                                                       new BaseExpression[] {expression, getFactory().newConstant(tgtTypeName)});
         conversion.setType(getDataTypeManager().getDataTypeClass(tgtTypeName));
         conversion.setFunctionDescriptor(fd);
         conversion.makeImplicit();
 
         // Expected criteria
-        CompareCriteria expected = getFactory().newCompareCriteria(e1, Operator.EQ, conversion);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(e1, Operator.EQ, conversion);
 
         // Resolve the query and check against expected objects
-        CompareCriteria actual = (CompareCriteria)helpResolveCriteria("pm3.g1.e2='2003-02-27'"); //$NON-NLS-1$
+        CompareCriteriaImpl actual = (CompareCriteriaImpl)helpResolveCriteria("pm3.g1.e2='2003-02-27'"); //$NON-NLS-1$
 
         //if (! actual.getLeftExpression().equals(expected.getLeftExpression())) {
         //	fail("left exprs not equal");
@@ -1348,29 +1348,29 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testStringConversion2() {
         // Expected left expression
-        ElementSymbol e1 = getFactory().newElementSymbol("pm3.g1.e2"); //$NON-NLS-1$
-        e1.setType(DataTypeManagerService.DefaultDataTypes.DATE.getTypeClass());
+        ElementSymbolImpl e1 = getFactory().newElementSymbol("pm3.g1.e2"); //$NON-NLS-1$
+        e1.setType(DefaultDataTypeManager.DefaultDataTypes.DATE.getTypeClass());
 
         // Expected right expression
-        Class srcType = DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass();
-        String tgtTypeName = DataTypeManagerService.DefaultDataTypes.DATE.getId();
-        Expression expression = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
+        Class srcType = DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass();
+        String tgtTypeName = DefaultDataTypeManager.DefaultDataTypes.DATE.getId();
+        BaseExpression expression = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
 
-        FunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
-        FunctionDescriptor fd = library.findFunction(IFunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
-            DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()});
+        DefaultFunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
+        TCFunctionDescriptor fd = library.findFunction(FunctionLibrary.FunctionName.CONVERT, new Class[] {srcType,
+            DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()});
 
-        Function conversion = getFactory().newFunction(fd.getName(),
-                                                       new Expression[] {expression, getFactory().newConstant(tgtTypeName)});
+        FunctionImpl conversion = getFactory().newFunction(fd.getName(),
+                                                       new BaseExpression[] {expression, getFactory().newConstant(tgtTypeName)});
         conversion.setType(getDataTypeManager().getDataTypeClass(tgtTypeName));
         conversion.setFunctionDescriptor(fd);
         conversion.makeImplicit();
 
         // Expected criteria
-        CompareCriteria expected = getFactory().newCompareCriteria(conversion, Operator.EQ, e1);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(conversion, Operator.EQ, e1);
 
         // Resolve the query and check against expected objects
-        CompareCriteria actual = (CompareCriteria)helpResolveCriteria("'2003-02-27'=pm3.g1.e2"); //$NON-NLS-1$
+        CompareCriteriaImpl actual = (CompareCriteriaImpl)helpResolveCriteria("'2003-02-27'=pm3.g1.e2"); //$NON-NLS-1$
 
         //if (! actual.getLeftExpression().equals(expected.getLeftExpression())) {
         //	fail("Left expressions not equal");
@@ -1385,17 +1385,17 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testStringConversion3() {
         // Expected left expression
-        ElementSymbol e1 = getFactory().newElementSymbol("pm3.g1.e1"); //$NON-NLS-1$
-        e1.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        ElementSymbolImpl e1 = getFactory().newElementSymbol("pm3.g1.e1"); //$NON-NLS-1$
+        e1.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
 
         // Expected right expression
-        Constant e2 = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
+        ConstantImpl e2 = getFactory().newConstant("2003-02-27"); //$NON-NLS-1$
 
         // Expected criteria
-        CompareCriteria expected = getFactory().newCompareCriteria(e1, Operator.EQ, e2);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(e1, Operator.EQ, e2);
 
         // Resolve the query and check against expected objects
-        CompareCriteria actual = (CompareCriteria)helpResolveCriteria("pm3.g1.e1='2003-02-27'"); //$NON-NLS-1$
+        CompareCriteriaImpl actual = (CompareCriteriaImpl)helpResolveCriteria("pm3.g1.e1='2003-02-27'"); //$NON-NLS-1$
 
         //if (! actual.getLeftExpression().equals(expected.getLeftExpression())) {
         //	System.out.println("left exprs not equal");
@@ -1409,19 +1409,19 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testDateToTimestampConversion_defect9747() {
         // Expected left expression
-        ElementSymbol e1 = getFactory().newElementSymbol("pm3.g1.e4"); //$NON-NLS-1$
-        e1.setType(DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getTypeClass());
+        ElementSymbolImpl e1 = getFactory().newElementSymbol("pm3.g1.e4"); //$NON-NLS-1$
+        e1.setType(DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getTypeClass());
 
         // Expected right expression
-        Constant e2 = getFactory().newConstant(TimestampUtil.createDate(96, 0, 31), DataTypeManagerService.DefaultDataTypes.DATE.getTypeClass());
-        Function f1 = getFactory().newFunction("convert", new Expression[] {e2, getFactory().newConstant(DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId())}); //$NON-NLS-1$
+        ConstantImpl e2 = getFactory().newConstant(TimestampUtil.createDate(96, 0, 31), DefaultDataTypeManager.DefaultDataTypes.DATE.getTypeClass());
+        FunctionImpl f1 = getFactory().newFunction("convert", new BaseExpression[] {e2, getFactory().newConstant(DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId())}); //$NON-NLS-1$
         f1.makeImplicit();
 
         // Expected criteria
-        CompareCriteria expected = getFactory().newCompareCriteria(e1, Operator.GT, f1);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(e1, Operator.GT, f1);
 
         // Resolve the query and check against expected objects
-        CompareCriteria actual = (CompareCriteria)helpResolveCriteria("pm3.g1.e4 > {d '1996-01-31'}"); //$NON-NLS-1$
+        CompareCriteriaImpl actual = (CompareCriteriaImpl)helpResolveCriteria("pm3.g1.e4 > {d '1996-01-31'}"); //$NON-NLS-1$
 
         assertEquals("Did not match expected criteria", expected, actual); //$NON-NLS-1$
     }
@@ -1434,7 +1434,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testLookupFunction() {
         String sql = "SELECT lookup('pm1.g1', 'e1', 'e2', e2) AS x, lookup('pm1.g1', 'e4', 'e3', e3) AS y FROM pm1.g1"; //$NON-NLS-1$
-        Query resolvedQuery = (Query)helpResolve(sql);
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve(sql);
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"x", "y"}); //$NON-NLS-1$ //$NON-NLS-2$
         helpCheckElements(resolvedQuery.getSelect(), new String[] {"PM1.G1.E2", "PM1.G1.E3"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -1443,8 +1443,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         List projSymbols = resolvedQuery.getSelect().getProjectedSymbols();
         assertEquals("Wrong number of projected symbols", 2, projSymbols.size()); //$NON-NLS-1$
-        assertEquals("Wrong type for first symbol", String.class, ((Expression)projSymbols.get(0)).getType()); //$NON-NLS-1$
-        assertEquals("Wrong type for second symbol", Double.class, ((Expression)projSymbols.get(1)).getType()); //$NON-NLS-1$
+        assertEquals("Wrong type for first symbol", String.class, ((BaseExpression)projSymbols.get(0)).getType()); //$NON-NLS-1$
+        assertEquals("Wrong type for second symbol", Double.class, ((BaseExpression)projSymbols.get(1)).getType()); //$NON-NLS-1$
     }
 
     @Test
@@ -1474,25 +1474,25 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testLookupFunctionVirtualGroup() throws Exception {
         String sql = "SELECT lookup('vm1.g1', 'e1', 'e2', e2)  FROM vm1.g1 "; //$NON-NLS-1$
-        Query command = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        QueryImpl command = (QueryImpl)helpParse(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().example1Cached());
     }
 
     @Test
     public void testLookupFunctionPhysicalGroup() throws Exception {
         String sql = "SELECT lookup('pm1.g1', 'e1', 'e2', e2)  FROM pm1.g1 "; //$NON-NLS-1$
-        Query command = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        QueryImpl command = (QueryImpl)helpParse(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().example1Cached());
     }
 
     @Test
     public void testLookupFunctionFailBadKeyElement() throws Exception {
         String sql = "SELECT lookup('pm1.g1', 'e1', 'x', e2) AS x, lookup('pm1.g1', 'e4', 'e3', e3) AS y FROM pm1.g1"; //$NON-NLS-1$
-        Command command = getQueryParser().parseCommand(sql);
+        CommandImpl command = getQueryParser().parseCommand(sql);
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, metadata);
             fail("exception expected"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -1504,18 +1504,18 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testNamespacedFunction() throws Exception {
         String sql = "SELECT namespace.func('e1')  FROM vm1.g1 "; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().createTransformationMetadata(getMetadataFactory().example1Cached().getMetadataStore(),
+        QueryMetadataInterface metadata = getMetadataFactory().createTransformationMetadata(getMetadataFactory().example1Cached().getMetadataStore(),
                                                                                         "example1",
                                                                                         new FunctionTree(
                                                                                                          getTeiidVersion(),
                                                                                                          "foo",
                                                                                                          new FakeFunctionMetadataSource()));
 
-        Query command = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        QueryImpl command = (QueryImpl)helpParse(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, metadata);
 
-        command = (Query)helpParse("SELECT func('e1')  FROM vm1.g1 ");
+        command = (QueryImpl)helpParse("SELECT func('e1')  FROM vm1.g1 ");
         queryResolver.resolveCommand(command, metadata);
     }
 
@@ -1523,8 +1523,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testSetCriteriaCastFromExpression_9657() {
         // parse
-        Criteria expected = null;
-        Criteria actual = null;
+        CriteriaImpl expected = null;
+        CriteriaImpl actual = null;
         try {
             actual = getQueryParser().parseCriteria("bqt1.smalla.shortvalue IN (1, 2)"); //$NON-NLS-1$
             expected = getQueryParser().parseCriteria("convert(bqt1.smalla.shortvalue, integer) IN (1, 2)"); //$NON-NLS-1$
@@ -1535,7 +1535,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCriteria(expected, getMetadataFactory().exampleBQTCached());
             queryResolver.resolveCriteria(actual, getMetadataFactory().exampleBQTCached());
         } catch (Exception e) {
@@ -1543,7 +1543,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         }
 
         // Tweak expected to hide convert function - this is expected
-        ((Function)((SetCriteria)expected).getExpression()).makeImplicit();
+        ((FunctionImpl)((SetCriteriaImpl)expected).getExpression()).makeImplicit();
 
         assertEquals("Did not match expected criteria", expected, actual); //$NON-NLS-1$
     }
@@ -1609,7 +1609,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testCompareSubQuery1() {
 
         String sql = "select e1 from pm1.g1 where e2 = any (select e2 from pm4.g1)"; //$NON-NLS-1$
-        Query outerQuery = (Query)this.helpResolveSubquery(sql, new String[0]);
+        QueryImpl outerQuery = (QueryImpl)this.helpResolveSubquery(sql, new String[0]);
 
         helpCheckFrom(outerQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(outerQuery, new String[] {"pm1.g1.e1"}); //$NON-NLS-1$
@@ -1879,19 +1879,19 @@ public abstract class AbstractTestResolver extends AbstractTest {
         //String sql = "select intkey from SmallA where user() = 'bqt2'";
 
         // Expected left expression
-        FunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
-        FunctionDescriptor fd = library.findFunction(IFunctionLibrary.FunctionName.USER, new Class[] {});
-        Function user = getFactory().newFunction(fd.getName(), new Expression[] {});
+        DefaultFunctionLibrary library = getMetadataFactory().getSystemFunctionManager().getSystemFunctionLibrary();
+        TCFunctionDescriptor fd = library.findFunction(FunctionLibrary.FunctionName.USER, new Class[] {});
+        FunctionImpl user = getFactory().newFunction(fd.getName(), new BaseExpression[] {});
         user.setFunctionDescriptor(fd);
 
         // Expected right expression
-        Expression e1 = getFactory().newConstant("bqt2", String.class); //$NON-NLS-1$
+        BaseExpression e1 = getFactory().newConstant("bqt2", String.class); //$NON-NLS-1$
 
         // Expected criteria
-        CompareCriteria expected = getFactory().newCompareCriteria(user, Operator.EQ, e1);
+        CompareCriteriaImpl expected = getFactory().newCompareCriteria(user, Operator.EQ, e1);
 
         // Resolve the query and check against expected objects
-        CompareCriteria actual = (CompareCriteria)helpResolveCriteria("user()='bqt2'"); //$NON-NLS-1$
+        CompareCriteriaImpl actual = (CompareCriteriaImpl)helpResolveCriteria("user()='bqt2'"); //$NON-NLS-1$
         assertEquals("Did not match expected criteria", expected, actual); //$NON-NLS-1$
     }
 
@@ -1942,38 +1942,38 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testNonAutoConversionOfLiteralIntegerToShort() throws Exception {
         // parse
-        Query command = (Query)getQueryParser().parseCommand("SELECT intkey FROM bqt1.smalla WHERE shortvalue = 5"); //$NON-NLS-1$
+        QueryImpl command = (QueryImpl)getQueryParser().parseCommand("SELECT intkey FROM bqt1.smalla WHERE shortvalue = 5"); //$NON-NLS-1$
 
         // resolve
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().exampleBQTCached());
 
         // Check whether an implicit conversion was added on the correct side
-        CompareCriteria crit = (CompareCriteria)command.getCriteria();
+        CompareCriteriaImpl crit = (CompareCriteriaImpl)command.getCriteria();
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass(), crit.getRightExpression().getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass(), crit.getRightExpression().getType());
         assertEquals("Sql is incorrect after resolving", "SELECT intkey FROM bqt1.smalla WHERE shortvalue = 5", command.toString()); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Test
     public void testNonAutoConversionOfLiteralIntegerToShort2() throws Exception {
         // parse
-        Query command = (Query)getQueryParser().parseCommand("SELECT intkey FROM bqt1.smalla WHERE 5 = shortvalue"); //$NON-NLS-1$
+        QueryImpl command = (QueryImpl)getQueryParser().parseCommand("SELECT intkey FROM bqt1.smalla WHERE 5 = shortvalue"); //$NON-NLS-1$
 
         // resolve
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().exampleBQTCached());
 
         // Check whether an implicit conversion was added on the correct side
-        CompareCriteria crit = (CompareCriteria)command.getCriteria();
+        CompareCriteriaImpl crit = (CompareCriteriaImpl)command.getCriteria();
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass(), crit.getLeftExpression().getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass(), crit.getLeftExpression().getType());
         assertEquals("Sql is incorrect after resolving", "SELECT intkey FROM bqt1.smalla WHERE 5 = shortvalue", command.toString()); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Test
     public void testAliasedOrderBy() {
-        Query resolvedQuery = (Query)helpResolve("SELECT pm1.g1.e1 as y FROM pm1.g1 ORDER BY y"); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT pm1.g1.e1 as y FROM pm1.g1 ORDER BY y"); //$NON-NLS-1$
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         helpCheckSelect(resolvedQuery, new String[] {"y"}); //$NON-NLS-1$
     }
@@ -2029,10 +2029,10 @@ public abstract class AbstractTestResolver extends AbstractTest {
      */
     @Test
     public void testImplConversionBetweenIntAndShort() throws Exception {
-        Insert command = (Insert)getQueryParser().parseCommand("Insert into pm5.g3(e2) Values(100)"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        InsertImpl command = (InsertImpl)getQueryParser().parseCommand("Insert into pm5.g3(e2) Values(100)"); //$NON-NLS-1$
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, metadata);
-        assertTrue(command.getValues().get(0).getType() == DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass());
+        assertTrue(command.getValues().get(0).getType() == DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass());
     }
 
     public TransformationMetadata example_12968() {
@@ -2045,11 +2045,11 @@ public abstract class AbstractTestResolver extends AbstractTest {
         Table pm2g1 = getMetadataFactory().createPhysicalGroup("mySchema.myTable2", pm2); //$NON-NLS-1$
 
         getMetadataFactory().createElements(pm1g1, new String[] {"myColumn", "myColumn2"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-                                       new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                           DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+                                       new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                           DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
         getMetadataFactory().createElements(pm2g1, new String[] {"myColumn", "myColumn2"}, //$NON-NLS-1$ //$NON-NLS-2$ 
-                                       new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                           DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+                                       new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                           DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
 
         return getMetadataFactory().createTransformationMetadata(metadataStore, "12968");
     }
@@ -2094,22 +2094,22 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testNestedUnionQueryWithNull() throws Exception {
-        SetQuery command = (SetQuery)helpResolve("SELECT e2, e3 FROM pm1.g1 UNION (SELECT null, e3 FROM pm1.g2 UNION SELECT null, e3 from pm1.g1)"); //$NON-NLS-1$
+        SetQueryImpl command = (SetQueryImpl)helpResolve("SELECT e2, e3 FROM pm1.g1 UNION (SELECT null, e3 FROM pm1.g2 UNION SELECT null, e3 from pm1.g1)"); //$NON-NLS-1$
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                      command.getProjectedSymbols().get(0).getType());
     }
 
     @Test
     public void testUnionQueryClone() throws Exception {
-        SetQuery command = (SetQuery)helpResolve("SELECT e2, e3 FROM pm1.g1 UNION SELECT e3, e2 from pm1.g1"); //$NON-NLS-1$
+        SetQueryImpl command = (SetQueryImpl)helpResolve("SELECT e2, e3 FROM pm1.g1 UNION SELECT e3, e2 from pm1.g1"); //$NON-NLS-1$
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                      command.getProjectedSymbols().get(1).getType());
 
         command = command.clone();
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                      command.getProjectedSymbols().get(1).getType());
     }
 
@@ -2182,18 +2182,18 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testProcParamComparison_defect13653() {
         String userSql = "SELECT * FROM (EXEC mmspTest1.MMSP5('a')) AS a, (EXEC mmsptest1.mmsp6('b')) AS b"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleBQTCached();
+        QueryMetadataInterface metadata = getMetadataFactory().exampleBQTCached();
 
-        Query query = (Query)helpResolve(userSql, metadata);
-        From from = query.getFrom();
+        QueryImpl query = (QueryImpl)helpResolve(userSql, metadata);
+        FromImpl from = query.getFrom();
         Collection fromClauses = from.getClauses();
-        SPParameter params[] = new SPParameter[2];
+        SPParameterImpl params[] = new SPParameterImpl[2];
         Iterator iter = fromClauses.iterator();
         while (iter.hasNext()) {
-            SubqueryFromClause clause = (SubqueryFromClause)iter.next();
-            StoredProcedure proc = (StoredProcedure)clause.getCommand();
-            for (SPParameter param : proc.getParameters()) {
-                if (param.getParameterType() == SPParameter.IN) {
+            SubqueryFromClauseImpl clause = (SubqueryFromClauseImpl)iter.next();
+            StoredProcedureImpl proc = (StoredProcedureImpl)clause.getCommand();
+            for (SPParameterImpl param : proc.getParameters()) {
+                if (param.getParameterType() == SPParameterImpl.IN) {
                     if (params[0] == null) {
                         params[0] = param;
                     } else {
@@ -2209,30 +2209,30 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testNullConstantInSelect() throws Exception {
         String userSql = "SELECT null as x"; //$NON-NLS-1$
-        Query query = (Query)helpParse(userSql);
+        QueryImpl query = (QueryImpl)helpParse(userSql);
 
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(query, getMetadataFactory().exampleBQTCached());
 
         // Check type of resolved null constant
-        Expression symbol = query.getSelect().getSymbols().get(0);
+        BaseExpression symbol = query.getSelect().getSymbols().get(0);
         assertNotNull(symbol.getType());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), symbol.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), symbol.getType());
     }
 
     @Test
     public void test11716() throws Exception {
         String sql = "SELECT e1 FROM pm1.g1 where e1='1'"; //$NON-NLS-1$
         Map externalMetadata = new HashMap();
-        GroupSymbol inputSet = getFactory().newGroupSymbol("INPUT"); //$NON-NLS-1$
+        GroupSymbolImpl inputSet = getFactory().newGroupSymbol("INPUT"); //$NON-NLS-1$
         List inputSetElements = new ArrayList();
-        ElementSymbol inputSetElement = getFactory().newElementSymbol("INPUT.e1"); //$NON-NLS-1$
+        ElementSymbolImpl inputSetElement = getFactory().newElementSymbol("INPUT.e1"); //$NON-NLS-1$
         inputSetElements.add(inputSetElement);
         externalMetadata.put(inputSet, inputSetElements);
-        Query command = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        QueryImpl command = (QueryImpl)helpParse(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, metadata);
-        Collection groups = GroupCollectorVisitor.getGroups(command, false);
+        Collection groups = GroupCollectorVisitorImpl.getGroups(command, false);
         assertFalse(groups.contains(inputSet));
     }
 
@@ -2260,8 +2260,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testUnionInSubquery() throws Exception {
         String sql = "SELECT StringKey FROM (SELECT BQT2.SmallB.StringKey FROM BQT2.SmallB union SELECT convert(BQT2.SmallB.FloatNum, string) FROM BQT2.SmallB) x"; //$NON-NLS-1$
-        Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        CommandImpl command = getQueryParser().parseCommand(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(command, getMetadataFactory().exampleBQTCached());
     }
 
@@ -2273,36 +2273,36 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testUnionOfAliasedLiteralsGetsModified() {
         String sql = "SELECT 5 AS x UNION ALL SELECT 10 AS x"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
     }
 
     @Test
     public void testXMLWithProcSubquery() {
         String sql = "SELECT * FROM xmltest.doc4 WHERE node2 IN (SELECT e1 FROM (EXEC pm1.vsp1()) AS x)"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
     }
 
     @Test
     public void testDefect18832() {
         String sql = "SELECT * from (SELECT null as a, e1 FROM pm1.g1) b"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         List projectedSymbols = c.getProjectedSymbols();
         for (int i = 0; i < projectedSymbols.size(); i++) {
-            ElementSymbol symbol = (ElementSymbol)projectedSymbols.get(i);
-            assertTrue(!symbol.getType().equals(DataTypeManagerService.DefaultDataTypes.NULL));
+            ElementSymbolImpl symbol = (ElementSymbolImpl)projectedSymbols.get(i);
+            assertTrue(!symbol.getType().equals(DefaultDataTypeManager.DefaultDataTypes.NULL));
         }
     }
 
     @Test
     public void testDefect18832_2() {
         String sql = "SELECT a.*, b.* from (SELECT null as a, e1 FROM pm1.g1) a, (SELECT e1 FROM pm1.g1) b"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         List projectedSymbols = c.getProjectedSymbols();
         for (int i = 0; i < projectedSymbols.size(); i++) {
-            ElementSymbol symbol = (ElementSymbol)projectedSymbols.get(i);
-            assertTrue(!symbol.getType().equals(DataTypeManagerService.DefaultDataTypes.NULL));
+            ElementSymbolImpl symbol = (ElementSymbolImpl)projectedSymbols.get(i);
+            assertTrue(!symbol.getType().equals(DefaultDataTypeManager.DefaultDataTypes.NULL));
         }
     }
 
@@ -2318,17 +2318,17 @@ public abstract class AbstractTestResolver extends AbstractTest {
         helpResolve(sql);
     }
 
-    protected void verifyProjectedTypes(Command c, Class[] types) {
+    protected void verifyProjectedTypes(CommandImpl c, Class[] types) {
         List projSymbols = c.getProjectedSymbols();
         for (int i = 0; i < projSymbols.size(); i++) {
-            assertEquals("Found type mismatch at column " + i, types[i], ((Expression)projSymbols.get(i)).getType()); //$NON-NLS-1$
+            assertEquals("Found type mismatch at column " + i, types[i], ((BaseExpression)projSymbols.get(i)).getType()); //$NON-NLS-1$
         }
     }
 
     @Test
     public void testNestedInlineViews() throws Exception {
         String sql = "SELECT * FROM (SELECT * FROM (SELECT * FROM pm1.g1) AS Y) AS X"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
 
         verifyProjectedTypes(c, new Class[] {String.class, Integer.class, Boolean.class, Double.class});
@@ -2337,7 +2337,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testNestedInlineViewsNoStar() throws Exception {
         String sql = "SELECT e1 FROM (SELECT e1 FROM (SELECT e1 FROM pm1.g1) AS Y) AS X"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
 
         verifyProjectedTypes(c, new Class[] {String.class});
@@ -2346,7 +2346,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testNestedInlineViewsCount() throws Exception {
         String sql = "SELECT COUNT(*) FROM (SELECT * FROM (SELECT * FROM pm1.g1) AS Y) AS X"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
         verifyProjectedTypes(c, new Class[] {Integer.class});
     }
@@ -2354,7 +2354,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testAggOverInlineView() throws Exception {
         String sql = "SELECT SUM(x) FROM (SELECT (e2 + 1) AS x FROM pm1.g1) AS g"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
         verifyProjectedTypes(c, new Class[] {Long.class});
 
@@ -2407,7 +2407,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testCreate() {
         String sql = "CREATE LOCAL TEMPORARY TABLE temp_table (column1 string)"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
     }
 
@@ -2445,7 +2445,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testCreateImplicitName() {
         String sql = "CREATE LOCAL TEMPORARY TABLE #g1 (column1 string)"; //$NON-NLS-1$
-        Command c = helpResolve(sql);
+        CommandImpl c = helpResolve(sql);
         assertEquals(sql, c.toString());
     }
 
@@ -2484,11 +2484,11 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testResolveUnqualifiedCriteria() throws Exception {
-        Criteria criteria = getQueryParser().parseCriteria("e1 = 1"); //$NON-NLS-1$
+        CriteriaImpl criteria = getQueryParser().parseCriteria("e1 = 1"); //$NON-NLS-1$
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCriteria(criteria, metadata);
             fail("Exception expected"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -2563,14 +2563,14 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testExecProjectedSymbols() {
         String query = "exec pm1.sq1()"; //$NON-NLS-1$
 
-        StoredProcedure proc = (StoredProcedure)helpResolve(query);
+        StoredProcedureImpl proc = (StoredProcedureImpl)helpResolve(query);
 
-        List<Expression> projected = proc.getProjectedSymbols();
+        List<BaseExpression> projected = proc.getProjectedSymbols();
 
         assertEquals(2, projected.size());
 
-        for (Iterator<Expression> i = projected.iterator(); i.hasNext();) {
-            ElementSymbol symbol = (ElementSymbol)i.next();
+        for (Iterator<BaseExpression> i = projected.iterator(); i.hasNext();) {
+            ElementSymbolImpl symbol = (ElementSymbolImpl)i.next();
             assertNotNull(symbol.getGroupSymbol());
         }
     }
@@ -2581,12 +2581,12 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
         Schema pm1 = getMetadataFactory().createPhysicalModel("pm1", metadataStore);
 
-        ColumnSet<Procedure> rs2 = getMetadataFactory().createResultSet("rs2", new String[] {"in", "e2"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter rs2p2 = getMetadataFactory().createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> rs2 = getMetadataFactory().createResultSet("rs2", new String[] {"in", "e2"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter rs2p2 = getMetadataFactory().createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         Procedure sq2 = getMetadataFactory().createStoredProcedure("sq2", pm1, Arrays.asList(rs2p2)); //$NON-NLS-1$
         sq2.setResultSet(rs2);
 
-        IQueryMetadataInterface metadata = getMetadataFactory().createTransformationMetadata(metadataStore, "example1");
+        QueryMetadataInterface metadata = getMetadataFactory().createTransformationMetadata(metadataStore, "example1");
 
         helpResolveException("select * from pm1.sq2", metadata, "TEIID30114 Cannot access procedure pm1.sq2 using table semantics since the parameter and result set column names are not all unique."); //$NON-NLS-1$ //$NON-NLS-2$
     }
@@ -2639,26 +2639,26 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testSelectIntoWithNullLiteral() {
         String sql = "select null as x into #temp from pm1.g1"; //$NON-NLS-1$
 
-        Query query = (Query)helpResolve(sql);
+        QueryImpl query = (QueryImpl)helpResolve(sql);
 
         TempMetadataStore store = query.getTemporaryMetadata();
 
         TempMetadataID id = store.getTempElementID("#temp.x"); //$NON-NLS-1$
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), id.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), id.getType());
     }
 
     @Test
     public void testInsertWithNullLiteral() {
         String sql = "insert into #temp (x) values (null)"; //$NON-NLS-1$
 
-        Insert insert = (Insert)helpResolve(sql);
+        InsertImpl insert = (InsertImpl)helpResolve(sql);
 
         TempMetadataStore store = insert.getTemporaryMetadata();
 
         TempMetadataID id = store.getTempElementID("#temp.x"); //$NON-NLS-1$
 
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), id.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), id.getType());
     }
 
     @Test
@@ -2709,7 +2709,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
         String sql = "Insert into pm1.g1 values (1, 2, true, 4)"; //$NON-NLS-1$
 
         helpResolve(sql);
-        Insert command = (Insert)helpResolve(sql);
+        InsertImpl command = (InsertImpl)helpResolve(sql);
         assertEquals(4, command.getVariables().size());
     }
 
@@ -2717,15 +2717,15 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testInsertWithoutColumnsUndefinedTemp() {
         String sql = "Insert into #temp values (1, 2)"; //$NON-NLS-1$
 
-        Insert command = (Insert)helpResolve(sql);
+        InsertImpl command = (InsertImpl)helpResolve(sql);
         assertEquals(2, command.getVariables().size());
     }
 
     @Test
     public void testCase6319() throws Exception {
         String sql = "select floatnum from bqt1.smalla group by floatnum having sum(floatnum) between 51.0 and 100.0 "; //$NON-NLS-1$
-        Query query = (Query)helpParse(sql);
-        QueryResolver queryResolver = new QueryResolver(getQueryParser());
+        QueryImpl query = (QueryImpl)helpParse(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
         queryResolver.resolveCommand(query, getMetadataFactory().exampleBQTCached());
     }
 
@@ -2773,10 +2773,10 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testUpdateSetClauseReferenceType() {
         String sql = "UPDATE pm1.g1 SET pm1.g1.e1 = 1, pm1.g1.e2 = ?;"; //$NON-NLS-1$
 
-        Update update = (Update)helpResolve(sql, getMetadataFactory().example1Cached());
+        UpdateImpl update = (UpdateImpl)helpResolve(sql, getMetadataFactory().example1Cached());
 
-        Expression ref = update.getChangeList().getClauses().get(1).getValue();
-        assertTrue(ref instanceof Reference);
+        BaseExpression ref = update.getChangeList().getClauses().get(1).getValue();
+        assertTrue(ref instanceof ReferenceImpl);
         assertNotNull(ref.getType());
     }
 
@@ -2792,8 +2792,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
     @Test
     public void testReferenceInSelect() {
         String sql = "select ?, e1 from pm1.g1"; //$NON-NLS-1$
-        Query command = (Query)helpResolve(sql, getMetadataFactory().example1Cached());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(),
+        QueryImpl command = (QueryImpl)helpResolve(sql, getMetadataFactory().example1Cached());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(),
                      command.getProjectedSymbols().get(0).getType());
     }
 
@@ -2801,8 +2801,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testReferenceInSelect1() {
         String sql = "select convert(?, integer), e1 from pm1.g1"; //$NON-NLS-1$
 
-        Query command = (Query)helpResolve(sql, getMetadataFactory().example1Cached());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
+        QueryImpl command = (QueryImpl)helpResolve(sql, getMetadataFactory().example1Cached());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
                      command.getProjectedSymbols().get(0).getType());
     }
 
@@ -2810,8 +2810,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testUnionWithObjectTypeConversion() {
         String sql = "select convert(null, xml) from pm1.g1 union all select 1"; //$NON-NLS-1$
 
-        SetQuery query = (SetQuery)helpResolve(sql, getMetadataFactory().example1Cached());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass(),
+        SetQueryImpl query = (SetQueryImpl)helpResolve(sql, getMetadataFactory().example1Cached());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass(),
                      query.getProjectedSymbols().get(0).getType());
     }
 
@@ -2819,20 +2819,20 @@ public abstract class AbstractTestResolver extends AbstractTest {
     public void testUnionWithSubQuery() {
         String sql = "select 1 from pm1.g1 where exists (select 1) union select 2"; //$NON-NLS-1$
 
-        SetQuery command = (SetQuery)helpResolve(sql);
+        SetQueryImpl command = (SetQueryImpl)helpResolve(sql);
 
-        assertEquals(1, CommandCollectorVisitor.getCommands(command).size());
+        assertEquals(1, CommandCollectorVisitorImpl.getCommands(command).size());
     }
 
     @Test
     public void testOrderBy_J658a() {
-        Query resolvedQuery = (Query)helpResolve("SELECT pm1.g1.e1, e2, e3 as x, (5+2) as y FROM pm1.g1 ORDER BY e3"); //$NON-NLS-1$
-        OrderBy orderBy = resolvedQuery.getOrderBy();
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT pm1.g1.e1, e2, e3 as x, (5+2) as y FROM pm1.g1 ORDER BY e3"); //$NON-NLS-1$
+        OrderByImpl orderBy = resolvedQuery.getOrderBy();
         int[] expectedPositions = new int[] {2};
         helpTestOrderBy(orderBy, expectedPositions);
     }
 
-    private void helpTestOrderBy(OrderBy orderBy, int[] expectedPositions) {
+    private void helpTestOrderBy(OrderByImpl orderBy, int[] expectedPositions) {
         assertEquals(expectedPositions.length, orderBy.getVariableCount());
         for (int i = 0; i < expectedPositions.length; i++) {
             assertEquals(expectedPositions[i], orderBy.getExpressionPosition(i));
@@ -2841,13 +2841,13 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testOrderBy_J658b() {
-        Query resolvedQuery = (Query)helpResolve("SELECT pm1.g1.e1, e2, e3 as x, (5+2) as y FROM pm1.g1 ORDER BY e2, e3 "); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT pm1.g1.e1, e2, e3 as x, (5+2) as y FROM pm1.g1 ORDER BY e2, e3 "); //$NON-NLS-1$
         helpTestOrderBy(resolvedQuery.getOrderBy(), new int[] {1, 2});
     }
 
     @Test
     public void testOrderBy_J658c() {
-        Query resolvedQuery = (Query)helpResolve("SELECT pm1.g1.e1, e2 as x, e3 as y FROM pm1.g1 ORDER BY x, e3 "); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT pm1.g1.e1, e2 as x, e3 as y FROM pm1.g1 ORDER BY x, e3 "); //$NON-NLS-1$
         helpTestOrderBy(resolvedQuery.getOrderBy(), new int[] {1, 2});
     }
 
@@ -2859,13 +2859,13 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testOrderBy_J658e() {
-        Query resolvedQuery = (Query)helpResolve("SELECT pm1.g1.e1, e2 as x, e3 as e2 FROM pm1.g1 ORDER BY x, e2 "); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolve("SELECT pm1.g1.e1, e2 as x, e3 as e2 FROM pm1.g1 ORDER BY x, e2 "); //$NON-NLS-1$
         helpTestOrderBy(resolvedQuery.getOrderBy(), new int[] {1, 2});
     }
 
     @Test
     public void testSPOutParamWithExec() {
-        StoredProcedure proc = (StoredProcedure)helpResolve("exec pm2.spTest8(1)", getMetadataFactory().exampleBQTCached());
+        StoredProcedureImpl proc = (StoredProcedureImpl)helpResolve("exec pm2.spTest8(1)", getMetadataFactory().exampleBQTCached());
         assertEquals(2, proc.getProjectedSymbols().size());
     }
 
@@ -2875,7 +2875,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
      */
     @Test
     public void testSPOutParamWithCallableStatement() {
-        StoredProcedure proc = (StoredProcedure)helpResolve("{call pm2.spTest8(1)}", getMetadataFactory().exampleBQTCached());
+        StoredProcedureImpl proc = (StoredProcedureImpl)helpResolve("{call pm2.spTest8(1)}", getMetadataFactory().exampleBQTCached());
         assertEquals(3, proc.getProjectedSymbols().size());
     }
 
@@ -2886,13 +2886,13 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testProcRelationalWithOutParam() {
-        Query proc = (Query)helpResolve("select * from pm2.spTest8 where inkey = 1", getMetadataFactory().exampleBQTCached());
+        QueryImpl proc = (QueryImpl)helpResolve("select * from pm2.spTest8 where inkey = 1", getMetadataFactory().exampleBQTCached());
         assertEquals(3, proc.getProjectedSymbols().size());
     }
 
     @Test
     public void testSPReturnParamWithNoResultSet() {
-        StoredProcedure proc = (StoredProcedure)helpResolve("exec pm4.spTest9(1)", getMetadataFactory().exampleBQTCached());
+        StoredProcedureImpl proc = (StoredProcedureImpl)helpResolve("exec pm4.spTest9(1)", getMetadataFactory().exampleBQTCached());
         assertEquals(1, proc.getProjectedSymbols().size());
     }
 
@@ -2974,13 +2974,13 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testOrderByExpression() {
-        Query query = (Query)helpResolve("select pm1.g1.e1 from pm1.g1 order by e2 || e3 "); //$NON-NLS-1$
+        QueryImpl query = (QueryImpl)helpResolve("select pm1.g1.e1 from pm1.g1 order by e2 || e3 "); //$NON-NLS-1$
         assertEquals(-1, query.getOrderBy().getExpressionPosition(0));
     }
 
     @Test
     public void testOrderByExpression1() {
-        Query query = (Query)helpResolve("select pm1.g1.e1 || e2 from pm1.g1 order by pm1.g1.e1 || e2 "); //$NON-NLS-1$
+        QueryImpl query = (QueryImpl)helpResolve("select pm1.g1.e1 || e2 from pm1.g1 order by pm1.g1.e1 || e2 "); //$NON-NLS-1$
         assertEquals(0, query.getOrderBy().getExpressionPosition(0));
     }
 
@@ -3002,7 +3002,7 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testCorrelatedTextTable() {
-        Command command = helpResolve("select x.* from pm1.g1, texttable(e1 COLUMNS x string) x"); //$NON-NLS-1$
+        CommandImpl command = helpResolve("select x.* from pm1.g1, texttable(e1 COLUMNS x string) x"); //$NON-NLS-1$
         assertEquals(1, command.getProjectedSymbols().size());
     }
 
@@ -3079,8 +3079,8 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testTrim() {
-        Query query = (Query)helpResolve("select trim(e1) from pm1.g1");
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), query.getProjectedSymbols().get(0).getType());
+        QueryImpl query = (QueryImpl)helpResolve("select trim(e1) from pm1.g1");
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), query.getProjectedSymbols().get(0).getType());
     }
 
     @Test
@@ -3095,9 +3095,9 @@ public abstract class AbstractTestResolver extends AbstractTest {
 
     @Test
     public void testXmlQueryWithParam() {
-        Query q = (Query)helpResolve("select xmlquery('/a' passing ?)");
-        XMLQuery ex = (XMLQuery)SymbolMap.getExpression(q.getSelect().getSymbols().get(0));
-        assertEquals(DataTypeManagerService.DefaultDataTypes.XML.getTypeClass(), ex.getPassing().get(0).getExpression().getType());
+        QueryImpl q = (QueryImpl)helpResolve("select xmlquery('/a' passing ?)");
+        XMLQueryImpl ex = (XMLQueryImpl)SymbolMap.getExpression(q.getSelect().getSymbols().get(0));
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass(), ex.getPassing().get(0).getExpression().getType());
     }
 
     @Test

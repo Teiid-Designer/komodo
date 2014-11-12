@@ -34,11 +34,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.type.IDataTypeManagerService;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.common.util.CheckArg;
 import org.modeshape.jcr.api.JcrConstants;
@@ -47,7 +47,7 @@ import org.modeshape.jcr.api.JcrConstants;
  * Utility object class designed to facilitate constructing an AST or Abstract Syntax Tree representing nodes and properties that
  * are compatible with ModeShape graph component structure.
  */
-public abstract class ASTNode extends SimpleNode implements LanguageObject, StringConstants, Cloneable {
+public abstract class ASTNode extends SimpleNode implements BaseLanguageObject, StringConstants, Cloneable {
 
     /**
      * 
@@ -123,7 +123,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param parser teiid parser
      * @param nodeTypeIndex node type id
      */
-    public ASTNode(ITeiidParser parser, int nodeTypeIndex) {
+    public ASTNode(TeiidSeqParser parser, int nodeTypeIndex) {
         super(parser, nodeTypeIndex);
 
         String lexiconType = TeiidSqlLexicon.getTypeId(getClass());
@@ -150,13 +150,13 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
     /**
      * @return data type service
      */
-    public IDataTypeManagerService getDataTypeService() {
+    public DataTypeManager getDataTypeService() {
         return getTeiidParser().getDataTypeService();
     }
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 
@@ -519,7 +519,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param referenceName name for identifier
      * @param languageObject child to add
      */
-    public void addLastChild(String referenceName, LanguageObject languageObject) {
+    public void addLastChild(String referenceName, BaseLanguageObject languageObject) {
         if (languageObject == null)
             languageObject = new NullNode(getTeiidParser());
 
@@ -535,7 +535,7 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param referenceName name for identifier
      * @param languageObject child to add
      */
-    public void setChild(String referenceName, LanguageObject languageObject) {
+    public void setChild(String referenceName, BaseLanguageObject languageObject) {
         removeChildren(referenceName);
 
         if (languageObject == null)
@@ -552,13 +552,13 @@ public abstract class ASTNode extends SimpleNode implements LanguageObject, Stri
      * @param referenceName name for identifier
      * @param languageObjects children to add
      */
-    public void setChildren(String referenceName, Collection<? extends LanguageObject> languageObjects) {
+    public void setChildren(String referenceName, Collection<? extends BaseLanguageObject> languageObjects) {
         removeChildren(referenceName);
 
         if (languageObjects == null)
             return;
 
-        for (LanguageObject object : languageObjects) {
+        for (BaseLanguageObject object : languageObjects) {
             addLastChild(referenceName, object);
         }
     }

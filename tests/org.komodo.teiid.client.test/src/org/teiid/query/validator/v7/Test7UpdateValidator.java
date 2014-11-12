@@ -21,7 +21,7 @@
 */
 package org.teiid.query.validator.v7;
 
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.v7.Test7Factory;
 import org.teiid.query.validator.AbstractTestUpdateValidator;

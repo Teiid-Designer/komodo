@@ -28,7 +28,7 @@ import java.io.StringReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.XMLEvent;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.SQLXMLImpl;
 import org.teiid.core.types.Transform;
 import org.teiid.core.types.XMLType;
@@ -42,7 +42,7 @@ public class StringToSQLXMLTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public StringToSQLXMLTransform(DataTypeManagerService dataTypeManager) {
+    public StringToSQLXMLTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 
@@ -91,7 +91,7 @@ public class StringToSQLXMLTransform extends Transform {
 	 * @return Source type
 	 */
 	public Class<?> getSourceType() {
-		return DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass();
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class StringToSQLXMLTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.XML.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass();
 	}
 	
 	@Override

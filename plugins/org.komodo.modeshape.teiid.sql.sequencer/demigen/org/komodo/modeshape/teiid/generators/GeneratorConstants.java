@@ -77,6 +77,16 @@ public interface GeneratorConstants extends StringConstants {
     String DEMI_GEN_DIR = EXEC_HOME + File.separator + "demigen";
 
     /**
+     * Language object interface prefix
+     */
+    String LANG_OBJECT_PREFIX = "Base";
+
+    /**
+     * Language object post fix
+     */
+    String LANG_OBJECT_POSTFIX = "Impl";
+
+    /**
      * Utilities for use in the generators
      */
     class Utilities {

@@ -30,12 +30,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.query.resolver.QueryResolver;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.teiid.query.resolver.TCQueryResolver;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public abstract class AbstractTestAlterValidation extends AbstractTest {
@@ -43,16 +43,16 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestAlterValidation(ITeiidVersion teiidVersion) {
+    public AbstractTestAlterValidation(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
-    private Command helpResolve(String sql, IQueryMetadataInterface metadata) {
-        Command command = null;
+    private CommandImpl helpResolve(String sql, QueryMetadataInterface metadata) {
+        CommandImpl command = null;
 
         try {
             command = getQueryParser().parseCommand(sql);
-            QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
             queryResolver.resolveCommand(command, metadata);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -61,15 +61,15 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
         return command;
     }
 
-    public ValidatorReport helpValidate(String sql, String[] expectedStringArray, IQueryMetadataInterface metadata) {
-        Command command = helpResolve(sql, metadata);
+    public ValidatorReport helpValidate(String sql, String[] expectedStringArray, QueryMetadataInterface metadata) {
+        CommandImpl command = helpResolve(sql, metadata);
 
         return helpRunValidator(command, expectedStringArray, metadata);
     }
 
-    public ValidatorReport helpRunValidator(Command command, String[] expectedStringArray, IQueryMetadataInterface metadata) {
+    public ValidatorReport helpRunValidator(CommandImpl command, String[] expectedStringArray, QueryMetadataInterface metadata) {
         try {
-            ValidatorReport report = new Validator().validate(command, metadata);
+            ValidatorReport report = new DefaultValidator().validate(command, metadata);
 
             examineReport(command, expectedStringArray, report);
             return report;
@@ -80,14 +80,14 @@ public abstract class AbstractTestAlterValidation extends AbstractTest {
 
     private void examineReport(Object command, String[] expectedStringArray, ValidatorReport report) {
         // Get invalid objects from report
-        Collection<LanguageObject> actualObjs = new ArrayList<LanguageObject>();
+        Collection<BaseLanguageObject> actualObjs = new ArrayList<BaseLanguageObject>();
         report.collectInvalidObjects(actualObjs);
 
         // Compare expected and actual objects
         Set<String> expectedStrings = new HashSet<String>(Arrays.asList(expectedStringArray));
         Set<String> actualStrings = new HashSet<String>();
-        for (LanguageObject obj : actualObjs) {
-            actualStrings.add(SQLStringVisitor.getSQLString(obj));
+        for (BaseLanguageObject obj : actualObjs) {
+            actualStrings.add(SQLStringVisitorImpl.getSQLString(obj));
         }
 
         if (expectedStrings.size() == 0 && actualStrings.size() > 0) {

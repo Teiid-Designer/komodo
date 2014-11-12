@@ -21,8 +21,8 @@
 */
 package org.teiid.query.validator.v85;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.validator.v8.Test8FunctionMetadataValidator;
 
 /**
@@ -31,7 +31,7 @@ import org.teiid.query.validator.v8.Test8FunctionMetadataValidator;
 @SuppressWarnings( "javadoc" )
 public class Test85FunctionMetadataValidator extends Test8FunctionMetadataValidator {
 
-    protected Test85FunctionMetadataValidator(ITeiidVersion teiidVersion) {
+    protected Test85FunctionMetadataValidator(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

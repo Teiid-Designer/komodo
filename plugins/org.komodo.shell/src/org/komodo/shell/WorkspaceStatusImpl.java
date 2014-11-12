@@ -30,9 +30,9 @@ import java.util.Set;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
-import org.komodo.spi.runtime.ITeiidInstance;
-import org.teiid.runtime.client.instance.TeiidInstance;
-import org.teiid.runtime.client.instance.TeiidJdbcInfo;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.teiid.runtime.client.instance.TCTeiidInstance;
+import org.teiid.runtime.client.instance.TCTeiidJdbcInfo;
 
 /**
  * Test implementation of WorkspaceStatus
@@ -163,12 +163,12 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      * @see org.komodo.shell.api.WorkspaceStatus#setTeiidServerUrl(java.lang.String)
      */
     @Override
-    public ITeiidInstance getTeiidInstance() {
-        ITeiidInstance teiidInstance = getTeiidParent().getTeiidInstance();
+    public TeiidInstance getTeiidInstance() {
+        TeiidInstance teiidInstance = getTeiidParent().getTeiidInstance();
         if (teiidInstance == null) {
-            TeiidJdbcInfo jdbcInfo = new TeiidJdbcInfo();
+            TCTeiidJdbcInfo jdbcInfo = new TCTeiidJdbcInfo();
             jdbcInfo.setHostProvider(getTeiidParent());
-            teiidInstance = new TeiidInstance(getTeiidParent(), jdbcInfo);
+            teiidInstance = new TCTeiidInstance(getTeiidParent(), jdbcInfo);
         }
 
         return teiidInstance;

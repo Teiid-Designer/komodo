@@ -26,22 +26,22 @@ import java.util.Collections;
 import java.util.List;
 
 import org.komodo.spi.Messages;
-import org.komodo.spi.outcome.IOutcome.Level;
+import org.komodo.spi.outcome.Outcome.Level;
 
 /**
  *
  */
 public class OutcomeFactory {
 
-    private static class Outcome implements IOutcome {
+    private static class OutcomeImpl implements Outcome {
 
-    	private List<IOutcome> children;
+    	private List<Outcome> children;
     	
         private String message;
 
         private Exception exception;
 
-        private IOutcome.Level level;
+        private Outcome.Level level;
 
         /**
          * @return the message
@@ -77,14 +77,14 @@ public class OutcomeFactory {
          * @return the level
          */
         @Override
-        public IOutcome.Level getLevel() {
+        public Outcome.Level getLevel() {
             return this.level;
         }
 
         /**
          * @param level the level to set
          */
-        public void setLevel(IOutcome.Level level) {
+        public void setLevel(Outcome.Level level) {
             this.level = level;
         }
 
@@ -100,7 +100,7 @@ public class OutcomeFactory {
 		 * @see org.komodo.spi.outcome.IOutcome#getOutcomes()
 		 */
 		@Override
-		public List<IOutcome> getOutcomes() {
+		public List<Outcome> getOutcomes() {
 			return this.children == null ? Collections.EMPTY_LIST : this.children;
 		}
 
@@ -108,8 +108,8 @@ public class OutcomeFactory {
 		 * @see org.komodo.spi.outcome.IOutcome#addOutcome(org.komodo.spi.outcome.IOutcome)
 		 */
 		@Override
-		public void addOutcome(IOutcome outcome) {
-			if(this.children==null) this.children=new ArrayList<IOutcome>();
+		public void addOutcome(Outcome outcome) {
+			if(this.children==null) this.children=new ArrayList<Outcome>();
 			if(outcome.isMultiOutcome()) {
 				addOutcomes(outcome.getOutcomes());
 			} else {
@@ -129,8 +129,8 @@ public class OutcomeFactory {
 		 * @see org.komodo.spi.outcome.IOutcome#addOutcomes(java.util.List)
 		 */
 		@Override
-		public void addOutcomes(List<IOutcome> outcomes) {
-    		for(IOutcome outcome : outcomes) {
+		public void addOutcomes(List<Outcome> outcomes) {
+    		for(Outcome outcome : outcomes) {
     			addOutcome(outcome);
     		}
 		}
@@ -194,8 +194,8 @@ public class OutcomeFactory {
         return instance;
     }
 
-    public IOutcome createMultiOutcome(String message, List<IOutcome> outcomes) {
-    	Outcome multiOutcome = new Outcome();
+    public Outcome createMultiOutcome(String message, List<Outcome> outcomes) {
+    	OutcomeImpl multiOutcome = new OutcomeImpl();
     	multiOutcome.setMessage(message);
     	multiOutcome.setLevel(Level.OK);
     	multiOutcome.addOutcomes(outcomes);
@@ -205,8 +205,8 @@ public class OutcomeFactory {
     /**
      * @return default ok outcome
      */
-    public IOutcome createOK() {
-        Outcome outcome = new Outcome();
+    public Outcome createOK() {
+        OutcomeImpl outcome = new OutcomeImpl();
         outcome.setMessage(Messages.getString(Messages.OutcomeFactory.OK));
         outcome.setLevel(Level.OK);
         return outcome;
@@ -215,8 +215,8 @@ public class OutcomeFactory {
     /**
      * @return default ok outcome
      */
-    public IOutcome createOK(String msg) {
-        Outcome outcome = new Outcome();
+    public Outcome createOK(String msg) {
+        OutcomeImpl outcome = new OutcomeImpl();
         outcome.setMessage(msg);
         outcome.setLevel(Level.OK);
         return outcome;
@@ -226,8 +226,8 @@ public class OutcomeFactory {
      * @param msg
      * @return error outcome containing message
      */
-    public IOutcome createError(String msg) {
-        Outcome outcome = new Outcome();
+    public Outcome createError(String msg) {
+        OutcomeImpl outcome = new OutcomeImpl();
         outcome.setMessage(msg);
         outcome.setLevel(Level.ERROR);
         return outcome;
@@ -238,8 +238,8 @@ public class OutcomeFactory {
      * @param ex
      * @return error outcome containing message and exception
      */
-    public IOutcome createError(String msg, Exception ex) {
-        Outcome outcome = new Outcome();
+    public Outcome createError(String msg, Exception ex) {
+        OutcomeImpl outcome = new OutcomeImpl();
         outcome.setMessage(msg);
         outcome.setException(ex);
         outcome.setLevel(Level.ERROR);
@@ -250,8 +250,8 @@ public class OutcomeFactory {
      * @param msg
      * @return warning outcome containing message and exception
      */
-    public IOutcome createWarning(String msg) {
-        Outcome outcome = new Outcome();
+    public Outcome createWarning(String msg) {
+        OutcomeImpl outcome = new OutcomeImpl();
         outcome.setMessage(msg);
         outcome.setLevel(Level.WARNING);
         return outcome;
@@ -262,8 +262,8 @@ public class OutcomeFactory {
      * @param ex
      * @return information outcome containing message and exception
      */
-    public IOutcome createInformation(String msg, Exception ex) {
-        Outcome outcome = new Outcome();
+    public Outcome createInformation(String msg, Exception ex) {
+        OutcomeImpl outcome = new OutcomeImpl();
         outcome.setMessage(msg);
         outcome.setException(ex);
         outcome.setLevel(Level.INFO);

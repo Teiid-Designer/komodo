@@ -50,7 +50,7 @@ import java.util.regex.Matcher;
 
 import javax.sql.rowset.serial.SerialArray;
 
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.client.RequestMessage;
 import org.teiid.client.RequestMessage.ResultsMode;
 import org.teiid.client.RequestMessage.StatementType;
@@ -59,7 +59,7 @@ import org.teiid.client.util.ResultsFuture;
 import org.teiid.core.types.ArrayImpl;
 import org.teiid.core.types.BlobImpl;
 import org.teiid.core.types.ClobImpl;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.types.InputStreamFactory;
 import org.teiid.core.types.JDBCSQLTypeInfo;
 import org.teiid.core.types.Streamable;

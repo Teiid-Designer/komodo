@@ -27,15 +27,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.v86.Test86Resolver;
-import org.teiid.query.sql.lang.Query;
+import org.teiid.query.sql.lang.QueryImpl;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test87Resolver extends Test86Resolver {
 
-    protected Test87Resolver(ITeiidVersion teiidVersion) {
+    protected Test87Resolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -48,7 +48,7 @@ public class Test87Resolver extends Test86Resolver {
         List bindings = new ArrayList();
         bindings.add("pm1.g2.e1 as x"); //$NON-NLS-1$
 
-        Query resolvedQuery = (Query)helpResolveWithBindings("SELECT pm1.g1.e1, input.x FROM pm1.g1", metadata, bindings); //$NON-NLS-1$
+        QueryImpl resolvedQuery = (QueryImpl)helpResolveWithBindings("SELECT pm1.g1.e1, input.x FROM pm1.g1", metadata, bindings); //$NON-NLS-1$
 
         helpCheckFrom(resolvedQuery, new String[] {"pm1.g1"}); //$NON-NLS-1$
         assertEquals("SELECT pm1.g1.e1, pm1.g2.e1 AS x FROM pm1.g1", resolvedQuery.toString());

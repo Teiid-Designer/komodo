@@ -36,12 +36,12 @@ import java.util.Set;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.query.sql.lang.SPParameter;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.Column.SearchType;
@@ -51,16 +51,16 @@ import org.teiid.metadata.Procedure;
 import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
-import org.teiid.query.mapping.relational.QueryNode;
-import org.teiid.query.mapping.xml.MappingDocument;
-import org.teiid.query.mapping.xml.MappingElement;
+import org.teiid.query.mapping.relational.TCQueryNode;
+import org.teiid.query.mapping.xml.MappingDocumentImpl;
+import org.teiid.query.mapping.xml.MappingElementImpl;
 import org.teiid.query.metadata.TransformationMetadata;
-import org.teiid.query.resolver.QueryResolver;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.resolver.TCQueryResolver;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.lang.ProcedureContainer;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractTestValidator extends AbstractTest {
@@ -68,7 +68,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestValidator(ITeiidVersion teiidVersion) {
+    public AbstractTestValidator(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -78,70 +78,70 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Schema modelObj = getMetadataFactory().createPhysicalModel("test", metadataStore); //$NON-NLS-1$
         Schema vModelObj2 = getMetadataFactory().createVirtualModel("vTest", metadataStore); //$NON-NLS-1$
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
-        Column elemObj0 = getMetadataFactory().createElement("e0", groupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column elemObj0 = getMetadataFactory().createElement("e0", groupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         elemObj0.setNullType(NullType.No_Nulls);
-        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elemObj1.setSelectable(false);
-        Column elemObj2 = getMetadataFactory().createElement("e2", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj2 = getMetadataFactory().createElement("e2", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elemObj2.setSearchType(SearchType.Like_Only);
-        Column elemObj3 = getMetadataFactory().createElement("e3", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj3 = getMetadataFactory().createElement("e3", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elemObj3.setSearchType(SearchType.All_Except_Like);
 
         Table group2Obj = getMetadataFactory().createPhysicalGroup("group2", modelObj); //$NON-NLS-1$
-        Column elemObj2_0 = getMetadataFactory().createElement("e0", group2Obj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column elemObj2_0 = getMetadataFactory().createElement("e0", group2Obj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
         elemObj2_0.setUpdatable(false);
-        getMetadataFactory().createElement("e1", group2Obj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        Column elemObj2_2 = getMetadataFactory().createElement("e2", group2Obj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e1", group2Obj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj2_2 = getMetadataFactory().createElement("e2", group2Obj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elemObj2_2.setUpdatable(false);
 
         Table group3Obj = getMetadataFactory().createPhysicalGroup("group3", modelObj); //$NON-NLS-1$
         group3Obj.setSupportsUpdate(false);
-        getMetadataFactory().createElement("e0", group3Obj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e1", group3Obj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e2", group3Obj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e0", group3Obj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e1", group3Obj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e2", group3Obj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
 
         // Create virtual group & elements.
-        QueryNode vNode = new QueryNode("SELECT * FROM test.group WHERE e2 = 'x'"); //$NON-NLS-1$ //$NON-NLS-2$
+        TCQueryNode vNode = new TCQueryNode("SELECT * FROM test.group WHERE e2 = 'x'"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vGroup = getMetadataFactory().createVirtualGroup("vGroup", vModelObj2, vNode); //$NON-NLS-1$
         getMetadataFactory().createElements(vGroup, new String[] {"e0", "e1", "e2", "e3"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-                                           new String[] {DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                               DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                           new String[] {DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 
-        QueryNode vNode2 = new QueryNode("SELECT * FROM test.group"); //$NON-NLS-1$ //$NON-NLS-2$
+        TCQueryNode vNode2 = new TCQueryNode("SELECT * FROM test.group"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vGroup2 = getMetadataFactory().createVirtualGroup("vMap", vModelObj2, vNode2); //$NON-NLS-1$
         List<Column> vGroupE2 = getMetadataFactory().createElements(vGroup2, new String[] {"e0", "e1", "e2", "e3"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-                                                                   new String[] {DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-                                                                       DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                                       DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                                       DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+                                                                   new String[] {DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+                                                                       DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                                       DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                                       DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
         vGroupE2.get(0).setNullType(NullType.No_Nulls);
         vGroupE2.get(1).setSelectable(false);
         vGroupE2.get(2).setSearchType(SearchType.Like_Only);
         vGroupE2.get(3).setSearchType(SearchType.All_Except_Like);
 
         // Create virtual documents
-        MappingDocument doc = new MappingDocument(getTeiidParser(), false);
-        MappingElement complexRoot = new MappingElement(getTeiidParser(), "a0"); //$NON-NLS-1$
+        MappingDocumentImpl doc = new MappingDocumentImpl(getTeiidParser(), false);
+        MappingElementImpl complexRoot = new MappingElementImpl(getTeiidParser(), "a0"); //$NON-NLS-1$
         doc.addChildElement(complexRoot);
 
-        MappingElement sourceNode = new MappingElement(getTeiidParser(), "a1"); //$NON-NLS-1$
+        MappingElementImpl sourceNode = new MappingElementImpl(getTeiidParser(), "a1"); //$NON-NLS-1$
         complexRoot.addChildElement(sourceNode);
         sourceNode.setSource("test.group"); //$NON-NLS-1$
-        sourceNode.addChildElement(new MappingElement(getTeiidParser(), "a2", "test.group.e1")); //$NON-NLS-1$ //$NON-NLS-2$
-        sourceNode.addChildElement(new MappingElement(getTeiidParser(), "b2", "test.group.e2")); //$NON-NLS-1$ //$NON-NLS-2$
-        sourceNode.addChildElement(new MappingElement(getTeiidParser(), "c2", "test.group.e3")); //$NON-NLS-1$ //$NON-NLS-2$
+        sourceNode.addChildElement(new MappingElementImpl(getTeiidParser(), "a2", "test.group.e1")); //$NON-NLS-1$ //$NON-NLS-2$
+        sourceNode.addChildElement(new MappingElementImpl(getTeiidParser(), "b2", "test.group.e2")); //$NON-NLS-1$ //$NON-NLS-2$
+        sourceNode.addChildElement(new MappingElementImpl(getTeiidParser(), "c2", "test.group.e3")); //$NON-NLS-1$ //$NON-NLS-2$
 
         Schema docModel = getMetadataFactory().createVirtualModel("vm1", metadataStore); //$NON-NLS-1$
         Table doc1 = getMetadataFactory().createXmlDocument("doc1", docModel, doc); //$NON-NLS-1$
 
 		if (getTeiidVersion().isLessThan(Version.TEIID_8_0.get())) {
 		    getMetadataFactory().createElements(doc1, new String[] { "a0", "a0.a1", "a0.a1.a2", "a0.a1.b2", "a0.a1.c2" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		                                        new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		                                                               DataTypeManagerService.DefaultDataTypes.STRING.getId() });
+		                                        new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		                                                               DefaultDataTypeManager.DefaultDataTypes.STRING.getId() });
 		}
 
         return getMetadataFactory().createTransformationMetadata(metadataStore, "example");
@@ -153,10 +153,10 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Schema modelObj = getMetadataFactory().createPhysicalModel("test", metadataStore); //$NON-NLS-1$
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
 
-        Column elemObj0 = getMetadataFactory().createElement("e0", groupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        Column elemObj2 = getMetadataFactory().createElement("e2", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e3", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj0 = getMetadataFactory().createElement("e0", groupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column elemObj2 = getMetadataFactory().createElement("e2", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e3", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
 
         elemObj0.setNullType(NullType.No_Nulls);
 
@@ -180,9 +180,9 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
 
         getMetadataFactory().createElements(groupObj, new String[] {"e0", "e1", "e2", "e3", "e4", "e5" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-        }, new String[] {DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-            DataTypeManagerService.DefaultDataTypes.OBJECT.getId(), DataTypeManagerService.DefaultDataTypes.BLOB.getId(),
-            DataTypeManagerService.DefaultDataTypes.CLOB.getId(), DataTypeManagerService.DefaultDataTypes.XML.getId(),});
+        }, new String[] {DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId(), DefaultDataTypeManager.DefaultDataTypes.BLOB.getId(),
+            DefaultDataTypeManager.DefaultDataTypes.CLOB.getId(), DefaultDataTypeManager.DefaultDataTypes.XML.getId(),});
 
         return getMetadataFactory().createTransformationMetadata(metadataStore, "example2");
     }
@@ -193,8 +193,8 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Schema modelObj = getMetadataFactory().createPhysicalModel("test", metadataStore); //$NON-NLS-1$
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
 
-        getMetadataFactory().createElement("e0", groupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e0", groupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column elemObj1 = getMetadataFactory().createElement("e1", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
 
         elemObj1.setNullType(NullType.No_Nulls);
         elemObj1.setDefaultValue(Boolean.FALSE.toString());
@@ -209,25 +209,25 @@ public abstract class AbstractTestValidator extends AbstractTest {
         // Create metadata objects 
         Schema modelObj = getMetadataFactory().createPhysicalModel("test", metadataStore); //$NON-NLS-1$
         Table groupObj = getMetadataFactory().createPhysicalGroup("group", modelObj); //$NON-NLS-1$
-        getMetadataFactory().createElement("e0", groupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e1", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e2", groupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e0", groupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e1", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e2", groupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         Schema vModelObj = getMetadataFactory().createVirtualModel("vTest", metadataStore); //$NON-NLS-1$
-        QueryNode vNode = new QueryNode("SELECT * FROM test.group"); //$NON-NLS-1$ //$NON-NLS-2$ 
+        TCQueryNode vNode = new TCQueryNode("SELECT * FROM test.group"); //$NON-NLS-1$ //$NON-NLS-2$ 
         Table vGroupObj = getMetadataFactory().createVirtualGroup("vGroup", vModelObj, vNode); //$NON-NLS-1$
-        Column vElemObj0 = getMetadataFactory().createElement("e0", vGroupObj, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        Column vElemObj1 = getMetadataFactory().createElement("e1", vGroupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e2", vGroupObj, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vElemObj0 = getMetadataFactory().createElement("e0", vGroupObj, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column vElemObj1 = getMetadataFactory().createElement("e1", vGroupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e2", vGroupObj, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         List<Column> elements = new ArrayList<Column>(2);
         elements.add(vElemObj0);
         elements.add(vElemObj1);
         getMetadataFactory().createAccessPattern("ap1", vGroupObj, elements); //e1 //$NON-NLS-1$
 
-        QueryNode vNode2 = new QueryNode("SELECT * FROM vTest.vGroup"); //$NON-NLS-1$ //$NON-NLS-2$ 
+        TCQueryNode vNode2 = new TCQueryNode("SELECT * FROM vTest.vGroup"); //$NON-NLS-1$ //$NON-NLS-2$ 
         Table vGroupObj2 = getMetadataFactory().createVirtualGroup("vGroup2", vModelObj, vNode2); //$NON-NLS-1$
-        Column vElemObj20 = getMetadataFactory().createElement("e0", vGroupObj2, DataTypeManagerService.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
-        Column vElemObj21 = getMetadataFactory().createElement("e1", vGroupObj2, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        getMetadataFactory().createElement("e2", vGroupObj2, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        Column vElemObj20 = getMetadataFactory().createElement("e0", vGroupObj2, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()); //$NON-NLS-1$
+        Column vElemObj21 = getMetadataFactory().createElement("e1", vGroupObj2, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        getMetadataFactory().createElement("e2", vGroupObj2, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         elements = new ArrayList<Column>(2);
         elements.add(vElemObj20);
         elements.add(vElemObj21);
@@ -238,12 +238,12 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     // ################################## TEST HELPERS ################################
 
-    private Command helpResolve(String sql, IQueryMetadataInterface metadata) {
-        Command command = null;
+    private CommandImpl helpResolve(String sql, QueryMetadataInterface metadata) {
+        CommandImpl command = null;
 
         try {
             command = getQueryParser().parseCommand(sql);
-            QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
             queryResolver.resolveCommand(command, metadata);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -252,23 +252,23 @@ public abstract class AbstractTestValidator extends AbstractTest {
         return command;
     }
 
-    private Command helpResolve(String sql, GroupSymbol container, int type, IQueryMetadataInterface metadata)
+    private CommandImpl helpResolve(String sql, GroupSymbolImpl container, int type, QueryMetadataInterface metadata)
         throws Exception {
-        Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        CommandImpl command = getQueryParser().parseCommand(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, container, type, metadata, false);
         return command;
     }
 
-    public ValidatorReport helpValidate(String sql, String[] expectedStringArray, IQueryMetadataInterface metadata) {
-        Command command = helpResolve(sql, metadata);
+    public ValidatorReport helpValidate(String sql, String[] expectedStringArray, QueryMetadataInterface metadata) {
+        CommandImpl command = helpResolve(sql, metadata);
 
         return helpRunValidator(command, expectedStringArray, metadata);
     }
 
-    public ValidatorReport helpRunValidator(Command command, String[] expectedStringArray, IQueryMetadataInterface metadata) {
+    public ValidatorReport helpRunValidator(CommandImpl command, String[] expectedStringArray, QueryMetadataInterface metadata) {
         try {
-            ValidatorReport report = new Validator().validate(command, metadata);
+            ValidatorReport report = new DefaultValidator().validate(command, metadata);
 
             examineReport(command, expectedStringArray, report);
             return report;
@@ -279,14 +279,14 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     private void examineReport(Object command, String[] expectedStringArray, ValidatorReport report) {
         // Get invalid objects from report
-        Collection<LanguageObject> actualObjs = new ArrayList<LanguageObject>();
+        Collection<BaseLanguageObject> actualObjs = new ArrayList<BaseLanguageObject>();
         report.collectInvalidObjects(actualObjs);
 
         // Compare expected and actual objects
         Set<String> expectedStrings = new HashSet<String>(Arrays.asList(expectedStringArray));
         Set<String> actualStrings = new HashSet<String>();
-        for (LanguageObject obj : actualObjs) {
-            actualStrings.add(SQLStringVisitor.getSQLString(obj));
+        for (BaseLanguageObject obj : actualObjs) {
+            actualStrings.add(SQLStringVisitorImpl.getSQLString(obj));
         }
 
         if (expectedStrings.size() == 0 && actualStrings.size() > 0) {
@@ -300,7 +300,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     protected void helpValidateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType) {
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
 
         try {
             validateProcedure(userUpdateStr, metadata);
@@ -309,14 +309,14 @@ public abstract class AbstractTestValidator extends AbstractTest {
         }
     }
 
-    protected void validateProcedure(String userUpdateStr, IQueryMetadataInterface metadata)
+    protected void validateProcedure(String userUpdateStr, QueryMetadataInterface metadata)
         throws Exception {
         ProcedureContainer command = (ProcedureContainer)helpResolve(userUpdateStr, metadata);
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
-        Command proc = queryResolver.expandCommand(command, metadata);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
+        CommandImpl proc = queryResolver.expandCommand(command, metadata);
 
-        Validator validator = new Validator();
+        DefaultValidator validator = new DefaultValidator();
         ValidatorReport report = validator.validate(proc, metadata);
         if (report.hasItems()) {
             throw new Exception(report.getFailureMessage());
@@ -330,7 +330,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     protected void helpFailProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType) {
 
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
 
         try {
             validateProcedure(userUpdateStr, metadata);
@@ -580,11 +580,11 @@ public abstract class AbstractTestValidator extends AbstractTest {
     // non-null, no-default elements not left
     @Test
     public void testInsert4() throws Exception {
-        IQueryMetadataInterface metadata = exampleMetadata1();
+        QueryMetadataInterface metadata = exampleMetadata1();
 
-        Command command = getQueryParser().parseCommand("INSERT INTO test.group (e0) VALUES (2)"); //$NON-NLS-1$
+        CommandImpl command = getQueryParser().parseCommand("INSERT INTO test.group (e0) VALUES (2)"); //$NON-NLS-1$
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {}, metadata);
@@ -593,10 +593,10 @@ public abstract class AbstractTestValidator extends AbstractTest {
     // non-null, no-default elements left
     @Test
     public void testInsert5() throws Exception {
-        IQueryMetadataInterface metadata = exampleMetadata1();
+        QueryMetadataInterface metadata = exampleMetadata1();
 
-        Command command = getQueryParser().parseCommand("INSERT INTO test.group (e1, e2) VALUES ('x', 'y')"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        CommandImpl command = getQueryParser().parseCommand("INSERT INTO test.group (e1, e2) VALUES ('x', 'y')"); //$NON-NLS-1$
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {"test.\"group\".e0"}, metadata); //$NON-NLS-1$
@@ -604,10 +604,10 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     @Test
     public void testValidateInsertElements1() throws Exception {
-        IQueryMetadataInterface metadata = exampleMetadata();
+        QueryMetadataInterface metadata = exampleMetadata();
 
-        Command command = getQueryParser().parseCommand("INSERT INTO test.group2 (e0, e1, e2) VALUES (5, 'x', 'y')"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        CommandImpl command = getQueryParser().parseCommand("INSERT INTO test.group2 (e0, e1, e2) VALUES (5, 'x', 'y')"); //$NON-NLS-1$
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {"e2", "e0"}, metadata); //$NON-NLS-1$ //$NON-NLS-2$
@@ -615,11 +615,11 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     @Test
     public void testValidateInsertElements2() throws Exception {
-        IQueryMetadataInterface metadata = exampleMetadata();
+        QueryMetadataInterface metadata = exampleMetadata();
 
-        Command command = getQueryParser().parseCommand("INSERT INTO test.group2 (e1) VALUES ('y')"); //$NON-NLS-1$
+        CommandImpl command = getQueryParser().parseCommand("INSERT INTO test.group2 (e1) VALUES ('y')"); //$NON-NLS-1$
 
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {}, metadata);
@@ -642,10 +642,10 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     @Test
     public void testValidateUpdateElements1() throws Exception {
-        IQueryMetadataInterface metadata = exampleMetadata();
+        QueryMetadataInterface metadata = exampleMetadata();
 
-        Command command = getQueryParser().parseCommand("UPDATE test.group2 SET e0 = 5, e1 = 'x', e2 = 'y'"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        CommandImpl command = getQueryParser().parseCommand("UPDATE test.group2 SET e0 = 5, e1 = 'x', e2 = 'y'"); //$NON-NLS-1$
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {"e2", "e0"}, metadata); //$NON-NLS-1$ //$NON-NLS-2$
@@ -653,10 +653,10 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     @Test
     public void testValidateUpdateElements2() throws Exception {
-        IQueryMetadataInterface metadata = exampleMetadata();
+        QueryMetadataInterface metadata = exampleMetadata();
 
-        Command command = getQueryParser().parseCommand("UPDATE test.group2 SET e1 = 'x'"); //$NON-NLS-1$
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        CommandImpl command = getQueryParser().parseCommand("UPDATE test.group2 SET e1 = 'x'"); //$NON-NLS-1$
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         helpRunValidator(command, new String[] {}, metadata);
@@ -1111,24 +1111,24 @@ public abstract class AbstractTestValidator extends AbstractTest {
     @Test
     public void testValidateAssignmentWithFunctionOnParameter_InServer() throws Exception {
         String sql = "EXEC pm1.vsp36(5)"; //$NON-NLS-1$
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
-        Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        CommandImpl command = getQueryParser().parseCommand(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         // Validate
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         assertEquals(0, report.getItems().size());
     }
 
     @Test
     public void testDefect9917() throws Exception {
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
         String sql = "SELECT lookup('pm1.g1', 'e1a', 'e2', e2) AS x, lookup('pm1.g1', 'e4', 'e3', e3) AS y FROM pm1.g1"; //$NON-NLS-1$
-        Command command = getQueryParser().parseCommand(sql);
+        CommandImpl command = getQueryParser().parseCommand(sql);
         try {
-            QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
             fail("Did not get exception"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -1138,7 +1138,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         sql = "SELECT lookup('pm1.g1a', 'e1', 'e2', e2) AS x, lookup('pm1.g1', 'e4', 'e3', e3) AS y FROM pm1.g1"; //$NON-NLS-1$
         command = getQueryParser().parseCommand(sql);
         try {
-            QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
             fail("Did not get exception"); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -1148,44 +1148,44 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     @Test
     public void testLookupKeyElementComparable() throws Exception {
-        IQueryMetadataInterface metadata = exampleMetadata2();
+        QueryMetadataInterface metadata = exampleMetadata2();
         String sql = "SELECT lookup('test.group', 'e2', 'e3', convert(e2, blob)) AS x FROM test.group"; //$NON-NLS-1$
-        Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        CommandImpl command = getQueryParser().parseCommand(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         assertEquals("Expressions of type OBJECT, CLOB, BLOB, or XML cannot be used as LOOKUP key columns: test.\"group\".e3.", report.toString()); //$NON-NLS-1$
     }
 
     @Test
     public void testDefect12107() throws Exception {
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
         String sql = "SELECT SUM(DISTINCT lookup('pm1.g1', 'e2', 'e2', e2)) FROM pm1.g1"; //$NON-NLS-1$
-        Command command = helpResolve(sql, metadata);
+        CommandImpl command = helpResolve(sql, metadata);
         sql = "SELECT SUM(DISTINCT lookup('pm1.g1', 'e3', 'e2', e2)) FROM pm1.g1"; //$NON-NLS-1$
         command = helpResolve(sql, metadata);
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         assertEquals("The aggregate function SUM cannot be used with non-numeric expressions: SUM(DISTINCT lookup('pm1.g1', 'e3', 'e2', e2))", report.toString()); //$NON-NLS-1$
     }
 
-    private ValidatorReport helpValidateInModeler(String procName, String procSql, IQueryMetadataInterface metadata)
+    private ValidatorReport helpValidateInModeler(String procName, String procSql, QueryMetadataInterface metadata)
         throws Exception {
-        Command command = getQueryParser().parseCommand(procSql);
+        CommandImpl command = getQueryParser().parseCommand(procSql);
 
-        GroupSymbol group = getFactory().newGroupSymbol(procName);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
-        queryResolver.resolveCommand(command, group, ICommand.TYPE_STORED_PROCEDURE, metadata, true);
+        GroupSymbolImpl group = getFactory().newGroupSymbol(procName);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
+        queryResolver.resolveCommand(command, group, Command.TYPE_STORED_PROCEDURE, metadata, true);
 
         // Validate
-        return new Validator().validate(command, metadata);
+        return new DefaultValidator().validate(command, metadata);
     }
 
     @Test
     public void testValidateDynamicCommandWithNonTempGroup_InModeler() throws Exception {
         // SQL is same as pm1.vsp36() in example1 
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN execute string 'select ' || '1' as X integer into pm1.g3; END"; //$NON-NLS-1$        
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp36", sql, metadata); //$NON-NLS-1$
@@ -1196,7 +1196,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     @Test
     public void testDynamicDupUsing() throws Exception {
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN execute string 'select ' || '1' as X integer into #temp using id=1, id=2; END"; //$NON-NLS-1$        
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp36", sql, metadata); //$NON-NLS-1$
@@ -1208,7 +1208,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     public void testValidateAssignmentWithFunctionOnParameter_InModeler() throws Exception {
         // SQL is same as pm1.vsp36() in example1 
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN DECLARE integer x; x = pm1.vsp36.param1 * 2; SELECT x; END"; //$NON-NLS-1$        
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp36", sql, metadata); //$NON-NLS-1$
@@ -1221,7 +1221,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
                      "WHERE BQT1.SmallA.DateValue = BQT2.SmallB.DateValue AND BQT1.SmallA.ObjectValue = BQT2.SmallB.ObjectValue "
                      + //$NON-NLS-1$
                      "AND BQT1.SmallA.IntKey < 30 AND BQT2.SmallB.IntKey < 30 ORDER BY BQT1.SmallA.DateValue"; //$NON-NLS-1$
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleBQTCached();
+        QueryMetadataInterface metadata = getMetadataFactory().exampleBQTCached();
 
         // Validate
         helpValidate(sql, new String[] {"BQT1.SmallA.ObjectValue = BQT2.SmallB.ObjectValue"}, metadata); //$NON-NLS-1$ 
@@ -1231,7 +1231,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     public void testDefect16772() throws Exception {
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN IF (pm1.vsp42.param1 > 0) SELECT 1 AS x; ELSE SELECT 0 AS x; END"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp42", sql, metadata); //$NON-NLS-1$ 
@@ -1242,7 +1242,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     public void testDupLabel() throws Exception {
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN IF (pm1.vsp42.param1 > 0) x : begin SELECT 1 AS x; x: begin atomic select 2 as x; end end END"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp42", sql, metadata); //$NON-NLS-1$ 
@@ -1253,7 +1253,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     public void testInvalidContinue() throws Exception {
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN continue; END"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp42", sql, metadata); //$NON-NLS-1$ 
@@ -1264,7 +1264,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     public void testInvalidLabel() throws Exception {
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN IF (pm1.vsp42.param1 > 0) x : begin continue y; end END"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp42", sql, metadata); //$NON-NLS-1$ 
@@ -1275,7 +1275,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
     public void testNonQueryAgg() throws Exception {
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN IF (max(pm1.vsp42.param1) > 0) SELECT 1 AS x; ELSE SELECT 0 AS x; END"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp42", sql, metadata); //$NON-NLS-1$ 
@@ -1285,14 +1285,14 @@ public abstract class AbstractTestValidator extends AbstractTest {
     @Test
     public void testDefect14886() throws Exception {
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN END"; //$NON-NLS-1$        
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
-        Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        CommandImpl command = getQueryParser().parseCommand(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         // Validate
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         // Validate
         assertEquals(0, report.getItems().size());
     }
@@ -1304,12 +1304,12 @@ public abstract class AbstractTestValidator extends AbstractTest {
         Column c = metadata.getElementID("pm1.g1.e1"); //$NON-NLS-1$
         c.setUpdatable(false);
 
-        Command command = getQueryParser().parseCommand(sql);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        CommandImpl command = getQueryParser().parseCommand(sql);
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(command, metadata);
 
         // Validate
-        ValidatorReport report = new Validator().validate(command, metadata);
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         // Validate
         assertEquals(0, report.getItems().size());
     }
@@ -1335,10 +1335,10 @@ public abstract class AbstractTestValidator extends AbstractTest {
     @Test
     public void testCase4237() throws Exception {
 
-        IQueryMetadataInterface metadata = helpCreateCase4237VirtualProcedureMetadata();
+        QueryMetadataInterface metadata = helpCreateCase4237VirtualProcedureMetadata();
 
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN EXEC pm1.sp(vm1.sp.in1); END"; //$NON-NLS-1$ 
-        Command command = helpResolve(sql, getFactory().newGroupSymbol("vm1.sp"), ICommand.TYPE_STORED_PROCEDURE, metadata);
+        CommandImpl command = helpResolve(sql, getFactory().newGroupSymbol("vm1.sp"), Command.TYPE_STORED_PROCEDURE, metadata);
         helpRunValidator(command, new String[0], metadata);
     }
 
@@ -1349,10 +1349,10 @@ public abstract class AbstractTestValidator extends AbstractTest {
     @Test
     public void testCase4237InlineView() throws Exception {
 
-        IQueryMetadataInterface metadata = helpCreateCase4237VirtualProcedureMetadata();
+        QueryMetadataInterface metadata = helpCreateCase4237VirtualProcedureMetadata();
 
         String sql = "CREATE VIRTUAL PROCEDURE BEGIN SELECT * FROM (EXEC pm1.sp(vm1.sp.in1)) AS FOO; END"; //$NON-NLS-1$ 
-        Command command = helpResolve(sql, getFactory().newGroupSymbol("vm1.sp"), ICommand.TYPE_STORED_PROCEDURE, metadata);
+        CommandImpl command = helpResolve(sql, getFactory().newGroupSymbol("vm1.sp"), Command.TYPE_STORED_PROCEDURE, metadata);
         helpRunValidator(command, new String[0], metadata);
     }
 
@@ -1364,15 +1364,15 @@ public abstract class AbstractTestValidator extends AbstractTest {
     private TransformationMetadata helpCreateCase4237VirtualProcedureMetadata() {
         MetadataStore metadataStore = new MetadataStore();
         Schema physicalModel = getMetadataFactory().createPhysicalModel("pm1", metadataStore); //$NON-NLS-1$
-        ColumnSet<Procedure> resultSet = getMetadataFactory().createResultSet("pm1.rs", new String[] {"e1", "e2"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter inParam = getMetadataFactory().createParameter("in", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        ColumnSet<Procedure> resultSet = getMetadataFactory().createResultSet("pm1.rs", new String[] {"e1", "e2"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter inParam = getMetadataFactory().createParameter("in", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
         Procedure storedProcedure = getMetadataFactory().createStoredProcedure("sp", physicalModel, Arrays.asList(inParam)); //$NON-NLS-1$ //$NON-NLS-2$
         storedProcedure.setResultSet(resultSet);
 
         Schema virtualModel = getMetadataFactory().createVirtualModel("vm1", metadataStore); //$NON-NLS-1$
-        ColumnSet<Procedure> virtualResultSet = getMetadataFactory().createResultSet("vm1.rs", new String[] {"e1", "e2"}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), DataTypeManagerService.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        ProcedureParameter virtualInParam = getMetadataFactory().createParameter("in1", ISPParameter.ParameterInfo.IN, DataTypeManagerService.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
-        QueryNode queryNode = new QueryNode("CREATE VIRTUAL PROCEDURE BEGIN EXEC pm1.sp(vm1.sp.in1); END"); //$NON-NLS-1$ //$NON-NLS-2$
+        ColumnSet<Procedure> virtualResultSet = getMetadataFactory().createResultSet("vm1.rs", new String[] {"e1", "e2"}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ProcedureParameter virtualInParam = getMetadataFactory().createParameter("in1", SPParameter.ParameterInfo.IN, DefaultDataTypeManager.DefaultDataTypes.STRING.getId()); //$NON-NLS-1$
+        TCQueryNode queryNode = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN EXEC pm1.sp(vm1.sp.in1); END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure virtualStoredProcedure = getMetadataFactory().createVirtualProcedure("sp", virtualModel, Arrays.asList(virtualInParam), queryNode); //$NON-NLS-1$
         virtualStoredProcedure.setResultSet(virtualResultSet);
 
@@ -1386,15 +1386,15 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     @Test
     public void testCreateWithNonSortablePrimaryKey() {
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
-        Command command = helpResolve("create local temporary table x (column1 string, column2 clob, primary key (column2))", metadata); //$NON-NLS-1$
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        CommandImpl command = helpResolve("create local temporary table x (column1 string, column2 clob, primary key (column2))", metadata); //$NON-NLS-1$
         helpRunValidator(command, new String[] {"column2"}, getMetadataFactory().example1Cached());
     }
 
     @Test
     public void testDropNonTemporary() {
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
-        Command command = helpResolve("drop table pm1.g1", metadata); //$NON-NLS-1$
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        CommandImpl command = helpResolve("drop table pm1.g1", metadata); //$NON-NLS-1$
         helpRunValidator(command, new String[] {command.toString()}, getMetadataFactory().example1Cached());
     }
 
@@ -1410,9 +1410,9 @@ public abstract class AbstractTestValidator extends AbstractTest {
 
     @Test
     public void testInsertIntoVirtualWithQuery() throws Exception {
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
-        Command command = helpResolve("insert into vm1.g1 select 1, 2, true, 3", metadata); //$NON-NLS-1$
-        ValidatorReport report = new Validator().validate(command, metadata);
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        CommandImpl command = helpResolve("insert into vm1.g1 select 1, 2, true, 3", metadata); //$NON-NLS-1$
+        ValidatorReport report = new DefaultValidator().validate(command, metadata);
         assertTrue(report.getItems().isEmpty());
     }
 
@@ -1425,7 +1425,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         .append("select cast(column1 as integer) from x;\n") //$NON-NLS-1$
         .append("END\n"); //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp36", procedure.toString(), metadata); //$NON-NLS-1$
@@ -1440,9 +1440,9 @@ public abstract class AbstractTestValidator extends AbstractTest {
         procedure += "select * from variables;\n"; //$NON-NLS-1$
         procedure += "END\n"; //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
-        Command command = helpResolve(procedure, metadata);
+        CommandImpl command = helpResolve(procedure, metadata);
         helpRunValidator(command, new String[] {"variables"}, metadata); //$NON-NLS-1$
     }
 
@@ -1671,7 +1671,7 @@ public abstract class AbstractTestValidator extends AbstractTest {
         .append("loop on (SELECT e1, e2 INTO #x FROM pm1.g1 WHERE e2 = '3') as x\n") //$NON-NLS-1$
         .append("BEGIN\nSELECT 1;\nEND\nSELECT 1\n;END\n"); //$NON-NLS-1$
 
-        IQueryMetadataInterface metadata = getMetadataFactory().example1Cached();
+        QueryMetadataInterface metadata = getMetadataFactory().example1Cached();
 
         // Validate
         ValidatorReport report = helpValidateInModeler("pm1.vsp36", procedure.toString(), metadata); //$NON-NLS-1$

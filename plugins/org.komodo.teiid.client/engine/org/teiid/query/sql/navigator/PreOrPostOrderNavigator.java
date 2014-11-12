@@ -26,100 +26,100 @@ import java.util.Collection;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.sql.lang.AlterProcedure;
-import org.teiid.query.sql.lang.AlterTrigger;
-import org.teiid.query.sql.lang.AlterView;
-import org.teiid.query.sql.lang.ArrayTable;
-import org.teiid.query.sql.lang.BetweenCriteria;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.CompoundCriteria;
-import org.teiid.query.sql.lang.Create;
-import org.teiid.query.sql.lang.CriteriaSelector;
-import org.teiid.query.sql.lang.Delete;
-import org.teiid.query.sql.lang.Drop;
-import org.teiid.query.sql.lang.DynamicCommand;
-import org.teiid.query.sql.lang.ExistsCriteria;
-import org.teiid.query.sql.lang.ExpressionCriteria;
-import org.teiid.query.sql.lang.From;
-import org.teiid.query.sql.lang.GroupBy;
-import org.teiid.query.sql.lang.HasCriteria;
-import org.teiid.query.sql.lang.Insert;
-import org.teiid.query.sql.lang.Into;
-import org.teiid.query.sql.lang.IsNullCriteria;
-import org.teiid.query.sql.lang.JoinPredicate;
-import org.teiid.query.sql.lang.JoinType;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.Limit;
-import org.teiid.query.sql.lang.MatchCriteria;
-import org.teiid.query.sql.lang.NotCriteria;
-import org.teiid.query.sql.lang.ObjectColumn;
-import org.teiid.query.sql.lang.ObjectTable;
-import org.teiid.query.sql.lang.Option;
-import org.teiid.query.sql.lang.OrderBy;
-import org.teiid.query.sql.lang.OrderByItem;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.lang.SetClause;
-import org.teiid.query.sql.lang.SetClauseList;
-import org.teiid.query.sql.lang.SetCriteria;
-import org.teiid.query.sql.lang.SetQuery;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubqueryFromClause;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
-import org.teiid.query.sql.lang.TextTable;
-import org.teiid.query.sql.lang.TranslateCriteria;
-import org.teiid.query.sql.lang.UnaryFromClause;
-import org.teiid.query.sql.lang.Update;
-import org.teiid.query.sql.lang.WithQueryCommand;
-import org.teiid.query.sql.lang.XMLColumn;
-import org.teiid.query.sql.lang.XMLTable;
-import org.teiid.query.sql.proc.AssignmentStatement;
-import org.teiid.query.sql.proc.Block;
-import org.teiid.query.sql.proc.BranchingStatement;
-import org.teiid.query.sql.proc.CommandStatement;
-import org.teiid.query.sql.proc.CreateProcedureCommand;
-import org.teiid.query.sql.proc.CreateUpdateProcedureCommand;
-import org.teiid.query.sql.proc.DeclareStatement;
-import org.teiid.query.sql.proc.ExceptionExpression;
-import org.teiid.query.sql.proc.IfStatement;
-import org.teiid.query.sql.proc.LoopStatement;
-import org.teiid.query.sql.proc.RaiseErrorStatement;
-import org.teiid.query.sql.proc.RaiseStatement;
-import org.teiid.query.sql.proc.ReturnStatement;
-import org.teiid.query.sql.proc.TriggerAction;
-import org.teiid.query.sql.proc.WhileStatement;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.AliasSymbol;
-import org.teiid.query.sql.symbol.Array;
-import org.teiid.query.sql.symbol.CaseExpression;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.DerivedColumn;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.ExpressionSymbol;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.JSONObject;
-import org.teiid.query.sql.symbol.MultipleElementSymbol;
-import org.teiid.query.sql.symbol.QueryString;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.ScalarSubquery;
-import org.teiid.query.sql.symbol.SearchedCaseExpression;
-import org.teiid.query.sql.symbol.TextLine;
-import org.teiid.query.sql.symbol.WindowFunction;
-import org.teiid.query.sql.symbol.WindowSpecification;
-import org.teiid.query.sql.symbol.XMLAttributes;
-import org.teiid.query.sql.symbol.XMLElement;
-import org.teiid.query.sql.symbol.XMLForest;
-import org.teiid.query.sql.symbol.XMLNamespaces;
-import org.teiid.query.sql.symbol.XMLParse;
-import org.teiid.query.sql.symbol.XMLQuery;
-import org.teiid.query.sql.symbol.XMLSerialize;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
+import org.teiid.query.sql.lang.AlterProcedureImpl;
+import org.teiid.query.sql.lang.AlterTriggerImpl;
+import org.teiid.query.sql.lang.AlterViewImpl;
+import org.teiid.query.sql.lang.ArrayTableImpl;
+import org.teiid.query.sql.lang.BetweenCriteriaImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CompoundCriteriaImpl;
+import org.teiid.query.sql.lang.CreateImpl;
+import org.teiid.query.sql.lang.CriteriaSelectorImpl;
+import org.teiid.query.sql.lang.DeleteImpl;
+import org.teiid.query.sql.lang.DropImpl;
+import org.teiid.query.sql.lang.DynamicCommandImpl;
+import org.teiid.query.sql.lang.ExistsCriteriaImpl;
+import org.teiid.query.sql.lang.ExpressionCriteriaImpl;
+import org.teiid.query.sql.lang.FromImpl;
+import org.teiid.query.sql.lang.GroupByImpl;
+import org.teiid.query.sql.lang.HasCriteriaImpl;
+import org.teiid.query.sql.lang.InsertImpl;
+import org.teiid.query.sql.lang.IntoImpl;
+import org.teiid.query.sql.lang.IsNullCriteriaImpl;
+import org.teiid.query.sql.lang.JoinPredicateImpl;
+import org.teiid.query.sql.lang.JoinTypeImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.LimitImpl;
+import org.teiid.query.sql.lang.MatchCriteriaImpl;
+import org.teiid.query.sql.lang.NotCriteriaImpl;
+import org.teiid.query.sql.lang.ObjectColumnImpl;
+import org.teiid.query.sql.lang.ObjectTableImpl;
+import org.teiid.query.sql.lang.OptionImpl;
+import org.teiid.query.sql.lang.OrderByImpl;
+import org.teiid.query.sql.lang.OrderByItemImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.lang.SetClauseImpl;
+import org.teiid.query.sql.lang.SetClauseListImpl;
+import org.teiid.query.sql.lang.SetCriteriaImpl;
+import org.teiid.query.sql.lang.SetQueryImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.SubqueryFromClauseImpl;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
+import org.teiid.query.sql.lang.TextTableImpl;
+import org.teiid.query.sql.lang.TranslateCriteriaImpl;
+import org.teiid.query.sql.lang.UnaryFromClauseImpl;
+import org.teiid.query.sql.lang.UpdateImpl;
+import org.teiid.query.sql.lang.WithQueryCommandImpl;
+import org.teiid.query.sql.lang.XMLColumnImpl;
+import org.teiid.query.sql.lang.XMLTableImpl;
+import org.teiid.query.sql.proc.AssignmentStatementImpl;
+import org.teiid.query.sql.proc.BlockImpl;
+import org.teiid.query.sql.proc.BranchingStatementImpl;
+import org.teiid.query.sql.proc.CommandStatementImpl;
+import org.teiid.query.sql.proc.CreateProcedureCommandImpl;
+import org.teiid.query.sql.proc.CreateUpdateProcedureCommandImpl;
+import org.teiid.query.sql.proc.DeclareStatementImpl;
+import org.teiid.query.sql.proc.ExceptionExpressionImpl;
+import org.teiid.query.sql.proc.IfStatementImpl;
+import org.teiid.query.sql.proc.LoopStatementImpl;
+import org.teiid.query.sql.proc.RaiseErrorStatementImpl;
+import org.teiid.query.sql.proc.RaiseStatementImpl;
+import org.teiid.query.sql.proc.ReturnStatementImpl;
+import org.teiid.query.sql.proc.TriggerActionImpl;
+import org.teiid.query.sql.proc.WhileStatementImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.AliasSymbolImpl;
+import org.teiid.query.sql.symbol.ArraySymbolImpl;
+import org.teiid.query.sql.symbol.CaseExpressionImpl;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.DerivedColumnImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.ExpressionSymbolImpl;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.JSONObjectImpl;
+import org.teiid.query.sql.symbol.MultipleElementSymbolImpl;
+import org.teiid.query.sql.symbol.QueryStringImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
+import org.teiid.query.sql.symbol.SearchedCaseExpressionImpl;
+import org.teiid.query.sql.symbol.TextLineImpl;
+import org.teiid.query.sql.symbol.BaseWindowFunction;
+import org.teiid.query.sql.symbol.WindowSpecificationImpl;
+import org.teiid.query.sql.symbol.XMLAttributesImpl;
+import org.teiid.query.sql.symbol.XMLElementImpl;
+import org.teiid.query.sql.symbol.XMLForestImpl;
+import org.teiid.query.sql.symbol.XMLNamespacesImpl;
+import org.teiid.query.sql.symbol.XMLParseImpl;
+import org.teiid.query.sql.symbol.XMLQueryImpl;
+import org.teiid.query.sql.symbol.XMLSerializeImpl;
 
 /** 
  *
@@ -144,32 +144,32 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
      * @param order
      * @param deep
      */
-    public PreOrPostOrderNavigator(LanguageVisitor visitor, boolean order, boolean deep) {
+    public PreOrPostOrderNavigator(TCLanguageVisitorImpl visitor, boolean order, boolean deep) {
         super(visitor);
         this.order = order;
         this.deep = deep;
     }
 
-    protected void preVisitVisitor(LanguageObject obj) {
+    protected void preVisitVisitor(BaseLanguageObject obj) {
         if (order == PRE_ORDER) {
             visitVisitor(obj);
         }
     }
 
-    protected void postVisitVisitor(LanguageObject obj) {
+    protected void postVisitVisitor(BaseLanguageObject obj) {
         if (order == POST_ORDER) {
             visitVisitor(obj);
         }
     }
 
     @Override
-    public void visit(AggregateSymbol obj) {
+    public void visit(BaseAggregateSymbol obj) {
         preVisitVisitor(obj);
 
         if (getTeiidVersion().isLessThan(Version.TEIID_8_0.get()))
             visitNode(obj.getExpression());
         else {
-            Expression[] args = obj.getArgs();
+            BaseExpression[] args = obj.getArgs();
             if (args != null) {
                 for (int i = 0; i < args.length; i++) {
                     visitNode(args[i]);
@@ -183,20 +183,20 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(AliasSymbol obj) {
+    public void visit(AliasSymbolImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getSymbol());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(MultipleElementSymbol obj) {
+    public void visit(MultipleElementSymbolImpl obj) {
         preVisitVisitor(obj);
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(AssignmentStatement obj) {
+    public void visit(AssignmentStatementImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getVariable());
         visitNode(obj.getExpression());
@@ -204,7 +204,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(BetweenCriteria obj) {
+    public void visit(BetweenCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         visitNode(obj.getLowerExpression());
@@ -213,7 +213,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(Block obj) {
+    public void visit(BlockImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getStatements());
         visitNodes(obj.getExceptionStatements());
@@ -221,13 +221,13 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(BranchingStatement obj) {
+    public void visit(BranchingStatementImpl obj) {
         preVisitVisitor(obj);
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(CaseExpression obj) {
+    public void visit(CaseExpressionImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         for (int i = 0; i < obj.getWhenCount(); i++) {
@@ -239,7 +239,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(CommandStatement obj) {
+    public void visit(CommandStatementImpl obj) {
         preVisitVisitor(obj);
         if (deep) {
             visitNode(obj.getCommand());
@@ -248,7 +248,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(CompareCriteria obj) {
+    public void visit(CompareCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getLeftExpression());
         visitNode(obj.getRightExpression());
@@ -256,28 +256,28 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(CompoundCriteria obj) {
+    public void visit(CompoundCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getCriteria());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(Constant obj) {
+    public void visit(ConstantImpl obj) {
         preVisitVisitor(obj);
         postVisitVisitor(obj);
     }
 
     @Override
     @Removed(Version.TEIID_8_0)
-    public void visit(CreateUpdateProcedureCommand obj) {
+    public void visit(CreateUpdateProcedureCommandImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getBlock());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(CreateProcedureCommand obj) {
+    public void visit(CreateProcedureCommandImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getBlock());
         postVisitVisitor(obj);
@@ -285,14 +285,14 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
 
     @Override
     @Removed(Version.TEIID_8_0)
-    public void visit(CriteriaSelector obj) {
+    public void visit(CriteriaSelectorImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getElements());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(DeclareStatement obj) {
+    public void visit(DeclareStatementImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getVariable());
         visitNode(obj.getExpression());
@@ -300,7 +300,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(Delete obj) {
+    public void visit(DeleteImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getGroup());
         visitNode(obj.getCriteria());
@@ -309,13 +309,13 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(ElementSymbol obj) {
+    public void visit(ElementSymbolImpl obj) {
         preVisitVisitor(obj);
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(ExistsCriteria obj) {
+    public void visit(ExistsCriteriaImpl obj) {
         preVisitVisitor(obj);
         if (deep) {
             visitNode(obj.getCommand());
@@ -324,23 +324,23 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(ExpressionSymbol obj) {
+    public void visit(ExpressionSymbolImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(From obj) {
+    public void visit(FromImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getClauses());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(Function obj) {
+    public void visit(FunctionImpl obj) {
         preVisitVisitor(obj);
-        Expression[] args = obj.getArgs();
+        BaseExpression[] args = obj.getArgs();
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
                 visitNode(args[i]);
@@ -350,28 +350,28 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(GroupBy obj) {
+    public void visit(GroupByImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getSymbols());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(GroupSymbol obj) {
+    public void visit(GroupSymbolImpl obj) {
         preVisitVisitor(obj);
         postVisitVisitor(obj);
     }
 
     @Override
     @Removed(Version.TEIID_8_0)
-    public void visit(HasCriteria obj) {
+    public void visit(HasCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getSelector());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(IfStatement obj) {
+    public void visit(IfStatementImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getCondition());
         visitNode(obj.getIfBlock());
@@ -380,7 +380,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(Insert obj) {
+    public void visit(InsertImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getGroup());
         visitNodes(obj.getVariables());
@@ -393,7 +393,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(Create obj) {
+    public void visit(CreateImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getTable());
         visitNodes(obj.getColumnSymbols());
@@ -402,28 +402,28 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(Drop obj) {
+    public void visit(DropImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getTable());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(Into obj) {
+    public void visit(IntoImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getGroup());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(IsNullCriteria obj) {
+    public void visit(IsNullCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(JoinPredicate obj) {
+    public void visit(JoinPredicateImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getLeftClause());
         visitNode(obj.getJoinType());
@@ -433,13 +433,13 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(JoinType obj) {
+    public void visit(JoinTypeImpl obj) {
         preVisitVisitor(obj);
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(Limit obj) {
+    public void visit(LimitImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getOffset());
         visitNode(obj.getRowLimit());
@@ -447,7 +447,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(LoopStatement obj) {
+    public void visit(LoopStatementImpl obj) {
         preVisitVisitor(obj);
         if (deep) {
             visitNode(obj.getCommand());
@@ -457,7 +457,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(MatchCriteria obj) {
+    public void visit(MatchCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getLeftExpression());
         visitNode(obj.getRightExpression());
@@ -465,34 +465,34 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(NotCriteria obj) {
+    public void visit(NotCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getCriteria());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(Option obj) {
+    public void visit(OptionImpl obj) {
         preVisitVisitor(obj);
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(OrderBy obj) {
+    public void visit(OrderByImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getOrderByItems());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(OrderByItem obj) {
+    public void visit(OrderByItemImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getSymbol());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(Query obj) {
+    public void visit(QueryImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getWith());
         visitNode(obj.getSelect());
@@ -508,7 +508,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(RaiseStatement obj) {
+    public void visit(RaiseStatementImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         postVisitVisitor(obj);
@@ -516,20 +516,20 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
 
     @Override
     @Removed(Version.TEIID_8_0)
-    public void visit(RaiseErrorStatement obj) {
+    public void visit(RaiseErrorStatementImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(Reference obj) {
+    public void visit(ReferenceImpl obj) {
         preVisitVisitor(obj);
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(ScalarSubquery obj) {
+    public void visit(ScalarSubqueryImpl obj) {
         preVisitVisitor(obj);
         if (deep) {
             visitNode(obj.getCommand());
@@ -538,7 +538,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(SearchedCaseExpression obj) {
+    public void visit(SearchedCaseExpressionImpl obj) {
         preVisitVisitor(obj);
         for (int i = 0; i < obj.getWhenCount(); i++) {
             visitNode(obj.getWhenCriteria(i));
@@ -549,14 +549,14 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(Select obj) {
+    public void visit(SelectImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getSymbols());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(SetCriteria obj) {
+    public void visit(SetCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         visitNodes(obj.getValues());
@@ -564,7 +564,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(SetQuery obj) {
+    public void visit(SetQueryImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getWith());
         visitNodes(obj.getQueryCommands());
@@ -575,13 +575,13 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(StoredProcedure obj) {
+    public void visit(StoredProcedureImpl obj) {
         preVisitVisitor(obj);
 
-        Collection<SPParameter> params = obj.getParameters();
+        Collection<SPParameterImpl> params = obj.getParameters();
         if (params != null && !params.isEmpty()) {
-            for (SPParameter parameter : params) {
-                Expression expression = parameter.getExpression();
+            for (SPParameterImpl parameter : params) {
+                BaseExpression expression = parameter.getExpression();
                 visitNode(expression);
             }
         }
@@ -591,7 +591,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(SubqueryCompareCriteria obj) {
+    public void visit(SubqueryCompareCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getLeftExpression());
         if (deep) {
@@ -601,7 +601,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(SubqueryFromClause obj) {
+    public void visit(SubqueryFromClauseImpl obj) {
         preVisitVisitor(obj);
         if (deep) {
             visitNode(obj.getCommand());
@@ -611,7 +611,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(SubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         if (deep) {
@@ -622,7 +622,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
 
     @Override
     @Removed(Version.TEIID_8_0)
-    public void visit(TranslateCriteria obj) {
+    public void visit(TranslateCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getSelector());
         visitNodes(obj.getTranslations());
@@ -630,14 +630,14 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(UnaryFromClause obj) {
+    public void visit(UnaryFromClauseImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getGroup());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(Update obj) {
+    public void visit(UpdateImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getGroup());
         visitNode(obj.getChangeList());
@@ -647,7 +647,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(WhileStatement obj) {
+    public void visit(WhileStatementImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getCondition());
         visitNode(obj.getBlock());
@@ -658,15 +658,15 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
      * NOTE: we specifically don't need to visit the as columns or the using identifiers.
      * These will be resolved by the dynamic command resolver instead.
      * 
-     * @see LanguageVisitor#visit(org.teiid.query.sql.lang.DynamicCommand)
+     * @see TCLanguageVisitorImpl#visit(org.teiid.query.sql.lang.DynamicCommandImpl)
      */
     @Override
-    public void visit(DynamicCommand obj) {
+    public void visit(DynamicCommandImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getSql());
         visitNode(obj.getIntoGroup());
         if (obj.getUsing() != null) {
-            for (SetClause setClause : obj.getUsing().getClauses()) {
+            for (SetClauseImpl setClause : obj.getUsing().getClauses()) {
                 visitNode(setClause.getValue());
             }
         }
@@ -674,14 +674,14 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(SetClauseList obj) {
+    public void visit(SetClauseListImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getClauses());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(SetClause obj) {
+    public void visit(SetClauseImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getSymbol());
         visitNode(obj.getValue());
@@ -689,14 +689,14 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(TextLine obj) {
+    public void visit(TextLineImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getExpressions());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(XMLForest obj) {
+    public void visit(XMLForestImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getNamespaces());
         visitNodes(obj.getArgs());
@@ -705,21 +705,21 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
 
     @Override
     @Since(Version.TEIID_8_0)
-    public void visit(JSONObject obj) {
+    public void visit(JSONObjectImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getArgs());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(XMLAttributes obj) {
+    public void visit(XMLAttributesImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getArgs());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(XMLElement obj) {
+    public void visit(XMLElementImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getNamespaces());
         visitNode(obj.getAttributes());
@@ -728,13 +728,13 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(XMLNamespaces obj) {
+    public void visit(XMLNamespacesImpl obj) {
         preVisitVisitor(obj);
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(TextTable obj) {
+    public void visit(TextTableImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getFile());
         visitNode(obj.getGroupSymbol());
@@ -742,11 +742,11 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(XMLTable obj) {
+    public void visit(XMLTableImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getNamespaces());
         visitNodes(obj.getPassing());
-        for (XMLColumn column : obj.getColumns()) {
+        for (XMLColumnImpl column : obj.getColumns()) {
             visitNode(column.getDefaultExpression());
         }
         visitNode(obj.getGroupSymbol());
@@ -755,10 +755,10 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
 
     @Override
     @Since(Version.TEIID_8_0)
-    public void visit(ObjectTable obj) {
+    public void visit(ObjectTableImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getPassing());
-        for (ObjectColumn column : obj.getColumns()) {
+        for (ObjectColumnImpl column : obj.getColumns()) {
             visitNode(column.getDefaultExpression());
         }
         visitNode(obj.getGroupSymbol());
@@ -766,7 +766,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(XMLQuery obj) {
+    public void visit(XMLQueryImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getNamespaces());
         visitNodes(obj.getPassing());
@@ -774,21 +774,21 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(DerivedColumn obj) {
+    public void visit(DerivedColumnImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(XMLSerialize obj) {
+    public void visit(XMLSerializeImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(QueryString obj) {
+    public void visit(QueryStringImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getPath());
         visitNodes(obj.getArgs());
@@ -796,21 +796,21 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(XMLParse obj) {
+    public void visit(XMLParseImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(ExpressionCriteria obj) {
+    public void visit(ExpressionCriteriaImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(WithQueryCommand obj) {
+    public void visit(WithQueryCommandImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getColumns());
         if (deep) {
@@ -820,14 +820,14 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(TriggerAction obj) {
+    public void visit(TriggerActionImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getBlock());
         postVisitVisitor(obj);
     }
 
     @Override
-    public void visit(ArrayTable obj) {
+    public void visit(ArrayTableImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getArrayValue());
         visitNode(obj.getGroupSymbol());
@@ -835,7 +835,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(AlterProcedure obj) {
+    public void visit(AlterProcedureImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getTarget());
         if (deep) {
@@ -845,7 +845,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(AlterTrigger obj) {
+    public void visit(AlterTriggerImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getTarget());
         if (deep) {
@@ -855,7 +855,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(AlterView obj) {
+    public void visit(AlterViewImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getTarget());
         if (deep) {
@@ -865,7 +865,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(WindowFunction obj) {
+    public void visit(BaseWindowFunction obj) {
         preVisitVisitor(obj);
         visitNode(obj.getFunction());
         visitNode(obj.getWindowSpecification());
@@ -873,7 +873,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
     }
 
     @Override
-    public void visit(WindowSpecification obj) {
+    public void visit(WindowSpecificationImpl obj) {
         preVisitVisitor(obj);
         visitNodes(obj.getPartition());
         visitNode(obj.getOrderBy());
@@ -882,7 +882,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
 
     @Override
     @Since(Version.TEIID_8_0)
-    public void visit(Array array) {
+    public void visit(ArraySymbolImpl array) {
         preVisitVisitor(array);
         visitNodes(array.getExpressions());
         postVisitVisitor(array);
@@ -890,7 +890,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
 
     @Override
     @Since(Version.TEIID_8_0)
-    public void visit(ExceptionExpression exceptionExpression) {
+    public void visit(ExceptionExpressionImpl exceptionExpression) {
         preVisitVisitor(exceptionExpression);
         visitNode(exceptionExpression.getMessage());
         visitNode(exceptionExpression.getSqlState());
@@ -901,7 +901,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
 
     @Override
     @Since(Version.TEIID_8_0)
-    public void visit(ReturnStatement obj) {
+    public void visit(ReturnStatementImpl obj) {
         preVisitVisitor(obj);
         visitNode(obj.getExpression());
         postVisitVisitor(obj);
@@ -912,7 +912,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
      * @param visitor
      * @param order
      */
-    public static void doVisit(LanguageObject object, LanguageVisitor visitor, boolean order) {
+    public static void doVisit(BaseLanguageObject object, TCLanguageVisitorImpl visitor, boolean order) {
         doVisit(object, visitor, order, false);
     }
 
@@ -922,7 +922,7 @@ public class PreOrPostOrderNavigator extends AbstractNavigator {
      * @param order
      * @param deep
      */
-    public static void doVisit(LanguageObject object, LanguageVisitor visitor, boolean order, boolean deep) {
+    public static void doVisit(BaseLanguageObject object, TCLanguageVisitorImpl visitor, boolean order, boolean deep) {
         PreOrPostOrderNavigator nav = new PreOrPostOrderNavigator(visitor, order, deep);
         object.acceptVisitor(nav);
     }

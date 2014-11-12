@@ -22,8 +22,8 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.types.Transform;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
@@ -32,7 +32,7 @@ public class ObjectToAnyTransform extends Transform {
 
     private Class targetClass;
     
-    public ObjectToAnyTransform(DataTypeManagerService dataTypeManager, Class targetClass) {
+    public ObjectToAnyTransform(DefaultDataTypeManager dataTypeManager, Class targetClass) {
         super(dataTypeManager);
         this.targetClass = targetClass;
     }
@@ -42,7 +42,7 @@ public class ObjectToAnyTransform extends Transform {
      * @return Source type
      */
     public Class getSourceType() {
-        return DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass();
+        return DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass();
     }
     
     public Class getTargetType() {

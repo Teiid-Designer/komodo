@@ -21,8 +21,8 @@
 */
 package org.teiid.query.validator.v8;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.sql.v8.Test8Factory;
 import org.teiid.query.validator.AbstractTestUpdateValidator;
@@ -35,7 +35,7 @@ public class Test8UpdateValidator extends AbstractTestUpdateValidator {
 
     private Test8Factory factory;
 
-    protected Test8UpdateValidator(ITeiidVersion teiidVersion) {
+    protected Test8UpdateValidator(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

@@ -28,7 +28,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.graphics.RGB;
 import org.komodo.eclipse.sql.ui.graphics.ColorManager;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 
 /**
@@ -42,9 +42,9 @@ public class SqlSourceViewerConfiguration
 	extends SourceViewerConfiguration {
 
     private final ColorManager colorManager;
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
-    public SqlSourceViewerConfiguration(ITeiidVersion teiidVersion, ColorManager colorManager) {
+    public SqlSourceViewerConfiguration(TeiidVersion teiidVersion, ColorManager colorManager) {
         this.teiidVersion = teiidVersion;
         this.colorManager = colorManager;
     }
@@ -52,7 +52,7 @@ public class SqlSourceViewerConfiguration
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 

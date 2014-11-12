@@ -24,10 +24,10 @@ package org.teiid.query.validator;
 
 import java.util.Collection;
 import java.util.Iterator;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.validator.IValidator.IValidatorReport;
+import org.komodo.spi.outcome.Outcome;
+import org.komodo.spi.validator.Validator.IValidatorReport;
 import org.teiid.query.report.ActivityReport;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.runtime.client.Messages;
 
 
@@ -43,7 +43,7 @@ public class ValidatorReport extends ActivityReport<ValidatorFailure> implements
     	super(name);
     }
 
-    public void collectInvalidObjects(Collection<LanguageObject> invalidObjects) {
+    public void collectInvalidObjects(Collection<BaseLanguageObject> invalidObjects) {
     	for (ValidatorFailure failure : getItems()) {
             if(failure.getInvalidObjectCount() > 0) {
                 invalidObjects.addAll(failure.getInvalidObjects());
@@ -84,7 +84,7 @@ public class ValidatorReport extends ActivityReport<ValidatorFailure> implements
     
     public void handleValidationWarning(String message) {
     	ValidatorFailure vf = new ValidatorFailure(message);
-    	vf.setStatus(IOutcome.Level.WARNING);
+    	vf.setStatus(Outcome.Level.WARNING);
         this.addItem(vf);
     }
     
@@ -92,11 +92,11 @@ public class ValidatorReport extends ActivityReport<ValidatorFailure> implements
         this.addItem(new ValidatorFailure(message));
     }
 
-    public void handleValidationError(String message, LanguageObject invalidObj) {
+    public void handleValidationError(String message, BaseLanguageObject invalidObj) {
         this.addItem(new ValidatorFailure(message, invalidObj));
     }
 
-    public void handleValidationError(String message, Collection<? extends LanguageObject> invalidObjs) {
+    public void handleValidationError(String message, Collection<? extends BaseLanguageObject> invalidObjs) {
         this.addItem(new ValidatorFailure(message, invalidObjs));
     }
 

@@ -34,11 +34,11 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.impl.DataPolicyMetadata.PermissionMetaData;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 import org.teiid.metadata.FunctionMethod.PushDown;
 import org.teiid.metadata.MetadataStore.Grant;
@@ -69,7 +69,7 @@ public class MetadataFactory implements Serializable {
 
 	private static final long serialVersionUID = 8590341087771685630L;
 
-	private final ITeiidVersion teiidVersion;
+	private final TeiidVersion teiidVersion;
 
     private String vdbName;
     private int vdbVersion;
@@ -113,12 +113,12 @@ public class MetadataFactory implements Serializable {
 		BUILTIN_NAMESPACES = Collections.unmodifiableMap(map);
 	}
 
-	public MetadataFactory(ITeiidVersion teiidVersion, String vdbName, int vdbVersion, Map<String, Datatype> runtimeTypes, Model model) {
+	public MetadataFactory(TeiidVersion teiidVersion, String vdbName, int vdbVersion, Map<String, Datatype> runtimeTypes, Model model) {
         this(teiidVersion, vdbName, vdbVersion, model.getName(), runtimeTypes, model.getProperties(), model.getSchemaText());
         this.model = model;
     }
 
-    public MetadataFactory(ITeiidVersion teiidVersion, String vdbName, int vdbVersion, String schemaName, Map<String, Datatype> runtimeTypes, Properties modelProperties, String rawMetadata) {
+    public MetadataFactory(TeiidVersion teiidVersion, String vdbName, int vdbVersion, String schemaName, Map<String, Datatype> runtimeTypes, Properties modelProperties, String rawMetadata) {
         this.teiidVersion = teiidVersion;
         this.vdbName = vdbName;
         this.vdbVersion = vdbVersion;
@@ -234,7 +234,7 @@ public class MetadataFactory implements Serializable {
     private Datatype setColumnType(String type,
             BaseColumn column) {
 		int arrayDimensions = 0;
-		while (DataTypeManagerService.isArrayType(type)) {
+		while (DefaultDataTypeManager.isArrayType(type)) {
 			arrayDimensions++;
 			type = type.substring(0, type.length()-2);
 		}
@@ -534,8 +534,8 @@ public class MetadataFactory implements Serializable {
         return clazz;
     }
 
-    public static FunctionMethod createFunctionFromMethod(ITeiidVersion teiidVersion, String name, Method method) {
-        DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+    public static FunctionMethod createFunctionFromMethod(TeiidVersion teiidVersion, String name, Method method) {
+        DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
         String returnType = dataTypeManager.getDataTypeName(method.getReturnType());
         Class<?>[] params = method.getParameterTypes();
         String[] paramTypes = new String[params.length];

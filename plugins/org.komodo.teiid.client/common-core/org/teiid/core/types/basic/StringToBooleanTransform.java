@@ -22,7 +22,7 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 
@@ -31,7 +31,7 @@ public class StringToBooleanTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public StringToBooleanTransform(DataTypeManagerService dataTypeManager) {
+    public StringToBooleanTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 
@@ -59,7 +59,7 @@ public class StringToBooleanTransform extends Transform {
 	 * @return Source type
 	 */
 	public Class<?> getSourceType() {
-		return DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass();
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class StringToBooleanTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
 	}
 	
 	@Override

@@ -7,7 +7,7 @@
    <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
-            adaptableType="org.komodo.spi.runtime.ITeiidParent"
+            adaptableType="org.komodo.spi.runtime.TeiidParent"
             class="org.komodo.eclipse.spi.adapter.TeiidParentAdapterFactory">
          <adapter
                type="org.eclipse.wst.server.core.IServer">

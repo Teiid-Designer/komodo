@@ -22,7 +22,7 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 public class StringToCharacterTransform extends Transform {
@@ -30,7 +30,7 @@ public class StringToCharacterTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public StringToCharacterTransform(DataTypeManagerService dataTypeManager) {
+    public StringToCharacterTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 

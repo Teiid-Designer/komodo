@@ -22,7 +22,7 @@ import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.RelationalObjectFactory;
 import org.komodo.relational.model.UniqueConstraint;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  * Test Class to test Table
@@ -87,9 +87,9 @@ public class TestUniqueConstraint {
     public void testValidateDefaultUC() {
     	UniqueConstraint uc = RelationalObjectFactory.INSTANCE.createUniqueConstraint(UC_NAME);
     	
-    	IOutcome outcome = uc.validate();
+    	Outcome outcome = uc.validate();
     	
-    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
+    	assertEquals(Outcome.Level.ERROR, outcome.getLevel());
     	if(!outcome.getMessage().startsWith("No columns defined for unique constraint")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}

@@ -23,10 +23,10 @@ package org.teiid.query.sql.v86;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.parser.ParseInfo;
-import org.teiid.query.sql.lang.Command;
+import org.teiid.query.sql.lang.CommandImpl;
 import org.teiid.query.sql.v85.TestQuery85Parser;
 
 /**
@@ -35,7 +35,7 @@ import org.teiid.query.sql.v85.TestQuery85Parser;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class TestQuery86Parser extends TestQuery85Parser {
 
-    protected TestQuery86Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery86Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -47,7 +47,7 @@ public class TestQuery86Parser extends TestQuery85Parser {
     public void testWindowedExpression() {
         String sql = "SELECT foo(x, y) over ()";
         try {
-            Command actualCommand = parser.parseCommand(sql, new ParseInfo());
+            CommandImpl actualCommand = parser.parseCommand(sql, new ParseInfo());
             assertEquals("SELECT foo(ALL x, y) OVER ()", actualCommand.toString());
         } catch (Exception ex) {
             fail(ex.getMessage());

@@ -21,7 +21,7 @@ import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.RelationalObjectFactory;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  * Test Class to test Table
@@ -86,9 +86,9 @@ public class TestModel {
     public void testValidateDefaultModel() {
     	Model model = RelationalObjectFactory.INSTANCE.createModel(MODEL_NAME);
     	
-    	IOutcome outcome = model.validate();
+    	Outcome outcome = model.validate();
     	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    	assertEquals(Outcome.Level.OK, outcome.getLevel());
     }
         
 }

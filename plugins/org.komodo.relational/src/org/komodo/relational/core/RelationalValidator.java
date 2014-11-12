@@ -8,7 +8,7 @@
 package org.komodo.relational.core;
 
 import org.komodo.relational.model.RelationalObject;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.utils.StringNameValidator;
 
 /**
@@ -21,7 +21,7 @@ public interface RelationalValidator {
      * @param relationalObj the object
      * @return the validation outcome
      */
-    public IOutcome validate(RelationalObject relationalObj);
+    public Outcome validate(RelationalObject relationalObj);
 
     /**
      * Set the name validator

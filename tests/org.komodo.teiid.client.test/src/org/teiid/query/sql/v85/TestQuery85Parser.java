@@ -22,13 +22,13 @@
 package org.teiid.query.sql.v85;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.teiid.query.sql.lang.From;
-import org.teiid.query.sql.lang.GroupBy;
-import org.teiid.query.sql.lang.Query;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.teiid.query.sql.lang.FromImpl;
+import org.teiid.query.sql.lang.GroupByImpl;
+import org.teiid.query.sql.lang.QueryImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 import org.teiid.query.sql.v84.TestQuery84Parser;
 
 /**
@@ -37,7 +37,7 @@ import org.teiid.query.sql.v84.TestQuery84Parser;
 @SuppressWarnings( {"javadoc"} )
 public class TestQuery85Parser extends TestQuery84Parser {
 
-    protected TestQuery85Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery85Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -47,19 +47,19 @@ public class TestQuery85Parser extends TestQuery84Parser {
 
     @Test
     public void testGroupByRollup() {
-        GroupSymbol g = getFactory().newGroupSymbol("m.g"); //$NON-NLS-1$
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("m.g"); //$NON-NLS-1$
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Select select = getFactory().newSelect();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().newElementSymbol("a")); //$NON-NLS-1$
 
-        GroupBy groupBy = getFactory().newGroupBy();
+        GroupByImpl groupBy = getFactory().newGroupBy();
         groupBy.setRollup(true);
         groupBy.addSymbol(getFactory().newElementSymbol("b")); //$NON-NLS-1$
         groupBy.addSymbol(getFactory().newElementSymbol("c")); //$NON-NLS-1$
 
-        Query query = getFactory().newQuery();
+        QueryImpl query = getFactory().newQuery();
         query.setSelect(select);
         query.setFrom(from);
         query.setGroupBy(groupBy);

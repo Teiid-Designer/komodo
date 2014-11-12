@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Properties;
-import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.TeiidInstance;
 
 /**
  * WorkspaceStatus interface.
@@ -92,7 +92,7 @@ public interface WorkspaceStatus {
     /**
      * @return current teiid instance
      */
-    ITeiidInstance getTeiidInstance();
+    TeiidInstance getTeiidInstance();
 
 	/**
 	 * Add a WorkspaceContext Event Handler

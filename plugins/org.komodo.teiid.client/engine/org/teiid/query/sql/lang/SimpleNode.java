@@ -7,49 +7,49 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.parser.TeiidParser;
-import org.teiid.query.sql.visitor.SQLStringVisitor;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
+import org.teiid.query.parser.TeiidClientParser;
+import org.teiid.query.sql.visitor.SQLStringVisitorImpl;
 
 /**
  * Base class for AST Nodes
  */
-public class SimpleNode implements Node, LanguageObject {
+public class SimpleNode implements Node, BaseLanguageObject {
 
     protected Node parent;
     protected Node[] children;
     protected int id;
     protected Object value;
-    protected TeiidParser parser;
+    protected TeiidClientParser parser;
 
     /**
      * @param p
      * @param i
      */
-    public SimpleNode(TeiidParser p, int i) {
+    public SimpleNode(TeiidClientParser p, int i) {
         id = i;
         parser = p;
     }
 
     @Override
-    public TeiidParser getTeiidParser() {
+    public TeiidClientParser getTeiidParser() {
         return parser;
     }
 
     @Override
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return parser.getVersion();
     }
 
     protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
-        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+        TeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
     }
 
     protected boolean isLessThanTeiidVersion(Version teiidVersion) {
-        ITeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
+        TeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
         return maxVersion.isLessThan(teiidVersion.get());
     }
 
@@ -117,7 +117,7 @@ public class SimpleNode implements Node, LanguageObject {
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(TCLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 
@@ -127,7 +127,7 @@ public class SimpleNode implements Node, LanguageObject {
      */
     @Override
     public String toString() {
-        return SQLStringVisitor.getSQLString(this);
+        return SQLStringVisitorImpl.getSQLString(this);
     }
 
     /* Override this method if you want to customize how the node dumps
@@ -172,7 +172,7 @@ public class SimpleNode implements Node, LanguageObject {
         return clone;
     }
 
-    protected <T extends LanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
+    protected <T extends BaseLanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
         if (collection == null)
             return null;
 
@@ -184,7 +184,7 @@ public class SimpleNode implements Node, LanguageObject {
         return cloned;
     }
 
-    protected <T extends LanguageObject> List<T> cloneList(List<T> list) {
+    protected <T extends BaseLanguageObject> List<T> cloneList(List<T> list) {
         if (list == null)
             return null;
 

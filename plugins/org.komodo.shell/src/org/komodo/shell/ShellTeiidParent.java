@@ -24,26 +24,26 @@ package org.komodo.shell;
 import org.komodo.shell.api.IShellTeiidParent;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.HostProvider;
-import org.komodo.spi.runtime.ITeiidAdminInfo;
-import org.komodo.spi.runtime.ITeiidInstance;
-import org.komodo.spi.runtime.ITeiidParent;
+import org.komodo.spi.runtime.TeiidAdminInfo;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidParent;
 
 /**
- * Implementation of {@link ITeiidParent} for use by the shell framework
+ * Implementation of {@link TeiidParent} for use by the shell framework
  */
-public class ShellTeiidParent implements ITeiidParent, IShellTeiidParent {
+public class ShellTeiidParent implements TeiidParent, IShellTeiidParent {
 
     private String host = HostProvider.DEFAULT_HOST;
 
-    private int port = ITeiidAdminInfo.DEFAULT_PORT;
+    private int port = TeiidAdminInfo.DEFAULT_PORT;
 
-    private String userName = ITeiidAdminInfo.DEFAULT_ADMIN_USERNAME;
+    private String userName = TeiidAdminInfo.DEFAULT_ADMIN_USERNAME;
 
-    private String password = ITeiidAdminInfo.DEFAULT_ADMIN_PASSWORD;
+    private String password = TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD;
 
     private boolean secure = false;
 
-    private ITeiidInstance teiidInstance;
+    private TeiidInstance teiidInstance;
 
     private EventManager shellEventManager = new ShellEventManager();
 
@@ -63,12 +63,12 @@ public class ShellTeiidParent implements ITeiidParent, IShellTeiidParent {
     }
 
     @Override
-    public ITeiidInstance getTeiidInstance() {
+    public TeiidInstance getTeiidInstance() {
         return teiidInstance;
     }
 
     @Override
-    public void setTeiidInstance(ITeiidInstance teiidInstance) {
+    public void setTeiidInstance(TeiidInstance teiidInstance) {
         this.teiidInstance = teiidInstance;
     }
 

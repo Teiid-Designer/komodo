@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 
 /**
@@ -38,57 +38,6 @@ public class TeiidSqlLexicon implements StringConstants {
 	public interface Namespace {
 		public static final String PREFIX = "tsql";
 		public static final String URI = "http://www.teiid.org/sql/1.0";
-	}
-
-	/**
-	 * Property name used for specifying a teiid version. This property should
-	 * be added to the Sequencer's output node prior to sequencing.
-	 */
-	public static String TEIID_VERSION_PROPERTY = Namespace.PREFIX + COLON + "teiidVersion";
-
-	/**
-	 * tsql:expressionStatement
-	 */
-	public interface ExpressionStatement {
-
-		String ID = Namespace.PREFIX + COLON + "expressionStatement";
-
-		/**
-		 * EXPECTED_TYPE_CLASS Property
-		 */
-		String EXPECTED_TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "expectedTypeClass";
-
-		Class<?> EXPECTED_TYPE_CLASS_PROP_TYPE =  String.class;
-
-		boolean EXPECTED_TYPE_CLASS_PROP_MULTIPLE = false;
-
-		/**
-		 * EXPRESSION Reference
-		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
-
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean EXPRESSION_REF_MULTIPLE = false;
-
-	}
-
-	/**
-	 * tsql:labeled
-	 */
-	public interface Labeled {
-
-		String ID = Namespace.PREFIX + COLON + "labeled";
-
-		/**
-		 * LABEL Property
-		 */
-		String LABEL_PROP_NAME = Namespace.PREFIX + COLON + "label";
-
-		Class<?> LABEL_PROP_TYPE =  String.class;
-
-		boolean LABEL_PROP_MULTIPLE = false;
-
 	}
 
 	/**
@@ -115,6 +64,15 @@ public class TeiidSqlLexicon implements StringConstants {
 	public interface LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "languageObject";
+
+		/**
+		 * TEIID_VERSION Property
+		 */
+		String TEIID_VERSION_PROP_NAME = Namespace.PREFIX + COLON + "teiidVersion";
+
+		Class<?> TEIID_VERSION_PROP_TYPE =  String.class;
+
+		boolean TEIID_VERSION_PROP_MULTIPLE = false;
 
 	}
 
@@ -160,6 +118,51 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> COMMAND_REF_TYPE =  Command.class;
 
 		boolean COMMAND_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:expressionStatement
+	 */
+	public interface ExpressionStatement {
+
+		String ID = Namespace.PREFIX + COLON + "expressionStatement";
+
+		/**
+		 * EXPECTED_TYPE_CLASS Property
+		 */
+		String EXPECTED_TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "expectedTypeClass";
+
+		Class<?> EXPECTED_TYPE_CLASS_PROP_TYPE =  String.class;
+
+		boolean EXPECTED_TYPE_CLASS_PROP_MULTIPLE = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
+	 * tsql:labeled
+	 */
+	public interface Labeled {
+
+		String ID = Namespace.PREFIX + COLON + "labeled";
+
+		/**
+		 * LABEL Property
+		 */
+		String LABEL_PROP_NAME = Namespace.PREFIX + COLON + "label";
+
+		Class<?> LABEL_PROP_TYPE =  String.class;
+
+		boolean LABEL_PROP_MULTIPLE = false;
 
 	}
 
@@ -1860,6 +1863,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean IS_ABSTRACT = false;
 
 		/**
+		 * SELECTOR Property
+		 */
+		String SELECTOR_PROP_NAME = Namespace.PREFIX + COLON + "selector";
+
+		Class<?> SELECTOR_PROP_TYPE =  String.class;
+
+		boolean SELECTOR_PROP_MULTIPLE = false;
+
+		/**
 		 * ORDINAL Property
 		 */
 		String ORDINAL_PROP_NAME = Namespace.PREFIX + COLON + "ordinal";
@@ -1871,15 +1883,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		Version ORDINAL_PROP_SINCE_VERSION = Version.TEIID_8_7;
 
 		/**
-		 * SELECTOR Property
-		 */
-		String SELECTOR_PROP_NAME = Namespace.PREFIX + COLON + "selector";
-
-		Class<?> SELECTOR_PROP_TYPE =  String.class;
-
-		boolean SELECTOR_PROP_MULTIPLE = false;
-
-		/**
 		 * POSITION Property
 		 */
 		String POSITION_PROP_NAME = Namespace.PREFIX + COLON + "position";
@@ -1889,15 +1892,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean POSITION_PROP_MULTIPLE = false;
 
 		/**
-		 * WIDTH Property
-		 */
-		String WIDTH_PROP_NAME = Namespace.PREFIX + COLON + "width";
-
-		Class<?> WIDTH_PROP_TYPE =  Long.class;
-
-		boolean WIDTH_PROP_MULTIPLE = false;
-
-		/**
 		 * NO_TRIM Property
 		 */
 		String NO_TRIM_PROP_NAME = Namespace.PREFIX + COLON + "noTrim";
@@ -1905,6 +1899,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> NO_TRIM_PROP_TYPE =  Boolean.class;
 
 		boolean NO_TRIM_PROP_MULTIPLE = false;
+
+		/**
+		 * WIDTH Property
+		 */
+		String WIDTH_PROP_NAME = Namespace.PREFIX + COLON + "width";
+
+		Class<?> WIDTH_PROP_TYPE =  Long.class;
+
+		boolean WIDTH_PROP_MULTIPLE = false;
 
 	}
 
@@ -2462,15 +2465,6 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		boolean VARIABLE_TYPE_PROP_MULTIPLE = false;
 
-		/**
-		 * COMMAND Reference
-		 */
-		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
-
-		Class<?> COMMAND_REF_TYPE =  Command.class;
-
-		boolean COMMAND_REF_MULTIPLE = false;
-
 	}
 
 	/**
@@ -2708,15 +2702,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * MESSAGE Reference
-		 */
-		String MESSAGE_REF_NAME = Namespace.PREFIX + COLON + "message";
-
-		Class<?> MESSAGE_REF_TYPE =  Expression.class;
-
-		boolean MESSAGE_REF_MULTIPLE = false;
-
-		/**
 		 * ERROR_CODE Reference
 		 */
 		String ERROR_CODE_REF_NAME = Namespace.PREFIX + COLON + "errorCode";
@@ -2726,13 +2711,13 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean ERROR_CODE_REF_MULTIPLE = false;
 
 		/**
-		 * SQL_STATE Reference
+		 * MESSAGE Reference
 		 */
-		String SQL_STATE_REF_NAME = Namespace.PREFIX + COLON + "sqlState";
+		String MESSAGE_REF_NAME = Namespace.PREFIX + COLON + "message";
 
-		Class<?> SQL_STATE_REF_TYPE =  Expression.class;
+		Class<?> MESSAGE_REF_TYPE =  Expression.class;
 
-		boolean SQL_STATE_REF_MULTIPLE = false;
+		boolean MESSAGE_REF_MULTIPLE = false;
 
 		/**
 		 * PARENT_EXPRESSION Reference
@@ -2742,6 +2727,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> PARENT_EXPRESSION_REF_TYPE =  Expression.class;
 
 		boolean PARENT_EXPRESSION_REF_MULTIPLE = false;
+
+		/**
+		 * SQL_STATE Reference
+		 */
+		String SQL_STATE_REF_NAME = Namespace.PREFIX + COLON + "sqlState";
+
+		Class<?> SQL_STATE_REF_TYPE =  Expression.class;
+
+		boolean SQL_STATE_REF_MULTIPLE = false;
 
 	}
 
@@ -2820,15 +2814,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean AGGREGATE_FUNCTION_PROP_MULTIPLE = false;
 
 		/**
-		 * DISTINCT Property
-		 */
-		String DISTINCT_PROP_NAME = Namespace.PREFIX + COLON + "distinct";
-
-		Class<?> DISTINCT_PROP_TYPE =  Boolean.class;
-
-		boolean DISTINCT_PROP_MULTIPLE = false;
-
-		/**
 		 * NAME Property
 		 */
 		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
@@ -2836,6 +2821,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> NAME_PROP_TYPE =  String.class;
 
 		boolean NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * DISTINCT Property
+		 */
+		String DISTINCT_PROP_NAME = Namespace.PREFIX + COLON + "distinct";
+
+		Class<?> DISTINCT_PROP_TYPE =  Boolean.class;
+
+		boolean DISTINCT_PROP_MULTIPLE = false;
 
 		/**
 		 * ORDER_BY Reference
@@ -2885,15 +2879,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean SHORT_NAME_PROP_MULTIPLE = false;
 
 		/**
-		 * OUTPUT_NAME Property
-		 */
-		String OUTPUT_NAME_PROP_NAME = Namespace.PREFIX + COLON + "outputName";
-
-		Class<?> OUTPUT_NAME_PROP_TYPE =  String.class;
-
-		boolean OUTPUT_NAME_PROP_MULTIPLE = false;
-
-		/**
 		 * NAME Property
 		 */
 		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
@@ -2901,6 +2886,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> NAME_PROP_TYPE =  String.class;
 
 		boolean NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * OUTPUT_NAME Property
+		 */
+		String OUTPUT_NAME_PROP_NAME = Namespace.PREFIX + COLON + "outputName";
+
+		Class<?> OUTPUT_NAME_PROP_TYPE =  String.class;
+
+		boolean OUTPUT_NAME_PROP_MULTIPLE = false;
 
 	}
 
@@ -3041,11 +3035,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * tsql:array
+	 * tsql:arraySymbol
 	 */
-	public interface Array extends Expression {
+	public interface ArraySymbol extends Expression {
 
-		String ID = Namespace.PREFIX + COLON + "array";
+		String ID = Namespace.PREFIX + COLON + "arraySymbol";
 
 		boolean IS_ABSTRACT = false;
 
@@ -3742,10 +3736,6 @@ public class TeiidSqlLexicon implements StringConstants {
 	 * Enumeration of lexicon classes and their identifiers
 	 */
 	public enum LexTokens {
-		EXPRESSION_STATEMENT (ExpressionStatement.ID, ExpressionStatement.class),
-
-		LABELED (Labeled.ID, Labeled.class),
-
 		TARGETED_COMMAND (TargetedCommand.ID, TargetedCommand.class),
 
 		LANGUAGE_OBJECT (LanguageObject.ID, LanguageObject.class),
@@ -3755,6 +3745,10 @@ public class TeiidSqlLexicon implements StringConstants {
 		PREDICATE_CRITERIA (PredicateCriteria.ID, PredicateCriteria.class),
 
 		SUBQUERY_CONTAINER (SubqueryContainer.ID, SubqueryContainer.class),
+
+		EXPRESSION_STATEMENT (ExpressionStatement.ID, ExpressionStatement.class),
+
+		LABELED (Labeled.ID, Labeled.class),
 
 		CRITERIA (Criteria.ID, Criteria.class),
 
@@ -3918,7 +3912,7 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		GROUP_SYMBOL (GroupSymbol.ID, GroupSymbol.class),
 
-		ARRAY (Array.ID, Array.class),
+		ARRAY_SYMBOL (ArraySymbol.ID, ArraySymbol.class),
 
 		CASE_EXPRESSION (CaseExpression.ID, CaseExpression.class),
 
@@ -3989,13 +3983,13 @@ public class TeiidSqlLexicon implements StringConstants {
 	private static Map<String, LexTokens> astIndex = new HashMap<String, LexTokens>();
 
 	static {
-		astIndex.put(ExpressionStatement.class.getSimpleName(), LexTokens.EXPRESSION_STATEMENT);
-		astIndex.put(Labeled.class.getSimpleName(), LexTokens.LABELED);
 		astIndex.put(TargetedCommand.class.getSimpleName(), LexTokens.TARGETED_COMMAND);
 		astIndex.put(LanguageObject.class.getSimpleName(), LexTokens.LANGUAGE_OBJECT);
 		astIndex.put(Expression.class.getSimpleName(), LexTokens.EXPRESSION);
 		astIndex.put(PredicateCriteria.class.getSimpleName(), LexTokens.PREDICATE_CRITERIA);
 		astIndex.put(SubqueryContainer.class.getSimpleName(), LexTokens.SUBQUERY_CONTAINER);
+		astIndex.put(ExpressionStatement.class.getSimpleName(), LexTokens.EXPRESSION_STATEMENT);
+		astIndex.put(Labeled.class.getSimpleName(), LexTokens.LABELED);
 		astIndex.put(Criteria.class.getSimpleName(), LexTokens.CRITERIA);
 		astIndex.put(AbstractCompareCriteria.class.getSimpleName(), LexTokens.ABSTRACT_COMPARE_CRITERIA);
 		astIndex.put(CompareCriteria.class.getSimpleName(), LexTokens.COMPARE_CRITERIA);
@@ -4077,7 +4071,7 @@ public class TeiidSqlLexicon implements StringConstants {
 		astIndex.put(ElementSymbol.class.getSimpleName(), LexTokens.ELEMENT_SYMBOL);
 		astIndex.put(ExpressionSymbol.class.getSimpleName(), LexTokens.EXPRESSION_SYMBOL);
 		astIndex.put(GroupSymbol.class.getSimpleName(), LexTokens.GROUP_SYMBOL);
-		astIndex.put(Array.class.getSimpleName(), LexTokens.ARRAY);
+		astIndex.put(ArraySymbol.class.getSimpleName(), LexTokens.ARRAY_SYMBOL);
 		astIndex.put(CaseExpression.class.getSimpleName(), LexTokens.CASE_EXPRESSION);
 		astIndex.put(Constant.class.getSimpleName(), LexTokens.CONSTANT);
 		astIndex.put(DerivedColumn.class.getSimpleName(), LexTokens.DERIVED_COLUMN);
@@ -4100,6 +4094,10 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	public static String getTypeId(Class<? extends ASTNode> astNodeClass) {
+		String name = astNodeClass.getSimpleName();
+		if (! name.startsWith("Base")) {
+			name = name.replaceAll("Impl", EMPTY_STRING);
+		}
 		LexTokens lexToken = astIndex.get(astNodeClass.getSimpleName());
 		return lexToken.getId();
 	}
@@ -4252,7 +4250,7 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		Object groupSymbol(TeiidSqlContext context) throws Exception;
 
-		Object array(TeiidSqlContext context) throws Exception;
+		Object arraySymbol(TeiidSqlContext context) throws Exception;
 
 		Object caseExpression(TeiidSqlContext context) throws Exception;
 
@@ -4591,8 +4589,8 @@ public class TeiidSqlLexicon implements StringConstants {
 				callback.groupSymbol(context);
 				break;
 
-			case ARRAY:
-				callback.array(context);
+			case ARRAY_SYMBOL:
+				callback.arraySymbol(context);
 				break;
 
 			case CASE_EXPRESSION:

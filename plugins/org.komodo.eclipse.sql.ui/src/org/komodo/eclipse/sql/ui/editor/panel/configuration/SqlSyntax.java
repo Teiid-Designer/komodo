@@ -13,12 +13,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
-import org.komodo.spi.runtime.IExecutionConfigurationListener;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.spi.runtime.ExecutionConfigurationListener;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.type.DataTypeManager;
 import org.komodo.utils.KLog;
 
 /**
@@ -30,9 +30,9 @@ import org.komodo.utils.KLog;
  */
 public class SqlSyntax {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
-    IExecutionConfigurationListener configurationListener = new IExecutionConfigurationListener() {
+    ExecutionConfigurationListener configurationListener = new ExecutionConfigurationListener() {
         
         @Override
         public void configurationChanged(ExecutionConfigurationEvent event) {
@@ -57,14 +57,14 @@ public class SqlSyntax {
      * Create a new instance
      * @param teiidVersion 
      */
-    public SqlSyntax(ITeiidVersion teiidVersion) {
+    public SqlSyntax(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
         init();
     }
     
     private void init() {
-        QueryParser queryParser = new QueryParser(teiidVersion);
-        IDataTypeManagerService dataTypeManagerService = queryParser.getTeiidParser().getDataTypeService(); 
+        SQQueryParser queryParser = new SQQueryParser(teiidVersion);
+        DataTypeManager dataTypeManagerService = queryParser.getTeiidParser().getDataTypeService(); 
 
         try {
 			// RESERVED WORDS List

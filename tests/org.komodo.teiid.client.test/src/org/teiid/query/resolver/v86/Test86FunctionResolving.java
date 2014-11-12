@@ -24,18 +24,18 @@ package org.teiid.query.resolver.v86;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.eval.Evaluator;
 import org.teiid.query.metadata.TransformationMetadata;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.resolver.v85.Test85FunctionResolving;
-import org.teiid.query.sql.symbol.Function;
+import org.teiid.query.sql.symbol.FunctionImpl;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test86FunctionResolving extends Test85FunctionResolving {
 
-    protected Test86FunctionResolving(ITeiidVersion teiidVersion) {
+    protected Test86FunctionResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -59,8 +59,8 @@ public class Test86FunctionResolving extends Test85FunctionResolving {
 
         String sql = "func(('a', 'b'))";
 
-        Function func = (Function)getQueryParser().parseExpression(sql);
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+        FunctionImpl func = (FunctionImpl)getQueryParser().parseExpression(sql);
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
         visitor.resolveLanguageObject(func, tm);
         assertEquals(1, func.getArgs().length);
 

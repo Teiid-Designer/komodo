@@ -28,8 +28,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.ProcedureReservedWords;
 
 /**
@@ -38,11 +38,11 @@ import org.teiid.query.sql.ProcedureReservedWords;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestReservedWords {
 
-    ITeiidVersion TEIID_VERSION_7 = Version.TEIID_7_7.get();
+    TeiidVersion TEIID_VERSION_7 = Version.TEIID_7_7.get();
 
-    ITeiidVersion TEIID_VERSION_8 = Version.TEIID_8_5.get();
+    TeiidVersion TEIID_VERSION_8 = Version.TEIID_8_5.get();
 
-    ITeiidVersion TEIID_VERSION_87 = Version.TEIID_8_7.get();
+    TeiidVersion TEIID_VERSION_87 = Version.TEIID_8_7.get();
 
     @Test
     public void testGetNonReservedWords() {

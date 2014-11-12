@@ -24,7 +24,7 @@ package org.teiid.core.types.basic;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 
@@ -33,7 +33,7 @@ public class BigIntegerToBigDecimalTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public BigIntegerToBigDecimalTransform(DataTypeManagerService dataTypeManager) {
+    public BigIntegerToBigDecimalTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 
@@ -54,7 +54,7 @@ public class BigIntegerToBigDecimalTransform extends Transform {
 	 * @return Source type
 	 */
 	public Class<?> getSourceType() {
-		return DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getTypeClass();
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class BigIntegerToBigDecimalTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
 	}
 
 }

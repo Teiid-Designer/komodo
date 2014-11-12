@@ -34,19 +34,34 @@ import java.util.Map;
 import java.util.Set;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidVersion;
-import org.teiid.query.parser.AbstractTeiidParser;
-import org.teiid.query.parser.TeiidParser;
-import org.teiid.query.sql.lang.AlterProcedure;
-import org.teiid.query.sql.lang.Select;
-import org.teiid.query.sql.lang.v7.Alter7Procedure;
-import org.teiid.query.sql.lang.v8.Alter8Procedure;
-import org.teiid.query.sql.proc.Block;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.Symbol;
-import org.teiid.query.sql.symbol.WindowFunction;
-import org.teiid.query.sql.symbol.v7.Aggregate7Symbol;
-import org.teiid.query.sql.symbol.v8.Aggregate8Symbol;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.teiid.query.parser.AbstractTeiidClientParser;
+import org.teiid.query.parser.TeiidClientParser;
+import org.teiid.query.sql.lang.AlterProcedureImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.CriteriaSelectorImpl;
+import org.teiid.query.sql.lang.HasCriteriaImpl;
+import org.teiid.query.sql.lang.ObjectTableImpl;
+import org.teiid.query.sql.lang.SelectImpl;
+import org.teiid.query.sql.lang.Teiid7ClientParserTreeConstants;
+import org.teiid.query.sql.lang.Teiid8ClientParserTreeConstants;
+import org.teiid.query.sql.lang.TranslateCriteriaImpl;
+import org.teiid.query.sql.lang.v7.Alter7ProcedureImpl;
+import org.teiid.query.sql.lang.v8.Alter8ProcedureImpl;
+import org.teiid.query.sql.proc.BlockImpl;
+import org.teiid.query.sql.proc.CreateProcedureCommandImpl;
+import org.teiid.query.sql.proc.CreateUpdateProcedureCommandImpl;
+import org.teiid.query.sql.proc.ExceptionExpressionImpl;
+import org.teiid.query.sql.proc.RaiseErrorStatementImpl;
+import org.teiid.query.sql.proc.RaiseStatementImpl;
+import org.teiid.query.sql.proc.ReturnStatementImpl;
+import org.teiid.query.sql.symbol.ArraySymbolImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.BaseWindowFunction;
+import org.teiid.query.sql.symbol.JSONObjectImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
+import org.teiid.query.sql.symbol.v7.Aggregate7SymbolImpl;
+import org.teiid.query.sql.symbol.v8.Aggregate8SymbolImpl;
 import org.teiid.runtime.client.Messages;
 
 /**
@@ -66,35 +81,39 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
     private static final String PREFIX = "JJT"; //$NON-NLS-1$
     private static final String NON_NLS = "//$NON-NLS-1$"; //$NON-NLS-1$
     private static final String PACKAGE_NAME = "org.teiid.query.sql.lang"; //$NON-NLS-1$
-    private static final String CONSTANT_CLASS_PREFIX = "Teiid"; //$NON-NLS-1$
-    private static final String CONSTANT_CLASS_POSTFIX = "ParserTreeConstants"; //$NON-NLS-1$
+    private static final String TEIID_CLASS_PREFIX = "Teiid"; //$NON-NLS-1$
+    private static final String TEIID_CLASS_POSTFIX = "ClientParser";
     private static final String NODENAME_FIELD = "jjtNodeName"; //$NON-NLS-1$
     private static final String VOID = "VOID"; //$NON-NLS-1$
-    
+    private static final String TEIID_PARSER_INTERFACE = TeiidClientParser.class.getSimpleName();
+    private static final String TEIID_SEVEN_CONSTANT_CLASS = Teiid7ClientParserTreeConstants.class.getSimpleName();
+    private static final String TEIID_EIGHT_CONSTANT_CLASS = Teiid8ClientParserTreeConstants.class.getSimpleName();
+    private static final String LANGUAGE_OBJECT = BaseLanguageObject.class.getSimpleName();
+
     /* Methods that should be excluded from creation */
     private static final String[] COMPONENT_METHOD_EXCLUSIONS = { };
 
     /* Classes that are interfaces and have version specific classes */
-    private static final Class[] COMPONENT_INTERFACES = { AggregateSymbol.class,
-                                                                                                       AlterProcedure.class,
-                                                                                                       WindowFunction.class};
+    private static final Class[] COMPONENT_INTERFACES = { BaseAggregateSymbol.class,
+                                                                                                       AlterProcedureImpl.class,
+                                                                                                       BaseWindowFunction.class};
 
     private static final Map<String, String> AST_NODE_ANNOTATIONS = new HashMap<String, String>();
 
     static {
-        AST_NODE_ANNOTATIONS.put("CreateUpdateProcedureCommand", "@Removed(Version.TEIID_8_0)"); //$NON-NLS-1$ //$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("CriteriaSelector", "@Removed(Version.TEIID_8_0)"); //$NON-NLS-1$ //$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("RaiseErrorStatement", "@Removed(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("TranslateCriteria", "@Removed(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("HasCriteria", "@Removed(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
+        AST_NODE_ANNOTATIONS.put(CreateUpdateProcedureCommandImpl.class.getSimpleName(), "@Removed(Version.TEIID_8_0)"); //$NON-NLS-1$ 
+        AST_NODE_ANNOTATIONS.put(CriteriaSelectorImpl.class.getSimpleName(), "@Removed(Version.TEIID_8_0)"); //$NON-NLS-1$ 
+        AST_NODE_ANNOTATIONS.put(RaiseErrorStatementImpl.class.getSimpleName(), "@Removed(Version.TEIID_8_0)");  //$NON-NLS-1$
+        AST_NODE_ANNOTATIONS.put(TranslateCriteriaImpl.class.getSimpleName(), "@Removed(Version.TEIID_8_0)");  //$NON-NLS-1$
+        AST_NODE_ANNOTATIONS.put(HasCriteriaImpl.class.getSimpleName(), "@Removed(Version.TEIID_8_0)");  //$NON-NLS-1$
 
-        AST_NODE_ANNOTATIONS.put("CreateProcedureCommand", "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("ObjectTable", "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("ReturnStatement", "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("RaiseStatement", "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("Array", "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("ExceptionExpression", "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
-        AST_NODE_ANNOTATIONS.put("JSONObject", "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$//$NON-NLS-2$
+        AST_NODE_ANNOTATIONS.put(CreateProcedureCommandImpl.class.getSimpleName(), "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$
+        AST_NODE_ANNOTATIONS.put(ObjectTableImpl.class.getSimpleName(), "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$
+        AST_NODE_ANNOTATIONS.put(ReturnStatementImpl.class.getSimpleName(), "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$
+        AST_NODE_ANNOTATIONS.put(RaiseStatementImpl.class.getSimpleName(), "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$
+        AST_NODE_ANNOTATIONS.put(ArraySymbolImpl.class.getSimpleName(), "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$
+        AST_NODE_ANNOTATIONS.put(ExceptionExpressionImpl.class.getSimpleName(), "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$
+        AST_NODE_ANNOTATIONS.put(JSONObjectImpl.class.getSimpleName(), "@Since(Version.TEIID_8_0)");  //$NON-NLS-1$
     }
 
     /**
@@ -103,7 +122,9 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
     private final BufferedWriter factoryWriter;
 
     /**
-     * @throws Exception
+     * Create new instance
+     *
+     * @throws Exception if generator fails
      */
     public TeiidNodeFactoryGenerator() throws Exception {
         File factoryFile = new File(FACTORY_DIR, FACTORY_FILENAME);
@@ -123,19 +144,38 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         factoryWriter.write(token);
     }
 
+    private String createIsTeiidParserMethodName(int serverVersion) {
+        return "is" + TEIID_CLASS_PREFIX + serverVersion+ TEIID_CLASS_POSTFIX;
+    }
+
+    private String createTeiidVersionParserClass(int serverVersion) {
+        return TEIID_CLASS_PREFIX + serverVersion + TEIID_CLASS_POSTFIX;
+    }
+
+    private String createTeiidConstantClass(int serverVersion) {
+        switch (serverVersion) {
+            case 7:
+                return TEIID_SEVEN_CONSTANT_CLASS;
+            case 8:
+                return TEIID_EIGHT_CONSTANT_CLASS;
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+    
     private String createImports(int[] serverVersions) throws Exception {
         StringBuffer buf = new StringBuffer();
         String imp = "import";
 
-        Package teiidParserPkg = TeiidParser.class.getPackage();
+        Package teiidParserPkg = TeiidClientParser.class.getPackage();
         for (int serverVersion : serverVersions) {
             buf.append(imp + SPACE + teiidParserPkg.getName() + DOT)
-                 .append("v" + serverVersion + DOT + "Teiid" + serverVersion + "Parser")
+                 .append("v" + serverVersion + DOT + createTeiidVersionParserClass(serverVersion))
                  .append(SEMI_COLON + NEW_LINE);
         }
 
-        Class<?>[] klazzes = { TeiidParser.class, Messages.class, 
-                                             TeiidVersion.Version.class,
+        Class<?>[] klazzes = { TeiidClientParser.class, Messages.class, 
+                                             DefaultTeiidVersion.Version.class,
                                              Removed.class, Since.class };
 
         for (Class<?> klazz : klazzes) {
@@ -143,13 +183,13 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         }
 
         Package[] SQL_PACKAGES = {
-            Select.class.getPackage(), // lang package
-            Block.class.getPackage(), // proc package
-            Symbol.class.getPackage(), //symbol package
-            Alter7Procedure.class.getPackage(), // lang.v7 package
-            Alter8Procedure.class.getPackage(), // lang.v8 package
-            Aggregate7Symbol.class.getPackage(), // symbol.v7 package
-            Aggregate8Symbol.class.getPackage() // symbol.v8 package
+            SelectImpl.class.getPackage(), // lang package
+            BlockImpl.class.getPackage(), // proc package
+            SymbolImpl.class.getPackage(), //symbol package
+            Alter7ProcedureImpl.class.getPackage(), // lang.v7 package
+            Alter8ProcedureImpl.class.getPackage(), // lang.v8 package
+            Aggregate7SymbolImpl.class.getPackage(), // symbol.v7 package
+            Aggregate8SymbolImpl.class.getPackage() // symbol.v8 package
         };
 
         for (Package p : SQL_PACKAGES) {
@@ -176,6 +216,9 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
 
         // static getInstance method
         buf.append(NEW_LINE)
+             .append(TAB + "/**" + NEW_LINE)
+             .append(TAB + " * @return singleton instance" + NEW_LINE)
+             .append(TAB + " */" + NEW_LINE)
              .append(TAB + PUBLIC + SPACE + STATIC + SPACE + "TeiidNodeFactory getInstance() " + OPEN_BRACE + NEW_LINE)
              .append(TAB + TAB + "if (instance == null) instance = new TeiidNodeFactory();" + NEW_LINE)
              .append(TAB + TAB + "return instance;" + NEW_LINE)
@@ -184,8 +227,8 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         // static isTeiidXParser method
         for (int serverVersion : serverVersions) {
             buf.append(NEW_LINE)
-                 .append(TAB + PRIVATE + SPACE + STATIC + SPACE + "boolean isTeiid" + serverVersion+ "Parser(TeiidParser teiidParser) " + OPEN_BRACE + NEW_LINE) 
-                 .append(TAB + TAB + "return teiidParser instanceof Teiid" + serverVersion + "Parser;" + NEW_LINE)
+                 .append(TAB + PRIVATE + SPACE + STATIC + SPACE + "boolean " + createIsTeiidParserMethodName(serverVersion) + "(" + TEIID_PARSER_INTERFACE + " teiidParser) " + OPEN_BRACE + NEW_LINE) 
+                 .append(TAB + TAB + "return teiidParser instanceof " + createTeiidVersionParserClass(serverVersion) + SEMI_COLON + NEW_LINE)
                  .append(TAB + CLOSE_BRACE + NEW_LINE + NEW_LINE);
         }
 
@@ -193,12 +236,12 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         buf.append(TAB + "/**" + NEW_LINE)
              .append(TAB + " * Method used by the generated parsers for constructing nodes" + NEW_LINE)
              .append(TAB + " *" + NEW_LINE)
-             .append(TAB + " * @param teiidParser" + NEW_LINE)
-             .append(TAB + " * @param nodeType" + NEW_LINE)
+             .append(TAB + " * @param teiidParser teiid parser" + NEW_LINE)
+             .append(TAB + " * @param nodeType node type" + NEW_LINE)
              .append(TAB + " *" + NEW_LINE)
              .append(TAB + " * @return created language object" + NEW_LINE)
              .append(TAB + " */" + NEW_LINE)
-             .append(TAB + "public static LanguageObject jjtCreate(TeiidParser teiidParser, int nodeType) " + OPEN_BRACE + NEW_LINE)
+             .append(TAB + "public static " + LANGUAGE_OBJECT + " jjtCreate(" + TEIID_PARSER_INTERFACE + " teiidParser, int nodeType) " + OPEN_BRACE + NEW_LINE)
              .append(TAB + TAB + "return getInstance().create(teiidParser, nodeType);" + NEW_LINE)
              .append(TAB + CLOSE_BRACE + NEW_LINE + NEW_LINE);
 
@@ -206,12 +249,12 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         buf.append(TAB + "/**" + NEW_LINE)
              .append(TAB + " * Create a parser node for the given node type" + NEW_LINE)
              .append(TAB + " *" + NEW_LINE)
-             .append(TAB + " * @param teiidParser" + NEW_LINE)
-             .append(TAB + " * @param nodeType" + NEW_LINE)
+             .append(TAB + " * @param teiidParser teiid parser" + NEW_LINE)
+             .append(TAB + " * @param nodeType node type" + NEW_LINE)
              .append(TAB + " *" + NEW_LINE)
              .append(TAB + " * @return node applicable to the given parser" + NEW_LINE)
              .append(TAB + " */" + NEW_LINE)
-             .append(TAB + "public <T extends LanguageObject> T create(TeiidParser teiidParser, int nodeType) " + OPEN_BRACE + NEW_LINE);
+             .append(TAB + "public <T extends " + LANGUAGE_OBJECT + "> T create(" + TEIID_PARSER_INTERFACE + " teiidParser, int nodeType) " + OPEN_BRACE + NEW_LINE);
 
         for (int i = 0; i < serverVersions.length; ++i) {
             int serverVersion = serverVersions[i];
@@ -220,8 +263,8 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
             if (i > 0)
                 buf.append("else ");
 
-            buf.append("if (isTeiid" + serverVersion + "Parser(teiidParser))" + NEW_LINE)
-                 .append(TAB + TAB + TAB + "return create((Teiid" + serverVersion + "Parser) teiidParser, nodeType);" + NEW_LINE);
+            buf.append("if (" + createIsTeiidParserMethodName(serverVersion) + "(teiidParser))" + NEW_LINE)
+                 .append(TAB + TAB + TAB + "return create((" + createTeiidVersionParserClass(serverVersion) + ") teiidParser, nodeType);" + NEW_LINE);
         }
 
         buf.append(TAB +TAB + "throw new IllegalArgumentException(")
@@ -233,12 +276,12 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         buf.append(TAB + "/**" + NEW_LINE)
             .append(TAB + " * Create a parser node for the node with the given common node name" + NEW_LINE)
             .append(TAB + " *" + NEW_LINE)
-            .append(TAB + " * @param teiidParser" + NEW_LINE)
-            .append(TAB + " * @param nodeType" + NEW_LINE)
+            .append(TAB + " * @param teiidParser teiid parser" + NEW_LINE)
+            .append(TAB + " * @param nodeType node type" + NEW_LINE)
             .append(TAB + " *" + NEW_LINE)
             .append(TAB + " * @return node applicable to the given parser" + NEW_LINE)
             .append(TAB + " */" + NEW_LINE)
-            .append(TAB + "public <T extends LanguageObject> T create(TeiidParser teiidParser, ASTNodes nodeType) " + OPEN_BRACE + NEW_LINE)
+            .append(TAB + "public <T extends " + LANGUAGE_OBJECT + "> T create(" + TEIID_PARSER_INTERFACE + " teiidParser, ASTNodes nodeType) " + OPEN_BRACE + NEW_LINE)
             .append(NEW_LINE);
 
         for (int i = 0; i < serverVersions.length; ++i) {
@@ -248,13 +291,14 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
             if (i > 0)
                 buf.append("else" + SPACE);
 
-            buf.append("if (isTeiid" + serverVersion + "Parser(teiidParser)) " + OPEN_BRACE + NEW_LINE)
-                 .append(TAB +TAB + TAB + "for (int i = 0; i < Teiid" + serverVersion)
-                 .append("ParserTreeConstants.jjtNodeName.length; ++i) ")
+            String constantClass = createTeiidConstantClass(serverVersion);
+            buf.append("if (" + createIsTeiidParserMethodName(serverVersion) + "(teiidParser)) " + OPEN_BRACE + NEW_LINE)
+                 .append(TAB +TAB + TAB + "for (int i = 0; i < " + constantClass)
+                 .append(DOT + "jjtNodeName.length; ++i) ")
                  .append(OPEN_BRACE + NEW_LINE)
                  .append(TAB + TAB + TAB + TAB)
-                 .append("String constantName = Teiid" + serverVersion)
-                 .append("ParserTreeConstants.jjtNodeName[i];" + NEW_LINE)
+                 .append("String constantName = " + constantClass)
+                 .append(DOT + "jjtNodeName[i];" + NEW_LINE)
                  .append(TAB + TAB + TAB + TAB + TAB)
                  .append("if (! constantName.equalsIgnoreCase(nodeType.getName()))" + NEW_LINE)
                  .append(TAB + TAB + TAB + TAB + TAB + TAB +"continue;" + NEW_LINE)
@@ -304,9 +348,17 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
 
     private String createASTNodeEnumValue(String typeName) {
         StringBuffer buffer = new StringBuffer();
+        //
+        // Remove the Impl postfix from the enum value itself although keeps it for the actual name value
+        //
+        String rootTypeName = typeName.replaceAll(LANG_OBJECT_POSTFIX, EMPTY_STRING);
+        //
+        // Remove the Base prefix from the enum value itself although keeps it for the actual name value
+        //
+        rootTypeName = rootTypeName.replaceFirst(LANG_OBJECT_PREFIX, EMPTY_STRING);
 
         buffer.append(TAB + TAB + "/**" + NEW_LINE); //$NON-NLS-1$
-        buffer.append(TAB + TAB + " * " + typeName + NEW_LINE); //$NON-NLS-1$
+        buffer.append(TAB + TAB + " * " + rootTypeName + NEW_LINE); //$NON-NLS-1$
         buffer.append(TAB + TAB + " * @generated" +  NEW_LINE); //$NON-NLS-1$
         buffer.append(TAB + TAB + " */" + NEW_LINE); //$NON-NLS-1$
 
@@ -315,13 +367,14 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
             buffer.append(TAB + TAB + annotation + NEW_LINE);
 
         buffer.append(TAB + TAB);
-        for (int i = 0; i < typeName.length(); ++i) {
-            Character c = typeName.charAt(i);
+
+        for (int i = 0; i < rootTypeName.length(); ++i) {
+            Character c = rootTypeName.charAt(i);
 
             // Avoid issues with sequences of capitals such as XMLSerialise
             Character c1 = null;
-            if ((i + 1) < typeName.length())
-                c1 = typeName.charAt(i + 1);
+            if ((i + 1) < rootTypeName.length())
+                c1 = rootTypeName.charAt(i + 1);
 
             if (i > 0 && Character.isUpperCase(c) && ! (c1 != null && Character.isUpperCase(c1)))
                 buffer.append(UNDERSCORE);
@@ -368,7 +421,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         buffer.append(" * @param nodeType" + NEW_LINE); //$NON-NLS-1$
         buffer.append(" * @return version " +serverVersion + " teiid parser node" + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$
         buffer.append(" */" + NEW_LINE); //$NON-NLS-1$
-        buffer.append("private <T extends LanguageObject> T create(Teiid" + serverVersion + "Parser teiidParser, int nodeType) {" + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$
+        buffer.append("private <T extends " + LANGUAGE_OBJECT + "> T create(" + createTeiidVersionParserClass(serverVersion) + " teiidParser, int nodeType) {" + NEW_LINE); //$NON-NLS-1$ //$NON-NLS-2$
 
         return buffer.toString();
     }
@@ -391,7 +444,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
         buffer.append(TAB + " * @param nodeType" + NEW_LINE); //$NON-NLS-1$
         buffer.append(TAB + " * @return" + NEW_LINE); //$NON-NLS-1$
         buffer.append(TAB + " */" + NEW_LINE); //$NON-NLS-1$
-        buffer.append(TAB + "private " + typeName + " create" + typeName + "(TeiidParser teiidParser, int nodeType) {" + NEW_LINE);
+        buffer.append(TAB + "private " + typeName + " create" + typeName + "(" + TEIID_PARSER_INTERFACE + " teiidParser, int nodeType) {" + NEW_LINE);
         
         boolean isInterface = false;
         for (Class<?> iface : COMPONENT_INTERFACES) {
@@ -406,9 +459,11 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
                 int serverVersion = serverVersions[i];
 
                 //
-                // Implementation of interface type will have
-                // the server version in the middle of it
+                // Implementation of interface type will have the server version in the middle of it
                 //
+                typeName = typeName.replaceFirst(LANG_OBJECT_PREFIX, EMPTY_STRING);
+                typeName = typeName.replaceAll(LANG_OBJECT_POSTFIX, EMPTY_STRING);
+
                 StringBuffer typeSVName = new StringBuffer();
                 for (int index = 0; index < typeName.length(); ++index) {
                     char c = typeName.charAt(index);
@@ -420,15 +475,19 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
                     typeSVName.append(c);
                 }
 
+                // Append the language object postfix if the parent does not already have it
+                if (! typeSVName.toString().endsWith(LANG_OBJECT_POSTFIX))
+                    typeSVName.append(LANG_OBJECT_POSTFIX);
+
                 buffer.append(TAB + TAB);
 
                 if (i > 0)
                     buffer.append("else ");
 
-                buffer.append("if (isTeiid" + serverVersion + "Parser(teiidParser))" + NEW_LINE);
+                buffer.append("if (" + createIsTeiidParserMethodName(serverVersion) + "(teiidParser))" + NEW_LINE);
                 buffer.append(TAB + TAB + TAB + "return new " + typeSVName.toString())
                          .append(OPEN_BRACKET + OPEN_BRACKET)
-                         .append("Teiid" + serverVersion + "Parser" + CLOSE_BRACKET + SPACE)
+                         .append(createTeiidVersionParserClass(serverVersion) + CLOSE_BRACKET + SPACE)
                          .append("teiidParser, nodeType" + CLOSE_BRACKET)
                          .append(SEMI_COLON + NEW_LINE); 
             }
@@ -457,7 +516,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
             astNodesEnum.add(createASTNodesEnumDeclaration());
 
             for (int serverVersion : serverVersions) {
-                String constantClassName = CONSTANT_CLASS_PREFIX + serverVersion + CONSTANT_CLASS_POSTFIX;
+                String constantClassName = createTeiidConstantClass(serverVersion);
                 Class<?> constantClass = Class.forName(PACKAGE_NAME + DOT + constantClassName);
 
                 /* Index node names against their camelcase equivalents */
@@ -515,7 +574,7 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
             write(LICENSE);
 
             // Write package
-            Package p = AbstractTeiidParser.class.getPackage();
+            Package p = AbstractTeiidClientParser.class.getPackage();
             write("package " + p.getName() + SEMI_COLON + NEW_LINE + NEW_LINE);
 
             // Write imports
@@ -552,8 +611,8 @@ public class TeiidNodeFactoryGenerator implements GeneratorConstants {
      * Execute to auto-generate the factory methods based on the
      * TeiidnTreeParserConstants interfaces.
      *
-     * @param args
-     * @throws Exception
+     * @param args arguments
+     * @throws Exception exception
      */
     public static void main(String[] args) throws Exception {
         TeiidNodeFactoryGenerator factory = new TeiidNodeFactoryGenerator();

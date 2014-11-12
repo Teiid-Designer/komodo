@@ -22,7 +22,7 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 public class BooleanToNumberTransform extends Transform {
@@ -31,7 +31,7 @@ public class BooleanToNumberTransform extends Transform {
 	private Object falseVal;
 	private Class<?> targetType;
 	
-	public BooleanToNumberTransform(DataTypeManagerService dataTypeManager, Object trueVal, Object falseVal) {
+	public BooleanToNumberTransform(DefaultDataTypeManager dataTypeManager, Object trueVal, Object falseVal) {
 	    super(dataTypeManager);
 		this.trueVal = trueVal;
 		this.falseVal = falseVal;
@@ -40,7 +40,7 @@ public class BooleanToNumberTransform extends Transform {
 
 	@Override
 	public Class getSourceType() {
-		return DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass();
 	}
 	
 	@Override

@@ -26,12 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.AbstractTestQueryParser;
-import org.teiid.query.sql.lang.Create;
-import org.teiid.query.sql.lang.Drop;
-import org.teiid.query.sql.symbol.ElementSymbol;
+import org.teiid.query.sql.lang.CreateImpl;
+import org.teiid.query.sql.lang.DropImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test7CreateDrop extends AbstractTestQueryParser {
@@ -55,14 +55,14 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testCreateTempTable1() {
-        Create create = getFactory().newCreate();
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         List columns = new ArrayList();
-        ElementSymbol column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass());
+        ElementSymbolImpl column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c2");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.BYTE.getTypeClass());
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.BYTE.getTypeClass());
         columns.add(column);
         create.setElementSymbolsAsColumns(columns);
         helpTest("Create local TEMPORARY table tempTable (c1 boolean, c2 byte)", "CREATE LOCAL TEMPORARY TABLE tempTable (c1 boolean, c2 byte)", create); //$NON-NLS-1$ //$NON-NLS-2$
@@ -70,14 +70,14 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testCreateTempTable2() {
-        Create create = getFactory().newCreate();
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         List columns = new ArrayList();
-        ElementSymbol column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass());
+        ElementSymbolImpl column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c2");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.BYTE.getTypeClass());
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.BYTE.getTypeClass());
         columns.add(column);
         create.setElementSymbolsAsColumns(columns);
         helpTest("Create local TEMPORARY table tempTable(c1 boolean, c2 byte)", "CREATE LOCAL TEMPORARY TABLE tempTable (c1 boolean, c2 byte)", create); //$NON-NLS-1$ //$NON-NLS-2$
@@ -105,14 +105,14 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testCreateTempTableWithPrimaryKey() {
-        Create create = getFactory().newCreate();
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         List columns = new ArrayList();
-        ElementSymbol column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.BOOLEAN.getTypeClass());
+        ElementSymbolImpl column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c2");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.BYTE.getTypeClass());
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.BYTE.getTypeClass());
         columns.add(column);
         create.setElementSymbolsAsColumns(columns);
         create.getPrimaryKey().add(column);
@@ -121,7 +121,7 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testDropTable() {
-        Drop drop = getFactory().newDrop();
+        DropImpl drop = getFactory().newDrop();
         drop.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         helpTest("DROP table tempTable", "DROP TABLE tempTable", drop); //$NON-NLS-1$ //$NON-NLS-2$
     }
@@ -133,23 +133,23 @@ public class Test7CreateDrop extends AbstractTestQueryParser {
 
     @Test
     public void testTypeAliases() {
-        Create create = getFactory().newCreate();
+        CreateImpl create = getFactory().newCreate();
         create.setTable(getFactory().newGroupSymbol("tempTable")); //$NON-NLS-1$
         List columns = new ArrayList();
-        ElementSymbol column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+        ElementSymbolImpl column = getFactory().newElementSymbol("c1");//$NON-NLS-1$
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c2");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.BYTE.getTypeClass());
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.BYTE.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c3");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.SHORT.getTypeClass());
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.SHORT.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c4");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.FLOAT.getTypeClass());
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.FLOAT.getTypeClass());
         columns.add(column);
         column = getFactory().newElementSymbol("c5");//$NON-NLS-1$
-        column.setType(DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getTypeClass());
+        column.setType(DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getTypeClass());
         columns.add(column);
         create.setElementSymbolsAsColumns(columns);
         helpTest("Create local TEMPORARY table tempTable (c1 varchar, c2 tinyint, c3 smallint, c4 real, c5 decimal)", "CREATE LOCAL TEMPORARY TABLE tempTable (c1 varchar, c2 tinyint, c3 smallint, c4 real, c5 decimal)", create); //$NON-NLS-1$ 

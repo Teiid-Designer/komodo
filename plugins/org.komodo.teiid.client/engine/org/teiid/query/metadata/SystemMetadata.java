@@ -33,15 +33,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeAliases;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.type.DataTypeManager;
+import org.komodo.spi.type.DataTypeManager.DataTypeAliases;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.VDBMetaData;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.core.util.PropertiesUtils;
 import org.teiid.metadata.Datatype;
@@ -49,19 +49,19 @@ import org.teiid.metadata.MetadataFactory;
 import org.teiid.metadata.MetadataStore;
 import org.teiid.metadata.Table;
 import org.teiid.query.function.SystemFunctionManager;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.validator.ValidatorReport;
 import org.teiid.runtime.client.Messages;
 
 public class SystemMetadata {
 	
-	private static Map<ITeiidVersion, SystemMetadata> instances = new HashMap<ITeiidVersion, SystemMetadata>();
+	private static Map<TeiidVersion, SystemMetadata> instances = new HashMap<TeiidVersion, SystemMetadata>();
 	
 	/**
 	 * @param teiidVersion
 	 * @return get singleton instance keyed on given teiid version
 	 */
-	public static SystemMetadata getInstance(ITeiidVersion teiidVersion) {
+	public static SystemMetadata getInstance(TeiidVersion teiidVersion) {
 		SystemMetadata instance = instances.get(teiidVersion);
 		if (instance == null) {
 		    instance = new SystemMetadata(teiidVersion);
@@ -71,8 +71,8 @@ public class SystemMetadata {
 		return instance;
 	}
 
-	private final ITeiidVersion teiidVersion;
-	private final DataTypeManagerService dataTypeManager;
+	private final TeiidVersion teiidVersion;
+	private final DefaultDataTypeManager dataTypeManager;
 	private List<Datatype> dataTypes = new ArrayList<Datatype>();
 	private Map<String, Datatype> typeMap = new TreeMap<String, Datatype>(String.CASE_INSENSITIVE_ORDER);
 	private MetadataStore systemStore;
@@ -80,12 +80,12 @@ public class SystemMetadata {
 	/**
 	 * @param teiidVersion
 	 */
-	public SystemMetadata(ITeiidVersion teiidVersion) {
+	public SystemMetadata(TeiidVersion teiidVersion) {
 	    if (teiidVersion.isLessThan(Version.TEIID_8_0.get()))
 	        throw new UnsupportedOperationException(Messages.getString(Messages.Misc.TeiidVersionFailure, this.getClass().getSimpleName(), teiidVersion));
 
 		this.teiidVersion = teiidVersion;
-		this.dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+		this.dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
 
 		String resourceLocation = this.getClass().getPackage().getName();
         resourceLocation = resourceLocation.replaceAll("\\.", File.separator); //$NON-NLS-1$
@@ -108,9 +108,9 @@ public class SystemMetadata {
 				}
 				PropertiesUtils.setBeanProperties(dt, p, null);
 				if ("string".equals(dt.getName())) { //$NON-NLS-1$
-					dt.setLength(DataTypeManagerService.MAX_STRING_LENGTH);
+					dt.setLength(DefaultDataTypeManager.MAX_STRING_LENGTH);
 				} else if ("varbinary".equals(dt.getName())) { //$NON-NLS-1$
-					dt.setLength(DataTypeManagerService.MAX_LOB_MEMORY_BYTES);
+					dt.setLength(DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES);
 				}
 				dataTypes.add(dt);
 				if (dt.isBuiltin()) {
@@ -127,12 +127,12 @@ public class SystemMetadata {
 				throw new RuntimeException(e);
 			}
 		}
-		addAliasType(DataTypeManagerService.DataTypeAliases.BIGINT);
-		addAliasType(DataTypeManagerService.DataTypeAliases.DECIMAL);
-		addAliasType(DataTypeManagerService.DataTypeAliases.REAL);
-		addAliasType(DataTypeManagerService.DataTypeAliases.SMALLINT);
-		addAliasType(DataTypeManagerService.DataTypeAliases.TINYINT);
-		addAliasType(DataTypeManagerService.DataTypeAliases.VARCHAR);
+		addAliasType(DataTypeManager.DataTypeAliases.BIGINT);
+		addAliasType(DataTypeManager.DataTypeAliases.DECIMAL);
+		addAliasType(DataTypeManager.DataTypeAliases.REAL);
+		addAliasType(DataTypeManager.DataTypeAliases.SMALLINT);
+		addAliasType(DataTypeManager.DataTypeAliases.TINYINT);
+		addAliasType(DataTypeManager.DataTypeAliases.VARCHAR);
 		for (String name : dataTypeManager.getAllDataTypeNames()) {
 			if (!name.equals(DefaultDataTypes.NULL.getId())) {
 				ArgCheck.isNotNull(typeMap.get(name), name);
@@ -143,13 +143,13 @@ public class SystemMetadata {
 		vdb.setName("System");  //$NON-NLS-1$
 		vdb.setVersion(1);
 		Properties p = new Properties();
-		QueryParser parser = new QueryParser(teiidVersion);
+		TCQueryParser parser = new TCQueryParser(teiidVersion);
 		systemStore = loadSchema(vdb, p, resourceLocation, "SYS", parser).asMetadataStore(); //$NON-NLS-1$
 		systemStore.addDataTypes(dataTypes);
 		loadSchema(vdb, p, resourceLocation, "SYSADMIN", parser).mergeInto(systemStore); //$NON-NLS-1$
 		SystemFunctionManager systemFunctionManager = new SystemFunctionManager(teiidVersion, getClass().getClassLoader());
         TransformationMetadata tm = new TransformationMetadata(parser.getTeiidParser(), vdb, new CompositeMetadataStore(systemStore), null, systemFunctionManager.getSystemFunctions(), null);
-        vdb.addAttchment(IQueryMetadataInterface.class, tm);
+        vdb.addAttchment(QueryMetadataInterface.class, tm);
 		MetadataValidator validator = new MetadataValidator(this.teiidVersion, this.typeMap);
 		ValidatorReport report = validator.validate(vdb, systemStore);
 		if (report.hasItems()) {
@@ -157,7 +157,7 @@ public class SystemMetadata {
 		}
 	}
 
-	private MetadataFactory loadSchema(VDBMetaData vdb, Properties p, String resourceLocation, String name, QueryParser parser) {
+	private MetadataFactory loadSchema(VDBMetaData vdb, Properties p, String resourceLocation, String name, TCQueryParser parser) {
 		ModelMetaData mmd = new ModelMetaData();
 		mmd.setName(name);
 		vdb.addModel(mmd);

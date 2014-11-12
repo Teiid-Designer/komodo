@@ -31,40 +31,40 @@ import java.util.Set;
 
 import javax.script.ScriptEngine;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
-import org.komodo.spi.xml.IMappingNode;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.udf.FunctionLibrary;
+import org.komodo.spi.xml.MappingNode;
 import org.teiid.query.eval.TeiidScriptEngine;
-import org.teiid.query.mapping.relational.QueryNode;
-import org.teiid.query.sql.lang.ObjectTable;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.mapping.relational.TCQueryNode;
+import org.teiid.query.sql.lang.ObjectTableImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
 
 
 /**
  * This is an abstract implementation of the metadata interface.  It can 
  * be subclassed to create test implementations or partial implementations.
  */
-public class BasicQueryMetadata implements IQueryMetadataInterface {
+public class BasicQueryMetadata implements QueryMetadataInterface {
 	
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     /**
      * Constructor for AbstractQueryMetadata.
      * @param teiidVersion
      */
-    public BasicQueryMetadata(ITeiidVersion teiidVersion) {
+    public BasicQueryMetadata(TeiidVersion teiidVersion) {
         super();
         this.teiidVersion = teiidVersion;
     }
 
     @Override
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return teiidVersion;
     }
 
     /**
-     * @see IQueryMetadataInterface#getElementID(String)
+     * @see QueryMetadataInterface#getElementID(String)
      */
     @Override
     public Object getElementID(String elementName)
@@ -73,7 +73,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getGroupID(String)
+     * @see QueryMetadataInterface#getGroupID(String)
      */
     @Override
     public Object getGroupID(String groupName)
@@ -82,7 +82,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
     
     /**
-     * @see IQueryMetadataInterface#getGroupID(String)
+     * @see QueryMetadataInterface#getGroupID(String)
      */
     @Override
     public Collection getGroupsForPartialName(String partialGroupName)
@@ -91,7 +91,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getModelID(Object)
+     * @see QueryMetadataInterface#getModelID(Object)
      */
     @Override
     public Object getModelID(Object groupOrElementID)
@@ -100,7 +100,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getFullName(Object)
+     * @see QueryMetadataInterface#getFullName(Object)
      */
     @Override
     public String getFullName(Object metadataID)
@@ -109,7 +109,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getElementIDsInGroupID(Object)
+     * @see QueryMetadataInterface#getElementIDsInGroupID(Object)
      */
     @Override
     public List getElementIDsInGroupID(Object groupID)
@@ -118,7 +118,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getGroupIDForElementID(Object)
+     * @see QueryMetadataInterface#getGroupIDForElementID(Object)
      */
     @Override
     public Object getGroupIDForElementID(Object elementID)
@@ -127,16 +127,16 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getStoredProcedureInfoForProcedure(String)
+     * @see QueryMetadataInterface#getStoredProcedureInfoForProcedure(String)
      */
     @Override
-    public StoredProcedureInfo getStoredProcedureInfoForProcedure(String fullyQualifiedProcedureName)
+    public TCStoredProcedureInfo getStoredProcedureInfoForProcedure(String fullyQualifiedProcedureName)
         throws Exception {
         return null;
     }
 
     /**
-     * @see IQueryMetadataInterface#getElementType(Object)
+     * @see QueryMetadataInterface#getElementType(Object)
      */
     @Override
     public String getElementType(Object elementID)
@@ -161,7 +161,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
     
     /** 
-     * @see IQueryMetadataInterface#getDistinctValues(java.lang.Object)
+     * @see QueryMetadataInterface#getDistinctValues(java.lang.Object)
      *
      */
     @Override
@@ -169,7 +169,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
         return -1;
     }
     /** 
-     * @see IQueryMetadataInterface#getNullValues(java.lang.Object)
+     * @see QueryMetadataInterface#getNullValues(java.lang.Object)
      *
      */
     @Override
@@ -204,7 +204,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     
 
     /**
-     * @see IQueryMetadataInterface#isVirtualGroup(Object)
+     * @see QueryMetadataInterface#isVirtualGroup(Object)
      */
     @Override
     public boolean isVirtualGroup(Object groupID)
@@ -213,7 +213,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /** 
-     * @see IQueryMetadataInterface#hasMaterialization(java.lang.Object)
+     * @see QueryMetadataInterface#hasMaterialization(java.lang.Object)
      *
      */
     @Override
@@ -223,7 +223,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
     
     /** 
-     * @see IQueryMetadataInterface#getMaterialization(java.lang.Object)
+     * @see QueryMetadataInterface#getMaterialization(java.lang.Object)
      *
      */
     @Override
@@ -233,7 +233,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
     
     /** 
-     * @see IQueryMetadataInterface#getMaterializationStage(java.lang.Object)
+     * @see QueryMetadataInterface#getMaterializationStage(java.lang.Object)
      *
      */
     @Override
@@ -243,7 +243,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
     
     /**
-     * @see IQueryMetadataInterface#isVirtualModel(Object)
+     * @see QueryMetadataInterface#isVirtualModel(Object)
      */
     @Override
     public boolean isVirtualModel(Object modelID)
@@ -252,10 +252,10 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getVirtualPlan(Object)
+     * @see QueryMetadataInterface#getVirtualPlan(Object)
      */
     @Override
-    public QueryNode getVirtualPlan(Object groupID)
+    public TCQueryNode getVirtualPlan(Object groupID)
         throws Exception {
         return null;
     }
@@ -294,7 +294,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#modelSupports(Object, int)
+     * @see QueryMetadataInterface#modelSupports(Object, int)
      */
     @Override
     public boolean modelSupports(Object modelID, int modelConstant)
@@ -303,7 +303,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#groupSupports(Object, int)
+     * @see QueryMetadataInterface#groupSupports(Object, int)
      */
     @Override
     public boolean groupSupports(Object groupID, int groupConstant)
@@ -312,7 +312,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#elementSupports(Object, int)
+     * @see QueryMetadataInterface#elementSupports(Object, int)
      */
     @Override
     public boolean elementSupports(Object elementID, int elementConstant)
@@ -321,7 +321,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getMaxSetSize(Object)
+     * @see QueryMetadataInterface#getMaxSetSize(Object)
      */
     @Override
     public int getMaxSetSize(Object modelID)
@@ -331,7 +331,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
 
 
     /**
-     * @see IQueryMetadataInterface#getIndexesInGroup(java.lang.Object)
+     * @see QueryMetadataInterface#getIndexesInGroup(java.lang.Object)
      */
     @Override
     public Collection getIndexesInGroup(Object groupID)
@@ -340,7 +340,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getUniqueKeysInGroup(Object)
+     * @see QueryMetadataInterface#getUniqueKeysInGroup(Object)
      */
     @Override
     public Collection getUniqueKeysInGroup(Object groupID)
@@ -349,7 +349,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getForeignKeysInGroup(Object)
+     * @see QueryMetadataInterface#getForeignKeysInGroup(Object)
      */
     @Override
     public Collection getForeignKeysInGroup(Object groupID)
@@ -358,7 +358,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getPrimaryKeyIDForForeignKeyID(Object)
+     * @see QueryMetadataInterface#getPrimaryKeyIDForForeignKeyID(Object)
      */
     @Override
     public Object getPrimaryKeyIDForForeignKeyID(Object foreignKeyID)
@@ -367,7 +367,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getElementIDsInKey(Object)
+     * @see QueryMetadataInterface#getElementIDsInKey(Object)
      */
     @Override
     public List getElementIDsInKey(Object key)
@@ -376,7 +376,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getElementIDsInIndex(java.lang.Object)
+     * @see QueryMetadataInterface#getElementIDsInIndex(java.lang.Object)
      */
     @Override
     public List getElementIDsInIndex(Object index)
@@ -385,7 +385,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getAccessPatternsInGroup(Object)
+     * @see QueryMetadataInterface#getAccessPatternsInGroup(Object)
      */
     @Override
     public Collection getAccessPatternsInGroup(Object groupID)
@@ -394,7 +394,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getElementIDsInAccessPattern(Object)
+     * @see QueryMetadataInterface#getElementIDsInAccessPattern(Object)
      */
     @Override
     public List getElementIDsInAccessPattern(Object accessPattern)
@@ -403,7 +403,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#isXMLGroup(Object)
+     * @see QueryMetadataInterface#isXMLGroup(Object)
      */
     @Override
     public boolean isXMLGroup(Object groupID)
@@ -412,16 +412,16 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /**
-     * @see IQueryMetadataInterface#getMappingNode(Object)
+     * @see QueryMetadataInterface#getMappingNode(Object)
      */
     @Override
-    public IMappingNode getMappingNode(Object groupID)
+    public MappingNode getMappingNode(Object groupID)
         throws Exception {
         return null;
     }
     
     /**
-     * @see IQueryMetadataInterface#getVirtualDatabaseName()
+     * @see QueryMetadataInterface#getVirtualDatabaseName()
      */
     @Override
     public String getVirtualDatabaseName() 
@@ -441,7 +441,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     public float getCardinality(Object groupID) 
     	throws Exception{
     		
-    	return IQueryMetadataInterface.UNKNOWN_CARDINALITY;
+    	return QueryMetadataInterface.UNKNOWN_CARDINALITY;
     }
 
     @Override
@@ -491,7 +491,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
     
     /** 
-     * @see IQueryMetadataInterface#getModeledType(java.lang.Object)
+     * @see QueryMetadataInterface#getModeledType(java.lang.Object)
      *
      */
     @Override
@@ -500,7 +500,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
     
     /** 
-     * @see IQueryMetadataInterface#getModeledBaseType(java.lang.Object)
+     * @see QueryMetadataInterface#getModeledBaseType(java.lang.Object)
      *
      */
     @Override
@@ -509,7 +509,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
     }
 
     /** 
-     * @see IQueryMetadataInterface#getModeledPrimitiveType(java.lang.Object)
+     * @see QueryMetadataInterface#getModeledPrimitiveType(java.lang.Object)
      *
      */
     @Override
@@ -542,7 +542,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
 	}
 
 	@Override
-	public IFunctionLibrary getFunctionLibrary() {
+	public FunctionLibrary getFunctionLibrary() {
 		return null;
 	}
 	
@@ -562,7 +562,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
 	}
 	
 	@Override
-	public IQueryMetadataInterface getDesignTimeMetadata() {
+	public QueryMetadataInterface getDesignTimeMetadata() {
 		return this;
 	}
 	
@@ -577,7 +577,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
 	}
 	
 	@Override
-	public IQueryMetadataInterface getSessionMetadata() {
+	public QueryMetadataInterface getSessionMetadata() {
 		return null;
 	}
 	
@@ -588,7 +588,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
 
 	@Override
 	public ScriptEngine getScriptEngine(String language) throws Exception {
-		if (language == null || ObjectTable.DEFAULT_LANGUAGE.equals(language)) {
+		if (language == null || ObjectTableImpl.DEFAULT_LANGUAGE.equals(language)) {
 			return new TeiidScriptEngine();
 		}
 		return getScriptEngineDirect(language);
@@ -611,7 +611,7 @@ public class BasicQueryMetadata implements IQueryMetadataInterface {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<Expression, Integer> getFunctionBasedExpressions(Object metadataID) {
+	public Map<BaseExpression, Integer> getFunctionBasedExpressions(Object metadataID) {
 		return null;
 	}
 

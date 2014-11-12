@@ -21,8 +21,8 @@
 */
 package org.komodo.modeshape.teiid.sequencer.v87;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.modeshape.teiid.sequencer.v85.Test85SqlNodeVisitor;
 
 /**
@@ -31,7 +31,7 @@ import org.komodo.modeshape.teiid.sequencer.v85.Test85SqlNodeVisitor;
 @SuppressWarnings( {"javadoc"} )
 public class Test87SqlNodeVisitor extends Test85SqlNodeVisitor {
 
-    protected Test87SqlNodeVisitor(ITeiidVersion teiidVersion) {
+    protected Test87SqlNodeVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

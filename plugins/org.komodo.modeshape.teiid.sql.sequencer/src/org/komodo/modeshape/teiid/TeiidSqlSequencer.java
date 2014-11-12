@@ -37,11 +37,10 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.QueryParser;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.common.annotation.NotThreadSafe;
 import org.modeshape.common.text.ParsingException;
@@ -59,33 +58,22 @@ import org.modeshape.jcr.api.sequencer.Sequencer;
 @NotThreadSafe
 public class TeiidSqlSequencer extends Sequencer {
 
-    private static ITeiidVersion DEFAULT_TEIID_VERSION = Version.TEIID_8_7.get();
-
     private static final KLog LOGGER = KLog.getLogger();
-
-    private ITeiidVersion teiidVersion = DEFAULT_TEIID_VERSION;
 
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
-        return this.teiidVersion;
-    }
-
-    /**
-     * @param teiidVersion the teiidVersion to set
-     */
-    public void setTeiidVersion(ITeiidVersion teiidVersion) {
-        this.teiidVersion = teiidVersion;
+    public TeiidVersion getTeiidVersion() {
+        return TeiidVersionProvider.getInstance().getTeiidVersion();
     }
 
     /**
      * Create a query parser for parsing the SQL string
      *
-     * @return instance of {@link QueryParser} for the provided teiid version
+     * @return instance of {@link SQQueryParser} for the provided teiid version
      */
-    protected QueryParser createParser() {
-        QueryParser queryParser = new QueryParser(getTeiidVersion());
+    protected SQQueryParser createParser() {
+        SQQueryParser queryParser = new SQQueryParser(getTeiidVersion());
         return queryParser;
     }
 
@@ -99,14 +87,9 @@ public class TeiidSqlSequencer extends Sequencer {
         Binary sqlContent = inputProperty.getBinary();
         CheckArg.isNotNull(sqlContent, "teiid sql content binary value"); //$NON-NLS-1$
 
-        if (outputNode.hasProperty(TeiidSqlLexicon.TEIID_VERSION_PROPERTY)) {
-            Property versionProp = outputNode.getProperty(TeiidSqlLexicon.TEIID_VERSION_PROPERTY);
-            setTeiidVersion(new TeiidVersion(versionProp.getString()));
-        }
-
         // Perform the parsing
         final ASTNode rootNode;
-        QueryParser parser = createParser();
+        SQQueryParser parser = createParser();
         InputStream stream = sqlContent.getStream();
         try {
             String sql = IoUtil.read(stream);
@@ -195,12 +178,17 @@ public class TeiidSqlSequencer extends Sequencer {
             sequenceNode = parentNode.addNode(jcrName, astNode.getPrimaryType());
         }
 
+        // Add the mixin types to the sequence node
         astNode.setSequencedNode(sequenceNode);
         for (String mixin : astNode.getMixins()) {
             sequenceNode.addMixin(mixin);
         }
         astNode.removeProperty(JcrConstants.JCR_MIXIN_TYPES);
         astNode.removeProperty(JcrConstants.JCR_PRIMARY_TYPE);
+
+        // Add the teiid version to the sequence node
+        sequenceNode.setProperty(TeiidSqlLexicon.LanguageObject.TEIID_VERSION_PROP_NAME, getTeiidVersion().toString());
+
         return sequenceNode;
     }
 

@@ -26,27 +26,27 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.resolver.util.ResolverVisitor;
-import org.teiid.query.sql.lang.CompareCriteria;
-import org.teiid.query.sql.lang.CriteriaSelector;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.TranslateCriteria;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
+import org.teiid.query.sql.lang.CompareCriteriaImpl;
+import org.teiid.query.sql.lang.CriteriaSelectorImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.TranslateCriteriaImpl;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 
 
 /**
  */
-public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
+public class ResolveVirtualGroupCriteriaVisitor extends TCLanguageVisitorImpl {
 
     private List virtualGroup;
 
-    private IQueryMetadataInterface metadata;
+    private QueryMetadataInterface metadata;
 
     /**
      * Constructor for ResolveElementsVisitor with no specified groups.  In this
@@ -55,21 +55,21 @@ public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
      * @param virtualGroup 
      * @param metadata
      */
-    public ResolveVirtualGroupCriteriaVisitor(ITeiidVersion teiidVersion, GroupSymbol virtualGroup,  IQueryMetadataInterface metadata) {
+    public ResolveVirtualGroupCriteriaVisitor(TeiidVersion teiidVersion, GroupSymbolImpl virtualGroup,  QueryMetadataInterface metadata) {
         super(teiidVersion);
         this.virtualGroup = Arrays.asList(new Object[] {virtualGroup});
         this.metadata = metadata;
     }
 
     @Override
-    public void visit(TranslateCriteria obj) {
+    public void visit(TranslateCriteriaImpl obj) {
     	if(obj.hasTranslations()) {
     		Iterator transIter = obj.getTranslations().iterator();
     		while(transIter.hasNext()) {
-				CompareCriteria ccrit = (CompareCriteria) transIter.next();
-				ElementSymbol element = (ElementSymbol) ccrit.getLeftExpression();
+				CompareCriteriaImpl ccrit = (CompareCriteriaImpl) transIter.next();
+				ElementSymbolImpl element = (ElementSymbolImpl) ccrit.getLeftExpression();
 				try {
-                    ResolverVisitor resolverVisitor = new ResolverVisitor(getTeiidVersion());
+                    ResolverVisitorImpl resolverVisitor = new ResolverVisitorImpl(getTeiidVersion());
                     resolverVisitor.resolveLanguageObject(element, virtualGroup, metadata);
 				} catch(Exception e) {
                     throw new RuntimeException(e);
@@ -79,13 +79,13 @@ public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
     }
 
     @Override
-    public void visit(CriteriaSelector obj) {
+    public void visit(CriteriaSelectorImpl obj) {
     	if(obj.hasElements()) {
 			Iterator elmntIter = obj.getElements().iterator();
 			while(elmntIter.hasNext()) {
-				ElementSymbol virtualElement = (ElementSymbol) elmntIter.next();
+				ElementSymbolImpl virtualElement = (ElementSymbolImpl) elmntIter.next();
                 try {
-                    ResolverVisitor resolverVisitor = new ResolverVisitor(getTeiidVersion());
+                    ResolverVisitorImpl resolverVisitor = new ResolverVisitorImpl(getTeiidVersion());
                     resolverVisitor.resolveLanguageObject(virtualElement, virtualGroup, metadata);
                 } catch(Exception e) {
                     throw new RuntimeException(e);
@@ -102,7 +102,7 @@ public class ResolveVirtualGroupCriteriaVisitor extends LanguageVisitor {
      * @param metadata
      * @throws Exception
      */
-    public static void resolveCriteria(LanguageObject obj, GroupSymbol virtualGroup,  IQueryMetadataInterface metadata)
+    public static void resolveCriteria(BaseLanguageObject obj, GroupSymbolImpl virtualGroup,  QueryMetadataInterface metadata)
         throws Exception {
         if(obj == null) {
             return;

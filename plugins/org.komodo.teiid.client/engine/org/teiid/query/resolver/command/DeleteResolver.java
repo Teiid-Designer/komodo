@@ -25,14 +25,14 @@ package org.teiid.query.resolver.command;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.ProcedureContainerResolver;
-import org.teiid.query.resolver.QueryResolver;
-import org.teiid.query.resolver.util.ResolverVisitor;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.Delete;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.resolver.TCQueryResolver;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.DeleteImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 
 
 /**
@@ -43,24 +43,24 @@ public class DeleteResolver extends ProcedureContainerResolver {
     /**
      * @param queryResolver
      */
-    public DeleteResolver(QueryResolver queryResolver) {
+    public DeleteResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 
     /** 
-     * @see org.teiid.query.resolver.ProcedureContainerResolver#resolveProceduralCommand(org.teiid.query.sql.lang.Command, org.teiid.query.metadata.TempMetadataAdapter)
+     * @see org.teiid.query.resolver.ProcedureContainerResolver#resolveProceduralCommand(org.teiid.query.sql.lang.CommandImpl, org.teiid.query.metadata.TempMetadataAdapter)
      */
     @Override
-    public void resolveProceduralCommand(Command command, TempMetadataAdapter metadata) 
+    public void resolveProceduralCommand(CommandImpl command, TempMetadataAdapter metadata) 
         throws Exception {
 
         //Cast to known type
-        Delete delete = (Delete) command;
+        DeleteImpl delete = (DeleteImpl) command;
 
-        Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+        Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
         groups.add(delete.getGroup());
         getQueryResolver().resolveSubqueries(command, metadata, groups);
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidParser().getVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidParser().getVersion());
         visitor.resolveLanguageObject(delete, groups, delete.getExternalGroupContexts(), metadata);
     }
     
@@ -72,8 +72,8 @@ public class DeleteResolver extends ProcedureContainerResolver {
      * @throws Exception
      */
     @Override
-    protected String getPlan(IQueryMetadataInterface metadata,
-                           GroupSymbol group) throws Exception {
+    protected String getPlan(QueryMetadataInterface metadata,
+                           GroupSymbolImpl group) throws Exception {
         return metadata.getDeletePlan(group.getMetadataID());
     }
     

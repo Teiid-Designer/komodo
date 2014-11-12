@@ -24,41 +24,41 @@ package org.teiid.query.sql.visitor;
 
 import java.util.TreeSet;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.udf.FunctionLibrary;
 import org.teiid.metadata.FunctionMethod.Determinism;
 import org.teiid.metadata.FunctionMethod.PushDown;
-import org.teiid.query.function.FunctionDescriptor;
+import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.metadata.TempMetadataID;
-import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.sql.lang.ExistsCriteria;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.lang.SubqueryCompareCriteria;
-import org.teiid.query.sql.lang.SubquerySetCriteria;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
+import org.teiid.query.sql.lang.ExistsCriteriaImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.lang.SubqueryCompareCriteriaImpl;
+import org.teiid.query.sql.lang.SubquerySetCriteriaImpl;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.query.sql.navigator.PreOrderNavigator;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.AliasSymbol;
-import org.teiid.query.sql.symbol.Constant;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.ExpressionSymbol;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.ScalarSubquery;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.AliasSymbolImpl;
+import org.teiid.query.sql.symbol.ConstantImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.ExpressionSymbolImpl;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
 
 
 /**
  * <p>This visitor class will traverse a language object tree, and determine
  * if the current expression can be evaluated</p>
  */
-public class EvaluatableVisitor extends LanguageVisitor {
+public class EvaluatableVisitor extends TCLanguageVisitorImpl {
 	
 	/**
      * @param teiidVersion
      */
-    public EvaluatableVisitor(ITeiidVersion teiidVersion) {
+    public EvaluatableVisitor(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -73,12 +73,12 @@ public class EvaluatableVisitor extends LanguageVisitor {
 	private Determinism determinismLevel = Determinism.DETERMINISTIC;
 	private boolean hasCorrelatedReferences;
 
-    public void visit(Function obj) {
-        FunctionDescriptor fd = obj.getFunctionDescriptor();
+    public void visit(FunctionImpl obj) {
+        TCFunctionDescriptor fd = obj.getFunctionDescriptor();
         this.setDeterminismLevel(fd.getDeterministic());
         if (fd.getPushdown() == PushDown.MUST_PUSHDOWN || fd.getDeterministic() == Determinism.NONDETERMINISTIC) {
             evaluationNotPossible(EvaluationLevel.PUSH_DOWN);
-        } else if (IFunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(obj.getName())
+        } else if (FunctionLibrary.FunctionName.LOOKUP.equalsIgnoreCase(obj.getName())
         		//TODO: if we had the context here we could plan better for non-prepared requests
         		|| fd.getDeterministic().compareTo(Determinism.COMMAND_DETERMINISTIC) <= 0) {
             evaluationNotPossible(EvaluationLevel.PROCESSING);
@@ -86,7 +86,7 @@ public class EvaluatableVisitor extends LanguageVisitor {
     }
     
     @Override
-    public void visit(Constant obj) {
+    public void visit(ConstantImpl obj) {
     	if (obj.isMultiValued()) {
             evaluationNotPossible(EvaluationLevel.PUSH_DOWN);
     	}
@@ -106,7 +106,7 @@ public class EvaluatableVisitor extends LanguageVisitor {
     	}
     }
         
-    public void visit(ElementSymbol obj) {
+    public void visit(ElementSymbolImpl obj) {
         if (obj.getGroupSymbol() == null) {
             evaluationNotPossible(EvaluationLevel.PROCESSING);
             return;
@@ -123,15 +123,15 @@ public class EvaluatableVisitor extends LanguageVisitor {
 		evaluationNotPossible(EvaluationLevel.PUSH_DOWN);
     }
     
-    public void visit(ExpressionSymbol obj) {
+    public void visit(ExpressionSymbolImpl obj) {
 		evaluationNotPossible(EvaluationLevel.PUSH_DOWN);
     }
     
-    public void visit(AliasSymbol obj) {
+    public void visit(AliasSymbolImpl obj) {
 		evaluationNotPossible(EvaluationLevel.PUSH_DOWN);
     }
     
-    public void visit(AggregateSymbol obj) {
+    public void visit(BaseAggregateSymbol obj) {
     	if (obj.getFunctionDescriptor() != null) {
     		this.setDeterminismLevel(obj.getFunctionDescriptor().getDeterministic());
     	}
@@ -142,7 +142,7 @@ public class EvaluatableVisitor extends LanguageVisitor {
      * We assume the non-push down for correlation variables,
      * then make specific checks when correlated variables are allowed.
      */
-    public void visit(Reference obj) {
+    public void visit(ReferenceImpl obj) {
         hasCorrelatedReferences |= obj.isCorrelated();
         if (obj.isPositional()) {
         	setDeterminismLevel(Determinism.COMMAND_DETERMINISTIC);
@@ -150,16 +150,16 @@ public class EvaluatableVisitor extends LanguageVisitor {
     	evaluationNotPossible(EvaluationLevel.PROCESSING);
     }
     
-    public void visit(StoredProcedure proc){
+    public void visit(StoredProcedureImpl proc){
 		evaluationNotPossible(EvaluationLevel.PUSH_DOWN);
-		for (SPParameter param : proc.getInputParameters()) {
-			if (!(param.getExpression() instanceof Constant)) {
+		for (SPParameterImpl param : proc.getInputParameters()) {
+			if (!(param.getExpression() instanceof ConstantImpl)) {
 				evaluationNotPossible(EvaluationLevel.PROCESSING);
 			}
 		}
     }
     
-    public void visit(ScalarSubquery obj){
+    public void visit(ScalarSubqueryImpl obj){
         /*
          * Purposely excluded since only the optimizer ever sets
          * a scalarsubquery's shouldEvaluate flag to true and this
@@ -178,7 +178,7 @@ public class EvaluatableVisitor extends LanguageVisitor {
 //		evaluationNotPossible(EvaluationLevel.PROCESSING);
 //    }
     
-    public void visit(ExistsCriteria obj) {
+    public void visit(ExistsCriteriaImpl obj) {
     	if (obj.shouldEvaluate()) {
     		evaluationNotPossible(EvaluationLevel.PROCESSING);
     	} else {
@@ -186,11 +186,11 @@ public class EvaluatableVisitor extends LanguageVisitor {
     	}
     }        
 
-    public void visit(SubquerySetCriteria obj) {
+    public void visit(SubquerySetCriteriaImpl obj) {
 		evaluationNotPossible(EvaluationLevel.PUSH_DOWN);
     }        
 
-    public void visit(SubqueryCompareCriteria obj) {
+    public void visit(SubqueryCompareCriteriaImpl obj) {
 		evaluationNotPossible(EvaluationLevel.PUSH_DOWN);
     }
     
@@ -205,25 +205,25 @@ public class EvaluatableVisitor extends LanguageVisitor {
 	 *  Will return true if the expression can be deterministically evaluated at runtime, but it may not be
 	 *  evaluatable during planning
 	 */
-	public static final boolean willBecomeConstant(LanguageObject obj) {
+	public static final boolean willBecomeConstant(BaseLanguageObject obj) {
 	    return willBecomeConstant(obj, false);
 	}
 
 	/**
 	 *  Should be called to check if the object can fully evaluated
 	 */
-	public static final boolean isFullyEvaluatable(LanguageObject obj, boolean duringPlanning) {
+	public static final boolean isFullyEvaluatable(BaseLanguageObject obj, boolean duringPlanning) {
 	    return isEvaluatable(obj, duringPlanning?EvaluationLevel.PLANNING:EvaluationLevel.PROCESSING);
 	}
 
-	public static final boolean isEvaluatable(LanguageObject obj, EvaluationLevel target) {
+	public static final boolean isEvaluatable(BaseLanguageObject obj, EvaluationLevel target) {
         EvaluatableVisitor visitor = new EvaluatableVisitor(obj.getTeiidVersion());
         visitor.targetLevel = target;
         PreOrderNavigator.doVisit(obj, visitor);
         return visitor.isEvaluationPossible();
     }
     
-    public static final boolean willBecomeConstant(LanguageObject obj, boolean pushdown) {
+    public static final boolean willBecomeConstant(BaseLanguageObject obj, boolean pushdown) {
         EvaluatableVisitor visitor = new EvaluatableVisitor(obj.getTeiidVersion());
         visitor.targetLevel = EvaluationLevel.PROCESSING;
         PreOrderNavigator.doVisit(obj, visitor);
@@ -233,7 +233,7 @@ public class EvaluatableVisitor extends LanguageVisitor {
         return visitor.isEvaluationPossible();
     }
     
-    public static final boolean needsProcessingEvaluation(LanguageObject obj) {
+    public static final boolean needsProcessingEvaluation(BaseLanguageObject obj) {
         EvaluatableVisitor visitor = new EvaluatableVisitor(obj.getTeiidVersion());
         DeepPreOrderNavigator.doVisit(obj, visitor);
         return visitor.levels.contains(EvaluationLevel.PROCESSING);

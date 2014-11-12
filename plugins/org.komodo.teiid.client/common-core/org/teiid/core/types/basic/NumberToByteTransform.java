@@ -22,14 +22,14 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 public class NumberToByteTransform extends Transform {
 	
 	private Class<?> sourceType;
 	
-	public NumberToByteTransform(DataTypeManagerService dataTypeManager, Class<?> sourceType) {
+	public NumberToByteTransform(DefaultDataTypeManager dataTypeManager, Class<?> sourceType) {
 	    super(dataTypeManager);
 		this.sourceType = sourceType;
 	}
@@ -57,7 +57,7 @@ public class NumberToByteTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.BYTE.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BYTE.getTypeClass();
 	}
 	
 	@Override

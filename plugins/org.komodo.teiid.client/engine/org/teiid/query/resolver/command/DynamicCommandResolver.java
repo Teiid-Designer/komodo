@@ -27,20 +27,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.resolver.CommandResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.ProcedureReservedWords;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.DynamicCommand;
-import org.teiid.query.sql.lang.SetClause;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.GroupSymbol;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.DynamicCommandImpl;
+import org.teiid.query.sql.lang.SetClauseImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
 import org.teiid.runtime.client.Messages;
 
 
@@ -52,51 +52,51 @@ public class DynamicCommandResolver extends CommandResolver {
     /**
      * @param queryResolver
      */
-    public DynamicCommandResolver(QueryResolver queryResolver) {
+    public DynamicCommandResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 
     /** 
-     * @see org.teiid.query.resolver.CommandResolver#resolveCommand(org.teiid.query.sql.lang.Command, TempMetadataAdapter, boolean)
+     * @see org.teiid.query.resolver.CommandResolver#resolveCommand(org.teiid.query.sql.lang.CommandImpl, TempMetadataAdapter, boolean)
      */
     @Override
-    public void resolveCommand(Command command, TempMetadataAdapter metadata, boolean resolveNullLiterals) 
+    public void resolveCommand(CommandImpl command, TempMetadataAdapter metadata, boolean resolveNullLiterals) 
         throws Exception {
 
-        DynamicCommand dynamicCmd = (DynamicCommand)command;
+        DynamicCommandImpl dynamicCmd = (DynamicCommandImpl)command;
         
         Iterator columns = dynamicCmd.getAsColumns().iterator();
 
-        Set<GroupSymbol> groups = new HashSet<GroupSymbol>();
+        Set<GroupSymbolImpl> groups = new HashSet<GroupSymbolImpl>();
         
         //if there is no into group, just create temp metadata ids
         if (dynamicCmd.getIntoGroup() == null) {
             while (columns.hasNext()) {
-                ElementSymbol column = (ElementSymbol)columns.next();
+                ElementSymbolImpl column = (ElementSymbolImpl)columns.next();
                 column.setMetadataID(new TempMetadataID(column.getShortName(), column.getType()));
             }
         } else if (dynamicCmd.getIntoGroup().isTempGroupSymbol()) {
             while (columns.hasNext()) {
-                ElementSymbol column = (ElementSymbol)columns.next();
-                GroupSymbol gs = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
+                ElementSymbolImpl column = (ElementSymbolImpl)columns.next();
+                GroupSymbolImpl gs = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
                 gs.setName(dynamicCmd.getIntoGroup().getName());
                 column.setGroupSymbol(gs);
             }
         }
         
-        ResolverVisitor visitor = new ResolverVisitor(getTeiidParser().getVersion());
+        ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidParser().getVersion());
         visitor.resolveLanguageObject(dynamicCmd, groups, dynamicCmd.getExternalGroupContexts(), metadata);
         String sqlType = getDataTypeManager().getDataTypeName(dynamicCmd.getSql().getType());
-        String targetType = DataTypeManagerService.DefaultDataTypes.STRING.getId();
+        String targetType = DefaultDataTypeManager.DefaultDataTypes.STRING.getId();
         
         if (!targetType.equals(sqlType) && !getDataTypeManager().isImplicitConversion(sqlType, targetType)) {
              throw new QueryResolverException(Messages.gs(Messages.TEIID.TEIID30100, sqlType));
         }
         
         if (dynamicCmd.getUsing() != null && !dynamicCmd.getUsing().isEmpty()) {
-            for (SetClause clause : dynamicCmd.getUsing().getClauses()) {
-                ElementSymbol id = clause.getSymbol();
-                GroupSymbol gs = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
+            for (SetClauseImpl clause : dynamicCmd.getUsing().getClauses()) {
+                ElementSymbolImpl id = clause.getSymbol();
+                GroupSymbolImpl gs = getTeiidParser().createASTNode(ASTNodes.GROUP_SYMBOL);
                 gs.setName(ProcedureReservedWords.DVARS);
                 id.setGroupSymbol(gs);
                 id.setType(clause.getValue().getType());
@@ -104,7 +104,7 @@ public class DynamicCommandResolver extends CommandResolver {
             }
         }
         
-        GroupSymbol intoSymbol = dynamicCmd.getIntoGroup();
+        GroupSymbolImpl intoSymbol = dynamicCmd.getIntoGroup();
         if (intoSymbol != null) {
             if (!intoSymbol.isImplicitTempGroupSymbol()) {
                 ResolverUtil.resolveGroup(intoSymbol, metadata);

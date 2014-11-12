@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.teiid.query.proc.wsdl;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.language.SQLConstants;
 
 /**
@@ -29,17 +29,17 @@ import org.teiid.language.SQLConstants;
  */
 public abstract class AbstractWsdlHelper {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     /**
      * @param teiidVersion
      */
-    public AbstractWsdlHelper(ITeiidVersion teiidVersion) {
+    public AbstractWsdlHelper(TeiidVersion teiidVersion) {
         super();
         this.teiidVersion = teiidVersion;
     }
 
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return teiidVersion;
     }
 

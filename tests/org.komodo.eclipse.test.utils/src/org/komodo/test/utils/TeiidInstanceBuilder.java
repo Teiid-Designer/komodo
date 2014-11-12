@@ -23,31 +23,31 @@ package org.komodo.test.utils;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import org.komodo.spi.runtime.ITeiidAdminInfo;
-import org.komodo.spi.runtime.ITeiidInstance;
-import org.komodo.spi.runtime.ITeiidJdbcInfo;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.TeiidAdminInfo;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 @SuppressWarnings( {"javadoc"} )
 public class TeiidInstanceBuilder {
 
-	private ITeiidInstance teiidInstance;
+	private TeiidInstance teiidInstance;
 
-	public TeiidInstanceBuilder(ITeiidVersion teiidVersion) throws Exception {
-		teiidInstance = mock(ITeiidInstance.class);
+	public TeiidInstanceBuilder(TeiidVersion teiidVersion) throws Exception {
+		teiidInstance = mock(TeiidInstance.class);
 		when(teiidInstance.getVersion()).thenReturn(teiidVersion);
 
-		ITeiidAdminInfo adminInfo = mock(ITeiidAdminInfo.class);
+		TeiidAdminInfo adminInfo = mock(TeiidAdminInfo.class);
 		when(teiidInstance.getTeiidAdminInfo()).thenReturn(adminInfo);
 
-		ITeiidJdbcInfo jdbcInfo = mock(ITeiidJdbcInfo.class);
+		TeiidJdbcInfo jdbcInfo = mock(TeiidJdbcInfo.class);
 		when(teiidInstance.getTeiidJdbcInfo()).thenReturn(jdbcInfo);
 	}
 
 	/**
 	 * @return the teiidInstance
 	 */
-	public ITeiidInstance getTeiidInstance() {
+	public TeiidInstance getTeiidInstance() {
 		return this.teiidInstance;
 	}
 

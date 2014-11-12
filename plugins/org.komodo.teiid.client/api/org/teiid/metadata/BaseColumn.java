@@ -25,9 +25,9 @@ package org.teiid.metadata;
 import java.util.Collections;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.teiid.core.types.DataTypeManagerService;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.StringUtil;
 
 
@@ -46,7 +46,7 @@ public abstract class BaseColumn extends AbstractMetadataRecord {
 		Unknown		
 	}
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
 	private String datatypeUUID;
     private String runtimeType;
@@ -63,7 +63,7 @@ public abstract class BaseColumn extends AbstractMetadataRecord {
     @Since(Version.TEIID_8_7)
     private String nativeType;
 
-    public BaseColumn(ITeiidVersion teiidVersion) {
+    public BaseColumn(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
     }
 
@@ -80,7 +80,7 @@ public abstract class BaseColumn extends AbstractMetadataRecord {
     }
     
     public Class<?> getJavaType() {
-        return DataTypeManagerService.getInstance(teiidVersion).getDataTypeClass(runtimeType);
+        return DefaultDataTypeManager.getInstance(teiidVersion).getDataTypeClass(runtimeType);
     }
 
     public int getLength() {

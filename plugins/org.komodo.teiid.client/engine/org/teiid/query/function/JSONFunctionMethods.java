@@ -30,8 +30,8 @@ import java.sql.SQLException;
 import java.util.Stack;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.common.buffer.FileStore;
 import org.teiid.common.buffer.FileStoreInputStreamFactory;
 import org.teiid.common.buffer.impl.MemoryStorageManager;
@@ -39,7 +39,7 @@ import org.teiid.core.types.BlobType;
 import org.teiid.core.types.ClobImpl;
 import org.teiid.core.types.ClobType;
 import org.teiid.core.types.ClobType.Type;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.InputStreamFactory;
 import org.teiid.core.types.Streamable;
 import org.teiid.core.util.ObjectConverterUtil;
@@ -107,13 +107,13 @@ public class JSONFunctionMethods {
 	};
 	
 	public static class JSONBuilder {
-	    private final ITeiidVersion teiidVersion;
+	    private final TeiidVersion teiidVersion;
 		private Writer writer;
 		private FileStoreInputStreamFactory fsisf;
 		private FileStore fs;
 		private Stack<Integer> position = new Stack<Integer>();
 
-		public JSONBuilder(ITeiidVersion teiidVersion) {
+		public JSONBuilder(TeiidVersion teiidVersion) {
 		    this.teiidVersion = teiidVersion;
             MemoryStorageManager manager = new MemoryStorageManager();
 			fs = manager.createFileStore("xml"); //$NON-NLS-1$
@@ -165,8 +165,8 @@ public class JSONFunctionMethods {
 					writer.write(object.toString());
 				} else {
 					writer.append('"');
-					String text = (String) DataTypeManagerService.getInstance(teiidVersion).transformValue(object, 
-					                                                                  DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass());
+					String text = (String) DefaultDataTypeManager.getInstance(teiidVersion).transformValue(object, 
+					                                                                  DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass());
 					JSONParser.escape(text, writer);
 					writer.append('"');
 				}

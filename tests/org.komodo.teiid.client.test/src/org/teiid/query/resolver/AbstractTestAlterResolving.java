@@ -29,11 +29,11 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.query.sql.lang.AlterTrigger;
-import org.teiid.query.sql.lang.AlterView;
-import org.teiid.query.sql.lang.Command;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.teiid.query.sql.lang.AlterTriggerImpl;
+import org.teiid.query.sql.lang.AlterViewImpl;
+import org.teiid.query.sql.lang.CommandImpl;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 
 @SuppressWarnings( {"nls", "javadoc"} )
@@ -42,11 +42,11 @@ public abstract class AbstractTestAlterResolving extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestAlterResolving(ITeiidVersion teiidVersion) {
+    public AbstractTestAlterResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
-    protected Command helpParse(String sql) {
+    protected CommandImpl helpParse(String sql) {
         try {
             return getQueryParser().parseCommand(sql);
         } catch (Exception e) {
@@ -54,14 +54,14 @@ public abstract class AbstractTestAlterResolving extends AbstractTest {
         }
     }
 
-    protected Command helpResolve(String sql, IQueryMetadataInterface queryMetadata) {
+    protected CommandImpl helpResolve(String sql, QueryMetadataInterface queryMetadata) {
         return helpResolve(helpParse(sql), queryMetadata);
     }
 
-    protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {
+    protected CommandImpl helpResolve(CommandImpl command, QueryMetadataInterface queryMetadataInterface) {
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadataInterface);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -74,18 +74,18 @@ public abstract class AbstractTestAlterResolving extends AbstractTest {
         return command;
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata) {
         helpResolveException(sql, queryMetadata, null);
     }
 
-    protected void helpResolveException(String sql, IQueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
+    protected void helpResolveException(String sql, QueryMetadataInterface queryMetadata, String expectedExceptionMessage) {
 
         // parse
-        Command command = helpParse(sql);
+        CommandImpl command = helpParse(sql);
 
         // resolve
         try {
-            QueryResolver queryResolver = new QueryResolver(getQueryParser());
+            TCQueryResolver queryResolver = new TCQueryResolver(getQueryParser());
             queryResolver.resolveCommand(command, queryMetadata);
             fail("Expected exception for resolving " + sql); //$NON-NLS-1$
         } catch (QueryResolverException e) {
@@ -99,13 +99,13 @@ public abstract class AbstractTestAlterResolving extends AbstractTest {
 
     @Test
     public void testAlterView() {
-        AlterView alterView = (AlterView)helpResolve("alter view SmallA_2589 as select 2", getMetadataFactory().exampleBQTCached());
+        AlterViewImpl alterView = (AlterViewImpl)helpResolve("alter view SmallA_2589 as select 2", getMetadataFactory().exampleBQTCached());
         assertNotNull(alterView.getTarget().getMetadataID());
     }
 
     @Test
     public void testAlterTriggerInsert() {
-        AlterTrigger alterTrigger = (AlterTrigger)helpResolve("alter trigger on SmallA_2589 instead of insert as for each row begin atomic select new.intkey; end",
+        AlterTriggerImpl alterTrigger = (AlterTriggerImpl)helpResolve("alter trigger on SmallA_2589 instead of insert as for each row begin atomic select new.intkey; end",
                                                               getMetadataFactory().exampleBQTCached());
         assertNotNull(alterTrigger.getTarget().getMetadataID());
     }

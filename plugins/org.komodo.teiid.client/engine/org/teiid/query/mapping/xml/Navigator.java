@@ -38,7 +38,7 @@ public class Navigator extends MappingVisitor {
         this.realVisitor = visitor;
     }
         
-    public void visit(MappingNode node) {
+    public void visit(MappingNodeImpl node) {
         if (preOrder) {
             node.acceptVisitor(realVisitor);
         }
@@ -49,9 +49,9 @@ public class Navigator extends MappingVisitor {
     }
 
     /** 
-     * @see org.teiid.query.mapping.xml.MappingVisitor#visit(org.teiid.query.mapping.xml.MappingElement)
+     * @see org.teiid.query.mapping.xml.MappingVisitor#visit(org.teiid.query.mapping.xml.MappingElementImpl)
      */
-    public void visit(MappingElement element) {
+    public void visit(MappingElementImpl element) {
         if (preOrder) {
             element.acceptVisitor(realVisitor);
         }
@@ -67,9 +67,9 @@ public class Navigator extends MappingVisitor {
     }
 
     /** 
-     * @see org.teiid.query.mapping.xml.MappingVisitor#visit(org.teiid.query.mapping.xml.MappingRecursiveElement)
+     * @see org.teiid.query.mapping.xml.MappingVisitor#visit(org.teiid.query.mapping.xml.MappingRecursiveElementImpl)
      */
-    public void visit(MappingRecursiveElement element) {
+    public void visit(MappingRecursiveElementImpl element) {
         this.realVisitor.visit(element);
         
         // Do not walk the children of the recursive class as they are

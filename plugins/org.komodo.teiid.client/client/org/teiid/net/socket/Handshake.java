@@ -28,8 +28,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
-import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.teiid.core.util.ApplicationInfo;
 import org.teiid.core.util.StringUtil;
 
@@ -53,8 +53,8 @@ public class Handshake implements Externalizable {
     	this.version = version;
     }
 
-    private ITeiidVersion getTeiidVersion() {
-        ITeiidVersion version = new TeiidVersion(getVersion());
+    private TeiidVersion getTeiidVersion() {
+        TeiidVersion version = new DefaultTeiidVersion(getVersion());
         return version;
     }
 

@@ -42,9 +42,9 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.core.types.BinaryType;
-import org.teiid.core.types.DataTypeManagerService;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.teiid.core.types.BinaryTypeImpl;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.util.ReaderInputStream;
 import org.teiid.runtime.client.Messages;
 
@@ -59,8 +59,8 @@ final class DataTypeTransformer {
     // Prevent instantiation
     private DataTypeTransformer() {}
 
-    private static DataTypeManagerService getDataTypeManager(ITeiidVersion teiidVersion) {
-        DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+    private static DefaultDataTypeManager getDataTypeManager(TeiidVersion teiidVersion) {
+        DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
         return dataTypeManager;
     }
 
@@ -70,15 +70,15 @@ final class DataTypeTransformer {
      * @return a BigDecimal object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final BigDecimal getBigDecimal(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final BigDecimal getBigDecimal(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, BigDecimal.class);
     }
     
-    static final <T> T transform(ITeiidVersion teiidVersion, Object value, Class<T> targetType) throws SQLException {
+    static final <T> T transform(TeiidVersion teiidVersion, Object value, Class<T> targetType) throws SQLException {
     	return transform(teiidVersion, value, targetType, getRuntimeType(teiidVersion, targetType));
     }
     
-    static final <T> T transform(ITeiidVersion teiidVersion, Object value, Class<T> targetType, Class<?> runtimeType) throws SQLException {
+    static final <T> T transform(TeiidVersion teiidVersion, Object value, Class<T> targetType, Class<?> runtimeType) throws SQLException {
     	if (value == null || targetType.isAssignableFrom(value.getClass())) {
     		return targetType.cast(value);
     	}
@@ -92,8 +92,8 @@ final class DataTypeTransformer {
                 return targetType.cast(blob.getBytes(1, (int)length));
             } else if (value instanceof String) {
             	return targetType.cast(((String)value).getBytes());
-            } else if (value instanceof BinaryType) {
-            	return targetType.cast(((BinaryType)value).getBytesDirect());
+            } else if (value instanceof BinaryTypeImpl) {
+            	return targetType.cast(((BinaryTypeImpl)value).getBytesDirect());
             }
     	} else if (targetType == String.class) {
     		if (value instanceof SQLXML) {
@@ -109,7 +109,7 @@ final class DataTypeTransformer {
         	}
     	}
     	try {
-    		DataTypeManagerService dataTypeManager = getDataTypeManager(teiidVersion);
+    		DefaultDataTypeManager dataTypeManager = getDataTypeManager(teiidVersion);
             return (T)dataTypeManager.transformValue(dataTypeManager.convertToRuntimeType(value, true), runtimeType);
     	} catch (Exception e) {
     		String valueStr = value.toString();
@@ -121,19 +121,19 @@ final class DataTypeTransformer {
     	} 
     }
     
-	static final <T> Class<?> getRuntimeType(ITeiidVersion teiidVersion, Class<T> type) {
+	static final <T> Class<?> getRuntimeType(TeiidVersion teiidVersion, Class<T> type) {
 		Class<?> runtimeType = type;
 		if (!getDataTypeManager(teiidVersion).getAllDataTypeClasses().contains(type)) {
 			if (type == Clob.class) {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.CLOB.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.CLOB.getTypeClass();
 			} else if (type == Blob.class) {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass();
 			} else if (type == SQLXML.class) {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.XML.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.XML.getTypeClass();
 			} else if (type == byte[].class) {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass();
 			} else {
-				runtimeType = DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass();
+				runtimeType = DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass();
 			}
 		}
 		return runtimeType;
@@ -145,7 +145,7 @@ final class DataTypeTransformer {
      * @return a Boolean object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final boolean getBoolean(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final boolean getBoolean(TeiidVersion teiidVersion, Object value) throws SQLException {
     	if (value == null) {
     		return false;
     	}
@@ -158,18 +158,18 @@ final class DataTypeTransformer {
      * @return a Byte object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final byte getByte(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final byte getByte(TeiidVersion teiidVersion, Object value) throws SQLException {
     	if (value == null) {
     		return 0;
     	}
     	return transform(teiidVersion, value, Byte.class); 
     }
     
-    static final byte[] getBytes(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final byte[] getBytes(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, byte[].class);
     }
     
-    static final Character getCharacter(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final Character getCharacter(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, Character.class); 
     }
 
@@ -180,7 +180,7 @@ final class DataTypeTransformer {
      * @return a Date object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final Date getDate(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final Date getDate(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, Date.class); 
     }
 
@@ -190,7 +190,7 @@ final class DataTypeTransformer {
      * @return a Double object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final double getDouble(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final double getDouble(TeiidVersion teiidVersion, Object value) throws SQLException {
     	if (value == null) {
     		return 0;
     	}
@@ -203,7 +203,7 @@ final class DataTypeTransformer {
      * @return a Float object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final float getFloat(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final float getFloat(TeiidVersion teiidVersion, Object value) throws SQLException {
     	if (value == null) {
     		return 0;
     	}
@@ -216,7 +216,7 @@ final class DataTypeTransformer {
      * @return a Integer object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final int getInteger(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final int getInteger(TeiidVersion teiidVersion, Object value) throws SQLException {
     	if (value == null) {
     		return 0;
     	}
@@ -229,7 +229,7 @@ final class DataTypeTransformer {
      * @return a Long object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final long getLong(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final long getLong(TeiidVersion teiidVersion, Object value) throws SQLException {
     	if (value == null) {
     		return 0;
     	}
@@ -242,7 +242,7 @@ final class DataTypeTransformer {
      * @return a Short object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final short getShort(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final short getShort(TeiidVersion teiidVersion, Object value) throws SQLException {
     	if (value == null) {
     		return 0;
     	}
@@ -256,7 +256,7 @@ final class DataTypeTransformer {
      * @return a Time object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final Time getTime(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final Time getTime(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, Time.class); 
     }
 
@@ -267,11 +267,11 @@ final class DataTypeTransformer {
      * @return a Timestamp object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final Timestamp getTimestamp(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final Timestamp getTimestamp(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, Timestamp.class); 
     }
     
-    static final String getString(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final String getString(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, String.class); 
     }
 
@@ -282,7 +282,7 @@ final class DataTypeTransformer {
      * @return a Timestamp object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final Blob getBlob(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final Blob getBlob(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, Blob.class); 
     }
 
@@ -293,7 +293,7 @@ final class DataTypeTransformer {
      * @return a Timestamp object
      * @throws SQLException if failed to transform to the desired datatype
      */
-    static final Clob getClob(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final Clob getClob(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, Clob.class); 
     }
 
@@ -303,11 +303,11 @@ final class DataTypeTransformer {
      * @return a SQLXML object
      * @throws SQLException if failed to transform to the desired datatype
      */    
-    static final SQLXML getSQLXML(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final SQLXML getSQLXML(TeiidVersion teiidVersion, Object value) throws SQLException {
     	return transform(teiidVersion, value, SQLXML.class); 
     }
     
-    static final Reader getCharacterStream(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final Reader getCharacterStream(TeiidVersion teiidVersion, Object value) throws SQLException {
     	if (value == null) {
 			return null;
 		}
@@ -323,7 +323,7 @@ final class DataTypeTransformer {
 		return new StringReader(getString(teiidVersion, value));
     }
     
-    static final InputStream getAsciiStream(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final InputStream getAsciiStream(TeiidVersion teiidVersion, Object value) throws SQLException {
     	if (value == null) {
 			return null;
 		}
@@ -340,7 +340,7 @@ final class DataTypeTransformer {
 		return new ByteArrayInputStream(getString(teiidVersion, value).getBytes(Charset.forName("ASCII"))); //$NON-NLS-1$
     }
 
-    static final NClob getNClob(ITeiidVersion teiidVersion, Object value) throws SQLException {
+    static final NClob getNClob(TeiidVersion teiidVersion, Object value) throws SQLException {
 		final Clob clob = getClob(teiidVersion, value);
 		if (clob == null) {
 			return null;
@@ -362,7 +362,7 @@ final class DataTypeTransformer {
 		});
     }
     
-    static final Array getArray(ITeiidVersion teiidVersion, Object obj) throws SQLException {
+    static final Array getArray(TeiidVersion teiidVersion, Object obj) throws SQLException {
     	//TODO: type primitive arrays more closely
     	return transform(teiidVersion, obj, Array.class, Object[].class); 
     }

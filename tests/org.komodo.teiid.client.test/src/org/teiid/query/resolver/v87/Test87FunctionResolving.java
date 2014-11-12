@@ -26,20 +26,20 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.metadata.TransformationMetadata;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.resolver.v86.Test86FunctionResolving;
-import org.teiid.query.sql.symbol.Function;
+import org.teiid.query.sql.symbol.FunctionImpl;
 import org.teiid.query.unittest.RealMetadataFactory.DDLHolder;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public class Test87FunctionResolving extends Test86FunctionResolving {
 
-    protected Test87FunctionResolving(ITeiidVersion teiidVersion) {
+    protected Test87FunctionResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -61,9 +61,9 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
                                                                 new DDLHolder("z", "create foreign function f () returns string"));
 
         String sql = "f()";
-        Function func = (Function)getQueryParser().parseExpression(sql);
+        FunctionImpl func = (FunctionImpl)getQueryParser().parseExpression(sql);
 
-        ResolverVisitor resolver = new ResolverVisitor(getTeiidVersion());
+        ResolverVisitorImpl resolver = new ResolverVisitorImpl(getTeiidVersion());
         try {
             resolver.resolveLanguageObject(func, tm);
             fail();
@@ -72,15 +72,15 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
         }
 
         sql = "z.f()";
-        func = (Function)getQueryParser().parseExpression(sql);
-        resolver = new ResolverVisitor(getTeiidVersion());
+        func = (FunctionImpl)getQueryParser().parseExpression(sql);
+        resolver = new ResolverVisitorImpl(getTeiidVersion());
         resolver.resolveLanguageObject(func, tm);
     }
 
     @Test
     public void testUDFResolveOrder() throws Exception {
 
-        IQueryMetadataInterface tm = getMetadataFactory().fromDDL("create foreign function func(x object) returns object; "
+        QueryMetadataInterface tm = getMetadataFactory().fromDDL("create foreign function func(x object) returns object; "
                                                                 + " create foreign function func(x string) returns string;"
                                                                 + " create foreign function func1(x object) returns double;"
                                                                 + " create foreign function func1(x string[]) returns bigdecimal;",
@@ -89,16 +89,16 @@ public class Test87FunctionResolving extends Test86FunctionResolving {
 
         String sql = "func('a')";
 
-        Function func = (Function) getQueryParser().parseExpression(sql);
-        ResolverVisitor resolver = new ResolverVisitor(getTeiidVersion());
+        FunctionImpl func = (FunctionImpl) getQueryParser().parseExpression(sql);
+        ResolverVisitorImpl resolver = new ResolverVisitorImpl(getTeiidVersion());
         resolver.resolveLanguageObject(func, tm);
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), func.getArgs()[0].getType());
-        assertEquals(DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass(), func.getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), func.getArgs()[0].getType());
+        assertEquals(DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass(), func.getType());
 
         sql = "func1(('1',))";
 
-        func = (Function) getQueryParser().parseExpression(sql);
-        resolver = new ResolverVisitor(getTeiidVersion());
+        func = (FunctionImpl) getQueryParser().parseExpression(sql);
+        resolver = new ResolverVisitorImpl(getTeiidVersion());
         resolver.resolveLanguageObject(func, tm);
         System.out.println(func.getType());
     }

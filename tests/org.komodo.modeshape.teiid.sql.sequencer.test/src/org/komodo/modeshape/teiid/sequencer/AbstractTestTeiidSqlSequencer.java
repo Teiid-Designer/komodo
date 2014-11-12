@@ -21,33 +21,16 @@
  */
 package org.komodo.modeshape.teiid.sequencer;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
-import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
-import java.io.File;
-import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.Property;
-import javax.jcr.PropertyIterator;
-import javax.jcr.RepositoryException;
-import javax.jcr.Value;
 import org.junit.Test;
-import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
+import org.komodo.modeshape.AbstractSequencerTest;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractCompareCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractSetCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AggregateSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AliasSymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AssignmentStatement;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.BetweenCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Block;
@@ -60,7 +43,6 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.DerivedColumn;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.DynamicCommand;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ElementSymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Expression;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ExpressionSymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.From;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Function;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.GroupBy;
@@ -69,7 +51,6 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.IfStatement;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Insert;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.IsNullCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinPredicate;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinType;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.LoopStatement;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.MatchCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.MultipleElementSymbol;
@@ -92,22 +73,17 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TableFunctionReference;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TargetedCommand;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TextColumn;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TextTable;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.UnaryFromClause;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.WindowFunction;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.WindowSpecification;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLAttributes;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLElement;
 import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
-import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.query.sql.lang.ISetQuery;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.query.sql.lang.JoinType;
+import org.komodo.spi.query.sql.lang.SetQuery.Operation;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
-import org.komodo.utils.KLog;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.modeshape.jcr.api.JcrConstants;
-import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
 
 /**
  *
@@ -115,279 +91,27 @@ import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTest {
 
-    protected ITeiidVersion teiidVersion;
-
     /**
      * @param teiidVersion
      */
-    public AbstractTestTeiidSqlSequencer(ITeiidVersion teiidVersion) {
-        this.teiidVersion = teiidVersion;
+    public AbstractTestTeiidSqlSequencer(TeiidVersion teiidVersion) {
+        super(teiidVersion);
     }
 
-    @Override
-    protected ITeiidVersion getTeiidVersion() {
-        return teiidVersion;
-    }
-
-    protected IDataTypeManagerService getDataTypeService() {
-        ExecutionAdminFactory factory = new ExecutionAdminFactory();
-        return factory.getDataTypeManagerService(teiidVersion); 
-    }
-
-    protected void verifyProperty( Node node, String propertyName, String expectedValue ) throws RepositoryException {
-        Property property = node.getProperty(propertyName);
-        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
-        assertEquals(expectedValue, value.getString());
-    }
-
-    protected void verifyProperty( Node node, String propertyName, long expectedValue ) throws RepositoryException {
-        Property property = node.getProperty(propertyName);
-        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
-        assertEquals(expectedValue, value.getLong());
-    }
-
-    protected void verifyProperty( Node node, String propertyName, boolean expectedValue ) throws RepositoryException {
-        Property property = node.getProperty(propertyName);
-        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
-        assertEquals(expectedValue, value.getBoolean());
-    }
-
-    protected void verifyProperty( Node node, String propertyName, java.sql.Date expectedValue ) throws RepositoryException {
-        Property property = node.getProperty(propertyName);
-        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
-        assertEquals(expectedValue, java.sql.Date.valueOf(value.getString()));
-    }
-
-    protected void verifyProperty( Node node, String propertyName, java.sql.Time expectedValue ) throws RepositoryException {
-        Property property = node.getProperty(propertyName);
-        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
-        assertEquals(expectedValue, java.sql.Time.valueOf(value.getString()));
-    }
-
-    protected boolean verifyHasProperty( Node node, String propNameStr ) throws RepositoryException {
-        return node.hasProperty(propNameStr);
-    }
-
-    protected void verifyPrimaryType( Node node, String expectedValue ) throws RepositoryException {
-        verifyProperty(node, JCR_PRIMARY_TYPE, expectedValue);
-    }
-
-    protected void verifyMixinType( Node node, String expectedValue ) throws RepositoryException {
-        verifyProperty(node, JCR_MIXIN_TYPES, expectedValue);
-    }
-    
-    protected void verifyMixinTypes( Node node, String... expectedValues ) throws RepositoryException {
-        Value[] values = node.getProperty(JCR_MIXIN_TYPES).getValues();
-        Set<String> valuesSet = new TreeSet<String>();
-        for (Value value : values) {
-            valuesSet.add(value.getString());
-        }
-        List<String> expectedValuesList = new ArrayList<String>(Arrays.asList(expectedValues));
-        for (Iterator<String> expectedValuesIterator = expectedValuesList.iterator(); expectedValuesIterator.hasNext();) {
-            assertTrue(valuesSet.contains(expectedValuesIterator.next()));
-            expectedValuesIterator.remove();
-        }
-        assertTrue(expectedValuesList.isEmpty());
-    }
-
-    protected void verifyBaseProperties( Node node, String primaryType, String mixinType) throws RepositoryException {
-        verifyPrimaryType(node, primaryType);
-        verifyMixinType(node, mixinType);
-    }
-
-    protected Node findNode( Node parent, String nodePath, String... mixinTypes ) throws Exception {
-        Node child = parent.getNode(nodePath);
-        assertNotNull(child);
-        verifyMixinTypes(child, mixinTypes);
-        return child;
-    }
-
-    private void traverse(String prefix, Node node, StringBuffer buffer) throws Exception {
-        buffer.append(prefix + node.getName() + NEW_LINE);
-
-        PropertyIterator propertyIterator = node.getProperties();
-        while(propertyIterator.hasNext()) {
-            Property property = propertyIterator.nextProperty();
-            buffer.append(prefix + prefix + property.toString() + NEW_LINE);
-        }
-
-        NodeIterator children = node.getNodes();
-        while(children.hasNext()) {
-            traverse(prefix + TAB, children.nextNode(), buffer);
-        }
-    }
-
-    protected void traverse(Node node) throws Exception {
-        StringBuffer buffer = new StringBuffer();
-        traverse(EMPTY_STRING, node, buffer);
-        KLog.getLogger().info(buffer.toString());
-    }
-
-    protected File wrapSQLText(String sql) throws Exception {
-        File tmpFile = File.createTempFile(TeiidSqlLexicon.Namespace.PREFIX, DOT + "tsql");
-        tmpFile.deleteOnExit();
-        FileWriter fw = new FileWriter(tmpFile);
-        fw.write(sql);
-        fw.close();
-        return tmpFile;
-    }
-
-    protected Node sequenceSql( File sqlFile ) throws Exception {
-        String fileName = sqlFile.getName();
-        createNodeWithContentFromFile(fileName, sqlFile);
-
-        Node fileNode = session().getNode(FORWARD_SLASH + fileName);
-        assertNotNull(fileNode);
+    protected Node sequenceSql(String text) throws Exception {
+        Node fileNode = prepareSequence(text, SequenceType.TSQL);
 
         Node contentNode = fileNode.getNode(JcrConstants.JCR_CONTENT);
         assertNotNull(contentNode);
 
-        Property teiidVersion = fileNode.getProperty(TeiidSqlLexicon.TEIID_VERSION_PROPERTY);
-        assertNotNull(teiidVersion);
-
         Property content = contentNode.getProperty(JcrConstants.JCR_DATA);
         assertNotNull(content);
 
-        boolean success = session().sequence("Teiid SQL Sequencer", content, fileNode);
+        // Run the sequencer manually
+        boolean success = session().sequence(SequenceType.TSQL.getSequencerName(), content, fileNode);
         assertTrue(success);
 
         return fileNode;
-    }
-
-    protected Node sequenceSql(String sqlText) throws Exception {
-        File sqlFile = wrapSQLText(sqlText);
-        Node fileNode = sequenceSql(sqlFile);
-        assertNotNull(fileNode);
-        return fileNode;
-    }
-
-    protected String enc(String input) {
-        return session().encode(input);
-    }
-
-    protected Node verify(Node parentNode, String relativePath, int index, String mixinType) throws Exception {
-        String indexExp = EMPTY_STRING;
-        if (index > -1)
-            indexExp = OPEN_SQUARE_BRACKET + index + CLOSE_SQUARE_BRACKET;
-
-        Node childNode = null;
-        if (parentNode.hasNode(relativePath)) {
-            childNode = parentNode.getNode(relativePath + indexExp);
-        } else
-            childNode = parentNode.getNode(enc(relativePath ) + indexExp);
-        assertNotNull(childNode);
-
-        verifyBaseProperties(childNode, JcrConstants.NT_UNSTRUCTURED, mixinType);
-        return childNode;
-    }
-
-    protected Node verify(Node parentNode, String relativePath, String mixinType) throws Exception {
-        return verify(parentNode, relativePath, -1, mixinType);
-    }
-
-    protected void verifyJoin(Node joinPredicate, IJoinType.Types joinType) throws Exception {
-        Node joinNode = verify(joinPredicate, JoinPredicate.JOIN_TYPE_REF_NAME, JoinType.ID);
-        verifyProperty(joinNode, TeiidSqlLexicon.JoinType.KIND_PROP_NAME, joinType.name());
-    }
-
-    protected void verifyUnaryFromClauseGroup(Node jpNode, String refName, int refIndex, String... gSymbolProps) throws Exception {
-        Node refNode = verify(jpNode, refName, refIndex, UnaryFromClause.ID);
-        Node groupNode = verify(refNode, UnaryFromClause.GROUP_REF_NAME, GroupSymbol.ID);
-
-        String name = gSymbolProps[0];
-        verifyProperty(groupNode, Symbol.NAME_PROP_NAME, name);
-
-        if (gSymbolProps.length > 1) {
-            String definition = gSymbolProps[1];
-            verifyProperty(groupNode, GroupSymbol.DEFINITION_PROP_NAME, definition);
-        }
-    }
-
-    protected void verifyUnaryFromClauseGroup(Node jpNode, String refName, String... gSymbolProps) throws Exception {
-        verifyUnaryFromClauseGroup(jpNode, refName, -1, gSymbolProps);
-    }
-
-    protected void verifyConstant(Node parentNode, String refName, int refIndex, String literal) throws Exception {
-        Node constantNode = verify(parentNode, refName, refIndex, Constant.ID);
-        verifyProperty(constantNode, Constant.VALUE_PROP_NAME, literal);
-    }
-
-    protected void verifyConstant(Node parentNode, String refName, String literal) throws Exception {
-        verifyConstant(parentNode, refName, -1, literal);
-    }
-
-    protected void verifyConstant(Node parentNode, String refName, int refIndex, int literal) throws Exception {
-        Node constantNode = verify(parentNode, refName, refIndex, Constant.ID);
-        verifyProperty(constantNode, Constant.VALUE_PROP_NAME, literal);
-    }
-
-    protected void verifyConstant(Node parentNode, String refName, int literal) throws Exception {
-        verifyConstant(parentNode, refName, -1, literal);
-    }
-
-    protected void verifyElementSymbol(Node parentNode, String refName, int refIndex, String elementSymbolName) throws Exception {
-        Node elementSymbolNode = verify(parentNode, refName, refIndex, ElementSymbol.ID);
-        verifyProperty(elementSymbolNode, Symbol.NAME_PROP_NAME, elementSymbolName);
-    }
-
-    protected void verifyElementSymbol(Node parentNode, String refName, String elementSymbolName) throws Exception {
-        verifyElementSymbol(parentNode, refName, -1, elementSymbolName);
-    }
-
-    protected Node verifyAliasSymbol(Node parentNode, String refName, int refIndex, String aliasName, String symbolId) throws Exception {
-        Node aliasNode = verify(parentNode, refName, refIndex, AliasSymbol.ID);
-        verifyProperty(aliasNode, Symbol.NAME_PROP_NAME, aliasName);
-        return verify(aliasNode, AliasSymbol.SYMBOL_REF_NAME, symbolId);
-    }
-
-    protected Node verifyAliasSymbol(Node parentNode, String refName, String aliasName, String symbolId) throws Exception {
-        return verifyAliasSymbol(parentNode, refName, -1, aliasName, symbolId);
-    }
-
-    protected void verifyAliasSymbolWithElementSymbol(Node parentNode, String refName, int refIndex, String aliasName, String elementSymbolName) throws Exception {
-        Node aliasNode = verify(parentNode, refName, refIndex, AliasSymbol.ID);
-        verifyProperty(aliasNode, Symbol.NAME_PROP_NAME, aliasName);
-        Node elementSymbolNode = verify(aliasNode, AliasSymbol.SYMBOL_REF_NAME, ElementSymbol.ID);
-        verifyProperty(elementSymbolNode, Symbol.NAME_PROP_NAME, elementSymbolName);
-    }
-
-    protected Node verifyExpressionSymbol(Node parentNode, String refName, int refIndex, String expSymbolExpressionId) throws Exception {
-        Node expSymbolNode = verify(parentNode, refName, refIndex, ExpressionSymbol.ID);
-
-        Property property = expSymbolNode.getProperty(Symbol.NAME_PROP_NAME);
-        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
-        assertTrue(value.toString().startsWith("expr"));
-
-        return verify(expSymbolNode, ExpressionSymbol.EXPRESSION_REF_NAME, expSymbolExpressionId);
-    }
-
-    protected Node verifyExpressionSymbol(Node parentNode, String refName, String expSymbolExpressionId) throws Exception {
-        return verifyExpressionSymbol(parentNode, refName, -1, expSymbolExpressionId);
-    }
-
-    protected String deriveProcPrefix(boolean useNewLine) {
-        StringBuilder builder = new StringBuilder();
-        
-        if (getTeiidVersion().isLessThan(TeiidVersion.Version.TEIID_8_4.get())) {
-            builder.append("CREATE VIRTUAL PROCEDURE");
-            if (useNewLine)
-                builder.append(NEW_LINE);
-            else
-                builder.append(SPACE);
-        }
-
-        builder.append("BEGIN");
-
-        if (!useNewLine)
-            builder.append(SPACE);
-        
-        return builder.toString();
-    }
-
-    protected void verifySql(String expectedSql, Node topNode) throws Exception {
-        TeiidSqlNodeVisitor visitor = new TeiidSqlNodeVisitor();
-        String actualSql = visitor.getTeiidSql(getTeiidVersion(), topNode);
-        assertEquals(expectedSql, actualSql);
     }
 
     @Test
@@ -411,7 +135,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
 
         // JoinPredicate should have a JOIN
-        verifyJoin(jpNode, IJoinType.Types.JOIN_INNER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_INNER);
 
         // Join Predicate should have a left clause
         // UnaryFromClause should have a group
@@ -443,7 +167,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
@@ -464,7 +188,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, 1, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
@@ -488,10 +212,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
 
         Node jpNode2 = verify(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
@@ -515,13 +239,13 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
 
         Node jpNode2 = verify(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
 
         Node jpNode3 = verify(jpNode1, JoinPredicate.RIGHT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode3, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode3, JoinType.Types.JOIN_CROSS);
         
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g2");
@@ -546,10 +270,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
         
         Node jpNode2 = verify(jpNode1, JoinPredicate.RIGHT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
         
         verifyUnaryFromClauseGroup(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
 
@@ -573,10 +297,10 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
 
         Node jpNode2 = verify(jpNode1, JoinPredicate.RIGHT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g2");
@@ -601,12 +325,12 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode1 = verify(fromNode, From.CLAUSES_REF_NAME, 1, JoinPredicate.ID);
-        verifyJoin(jpNode1, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode1, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode1, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g1");
         
         Node jpNode2 = verify(jpNode1, JoinPredicate.RIGHT_CLAUSE_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode2, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode2, JoinType.Types.JOIN_CROSS);
         
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g2");
         verifyUnaryFromClauseGroup(jpNode2, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g3");
@@ -614,7 +338,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 2, "g4");
 
         Node jpNode3 = verify(fromNode, From.CLAUSES_REF_NAME, 3, JoinPredicate.ID);
-        verifyJoin(jpNode3, IJoinType.Types.JOIN_CROSS);
+        verifyJoin(jpNode3, JoinType.Types.JOIN_CROSS);
 
         verifyUnaryFromClauseGroup(jpNode3, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g5");
         verifyUnaryFromClauseGroup(jpNode3, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g6");
@@ -639,7 +363,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g1");
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, 2, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_INNER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_INNER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "g2");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "g3");
@@ -671,7 +395,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_RIGHT_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_RIGHT_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -703,7 +427,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_RIGHT_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_RIGHT_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -735,7 +459,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_LEFT_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_LEFT_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -767,7 +491,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_LEFT_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_LEFT_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -799,7 +523,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_FULL_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_FULL_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -831,7 +555,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
         Node fromNode = verify(queryNode, Query.FROM_REF_NAME, From.ID);
 
         Node jpNode = verify(fromNode, From.CLAUSES_REF_NAME, JoinPredicate.ID);
-        verifyJoin(jpNode, IJoinType.Types.JOIN_FULL_OUTER);
+        verifyJoin(jpNode, JoinType.Types.JOIN_FULL_OUTER);
 
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.LEFT_CLAUSE_REF_NAME, "myG", "g");
         verifyUnaryFromClauseGroup(jpNode, JoinPredicate.RIGHT_CLAUSE_REF_NAME, "myH", "h");
@@ -1900,7 +1624,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTes
 
         Node unionQueryNode = verify(criteriaNode, SubqueryContainer.COMMAND_REF_NAME, SetQuery.ID);
         verifyProperty(unionQueryNode, SetQuery.ALL_PROP_NAME, true);
-        verifyProperty(unionQueryNode, SetQuery.OPERATION_PROP_NAME, ISetQuery.Operation.UNION.name());
+        verifyProperty(unionQueryNode, SetQuery.OPERATION_PROP_NAME, Operation.UNION.name());
 
         Node u1QueryNode = verify(unionQueryNode, SetQuery.LEFT_QUERY_REF_NAME, Query.ID);
         Node u1SelectNode = verify(u1QueryNode, Query.SELECT_REF_NAME, Select.ID);
