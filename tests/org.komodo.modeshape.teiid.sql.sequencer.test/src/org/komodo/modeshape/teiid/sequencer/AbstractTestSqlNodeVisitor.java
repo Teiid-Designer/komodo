@@ -22,23 +22,17 @@
 package org.komodo.modeshape.teiid.sequencer;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.File;
-import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.jcr.NamespaceRegistry;
 import javax.jcr.Node;
-import javax.jcr.NodeIterator;
-import javax.jcr.Property;
-import javax.jcr.PropertyIterator;
 import org.junit.Test;
+import org.komodo.modeshape.AbstractSequencerTest;
 import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
 import org.komodo.modeshape.teiid.TeiidSqlSequencer;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.QueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.AbstractTestFactory;
@@ -94,11 +88,8 @@ import org.komodo.spi.query.sql.lang.IOrderBy;
 import org.komodo.spi.query.sql.lang.ISPParameter;
 import org.komodo.spi.query.sql.lang.ISetQuery.Operation;
 import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.IDataTypeManagerService;
 import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
-import org.komodo.utils.KLog;
-import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.nodetype.NodeTypeManager;
 
 /**
@@ -107,21 +98,14 @@ import org.modeshape.jcr.api.nodetype.NodeTypeManager;
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractTestSqlNodeVisitor extends AbstractSequencerTest {
 
-    protected ITeiidVersion teiidVersion;
-
     protected QueryParser parser;
 
     /**
      * @param teiidVersion 
      */
     public AbstractTestSqlNodeVisitor(ITeiidVersion teiidVersion) {
-        this.teiidVersion = teiidVersion;
+        super(teiidVersion);
         this.parser = new QueryParser(teiidVersion);
-    }
-
-    @Override
-    protected ITeiidVersion getTeiidVersion() {
-        return teiidVersion;
     }
 
     protected abstract AbstractTestFactory getFactory();
@@ -129,62 +113,6 @@ public abstract class AbstractTestSqlNodeVisitor extends AbstractSequencerTest {
     //
     //    // ################################## TEST HELPERS ################################ 
     //
-
-    protected Node sequenceSql(File sqlFile) throws Exception {
-        String fileName = sqlFile.getName();
-        createNodeWithContentFromFile(fileName, sqlFile);
-
-        Node fileNode = session().getNode(FORWARD_SLASH + fileName);
-        assertNotNull(fileNode);
-
-        Node contentNode = fileNode.getNode(JcrConstants.JCR_CONTENT);
-        assertNotNull(contentNode);
-
-        Property teiidVersion = fileNode.getProperty(TeiidSqlLexicon.TEIID_VERSION_PROPERTY);
-        assertNotNull(teiidVersion);
-
-        Property content = contentNode.getProperty(JcrConstants.JCR_DATA);
-        assertNotNull(content);
-
-        boolean success = session().sequence("Teiid SQL Sequencer", content, fileNode);
-        assertTrue(success);
-
-        return fileNode;
-    }
-
-    protected File wrapSQLText(String sql) throws Exception {
-        File tmpFile = File.createTempFile(TeiidSqlLexicon.Namespace.PREFIX, DOT + "tsql");
-        tmpFile.deleteOnExit();
-        FileWriter fw = new FileWriter(tmpFile);
-        fw.write(sql);
-        fw.close();
-        return tmpFile;
-    }
-
-    protected Node sequenceSql(String sqlText) throws Exception {
-        File sqlFile = wrapSQLText(sqlText);
-        Node fileNode = sequenceSql(sqlFile);
-        assertNotNull(fileNode);
-        return fileNode;
-    }
-
-    protected String deriveProcPrefix(boolean useNewLine) {
-        StringBuilder builder = new StringBuilder();
-
-        if (getTeiidVersion().isLessThan(TeiidVersion.Version.TEIID_8_4.get())) {
-            builder.append("CREATE VIRTUAL PROCEDURE");
-            if (useNewLine) builder.append(NEW_LINE);
-            else builder.append(SPACE);
-        }
-
-        builder.append("BEGIN");
-
-        if (!useNewLine)
-            builder.append(SPACE);
-
-        return builder.toString();
-    }
-
     protected List getWhenExpressions(int expressions) {
         return getWhenExpressions(expressions, -1, false);
     }
@@ -252,27 +180,6 @@ public abstract class AbstractTestSqlNodeVisitor extends AbstractSequencerTest {
         SearchedCaseExpression caseExpr = getFactory().newSearchedCaseExpression(getAlphaWhenCriteria(whens), getThenExpressions(whens));
         caseExpr.setElseExpression(getFactory().newConstant(new Integer(9999)));
         return caseExpr;
-    }
-
-    private void traverse(String prefix, Node node, StringBuffer buffer) throws Exception {
-        buffer.append(prefix + node.getName() + NEW_LINE);
-
-        PropertyIterator propertyIterator = node.getProperties();
-        while(propertyIterator.hasNext()) {
-            Property property = propertyIterator.nextProperty();
-            buffer.append(prefix + prefix + property.toString() + NEW_LINE);
-        }
-
-        NodeIterator children = node.getNodes();
-        while(children.hasNext()) {
-            traverse(prefix + TAB, children.nextNode(), buffer);
-        }
-    }
-
-    protected void traverse(Node node) throws Exception {
-        StringBuffer buffer = new StringBuffer();
-        traverse(EMPTY_STRING, node, buffer);
-        KLog.getLogger().info(buffer.toString());
     }
 
     protected void helpTest(LanguageObject languageObject, String expectedSql) {

@@ -41,39 +41,6 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
-	 * Property name used for specifying a teiid version. This property should
-	 * be added to the Sequencer's output node prior to sequencing.
-	 */
-	public static String TEIID_VERSION_PROPERTY = Namespace.PREFIX + COLON + "teiidVersion";
-
-	/**
-	 * tsql:expressionStatement
-	 */
-	public interface ExpressionStatement {
-
-		String ID = Namespace.PREFIX + COLON + "expressionStatement";
-
-		/**
-		 * EXPECTED_TYPE_CLASS Property
-		 */
-		String EXPECTED_TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "expectedTypeClass";
-
-		Class<?> EXPECTED_TYPE_CLASS_PROP_TYPE =  String.class;
-
-		boolean EXPECTED_TYPE_CLASS_PROP_MULTIPLE = false;
-
-		/**
-		 * EXPRESSION Reference
-		 */
-		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
-
-		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
-
-		boolean EXPRESSION_REF_MULTIPLE = false;
-
-	}
-
-	/**
 	 * tsql:labeled
 	 */
 	public interface Labeled {
@@ -110,11 +77,47 @@ public class TeiidSqlLexicon implements StringConstants {
 	}
 
 	/**
+	 * tsql:expressionStatement
+	 */
+	public interface ExpressionStatement {
+
+		String ID = Namespace.PREFIX + COLON + "expressionStatement";
+
+		/**
+		 * EXPECTED_TYPE_CLASS Property
+		 */
+		String EXPECTED_TYPE_CLASS_PROP_NAME = Namespace.PREFIX + COLON + "expectedTypeClass";
+
+		Class<?> EXPECTED_TYPE_CLASS_PROP_TYPE =  String.class;
+
+		boolean EXPECTED_TYPE_CLASS_PROP_MULTIPLE = false;
+
+		/**
+		 * EXPRESSION Reference
+		 */
+		String EXPRESSION_REF_NAME = Namespace.PREFIX + COLON + "expression";
+
+		Class<?> EXPRESSION_REF_TYPE =  Expression.class;
+
+		boolean EXPRESSION_REF_MULTIPLE = false;
+
+	}
+
+	/**
 	 * tsql:languageObject
 	 */
 	public interface LanguageObject {
 
 		String ID = Namespace.PREFIX + COLON + "languageObject";
+
+		/**
+		 * TEIID_VERSION Property
+		 */
+		String TEIID_VERSION_PROP_NAME = Namespace.PREFIX + COLON + "teiidVersion";
+
+		Class<?> TEIID_VERSION_PROP_TYPE =  String.class;
+
+		boolean TEIID_VERSION_PROP_MULTIPLE = false;
 
 	}
 
@@ -2462,15 +2465,6 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		boolean VARIABLE_TYPE_PROP_MULTIPLE = false;
 
-		/**
-		 * COMMAND Reference
-		 */
-		String COMMAND_REF_NAME = Namespace.PREFIX + COLON + "command";
-
-		Class<?> COMMAND_REF_TYPE =  Command.class;
-
-		boolean COMMAND_REF_MULTIPLE = false;
-
 	}
 
 	/**
@@ -2708,15 +2702,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean IS_ABSTRACT = false;
 
 		/**
-		 * MESSAGE Reference
-		 */
-		String MESSAGE_REF_NAME = Namespace.PREFIX + COLON + "message";
-
-		Class<?> MESSAGE_REF_TYPE =  Expression.class;
-
-		boolean MESSAGE_REF_MULTIPLE = false;
-
-		/**
 		 * ERROR_CODE Reference
 		 */
 		String ERROR_CODE_REF_NAME = Namespace.PREFIX + COLON + "errorCode";
@@ -2724,6 +2709,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> ERROR_CODE_REF_TYPE =  Expression.class;
 
 		boolean ERROR_CODE_REF_MULTIPLE = false;
+
+		/**
+		 * MESSAGE Reference
+		 */
+		String MESSAGE_REF_NAME = Namespace.PREFIX + COLON + "message";
+
+		Class<?> MESSAGE_REF_TYPE =  Expression.class;
+
+		boolean MESSAGE_REF_MULTIPLE = false;
 
 		/**
 		 * SQL_STATE Reference
@@ -2820,15 +2814,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean AGGREGATE_FUNCTION_PROP_MULTIPLE = false;
 
 		/**
-		 * DISTINCT Property
-		 */
-		String DISTINCT_PROP_NAME = Namespace.PREFIX + COLON + "distinct";
-
-		Class<?> DISTINCT_PROP_TYPE =  Boolean.class;
-
-		boolean DISTINCT_PROP_MULTIPLE = false;
-
-		/**
 		 * NAME Property
 		 */
 		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
@@ -2836,6 +2821,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> NAME_PROP_TYPE =  String.class;
 
 		boolean NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * DISTINCT Property
+		 */
+		String DISTINCT_PROP_NAME = Namespace.PREFIX + COLON + "distinct";
+
+		Class<?> DISTINCT_PROP_TYPE =  Boolean.class;
+
+		boolean DISTINCT_PROP_MULTIPLE = false;
 
 		/**
 		 * ORDER_BY Reference
@@ -2885,15 +2879,6 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean SHORT_NAME_PROP_MULTIPLE = false;
 
 		/**
-		 * OUTPUT_NAME Property
-		 */
-		String OUTPUT_NAME_PROP_NAME = Namespace.PREFIX + COLON + "outputName";
-
-		Class<?> OUTPUT_NAME_PROP_TYPE =  String.class;
-
-		boolean OUTPUT_NAME_PROP_MULTIPLE = false;
-
-		/**
 		 * NAME Property
 		 */
 		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";
@@ -2901,6 +2886,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		Class<?> NAME_PROP_TYPE =  String.class;
 
 		boolean NAME_PROP_MULTIPLE = false;
+
+		/**
+		 * OUTPUT_NAME Property
+		 */
+		String OUTPUT_NAME_PROP_NAME = Namespace.PREFIX + COLON + "outputName";
+
+		Class<?> OUTPUT_NAME_PROP_TYPE =  String.class;
+
+		boolean OUTPUT_NAME_PROP_MULTIPLE = false;
 
 	}
 
@@ -3742,11 +3736,11 @@ public class TeiidSqlLexicon implements StringConstants {
 	 * Enumeration of lexicon classes and their identifiers
 	 */
 	public enum LexTokens {
-		EXPRESSION_STATEMENT (ExpressionStatement.ID, ExpressionStatement.class),
-
 		LABELED (Labeled.ID, Labeled.class),
 
 		TARGETED_COMMAND (TargetedCommand.ID, TargetedCommand.class),
+
+		EXPRESSION_STATEMENT (ExpressionStatement.ID, ExpressionStatement.class),
 
 		LANGUAGE_OBJECT (LanguageObject.ID, LanguageObject.class),
 
@@ -3989,9 +3983,9 @@ public class TeiidSqlLexicon implements StringConstants {
 	private static Map<String, LexTokens> astIndex = new HashMap<String, LexTokens>();
 
 	static {
-		astIndex.put(ExpressionStatement.class.getSimpleName(), LexTokens.EXPRESSION_STATEMENT);
 		astIndex.put(Labeled.class.getSimpleName(), LexTokens.LABELED);
 		astIndex.put(TargetedCommand.class.getSimpleName(), LexTokens.TARGETED_COMMAND);
+		astIndex.put(ExpressionStatement.class.getSimpleName(), LexTokens.EXPRESSION_STATEMENT);
 		astIndex.put(LanguageObject.class.getSimpleName(), LexTokens.LANGUAGE_OBJECT);
 		astIndex.put(Expression.class.getSimpleName(), LexTokens.EXPRESSION);
 		astIndex.put(PredicateCriteria.class.getSimpleName(), LexTokens.PREDICATE_CRITERIA);

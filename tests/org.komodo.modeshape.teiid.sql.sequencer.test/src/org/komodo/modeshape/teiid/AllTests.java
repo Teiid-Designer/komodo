@@ -23,14 +23,19 @@ package org.komodo.modeshape.teiid;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.komodo.modeshape.teiid.sequencer.v8.Test8Sequencers;
 import org.komodo.modeshape.teiid.sequencer.v8.Test8SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v8.TestTeiid8SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v84.Test84Sequencers;
 import org.komodo.modeshape.teiid.sequencer.v84.Test84SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v84.TestTeiid84SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v85.Test85Sequencers;
 import org.komodo.modeshape.teiid.sequencer.v85.Test85SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v85.TestTeiid85SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v86.Test86Sequencers;
 import org.komodo.modeshape.teiid.sequencer.v86.Test86SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v86.TestTeiid86SqlSequencer;
+import org.komodo.modeshape.teiid.sequencer.v87.Test87Sequencers;
 import org.komodo.modeshape.teiid.sequencer.v87.Test87SqlNodeVisitor;
 import org.komodo.modeshape.teiid.sequencer.v87.TestTeiid87SqlSequencer;
 import org.komodo.modeshape.teiid.sql.v8.Test8Cloning;
@@ -70,7 +75,14 @@ import org.komodo.modeshape.teiid.sql.v87.TestQuery87Parser;
                                         TestTeiid84SqlSequencer.class,
                                         TestTeiid85SqlSequencer.class,
                                         TestTeiid86SqlSequencer.class,
-                                        TestTeiid87SqlSequencer.class
+                                        TestTeiid87SqlSequencer.class,
+
+                                        // sequencers
+                                        Test8Sequencers.class,
+                                        Test84Sequencers.class,
+                                        Test85Sequencers.class,
+                                        Test86Sequencers.class,
+                                        Test87Sequencers.class
                                     } )
 public class AllTests {
     // nothing to do

@@ -52,6 +52,7 @@ import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.runtime.version.ITeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion.Version;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.value.Reference;
@@ -108,7 +109,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
     };
 
     private static final String[] IGNORED_METHOD_NAMES = {
-        "getTeiidParser", "getTeiidVersion"
+        "getTeiidParser"
     };
 
     private static final List<String> IGNORED_METHOD_LIST = Arrays.asList(IGNORED_METHOD_NAMES);
@@ -451,24 +452,6 @@ public class TeiidCndGenerator implements GeneratorConstants {
         lex(PUBLIC + SPACE + CLASS + SPACE + TEIID_SQL_LEXICON + " implements StringConstants" + SPACE + OPEN_BRACE);
         lex(NEW_LINE);
         lex(NEW_LINE);
-    }
-
-    /**
-     * Generate the teiid version property constant of the Lexicon java file
-     *
-     * @throws Exception
-     */
-    private void lexTeiidVersionProperty() throws Exception {
-        StringBuffer buf = new StringBuffer();
-        buf.append(TAB + "/**" + NEW_LINE)
-             .append(TAB + " * Property name used for specifying a teiid version. This property should" + NEW_LINE)
-             .append(TAB + " * be added to the Sequencer's output node prior to sequencing." + NEW_LINE)
-             .append(TAB + " */" + NEW_LINE)
-             .append(TAB + PUBLIC + SPACE + STATIC + SPACE + "String TEIID_VERSION_PROPERTY = ")
-             .append("Namespace.PREFIX + COLON + \"teiidVersion\"" + SEMI_COLON)
-             .append(NEW_LINE)
-             .append(NEW_LINE);
-        lex(buf.toString());
     }
 
     /**
@@ -1221,8 +1204,9 @@ public class TeiidCndGenerator implements GeneratorConstants {
             PropertyAspect propAspect = new PropertyAspect(aspectName, ModeshapeType.STRING, multiple);
             propAspect.setConstraints(constraints);
             aspect = propAspect;
-        }
-        else
+        } else if (parameterClass.equals(ITeiidVersion.class)) {
+            aspect = new PropertyAspect(aspectName, ModeshapeType.STRING, multiple);
+        } else
             System.out.println("The class " + classNode.klazz().getSimpleName() + " has the setter method " + method.getName() + " with a parameter type '" + aspectType + "' is not supported");
 
         if (aspect != null) {
@@ -1595,8 +1579,6 @@ public class TeiidCndGenerator implements GeneratorConstants {
             cndSection1Comment("@generated using " + getClass().getCanonicalName());
             cnd(NEW_LINE);
             writeNamespaces();
-
-            lexTeiidVersionProperty();
 
             cndSection1Comment("NODETYPES");
             writeClassTree();
