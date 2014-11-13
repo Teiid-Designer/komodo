@@ -23,7 +23,7 @@
 package org.teiid.core.types.basic;
 
 import java.math.BigDecimal;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 
@@ -31,7 +31,7 @@ public class FixedNumberToBigDecimalTransform extends Transform {
 
 	private Class<?> sourceType;
 	
-	public FixedNumberToBigDecimalTransform(DataTypeManagerService dataTypeManager, Class<?> sourceType) {
+	public FixedNumberToBigDecimalTransform(DefaultDataTypeManager dataTypeManager, Class<?> sourceType) {
 	    super(dataTypeManager);
 		this.sourceType = sourceType;
 	}
@@ -61,7 +61,7 @@ public class FixedNumberToBigDecimalTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
 	}
 
 }

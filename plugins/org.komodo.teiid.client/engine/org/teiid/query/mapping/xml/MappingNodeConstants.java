@@ -31,7 +31,7 @@ import java.util.Map;
 
 /**
  * Constants, property names, and property default values for
- * a {@link MappingNode}.
+ * a {@link MappingNodeImpl}.
  */
 public final class MappingNodeConstants {
    
@@ -44,19 +44,19 @@ public final class MappingNodeConstants {
     
     /**
      * Indicates a search of a mapping document should be upward.  See
-     * {@link MappingNode#findFirstNodeWithProperty}
+     * {@link MappingNodeImpl#findFirstNodeWithProperty}
      */
     public static final int SEARCH_UP = 2;
 
     /**
      * Indicates a search of a mapping document should be downward, DEPTH FIRST.  See
-     * {@link MappingNode#findFirstNodeWithProperty}
+     * {@link MappingNodeImpl#findFirstNodeWithProperty}
      */
     public static final int SEARCH_DOWN = 3; // DEPTH FIRST
 
     /**
      * Indicates a search of a mapping document should be downward, BREADTH FIRST.  See
-     * {@link MappingNode#findFirstNodeWithProperty}
+     * {@link MappingNodeImpl#findFirstNodeWithProperty}
      */
     public static final int SEARCH_DOWN_BREADTH_FIRST = 4; //BREADTH FIRST
     
@@ -622,7 +622,7 @@ public final class MappingNodeConstants {
        
         /**
          * Default property values, keyed off the properties defined in 
-         * {@link MappingNodeConstants.Properties}.  The {@link MappingNode} class will return
+         * {@link MappingNodeConstants.Properties}.  The {@link MappingNodeImpl} class will return
          * these values if none are defined, for each property.
          */
         public static final Map<Properties, Object> DEFAULT_VALUES;

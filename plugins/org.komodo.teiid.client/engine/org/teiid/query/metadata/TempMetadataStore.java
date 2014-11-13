@@ -28,12 +28,12 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import org.teiid.query.metadata.TempMetadataID.Type;
-import org.teiid.query.sql.symbol.AliasSymbol;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.ExpressionSymbol;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.symbol.AliasSymbolImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.ExpressionSymbolImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
 
 
 /**
@@ -107,11 +107,11 @@ public class TempMetadataStore implements Serializable {
      * @param isVirtual whether or not the group is a virtual group
      * @param isTempTable whether or not the group is a temporary table
      */
-    public TempMetadataID addTempGroup(String tempGroup, List<? extends Expression> tempSymbols, boolean isVirtual, boolean isTempTable) { 
+    public TempMetadataID addTempGroup(String tempGroup, List<? extends BaseExpression> tempSymbols, boolean isVirtual, boolean isTempTable) { 
         // Add the temporary group
         List<TempMetadataID> elementIDs = new ArrayList<TempMetadataID>(tempSymbols.size());
         
-        for (Expression symbol : tempSymbols) {
+        for (BaseExpression symbol : tempSymbols) {
             TempMetadataID elementID = createElementSymbol(tempGroup, symbol, isTempTable);
         
             elementIDs.add(elementID);
@@ -123,30 +123,30 @@ public class TempMetadataStore implements Serializable {
         return groupID;
     }
 
-    private TempMetadataID createElementSymbol(String tempName, Expression symbol, boolean isTempTable) {
+    private TempMetadataID createElementSymbol(String tempName, BaseExpression symbol, boolean isTempTable) {
         // Create new element name
-        String elementName = tempName + Symbol.SEPARATOR + Symbol.getShortName(symbol);
+        String elementName = tempName + SymbolImpl.SEPARATOR + SymbolImpl.getShortName(symbol);
         
         Object metadataID = null;
         
-        if (symbol instanceof AliasSymbol) {
-            AliasSymbol as = (AliasSymbol)symbol;
+        if (symbol instanceof AliasSymbolImpl) {
+            AliasSymbolImpl as = (AliasSymbolImpl)symbol;
             symbol = as.getSymbol();
         }
         
         //the following allows for original metadata ids to be determined for proc inputs
-        if (symbol instanceof ExpressionSymbol) {
-            Expression expr = ((ExpressionSymbol)symbol).getExpression();
-            if (expr instanceof Reference) {
-                expr = ((Reference)expr).getExpression();
+        if (symbol instanceof ExpressionSymbolImpl) {
+            BaseExpression expr = ((ExpressionSymbolImpl)symbol).getExpression();
+            if (expr instanceof ReferenceImpl) {
+                expr = ((ReferenceImpl)expr).getExpression();
             } 
-            if (expr instanceof ElementSymbol) {
+            if (expr instanceof ElementSymbolImpl) {
                 symbol = expr;
             }
         }
         
-        if (symbol instanceof ElementSymbol) {
-            metadataID = ((ElementSymbol)symbol).getMetadataID();
+        if (symbol instanceof ElementSymbolImpl) {
+            metadataID = ((ElementSymbolImpl)symbol).getMetadataID();
         }
         
         while (metadataID != null && metadataID instanceof TempMetadataID) {
@@ -165,7 +165,7 @@ public class TempMetadataStore implements Serializable {
      * @param symbol - element to be added
      * @return metadata id.
      */
-    public TempMetadataID addElementSymbolToTempGroup(String tempGroup, Expression symbol) {
+    public TempMetadataID addElementSymbolToTempGroup(String tempGroup, BaseExpression symbol) {
         TempMetadataID groupID = this.tempGroups.get(tempGroup);
         if (groupID != null) {
             TempMetadataID elementID = createElementSymbol(tempGroup, symbol, false);
@@ -192,7 +192,7 @@ public class TempMetadataStore implements Serializable {
      * @return Metadata ID or null if not found
      */
     public TempMetadataID getTempElementID(String tempElement) {
-        int index = tempElement.lastIndexOf(Symbol.SEPARATOR);
+        int index = tempElement.lastIndexOf(SymbolImpl.SEPARATOR);
         if(index < 0) {
             return null;
         }
@@ -225,7 +225,7 @@ public class TempMetadataStore implements Serializable {
         return null;
     }
     
-    public void addElementToTempGroup(String tempGroup, ElementSymbol symbol) {
+    public void addElementToTempGroup(String tempGroup, ElementSymbolImpl symbol) {
         TempMetadataID groupID = tempGroups.get(tempGroup);        
         if(groupID != null) {
             groupID.addElement((TempMetadataID)symbol.getMetadataID());

@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import org.teiid.client.metadata.ResultsMetadataConstants;
 import org.teiid.core.CoreConstants;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.JDBCSQLTypeInfo;
 import org.teiid.core.util.PropertiesUtils;
 import org.teiid.runtime.client.Messages;
@@ -286,8 +286,8 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
         .append(" AND UCASE(Name)") .append(LIKE_ESCAPE).toString(); //$NON-NLS-1$
     }
 
-    private DataTypeManagerService getDataTypeManager() {
-        return DataTypeManagerService.getInstance(driverConnection.getTeiidVersion());
+    private DefaultDataTypeManager getDataTypeManager() {
+        return DefaultDataTypeManager.getInstance(driverConnection.getTeiidVersion());
     }
 
     /**
@@ -376,35 +376,35 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
 
         // HardCoding metadata details for SCOPE column
         metadataList[0] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.BEST_ROW.SCOPE,
-                            DataTypeManagerService.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // HardCoding metadata details for COLUMN_NAME column
         metadataList[1] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.BEST_ROW.COLUMN_NAME,
-                            DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // HardCoding metadata details for DATA_TYPE column
         metadataList[2] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.BEST_ROW.DATA_TYPE,
-                            DataTypeManagerService.DefaultDataTypes.SHORT, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.SHORT, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // HardCoding metadata details for TYPE_NAME column
         metadataList[3] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.BEST_ROW.TYPE_NAME,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // HardCoding metadata details for COLUMN_SIZE column
         metadataList[4] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.BEST_ROW.COLUMN_SIZE,
-                            DataTypeManagerService.DefaultDataTypes.INTEGER, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.INTEGER, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // HardCoding metadata details for BUFFER_LENGTH column
         metadataList[5] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.BEST_ROW.BUFFER_LENGTH,
-                            DataTypeManagerService.DefaultDataTypes.INTEGER, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.INTEGER, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
 
         // HardCoding metadata details for DECIMAL_DIGITS column
         metadataList[6] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.BEST_ROW.DECIMAL_DIGITS,
-                            DataTypeManagerService.DefaultDataTypes.SHORT, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.SHORT, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // HardCoding metadata details for PSEUDO_COLUMN column
         metadataList[7] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.BEST_ROW.PSEUDO_COLUMN,
-                            DataTypeManagerService.DefaultDataTypes.SHORT, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.SHORT, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // logging
         String logMsg = Messages.getString(Messages.JDBC.MMDatabaseMetadata_Best_row_sucess, table); 
@@ -427,7 +427,7 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
 
         // HardCoding metadata details for TABLE_CAT column
         metadataList[0] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.CATALOGS.TABLE_CAT, 
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
 
         // logging
         String logMsg = Messages.getString(Messages.JDBC.MMDatabaseMetadata_Catalog_success); 
@@ -473,21 +473,21 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
         Map[] metadataList = new Map[8];
 
         metadataList[0] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.TABLE_CAT,
-                            DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
         metadataList[1] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.TABLE_SCHEM,
-                            DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
         metadataList[2] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.TABLE_NAME,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
         metadataList[3] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.COLUMN_NAME,
-                             DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                             DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
         metadataList[4] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.GRANTOR,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
         metadataList[5] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.GRANTEE,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
         metadataList[6] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.PRIVILEGE,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
         metadataList[7] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.IS_GRANTABLE,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
        
         return dummyStatement().createResultSet(records, metadataList);
         
@@ -1385,19 +1385,19 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
 
         // HardCoding metadata details for TABLE_CAT column
         metadataList[0] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TABLES.TABLE_CAT,
-                            DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
 
         // HardCoding metadata details for TABLE_SCHEM column
         metadataList[1] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TABLES.TABLE_SCHEM,
-                            DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
 
         // HardCoding metadata details for TABLE_NAME column
         metadataList[2] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TABLES.TABLE_NAME,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // HardCoding metadata details for SUPERTABLE_NAME column
         metadataList[3] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TABLES.SUPERTABLE_NAME,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // construct results object from column values and their metadata
         return dummyStatement().createResultSet(records, metadataList);
@@ -1424,27 +1424,27 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
 
         // HardCoding metadata details for TYPE_CAT column
         metadataList[0] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TYPES.TYPE_CAT,
-                            DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
 
         // HardCoding metadata details for TYPE_SCHEM column
         metadataList[1] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TYPES.TYPE_SCHEM,
-                            DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
 
         // HardCoding metadata details for TYPE_NAME column
         metadataList[2] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TYPES.TYPE_NAME,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         // HardCoding metadata details for SUPERTYPE_CAT column
         metadataList[3] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TYPES.SUPERTYPE_CAT,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
 
         // HardCoding metadata details for SUPERTYPE_SCHEM column
         metadataList[4] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TYPES.SUPERTYPE_SCHEM,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
         
         // HardCoding metadata details for SUPERTYPE_NAME column
         metadataList[5] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.SUPER_TYPES.SUPERTYPE_NAME,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
         
         // construct results object from column values and their metadata
         return dummyStatement().createResultSet(records, metadataList);
@@ -1464,19 +1464,19 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
         Map[] metadataList = new Map[7];
 
         metadataList[0] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.TABLE_CAT,
-                            DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
         metadataList[1] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.TABLE_SCHEM,
-                            DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
         metadataList[2] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.TABLE_NAME,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
         metadataList[3] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.GRANTOR,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
         metadataList[4] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.GRANTEE,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
         metadataList[5] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.PRIVILEGE,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
         metadataList[6] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.PRIVILEGES.IS_GRANTABLE,
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NULLABLE, driverConnection);
        
         return dummyStatement().createResultSet(records, metadataList);
         
@@ -1600,7 +1600,7 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
         Map[] metadataList = new Map[1];
 
         metadataList[0] = StatementImpl.getColumnMetadata(null, JDBCColumnNames.TABLE_TYPES.TABLE_TYPE, 
-                            DataTypeManagerService.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
+                            DefaultDataTypeManager.DefaultDataTypes.STRING, ResultsMetadataConstants.NULL_TYPES.NOT_NULL, driverConnection);
 
         logger.fine(Messages.getString(Messages.JDBC.MMDatabaseMetadata_getTableType_success)); 
 
@@ -1647,24 +1647,24 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
 
         Map[] metadataList = new Map[18];
 
-        metadataList[0] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.TYPE_NAME, DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[1] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.DATA_TYPE, DataTypeManagerService.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[2] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.PRECISION, DataTypeManagerService.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[3] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.LITERAL_PREFIX, DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE,  ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[4] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.LITERAL_SUFFIX, DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE,  ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[5] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.CREATE_PARAMS, DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE,  ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[6] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.NULLABLE, DataTypeManagerService.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NULLABLE,  ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[7] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.CASE_SENSITIVE, DataTypeManagerService.DefaultDataTypes.BOOLEAN,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, driverConnection);//$NON-NLS-1$ 
-        metadataList[8] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.SEARCHABLE, DataTypeManagerService.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[9] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.UNSIGNED_ATTRIBUTE, DataTypeManagerService.DefaultDataTypes.BOOLEAN,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[10] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.FIXED_PREC_SCALE, DataTypeManagerService.DefaultDataTypes.BOOLEAN,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$
-        metadataList[11] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.AUTOINCREMENT, DataTypeManagerService.DefaultDataTypes.BOOLEAN,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, driverConnection);//$NON-NLS-1$ 
-        metadataList[12] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.LOCAL_TYPE_NAME, DataTypeManagerService.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[13] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.MINIMUM_SCALE, DataTypeManagerService.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[14] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.MAXIMUM_SCALE, DataTypeManagerService.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[15] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.SQL_DATA_TYPE, DataTypeManagerService.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[16] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.SQL_DATETIME_SUB, DataTypeManagerService.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
-        metadataList[17] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.NUM_PREC_RADIX, DataTypeManagerService.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[0] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.TYPE_NAME, DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[1] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.DATA_TYPE, DefaultDataTypeManager.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[2] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.PRECISION, DefaultDataTypeManager.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[3] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.LITERAL_PREFIX, DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE,  ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[4] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.LITERAL_SUFFIX, DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE,  ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[5] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.CREATE_PARAMS, DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NULLABLE,  ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[6] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.NULLABLE, DefaultDataTypeManager.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NULLABLE,  ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[7] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.CASE_SENSITIVE, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, driverConnection);//$NON-NLS-1$ 
+        metadataList[8] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.SEARCHABLE, DefaultDataTypeManager.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[9] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.UNSIGNED_ATTRIBUTE, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[10] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.FIXED_PREC_SCALE, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$
+        metadataList[11] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.AUTOINCREMENT, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, driverConnection);//$NON-NLS-1$ 
+        metadataList[12] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.LOCAL_TYPE_NAME, DefaultDataTypeManager.DefaultDataTypes.STRING,  ResultsMetadataConstants.NULL_TYPES.NOT_NULL, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[13] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.MINIMUM_SCALE, DefaultDataTypeManager.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[14] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.MAXIMUM_SCALE, DefaultDataTypeManager.DefaultDataTypes.SHORT,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[15] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.SQL_DATA_TYPE, DefaultDataTypeManager.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[16] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.SQL_DATETIME_SUB, DefaultDataTypeManager.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
+        metadataList[17] = StatementImpl.getColumnMetadata(CoreConstants.SYSTEM_MODEL + "." + DATA_TYPES, JDBCColumnNames.TYPE_INFO.NUM_PREC_RADIX, DefaultDataTypeManager.DefaultDataTypes.INTEGER,  ResultsMetadataConstants.NULL_TYPES.NULLABLE, ResultsMetadataConstants.SEARCH_TYPES.SEARCHABLE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, driverConnection);//$NON-NLS-1$ 
 
         ResultSetMetaData rmetadata = new ResultSetMetaDataImpl(new MetadataProvider(metadataList), null);
 
@@ -1711,13 +1711,13 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
                 JDBCColumnNames.UDTS.BASE_TYPE
         };
         String[] dataTypes = new String[] {
-                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                DataTypeManagerService.DefaultDataTypes.STRING.getId(), 
-                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                DataTypeManagerService.DefaultDataTypes.SHORT.getId()                
+                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), 
+                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.SHORT.getId()                
         };       
         return dummyStatement().createResultSet(Collections.EMPTY_LIST, columnNames, dataTypes);
     }
@@ -2027,7 +2027,7 @@ public class DatabaseMetaDataImpl extends WrapperImpl implements DatabaseMetaDat
     	String toName = JDBCSQLTypeInfo.getTypeName(toType);
     
     	if (fromName.equals(toName)) {
-    		if (fromName.equals(DataTypeManagerService.DefaultDataTypes.OBJECT.getId()) && fromName != toName) {
+    		if (fromName.equals(DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId()) && fromName != toName) {
     			return false;
     		}
     		return true;

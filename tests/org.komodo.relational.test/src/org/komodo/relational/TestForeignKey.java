@@ -23,7 +23,7 @@ import org.komodo.relational.constants.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.RelationalObjectFactory;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  * Test Class to test Table
@@ -88,9 +88,9 @@ public class TestForeignKey {
     public void testValidateDefaultFK() {
     	ForeignKey fk = RelationalObjectFactory.INSTANCE.createForeignKey(FK_NAME);
     	
-    	IOutcome outcome = fk.validate();
+    	Outcome outcome = fk.validate();
     	
-    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
+    	assertEquals(Outcome.Level.ERROR, outcome.getLevel());
     	if(!outcome.getMessage().startsWith("No columns defined for foreign key")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
     	}

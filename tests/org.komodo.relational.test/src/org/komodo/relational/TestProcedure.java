@@ -29,7 +29,7 @@ import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.relational.model.RelationalObjectFactory;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  * Test Class to test Procedure
@@ -425,9 +425,9 @@ public class TestProcedure {
     public void testValidateDefaultProc() {
     	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	
-    	IOutcome outcome = proc.validate();
+    	Outcome outcome = proc.validate();
     	
-    	assertEquals(IOutcome.Level.WARNING, outcome.getLevel());
+    	assertEquals(Outcome.Level.WARNING, outcome.getLevel());
     	assertEquals("No parameters defined for procedure", outcome.getMessage()); //$NON-NLS-1$
     }
 
@@ -439,9 +439,9 @@ public class TestProcedure {
     	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure("Crap ?"); //$NON-NLS-1$
     	proc.createParameter();
     	
-    	IOutcome outcome = proc.validate();
+    	Outcome outcome = proc.validate();
     	
-    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
+    	assertEquals(Outcome.Level.ERROR, outcome.getLevel());
     	
     	if(!outcome.getMessage().startsWith("The character ' ' (at position 5) is not allowed")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
@@ -456,9 +456,9 @@ public class TestProcedure {
     	Procedure proc = RelationalObjectFactory.INSTANCE.createProcedure(PROC_NAME);
     	proc.createParameter();
     	
-    	IOutcome outcome = proc.validate();
+    	Outcome outcome = proc.validate();
     	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    	assertEquals(Outcome.Level.OK, outcome.getLevel());
     }
 
 }

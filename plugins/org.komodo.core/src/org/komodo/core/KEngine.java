@@ -28,8 +28,8 @@ import org.komodo.core.event.KEvent;
 import org.komodo.core.event.KListener;
 import org.komodo.repository.LocalRepository;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.IRepository;
-import org.komodo.spi.repository.IRepositoryClient;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
@@ -37,7 +37,7 @@ import org.komodo.utils.KLog;
 /**
  * The Komodo engine. It is responsible for persisting and retriever user session data and Teiid artifacts.
  */
-public final class KEngine implements IRepositoryClient, StringConstants {
+public final class KEngine implements RepositoryClient, StringConstants {
 
     private static KEngine _instance;
 
@@ -55,7 +55,7 @@ public final class KEngine implements IRepositoryClient, StringConstants {
 
     private final Set<KListener> listeners = new HashSet<KListener>();
 
-    private final Set<IRepository> repositories = new HashSet<IRepository>();
+    private final Set<Repository> repositories = new HashSet<Repository>();
 
     private State state = State.NOT_STARTED;
 
@@ -68,7 +68,7 @@ public final class KEngine implements IRepositoryClient, StringConstants {
     /**
      * @return the defaultRepository
      */
-    public IRepository getDefaultRepository() {
+    public Repository getDefaultRepository() {
         return this.defaultRepository;
     }
 
@@ -91,7 +91,7 @@ public final class KEngine implements IRepositoryClient, StringConstants {
      * @param repository the repository being added (cannot be <code>null</code>)
      * @throws KException if the repository was not added
      */
-    public void add(final IRepository repository) throws KException {
+    public void add(final Repository repository) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
 
         if (this.repositories.add(repository)) {
@@ -117,7 +117,7 @@ public final class KEngine implements IRepositoryClient, StringConstants {
     /**
      * @return the registered repositories (never <code>null</code> but can be empty)
      */
-    public Set<IRepository> getRepositories() {
+    public Set<Repository> getRepositories() {
         return Collections.unmodifiableSet(this.repositories);
     }
 
@@ -138,7 +138,7 @@ public final class KEngine implements IRepositoryClient, StringConstants {
     private void notifyRepositories(final RepositoryClientEvent event) {
         ArgCheck.isNotNull(event);
 
-        for (IRepository repository : getRepositories()) {
+        for (Repository repository : getRepositories()) {
             repository.notify(event);
         }
     }
@@ -163,7 +163,7 @@ public final class KEngine implements IRepositoryClient, StringConstants {
      *
      * @throws KException if the repository was not removed
      */
-    public void remove(final IRepository repository) throws KException {
+    public void remove(final Repository repository) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
 
         if (this.repositories.remove(repository)) {

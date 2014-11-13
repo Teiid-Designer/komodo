@@ -22,8 +22,8 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.BinaryType;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.BinaryTypeImpl;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 public class BinaryToBlobTransform extends Transform {
@@ -31,7 +31,7 @@ public class BinaryToBlobTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public BinaryToBlobTransform(DataTypeManagerService dataTypeManager) {
+    public BinaryToBlobTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 
@@ -44,7 +44,7 @@ public class BinaryToBlobTransform extends Transform {
 	 * the transformation fails
 	 */
 	public Object transformDirect(Object value) throws Exception {
-        BinaryType contents = (BinaryType)value;                
+        BinaryTypeImpl contents = (BinaryTypeImpl)value;                
 		return contents.toBlob();
 	}
 
@@ -53,7 +53,7 @@ public class BinaryToBlobTransform extends Transform {
 	 * @return Source type
 	 */
 	public Class<?> getSourceType() {
-		return DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass();
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class BinaryToBlobTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.BLOB.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BLOB.getTypeClass();
 	}
 	
 }

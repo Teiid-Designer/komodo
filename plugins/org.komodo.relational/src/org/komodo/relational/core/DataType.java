@@ -7,7 +7,7 @@
 */
 package org.komodo.relational.core;
 
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.utils.ArgCheck;
 
 
@@ -182,13 +182,13 @@ public class DataType implements DataTypes {
      * @return the validation status
      */
     public boolean isValid() {
-    	return validate().getLevel()!=IOutcome.Level.ERROR;
+    	return validate().getLevel()!=Outcome.Level.ERROR;
     }
     
     /**
      * @return the validation status
      */
-    public IOutcome validate() {
+    public Outcome validate() {
     	return this.validator.validate(this);
     }
 

@@ -25,7 +25,7 @@ package org.teiid.query.optimizer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.metadata.AggregateAttributes;
 import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.FunctionMethod.Determinism;
@@ -55,7 +55,7 @@ public class FakeFunctionMetadataSource implements FunctionMetadataSource {
         method2.setPushdown(PushDown.MUST_PUSHDOWN);
         methods.add(method2);
         
-        FunctionMethod method3 = new FunctionMethod("parsedate_", "", "", null, null, new FunctionParameter[] {p1}, new FunctionParameter("", DataTypeManagerService.DefaultDataTypes.DATE.getId()));  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        FunctionMethod method3 = new FunctionMethod("parsedate_", "", "", null, null, new FunctionParameter[] {p1}, new FunctionParameter("", DefaultDataTypeManager.DefaultDataTypes.DATE.getId()));  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         method3.setPushdown(PushDown.MUST_PUSHDOWN);
         methods.add(method3);
         

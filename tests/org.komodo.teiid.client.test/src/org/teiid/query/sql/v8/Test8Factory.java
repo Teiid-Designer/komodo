@@ -21,13 +21,13 @@
 */
 package org.teiid.query.sql.v8;
 
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.AbstractTestFactory;
-import org.teiid.query.sql.proc.RaiseStatement;
-import org.teiid.query.sql.symbol.AggregateSymbol;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.WindowFunction;
+import org.teiid.query.sql.proc.RaiseStatementImpl;
+import org.teiid.query.sql.symbol.BaseAggregateSymbol;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.BaseWindowFunction;
 
 @SuppressWarnings( {"javadoc"} )
 public class Test8Factory extends AbstractTestFactory {
@@ -35,38 +35,38 @@ public class Test8Factory extends AbstractTestFactory {
     /**
      * @param parser
      */
-    public Test8Factory(QueryParser parser) {
+    public Test8Factory(TCQueryParser parser) {
         super(parser);
     }
 
     @Override
-    public Expression wrapExpression(Expression expr, String... exprName) {
+    public BaseExpression wrapExpression(BaseExpression expr, String... exprName) {
         // Expression are no longer wrapped in ExpressionSymbols. Purely a version 7 concept
         return expr;
     }
 
     @Override
-    public AggregateSymbol newAggregateSymbol(String name, boolean isDistinct, Expression expression) {
-        AggregateSymbol as = newNode(ASTNodes.AGGREGATE_SYMBOL);
+    public BaseAggregateSymbol newAggregateSymbol(String name, boolean isDistinct, BaseExpression expression) {
+        BaseAggregateSymbol as = newNode(ASTNodes.AGGREGATE_SYMBOL);
         as.setName(name);
         as.setDistinct(isDistinct);
         if (expression == null)
             as.setArgs(null);
         else
-            as.setArgs(new Expression[] {expression});
+            as.setArgs(new BaseExpression[] {expression});
         return as;
     }
 
     @Override
-    public WindowFunction newWindowFunction(String name) {
-        WindowFunction windowFunction = newNode(ASTNodes.WINDOW_FUNCTION);
+    public BaseWindowFunction newWindowFunction(String name) {
+        BaseWindowFunction windowFunction = newNode(ASTNodes.WINDOW_FUNCTION);
         // window function no longer uses name
         return windowFunction;
     }
 
     @Override
-    public RaiseStatement newRaiseStatement(Expression expr) {
-        RaiseStatement raiseStatement = newNode(ASTNodes.RAISE_STATEMENT);
+    public RaiseStatementImpl newRaiseStatement(BaseExpression expr) {
+        RaiseStatementImpl raiseStatement = newNode(ASTNodes.RAISE_STATEMENT);
         raiseStatement.setExpression(expr);
         return raiseStatement;
     }

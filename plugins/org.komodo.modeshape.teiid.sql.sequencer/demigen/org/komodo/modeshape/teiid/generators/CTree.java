@@ -93,6 +93,17 @@ public class CTree implements StringConstants {
             return this.klazz;
         }
 
+
+        /**
+         * @return name of this node without any impl postfix
+         */
+        public String getName() {
+            String name = klazz().getSimpleName();
+            name = name.replaceAll(GeneratorConstants.LANG_OBJECT_PREFIX, EMPTY_STRING);
+            name = name.replaceAll(GeneratorConstants.LANG_OBJECT_POSTFIX, EMPTY_STRING);
+            return name;
+        }
+
         /**
          * @param objClass class to test
          * @return this or its children contain the given class

@@ -8,7 +8,7 @@
 package org.komodo.eclipse.sql.ui.editor.panel;
 
 import java.util.EventObject;
-import org.komodo.spi.query.sql.lang.ICommand;
+import org.komodo.spi.query.sql.lang.Command;
 
 /**
  * The <code>SqlEditorEvent</code> class notifies interested
@@ -45,7 +45,7 @@ public class SqlEditorEvent extends EventObject {
     // FIELDS
     ///////////////////////////////////////////////////////////////////////////
 
-    private ICommand command = null;
+    private Command command = null;
     private String SQLString = null;
     private int type;
 
@@ -53,11 +53,11 @@ public class SqlEditorEvent extends EventObject {
     // CONSTRUCTORS
     ///////////////////////////////////////////////////////////////////////////
 
-    public SqlEditorEvent(ICommand command, int type) {
+    public SqlEditorEvent(Command command, int type) {
         this(null,command,type);
     }
     
-    public SqlEditorEvent(Object source, ICommand query, String SQLString, int type) {
+    public SqlEditorEvent(Object source, Command query, String SQLString, int type) {
         super(source);
         if ( type != PARSABLE
           && type != RESOLVABLE
@@ -69,7 +69,7 @@ public class SqlEditorEvent extends EventObject {
         this.type = type;
     }
 
-    public SqlEditorEvent(Object source, ICommand query, int type) {
+    public SqlEditorEvent(Object source, Command query, int type) {
         super(source);
         if ( type != PARSABLE
           && type != RESOLVABLE
@@ -101,7 +101,7 @@ public class SqlEditorEvent extends EventObject {
     // METHODS
     ///////////////////////////////////////////////////////////////////////////
 
-    public ICommand getCommand() {
+    public Command getCommand() {
         return this.command;
     }
 

@@ -26,8 +26,8 @@ import static org.junit.Assert.assertEquals;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.metadata.Column;
 import org.teiid.metadata.ColumnSet;
@@ -37,16 +37,16 @@ import org.teiid.metadata.MetadataStore;
 import org.teiid.metadata.Procedure;
 import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
-import org.teiid.query.mapping.relational.QueryNode;
+import org.teiid.query.mapping.relational.TCQueryNode;
 import org.teiid.query.metadata.TransformationMetadata;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Symbol;
-import org.teiid.query.validator.UpdateValidator.UpdateInfo;
-import org.teiid.query.validator.UpdateValidator.UpdateType;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateInfo;
+import org.teiid.query.validator.DefaultUpdateValidator.UpdateType;
 
 @SuppressWarnings({"javadoc", "nls"})
 public abstract class AbstractTestUpdateValidator extends AbstractTest {
@@ -54,21 +54,21 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
 	/**
      * @param teiidVersion
      */
-    public AbstractTestUpdateValidator(ITeiidVersion teiidVersion) {
+    public AbstractTestUpdateValidator(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
-    private UpdateValidator helpTest(String sql, TransformationMetadata md, boolean shouldFail) {
+    private DefaultUpdateValidator helpTest(String sql, TransformationMetadata md, boolean shouldFail) {
 		return helpTest(sql, md, shouldFail, shouldFail, shouldFail);
 	}
 	
-	private UpdateValidator helpTest(String sql, TransformationMetadata md, boolean failInsert, boolean failUpdate, boolean failDelete) { 	
+	private DefaultUpdateValidator helpTest(String sql, TransformationMetadata md, boolean failInsert, boolean failUpdate, boolean failDelete) { 	
 		try {
 			String vGroup = "gx";
-			Command command = createView(sql, md, vGroup);
+			CommandImpl command = createView(sql, md, vGroup);
 			
-			UpdateValidator uv = new UpdateValidator(md, UpdateType.INHERENT, UpdateType.INHERENT, UpdateType.INHERENT);
-			GroupSymbol gs = getFactory().newGroupSymbol(vGroup);
+			DefaultUpdateValidator uv = new DefaultUpdateValidator(md, UpdateType.INHERENT, UpdateType.INHERENT, UpdateType.INHERENT);
+			GroupSymbolImpl gs = getFactory().newGroupSymbol(vGroup);
 			ResolverUtil.resolveGroup(gs, md);
 			uv.validate(command, ResolverUtil.resolveElementsInGroup(gs, md));
 			UpdateInfo info = uv.getUpdateInfo();
@@ -81,21 +81,21 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
 		}
 	}
 
-	public Command createView(String sql, TransformationMetadata md, String vGroup)
+	public CommandImpl createView(String sql, TransformationMetadata md, String vGroup)
 			throws Exception {
-		QueryNode vm1g1n1 = new QueryNode(sql); 
+		TCQueryNode vm1g1n1 = new TCQueryNode(sql); 
 		Table vm1g1 = getMetadataFactory().createUpdatableVirtualGroup(vGroup, md.getMetadataStore().getSchema("VM1"), vm1g1n1);
 
-		Command command = getQueryParser().parseCommand(sql);
-		QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+		CommandImpl command = getQueryParser().parseCommand(sql);
+		TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
 		queryResolver.resolveCommand(command, md);
 
-		List<Expression> symbols = command.getProjectedSymbols();
+		List<BaseExpression> symbols = command.getProjectedSymbols();
 		String[] names = new String[symbols.size()];
 		String[] types = new String[symbols.size()];
 		int i = 0;
-		for (Expression singleElementSymbol : symbols) {
-			names[i] = Symbol.getShortName(singleElementSymbol);
+		for (BaseExpression singleElementSymbol : symbols) {
+			names[i] = SymbolImpl.getShortName(singleElementSymbol);
 			types[i++] = getDataTypeManager().getDataTypeName(singleElementSymbol.getType());
 		}
 		
@@ -123,10 +123,10 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
 		List<Column> pm1g1e = getMetadataFactory().createElements(pm1g1, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			new String[] { 
-		        DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		        DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-		        DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(),
-		        DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+		        DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 		if (!allUpdatable) {
 			pm1g1e.get(0).setUpdatable(false);
 		}
@@ -136,10 +136,10 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
 		List<Column> pm1g2e = getMetadataFactory().createElements(pm1g2, 
 			new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			new String[] {
-		        DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		        DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-		        DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(),
-		        DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+		        DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
 
 		getMetadataFactory().createKey(Type.Primary, "pk", pm1g2, pm1g1e.subList(1, 2));
 		getMetadataFactory().createForeignKey("fk", pm1g2, pm1g2e.subList(0, 1), pk);
@@ -147,10 +147,10 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
         List<Column> pm1g3e = getMetadataFactory().createElements(pm1g3, 
             new String[] { "e1", "e2", "e3", "e4" }, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             new String[] { 
-                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-                DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(),
-                DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         pm1g3e.get(0).setNullType(NullType.No_Nulls);
         pm1g3e.get(0).setDefaultValue(null);
         
@@ -162,52 +162,52 @@ public abstract class AbstractTestUpdateValidator extends AbstractTest {
         pm1g3e.get(2).setDefaultValue("xyz"); //$NON-NLS-1$
 
 		// Create virtual groups
-		QueryNode vm1g1n1 = new QueryNode("SELECT e1 as a, e2 FROM pm1.g1 WHERE e3 > 5"); //$NON-NLS-1$ //$NON-NLS-2$
+		TCQueryNode vm1g1n1 = new TCQueryNode("SELECT e1 as a, e2 FROM pm1.g1 WHERE e3 > 5"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vm1g1 = getMetadataFactory().createUpdatableVirtualGroup("g1", vm1, vm1g1n1); //$NON-NLS-1$
-		QueryNode vm1g2n1 = new QueryNode("SELECT e1, e2, e3, e4 FROM pm1.g2 WHERE e3 > 5"); //$NON-NLS-1$ //$NON-NLS-2$
+		TCQueryNode vm1g2n1 = new TCQueryNode("SELECT e1, e2, e3, e4 FROM pm1.g2 WHERE e3 > 5"); //$NON-NLS-1$ //$NON-NLS-2$
 		Table vm1g2 = getMetadataFactory().createUpdatableVirtualGroup("g2", vm1, vm1g2n1); //$NON-NLS-1$
-        QueryNode vm1g3n1 = new QueryNode("SELECT e1, e3 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
+        TCQueryNode vm1g3n1 = new TCQueryNode("SELECT e1, e3 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vm1g3 = getMetadataFactory().createUpdatableVirtualGroup("g3", vm1, vm1g3n1); //$NON-NLS-1$
-        QueryNode vm1g4n1 = new QueryNode("SELECT e1, e2 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
+        TCQueryNode vm1g4n1 = new TCQueryNode("SELECT e1, e2 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vm1g4 = getMetadataFactory().createUpdatableVirtualGroup("g4", vm1, vm1g4n1); //$NON-NLS-1$
-        QueryNode vm1g5n1 = new QueryNode("SELECT e2, e3 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
+        TCQueryNode vm1g5n1 = new TCQueryNode("SELECT e2, e3 FROM pm1.g3"); //$NON-NLS-1$ //$NON-NLS-2$
         Table vm1g5 = getMetadataFactory().createVirtualGroup("g5", vm1, vm1g5n1); //$NON-NLS-1$
 
 		// Create virtual elements
 		getMetadataFactory().createElements(vm1g1, 
 			new String[] { "a", "e2"}, //$NON-NLS-1$ //$NON-NLS-2$
 			new String[] { 
-		        DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		        DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+		        DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
 		getMetadataFactory().createElements(vm1g2, 
 			new String[] { "e1", "e2","e3", "e4"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			new String[] {
-		        DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-		        DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-		        DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(),
-		        DataTypeManagerService.DefaultDataTypes.DOUBLE.getId() });
+		        DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(),
+		        DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId() });
         getMetadataFactory().createElements(vm1g3, 
             new String[] { "e1", "e2"}, //$NON-NLS-1$ //$NON-NLS-2$
             new String[] {
-                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
+                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
         getMetadataFactory().createElements(vm1g4, 
             new String[] { "e1", "e3"}, //$NON-NLS-1$ //$NON-NLS-2$
             new String[] {
-                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId()});
+                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId()});
         getMetadataFactory().createElements(vm1g5, 
             new String[] { "e2","e3"}, //$NON-NLS-1$ //$NON-NLS-2$
             new String[] {
-                DataTypeManagerService.DefaultDataTypes.INTEGER.getId(),
-                DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId()});
+                DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(),
+                DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId()});
 
         // Stored queries
         ColumnSet<Procedure> rs1 = getMetadataFactory().createResultSet("rs1", new String[] { "e1", "e2" }, 
                                                                             new String[] {
-                                                                                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-                                                                                DataTypeManagerService.DefaultDataTypes.INTEGER.getId()});
-        QueryNode sq1n1 = new QueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$
+                                                                                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+                                                                                DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId()});
+        TCQueryNode sq1n1 = new TCQueryNode("CREATE VIRTUAL PROCEDURE BEGIN SELECT e1, e2 FROM pm1.g1; END"); //$NON-NLS-1$ //$NON-NLS-2$
         Procedure sq1 = getMetadataFactory().createVirtualProcedure("sq1", pm1, Collections.EMPTY_LIST, sq1n1);  //$NON-NLS-1$
         sq1.setResultSet(rs1);
 		// Create the facade from the store

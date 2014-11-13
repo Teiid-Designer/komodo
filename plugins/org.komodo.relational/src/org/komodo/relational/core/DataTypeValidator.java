@@ -7,7 +7,7 @@
 */
 package org.komodo.relational.core;
 
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  *
@@ -19,6 +19,6 @@ public interface DataTypeValidator {
      * @param dataType the DataType
      * @return the validation outcome
      */
-    public IOutcome validate(DataType dataType);
+    public Outcome validate(DataType dataType);
 
 }

@@ -23,7 +23,7 @@
 package org.teiid.core.types.basic;
 
 import java.math.BigDecimal;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 
@@ -31,7 +31,7 @@ public class FloatingNumberToBigIntegerTransform extends Transform {
 
 	private Class<?> sourceType;
 	
-	public FloatingNumberToBigIntegerTransform(DataTypeManagerService dataTypeManager, Class<?> sourceType) {
+	public FloatingNumberToBigIntegerTransform(DefaultDataTypeManager dataTypeManager, Class<?> sourceType) {
 	    super(dataTypeManager);
 		this.sourceType = sourceType;
 	}
@@ -61,7 +61,7 @@ public class FloatingNumberToBigIntegerTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getTypeClass();
 	}
 
 	@Override

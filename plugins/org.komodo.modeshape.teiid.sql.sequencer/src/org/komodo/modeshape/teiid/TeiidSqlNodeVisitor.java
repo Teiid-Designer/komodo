@@ -44,7 +44,7 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AggregateSymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AliasSymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Alter;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AlterTrigger;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Array;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ArraySymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ArrayTable;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AssignmentStatement;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.BetweenCriteria;
@@ -144,29 +144,25 @@ import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.NonReserved;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.Reserved;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.Tokens;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
-import org.komodo.modeshape.teiid.sql.lang.SubqueryCompareCriteria.PredicateQuantifier;
+import org.komodo.modeshape.teiid.sql.lang.SubqueryCompareCriteriaImpl.PredicateQuantifier;
 import org.komodo.modeshape.teiid.sql.lang.TriggerEvent;
-import org.komodo.modeshape.teiid.sql.proc.BranchingStatement.BranchingMode;
-import org.komodo.spi.query.sql.lang.ICompoundCriteria;
-import org.komodo.spi.query.sql.lang.IJoinType;
-import org.komodo.spi.query.sql.lang.IMatchCriteria;
-import org.komodo.spi.query.sql.lang.IMatchCriteria.MatchMode;
-import org.komodo.spi.query.sql.lang.ISPParameter.ParameterInfo;
-import org.komodo.spi.query.sql.lang.ISetQuery;
-import org.komodo.spi.query.sql.symbol.IAggregateSymbol;
-import org.komodo.spi.query.sql.symbol.IElementSymbol;
-import org.komodo.spi.query.sql.symbol.IElementSymbol.DisplayMode;
-import org.komodo.spi.query.sql.symbol.ISymbol;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.modeshape.teiid.sql.proc.BranchingStatementImpl.BranchingMode;
+import org.komodo.spi.query.sql.lang.JoinType.Types;
+import org.komodo.spi.query.sql.lang.MatchCriteria.MatchMode;
+import org.komodo.spi.query.sql.lang.SPParameter.ParameterInfo;
+import org.komodo.spi.query.sql.lang.SetQuery.Operation;
+import org.komodo.spi.query.sql.symbol.AggregateSymbol.Type;
+import org.komodo.spi.query.sql.symbol.ElementSymbol.DisplayMode;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.komodo.spi.type.IDataTypeManagerService;
-import org.komodo.spi.type.IDataTypeManagerService.DataTypeName;
+import org.komodo.spi.type.DataTypeManager;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.common.collection.EmptyIterator;
 import org.modeshape.jcr.JcrSession;
-import org.teiid.runtime.client.admin.factory.ExecutionAdminFactory;
+import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
 /**
  *
@@ -218,9 +214,9 @@ public class TeiidSqlNodeVisitor
 
     private StringBuilder builder;
 
-    private ITeiidVersion teiidVersion;
+    private TeiidVersion teiidVersion;
 
-    private IDataTypeManagerService dataTypeManager;
+    private DataTypeManager dataTypeManager;
 
     /**
      * @return the session
@@ -230,12 +226,12 @@ public class TeiidSqlNodeVisitor
     }
 
     protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
-        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+        TeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
     }
 
     protected boolean isLessThanTeiidVersion(Version teiidVersion) {
-        ITeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
+        TeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
         return maxVersion.isLessThan(teiidVersion.get());
     }
 
@@ -246,16 +242,16 @@ public class TeiidSqlNodeVisitor
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 
     /**
      * @return data type manager service
      */
-    public IDataTypeManagerService getDataTypeManager() {
+    public DataTypeManager getDataTypeManager() {
         if (dataTypeManager == null) {
-            ExecutionAdminFactory factory = new ExecutionAdminFactory();
+            TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
             return factory.getDataTypeManagerService(getTeiidVersion());
         }
 
@@ -268,12 +264,12 @@ public class TeiidSqlNodeVisitor
      * @return SQL String representation of the given node
      * @throws Exception if node causes a failure
      */
-    public String getTeiidSql(ITeiidVersion teiidVersion, Node node) throws Exception {
+    public String getTeiidSql(TeiidVersion teiidVersion, Node node) throws Exception {
         if (node == null)
             return UNDEFINED;
 
         if (teiidVersion == null)
-            teiidVersion = TeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
+            teiidVersion = DefaultTeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
 
         this.teiidVersion = teiidVersion;
         this.dataTypeManager = getDataTypeManager();
@@ -736,7 +732,7 @@ public class TeiidSqlNodeVisitor
         String[] pathParts = name.split("\\."); //$NON-NLS-1$
         for (int i = 0; i < pathParts.length; i++) {
             if (i > 0) {
-                append(ISymbol.SEPARATOR);
+                append(org.komodo.spi.query.sql.symbol.Symbol.SEPARATOR);
             }
 
             append(escapeSinglePart(pathParts[i]));
@@ -744,7 +740,7 @@ public class TeiidSqlNodeVisitor
     }
 
     protected String shortName(String name) {
-        int index = name.lastIndexOf(ISymbol.SEPARATOR);
+        int index = name.lastIndexOf(org.komodo.spi.query.sql.symbol.Symbol.SEPARATOR);
         if(index >= 0) {
             return name.substring(index + 1);
         }
@@ -1062,9 +1058,9 @@ public class TeiidSqlNodeVisitor
         // Get operator string
         long operator = propertyLong(node, CompoundCriteria.OPERATOR_PROP_NAME);
         String operatorStr = EMPTY_STRING;
-        if (operator == ICompoundCriteria.AND) {
+        if (operator == org.komodo.spi.query.sql.lang.CompoundCriteria.AND) {
             operatorStr = AND;
-        } else if (operator == ICompoundCriteria.OR) {
+        } else if (operator == org.komodo.spi.query.sql.lang.CompoundCriteria.OR) {
             operatorStr = OR;
         }
 
@@ -1169,7 +1165,7 @@ public class TeiidSqlNodeVisitor
         }
 
         String modeString = propertyString(node,  MatchCriteria.MODE_PROP_NAME);
-        MatchMode mode = IMatchCriteria.MatchMode.findMatchMode(modeString);
+        MatchMode mode = org.komodo.spi.query.sql.lang.MatchCriteria.MatchMode.findMatchMode(modeString);
         switch (mode) {
             case SIMILAR:
                 append(SIMILAR);
@@ -1190,7 +1186,7 @@ public class TeiidSqlNodeVisitor
         visit(rightExpression);
 
         String escapeChar = propertyString(node,  MatchCriteria.ESCAPE_CHAR_PROP_NAME);
-        if (! Character.toString(IMatchCriteria.NULL_ESCAPE_CHAR).equals(escapeChar)) {
+        if (! Character.toString(org.komodo.spi.query.sql.lang.MatchCriteria.NULL_ESCAPE_CHAR).equals(escapeChar)) {
             append(SPACE);
             append(ESCAPE);
             append(SPACE);
@@ -1706,10 +1702,10 @@ public class TeiidSqlNodeVisitor
         boolean cmdIsAll = propertyBoolean(queryCommand, SetQuery.ALL_PROP_NAME);
 
         String parentOpName = propertyString(parent, SetQuery.OPERATION_PROP_NAME);
-        ISetQuery.Operation parentOp = ISetQuery.Operation.findOperation(parentOpName);
+        Operation parentOp = Operation.findOperation(parentOpName);
 
         String cmdOpName = propertyString(queryCommand, SetQuery.OPERATION_PROP_NAME);
-        ISetQuery.Operation cmdOp = ISetQuery.Operation.findOperation(cmdOpName);
+        Operation cmdOp = Operation.findOperation(cmdOpName);
 
         if (limit != null || orderBy != null ||
             (right && 
@@ -1735,7 +1731,7 @@ public class TeiidSqlNodeVisitor
         beginClause(0);
 
         String opName = propertyString(node, SetQuery.OPERATION_PROP_NAME);
-        ISetQuery.Operation op = ISetQuery.Operation.findOperation(opName);
+        Operation op = Operation.findOperation(opName);
         append(op.name());
 
         boolean isAll = propertyBoolean(node, SetQuery.ALL_PROP_NAME);
@@ -2199,7 +2195,7 @@ public class TeiidSqlNodeVisitor
         Node node = (Node) context.get(NODE_KEY);
 
         String kindName = propertyString(node, JoinType.KIND_PROP_NAME);
-        IJoinType.Types kind = IJoinType.Types.findType(kindName);
+        Types kind = Types.findType(kindName);
 
         append(kind.toPrintStatement());
 
@@ -3111,7 +3107,7 @@ public class TeiidSqlNodeVisitor
         boolean distinct = propertyBoolean(node, AggregateSymbol.DISTINCT_PROP_NAME);
 
         String aggFunctionName = propertyString(node, AggregateSymbol.AGGREGATE_FUNCTION_PROP_NAME);
-        IAggregateSymbol.Type aggregateFunction = IAggregateSymbol.Type.findAggregateFunction(aggFunctionName);
+        Type aggregateFunction = Type.findAggregateFunction(aggFunctionName);
 
         append(name);
         append(OPEN_BRACKET);
@@ -3119,7 +3115,7 @@ public class TeiidSqlNodeVisitor
         if (distinct) {
             append(DISTINCT);
             append(SPACE);
-        } else if (aggregateFunction == IAggregateSymbol.Type.USER_DEFINED) {
+        } else if (aggregateFunction == Type.USER_DEFINED) {
             append(ALL);
             append(SPACE);
         }
@@ -3128,7 +3124,7 @@ public class TeiidSqlNodeVisitor
         if (args.hasNext()) {
             iterate(args);
         } else {
-            if (aggregateFunction == IAggregateSymbol.Type.COUNT) {
+            if (aggregateFunction == Type.COUNT) {
                 append(ALL_COLS);
             }
         }
@@ -3177,7 +3173,7 @@ public class TeiidSqlNodeVisitor
         boolean shortNameOnly = context.get(SHORT_NAME_ONLY_KEY) != null ? (Boolean) context.get(SHORT_NAME_ONLY_KEY) : false;
 
         String displayModeName = propertyString(node, ElementSymbol.DISPLAY_MODE_PROP_NAME);
-        DisplayMode displayMode = IElementSymbol.DisplayMode.findDisplayMode(displayModeName);
+        DisplayMode displayMode = DisplayMode.findDisplayMode(displayModeName);
 
         String outputName = outputName(node);
         
@@ -3228,18 +3224,18 @@ public class TeiidSqlNodeVisitor
     }
 
     @Override
-    public Object array(TeiidSqlContext context) throws RepositoryException {
+    public Object arraySymbol(TeiidSqlContext context) throws RepositoryException {
         Node node = (Node) context.get(NODE_KEY);
 
-        boolean implicit = propertyBoolean(node, Array.IMPLICIT_PROP_NAME);
+        boolean implicit = propertyBoolean(node, ArraySymbol.IMPLICIT_PROP_NAME);
         if (!implicit) {
             append(LPAREN);
         }
 
-        iterate(node, Array.EXPRESSIONS_REF_NAME);
+        iterate(node, ArraySymbol.EXPRESSIONS_REF_NAME);
         if (!implicit) {
 
-            if (size(node, Array.EXPRESSIONS_REF_NAME) == 1) {
+            if (size(node, ArraySymbol.EXPRESSIONS_REF_NAME) == 1) {
                 append(COMMA);
             }
 

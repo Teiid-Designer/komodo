@@ -9,7 +9,7 @@ package org.komodo.relational.core;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 
 /**
@@ -21,8 +21,8 @@ public class DefaultDataTypeValidator implements DataTypeValidator {
 	 * @see org.komodo.relational.core.DataTypeValidator#validate(org.komodo.relational.core.DataType)
 	 */
 	@Override
-	public IOutcome validate(DataType dataType) {
-    	IOutcome theOutcome = null;
+	public Outcome validate(DataType dataType) {
+    	Outcome theOutcome = null;
     	
     	// --------------------------------------------------
     	// Name Validation - done for all Relational Objects

@@ -69,7 +69,7 @@ public class MappingOutputter {
      *
      * @throws IOException if there are problems writing to the file.
      */
-    public void write(MappingDocument doc, PrintWriter stream) throws IOException {
+    public void write(MappingDocumentImpl doc, PrintWriter stream) throws IOException {
         try {
         	writer = xof.createXMLStreamWriter(stream);
         	writer.writeStartDocument("UTF-8", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -98,7 +98,7 @@ public class MappingOutputter {
      * <p>Load XML document from domain object. </p>
      * @throws XMLStreamException 
      */
-    void loadNode( MappingNode node ) throws XMLStreamException {
+    void loadNode( MappingNodeImpl node ) throws XMLStreamException {
     	writer.writeStartElement(ELEM_NODE);
 
         //namespace declarations have to be handled specially
@@ -115,7 +115,7 @@ public class MappingOutputter {
 
         Iterator children = node.getChildren().iterator();
         while ( children.hasNext() ) {
-            MappingNode child = (MappingNode)children.next();
+            MappingNodeImpl child = (MappingNodeImpl)children.next();
             loadNode( child );
         }
         writer.writeEndElement();

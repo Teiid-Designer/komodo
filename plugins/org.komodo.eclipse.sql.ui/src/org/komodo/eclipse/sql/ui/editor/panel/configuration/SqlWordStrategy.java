@@ -11,7 +11,7 @@ package org.komodo.eclipse.sql.ui.editor.panel.configuration;
 
 import java.util.StringTokenizer;
 import org.eclipse.jface.text.formatter.IFormattingStrategy;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 
 /**
@@ -28,7 +28,7 @@ public class SqlWordStrategy implements IFormattingStrategy {
      *
      * @param teiidVersion version of teiid client
      */
-    public SqlWordStrategy(ITeiidVersion teiidVersion) {
+    public SqlWordStrategy(TeiidVersion teiidVersion) {
         sqlSyntax = new SqlSyntax(teiidVersion);
     }
     

@@ -27,8 +27,8 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.IExecutionAdmin.ConnectivityType;
-import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
+import org.komodo.spi.runtime.TeiidInstance;
 
 /**
  * Displays a summary of the current status, including what repository the
@@ -58,7 +58,7 @@ public class StatusCommand extends BuiltInShellCommand implements StringConstant
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("StatusCommand.CurrentRepo", currentRepo)); //$NON-NLS-1$
 		
         // Teiid Instance info
-        ITeiidInstance teiidInstance = wsStatus.getTeiidInstance();
+        TeiidInstance teiidInstance = wsStatus.getTeiidInstance();
         String teiidUrl = teiidInstance.getUrl();
         String teiidConnected = teiidInstance.isConnected() ?
             Messages.getString(Messages.StatusCommand.Connected) :

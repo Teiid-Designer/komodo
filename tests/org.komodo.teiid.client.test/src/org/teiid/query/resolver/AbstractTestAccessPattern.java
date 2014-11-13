@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.resolver.util.AccessPattern;
 
 @SuppressWarnings( "javadoc" )
@@ -37,7 +37,7 @@ public abstract class AbstractTestAccessPattern extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestAccessPattern(ITeiidVersion teiidVersion) {
+    public AbstractTestAccessPattern(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

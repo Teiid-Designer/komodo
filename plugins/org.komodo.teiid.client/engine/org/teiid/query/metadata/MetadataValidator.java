@@ -27,15 +27,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.outcome.Outcome;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.ModelMetaData.Message.Severity;
 import org.teiid.adminapi.impl.VDBMetaData;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.language.SQLConstants;
 import org.teiid.metadata.AbstractMetadataRecord;
 import org.teiid.metadata.Column;
@@ -52,34 +52,34 @@ import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
 import org.teiid.query.function.metadata.FunctionMetadataValidator;
-import org.teiid.query.mapping.relational.QueryNode;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.query.mapping.relational.TCQueryNode;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.report.ActivityReport;
 import org.teiid.query.report.ReportItem;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.resolver.util.ResolverVisitor;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.lang.QueryCommand;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.QueryCommandImpl;
 import org.teiid.query.sql.navigator.PostOrderNavigator;
 import org.teiid.query.sql.navigator.PreOrPostOrderNavigator;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
 import org.teiid.query.sql.visitor.EvaluatableVisitor;
-import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitor;
-import org.teiid.query.validator.Validator;
+import org.teiid.query.sql.visitor.ValueIteratorProviderCollectorVisitorImpl;
+import org.teiid.query.validator.DefaultValidator;
 import org.teiid.query.validator.ValidatorFailure;
 import org.teiid.query.validator.ValidatorReport;
 import org.teiid.runtime.client.Messages;
 
 public class MetadataValidator {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
-    private final QueryParser queryParser;
+    private final TCQueryParser queryParser;
 
 	private Map<String, Datatype> typeMap;
 
@@ -88,17 +88,17 @@ public class MetadataValidator {
 		void execute(VDBMetaData vdb, MetadataStore vdbStore, ValidatorReport report, MetadataValidator metadataValidator);
 	}	
 
-	public MetadataValidator(ITeiidVersion teiidVersion, Map<String, Datatype> typeMap) {
+	public MetadataValidator(TeiidVersion teiidVersion, Map<String, Datatype> typeMap) {
 		this.teiidVersion = teiidVersion;
         this.typeMap = typeMap;
-		this.queryParser = new QueryParser(teiidVersion);
+		this.queryParser = new TCQueryParser(teiidVersion);
 	}
 
-	public MetadataValidator(ITeiidVersion teiidVersion) {
+	public MetadataValidator(TeiidVersion teiidVersion) {
         this(teiidVersion, SystemMetadata.getInstance(teiidVersion).getRuntimeTypeMap());
     }
 
-	private <T extends LanguageObject> T createASTNode(ASTNodes nodeType) {
+	private <T extends BaseLanguageObject> T createASTNode(ASTNodes nodeType) {
 	    return queryParser.getTeiidParser().createASTNode(nodeType);
 	}
 
@@ -204,7 +204,7 @@ public class MetadataValidator {
 	private class ResolveQueryPlans implements MetadataRule {
 		@Override
 		public void execute(VDBMetaData vdb, MetadataStore store, ValidatorReport report, MetadataValidator metadataValidator) {
-			IQueryMetadataInterface metadata = vdb.getAttachment(IQueryMetadataInterface.class);
+			QueryMetadataInterface metadata = vdb.getAttachment(QueryMetadataInterface.class);
 	    	metadata = new TempMetadataAdapter(metadata, new TempMetadataStore());
 			for (Schema schema:store.getSchemaList()) {
 				if (vdb.getImportedModels().contains(schema.getName())) {
@@ -268,35 +268,35 @@ public class MetadataValidator {
 		}
 	}
 	
-    private void validate(VDBMetaData vdb, ModelMetaData model, AbstractMetadataRecord record, ValidatorReport report, IQueryMetadataInterface metadata, MetadataFactory mf) {
+    private void validate(VDBMetaData vdb, ModelMetaData model, AbstractMetadataRecord record, ValidatorReport report, QueryMetadataInterface metadata, MetadataFactory mf) {
     	ValidatorReport resolverReport = null;
     	try {
     		if (record instanceof Procedure) {
     			Procedure p = (Procedure)record;
-    			Command command = queryParser.parseProcedure(p.getQueryPlan(), false);
-                GroupSymbol gs = createASTNode(ASTNodes.GROUP_SYMBOL);
+    			CommandImpl command = queryParser.parseProcedure(p.getQueryPlan(), false);
+                GroupSymbolImpl gs = createASTNode(ASTNodes.GROUP_SYMBOL);
     			gs.setName(p.getFullName());
-    			QueryResolver resolver = new QueryResolver(queryParser);
-    			resolver.resolveCommand(command, gs, ICommand.TYPE_STORED_PROCEDURE, metadata, false);
-    			Validator validator = new Validator();
+    			TCQueryResolver resolver = new TCQueryResolver(queryParser);
+    			resolver.resolveCommand(command, gs, Command.TYPE_STORED_PROCEDURE, metadata, false);
+    			DefaultValidator validator = new DefaultValidator();
     			resolverReport =  validator.validate(command, metadata);
     		} else if (record instanceof Table) {
     			Table t = (Table)record;
     			
-    			GroupSymbol symbol = createASTNode(ASTNodes.GROUP_SYMBOL); 
+    			GroupSymbolImpl symbol = createASTNode(ASTNodes.GROUP_SYMBOL); 
     			symbol.setName(t.getFullName());
     			ResolverUtil.resolveGroup(symbol, metadata);
     			if (t.isVirtual() && (t.getColumns() == null || t.getColumns().isEmpty())) {
-    				QueryCommand command = (QueryCommand) queryParser.parseCommand(t.getSelectTransformation());
-    				QueryResolver resolver = new QueryResolver(queryParser);
+    				QueryCommandImpl command = (QueryCommandImpl) queryParser.parseCommand(t.getSelectTransformation());
+    				TCQueryResolver resolver = new TCQueryResolver(queryParser);
     				resolver.resolveCommand(command, metadata);
-    				Validator validator = new Validator();
+    				DefaultValidator validator = new DefaultValidator();
     				resolverReport =  validator.validate(command, metadata);
     				if(!resolverReport.hasItems()) {
-    					List<Expression> symbols = command.getProjectedSymbols();
-    					for (Expression column:symbols) {
+    					List<BaseExpression> symbols = command.getProjectedSymbols();
+    					for (BaseExpression column:symbols) {
     						try {
-								addColumn(Symbol.getShortName(column), column.getType(), t, mf);
+								addColumn(SymbolImpl.getShortName(column), column.getType(), t, mf);
 							} catch (Exception e) {
 								log(report, model, e.getMessage());
 							}
@@ -306,7 +306,7 @@ public class MetadataValidator {
     			
     			if (t.isMaterialized() && t.getMaterializedTable() == null) {
 	    			List<KeyRecord> fbis = t.getFunctionBasedIndexes();
-	    			List<GroupSymbol> groups = Arrays.asList(symbol);
+	    			List<GroupSymbolImpl> groups = Arrays.asList(symbol);
 					if (fbis != null && !fbis.isEmpty()) {
 						for (KeyRecord fbi : fbis) {
 	    					for (int j = 0; j < fbi.getColumns().size(); j++) {
@@ -316,10 +316,10 @@ public class MetadataValidator {
 	    						}
 	    						String exprString = c.getNameInSource();
 	    						try {
-		    						Expression ex = queryParser.parseExpression(exprString);
-		    						ResolverVisitor resolverVisitor = new ResolverVisitor(teiidVersion);
+		    						BaseExpression ex = queryParser.parseExpression(exprString);
+		    						ResolverVisitorImpl resolverVisitor = new ResolverVisitorImpl(teiidVersion);
 									resolverVisitor.resolveLanguageObject(ex, groups, metadata);
-									if (!ValueIteratorProviderCollectorVisitor.getValueIteratorProviders(ex).isEmpty()) {
+									if (!ValueIteratorProviderCollectorVisitorImpl.getValueIteratorProviders(ex).isEmpty()) {
 										log(report, model, Messages.gs(Messages.TEIID.TEIID31114, exprString, fbi.getFullName()));
 									} 
 									EvaluatableVisitor ev = new EvaluatableVisitor(teiidVersion);
@@ -336,12 +336,12 @@ public class MetadataValidator {
     			}
     			
     			// this seems to parse, resolve and validate.
-    			QueryResolver resolver = new QueryResolver(queryParser);
-    			resolver.resolveView(symbol, new QueryNode(t.getSelectTransformation()), SQLConstants.Reserved.SELECT, metadata);
+    			TCQueryResolver resolver = new TCQueryResolver(queryParser);
+    			resolver.resolveView(symbol, new TCQueryNode(t.getSelectTransformation()), SQLConstants.Reserved.SELECT, metadata);
     		}
 			if(resolverReport != null && resolverReport.hasItems()) {
 				for (ValidatorFailure v:resolverReport.getItems()) {
-					log(report, model, v.getOutcome() == IOutcome.Level.ERROR?Severity.ERROR:Severity.WARNING, v.getMessage());
+					log(report, model, v.getOutcome() == Outcome.Level.ERROR?Severity.ERROR:Severity.WARNING, v.getMessage());
 				}
 			}
 		} catch (Exception e) {
@@ -353,7 +353,7 @@ public class MetadataValidator {
 		if (type == null) {
 			throw new Exception(Messages.gs(Messages.TEIID.TEIID31086, name, table.getFullName()));
 		}
-		Column column = mf.addColumn(name, DataTypeManagerService.getInstance(teiidVersion).getDataTypeName(type), table);
+		Column column = mf.addColumn(name, DefaultDataTypeManager.getInstance(teiidVersion).getDataTypeName(type), table);
 		column.setUpdatable(table.supportsUpdate());
 		return column;		
 	}

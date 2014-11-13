@@ -22,13 +22,13 @@
 package org.teiid.query.sql.lang;
 
 import org.komodo.spi.annotation.Removed;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
-import org.teiid.query.sql.symbol.Expression;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.teiid.query.sql.symbol.BaseExpression;
 
 /**
  * Interface only applicable to the Teiid 7 parser
  */
 @Removed(Version.TEIID_8_0)
-public interface SingleElementSymbol extends Expression {
+public interface SingleElementSymbol extends BaseExpression {
 
 }

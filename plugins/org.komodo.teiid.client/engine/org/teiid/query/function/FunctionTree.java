@@ -35,11 +35,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.UserDefinedAggregate;
 import org.teiid.core.CoreConstants;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.ReflectionHelper;
 import org.teiid.metadata.AbstractMetadataRecord;
 import org.teiid.metadata.FunctionMethod;
@@ -62,7 +62,7 @@ import org.teiid.runtime.client.TeiidClientException;
  */
 public class FunctionTree {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
     // Constant used to look up the special descriptor key in a node map
     private static final Integer DESCRIPTOR_KEY = -1;
@@ -79,14 +79,14 @@ public class FunctionTree {
     private Map<String, Map<Object, Object>> treeRoot = new TreeMap<String, Map<Object, Object>>(String.CASE_INSENSITIVE_ORDER);
     private boolean validateClass;
 
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
 
     /**
      * Construct a new tree with the given source of function metadata.
      * @param teiidVersion
      * @param source The metadata source
      */
-    public FunctionTree(ITeiidVersion teiidVersion, String name, FunctionMetadataSource source) {
+    public FunctionTree(TeiidVersion teiidVersion, String name, FunctionMetadataSource source) {
     	this(teiidVersion, name, source, false);
     }
     
@@ -95,7 +95,7 @@ public class FunctionTree {
      * @param teiidVersion
      * @param source The metadata source
      */
-    public FunctionTree(ITeiidVersion teiidVersion, String name, FunctionMetadataSource source, boolean validateClass) {
+    public FunctionTree(TeiidVersion teiidVersion, String name, FunctionMetadataSource source, boolean validateClass) {
         this.teiidVersion = teiidVersion;
         // Load data structures
     	this.validateClass = validateClass;
@@ -112,9 +112,9 @@ public class FunctionTree {
         }
     }
 
-    public DataTypeManagerService getDataTypeManager() {
+    public DefaultDataTypeManager getDataTypeManager() {
         if (dataTypeManager == null)
-            dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
+            dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
 
         return dataTypeManager;
     }
@@ -179,7 +179,7 @@ public class FunctionTree {
      * @param source The function metadata source, which knows how to obtain the invocation class
      * @param method The function metadata for a particular method signature
      */
-    public FunctionDescriptor addFunction(String schema, FunctionMetadataSource source, FunctionMethod method, boolean system) {
+    public TCFunctionDescriptor addFunction(String schema, FunctionMetadataSource source, FunctionMethod method, boolean system) {
     	String categoryKey = method.getCategory();
     	if (categoryKey == null) {
     		method.setCategory(FunctionCategoryConstants.MISCELLANEOUS);
@@ -210,7 +210,7 @@ public class FunctionTree {
         	types = new Class<?>[0];
         }
 
-        FunctionDescriptor descriptor = createFunctionDescriptor(source, method, types, system);
+        TCFunctionDescriptor descriptor = createFunctionDescriptor(source, method, types, system);
         descriptor.setSchema(schema);
         // Store this path in the function tree
         // Look up function in function map
@@ -265,7 +265,7 @@ public class FunctionTree {
         return descriptor;
     }
 
-    private FunctionDescriptor createFunctionDescriptor(FunctionMetadataSource source, FunctionMethod method, Class<?>[] types, boolean system) {
+    private TCFunctionDescriptor createFunctionDescriptor(FunctionMetadataSource source, FunctionMethod method, Class<?>[] types, boolean system) {
         try {
             // Get return type
             FunctionParameter outputParam = method.getOutputParameter();
@@ -277,7 +277,7 @@ public class FunctionTree {
             boolean hasWrappedArg = false;
             if (!system) {
                 for (int i = 0; i < types.length; i++) {
-                    if (types[i] == DataTypeManagerService.DefaultDataTypes.VARBINARY.getTypeClass()) {
+                    if (types[i] == DefaultDataTypeManager.DefaultDataTypes.VARBINARY.getTypeClass()) {
                         hasWrappedArg = true;
                         inputTypes.set(i, byte[].class);
                     }
@@ -359,7 +359,7 @@ public class FunctionTree {
                 }
             }
 
-            FunctionDescriptor result = new FunctionDescriptor(teiidVersion, method, types, outputType, invocationMethod, requiresContext);
+            TCFunctionDescriptor result = new TCFunctionDescriptor(teiidVersion, method, types, outputType, invocationMethod, requiresContext);
             if (method.getAggregateAttributes() != null
                 && (method.getPushdown() == PushDown.CAN_PUSHDOWN || method.getPushdown() == PushDown.CANNOT_PUSHDOWN)) {
                 result.newInstance();
@@ -378,7 +378,7 @@ public class FunctionTree {
      * @param argTypes Types of each argument in the function
      * @return Descriptor which can be used to invoke the function
      */
-    FunctionDescriptor getFunction(String name, Class<?>[] argTypes) {
+    TCFunctionDescriptor getFunction(String name, Class<?>[] argTypes) {
         // Walk path in tree
         Map<Object, Object> node = treeRoot.get(name);
         if (node == null) {
@@ -389,7 +389,7 @@ public class FunctionTree {
         	if (nextNode == null) {
         		if (argTypes[i].isArray()) {
         			//array types are not yet considered in the function typing logic
-        			nextNode = (Map<Object, Object>) node.get(DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass());
+        			nextNode = (Map<Object, Object>) node.get(DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass());
         		}
         		if (nextNode == null) {
         			return null;
@@ -401,7 +401,7 @@ public class FunctionTree {
         // Look for key at the end
         if(node.containsKey(DESCRIPTOR_KEY)) {
             // This is the end - return descriptor
-            return (FunctionDescriptor) node.get(DESCRIPTOR_KEY);
+            return (TCFunctionDescriptor) node.get(DESCRIPTOR_KEY);
         }
         // No descriptor at this location in tree
         return null;

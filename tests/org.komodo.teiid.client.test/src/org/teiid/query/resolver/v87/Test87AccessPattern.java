@@ -21,8 +21,8 @@
 */
 package org.teiid.query.resolver.v87;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.v86.Test86AccessPattern;
 
 /**
@@ -31,7 +31,7 @@ import org.teiid.query.resolver.v86.Test86AccessPattern;
 @SuppressWarnings( "javadoc" )
 public class Test87AccessPattern extends Test86AccessPattern {
 
-    protected Test87AccessPattern(ITeiidVersion teiidVersion) {
+    protected Test87AccessPattern(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

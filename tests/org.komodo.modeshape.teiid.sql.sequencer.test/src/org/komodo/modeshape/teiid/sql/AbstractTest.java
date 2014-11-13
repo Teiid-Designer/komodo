@@ -21,29 +21,29 @@
 */
 package org.komodo.modeshape.teiid.sql;
 
-import org.komodo.modeshape.teiid.parser.QueryParser;
-import org.komodo.modeshape.teiid.sql.lang.LanguageObject;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.type.IDataTypeManagerService;
+import org.komodo.modeshape.teiid.parser.SQQueryParser;
+import org.komodo.modeshape.teiid.sql.lang.BaseLanguageObject;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.type.DataTypeManager;
 
 @SuppressWarnings( {"javadoc"} )
-public abstract class AbstractTest<T extends LanguageObject> {
+public abstract class AbstractTest<T extends BaseLanguageObject> {
 
-    protected ITeiidVersion teiidVersion;
+    protected TeiidVersion teiidVersion;
 
-    protected QueryParser parser;
+    protected SQQueryParser parser;
 
     /**
      * @param teiidVersion
      */
-    public AbstractTest(ITeiidVersion teiidVersion) {
+    public AbstractTest(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
-        this.parser = new QueryParser(teiidVersion);
+        this.parser = new SQQueryParser(teiidVersion);
     }
 
     protected abstract AbstractTestFactory getFactory();
 
-    protected IDataTypeManagerService getDataTypeService() {
+    protected DataTypeManager getDataTypeService() {
         return parser.getTeiidParser().getDataTypeService();
     }
 }

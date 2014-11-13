@@ -25,8 +25,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.sql.v8.Test8CreateDrop;
 
 /**
@@ -35,7 +35,7 @@ import org.teiid.query.sql.v8.Test8CreateDrop;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class Test85CreateDrop extends Test8CreateDrop {
 
-    protected Test85CreateDrop(ITeiidVersion teiidVersion) {
+    protected Test85CreateDrop(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

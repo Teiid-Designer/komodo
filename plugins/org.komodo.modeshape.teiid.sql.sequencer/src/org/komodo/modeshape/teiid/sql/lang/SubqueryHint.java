@@ -22,7 +22,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.NonReserved;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.Reserved;
 
@@ -35,7 +35,7 @@ public class SubqueryHint extends ASTNode implements NonReserved, Reserved {
      * @param p teiid parser
      * @param id node type id
      */
-    public SubqueryHint(ITeiidParser p, int id) {
+    public SubqueryHint(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

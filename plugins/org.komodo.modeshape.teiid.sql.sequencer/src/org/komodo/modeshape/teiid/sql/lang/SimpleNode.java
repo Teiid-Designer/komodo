@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 public abstract class SimpleNode implements Node {
 
@@ -36,28 +36,28 @@ public abstract class SimpleNode implements Node {
     private Node[] children;
     private int id;
     protected Object value;
-    private ITeiidParser parser;
+    private TeiidSeqParser parser;
 
-    public SimpleNode(ITeiidParser p, int i) {
+    public SimpleNode(TeiidSeqParser p, int i) {
         id = i;
         parser = p;
     }
 
-    public ITeiidParser getTeiidParser() {
+    public TeiidSeqParser getTeiidParser() {
         return parser;
     }
 
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return getTeiidParser().getVersion();
     }
 
-    protected boolean isTeiidVersionOrGreater(ITeiidVersion teiidVersion) {
-        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+    protected boolean isTeiidVersionOrGreater(TeiidVersion teiidVersion) {
+        TeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion) || minVersion.isGreaterThan(teiidVersion);
     }
 
-    protected boolean isLessThanTeiidVersion(ITeiidVersion teiidVersion) {
-        ITeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
+    protected boolean isLessThanTeiidVersion(TeiidVersion teiidVersion) {
+        TeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
         return maxVersion.isLessThan(teiidVersion);
     }
 
@@ -126,7 +126,7 @@ public abstract class SimpleNode implements Node {
         return value;
     }
 
-    protected <T extends LanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
+    protected <T extends BaseLanguageObject> Collection<T> cloneCollection(Collection<T> collection) {
         if (collection == null)
             throw new UnsupportedOperationException();
 
@@ -138,7 +138,7 @@ public abstract class SimpleNode implements Node {
         return cloned;
     }
 
-    protected <T extends LanguageObject> List<T> cloneList(List<T> list) {
+    protected <T extends BaseLanguageObject> List<T> cloneList(List<T> list) {
         if (list == null)
             throw new UnsupportedOperationException();
 
@@ -158,7 +158,7 @@ public abstract class SimpleNode implements Node {
 
     @Override
     public String toString() {
-        return TeiidParserTreeConstants.jjtNodeName[id];
+        return TeiidSequencingParserTreeConstants.jjtNodeName[id];
     }
 
     public String toString(String prefix) {

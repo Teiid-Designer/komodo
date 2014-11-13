@@ -49,9 +49,9 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.komodo.spi.query.sql.lang.ISPParameter;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.query.sql.lang.SPParameter;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.utils.KLog;
 import org.teiid.client.DQP;
 import org.teiid.client.RequestMessage;
@@ -63,8 +63,8 @@ import org.teiid.client.metadata.ResultsMetadataConstants;
 import org.teiid.client.plan.Annotation;
 import org.teiid.client.plan.PlanNode;
 import org.teiid.client.util.ResultsFuture;
-import org.teiid.core.types.DataTypeManagerService;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.types.JDBCSQLTypeInfo;
 import org.teiid.core.types.SQLXMLImpl;
 import org.teiid.core.util.StringUtil;
@@ -200,30 +200,30 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
         setTimeoutFromProperties();
     }
 
-    protected ITeiidVersion getTeiidVersion() {
+    protected TeiidVersion getTeiidVersion() {
         return driverConnection.getTeiidVersion();
     }
 
     protected boolean isLessThanTeiidEight() {
-        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+        TeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.isLessThan(Version.TEIID_8_0.get());
     }
 
     protected boolean isGreaterThanTeiidSeven() {
-        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+        TeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         return minVersion.isGreaterThan(Version.TEIID_7_7.get());
     }
 
     protected void checkSupportedVersion(Version teiidVersion) {
-        ITeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+        TeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
         if (minVersion.isLessThan(teiidVersion.get())) { 
             KLog.getLogger().error("StatementImpl.checkSupportedVersion", "Method being executed that is not supported in teiid version " + getTeiidVersion());  //$NON-NLS-1$//$NON-NLS-2$
             throw new UnsupportedOperationException();
         }
     }
 
-    protected DataTypeManagerService getDataTypeManager() {
-        return DataTypeManagerService.getInstance(driverConnection.getTeiidVersion());
+    protected DefaultDataTypeManager getDataTypeManager() {
+        return DefaultDataTypeManager.getInstance(driverConnection.getTeiidVersion());
     }
 
 	private void setTimeoutFromProperties() {
@@ -398,7 +398,7 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
 		    Iterator iteratorOfParameters = listOfParameters.iterator();
 		    while(iteratorOfParameters.hasNext()){
 		        ParameterInfo parameter = (ParameterInfo)iteratorOfParameters.next();
-		        if(parameter.getType() == ISPParameter.ParameterInfo.RESULT_SET.index()){
+		        if(parameter.getType() == SPParameter.ParameterInfo.RESULT_SET.index()){
 		            resultSetSize = parameter.getNumColumns();
 		            //one ResultSet only
 		            break;
@@ -411,7 +411,7 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
 		    iteratorOfParameters = listOfParameters.iterator();
 		    while(iteratorOfParameters.hasNext()){
 		        ParameterInfo parameter = (ParameterInfo)iteratorOfParameters.next();
-		        if(parameter.getType() == ISPParameter.ParameterInfo.RETURN_VALUE.index()){
+		        if(parameter.getType() == SPParameter.ParameterInfo.RETURN_VALUE.index()){
 		            count++;
 		            index++;
 		            int resultIndex = resultSetSize + count;
@@ -424,9 +424,9 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
 		    iteratorOfParameters = listOfParameters.iterator();
 		    while(iteratorOfParameters.hasNext()){
 		        ParameterInfo parameter = (ParameterInfo)iteratorOfParameters.next();
-		        if(parameter.getType() != ISPParameter.ParameterInfo.RETURN_VALUE.index() && parameter.getType() != ISPParameter.ParameterInfo.RESULT_SET.index()){
+		        if(parameter.getType() != SPParameter.ParameterInfo.RETURN_VALUE.index() && parameter.getType() != SPParameter.ParameterInfo.RESULT_SET.index()){
 		            index++;
-		            if(parameter.getType() == ISPParameter.ParameterInfo.OUT.index() || parameter.getType() == ISPParameter.ParameterInfo.INOUT.index()){
+		            if(parameter.getType() == SPParameter.ParameterInfo.OUT.index() || parameter.getType() == SPParameter.ParameterInfo.INOUT.index()){
 		                count++;
 		                int resultIndex = resultSetSize + count;
 		                outParamIndexMap.put(index, resultIndex);
@@ -614,9 +614,9 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
 				records.add(row);
 			}
 			createResultSet(records, new String[] {"PLAN_TEXT", "PLAN_XML", "DEBUG_LOG"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					new String[] { DataTypeManagerService.DefaultDataTypes.CLOB.getId(),
-			                                DataTypeManagerService.DefaultDataTypes.XML.getId(),
-			                                DataTypeManagerService.DefaultDataTypes.CLOB.getId()});
+					new String[] { DefaultDataTypeManager.DefaultDataTypes.CLOB.getId(),
+			                                DefaultDataTypeManager.DefaultDataTypes.XML.getId(),
+			                                DefaultDataTypeManager.DefaultDataTypes.CLOB.getId()});
 			return booleanFuture(true);
 		}
 		if (show.equalsIgnoreCase("ANNOTATIONS")) { //$NON-NLS-1$
@@ -631,10 +631,10 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
 				records.add(row);
 			}
 			createResultSet(records, new String[] {"CATEGORY", "PRIORITY", "ANNOTATION", "RESOLUTION"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-					new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-			                                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-			                                DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-			                                DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+					new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+			                                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+			                                DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+			                                DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 			return booleanFuture(true);
 		}
 		if (show.equalsIgnoreCase("ALL")) { //$NON-NLS-1$
@@ -646,12 +646,12 @@ public class StatementImpl extends WrapperImpl implements TeiidStatement {
 				records.add(row);
 			}
 			createResultSet(records, new String[] {"NAME", "VALUE"}, //$NON-NLS-1$ //$NON-NLS-2$
-					new String[] { DataTypeManagerService.DefaultDataTypes.STRING.getId(),
-			                                DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+					new String[] { DefaultDataTypeManager.DefaultDataTypes.STRING.getId(),
+			                                DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 			return booleanFuture(true);
 		}
 		List<List<String>> records = Collections.singletonList(Collections.singletonList(driverConnection.getExecutionProperty(show)));
-		createResultSet(records, new String[] {show}, new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId()});
+		createResultSet(records, new String[] {show}, new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId()});
 		return booleanFuture(true);
 	}
 

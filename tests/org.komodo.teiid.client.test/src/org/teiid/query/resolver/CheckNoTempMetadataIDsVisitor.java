@@ -24,14 +24,14 @@ package org.teiid.query.resolver;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.query.metadata.TempMetadataID;
-import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Symbol;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.SymbolImpl;
 
 
 /**
@@ -40,18 +40,18 @@ import org.teiid.query.sql.symbol.Symbol;
  * to TemporaryMetadatID's.
  */
 @SuppressWarnings( {"javadoc"} )
-public class CheckNoTempMetadataIDsVisitor extends LanguageVisitor {
+public class CheckNoTempMetadataIDsVisitor extends TCLanguageVisitorImpl {
 
-    private Collection<Symbol> symbolsWithTempMetadataIDs;
+    private Collection<SymbolImpl> symbolsWithTempMetadataIDs;
     
     /**
      * By default, this visitor deeply traverses all commands, and there are
      * no symbols to ignore
      * @param teiidVersion
      */
-	public CheckNoTempMetadataIDsVisitor(ITeiidVersion teiidVersion) {
+	public CheckNoTempMetadataIDsVisitor(TeiidVersion teiidVersion) {
 	    super(teiidVersion);
-        symbolsWithTempMetadataIDs = new ArrayList<Symbol>();    
+        symbolsWithTempMetadataIDs = new ArrayList<SymbolImpl>();    
     }
     
     /**
@@ -59,7 +59,7 @@ public class CheckNoTempMetadataIDsVisitor extends LanguageVisitor {
      * @return Collection of any unresolved Symbols; may
      * be empty but never null
      */
-    public Collection<Symbol> getSymbols(){
+    public Collection<SymbolImpl> getSymbols(){
         return this.symbolsWithTempMetadataIDs;
     }
 
@@ -69,7 +69,7 @@ public class CheckNoTempMetadataIDsVisitor extends LanguageVisitor {
      * @param obj
      * @return symbols
      */
-    public static final Collection<Symbol> checkSymbols(LanguageObject obj){
+    public static final Collection<SymbolImpl> checkSymbols(BaseLanguageObject obj){
         CheckNoTempMetadataIDsVisitor visitor = new CheckNoTempMetadataIDsVisitor(obj.getTeiidVersion());
         DeepPreOrderNavigator.doVisit(obj, visitor);
         return visitor.getSymbols();
@@ -78,14 +78,14 @@ public class CheckNoTempMetadataIDsVisitor extends LanguageVisitor {
     // visitor methods
     
     @Override
-    public void visit(ElementSymbol obj) {
+    public void visit(ElementSymbolImpl obj) {
         if (obj.getMetadataID() instanceof TempMetadataID){
             this.symbolsWithTempMetadataIDs.add(obj);
         }
     }
 
     @Override
-    public void visit(GroupSymbol obj) {
+    public void visit(GroupSymbolImpl obj) {
         if (obj.getMetadataID() instanceof TempMetadataID){
             this.symbolsWithTempMetadataIDs.add(obj);
         }

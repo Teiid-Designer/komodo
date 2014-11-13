@@ -25,7 +25,7 @@ import org.komodo.relational.core.DataType;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.relational.model.RelationalObjectFactory;
-import org.komodo.spi.outcome.IOutcome;
+import org.komodo.spi.outcome.Outcome;
 
 /**
  * Test Class to test Parameter
@@ -169,9 +169,9 @@ public class TestParameter {
     public void testValidateDefaultParam() {
     	Parameter param = RelationalObjectFactory.INSTANCE.createParameter(PARAM_NAME);
     	
-    	IOutcome outcome = param.validate();
+    	Outcome outcome = param.validate();
     	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    	assertEquals(Outcome.Level.OK, outcome.getLevel());
     }
         
     /**
@@ -181,9 +181,9 @@ public class TestParameter {
     public void testValidateParamWithGoodName() {
     	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("Crap?"); //$NON-NLS-1$
     	
-    	IOutcome outcome = param.validate();
+    	Outcome outcome = param.validate();
     	
-    	assertEquals(IOutcome.Level.OK, outcome.getLevel());
+    	assertEquals(Outcome.Level.OK, outcome.getLevel());
     }
     
     /**
@@ -193,9 +193,9 @@ public class TestParameter {
     public void testValidateParamWithBadName1() {
     	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("Crap ?"); //$NON-NLS-1$
     	
-    	IOutcome outcome = param.validate();
+    	Outcome outcome = param.validate();
     	
-    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
+    	assertEquals(Outcome.Level.ERROR, outcome.getLevel());
     	
     	if(!outcome.getMessage().startsWith("The name is invalid.")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$
@@ -209,9 +209,9 @@ public class TestParameter {
     public void testParamWithBadName2() {
     	Parameter param = RelationalObjectFactory.INSTANCE.createParameter("?Crap"); //$NON-NLS-1$
     	
-    	IOutcome outcome = param.validate();
+    	Outcome outcome = param.validate();
     	
-    	assertEquals(IOutcome.Level.ERROR, outcome.getLevel());
+    	assertEquals(Outcome.Level.ERROR, outcome.getLevel());
     	
     	if(!outcome.getMessage().startsWith("The first character of the name")) { //$NON-NLS-1$
     		fail("unexpected message"); //$NON-NLS-1$

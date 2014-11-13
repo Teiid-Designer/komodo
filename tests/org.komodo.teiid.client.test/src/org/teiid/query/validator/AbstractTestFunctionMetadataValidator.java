@@ -24,7 +24,7 @@ package org.teiid.query.validator;
 
 import static org.junit.Assert.fail;
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.metadata.FunctionMethod.PushDown;
 import org.teiid.query.function.metadata.FunctionMetadataValidator;
 
@@ -36,7 +36,7 @@ public abstract class AbstractTestFunctionMetadataValidator extends AbstractTest
     /**
      * @param teiidVersion
      */
-    public AbstractTestFunctionMetadataValidator(ITeiidVersion teiidVersion) {
+    public AbstractTestFunctionMetadataValidator(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

@@ -23,7 +23,7 @@
 package org.teiid.core.types.basic;
 
 import java.math.BigDecimal;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 
@@ -32,7 +32,7 @@ public class BigDecimalToBigIntegerTransform extends Transform {
 	/**
      * @param dataTypeManager
      */
-    public BigDecimalToBigIntegerTransform(DataTypeManagerService dataTypeManager) {
+    public BigDecimalToBigIntegerTransform(DefaultDataTypeManager dataTypeManager) {
         super(dataTypeManager);
     }
 
@@ -53,7 +53,7 @@ public class BigDecimalToBigIntegerTransform extends Transform {
 	 * @return Source type
 	 */
 	public Class<?> getSourceType() {
-		return DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getTypeClass();
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class BigDecimalToBigIntegerTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getTypeClass();
 	}
 
 	public boolean isExplicit() {

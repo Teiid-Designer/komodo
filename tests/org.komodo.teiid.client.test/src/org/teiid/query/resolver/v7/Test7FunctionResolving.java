@@ -27,13 +27,13 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.AbstractTestFunctionResolving;
-import org.teiid.query.resolver.util.ResolverVisitor;
+import org.teiid.query.resolver.util.ResolverVisitorImpl;
 import org.teiid.query.sql.AbstractTestFactory;
-import org.teiid.query.sql.symbol.Expression;
-import org.teiid.query.sql.symbol.Function;
+import org.teiid.query.sql.symbol.BaseExpression;
+import org.teiid.query.sql.symbol.FunctionImpl;
 import org.teiid.query.sql.v7.Test7Factory;
 
 @SuppressWarnings( {"nls" , "javadoc"})
@@ -58,13 +58,13 @@ public class Test7FunctionResolving extends AbstractTestFunctionResolving {
 
     @Test
     public void testResolveBadConvert() throws Exception {
-        Function function = getFactory().newFunction(
-                                         "convert", new Expression[] {
+        FunctionImpl function = getFactory().newFunction(
+                                         "convert", new BaseExpression[] {
                                              getFactory().newConstant(new Character('a')), 
-                                             getFactory().newConstant(DataTypeManagerService.DefaultDataTypes.DATE.getId())}); //$NON-NLS-1$
+                                             getFactory().newConstant(DefaultDataTypeManager.DefaultDataTypes.DATE.getId())}); //$NON-NLS-1$
 
         try {
-            ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+            ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
             visitor.resolveLanguageObject(function, getMetadataFactory().example1Cached());
             fail("excpetion expected"); //$NON-NLS-1$
         } catch (QueryResolverException err) {
@@ -74,11 +74,11 @@ public class Test7FunctionResolving extends AbstractTestFunctionResolving {
 
     @Test
     public void testResolveAmbiguousFunction() throws Exception {
-        Function function = getFactory().newFunction("LCASE",
-                                                     new Expression[] {getFactory().newReference(0)}); //$NON-NLS-1$
+        FunctionImpl function = getFactory().newFunction("LCASE",
+                                                     new BaseExpression[] {getFactory().newReference(0)}); //$NON-NLS-1$
 
         try {
-            ResolverVisitor visitor = new ResolverVisitor(getTeiidVersion());
+            ResolverVisitorImpl visitor = new ResolverVisitorImpl(getTeiidVersion());
             visitor.resolveLanguageObject(function, getMetadataFactory().example1Cached());
             fail("excpetion expected"); //$NON-NLS-1$
         } catch (QueryResolverException err) {

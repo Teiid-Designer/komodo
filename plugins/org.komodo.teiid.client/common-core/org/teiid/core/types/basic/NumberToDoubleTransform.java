@@ -22,7 +22,7 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 public class NumberToDoubleTransform extends Transform {
@@ -31,7 +31,7 @@ public class NumberToDoubleTransform extends Transform {
 	private boolean isNarrowing;
 	private boolean isLossy;
 	
-	public NumberToDoubleTransform(DataTypeManagerService dataTypeManager, Class<?> sourceType, boolean isNarrowing, boolean isLossy) {
+	public NumberToDoubleTransform(DefaultDataTypeManager dataTypeManager, Class<?> sourceType, boolean isNarrowing, boolean isLossy) {
 	    super(dataTypeManager);
 		this.sourceType = sourceType;
 		this.isNarrowing = isNarrowing;
@@ -63,7 +63,7 @@ public class NumberToDoubleTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.DOUBLE.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getTypeClass();
 	}
 	
 	@Override

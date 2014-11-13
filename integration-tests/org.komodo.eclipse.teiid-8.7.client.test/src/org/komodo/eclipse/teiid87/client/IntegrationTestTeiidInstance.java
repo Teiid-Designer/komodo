@@ -27,13 +27,13 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.komodo.spi.runtime.ITeiidJdbcInfo;
-import org.komodo.spi.runtime.ITeiidParent;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.ITeiidVersion.VersionID;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.TeiidParent;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion.VersionID;
 import org.komodo.test.utils.AbstractTeiidVersionTest;
 import org.mockito.Mockito;
-import org.teiid.runtime.client.instance.TeiidInstance;
+import org.teiid.runtime.client.instance.TCTeiidInstance;
 
 /**
  *
@@ -42,13 +42,13 @@ import org.teiid.runtime.client.instance.TeiidInstance;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class IntegrationTestTeiidInstance extends AbstractTeiidVersionTest {
 
-    private static final VersionID TEIID_VERSION_ID = ITeiidVersion.VersionID.TEIID_8_7;
+    private static final VersionID TEIID_VERSION_ID = TeiidVersion.VersionID.TEIID_8_7;
 
-    private ITeiidParent teiidParent;
+    private TeiidParent teiidParent;
 
-    private TeiidInstance teiidInstance;
+    private TCTeiidInstance teiidInstance;
 
-    private ITeiidJdbcInfo teiidJdbcInfo;
+    private TeiidJdbcInfo teiidJdbcInfo;
 
     public IntegrationTestTeiidInstance() {
         super(TEIID_VERSION_ID);
@@ -56,26 +56,26 @@ public class IntegrationTestTeiidInstance extends AbstractTeiidVersionTest {
 
     @Before
     public void setup() throws Exception {
-        teiidParent = Mockito.mock(ITeiidParent.class);
+        teiidParent = Mockito.mock(TeiidParent.class);
 
         when(teiidParent.getHost()).thenReturn("localhost");
         when(teiidParent.getPort()).thenReturn(9999);
         when(teiidParent.getUserName()).thenReturn("admin");
         when(teiidParent.getPassword()).thenReturn("admin");
 
-        teiidJdbcInfo = Mockito.mock(ITeiidJdbcInfo.class);
+        teiidJdbcInfo = Mockito.mock(TeiidJdbcInfo.class);
         when(teiidJdbcInfo.getHostProvider()).thenReturn(teiidParent);
-        when(teiidJdbcInfo.getPort()).thenReturn(ITeiidJdbcInfo.DEFAULT_PORT);
-        when(teiidJdbcInfo.getUsername()).thenReturn(ITeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
-        when(teiidJdbcInfo.getPassword()).thenReturn(ITeiidJdbcInfo.DEFAULT_JDBC_PASSWORD);
+        when(teiidJdbcInfo.getPort()).thenReturn(TeiidJdbcInfo.DEFAULT_PORT);
+        when(teiidJdbcInfo.getUsername()).thenReturn(TeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
+        when(teiidJdbcInfo.getPassword()).thenReturn(TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD);
         when(teiidJdbcInfo.isSecure()).thenReturn(true);
 
-        teiidInstance = new TeiidInstance(teiidParent, teiidJdbcInfo);
+        teiidInstance = new TCTeiidInstance(teiidParent, teiidJdbcInfo);
     }
 
     @Test
     public void testVersion() throws Exception {
-        ITeiidVersion version = teiidInstance.getVersion();
+        TeiidVersion version = teiidInstance.getVersion();
         assertEquals(getTeiidVersion(), version);
     }
 }

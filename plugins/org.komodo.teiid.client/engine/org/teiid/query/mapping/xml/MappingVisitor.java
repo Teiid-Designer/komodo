@@ -43,54 +43,54 @@ public class MappingVisitor {
     /**
 	 * @param node  
 	 */
-    public void visit(MappingNode node) {}
+    public void visit(MappingNodeImpl node) {}
     
-    public void visit(MappingDocument doc) {
-        visit((MappingNode)doc);
+    public void visit(MappingDocumentImpl doc) {
+        visit((MappingNodeImpl)doc);
     }
-    public void visit(MappingElement element) {
-        visit((MappingBaseNode)element);
+    public void visit(MappingElementImpl element) {
+        visit((MappingBaseNodeImpl)element);
     }
-    public void visit(MappingAttribute attribute) {
-        visit((MappingNode)attribute);
+    public void visit(MappingAttributeImpl attribute) {
+        visit((MappingNodeImpl)attribute);
     }
-    public void visit(MappingBaseNode baseNode) {
-        visit((MappingNode)baseNode);
+    public void visit(MappingBaseNodeImpl baseNode) {
+        visit((MappingNodeImpl)baseNode);
     }
-    public void visit(MappingChoiceNode choice) {
-        visit((MappingBaseNode)choice);
+    public void visit(MappingChoiceNodeImpl choice) {
+        visit((MappingBaseNodeImpl)choice);
     }
-    public void visit(MappingSequenceNode sequence) {
-        visit((MappingBaseNode)sequence);
+    public void visit(MappingSequenceNodeImpl sequence) {
+        visit((MappingBaseNodeImpl)sequence);
     }
-    public void visit(MappingAllNode all) {
-        visit((MappingBaseNode)all);
+    public void visit(MappingAllNodeImpl all) {
+        visit((MappingBaseNodeImpl)all);
     }
-    public void visit(MappingCommentNode comment) {
-        visit((MappingNode)comment);
+    public void visit(MappingCommentNodeImpl comment) {
+        visit((MappingNodeImpl)comment);
     }
-    public void visit(MappingCriteriaNode node) {
-        visit((MappingBaseNode)node);
+    public void visit(MappingCriteriaNodeImpl node) {
+        visit((MappingBaseNodeImpl)node);
     }
-    public void visit(MappingRecursiveElement element) {
-        visit((MappingElement)element);
+    public void visit(MappingRecursiveElementImpl element) {
+        visit((MappingElementImpl)element);
     }
-    public void visit(MappingSourceNode element) {
-        visit((MappingBaseNode)element);
+    public void visit(MappingSourceNodeImpl element) {
+        visit((MappingBaseNodeImpl)element);
     }
     /** 
      * @param element
      */
-    protected void walkChildNodes(MappingNode element) {
+    protected void walkChildNodes(MappingNodeImpl element) {
 
-        List<MappingNode> children = element.getNodeChildren();
-        for(Iterator<MappingNode> i=children.iterator(); i.hasNext();) {
+        List<MappingNodeImpl> children = element.getNodeChildren();
+        for(Iterator<MappingNodeImpl> i=children.iterator(); i.hasNext();) {
             
             if (shouldAbort()) {
                 break;
             }
             
-            MappingNode node = i.next();            
+            MappingNodeImpl node = i.next();            
             node.acceptVisitor(this);
         }
     }    
@@ -98,13 +98,13 @@ public class MappingVisitor {
     /** 
      * @param element
      */
-    protected void walkAttributes(MappingElement element) {
+    protected void walkAttributes(MappingElementImpl element) {
         List attributes = element.getAttributes();
         for(Iterator i=attributes.iterator(); i.hasNext();) {
             if (shouldAbort()) {
                 break;
             }            
-            visit((MappingAttribute)i.next());
+            visit((MappingAttributeImpl)i.next());
         }
     }     
 }

@@ -141,7 +141,7 @@ public abstract class Streamable<T> implements Externalizable {
     	MultiArrayOutputStream baos = null;
     	if (referenceStreamId == null) {
     		//TODO: detect when this buffering is not necessary
-    		baos = new MultiArrayOutputStream(DataTypeManagerService.MAX_LOB_MEMORY_BYTES);
+    		baos = new MultiArrayOutputStream(DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES);
     		DataOutputStream dataOutput = new DataOutputStream(baos);
     		try {
     			writeReference(dataOutput);

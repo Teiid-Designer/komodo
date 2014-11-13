@@ -3,34 +3,34 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.LanguageVisitor;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
-import org.komodo.modeshape.teiid.sql.symbol.Expression;
+import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
+import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
 
 /**
  *
  */
-public abstract class AbstractSetCriteria extends Criteria implements PredicateCriteria {
+public abstract class AbstractSetCriteria extends CriteriaImpl implements PredicateCriteria {
 
     /**
      * @param p teiid parser
      * @param id node type id
      */
-    public AbstractSetCriteria(ITeiidParser p, int id) {
+    public AbstractSetCriteria(TeiidSeqParser p, int id) {
         super(p, id);
     }
 
     /**
      * @return the expression
      */
-    public Expression getExpression() {
-        return getChildforIdentifierAndRefType(TeiidSqlLexicon.AbstractSetCriteria.EXPRESSION_REF_NAME, Expression.class);
+    public BaseExpression getExpression() {
+        return getChildforIdentifierAndRefType(TeiidSqlLexicon.AbstractSetCriteria.EXPRESSION_REF_NAME, BaseExpression.class);
     }
 
     /**
      * @param expression the expression to set
      */
-    public void setExpression(Expression expression) {
+    public void setExpression(BaseExpression expression) {
         setChild(TeiidSqlLexicon.AbstractSetCriteria.EXPRESSION_REF_NAME, expression);
     }
 
@@ -75,7 +75,7 @@ public abstract class AbstractSetCriteria extends Criteria implements PredicateC
 
     /** Accept the visitor. **/
     @Override
-    public void acceptVisitor(LanguageVisitor visitor) {
+    public void acceptVisitor(SQLanguageVisitorImpl visitor) {
         visitor.visit(this);
     }
 }

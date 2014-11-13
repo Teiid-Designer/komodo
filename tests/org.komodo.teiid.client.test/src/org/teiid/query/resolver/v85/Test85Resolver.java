@@ -24,15 +24,15 @@ package org.teiid.query.resolver.v85;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.query.resolver.v8.Test8Resolver;
-import org.teiid.query.sql.lang.Command;
+import org.teiid.query.sql.lang.CommandImpl;
 
 @SuppressWarnings( {"javadoc"} )
 public class Test85Resolver extends Test8Resolver {
 
-    protected Test85Resolver(ITeiidVersion teiidVersion) {
+    protected Test85Resolver(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -49,7 +49,7 @@ public class Test85Resolver extends Test8Resolver {
         .append("\n  insert into #matt values (1);") //$NON-NLS-1$
         .append("\nEND"); //$NON-NLS-1$
 
-        Command cmd = helpResolve(proc.toString());
+        CommandImpl cmd = helpResolve(proc.toString());
 
         String sExpected = "BEGIN\nCREATE LOCAL TEMPORARY TABLE #matt (x integer);\nINSERT INTO #matt (x) VALUES (1);\nEND\n\tCREATE LOCAL TEMPORARY TABLE #matt (x integer)\n\tINSERT INTO #matt (x) VALUES (1)\n"; //$NON-NLS-1$
         String sActual = cmd.printCommandTree();

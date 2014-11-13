@@ -22,14 +22,14 @@
 package org.komodo.modeshape.teiid.sql.v85;
 
 import org.junit.Test;
-import org.komodo.modeshape.teiid.sql.lang.From;
-import org.komodo.modeshape.teiid.sql.lang.GroupBy;
-import org.komodo.modeshape.teiid.sql.lang.Query;
-import org.komodo.modeshape.teiid.sql.lang.Select;
-import org.komodo.modeshape.teiid.sql.symbol.GroupSymbol;
+import org.komodo.modeshape.teiid.sql.lang.FromImpl;
+import org.komodo.modeshape.teiid.sql.lang.GroupByImpl;
+import org.komodo.modeshape.teiid.sql.lang.QueryImpl;
+import org.komodo.modeshape.teiid.sql.lang.SelectImpl;
+import org.komodo.modeshape.teiid.sql.symbol.GroupSymbolImpl;
 import org.komodo.modeshape.teiid.sql.v84.TestQuery84Parser;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -37,7 +37,7 @@ import org.komodo.spi.runtime.version.TeiidVersion.Version;
 @SuppressWarnings( {"javadoc"} )
 public class TestQuery85Parser extends TestQuery84Parser {
 
-    protected TestQuery85Parser(ITeiidVersion teiidVersion) {
+    protected TestQuery85Parser(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -48,19 +48,19 @@ public class TestQuery85Parser extends TestQuery84Parser {
     @Override
     @Test
     public void testGroupByRollup() {
-        GroupSymbol g = getFactory().newGroupSymbol("m.g"); //$NON-NLS-1$
-        From from = getFactory().newFrom();
+        GroupSymbolImpl g = getFactory().newGroupSymbol("m.g"); //$NON-NLS-1$
+        FromImpl from = getFactory().newFrom();
         from.addGroup(g);
 
-        Select select = getFactory().newSelect();
+        SelectImpl select = getFactory().newSelect();
         select.addSymbol(getFactory().newElementSymbol("a")); //$NON-NLS-1$
 
-        GroupBy groupBy = getFactory().newGroupBy();
+        GroupByImpl groupBy = getFactory().newGroupBy();
         groupBy.setRollup(true);
         groupBy.addSymbol(getFactory().newElementSymbol("b")); //$NON-NLS-1$
         groupBy.addSymbol(getFactory().newElementSymbol("c")); //$NON-NLS-1$
 
-        Query query = getFactory().newQuery();
+        QueryImpl query = getFactory().newQuery();
         query.setSelect(select);
         query.setFrom(from);
         query.setGroupBy(groupBy);

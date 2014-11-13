@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
-import org.komodo.spi.runtime.ITeiidDataSource;
+import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.uuid.WorkspaceUUIDService;
 
 
@@ -18,14 +18,14 @@ public class ModelConnectionMatcher {
      */
     public static final String PREVIEW_PREFIX = "PREVIEW_"; //$NON-NLS-1$
     
-    public Collection<ITeiidDataSource> findTeiidDataSources( Collection<String> names) throws Exception {
-        Collection<ITeiidDataSource> dataSources = new ArrayList<ITeiidDataSource>();
+    public Collection<TeiidDataSource> findTeiidDataSources( Collection<String> names) throws Exception {
+        Collection<TeiidDataSource> dataSources = new ArrayList<TeiidDataSource>();
 
         for (String name : names) {
             if (name.equalsIgnoreCase("DefaultDS") || name.equalsIgnoreCase("JmsXA")) { //$NON-NLS-1$ //$NON-NLS-2$
                 continue;
             }
-            TeiidDataSource tds = new TeiidDataSource(name, name, "<unknown>"); //$NON-NLS-1$
+            TCTeiidDataSource tds = new TCTeiidDataSource(name, name, "<unknown>"); //$NON-NLS-1$
             
             if (name.startsWith(PREVIEW_PREFIX)) {
                 UUID workspaceUuid = WorkspaceUUIDService.getInstance().getUUID();

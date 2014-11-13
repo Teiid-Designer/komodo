@@ -30,7 +30,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.adminapi.impl.DataPolicyMetadata.PermissionMetaData;
 import org.teiid.runtime.client.Messages;
 

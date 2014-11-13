@@ -21,44 +21,44 @@
 */
 package org.teiid.query.resolver;
 
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.query.parser.QueryParser;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.teiid.query.parser.TCQueryParser;
 import org.teiid.query.sql.AbstractTestFactory;
 import org.teiid.query.unittest.RealMetadataFactory;
 
 @SuppressWarnings( {"javadoc"} )
 public abstract class AbstractTest {
 
-    private final ITeiidVersion teiidVersion;
+    private final TeiidVersion teiidVersion;
 
-    private final DataTypeManagerService dataTypeManager;
+    private final DefaultDataTypeManager dataTypeManager;
 
-    private final QueryParser queryParser;
+    private final TCQueryParser queryParser;
 
     private final RealMetadataFactory metadataFactory;
 
     /**
      * @param teiidVersion
      */
-    public AbstractTest(ITeiidVersion teiidVersion) {
+    public AbstractTest(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
-        this.dataTypeManager = DataTypeManagerService.getInstance(teiidVersion);
-        this.queryParser = new QueryParser(teiidVersion);
+        this.dataTypeManager = DefaultDataTypeManager.getInstance(teiidVersion);
+        this.queryParser = new TCQueryParser(teiidVersion);
         this.metadataFactory = new RealMetadataFactory(teiidVersion);
     }
 
     /**
      * @return the teiidVersion
      */
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.teiidVersion;
     }
 
     /**
      * @return the queryParser
      */
-    public QueryParser getQueryParser() {
+    public TCQueryParser getQueryParser() {
         return this.queryParser;
     }
 
@@ -72,7 +72,7 @@ public abstract class AbstractTest {
     /**
      * @return the dataTypeManager
      */
-    public DataTypeManagerService getDataTypeManager() {
+    public DefaultDataTypeManager getDataTypeManager() {
         return this.dataTypeManager;
     }
 

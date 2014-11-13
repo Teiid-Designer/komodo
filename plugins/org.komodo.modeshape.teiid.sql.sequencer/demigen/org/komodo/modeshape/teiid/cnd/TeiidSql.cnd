@@ -38,17 +38,11 @@
 //==================================================
 //  Derived from Language Object Interfaces
 //==================================================
-[tsql:expressionStatement] mixin
-	- tsql:expectedTypeClass (string)
-	+ tsql:expression (tsql:expression)
-
-[tsql:labeled] mixin
-	- tsql:label (string)
-
 [tsql:targetedCommand] mixin
 	+ tsql:group (tsql:groupSymbol)
 
 [tsql:languageObject] mixin
+	- tsql:teiidVersion (string)
 
 [tsql:expression]	>	tsql:languageObject mixin
 	- tsql:typeClass (string)
@@ -57,6 +51,13 @@
 
 [tsql:subqueryContainer]	>	tsql:languageObject mixin
 	+ tsql:command (tsql:command)
+
+[tsql:expressionStatement] mixin
+	- tsql:expectedTypeClass (string)
+	+ tsql:expression (tsql:expression)
+
+[tsql:labeled] mixin
+	- tsql:label (string)
 
 //==================================================
 //  Derived from Language Object Classes
@@ -286,11 +287,11 @@
 	+ tsql:defaultExpression (tsql:expression)
 
 [tsql:textColumn]	>	tsql:projectedColumn mixin
-	- tsql:ordinal (boolean)
 	- tsql:selector (string)
+	- tsql:ordinal (boolean)
 	- tsql:position (long)
-	- tsql:width (long)
 	- tsql:noTrim (boolean)
+	- tsql:width (long)
 
 [tsql:xmlColumn]	>	tsql:projectedColumn mixin
 	- tsql:ordinal (boolean)
@@ -364,7 +365,6 @@
 
 [tsql:declareStatement]	>	tsql:assignmentStatement mixin
 	- tsql:variableType (string)
-	+ tsql:command (tsql:command)
 
 [tsql:returnStatement]	>	tsql:assignmentStatement mixin
 
@@ -398,10 +398,10 @@
 	+ tsql:condition (tsql:criteria)
 
 [tsql:exceptionExpression]	>	tsql:expression mixin
-	+ tsql:message (tsql:expression)
 	+ tsql:errorCode (tsql:expression)
-	+ tsql:sqlState (tsql:expression)
+	+ tsql:message (tsql:expression)
 	+ tsql:parentExpression (tsql:expression)
+	+ tsql:sqlState (tsql:expression)
 
 [tsql:function]	>	tsql:expression mixin
 	- tsql:arrayType (boolean)
@@ -412,16 +412,16 @@
 [tsql:aggregateSymbol]	>	tsql:function mixin
 	- tsql:windowed (boolean)
 	- tsql:aggregateFunction (string)
-	- tsql:distinct (boolean)
 	- tsql:name (string)
+	- tsql:distinct (boolean)
 	+ tsql:orderBy (tsql:orderBy)
 	+ tsql:args (tsql:expression) sns
 	+ tsql:condition (tsql:expression)
 
 [tsql:symbol]	>	tsql:languageObject mixin abstract
 	- tsql:shortName (string)
-	- tsql:outputName (string)
 	- tsql:name (string)
+	- tsql:outputName (string)
 
 [tsql:aliasSymbol]	>	tsql:symbol, tsql:expression mixin
 	+ tsql:symbol (tsql:expression)
@@ -441,7 +441,7 @@
 	- tsql:procedure (boolean)
 	- tsql:definition (string)
 
-[tsql:array]	>	tsql:expression mixin
+[tsql:arraySymbol]	>	tsql:expression mixin
 	- tsql:implicit (boolean)
 	+ tsql:expressions (tsql:expression) sns
 

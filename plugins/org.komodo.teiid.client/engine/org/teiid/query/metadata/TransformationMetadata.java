@@ -45,15 +45,15 @@ import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.adminapi.impl.DataPolicyMetadata;
 import org.teiid.adminapi.impl.VDBMetaData;
 import org.teiid.core.types.BlobImpl;
 import org.teiid.core.types.ClobImpl;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.InputStreamFactory;
 import org.teiid.core.types.SQLXMLImpl;
 import org.teiid.core.util.ArgCheck;
@@ -73,15 +73,15 @@ import org.teiid.metadata.ProcedureParameter;
 import org.teiid.metadata.ProcedureParameter.Type;
 import org.teiid.metadata.Schema;
 import org.teiid.metadata.Table;
-import org.teiid.query.function.FunctionLibrary;
+import org.teiid.query.function.DefaultFunctionLibrary;
 import org.teiid.query.function.FunctionTree;
-import org.teiid.query.mapping.relational.QueryNode;
-import org.teiid.query.mapping.xml.MappingDocument;
-import org.teiid.query.mapping.xml.MappingLoader;
-import org.teiid.query.mapping.xml.MappingNode;
-import org.teiid.query.parser.TeiidParser;
-import org.teiid.query.sql.lang.ObjectTable;
-import org.teiid.query.sql.lang.SPParameter;
+import org.teiid.query.mapping.relational.TCQueryNode;
+import org.teiid.query.mapping.xml.MappingDocumentImpl;
+import org.teiid.query.mapping.xml.MappingLoaderImpl;
+import org.teiid.query.mapping.xml.MappingNodeImpl;
+import org.teiid.query.parser.TeiidClientParser;
+import org.teiid.query.sql.lang.ObjectTableImpl;
+import org.teiid.query.sql.lang.SPParameterImpl;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 
@@ -94,7 +94,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 	
 	public static final String ALLOWED_LANGUAGES = "allowed-languages"; //$NON-NLS-1$
 
-	private static final class LiveQueryNode extends QueryNode {
+	private static final class LiveQueryNode extends TCQueryNode {
 		Procedure p;
 		private LiveQueryNode(Procedure p) {
 			super(null);
@@ -106,7 +106,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 		}
 	}
 	
-	private static final class LiveTableQueryNode extends QueryNode {
+	private static final class LiveTableQueryNode extends TCQueryNode {
 		Table t;
 		private LiveTableQueryNode(Table t) {
 			super(null);
@@ -153,11 +153,11 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
     public static Properties EMPTY_PROPS = new Properties();
 
-    private final TeiidParser teiidParser;
+    private final TeiidClientParser teiidParser;
     private final CompositeMetadataStore store;
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
     private Map<String, VDBResources.Resource> vdbEntries;
-    private FunctionLibrary functionLibrary;
+    private DefaultFunctionLibrary functionLibrary;
     private VDBMetaData vdbMetaData;
     private ScriptEngineManager scriptEngineManager;
     private Map<String, ScriptEngineFactory> scriptEngineFactories = Collections.synchronizedMap(new HashMap<String, ScriptEngineFactory>());
@@ -173,7 +173,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
     private Map<String, Object> metadataCache = Collections.synchronizedMap(new LRUCache<String, Object>(250));
     private Map<String, Object> groupInfoCache = Collections.synchronizedMap(new LRUCache<String, Object>(250));
     private Map<String, Collection<Table>> partialNameToFullNameCache = Collections.synchronizedMap(new LRUCache<String, Collection<Table>>(1000));
-    private Map<String, Collection<StoredProcedureInfo>> procedureCache = Collections.synchronizedMap(new LRUCache<String, Collection<StoredProcedureInfo>>(200));
+    private Map<String, Collection<TCStoredProcedureInfo>> procedureCache = Collections.synchronizedMap(new LRUCache<String, Collection<TCStoredProcedureInfo>>(200));
 
     /**
      * TransformationMetadata constructor
@@ -184,7 +184,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
      * @param systemFunctions 
      * @param functionTrees
      */
-    public TransformationMetadata(TeiidParser teiidParser, VDBMetaData vdbMetadata, final CompositeMetadataStore store, Map<String, VDBResources.Resource> vdbEntries, FunctionTree systemFunctions, Collection<FunctionTree> functionTrees) {
+    public TransformationMetadata(TeiidClientParser teiidParser, VDBMetaData vdbMetadata, final CompositeMetadataStore store, Map<String, VDBResources.Resource> vdbEntries, FunctionTree systemFunctions, Collection<FunctionTree> functionTrees) {
         super(teiidParser.getVersion());
     	ArgCheck.isNotNull(store);
     	this.teiidParser = teiidParser;
@@ -211,13 +211,13 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         	this.vdbEntries = vdbEntries;
         }
         if (functionTrees == null) {
-        	this.functionLibrary = new FunctionLibrary(teiidParser.getVersion(), systemFunctions);
+        	this.functionLibrary = new DefaultFunctionLibrary(teiidParser.getVersion(), systemFunctions);
         } else {
-            this.functionLibrary = new FunctionLibrary(teiidParser.getVersion(), systemFunctions, functionTrees.toArray(new FunctionTree[functionTrees.size()]));
+            this.functionLibrary = new DefaultFunctionLibrary(teiidParser.getVersion(), systemFunctions, functionTrees.toArray(new FunctionTree[functionTrees.size()]));
         }
     }
 
-    private TransformationMetadata(TeiidParser teiidParser, final CompositeMetadataStore store, FunctionLibrary functionLibrary) {
+    private TransformationMetadata(TeiidClientParser teiidParser, final CompositeMetadataStore store, DefaultFunctionLibrary functionLibrary) {
         super(teiidParser.getVersion());
         this.teiidParser = teiidParser;
         this.store = store;
@@ -225,20 +225,20 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         this.functionLibrary = functionLibrary;
     }
 
-    public TeiidParser getTeiidParser() {
+    public TeiidClientParser getTeiidParser() {
         return teiidParser;
     }
 
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return teiidParser.getVersion();
     }
 
     /**
      * @return the dataTypeManager
      */
-    public DataTypeManagerService getDataTypeManager() {
+    public DefaultDataTypeManager getDataTypeManager() {
         if (dataTypeManager == null)
-            dataTypeManager = DataTypeManagerService.getInstance(getTeiidVersion());
+            dataTypeManager = DefaultDataTypeManager.getInstance(getTeiidVersion());
 
         return this.dataTypeManager;
     }
@@ -369,9 +369,9 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
     	}
     }
 
-    public StoredProcedureInfo getStoredProcedureInfoForProcedure(final String name)
+    public TCStoredProcedureInfo getStoredProcedureInfoForProcedure(final String name)
         throws Exception {
-        StoredProcedureInfo result = getStoredProcInfoDirect(name);
+        TCStoredProcedureInfo result = getStoredProcInfoDirect(name);
         
 		if (result == null) {
 			 throw new TeiidClientException(name+NOT_EXISTS_MESSAGE);
@@ -380,24 +380,24 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         return result;
     }
 
-	private StoredProcedureInfo getStoredProcInfoDirect(
+	private TCStoredProcedureInfo getStoredProcInfoDirect(
 			final String name)
 			throws Exception {
 		ArgCheck.isNotEmpty(name);
         String canonicalName = name.toUpperCase();
-        Collection<StoredProcedureInfo> results = this.procedureCache.get(canonicalName);
+        Collection<TCStoredProcedureInfo> results = this.procedureCache.get(canonicalName);
         
         if (results == null) {
         	Collection<Procedure> procRecords = getMetadataStore().getStoredProcedure(canonicalName);
         	if (procRecords.isEmpty()) {
         		return null;
         	}
-        	results = new ArrayList<StoredProcedureInfo>(procRecords.size());
+        	results = new ArrayList<TCStoredProcedureInfo>(procRecords.size());
         	for (Procedure procRecord : procRecords) {
                 String procedureFullName = procRecord.getFullName();
 
                 // create the storedProcedure info object that would hold procedure's metadata
-                StoredProcedureInfo procInfo = new StoredProcedureInfo();
+                TCStoredProcedureInfo procInfo = new TCStoredProcedureInfo();
                 procInfo.setProcedureCallableName(procedureFullName);
                 procInfo.setProcedureID(procRecord);
 
@@ -409,7 +409,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
                     String runtimeType = paramRecord.getRuntimeType();
                     int direction = this.convertParamRecordTypeToStoredProcedureType(paramRecord.getType());
                     // create a parameter and add it to the procedure object
-                    SPParameter spParam = new SPParameter(getTeiidParser(), paramRecord.getPosition(), direction, paramRecord.getFullName());
+                    SPParameterImpl spParam = new SPParameterImpl(getTeiidParser(), paramRecord.getPosition(), direction, paramRecord.getFullName());
                     spParam.setMetadataID(paramRecord);
                     spParam.setClassType(getDataTypeManager().getDataTypeClass(runtimeType));
                     if (paramRecord.isVarArg()) {
@@ -424,7 +424,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
                     ColumnSet<Procedure> resultRecord = procRecord.getResultSet();
                     // resultSet is the last parameter in the procedure
                     int lastParamIndex = procInfo.getParameters().size() + 1;
-                    SPParameter param = new SPParameter(getTeiidParser(), lastParamIndex, SPParameter.RESULT_SET, resultRecord.getFullName());
+                    SPParameterImpl param = new SPParameterImpl(getTeiidParser(), lastParamIndex, SPParameterImpl.RESULT_SET, resultRecord.getFullName());
                     param.setClassType(java.sql.ResultSet.class);
                     param.setMetadataID(resultRecord);
 
@@ -438,7 +438,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 
                 // if this is a virtual procedure get the procedure plan
                 if(procRecord.isVirtual()) {
-                    QueryNode queryNode = new LiveQueryNode(procRecord);
+                    TCQueryNode queryNode = new LiveQueryNode(procRecord);
                     procInfo.setQueryPlan(queryNode);
                 }
                 
@@ -449,9 +449,9 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         	this.procedureCache.put(canonicalName, results);        	
         }
         
-        StoredProcedureInfo result = null;
+        TCStoredProcedureInfo result = null;
         
-        for (StoredProcedureInfo storedProcedureInfo : results) {
+        for (TCStoredProcedureInfo storedProcedureInfo : results) {
         	Schema schema = (Schema)storedProcedureInfo.getModelID();
 	        if(name.equalsIgnoreCase(storedProcedureInfo.getProcedureCallableName()) || vdbMetaData == null || vdbMetaData.isVisible(schema.getName())){
 	        	if (result != null) {
@@ -471,10 +471,10 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
      */
     private int convertParamRecordTypeToStoredProcedureType(final ProcedureParameter.Type parameterType) {
         switch (parameterType) {
-            case In : return SPParameter.IN;
-            case Out : return SPParameter.OUT;
-            case InOut : return SPParameter.INOUT;
-            case ReturnValue : return SPParameter.RETURN_VALUE;
+            case In : return SPParameterImpl.IN;
+            case Out : return SPParameterImpl.OUT;
+            case InOut : return SPParameterImpl.INOUT;
+            case ReturnValue : return SPParameterImpl.RETURN_VALUE;
             default : 
                 return -1;
         }
@@ -545,7 +545,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         return !modelRecord.isPhysical();
     }
 
-    public QueryNode getVirtualPlan(final Object groupID) throws Exception {
+    public TCQueryNode getVirtualPlan(final Object groupID) throws Exception {
         Table tableRecord = (Table) groupID;
         if (!tableRecord.isVirtual()) {
              throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID30359, tableRecord.getFullName(), "Query")); //$NON-NLS-1$
@@ -772,10 +772,10 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
         return null;
     }
 
-    public MappingNode getMappingNode(final Object groupID) throws Exception {
+    public MappingNodeImpl getMappingNode(final Object groupID) throws Exception {
         Table tableRecord = (Table) groupID;
         
-        MappingDocument mappingDoc = (MappingDocument) getFromMetadataCache(groupID, "xml-doc"); //$NON-NLS-1$
+        MappingDocumentImpl mappingDoc = (MappingDocumentImpl) getFromMetadataCache(groupID, "xml-doc"); //$NON-NLS-1$
         
         if (mappingDoc != null) {
         	return mappingDoc;
@@ -786,7 +786,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
             // get mapping transform
             String document = tableRecord.getSelectTransformation();            
             InputStream inputStream = new ByteArrayInputStream(document.getBytes());
-            MappingLoader reader = new MappingLoader(getTeiidParser());
+            MappingLoaderImpl reader = new MappingLoaderImpl(getTeiidParser());
             try{
                 mappingDoc = reader.loadDocument(inputStream);
                 mappingDoc.setName(groupName);
@@ -1108,7 +1108,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 	}
 
 	@Override
-	public FunctionLibrary getFunctionLibrary() {
+	public DefaultFunctionLibrary getFunctionLibrary() {
 		return this.functionLibrary;
 	}
 	
@@ -1119,7 +1119,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 	}
 	
 	@Override
-	public IQueryMetadataInterface getDesignTimeMetadata() {
+	public QueryMetadataInterface getDesignTimeMetadata() {
 		TransformationMetadata tm = new TransformationMetadata(getTeiidParser(), store, functionLibrary);
 		tm.groupInfoCache = this.groupInfoCache;
 		tm.metadataCache = this.metadataCache;
@@ -1167,7 +1167,7 @@ public class TransformationMetadata extends BasicQueryMetadata implements Serial
 			if (allowedLanguages != null) {
 				names.retainAll(allowedLanguages);
 			}
-			names.add(ObjectTable.DEFAULT_LANGUAGE);
+			names.add(ObjectTableImpl.DEFAULT_LANGUAGE);
 			throw new TeiidClientException(Messages.gs(Messages.TEIID.TEIID31109, language, names));
 		}
 		this.scriptEngineFactories.put(language, engine.getFactory());

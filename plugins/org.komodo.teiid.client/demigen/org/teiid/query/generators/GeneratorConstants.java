@@ -30,6 +30,9 @@ import org.komodo.spi.constants.StringConstants;
 @SuppressWarnings( "nls" )
 public interface GeneratorConstants extends StringConstants {
 
+    /**
+     * License text for inclusion at header to generated classes
+     */
     String LICENSE = EMPTY_STRING +
     "/*" + NEW_LINE +
     " * JBoss, Home of Professional Open Source." + NEW_LINE +
@@ -53,14 +56,39 @@ public interface GeneratorConstants extends StringConstants {
     " * 02110-1301 USA." + NEW_LINE +
     " */" + NEW_LINE;
 
+    /**
+     * Directory of execution
+     */
     String EXEC_HOME = DOT;
 
+    /**
+     * Source Directory
+     */
     String SRC_DIR = EXEC_HOME + File.separator + SRC;
 
+    /**
+     * Generated Root Directory
+     */
     String GEN_DIR = EXEC_HOME + File.separator + "gen";
 
+    /**
+     * Demi-Generated Root Directory
+     */
     String DEMI_GEN_DIR = EXEC_HOME + File.separator + "demigen";
-    
+
+    /**
+     * Language object interface prefix
+     */
+    String LANG_OBJECT_PREFIX = "Base";
+
+    /**
+     * Language object post fix
+     */
+    String LANG_OBJECT_POSTFIX = "Impl";
+
+    /**
+     * Utilities for source generation
+     */
     class Utilities {
 
         public static String convertPackageToDirPath(Package pkg) {

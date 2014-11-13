@@ -22,7 +22,7 @@ import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
 import org.eclipse.swt.SWT;
 import org.komodo.eclipse.sql.ui.graphics.ColorManager;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 
 /**
@@ -44,7 +44,7 @@ public class SqlCodeScanner extends RuleBasedScanner {
 	 * with setting the scanner�s set of rules
 	 * @param teiidVersion 
 	 */
-	public SqlCodeScanner(ITeiidVersion teiidVersion, ColorManager colorManager) {
+	public SqlCodeScanner(TeiidVersion teiidVersion, ColorManager colorManager) {
         
         // *** NOTE:  DONT USE SWT.BOLD for Keyword,Datatype,Function
         //            Word wrap doesnt work right for mixture of NORMAL AND BOLD 

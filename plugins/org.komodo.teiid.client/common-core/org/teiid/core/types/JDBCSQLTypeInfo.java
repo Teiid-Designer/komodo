@@ -32,8 +32,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.core.types.DataTypeManagerService.DefaultDataTypes;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 
 /**
  * <p> This is a helper class used to obtain SQL type information for java types.
@@ -77,27 +77,27 @@ public final class JDBCSQLTypeInfo {
 
     static {
     	//note the order in which these are added matters.  if there are multiple sql type mappings (e.g. biginteger and bigdecimal to numeric), the latter will be the primary
-    	addType(DataTypeManagerService.DefaultDataTypes.BIG_INTEGER, 20, 19, DataTypeManagerService.DefaultDataTypes.BIG_INTEGER.getId(), Types.NUMERIC);
-    	addType(new String[] {DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getId(), "decimal"}, 22, 20, DataTypeManagerService.DefaultDataTypes.BIG_DECIMAL.getId(), Types.NUMERIC, Types.DECIMAL); //$NON-NLS-1$
-    	addType(DataTypeManagerService.DefaultDataTypes.BLOB, Integer.MAX_VALUE, Integer.MAX_VALUE, Blob.class.getName(), Types.BLOB, Types.LONGVARBINARY);
-    	addType(DataTypeManagerService.DefaultDataTypes.BOOLEAN, 5, 1, DataTypeManagerService.DefaultDataTypes.BOOLEAN.getId(), Types.BIT, Types.BOOLEAN);
-    	addType(new String[] {DataTypeManagerService.DefaultDataTypes.BYTE.getId(), "tinyint"}, 4, 3, DataTypeManagerService.DefaultDataTypes.BYTE.getId(), Types.TINYINT); //$NON-NLS-1$
-    	addType(DataTypeManagerService.DefaultDataTypes.CHAR, 1, 1, DataTypeManagerService.DefaultDataTypes.CHAR.getId(), Types.CHAR);
-    	addType(DataTypeManagerService.DefaultDataTypes.CLOB, Integer.MAX_VALUE, Integer.MAX_VALUE, Clob.class.getName(), Types.CLOB, Types.NCLOB, Types.LONGNVARCHAR, Types.LONGVARCHAR);
-    	addType(DataTypeManagerService.DefaultDataTypes.DATE, 10, 10, DataTypeManagerService.DefaultDataTypes.DATE.getId(), Types.DATE);
-    	addType(DataTypeManagerService.DefaultDataTypes.DOUBLE, 22, 20, DataTypeManagerService.DefaultDataTypes.DOUBLE.getId(), Types.DOUBLE, Types.FLOAT);
-    	addType(new String[] {DataTypeManagerService.DefaultDataTypes.FLOAT.getId(), "real"}, 22, 20, DataTypeManagerService.DefaultDataTypes.FLOAT.getId(), Types.REAL); //$NON-NLS-1$
-    	addType(DataTypeManagerService.DefaultDataTypes.INTEGER, 11, 10, DataTypeManagerService.DefaultDataTypes.INTEGER.getId(), Types.INTEGER);
-    	addType(new String[] {DataTypeManagerService.DefaultDataTypes.LONG.getId(), "bigint"}, 20, 19, DataTypeManagerService.DefaultDataTypes.LONG.getId(), Types.BIGINT); //$NON-NLS-1$
-    	addType(DataTypeManagerService.DefaultDataTypes.OBJECT, Integer.MAX_VALUE, Integer.MAX_VALUE, DataTypeManagerService.DefaultDataTypes.OBJECT.getId(), Types.JAVA_OBJECT);
-    	addType(new String[] {DataTypeManagerService.DefaultDataTypes.SHORT.getId(), "smallint"}, 6, 5, DataTypeManagerService.DefaultDataTypes.SHORT.getId(), Types.SMALLINT); //$NON-NLS-1$
-    	addType(new String[] {DataTypeManagerService.DefaultDataTypes.STRING.getId(), "varchar"}, DataTypeManagerService.MAX_STRING_LENGTH, DataTypeManagerService.MAX_STRING_LENGTH, DataTypeManagerService.DefaultDataTypes.STRING.getId(), Types.VARCHAR, Types.NVARCHAR, Types.CHAR, Types.NCHAR); //$NON-NLS-1$
-    	addType(DataTypeManagerService.DefaultDataTypes.TIME, 8, 8, DataTypeManagerService.DefaultDataTypes.TIME.getId(), Types.TIME);
-    	addType(DataTypeManagerService.DefaultDataTypes.TIMESTAMP, 29, 29, DataTypeManagerService.DefaultDataTypes.TIMESTAMP.getId(), Types.TIMESTAMP);
-    	addType(DataTypeManagerService.DefaultDataTypes.XML, Integer.MAX_VALUE, Integer.MAX_VALUE, SQLXML.class.getName(), Types.SQLXML);
-    	addType(DataTypeManagerService.DefaultDataTypes.NULL, 4, 1, null, Types.NULL);
-    	addType(DataTypeManagerService.DefaultDataTypes.VARBINARY, DataTypeManagerService.MAX_LOB_MEMORY_BYTES, DataTypeManagerService.MAX_LOB_MEMORY_BYTES, byte[].class.getName(), Types.VARBINARY, Types.BINARY);
-    	addType(DataTypeManagerService.DefaultDataTypes.VARBINARY, DataTypeManagerService.MAX_LOB_MEMORY_BYTES, DataTypeManagerService.MAX_LOB_MEMORY_BYTES, byte[].class.getName(), Types.VARBINARY, Types.BINARY);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER, 20, 19, DefaultDataTypeManager.DefaultDataTypes.BIG_INTEGER.getId(), Types.NUMERIC);
+    	addType(new String[] {DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId(), "decimal"}, 22, 20, DefaultDataTypeManager.DefaultDataTypes.BIG_DECIMAL.getId(), Types.NUMERIC, Types.DECIMAL); //$NON-NLS-1$
+    	addType(DefaultDataTypeManager.DefaultDataTypes.BLOB, Integer.MAX_VALUE, Integer.MAX_VALUE, Blob.class.getName(), Types.BLOB, Types.LONGVARBINARY);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.BOOLEAN, 5, 1, DefaultDataTypeManager.DefaultDataTypes.BOOLEAN.getId(), Types.BIT, Types.BOOLEAN);
+    	addType(new String[] {DefaultDataTypeManager.DefaultDataTypes.BYTE.getId(), "tinyint"}, 4, 3, DefaultDataTypeManager.DefaultDataTypes.BYTE.getId(), Types.TINYINT); //$NON-NLS-1$
+    	addType(DefaultDataTypeManager.DefaultDataTypes.CHAR, 1, 1, DefaultDataTypeManager.DefaultDataTypes.CHAR.getId(), Types.CHAR);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.CLOB, Integer.MAX_VALUE, Integer.MAX_VALUE, Clob.class.getName(), Types.CLOB, Types.NCLOB, Types.LONGNVARCHAR, Types.LONGVARCHAR);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.DATE, 10, 10, DefaultDataTypeManager.DefaultDataTypes.DATE.getId(), Types.DATE);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.DOUBLE, 22, 20, DefaultDataTypeManager.DefaultDataTypes.DOUBLE.getId(), Types.DOUBLE, Types.FLOAT);
+    	addType(new String[] {DefaultDataTypeManager.DefaultDataTypes.FLOAT.getId(), "real"}, 22, 20, DefaultDataTypeManager.DefaultDataTypes.FLOAT.getId(), Types.REAL); //$NON-NLS-1$
+    	addType(DefaultDataTypeManager.DefaultDataTypes.INTEGER, 11, 10, DefaultDataTypeManager.DefaultDataTypes.INTEGER.getId(), Types.INTEGER);
+    	addType(new String[] {DefaultDataTypeManager.DefaultDataTypes.LONG.getId(), "bigint"}, 20, 19, DefaultDataTypeManager.DefaultDataTypes.LONG.getId(), Types.BIGINT); //$NON-NLS-1$
+    	addType(DefaultDataTypeManager.DefaultDataTypes.OBJECT, Integer.MAX_VALUE, Integer.MAX_VALUE, DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId(), Types.JAVA_OBJECT);
+    	addType(new String[] {DefaultDataTypeManager.DefaultDataTypes.SHORT.getId(), "smallint"}, 6, 5, DefaultDataTypeManager.DefaultDataTypes.SHORT.getId(), Types.SMALLINT); //$NON-NLS-1$
+    	addType(new String[] {DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), "varchar"}, DefaultDataTypeManager.MAX_STRING_LENGTH, DefaultDataTypeManager.MAX_STRING_LENGTH, DefaultDataTypeManager.DefaultDataTypes.STRING.getId(), Types.VARCHAR, Types.NVARCHAR, Types.CHAR, Types.NCHAR); //$NON-NLS-1$
+    	addType(DefaultDataTypeManager.DefaultDataTypes.TIME, 8, 8, DefaultDataTypeManager.DefaultDataTypes.TIME.getId(), Types.TIME);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP, 29, 29, DefaultDataTypeManager.DefaultDataTypes.TIMESTAMP.getId(), Types.TIMESTAMP);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.XML, Integer.MAX_VALUE, Integer.MAX_VALUE, SQLXML.class.getName(), Types.SQLXML);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.NULL, 4, 1, null, Types.NULL);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.VARBINARY, DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES, DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES, byte[].class.getName(), Types.VARBINARY, Types.BINARY);
+    	addType(DefaultDataTypeManager.DefaultDataTypes.VARBINARY, DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES, DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES, byte[].class.getName(), Types.VARBINARY, Types.BINARY);
     	
     	TypeInfo typeInfo = new TypeInfo(Integer.MAX_VALUE, 0, "ARRAY", Array.class.getName(), new int[Types.ARRAY]); //$NON-NLS-1$
 		CLASSNAME_TO_TYPEINFO.put(Array.class.getName(), typeInfo); 
@@ -142,7 +142,7 @@ public final class JDBCSQLTypeInfo {
         TypeInfo sqlType = NAME_TO_TYPEINFO.get(typeName);
         
         if (sqlType == null) {
-            if (DataTypeManagerService.isArrayType(typeName)) {
+            if (DefaultDataTypeManager.isArrayType(typeName)) {
         		return Types.ARRAY;
         	}
             return Types.JAVA_OBJECT;
@@ -183,7 +183,7 @@ public final class JDBCSQLTypeInfo {
     	TypeInfo typeInfo = TYPE_TO_TYPEINFO.get(jdbcSQLType);
     	
     	if (typeInfo == null) {
-    		return DataTypeManagerService.DefaultDataTypes.OBJECT.getId();
+    		return DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId();
     	}
     	
     	return typeInfo.javaClassName;
@@ -193,7 +193,7 @@ public final class JDBCSQLTypeInfo {
     	TypeInfo typeInfo = TYPE_TO_TYPEINFO.get(sqlType);
     	
     	if (typeInfo == null) {
-    		return DataTypeManagerService.DefaultDataTypes.OBJECT.getId();
+    		return DefaultDataTypeManager.DefaultDataTypes.OBJECT.getId();
     	}
     	
     	return typeInfo.name;
@@ -203,8 +203,8 @@ public final class JDBCSQLTypeInfo {
     	return NAME_TO_TYPEINFO.keySet();
     }
 
-	public static Integer getMaxDisplaySize(ITeiidVersion teiidVersion, Class<?> dataTypeClass) {
-	    return getMaxDisplaySize(DataTypeManagerService.getInstance(teiidVersion).getDataTypeName(dataTypeClass));
+	public static Integer getMaxDisplaySize(TeiidVersion teiidVersion, Class<?> dataTypeClass) {
+	    return getMaxDisplaySize(DefaultDataTypeManager.getInstance(teiidVersion).getDataTypeName(dataTypeClass));
 	}
 
 	public static Integer getMaxDisplaySize(String typeName) {
@@ -215,8 +215,8 @@ public final class JDBCSQLTypeInfo {
 	    return ti.maxDisplaySize;
 	}
 
-	public static Integer getDefaultPrecision(ITeiidVersion teiidVersion, Class<?> dataTypeClass) {
-	    return getDefaultPrecision(DataTypeManagerService.getInstance(teiidVersion).getDataTypeName(dataTypeClass));
+	public static Integer getDefaultPrecision(TeiidVersion teiidVersion, Class<?> dataTypeClass) {
+	    return getDefaultPrecision(DefaultDataTypeManager.getInstance(teiidVersion).getDataTypeName(dataTypeClass));
 	}
 
 	public static Integer getDefaultPrecision(String typeName) {

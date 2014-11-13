@@ -36,7 +36,7 @@ import java.util.Map.Entry;
 
 import org.komodo.spi.annotation.Removed;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.adminapi.Model;
 import org.teiid.core.util.ArgCheck;
 import org.teiid.core.util.CopyOnWriteLinkedHashMap;

@@ -48,7 +48,7 @@ import nu.xom.Nodes;
 import nu.xom.ParsingException;
 import nux.xom.xquery.StreamingPathFilter;
 import nux.xom.xquery.StreamingTransform;
-import org.teiid.core.types.BinaryType;
+import org.teiid.core.types.BinaryTypeImpl;
 import org.teiid.query.function.source.XMLSystemFunctions;
 import org.teiid.query.xquery.saxon.SaxonXQueryExpression.RowProcessor;
 import org.teiid.runtime.client.Messages;
@@ -82,8 +82,8 @@ public class XQueryEvaluator {
 		            	value = wrapStax((Source)value, xquery.getConfig());
 		            } else if (value instanceof java.util.Date) {
 		            	value = XMLSystemFunctions.convertToAtomicValue(value);
-		            } else if (value instanceof BinaryType) {
-		            	value = new HexBinaryValue(((BinaryType)value).getBytesDirect());
+		            } else if (value instanceof BinaryTypeImpl) {
+		            	value = new HexBinaryValue(((BinaryTypeImpl)value).getBytesDirect());
 		            }
 		            dynamicContext.setParameter(entry.getKey(), value);                
 		        }

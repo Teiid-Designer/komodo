@@ -23,7 +23,7 @@
 package org.teiid.translator;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  * Constants for all the possible standard system push down functions.

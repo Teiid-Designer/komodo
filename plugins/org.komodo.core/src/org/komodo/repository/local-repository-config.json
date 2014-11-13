@@ -12,13 +12,17 @@
         "removeDerivedContentWithOriginal" : true,
         "threadPool" : "modeshape-workers",
         "sequencers" : {
+            "DDL Sequencer" : {
+                "classname" : "DdlSequencer",
+                "pathExpressions" : [ "://(*.ddl/jcr:content)[@jcr:data] => /$1" ]
+            },
             "Teiid SQL Sequencer" : {
-            	"classname" : "org.komodo.modeshape.teiid.TeiidSqlSequencer",
-            	"pathExpressions" : [ "default://(*.tsql)/jcr:content[@jcr:data] => /tsql" ]
-           	},
-           	"DDL Sequencer" : {
-               	"classname" : "DdlSequencer",
-               	"pathExpressions" : [ "default://(*.ddl)/jcr:content[@jcr:data] => /ddl" ]
+                "classname" : "org.komodo.modeshape.teiid.TeiidSqlSequencer",
+                "pathExpressions" :
+                [
+                    "://(*.ddl/ddl:statements/*)[@ddl:queryExpression] => /$1",
+                    "://(*.ddl/ddl:statements//*)[@teiidddl:queryExpression] => /$1"
+                ]
             }
         }
     }

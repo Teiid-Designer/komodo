@@ -24,43 +24,43 @@ package org.teiid.query.validator;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.komodo.spi.outcome.IOutcome;
-import org.komodo.spi.validator.IValidator.IValidatorFailure;
+import org.komodo.spi.outcome.Outcome;
+import org.komodo.spi.validator.Validator.IValidatorFailure;
 import org.teiid.query.report.ReportItem;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 
 public class ValidatorFailure extends ReportItem implements IValidatorFailure {
 
 	public static final String VALIDATOR_FAILURE = "ValidatorFailure"; //$NON-NLS-1$
 
     // Don't want to pass this around, so make it transient
-    private transient Collection<LanguageObject> invalidObjects;  
-    private IOutcome.Level status = IOutcome.Level.ERROR;
+    private transient Collection<BaseLanguageObject> invalidObjects;  
+    private Outcome.Level status = Outcome.Level.ERROR;
 
     public ValidatorFailure(String description) { 
         super(VALIDATOR_FAILURE);
         setMessage(description);
     }
     
-    public ValidatorFailure(String description, LanguageObject object) {
+    public ValidatorFailure(String description, BaseLanguageObject object) {
         super(VALIDATOR_FAILURE);
         setMessage(description);
-        this.invalidObjects = new ArrayList<LanguageObject>(1);
+        this.invalidObjects = new ArrayList<BaseLanguageObject>(1);
         this.invalidObjects.add(object);
     }
 
-    public ValidatorFailure(String description, Collection<? extends LanguageObject> objects) { 
+    public ValidatorFailure(String description, Collection<? extends BaseLanguageObject> objects) { 
         super(VALIDATOR_FAILURE);
         setMessage(description);
-        this.invalidObjects = new ArrayList<LanguageObject>(objects);
+        this.invalidObjects = new ArrayList<BaseLanguageObject>(objects);
     }
     
-    public void setStatus(IOutcome.Level status) {
+    public void setStatus(Outcome.Level status) {
 		this.status = status;
 	}
 
     @Override
-    public IOutcome.Level getOutcome() {
+    public Outcome.Level getOutcome() {
         return status;
 	}
     
@@ -79,7 +79,7 @@ public class ValidatorFailure extends ReportItem implements IValidatorFailure {
      * Get the objects that failed validation.  The collection may be null.
      * @return Invalid objects, may be null
      */
-    public Collection<LanguageObject> getInvalidObjects() { 
+    public Collection<BaseLanguageObject> getInvalidObjects() { 
         return this.invalidObjects;
     } 
     

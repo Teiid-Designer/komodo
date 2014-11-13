@@ -32,7 +32,7 @@ import java.io.Writer;
 import java.lang.ref.PhantomReference;
 import java.nio.charset.Charset;
 import org.teiid.common.buffer.FileStore.FileStoreOutputStream;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.InputStreamFactory;
 
 public final class FileStoreInputStreamFactory extends InputStreamFactory {
@@ -96,7 +96,7 @@ public final class FileStoreInputStreamFactory extends InputStreamFactory {
 	 */
 	public FileStoreOutputStream getOuputStream() {
 		if (fsos == null) {
-			fsos = lobBuffer.createOutputStream(DataTypeManagerService.MAX_LOB_MEMORY_BYTES);
+			fsos = lobBuffer.createOutputStream(DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES);
 		}
 		return fsos;
 	}

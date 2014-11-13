@@ -66,7 +66,8 @@
 			 args="-pl target-platform,
                        plugins/org.komodo.spi,
                        plugins/libs/org.komodo.modeshape.lib,
-			           plugins/org.komodo.utils
+			           plugins/org.komodo.utils,
+			           plugins/org.komodo.teiid.client
 			       install"/>
 	</target>
 

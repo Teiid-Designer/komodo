@@ -21,29 +21,29 @@
  ************************************************************************************/
 package org.teiid.query.sql.visitor;
 
-import org.komodo.spi.query.sql.ISQLStringVisitorCallback;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.query.sql.lang.Criteria;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.komodo.spi.query.sql.SQLStringVisitorCallback;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.teiid.query.sql.lang.CriteriaImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 
 /**
  *
  */
-public class CallbackSQLStringVisitor extends SQLStringVisitor {
+public class CallbackSQLStringVisitor extends SQLStringVisitorImpl {
 
-    private final ISQLStringVisitorCallback callback;
+    private final SQLStringVisitorCallback callback;
 
     /**
      * @param teiidVersion
      * @param callback 
      */
-    public CallbackSQLStringVisitor(ITeiidVersion teiidVersion, ISQLStringVisitorCallback callback) {
+    public CallbackSQLStringVisitor(TeiidVersion teiidVersion, SQLStringVisitorCallback callback) {
         super(teiidVersion);
         this.callback = callback;
     }
 
     @Override
-    protected void visitNode(LanguageObject languageObject) {
+    protected void visitNode(BaseLanguageObject languageObject) {
         callback.visitNode(languageObject);
     }
 
@@ -53,7 +53,7 @@ public class CallbackSQLStringVisitor extends SQLStringVisitor {
     }
 
     @Override
-    protected void visitCriteria(String keyWord, Criteria criteria) {
+    protected void visitCriteria(String keyWord, CriteriaImpl criteria) {
         callback.visitCriteria(keyWord, criteria);
     }
 

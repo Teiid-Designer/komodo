@@ -22,7 +22,7 @@
 package org.komodo.shell.api;
 
 import org.komodo.spi.runtime.EventManager;
-import org.komodo.spi.runtime.ITeiidInstance;
+import org.komodo.spi.runtime.TeiidInstance;
 
 /**
  *
@@ -35,9 +35,9 @@ public interface IShellTeiidParent {
 
     String getName();
 
-    ITeiidInstance getTeiidInstance();
+    TeiidInstance getTeiidInstance();
 
-    void setTeiidInstance(ITeiidInstance teiidInstance);
+    void setTeiidInstance(TeiidInstance teiidInstance);
 
     EventManager getEventManager();
 

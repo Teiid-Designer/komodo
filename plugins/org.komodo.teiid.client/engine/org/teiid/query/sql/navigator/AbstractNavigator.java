@@ -25,22 +25,22 @@ package org.teiid.query.sql.navigator;
 import java.util.Collection;
 import java.util.List;
 import java.util.RandomAccess;
-import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 
 
 
 /** 
  * abstract parent class of navigators
  */
-public class AbstractNavigator extends LanguageVisitor {
+public class AbstractNavigator extends TCLanguageVisitorImpl {
 
-    private LanguageVisitor visitor;
+    private TCLanguageVisitorImpl visitor;
     
     /**
      * @param visitor
      */
-    public AbstractNavigator(LanguageVisitor visitor) {
+    public AbstractNavigator(TCLanguageVisitorImpl visitor) {
         super(visitor.getTeiidVersion());
         this.visitor = visitor;
     }
@@ -48,11 +48,11 @@ public class AbstractNavigator extends LanguageVisitor {
     /**
      * @return internal vistor
      */
-    public LanguageVisitor getVisitor() {
+    public TCLanguageVisitorImpl getVisitor() {
         return this.visitor;
     }
 
-    protected void visitVisitor(LanguageObject obj) {
+    protected void visitVisitor(BaseLanguageObject obj) {
     	if(this.visitor.shouldAbort()) {
             return;
         }
@@ -60,7 +60,7 @@ public class AbstractNavigator extends LanguageVisitor {
         obj.acceptVisitor(this.visitor);
     }
     
-    protected void visitNode(LanguageObject obj) {
+    protected void visitNode(BaseLanguageObject obj) {
         if(this.visitor.shouldAbort()) {
             return;
         }
@@ -70,20 +70,20 @@ public class AbstractNavigator extends LanguageVisitor {
         }
     }
     
-    protected void visitNodes(Collection<? extends LanguageObject> nodes) {
+    protected void visitNodes(Collection<? extends BaseLanguageObject> nodes) {
         if(this.visitor.shouldAbort() || nodes == null) {
             return;
         }
         int size = nodes.size();
         if (size > 0) {
         	if (nodes instanceof List<?> && nodes instanceof RandomAccess) {
-        		List<? extends LanguageObject> list = (List<? extends LanguageObject>) nodes;
+        		List<? extends BaseLanguageObject> list = (List<? extends BaseLanguageObject>) nodes;
         		for (int i = 0; i < size; i++) {
         			visitNode(list.get(i));
         		}
         		return;
         	}
-        	for (LanguageObject languageObject : nodes) {
+        	for (BaseLanguageObject languageObject : nodes) {
 				visitNode(languageObject);
 			}
         }

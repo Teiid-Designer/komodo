@@ -22,7 +22,7 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.parser.ITeiidParser;
+import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 
 /**
  *
@@ -33,7 +33,7 @@ public class SpecificHint extends ASTNode {
      * @param p teiid parser
      * @param id node type id
      */
-    public SpecificHint(ITeiidParser p, int id) {
+    public SpecificHint(TeiidSeqParser p, int id) {
         super(p, id);
     }
 

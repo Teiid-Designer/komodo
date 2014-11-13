@@ -21,301 +21,203 @@
  ************************************************************************************/
 package org.komodo.spi.runtime.version;
 
-import org.komodo.spi.Messages;
-
-
 /**
- * Teiid Instance version class 
- * 
- *
+ * Parent marker interface for teiid instance version information
  */
-public class TeiidVersion implements ITeiidVersion {
+public interface TeiidVersion {
+    
+    /**
+     * dot
+     */
+    String DOT = ".";  //$NON-NLS-1$
+    
+    /**
+     * wildcard character used in version strings
+     */
+    String WILDCARD = "x"; //$NON-NLS-1$
+    
+    /**
+     * zero
+     */
+    String ZERO = "0"; //$NON-NLS-1$
 
     /**
-     * Version enumerator
+     * one
      */
-    public static enum Version {
+    String ONE = "1"; //$NON-NLS-1$
 
-        /**
-         * The default preferred teiid instance
-         */
-        DEFAULT_TEIID_VERSION(VersionID.TEIID_8_6),
+    /**
+     * two
+     */
+    String TWO = "2"; //$NON-NLS-1$
 
-        /**
-         * Teiid 7.7
-         */
-        TEIID_7_7(VersionID.TEIID_7_7),
+    /**
+     * three
+     */
+    String THREE = "3"; //$NON-NLS-1$
 
-        /**
-         * Teiid 8.0
-         */
-        TEIID_8_0(VersionID.TEIID_8_0),
+    /**
+     * four
+     */
+    String FOUR = "4"; //$NON-NLS-1$
 
-        /**
-         * Teiid 8.1
-         */
-        TEIID_8_1(VersionID.TEIID_8_1),
+    /**
+     * five
+     */
+    String FIVE = "5"; //$NON-NLS-1$
 
-        /**
-         * Teiid 8.2
-         */
-        TEIID_8_2(VersionID.TEIID_8_2),
+    /**
+     * six
+     */
+    String SIX = "6"; //$NON-NLS-1$
 
-        /**
-         * Teiid 8.3
-         */
-        TEIID_8_3(VersionID.TEIID_8_3),
+    /**
+     * seven
+     */
+    String SEVEN = "7"; //$NON-NLS-1$
 
-        /**
-         * Teiid 8.4
-         */
-        TEIID_8_4(VersionID.TEIID_8_4),
+    /**
+     * eight
+     */
+    String EIGHT = "8"; //$NON-NLS-1$
 
-        /**
-         * Teiid 8.5
-         */
-        TEIID_8_5(VersionID.TEIID_8_5),
+    /**
+     * nine
+     */
+    String NINE = "9"; //$NON-NLS-1$
 
-        /**
-         * Teiid 8.6
-         */
-        TEIID_8_6(VersionID.TEIID_8_6),
+    /**
+     * Teiid id versions
+     */
+    enum VersionID {
+        TEIID_7_7(SEVEN + DOT + SEVEN + DOT + ZERO),
 
-        /**
-         * Teiid 8.7
-         */
-        TEIID_8_7(VersionID.TEIID_8_7);
+        TEIID_8_0(EIGHT + DOT + ZERO + DOT + ZERO),
 
-        private final ITeiidVersion version;
+        TEIID_8_1(EIGHT + DOT + ONE + DOT + ZERO),
 
-        Version(VersionID id) {
-            version = new TeiidVersion(id.toString());
+        TEIID_8_2(EIGHT + DOT + TWO + DOT + ZERO),
+
+        TEIID_8_3(EIGHT + DOT + THREE + DOT + ZERO),
+
+        TEIID_8_4(EIGHT + DOT + FOUR + DOT + ZERO),
+
+        TEIID_8_5(EIGHT + DOT + FIVE + DOT + ZERO),
+
+        TEIID_8_6(EIGHT + DOT + SIX + DOT + ZERO),
+
+        TEIID_8_7(EIGHT + DOT + SEVEN + DOT + ZERO);
+
+        private final String id;
+
+        VersionID(String id) {
+            this.id = id;
         }
 
-        /**
-         * @return version model
-         */
-        public ITeiidVersion get() {
-            return version;
+        @Override
+        public String toString() {
+            return id;
         }
     }
 
-    private String versionString = ZERO + DOT + ZERO + DOT + ZERO;
-
-    private final String majorVersion;
-
-    private String minorVersion = WILDCARD;
-
-    private String microVersion = WILDCARD;
+    /**
+     * Teiid version property constant
+     */
+    String TEIID_VERSION_PROPERTY = "org.teiid.version"; //$NON-NLS-1$
 
     /**
-     * Create a new instance with the given version segments
+     * @return the major version segment
+     */
+    String getMajor();
+    
+    /**
+     * @return the minor version segment
+     */
+    String getMinor();
+    
+    /**
+     * @return the micro version segment 
+     */
+    String getMicro();
+
+    /**
+     * Test whether the minor or micro segments are wildcards '*'
      * 
-     * @param major the major version
-     * @param minor the minor version
-     * @param micro the micro version
+     * @return true if there are wildcards. false otherwise
      */
-    public TeiidVersion(String major, String minor, String micro) {
-        if (major == null)
-            throw new IllegalArgumentException(Messages.getString(Messages.SPI.valueCannotBeNull, "major")); //$NON-NLS-1$
-        
-        if (minor == null)
-            throw new IllegalArgumentException(Messages.getString(Messages.SPI.valueCannotBeNull, "minor")); //$NON-NLS-1$
-        
-        if (micro == null)
-            throw new IllegalArgumentException(Messages.getString(Messages.SPI.valueCannotBeNull, "micro")); //$NON-NLS-1$
-        
-        this.majorVersion = major;
-        this.minorVersion = minor;
-        this.microVersion = micro;
-        this.versionString = major + DOT + minor + DOT + micro;
-    }
+    boolean hasWildCards();
+
+    /**
+     * @param otherVersion
+     * 
+     * @return true if the otherVersion is considered equivalent
+     */
+    boolean compareTo(TeiidVersion otherVersion);
     
     /**
-     * Create a new instance with the given version string
+     * Is this a 7 teiid instance?
      * 
-     * @param versionString the version string
+     * @return true is version is 7
      */
-    public TeiidVersion(String versionString) {
-        this.versionString = versionString;
+    boolean isSevenInstance();
 
-        String[] tokens = versionString.split("\\."); //$NON-NLS-1$
+    /**
+     * @return the minimum version that this version could be,
+     *                 eg. 8.x.x will be 8.0.0 while 8.1.x will be 8.1.0 and
+     *                       8.2.1 will always be 8.2.1
+     */
+    TeiidVersion getMinimumVersion();
 
-        if (tokens.length >= 3) {
-            majorVersion = tokens[0];
-            minorVersion = tokens[1];
-            if(tokens[2]!=null) {
-            	int dashIndex = tokens[2].indexOf('-');
-            	if(dashIndex!=-1 && tokens[2].length()>0) {
-            		microVersion = tokens[2].substring(0,dashIndex);
-            	} else {
-                    microVersion = tokens[2];
-            	}
-            }
-        }
-        else if(tokens.length == 2) {
-            majorVersion = tokens[0];
-            minorVersion = tokens[1];
-        }
-        else {
-            majorVersion = tokens[0];
-        }
-        this.versionString = majorVersion + DOT + minorVersion + DOT + microVersion;
-    }
+    /**
+     * @return the maximum version that this version could be,
+     *                 eg. 8.x.x will be 8.9.9 while 8.1.x will be 8.1.9 and
+     *                       8.2.1 will always be 8.2.1
+     */
+    TeiidVersion getMaximumVersion();
 
-    @Override
-    public String toString() {
-        return versionString;
-    }
+    /**
+     * Is this version greater than the given version
+     *
+     * Wildcards will cause the result to return false since either
+     * this or otherVersion could be the greater depending on the
+     * value given to the wildcard.
+     *
+     * @param otherVersion
+     *
+     * @return true if this version is greater. False otherwise.
+     */
+    boolean isGreaterThan(TeiidVersion otherVersion);
 
-    @Override
-    public String getMajor() {
-        return majorVersion;
-    }
+    /**
+     * Is this version less than the given version
+     *
+     * Wildcards will cause the result to return false since either
+     * this or otherVersion could be the lesser depending on the
+     * value given to the wildcard.
+     *
+     * @param otherVersion
+     *
+     * @return true if this version is less. False otherwise.
+     */
+    boolean isLessThan(TeiidVersion otherVersion);
 
-    @Override
-    public String getMinor() {
-        return minorVersion;
-    }
+    /**
+     * Convenience that delegates to {@link #compareTo(TeiidVersion)}
+     * and {@link #isGreaterThan(TeiidVersion)}.
+     *
+     * @param otherVersion
+     *
+     * @return this is greater than or equal to otherVersion
+     */
+    boolean isGreaterThanOrEqualTo(TeiidVersion otherVersion);
 
-    @Override
-    public String getMicro() {
-        return microVersion;
-    }
-    
-    @Override
-    public boolean hasWildCards() {
-        return majorVersion.equals(WILDCARD) || minorVersion.equals(WILDCARD) || microVersion.equals(WILDCARD);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.majorVersion == null) ? 0 : this.majorVersion.hashCode());
-        result = prime * result + ((this.microVersion == null) ? 0 : this.microVersion.hashCode());
-        result = prime * result + ((this.minorVersion == null) ? 0 : this.minorVersion.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        TeiidVersion other = (TeiidVersion)obj;
-        if (this.majorVersion == null) {
-            if (other.majorVersion != null) return false;
-        } else if (!this.majorVersion.equals(other.majorVersion)) return false;
-        if (this.microVersion == null) {
-            if (other.microVersion != null) return false;
-        } else if (!this.microVersion.equals(other.microVersion)) return false;
-        if (this.minorVersion == null) {
-            if (other.minorVersion != null) return false;
-        } else if (!this.minorVersion.equals(other.minorVersion)) return false;
-        return true;
-    }
-
-    @Override
-    public boolean compareTo(ITeiidVersion otherVersion) {
-        String entryMajor = otherVersion.getMajor();
-
-        if (! getMajor().equals(entryMajor) && ! getMajor().equals(WILDCARD) && ! entryMajor.equals(WILDCARD))
-            return false;
-        
-        String entryMinor = otherVersion.getMinor();
-        
-        if (! getMinor().equals(entryMinor) && ! getMinor().equals(WILDCARD) && ! entryMinor.equals(WILDCARD))
-            return false;
-        
-        String entryMicro = otherVersion.getMicro();
-        
-        if (! getMicro().equals(entryMicro) && ! getMicro().equals(WILDCARD) && ! entryMicro.equals(WILDCARD))
-            return false;
-        
-        /*
-         *  Either this version or entry version contain sufficient wildcards
-         *  to be considered a match
-         */
-        return true;
-    }
-    
-    @Override
-    public boolean isSevenInstance() {
-        return ITeiidVersion.SEVEN.equals(getMajor());
-    }
-
-    @Override
-    public ITeiidVersion getMinimumVersion() {
-        if (! this.hasWildCards())
-            return this;
-
-        String major = getMajor().equals(WILDCARD) ? SEVEN : getMajor();
-        String minor = getMinor().equals(WILDCARD) ? ZERO : getMinor();
-        String micro = getMicro().equals(WILDCARD) ? ZERO : getMicro();
-
-        return new TeiidVersion(major, minor, micro);
-    }
-
-    @Override
-    public ITeiidVersion getMaximumVersion() {
-        if (! this.hasWildCards())
-            return this;
-
-        String major = getMajor().equals(WILDCARD) ? NINE : getMajor();
-        String minor = getMinor().equals(WILDCARD) ? NINE : getMinor();
-        String micro = getMicro().equals(WILDCARD) ? NINE : getMicro();
-
-        return new TeiidVersion(major, minor, micro);
-    }
-
-    @Override
-    public boolean isGreaterThan(ITeiidVersion otherVersion) {
-        ITeiidVersion myMaxVersion = getMaximumVersion();
-        ITeiidVersion otherMinVersion = otherVersion.getMinimumVersion();
-
-        int majCompResult = myMaxVersion.getMajor().compareTo(otherMinVersion.getMajor());
-        if (majCompResult > 0)
-            return true;
-        
-        int minCompResult = myMaxVersion.getMinor().compareTo(otherMinVersion.getMinor());
-        if (majCompResult == 0 && minCompResult > 0)
-            return true;
-
-        int micCompResult = myMaxVersion.getMicro().compareTo(otherMinVersion.getMicro());
-        if (majCompResult == 0 && minCompResult == 0 && micCompResult > 0)
-            return true;
-            
-        return false;
-    }
-
-    @Override
-    public boolean isLessThan(ITeiidVersion otherVersion) {
-        ITeiidVersion myMaxVersion = getMaximumVersion();
-        ITeiidVersion otherMinVersion = otherVersion.getMinimumVersion();
-
-        int majCompResult = myMaxVersion.getMajor().compareTo(otherMinVersion.getMajor());
-        if (majCompResult < 0)
-            return true;
-
-        int minCompResult = myMaxVersion.getMinor().compareTo(otherMinVersion.getMinor());
-        if (majCompResult == 0 && minCompResult < 0)
-            return true;
-
-        int micCompResult = myMaxVersion.getMicro().compareTo(otherMinVersion.getMicro());
-        if (majCompResult == 0 && minCompResult == 0 && micCompResult < 0)
-            return true;
-            
-        return false;
-    }
-
-    @Override
-    public boolean isGreaterThanOrEqualTo(ITeiidVersion otherVersion) {
-        return this.compareTo(otherVersion) || this.isGreaterThan(otherVersion);
-    }
-
-    @Override
-    public boolean isLessThanOrEqualTo(ITeiidVersion otherVersion) {
-        return this.compareTo(otherVersion) || this.isLessThan(otherVersion);
-    }
+    /**
+     * Convenience that delegates to {@link #compareTo(TeiidVersion)}
+     * and {@link #isLessThan(TeiidVersion)}.
+     *
+     * @param otherVersion
+     *
+     * @return this is less than or equal to otherVersion
+     */
+    boolean isLessThanOrEqualTo(TeiidVersion otherVersion);
 }

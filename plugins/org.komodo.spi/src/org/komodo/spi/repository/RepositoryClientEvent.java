@@ -44,14 +44,14 @@ public final class RepositoryClientEvent {
 
     private final EventType eventType;
 
-    private final IRepositoryClient source;
+    private final RepositoryClient source;
 
     /**
      * @param eventType type of this event
      * @param source the source of this event
      * 
      */
-    public RepositoryClientEvent(EventType eventType, IRepositoryClient source) {
+    public RepositoryClientEvent(EventType eventType, RepositoryClient source) {
         this.eventType = eventType;
         this.source = source;
     }
@@ -66,7 +66,7 @@ public final class RepositoryClientEvent {
     /**
      * @return the source
      */
-    public IRepositoryClient getSource() {
+    public RepositoryClient getSource() {
         return this.source;
     }
 
@@ -75,7 +75,7 @@ public final class RepositoryClientEvent {
      *
      * @return event representing the given client has started
      */
-    public static RepositoryClientEvent createStartedEvent(IRepositoryClient source) {
+    public static RepositoryClientEvent createStartedEvent(RepositoryClient source) {
         return new RepositoryClientEvent(EventType.STARTED, source);
     }
 }

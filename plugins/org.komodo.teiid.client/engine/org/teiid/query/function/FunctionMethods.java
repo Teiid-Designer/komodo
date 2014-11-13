@@ -49,12 +49,12 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.core.types.BlobImpl;
 import org.teiid.core.types.BlobType;
 import org.teiid.core.types.ClobImpl;
 import org.teiid.core.types.ClobType;
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.InputStreamFactory.BlobInputStreamFactory;
 import org.teiid.core.types.InputStreamFactory.ClobInputStreamFactory;
 import org.teiid.core.util.PropertiesUtils;
@@ -919,7 +919,7 @@ public final class FunctionMethods {
 		int repeatCount = count.intValue();
 		StringBuffer result = new StringBuffer();
 
-		for (int i = 0; i < repeatCount && result.length() <= DataTypeManagerService.MAX_STRING_LENGTH; i++) {
+		for (int i = 0; i < repeatCount && result.length() <= DefaultDataTypeManager.MAX_STRING_LENGTH; i++) {
 			result.append(str);
 		}
 		return result.toString();
@@ -983,8 +983,8 @@ public final class FunctionMethods {
 	    if(length < str.length()) {
 	        return new String(str.substring(0, length));
 	    }
-	    if(length > DataTypeManagerService.MAX_STRING_LENGTH) {
-	    	length = DataTypeManagerService.MAX_STRING_LENGTH;
+	    if(length > DefaultDataTypeManager.MAX_STRING_LENGTH) {
+	    	length = DefaultDataTypeManager.MAX_STRING_LENGTH;
 	    }
 	    // Get pad character
 	    if(padStr.length() == 0) {
@@ -1057,7 +1057,7 @@ public final class FunctionMethods {
 
 	public static Object convert(CommandContext commandContext, Object src, String type)
 		throws TeiidClientException {
-	    DataTypeManagerService dataTypeManager = DataTypeManagerService.getInstance(commandContext.getTeiidVersion());
+	    DefaultDataTypeManager dataTypeManager = DefaultDataTypeManager.getInstance(commandContext.getTeiidVersion());
 		try {
 			return dataTypeManager.transformValue(src, dataTypeManager.getDataTypeClass(type));
 		} catch(Exception e) {

@@ -29,9 +29,9 @@ import org.komodo.repository.internal.ModeshapeEngineThread.Request;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestType;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.IRepository;
-import org.komodo.spi.repository.IRepositoryClient;
-import org.komodo.spi.repository.IRepositoryObserver;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.RepositoryClient;
+import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.KLog;
 
@@ -39,7 +39,7 @@ import org.komodo.utils.KLog;
  * A repository installed on the local machine, using the modeshape
  * engine and repository.
  */
-public class LocalRepository implements IRepository, StringConstants {
+public class LocalRepository implements Repository, StringConstants {
 
     private static String LOCAL_REPOSITORY_CONFIG = "local-repository-config.json"; //$NON-NLS-1$
 
@@ -80,9 +80,9 @@ public class LocalRepository implements IRepository, StringConstants {
 
     private State state;
 
-    private List<IRepositoryObserver> observers = new ArrayList<IRepositoryObserver>();
+    private List<RepositoryObserver> observers = new ArrayList<RepositoryObserver>();
     
-    private List<IRepositoryClient> clients = new ArrayList<IRepositoryClient>();
+    private List<RepositoryClient> clients = new ArrayList<RepositoryClient>();
 
     private ModeshapeEngineThread engineThread;
 
@@ -112,27 +112,27 @@ public class LocalRepository implements IRepository, StringConstants {
     }
 
     @Override
-    public void addClient(IRepositoryClient client) {
+    public void addClient(RepositoryClient client) {
         clients .add(client);
     }
 
     @Override
-    public void removeClient(IRepositoryClient client) {
+    public void removeClient(RepositoryClient client) {
         clients.remove(client);
     }
 
     @Override
-    public void addObserver(IRepositoryObserver observer) {
+    public void addObserver(RepositoryObserver observer) {
         observers.add(observer);
     }
 
     @Override
-    public void removeObserver(IRepositoryObserver observer) {
+    public void removeObserver(RepositoryObserver observer) {
         observers.remove(observer);
     }
 
     private void notifyObservers() {
-        for (IRepositoryObserver observer : observers) {
+        for (RepositoryObserver observer : observers) {
             try {
                 // Ensure all observers are informed even if one
                 // throws an exception

@@ -35,7 +35,7 @@ public interface EventManager {
      * @param listener the listener being register to receive events (never <code>null</code>)
      * @return <code>true</code> if listener was added
      */
-    boolean addListener( IExecutionConfigurationListener listener );
+    boolean addListener( ExecutionConfigurationListener listener );
 
     /**
      * Enable / disable the listeners in the event manager
@@ -53,7 +53,7 @@ public interface EventManager {
      * @param listener the listener being unregistered and will no longer receive events (never <code>null</code>)
      * @return <code>true</code> if listener was removed
      */
-    boolean removeListener( IExecutionConfigurationListener listener );
+    boolean removeListener( ExecutionConfigurationListener listener );
     
     /**
      * An <code>EventManager</code> that does not do anything.
@@ -61,7 +61,7 @@ public interface EventManager {
     EventManager EVENT_MANAGER_ADAPTER = new EventManager() {
 
         @Override
-        public boolean addListener( IExecutionConfigurationListener listener ) {
+        public boolean addListener( ExecutionConfigurationListener listener ) {
             return true;
         }
 
@@ -71,7 +71,7 @@ public interface EventManager {
         }
 
         @Override
-        public boolean removeListener( IExecutionConfigurationListener listener ) {
+        public boolean removeListener( ExecutionConfigurationListener listener ) {
             return true;
         }
 

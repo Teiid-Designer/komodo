@@ -21,17 +21,17 @@
  ************************************************************************************/
 package org.teiid.query.sql.lang;
 
-import org.teiid.query.parser.TeiidParser;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.parser.TeiidClientParser;
+import org.teiid.query.sql.symbol.BaseExpression;
 import org.teiid.runtime.client.Messages;
 
 /**
  *
  */
-public abstract class AbstractCompareCriteria extends Criteria implements PredicateCriteria, CriteriaOperator {
+public abstract class AbstractCompareCriteria extends CriteriaImpl implements PredicateCriteria, CriteriaOperator {
 
     /** The left-hand expression. */
-    private Expression leftExpression;
+    private BaseExpression leftExpression;
     /**
      * The operator used in the clause.
      * @see #Operator.EQ
@@ -47,7 +47,7 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * @param p
      * @param id
      */
-    public AbstractCompareCriteria(TeiidParser p, int id) {
+    public AbstractCompareCriteria(TeiidClientParser p, int id) {
         super(p, id);
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * Get left expression.
      * @return Left expression
      */
-    public Expression getLeftExpression() {
+    public BaseExpression getLeftExpression() {
         return this.leftExpression;
     }
 
@@ -89,14 +89,14 @@ public abstract class AbstractCompareCriteria extends Criteria implements Predic
      * Set left expression.
      * @param expression Left expression
      */
-    public void setLeftExpression(Expression expression) {
+    public void setLeftExpression(BaseExpression expression) {
         this.leftExpression = expression;
     }
 
     /**
      * @return right expression
      */
-    public abstract Expression getRightExpression();
+    public abstract BaseExpression getRightExpression();
 
     @Override
     public int hashCode() {

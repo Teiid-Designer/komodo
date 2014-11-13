@@ -22,17 +22,17 @@
 
 package org.teiid.query.resolver.command;
 
-import org.komodo.spi.query.sql.lang.ICommand;
+import org.komodo.spi.query.sql.lang.Command;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.metadata.Table.TriggerEvent;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.resolver.CommandResolver;
-import org.teiid.query.resolver.QueryResolver;
+import org.teiid.query.resolver.TCQueryResolver;
 import org.teiid.query.resolver.util.ResolverUtil;
-import org.teiid.query.sql.lang.Alter;
-import org.teiid.query.sql.lang.AlterProcedure;
-import org.teiid.query.sql.lang.AlterTrigger;
-import org.teiid.query.sql.lang.Command;
+import org.teiid.query.sql.lang.AlterImpl;
+import org.teiid.query.sql.lang.AlterProcedureImpl;
+import org.teiid.query.sql.lang.AlterTriggerImpl;
+import org.teiid.query.sql.lang.CommandImpl;
 import org.teiid.runtime.client.Messages;
 
 /**
@@ -43,32 +43,32 @@ public class AlterResolver extends CommandResolver {
 	/**
      * @param queryResolver
      */
-    public AlterResolver(QueryResolver queryResolver) {
+    public AlterResolver(TCQueryResolver queryResolver) {
         super(queryResolver);
     }
 
     @Override
-	public void resolveCommand(Command command, TempMetadataAdapter metadata,
+	public void resolveCommand(CommandImpl command, TempMetadataAdapter metadata,
 			boolean resolveNullLiterals) throws Exception {
-		Alter<? extends Command> alter = (Alter<? extends Command>)command;
+		AlterImpl<? extends CommandImpl> alter = (AlterImpl<? extends CommandImpl>)command;
 		ResolverUtil.resolveGroup(alter.getTarget(), metadata);
-		int type = ICommand.TYPE_QUERY;
+		int type = Command.TYPE_QUERY;
 		boolean viewTarget = true;
-		if (alter instanceof AlterTrigger) {
-			TriggerEvent event = ((AlterTrigger)alter).getEvent();
+		if (alter instanceof AlterTriggerImpl) {
+			TriggerEvent event = ((AlterTriggerImpl)alter).getEvent();
 			switch (event) {
 			case DELETE:
-				type = ICommand.TYPE_DELETE;
+				type = Command.TYPE_DELETE;
 				break;
 			case INSERT:
-				type = ICommand.TYPE_INSERT;
+				type = Command.TYPE_INSERT;
 				break;
 			case UPDATE:
-				type = ICommand.TYPE_UPDATE;
+				type = Command.TYPE_UPDATE;
 				break;
 			}
-		} else if (alter instanceof AlterProcedure) {
-			type = ICommand.TYPE_STORED_PROCEDURE;
+		} else if (alter instanceof AlterProcedureImpl) {
+			type = Command.TYPE_STORED_PROCEDURE;
 			viewTarget = false;
 		}
 		if (viewTarget && !getQueryResolver().isView(alter.getTarget(), metadata)) {

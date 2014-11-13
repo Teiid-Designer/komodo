@@ -21,23 +21,23 @@
 */
 package org.teiid.query.sql;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.query.parser.QueryParser;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.teiid.query.parser.TCQueryParser;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 
 @SuppressWarnings( {"javadoc"} )
-public abstract class AbstractTest<T extends LanguageObject> {
+public abstract class AbstractTest<T extends BaseLanguageObject> {
 
-    protected ITeiidVersion teiidVersion;
+    protected TeiidVersion teiidVersion;
 
-    protected QueryParser parser;
+    protected TCQueryParser parser;
 
     /**
      * @param teiidVersion
      */
-    public AbstractTest(ITeiidVersion teiidVersion) {
+    public AbstractTest(TeiidVersion teiidVersion) {
         this.teiidVersion = teiidVersion;
-        this.parser = new QueryParser(teiidVersion);
+        this.parser = new TCQueryParser(teiidVersion);
     }
 
     protected abstract AbstractTestFactory getFactory();

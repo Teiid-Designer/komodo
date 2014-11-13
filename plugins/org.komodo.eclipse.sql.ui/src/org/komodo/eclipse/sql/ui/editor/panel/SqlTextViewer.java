@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.komodo.eclipse.sql.ui.editor.panel.configuration.SqlPartitionScanner;
 import org.komodo.eclipse.sql.ui.editor.panel.configuration.SqlSourceViewerConfiguration;
 import org.komodo.eclipse.sql.ui.graphics.ColorManager;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 
 /**
@@ -77,7 +77,7 @@ public class SqlTextViewer extends SourceViewer {
 
     }
 
-    public SqlTextViewer(ITeiidVersion teiidVersion, Composite parent, IVerticalRuler ruler, int style, ColorManager colorManager) {
+    public SqlTextViewer(TeiidVersion teiidVersion, Composite parent, IVerticalRuler ruler, int style, ColorManager colorManager) {
         super(parent, ruler, style);
 
         configuration = new SqlSourceViewerConfiguration(teiidVersion, colorManager);

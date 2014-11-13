@@ -28,8 +28,8 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.GroupBy;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
 import org.komodo.modeshape.teiid.sequencer.v84.TestTeiid84SqlSequencer;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
@@ -46,7 +46,7 @@ public class TestTeiid85SqlSequencer extends TestTeiid84SqlSequencer {
     /**
      * @param teiidVersion
      */
-    protected TestTeiid85SqlSequencer(ITeiidVersion teiidVersion) {
+    protected TestTeiid85SqlSequencer(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 

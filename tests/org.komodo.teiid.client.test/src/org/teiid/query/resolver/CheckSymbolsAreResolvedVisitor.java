@@ -24,16 +24,16 @@ package org.teiid.query.resolver;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.query.parser.LanguageVisitor;
-import org.teiid.query.sql.lang.LanguageObject;
-import org.teiid.query.sql.symbol.CaseExpression;
-import org.teiid.query.sql.symbol.ElementSymbol;
-import org.teiid.query.sql.symbol.Function;
-import org.teiid.query.sql.symbol.GroupSymbol;
-import org.teiid.query.sql.symbol.Reference;
-import org.teiid.query.sql.symbol.ScalarSubquery;
-import org.teiid.query.sql.symbol.SearchedCaseExpression;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.teiid.query.parser.TCLanguageVisitorImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.symbol.CaseExpressionImpl;
+import org.teiid.query.sql.symbol.ElementSymbolImpl;
+import org.teiid.query.sql.symbol.FunctionImpl;
+import org.teiid.query.sql.symbol.GroupSymbolImpl;
+import org.teiid.query.sql.symbol.ReferenceImpl;
+import org.teiid.query.sql.symbol.ScalarSubqueryImpl;
+import org.teiid.query.sql.symbol.SearchedCaseExpressionImpl;
 
 
 /**
@@ -41,16 +41,16 @@ import org.teiid.query.sql.symbol.SearchedCaseExpression;
  * with respect to runtime metadata
  */
 @SuppressWarnings( {"javadoc"} )
-public class CheckSymbolsAreResolvedVisitor extends LanguageVisitor {
+public class CheckSymbolsAreResolvedVisitor extends TCLanguageVisitorImpl {
 
-    private Collection<LanguageObject> unresolvedSymbols;
+    private Collection<BaseLanguageObject> unresolvedSymbols;
     
 	/**
 	 * @param teiidVersion
 	 */
-	public CheckSymbolsAreResolvedVisitor(ITeiidVersion teiidVersion) {
+	public CheckSymbolsAreResolvedVisitor(TeiidVersion teiidVersion) {
 	    super(teiidVersion);
-        unresolvedSymbols = new ArrayList<LanguageObject>();    
+        unresolvedSymbols = new ArrayList<BaseLanguageObject>();    
     }
     
     /**
@@ -58,54 +58,54 @@ public class CheckSymbolsAreResolvedVisitor extends LanguageVisitor {
      * @return Collection of any unresolved Symbols; may
      * be empty but never null
      */
-    public Collection<LanguageObject> getUnresolvedSymbols(){
+    public Collection<BaseLanguageObject> getUnresolvedSymbols(){
         return this.unresolvedSymbols;
     }
     
     @Override
-    public void visit(CaseExpression obj) {
+    public void visit(CaseExpressionImpl obj) {
         if (obj.getType() == null){
             this.unresolvedSymbols.add(obj);
         }
     }
     
     @Override
-    public void visit(ElementSymbol obj) {
+    public void visit(ElementSymbolImpl obj) {
         if (obj.getMetadataID() == null){
             this.unresolvedSymbols.add(obj);
         }
     }
 
     @Override
-    public void visit(GroupSymbol obj) {
+    public void visit(GroupSymbolImpl obj) {
         if (!obj.isResolved()){
             this.unresolvedSymbols.add(obj);
         }
     }
 
     @Override
-    public void visit(SearchedCaseExpression obj) {
+    public void visit(SearchedCaseExpressionImpl obj) {
         if (obj.getType() == null){
             this.unresolvedSymbols.add(obj);
         }
     }
     
     @Override
-    public void visit(ScalarSubquery obj) {
+    public void visit(ScalarSubqueryImpl obj) {
         if (obj.getType() == null){
             this.unresolvedSymbols.add(obj);
         }
     }
     
     @Override
-    public void visit(Function obj) {
+    public void visit(FunctionImpl obj) {
         if (obj.getFunctionDescriptor() == null){
             this.unresolvedSymbols.add(obj);
         }
     }
     
     @Override
-    public void visit(Reference obj) {
+    public void visit(ReferenceImpl obj) {
         if (obj.getType() == null){
             this.unresolvedSymbols.add(obj);
         }

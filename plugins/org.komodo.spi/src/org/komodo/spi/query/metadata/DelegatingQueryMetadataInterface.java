@@ -29,26 +29,26 @@ import java.util.Set;
 
 import javax.script.ScriptEngine;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.udf.IFunctionLibrary;
-import org.komodo.spi.xml.IMappingNode;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.udf.FunctionLibrary;
+import org.komodo.spi.xml.MappingNode;
 
 /**
  *
  */
-public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface {
+public class DelegatingQueryMetadataInterface implements QueryMetadataInterface {
 
-    private final IQueryMetadataInterface delegate;
+    private final QueryMetadataInterface delegate;
 
     /**
      * @param delegate
      */
-    public DelegatingQueryMetadataInterface(IQueryMetadataInterface delegate) {
+    public DelegatingQueryMetadataInterface(QueryMetadataInterface delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public ITeiidVersion getTeiidVersion() {
+    public TeiidVersion getTeiidVersion() {
         return this.delegate.getTeiidVersion();
     }
 
@@ -93,7 +93,7 @@ public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface
     }
 
     @Override
-    public IStoredProcedureInfo getStoredProcedureInfoForProcedure(String fullyQualifiedProcedureName) throws Exception {
+    public StoredProcedureInfo getStoredProcedureInfoForProcedure(String fullyQualifiedProcedureName) throws Exception {
         return this.delegate.getStoredProcedureInfoForProcedure(fullyQualifiedProcedureName);
     }
 
@@ -163,7 +163,7 @@ public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface
     }
 
     @Override
-    public IQueryNode getVirtualPlan(Object groupID) throws Exception {
+    public QueryNode getVirtualPlan(Object groupID) throws Exception {
         return this.delegate.getVirtualPlan(groupID);
     }
 
@@ -253,7 +253,7 @@ public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface
     }
 
     @Override
-    public IMappingNode getMappingNode(Object groupID) throws Exception {
+    public MappingNode getMappingNode(Object groupID) throws Exception {
         return this.delegate.getMappingNode(groupID);
     }
 
@@ -353,7 +353,7 @@ public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface
     }
 
     @Override
-    public IFunctionLibrary getFunctionLibrary() {
+    public FunctionLibrary getFunctionLibrary() {
         return this.delegate.getFunctionLibrary();
     }
 
@@ -388,12 +388,12 @@ public class DelegatingQueryMetadataInterface implements IQueryMetadataInterface
     }
 
     @Override
-    public IQueryMetadataInterface getDesignTimeMetadata() {
+    public QueryMetadataInterface getDesignTimeMetadata() {
         return this.delegate.getDesignTimeMetadata();
     }
 
     @Override
-    public IQueryMetadataInterface getSessionMetadata() {
+    public QueryMetadataInterface getSessionMetadata() {
         return this.delegate.getSessionMetadata();
     }
 

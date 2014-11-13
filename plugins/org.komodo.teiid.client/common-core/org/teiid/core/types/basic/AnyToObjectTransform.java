@@ -22,14 +22,14 @@
 
 package org.teiid.core.types.basic;
 
-import org.teiid.core.types.DataTypeManagerService;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.Transform;
 
 public class AnyToObjectTransform extends Transform {
 	
 	private Class<?> sourceType;
 	
-	public AnyToObjectTransform(DataTypeManagerService dataTypeManager, Class<?> sourceType) {
+	public AnyToObjectTransform(DefaultDataTypeManager dataTypeManager, Class<?> sourceType) {
 	    super(dataTypeManager);
 		this.sourceType = sourceType;
 	}
@@ -56,7 +56,7 @@ public class AnyToObjectTransform extends Transform {
 	 * @return Target type
 	 */
 	public Class<?> getTargetType() {
-		return DataTypeManagerService.DefaultDataTypes.OBJECT.getTypeClass();
+		return DefaultDataTypeManager.DefaultDataTypes.OBJECT.getTypeClass();
 	}
 
 }

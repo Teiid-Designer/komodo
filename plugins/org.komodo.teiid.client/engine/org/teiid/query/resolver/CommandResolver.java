@@ -22,13 +22,13 @@
 
 package org.teiid.query.resolver;
 
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.teiid.core.types.DataTypeManagerService;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
-import org.teiid.query.parser.TeiidParser;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.parser.TeiidClientParser;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 
 
 /**
@@ -37,36 +37,36 @@ import org.teiid.query.sql.lang.LanguageObject;
  */
 public abstract class CommandResolver {
 
-    private final QueryResolver queryResolver;
+    private final TCQueryResolver queryResolver;
 
-    private DataTypeManagerService dataTypeManager;
+    private DefaultDataTypeManager dataTypeManager;
 
     /**
      * @param queryResolver
      */
-    public CommandResolver(QueryResolver queryResolver) {
+    public CommandResolver(TCQueryResolver queryResolver) {
         this.queryResolver = queryResolver;
     }
 
-    protected QueryResolver getQueryResolver() {
+    protected TCQueryResolver getQueryResolver() {
         return this.queryResolver;
     }
 
-    protected ITeiidVersion getTeiidVersion() {
+    protected TeiidVersion getTeiidVersion() {
         return getQueryResolver().getTeiidVersion();
     }
 
-    protected TeiidParser getTeiidParser() {
+    protected TeiidClientParser getTeiidParser() {
         return this.queryResolver.getQueryParser().getTeiidParser();
     }
 
-    protected <T extends LanguageObject> T create(ASTNodes type) {
+    protected <T extends BaseLanguageObject> T create(ASTNodes type) {
         return getTeiidParser().createASTNode(type);
     }
 
-    protected DataTypeManagerService getDataTypeManager() {
+    protected DefaultDataTypeManager getDataTypeManager() {
         if (dataTypeManager == null)
-            dataTypeManager = DataTypeManagerService.getInstance(getTeiidVersion());
+            dataTypeManager = DefaultDataTypeManager.getInstance(getTeiidVersion());
 
         return dataTypeManager;
     }
@@ -81,7 +81,7 @@ public abstract class CommandResolver {
      * @throws Exception If the query cannot be resolved
      * @throws Exception If there is an internal error     
      */        
-    public abstract void resolveCommand(Command command, TempMetadataAdapter metadata, boolean resolveNullLiterals)
+    public abstract void resolveCommand(CommandImpl command, TempMetadataAdapter metadata, boolean resolveNullLiterals)
     throws Exception;
     
 }

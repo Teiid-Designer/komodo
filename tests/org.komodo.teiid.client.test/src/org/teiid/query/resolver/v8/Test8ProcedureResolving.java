@@ -27,19 +27,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.teiid.core.types.DataTypeManagerService;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion.Version;
+import org.teiid.core.types.DefaultDataTypeManager;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.metadata.Table;
 import org.teiid.query.metadata.TransformationMetadata;
 import org.teiid.query.resolver.AbstractTestProcedureResolving;
 import org.teiid.query.sql.AbstractTestFactory;
-import org.teiid.query.sql.lang.SPParameter;
-import org.teiid.query.sql.lang.StoredProcedure;
-import org.teiid.query.sql.proc.TriggerAction;
-import org.teiid.query.sql.symbol.Array;
-import org.teiid.query.sql.symbol.Expression;
+import org.teiid.query.sql.lang.SPParameterImpl;
+import org.teiid.query.sql.lang.StoredProcedureImpl;
+import org.teiid.query.sql.proc.TriggerActionImpl;
+import org.teiid.query.sql.symbol.ArraySymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
 import org.teiid.query.sql.v8.Test8Factory;
 
 /**
@@ -50,7 +50,7 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
 
     private Test8Factory factory;
 
-    protected Test8ProcedureResolving(ITeiidVersion teiidVersion) {
+    protected Test8ProcedureResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
@@ -67,10 +67,10 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
     }
 
     @Override
-    protected TriggerAction helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType)
+    protected TriggerActionImpl helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType)
         throws Exception {
-        IQueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
-        return (TriggerAction)resolveProcedure(userUpdateStr, metadata);
+        QueryMetadataInterface metadata = getMetadataFactory().exampleUpdateProc(procedureType, procedure);
+        return (TriggerActionImpl)resolveProcedure(userUpdateStr, metadata);
     }
 
     @Test
@@ -296,16 +296,16 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
 
         String sql = "call proc (1)"; //$NON-NLS-1$
 
-        StoredProcedure sp = (StoredProcedure)helpResolve(sql, tm);
+        StoredProcedureImpl sp = (StoredProcedureImpl)helpResolve(sql, tm);
 
-        assertEquals(getFactory().newConstant(null, DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()),
+        assertEquals(getFactory().newConstant(null, DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()),
                      sp.getParameter(2).getExpression());
 
         sql = "call proc (1, 'a')"; //$NON-NLS-1$
 
-        sp = (StoredProcedure)helpResolve(sql, tm);
+        sp = (StoredProcedureImpl)helpResolve(sql, tm);
 
-        assertEquals(getFactory().newConstant("a", DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()),
+        assertEquals(getFactory().newConstant("a", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()),
                      sp.getParameter(2).getExpression());
     }
 
@@ -320,9 +320,9 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
 
         String sql = "call proc (1, 'a')"; //$NON-NLS-1$
 
-        StoredProcedure sp = (StoredProcedure)helpResolve(sql, tm);
+        StoredProcedureImpl sp = (StoredProcedureImpl)helpResolve(sql, tm);
 
-        assertEquals(getFactory().newConstant("a", DataTypeManagerService.DefaultDataTypes.STRING.getTypeClass()),
+        assertEquals(getFactory().newConstant("a", DefaultDataTypeManager.DefaultDataTypes.STRING.getTypeClass()),
                      sp.getParameter(2).getExpression());
     }
 
@@ -332,15 +332,15 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
         TransformationMetadata tm = createMetadata(ddl);
         String sql = "call proc (1, 2, 3)"; //$NON-NLS-1$
 
-        StoredProcedure sp = (StoredProcedure)helpResolve(sql, tm);
+        StoredProcedureImpl sp = (StoredProcedureImpl)helpResolve(sql, tm);
         assertEquals("EXEC proc(1, 2, 3)", sp.toString());
         assertEquals(getFactory().newConstant(1), sp.getParameter(1).getExpression());
-        Array expectedArray = getFactory().newArray(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
-                                                    Arrays.asList((Expression)getFactory().newConstant(2),
+        ArraySymbolImpl expectedArray = getFactory().newArray(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
+                                                    Arrays.asList((BaseExpression)getFactory().newConstant(2),
                                                                   getFactory().newConstant(3)));
         expectedArray.setImplicit(true);
         assertEquals(expectedArray, sp.getParameter(2).getExpression());
-        assertEquals(SPParameter.RESULT_SET, sp.getParameter(3).getParameterType());
+        assertEquals(SPParameterImpl.RESULT_SET, sp.getParameter(3).getParameterType());
     }
 
     @Test
@@ -354,10 +354,10 @@ public class Test8ProcedureResolving extends AbstractTestProcedureResolving {
         TransformationMetadata tm = createMetadata(ddl);
 
         String sql = "call proc ()"; //$NON-NLS-1$
-        StoredProcedure sp = (StoredProcedure)helpResolve(sql, tm);
+        StoredProcedureImpl sp = (StoredProcedureImpl)helpResolve(sql, tm);
         assertEquals("EXEC proc()", sp.toString());
-        Array expected = getFactory().newArray(DataTypeManagerService.DefaultDataTypes.INTEGER.getTypeClass(),
-                                           new ArrayList<Expression>(0));
+        ArraySymbolImpl expected = getFactory().newArray(DefaultDataTypeManager.DefaultDataTypes.INTEGER.getTypeClass(),
+                                           new ArrayList<BaseExpression>(0));
         expected.setImplicit(true);
         assertEquals(expected,
                      sp.getParameter(1).getExpression());

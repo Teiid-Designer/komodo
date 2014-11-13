@@ -26,8 +26,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.komodo.spi.query.sql.lang.ICommand;
-import org.komodo.spi.query.sql.lang.IExpression;
+import org.komodo.spi.query.sql.lang.Command;
+import org.komodo.spi.query.sql.lang.Expression;
 
 /**
  * Utility class for helping condense or find SQL command info
@@ -40,8 +40,8 @@ public class CommandHelper {
 	 * @param command
 	 * @return
 	 */
-	public static List<IExpression> getProjectedSymbols(final ICommand command) {
-        Set<IExpression> theSymbols = new LinkedHashSet<IExpression>();
+	public static List<Expression> getProjectedSymbols(final Command command) {
+        Set<Expression> theSymbols = new LinkedHashSet<Expression>();
         
         theSymbols.addAll(command.getProjectedSymbols());
         
@@ -50,7 +50,7 @@ public class CommandHelper {
         	theSymbols.addAll(command.getResultSetColumns());
         }
         
-        List<IExpression> symbols = new ArrayList(theSymbols.size());
+        List<Expression> symbols = new ArrayList(theSymbols.size());
         symbols.addAll(theSymbols);
         
         return symbols;

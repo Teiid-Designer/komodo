@@ -28,12 +28,12 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import org.junit.Test;
 import org.teiid.api.exception.query.QueryResolverException;
-import org.komodo.spi.query.metadata.IQueryMetadataInterface;
-import org.komodo.spi.runtime.version.ITeiidVersion;
+import org.komodo.spi.query.metadata.QueryMetadataInterface;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.metadata.Table;
 import org.teiid.query.metadata.TempMetadataAdapter;
-import org.teiid.query.sql.lang.Command;
-import org.teiid.query.sql.lang.LanguageObject;
+import org.teiid.query.sql.lang.CommandImpl;
+import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.lang.ProcedureContainer;
 import org.teiid.query.sql.navigator.DeepPreOrderNavigator;
 import org.teiid.runtime.client.TeiidClientException;
@@ -44,22 +44,22 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
     /**
      * @param teiidVersion
      */
-    public AbstractTestProcedureResolving(ITeiidVersion teiidVersion) {
+    public AbstractTestProcedureResolving(TeiidVersion teiidVersion) {
         super(teiidVersion);
     }
 
-    protected Command resolveProcedure(String userUpdateStr, IQueryMetadataInterface metadata) throws Exception {
+    protected CommandImpl resolveProcedure(String userUpdateStr, QueryMetadataInterface metadata) throws Exception {
         ProcedureContainer userCommand = (ProcedureContainer)getQueryParser().parseCommand(userUpdateStr);
-        QueryResolver queryResolver = new QueryResolver(getTeiidVersion());
+        TCQueryResolver queryResolver = new TCQueryResolver(getTeiidVersion());
         queryResolver.resolveCommand(userCommand, metadata);
         metadata = new TempMetadataAdapter(metadata, userCommand.getTemporaryMetadata());
         return queryResolver.expandCommand(userCommand, metadata);
     }
 
-    protected Command helpResolve(Command command, IQueryMetadataInterface queryMetadataInterface) {       
+    protected CommandImpl helpResolve(CommandImpl command, QueryMetadataInterface queryMetadataInterface) {       
         // resolve
         try { 
-            QueryResolver resolver = new QueryResolver(getTeiidVersion());
+            TCQueryResolver resolver = new TCQueryResolver(getTeiidVersion());
             resolver.resolveCommand(command, queryMetadataInterface);
         } catch(Exception e) {
             throw new RuntimeException(e);
@@ -67,17 +67,17 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
 
         CheckSymbolsAreResolvedVisitor vis = new CheckSymbolsAreResolvedVisitor(getTeiidVersion());
         DeepPreOrderNavigator.doVisit(command, vis);
-        Collection<LanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
+        Collection<BaseLanguageObject> unresolvedSymbols = vis.getUnresolvedSymbols();
         assertTrue("Found unresolved symbols: " + unresolvedSymbols, unresolvedSymbols.isEmpty()); //$NON-NLS-1$
         return command; 
     }
 
-    protected Command helpResolve(String sql, IQueryMetadataInterface queryMetadata) throws Exception {
-        Command command = getQueryParser().parseCommand(sql);
+    protected CommandImpl helpResolve(String sql, QueryMetadataInterface queryMetadata) throws Exception {
+        CommandImpl command = getQueryParser().parseCommand(sql);
         return helpResolve(command, queryMetadata);
     }
 
-    protected void helpResolveException(String userUpdateStr, IQueryMetadataInterface metadata, String msg) throws Exception {
+    protected void helpResolveException(String userUpdateStr, QueryMetadataInterface metadata, String msg) throws Exception {
         try {
             resolveProcedure(userUpdateStr, metadata);
             fail();
@@ -90,7 +90,7 @@ public abstract class AbstractTestProcedureResolving extends AbstractTest {
         helpFailUpdateProcedure(procedure, userUpdateStr, procedureType, null);
     }
 
-    protected abstract Command helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType)
+    protected abstract CommandImpl helpResolveUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType)
         throws Exception;
 
     protected void helpFailUpdateProcedure(String procedure, String userUpdateStr, Table.TriggerEvent procedureType, String msg) {
