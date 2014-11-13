@@ -22,13 +22,18 @@
 package org.komodo.repository;
 
 import java.net.URL;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import javax.jcr.Session;
 import org.komodo.repository.internal.ModeshapeEngineThread;
 import org.komodo.repository.internal.ModeshapeEngineThread.Request;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestType;
 import org.komodo.repository.internal.RepositoryImpl;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.RepositoryClientEvent;
+import org.komodo.utils.ArgCheck;
 
 /**
  * A repository installed on the local machine, using the modeshape engine and repository.
@@ -90,6 +95,182 @@ public class LocalRepository extends RepositoryImpl implements StringConstants {
         return false;
     }
 
+    private Session createSession() throws KException {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        class CreateSessionCallback implements RequestCallback {
+
+            private Throwable error = null;
+            private Session result = null;
+
+            @Override
+            public void errorOccurred( final Throwable e ) {
+                this.error = e;
+            }
+
+            Throwable getError() {
+                return this.error;
+            }
+
+            Session getSession() {
+                return this.result;
+            }
+
+            @Override
+            public void respond( final Object results ) {
+                this.result = (Session)results;
+                latch.countDown();
+            }
+
+        }
+
+        final CreateSessionCallback callback = new CreateSessionCallback();
+        this.engineThread.accept(new Request(RequestType.CREATE_SESSION, callback));
+
+        boolean timeout = false;
+
+        try {
+            timeout = !latch.await(3, TimeUnit.SECONDS);
+        } catch (final Exception e) {
+            throw new KException(e);
+        }
+
+        if (timeout) {
+            throw new KException(Messages.getString(Messages.LocalRepository.Unable_To_Create_Session));
+        }
+
+        if (callback.getError() != null) {
+            throw new KException(callback.getError());
+        }
+
+        return callback.getSession();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.IRepository#createTransaction(java.lang.String, boolean,
+     *      org.komodo.spi.repository.IRepository.UnitOfWorkListener)
+     */
+    @Override
+    public UnitOfWork createTransaction( final String name,
+                                         final boolean rollbackOnly,
+                                         final UnitOfWorkListener callback ) throws KException {
+        ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
+        LOGGER.debug("creating transaction '{0}' with rollbackOnly = {1}", name, rollbackOnly); //$NON-NLS-1$
+        return new LocalRepositoryTransaction(name, createSession(), rollbackOnly, callback);
+    }
+
+    class LocalRepositoryTransaction extends RepositoryImpl.UnitOfWorkImpl {
+
+        LocalRepositoryTransaction( final String uowName,
+                                    final Session uowSession,
+                                    final boolean uowRollbackOnly,
+                                    final UnitOfWorkListener listener ) {
+            super(uowName, uowSession, uowRollbackOnly, listener);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.repository.internal.RepositoryImpl.UnitOfWorkImpl#commit()
+         */
+        @Override
+        public void commit() {
+            if (isRollbackOnly()) {
+                rollback();
+            } else {
+                final CountDownLatch latch = new CountDownLatch(1);
+
+                class CommitCallback implements RequestCallback {
+
+                    @Override
+                    public void errorOccurred( final Throwable error ) {
+                        if (getCallback() == null) {
+                            throw new RuntimeException(error);
+                        }
+
+                        getCallback().errorOccurred(error);
+                    }
+
+                    @Override
+                    public void respond( final Object results ) {
+                        latch.countDown();
+                    }
+
+                }
+
+                final CommitCallback callback = new CommitCallback();
+                LocalRepository.this.engineThread.accept(new ModeshapeEngineThread.SessionRequest(RequestType.COMMIT_SESSION,
+                                                                                                  callback, getSession(),
+                                                                                                  getName()));
+
+                boolean noTimeout = false;
+
+                try {
+                    noTimeout = latch.await(3, TimeUnit.SECONDS);
+                } catch (final Exception e) {
+                    callback.equals(e);
+                }
+
+                if (noTimeout) {
+                    callback.respond(null);
+                } else {
+                    callback.errorOccurred(new KException(Messages.getString(Messages.LocalRepository.Commit_Timeout, getName())));
+                }
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.repository.internal.RepositoryImpl.UnitOfWorkImpl#rollback()
+         */
+        @Override
+        public void rollback() {
+            final CountDownLatch latch = new CountDownLatch(1);
+
+            class RollbackCallback implements RequestCallback {
+
+                @Override
+                public void errorOccurred( final Throwable error ) {
+                    if (getCallback() == null) {
+                        throw new RuntimeException(error);
+                    }
+
+                    getCallback().errorOccurred(error);
+                }
+
+                @Override
+                public void respond( final Object results ) {
+                    latch.countDown();
+                }
+
+            }
+
+            final RollbackCallback callback = new RollbackCallback();
+            LocalRepository.this.engineThread.accept(new ModeshapeEngineThread.SessionRequest(RequestType.ROLLBACK_SESSION,
+                                                                                              callback,
+                                                                                              getSession(),
+                                                                                              getName()));
+
+            boolean noTimeout = false;
+
+            try {
+                noTimeout = latch.await(3, TimeUnit.SECONDS);
+            } catch (final Exception e) {
+                callback.equals(e);
+            }
+
+            if (noTimeout) {
+                callback.respond(null);
+            } else {
+                callback.errorOccurred(new KException(Messages.getString(Messages.LocalRepository.Rollback_Timeout, getName())));
+            }
+        }
+
+    }
+
     private void createEngineThread() {
         if (engineThread != null && engineThread.isAlive()) return;
 
@@ -106,8 +287,14 @@ public class LocalRepository extends RepositoryImpl implements StringConstants {
         createEngineThread();
 
         RequestCallback callback = new RequestCallback() {
+
             @Override
-            public void execute() {
+            public void errorOccurred( final Throwable error ) {
+                throw new RuntimeException(error);
+            }
+
+            @Override
+            public void respond( final Object results ) {
                 if (engineThread.isEngineStarted()) {
                     LocalRepository.this.state = State.REACHABLE;
                     notifyObservers();

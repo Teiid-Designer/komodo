@@ -141,6 +141,11 @@ public interface Repository {
         String getName();
 
         /**
+         * @return <code>true</code> if only rollback is allowed
+         */
+        boolean isRollbackOnly();
+
+        /**
          * Discards all current changes made during this transaction.
          */
         void rollback();
@@ -153,19 +158,16 @@ public interface Repository {
     public interface UnitOfWorkListener {
 
         /**
-         * @param work
-         *        the work that was completed (never <code>null</code>)
-         */
-        void completedSuccessfully( final UnitOfWork work );
-
-        /**
-         * @param work
-         *        the work that was completed (never <code>null</code>)
          * @param error
          *        the error that occurred processing the transaction (never <code>null</code>)
          */
-        void errorOccurred( final UnitOfWork work,
-                            final Exception error );
+        void errorOccurred( final Throwable error );
+
+        /**
+         * @param results
+         *        the results of the work (can be <code>null</code>)
+         */
+        void respond( final Object results );
 
     }
 

@@ -40,11 +40,15 @@ public class Messages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum LocalRepository {
 
+        Commit_Timeout,
         Configuration_Problem,
         Configuration_Failure,
         Deployment_Failure,
         General_Exception,
-        EngineThread_Died;
+        Engine_Is_Stopped,
+        EngineThread_Died,
+        Rollback_Timeout,
+        Unable_To_Create_Session;
 
         @Override
         public String toString() {

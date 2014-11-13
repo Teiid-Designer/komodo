@@ -166,7 +166,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * A unit of work analogous to a transaction.
      */
-    class UnitOfWorkImpl implements IRepository.UnitOfWork {
+    public static class UnitOfWorkImpl implements IRepository.UnitOfWork {
 
         private final UnitOfWorkListener callback;
         private final String name;
@@ -183,10 +183,10 @@ public abstract class RepositoryImpl implements IRepository {
          * @param listener
          *        the callback (can be <code>null</code>)
          */
-        UnitOfWorkImpl( final String uowName,
-                        final Session uowSession,
-                        final boolean uowRollbackOnly,
-                        final UnitOfWorkListener listener ) {
+        public UnitOfWorkImpl( final String uowName,
+                               final Session uowSession,
+                               final boolean uowRollbackOnly,
+                               final UnitOfWorkListener listener ) {
             ArgCheck.isNotEmpty(uowName, "uowName"); //$NON-NLS-1$
             ArgCheck.isNotNull(uowSession, "uowSession"); //$NON-NLS-1$
 
@@ -203,7 +203,7 @@ public abstract class RepositoryImpl implements IRepository {
          */
         @Override
         public void commit() {
-            LOGGER.debug("commit transaction '{0'}", getName()); //$NON-NLS-1$
+            LOGGER.debug("commit transaction '{0}'", getName()); //$NON-NLS-1$
 
             if (this.rollbackOnly) {
                 rollback();
@@ -213,14 +213,14 @@ public abstract class RepositoryImpl implements IRepository {
                     LOGGER.debug("transaction '{0}' saved", getName()); //$NON-NLS-1$
 
                     if (this.callback != null) {
-                        this.callback.completedSuccessfully(this);
+                        this.callback.respond(this);
                     }
                 } catch (final Exception e) {
                     if (this.callback == null) {
                         LOGGER.error(Messages.getString(Komodo.ERROR_TRYING_TO_COMMIT, e, getName()));
                         rollback();
                     } else {
-                        this.callback.errorOccurred(this, e);
+                        this.callback.errorOccurred(e);
                     }
                 } finally {
                     this.session.logout();
@@ -252,8 +252,18 @@ public abstract class RepositoryImpl implements IRepository {
         /**
          * @return the JCR session used during the transaction (never <code>null</code>)
          */
-        Session getSession() {
+        protected Session getSession() {
             return this.session;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.IRepository.UnitOfWork#isRollbackOnly()
+         */
+        @Override
+        public boolean isRollbackOnly() {
+            return this.rollbackOnly;
         }
 
         /**
@@ -269,13 +279,13 @@ public abstract class RepositoryImpl implements IRepository {
                 LOGGER.debug("transaction '{0}' rolled back", getName()); //$NON-NLS-1$
 
                 if (this.callback != null) {
-                    this.callback.completedSuccessfully(this);
+                    this.callback.respond(null);
                 }
             } catch (final Exception e) {
                 if (this.callback == null) {
                     LOGGER.error(Messages.getString(Komodo.ERROR_TRYING_TO_ROLLBACK, e, getName()));
                 } else {
-                    this.callback.errorOccurred(this, e);
+                    this.callback.errorOccurred(e);
                 }
             } finally {
                 this.session.logout();
@@ -295,7 +305,7 @@ public abstract class RepositoryImpl implements IRepository {
      */
     static String LIBRARY_ROOT = (KOMODO_ROOT + "library/"); //$NON-NLS-1$
 
-    private static final KLog LOGGER = KLog.getLogger();
+    protected static final KLog LOGGER = KLog.getLogger();
 
     /**
      * The root path of the Komodo repository workspace.
@@ -413,31 +423,6 @@ public abstract class RepositoryImpl implements IRepository {
                 node.setProperty(name, value);
             }
         }
-    }
-
-    private Session createSession() throws KException {
-        try {
-            // TODO implement
-            return null;
-            //            return this.jcrRepository.login(this.credentials, this.workspace);
-        } catch (final Exception e) {
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.IRepository#createTransaction(java.lang.String, boolean,
-     *      org.komodo.spi.repository.IRepository.UnitOfWorkListener)
-     */
-    @Override
-    public UnitOfWork createTransaction( final String name,
-                                         final boolean rollbackOnly,
-                                         final UnitOfWorkListener callback ) throws KException {
-        ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-        LOGGER.debug("creating transaction '{0}' with rollbackOnly = {1}", name, rollbackOnly); //$NON-NLS-1$
-        return new UnitOfWorkImpl(name, createSession(), rollbackOnly, callback);
     }
 
     /**
