@@ -4098,7 +4098,7 @@ public class TeiidSqlLexicon implements StringConstants {
 		if (! name.startsWith("Base")) {
 			name = name.replaceAll("Impl", EMPTY_STRING);
 		}
-		LexTokens lexToken = astIndex.get(astNodeClass.getSimpleName());
+		LexTokens lexToken = astIndex.get(name);
 		return lexToken.getId();
 	}
 
