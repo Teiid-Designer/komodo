@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.logging.Level;
 import javax.jcr.ImportUUIDBehavior;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -143,6 +144,9 @@ public abstract class MultiUseAbstractTest {
 
         logger.setLogPath(newLogFile.getAbsolutePath());
         assertEquals(newLogFile.getAbsolutePath(), logger.getLogPath());
+
+        // Reduce needless output by setting log level quite high
+        logger.setLevel(Level.INFO);
         return newLogFile;
     }
 
