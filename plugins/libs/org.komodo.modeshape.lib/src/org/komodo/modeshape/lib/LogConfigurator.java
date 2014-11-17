@@ -22,6 +22,7 @@
 package org.komodo.modeshape.lib;
 
 import java.io.File;
+import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -59,8 +60,6 @@ public class LogConfigurator {
 
     private static final String ROOT = "ROOT"; //$NON-NLS-1$
 
-    private static final String ALL = "ALL"; //$NON-NLS-1$
-
     private static final String LEVEL = "level"; //$NON-NLS-1$
 
     private static final String APPENDER_REF = "appender-ref"; //$NON-NLS-1$
@@ -69,8 +68,14 @@ public class LogConfigurator {
 
     private String logPath = System.getProperty("user.home") + File.separator + ".komodo" + File.separator + "komodo.log"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 
+    private String level = "INFO"; //$NON-NLS-1$
+
     private static LogConfigurator instance;
 
+    /**
+     * @return singleton instance
+     * @throws Exception exception if singleton fails
+     */
     public static LogConfigurator getInstance() throws Exception {
         if (instance == null) {
             instance = new LogConfigurator();
@@ -141,10 +146,10 @@ public class LogConfigurator {
         encoder2.appendChild(pattern2);
         pattern2.setTextContent("%msg%n"); //$NON-NLS-1$
 
-        // <root level="ALL">
+        // <root level="level defined by field">
         Element root = doc.createElement(ROOT);
         configuration.appendChild(root);
-        root.setAttribute(LEVEL, ALL);
+        root.setAttribute(LEVEL, level);
 
         // <appender-ref ref="STDOUT" />
         Element appendRef1 = doc.createElement(APPENDER_REF);
@@ -178,12 +183,40 @@ public class LogConfigurator {
 
     /**
      * @param logPath the logPath to set
+     * @throws Exception exception
      */
     public void setLogPath(String logPath) throws Exception {
         this.logPath = logPath;
         initContext();
     }
 
+    /**
+     * Set the level of the logging configuration. Levels are not completely identical
+     * to Modeshape logging levels so method approximates and converts accordingly.
+     *
+     * @param level level for logging
+     * @throws Exception exception
+     */
+    public void setLevel(Level level) throws Exception {
+        if (Level.OFF.equals(level) || Level.ALL.equals(level) || Level.INFO.equals(level))
+            this.level = level.getName();
+        else if (Level.SEVERE.equals(level))
+            this.level = "ERROR"; //$NON-NLS-1$
+        else if (Level.WARNING.equals(level))
+            this.level = "WARN"; //$NON-NLS-1$
+        else if (Level.FINE.equals(level))
+            this.level = "DEBUG"; //$NON-NLS-1$
+        else if (Level.FINER.equals(level) || Level.FINEST.equals(level))
+            this.level = "TRACE"; //$NON-NLS-1$
+        else
+            this.level = "INFO"; //$NON-NLS-1$
+
+        initContext();
+    }
+
+    /**
+     * Dispose of this configurator
+     */
     public void dispose() {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         loggerContext.stop();

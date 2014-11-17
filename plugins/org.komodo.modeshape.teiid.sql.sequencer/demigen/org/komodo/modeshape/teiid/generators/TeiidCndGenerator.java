@@ -559,7 +559,7 @@ public class TeiidCndGenerator implements GeneratorConstants {
                       .append(TAB + TAB + "if (! name.startsWith(\"Base\")) " + OPEN_BRACE + NEW_LINE)
                       .append(TAB + TAB + TAB + "name = name.replaceAll(\"" + LANG_OBJECT_POSTFIX + "\", EMPTY_STRING);" + NEW_LINE)
                       .append(TAB + TAB + CLOSE_BRACE + NEW_LINE)
-                      .append(TAB + TAB + "LexTokens lexToken = astIndex.get(astNodeClass.getSimpleName());")
+                      .append(TAB + TAB + "LexTokens lexToken = astIndex.get(name);")
                       .append(NEW_LINE)
                       .append(TAB + TAB + "return lexToken.getId();" + NEW_LINE)
                       .append(TAB + CLOSE_BRACE + NEW_LINE);
