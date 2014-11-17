@@ -45,18 +45,21 @@ public class KLog implements KLogger {
 
         private FileHandler logPathHandler;
 
+        private Level level = Level.ALL;
+
         public BasicLogger() {
             this.logger = Logger.getLogger(KLogger.class.getName());
 
             try {
-                initHandler();
+                initLogger();
             } catch (Exception ex) {
                 // If this goes wrong then something really has gone wrong!!
                 throw new RuntimeException(ex);
             }
         }
 
-        private void initHandler() throws IOException {
+        private void initLogger() throws IOException {
+            this.logger.setLevel(level);
             logPathHandler = new FileHandler(logPath);
             this.logger.addHandler(logPathHandler);
         }
@@ -79,7 +82,13 @@ public class KLog implements KLogger {
         public void setLogPath(String logPath) throws Exception {
             this.logPath = logPath;
             this.logger.removeHandler(logPathHandler);
-            initHandler();
+            initLogger();
+        }
+
+        @Override
+        public void setLevel(Level level) throws Exception {
+            this.level = level;
+            initLogger();
         }
 
         @Override
@@ -174,6 +183,14 @@ public class KLog implements KLogger {
     @Override
     public void setLogPath(String logPath) throws Exception {
         kLogger.setLogPath(logPath);
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.spi.logging.KLogger#setLevel(java.util.logging.Level)
+     */
+    @Override
+    public void setLevel(Level level) throws Exception {
+        kLogger.setLevel(level);
     }
 
     /* (non-Javadoc)

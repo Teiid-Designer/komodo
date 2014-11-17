@@ -21,6 +21,8 @@
  */
 package org.komodo.spi.logging;
 
+import java.util.logging.Level;
+
 /**
  *
  */
@@ -44,6 +46,14 @@ public interface KLogger {
      * @throws Exception
      */
     void setLogPath(String logPath) throws Exception;
+
+    /**
+     * Set the logging level
+     *
+     * @param level preferred level
+     * @throws Exception exception if level change fails
+     */
+    void setLevel(Level level) throws Exception;
 
     /**
      * @param message

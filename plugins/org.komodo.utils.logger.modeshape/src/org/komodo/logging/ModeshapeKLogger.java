@@ -22,6 +22,7 @@
 package org.komodo.logging;
 
 
+import java.util.logging.Level;
 import org.komodo.modeshape.lib.LogConfigurator;
 import org.komodo.spi.logging.KLogger;
 import org.modeshape.common.i18n.TextI18n;
@@ -52,6 +53,11 @@ public class ModeshapeKLogger implements KLogger {
     @Override
     public void setLogPath(String logPath) throws Exception {
         LogConfigurator.getInstance().setLogPath(logPath);
+    }
+
+    @Override
+    public void setLevel(Level level) throws Exception {
+        LogConfigurator.getInstance().setLevel(level);
     }
 
     private Logger getLogger() {
