@@ -92,7 +92,7 @@ public class LocalRepository extends RepositoryImpl implements StringConstants {
 
     @Override
     public boolean ping() {
-        return false;
+        return this.engineThread.isEngineStarted();
     }
 
     private Session createSession() throws KException {
@@ -130,7 +130,7 @@ public class LocalRepository extends RepositoryImpl implements StringConstants {
         boolean timeout = false;
 
         try {
-            timeout = !latch.await(3, TimeUnit.SECONDS);
+            timeout = !latch.await(5, TimeUnit.SECONDS);
         } catch (final Exception e) {
             throw new KException(e);
         }
@@ -149,8 +149,8 @@ public class LocalRepository extends RepositoryImpl implements StringConstants {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#createTransaction(java.lang.String, boolean,
-     *      org.komodo.spi.repository.IRepository.UnitOfWorkListener)
+     * @see org.komodo.spi.repository.Repository#createTransaction(java.lang.String, boolean,
+     *      org.komodo.spi.repository.Repository.UnitOfWorkListener)
      */
     @Override
     public UnitOfWork createTransaction( final String name,

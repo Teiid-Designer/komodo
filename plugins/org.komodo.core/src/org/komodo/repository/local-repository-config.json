@@ -1,11 +1,12 @@
 {
-    "name" : "Local Repository",
-    "jndiName" : "jcr/Local Repository",
+    "name" : "Komodo Local Repository",
+    "jndiName" : "java:jcr/KomodoLocalRepository",
     "monitoring" : {
         "enabled" : true
     },
+    "node-types" : [ "config/xmi.cnd", "config/med.cnd", "config/mmcore.cnd", "config/vdb.cnd", "config/TeiidSql.cnd", "config/komodo.cnd" ],
     "workspaces" : {
-        "default" : "defaultWorkspace",
+        "default" : "komodoLocalWorkspace",
         "allowCreation" : true
     },
     "sequencing" : {
@@ -25,5 +26,4 @@
                 ]
             }
         }
-    }
-}
+    }}

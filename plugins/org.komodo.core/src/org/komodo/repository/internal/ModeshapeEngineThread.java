@@ -75,7 +75,12 @@ public class ModeshapeEngineThread extends Thread {
         /**
          * Request stopping of the engine
          */
-        STOP
+        STOP;
+
+        static boolean isSessionRequest(final RequestType requestType) {
+            return ((requestType == CREATE_SESSION) || (requestType == COMMIT_SESSION) || (requestType == ROLLBACK_SESSION));
+        }
+
     }
 
     /**
@@ -160,7 +165,7 @@ public class ModeshapeEngineThread extends Thread {
                                final String requestName ) {
             super(requestType, callback);
 
-            ArgCheck.isInstanceOf(SessionRequest.class, requestType);
+            ArgCheck.isTrue(RequestType.isSessionRequest(requestType), "request type is not a session request"); //$NON-NLS-1$
             ArgCheck.isNotNull(requestSession, "requestSession"); //$NON-NLS-1$
             ArgCheck.isNotEmpty(requestName, "requestName"); //$NON-NLS-1$
 
@@ -232,7 +237,8 @@ public class ModeshapeEngineThread extends Thread {
             throw new KException(Messages.getString(Messages.LocalRepository.Engine_Is_Stopped));
         }
 
-        return this.repository.login(null, "default"); //$NON-NLS-1$
+        // the workspace name must agree with the local-repository-config.json file
+        return this.repository.login(null, "komodoLocalWorkspace"); //$NON-NLS-1$
     }
 
     private boolean isEngineStopped() {
@@ -365,9 +371,9 @@ public class ModeshapeEngineThread extends Thread {
 
                 if (callback != null) {
                     if (error == null) {
-                        callback.errorOccurred(error);
-                    } else {
                         callback.respond(results);
+                    } else {
+                        callback.errorOccurred(error);
                     }
                 }
             } catch (final Exception e) {

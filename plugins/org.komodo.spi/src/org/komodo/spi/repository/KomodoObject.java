@@ -8,7 +8,7 @@
 package org.komodo.spi.repository;
 
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.IRepository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Represents a Komodo object.
@@ -49,7 +49,7 @@ public interface KomodoObject extends KNode {
      * @throws KException
      *         if any error occurs
      */
-    KomodoObject addChild( final org.komodo.spi.repository.IRepository.UnitOfWork transaction,
+    KomodoObject addChild( final Repository.UnitOfWork transaction,
                            final String name,
                            final String primaryType ) throws KException;
 
@@ -120,7 +120,7 @@ public interface KomodoObject extends KNode {
      * @throws KException
      *         if any error occurs
      */
-    Descriptor[] getMixins() throws KException;
+    Descriptor[] getDescriptors() throws KException;
 
     /**
      * @return this object's primary type descriptor (never <code>null</code>)

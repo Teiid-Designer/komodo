@@ -22,25 +22,28 @@ import org.komodo.core.Messages;
 import org.komodo.repository.internal.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Descriptor;
-import org.komodo.spi.repository.IRepository;
-import org.komodo.spi.repository.IRepository.UnitOfWork;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrNtLexicon;
 import org.modeshape.jcr.api.JcrTools;
 
+/**
+ * An implementation of a {@link KomodoObject Komodo object}.
+ */
 class ObjectImpl implements KomodoObject {
 
     private static final KLog LOGGER = KLog.getLogger();
 
     final int index;
     final String path;
-    final IRepository repository;
+    final Repository repository;
 
-    ObjectImpl( final IRepository komodoRepository,
+    ObjectImpl( final Repository komodoRepository,
                 final String path,
                 final int index ) {
         ArgCheck.isNotNull(komodoRepository, "komodoRepository"); //$NON-NLS-1$
@@ -78,7 +81,7 @@ class ObjectImpl implements KomodoObject {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#addChild(org.komodo.spi.repository.IRepository.UnitOfWork, java.lang.String,
+     * @see org.komodo.spi.repository.KomodoObject#addChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
      *      java.lang.String)
      */
     @Override
@@ -124,7 +127,7 @@ class ObjectImpl implements KomodoObject {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#addMixin(org.komodo.spi.repository.IRepository.UnitOfWork, java.lang.String[])
+     * @see org.komodo.spi.repository.KomodoObject#addMixin(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
     public void addMixin( final UnitOfWork transaction,
@@ -316,10 +319,10 @@ class ObjectImpl implements KomodoObject {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#getMixins()
+     * @see org.komodo.spi.repository.KomodoObject#getDescriptors()
      */
     @Override
-    public Descriptor[] getMixins() throws KException {
+    public Descriptor[] getDescriptors() throws KException {
         final UnitOfWork transaction = this.repository.createTransaction("kobject-getMixins", true, null); //$NON-NLS-1$
 
         try {
@@ -382,7 +385,13 @@ class ObjectImpl implements KomodoObject {
             final Node parent = getSession(transaction).getNode(getAbsolutePath()).getParent();
             transaction.commit();
 
-            if (RepositoryImpl.WORKSPACE_ROOT.equals(parent.getPath())) {
+            String parentPath =  parent.getPath();
+
+            if (!parentPath.endsWith("/")) { //$NON-NLS-1$
+                parentPath += "/"; //$NON-NLS-1$
+            }
+
+            if (RepositoryImpl.WORKSPACE_ROOT.equals(parentPath)) {
                 return null;
             }
 
@@ -490,7 +499,7 @@ class ObjectImpl implements KomodoObject {
      * @see org.komodo.spi.repository.KNode#getRepository()
      */
     @Override
-    public IRepository getRepository() {
+    public Repository getRepository() {
         return this.repository;
     }
 
@@ -637,7 +646,7 @@ class ObjectImpl implements KomodoObject {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#removeChild(org.komodo.spi.repository.IRepository.UnitOfWork,
+     * @see org.komodo.spi.repository.KomodoObject#removeChild(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String[])
      */
     @Override
@@ -687,7 +696,7 @@ class ObjectImpl implements KomodoObject {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#removeMixin(org.komodo.spi.repository.IRepository.UnitOfWork,
+     * @see org.komodo.spi.repository.KomodoObject#removeMixin(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String[])
      */
     @Override
@@ -750,7 +759,7 @@ class ObjectImpl implements KomodoObject {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#setPrimaryType(org.komodo.spi.repository.IRepository.UnitOfWork,
+     * @see org.komodo.spi.repository.KomodoObject#setPrimaryType(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */
     @Override
@@ -864,7 +873,7 @@ class ObjectImpl implements KomodoObject {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#setProperty(org.komodo.spi.repository.IRepository.UnitOfWork, java.lang.String,
+     * @see org.komodo.spi.repository.KomodoObject#setProperty(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
      *      java.lang.Object[])
      */
     @Override

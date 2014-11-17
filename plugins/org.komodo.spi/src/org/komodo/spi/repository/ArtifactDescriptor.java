@@ -35,7 +35,7 @@ public interface ArtifactDescriptor {
     /**
      * @return the repository where the artifact is located (never <code>null</code>)
      */
-    IRepository getRepository();
+    Repository getRepository();
 
     /**
      * @return the version of the artifact (never empty)

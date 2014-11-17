@@ -14,10 +14,10 @@ import javax.jcr.nodetype.PropertyDefinition;
 import org.komodo.repository.internal.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Descriptor;
-import org.komodo.spi.repository.IRepository;
-import org.komodo.spi.repository.IRepository.UnitOfWork;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -26,9 +26,9 @@ import org.komodo.utils.ArgCheck;
 class DescriptorImpl implements Descriptor {
 
     final String name;
-    final IRepository repository;
+    final Repository repository;
 
-    DescriptorImpl( final IRepository descriptorRepository,
+    DescriptorImpl( final Repository descriptorRepository,
                     final String descriptorPath ) {
         ArgCheck.isNotNull(descriptorRepository, "descriptorRepository"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(descriptorPath, "descriptorPath"); //$NON-NLS-1$
@@ -111,7 +111,7 @@ class DescriptorImpl implements Descriptor {
         }
     }
 
-    private Session getSession(final UnitOfWork transaction) {
+    private Session getSession( final UnitOfWork transaction ) {
         return ((UnitOfWorkImpl)transaction).getSession();
     }
 

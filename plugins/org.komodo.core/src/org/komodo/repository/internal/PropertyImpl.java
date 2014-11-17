@@ -20,11 +20,11 @@ import javax.jcr.ValueFactory;
 import org.komodo.core.Messages;
 import org.komodo.repository.internal.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.IRepository;
-import org.komodo.spi.repository.IRepository.UnitOfWork;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -210,10 +210,6 @@ class PropertyImpl implements Property {
         }
     }
 
-    private IRepository accessRepository() {
-        return this.parent.getRepository();
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -231,7 +227,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public boolean getBooleanValue() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getBooleanValue", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getBooleanValue", true, null); //$NON-NLS-1$
 
         try {
             final boolean result = getSession(transaction).getProperty(this.path).getBoolean();
@@ -255,7 +251,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public boolean[] getBooleanValues() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getBooleanValues", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getBooleanValues", true, null); //$NON-NLS-1$
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -287,7 +283,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public Calendar getDateValue() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getDateValue", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getDateValue", true, null); //$NON-NLS-1$
 
         try {
             final Calendar result = getSession(transaction).getProperty(this.path).getDate();
@@ -311,7 +307,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public Calendar[] getDateValues() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getDateValues", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getDateValues", true, null); //$NON-NLS-1$
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -343,7 +339,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public BigDecimal getDecimalValue() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getDecimalValue", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getDecimalValue", true, null); //$NON-NLS-1$
 
         try {
             final BigDecimal result = getSession(transaction).getProperty(this.path).getDecimal();
@@ -367,7 +363,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public BigDecimal[] getDecimalValues() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getDecimalValues", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getDecimalValues", true, null); //$NON-NLS-1$
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -399,7 +395,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public PropertyDescriptor getDescriptor() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getDescriptor", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getDescriptor", true, null); //$NON-NLS-1$
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -422,7 +418,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public double getDoubleValue() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getDoubleValue", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getDoubleValue", true, null); //$NON-NLS-1$
 
         try {
             final double result = getSession(transaction).getProperty(this.path).getDouble();
@@ -446,7 +442,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public double[] getDoubleValues() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getDoubleValues", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getDoubleValues", true, null); //$NON-NLS-1$
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -478,7 +474,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public long getLongValue() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getLongValue", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getLongValue", true, null); //$NON-NLS-1$
 
         try {
             final long result = getSession(transaction).getProperty(this.path).getLong();
@@ -502,7 +498,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public long[] getLongValues() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getLongValues", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getLongValues", true, null); //$NON-NLS-1$
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -553,7 +549,7 @@ class PropertyImpl implements Property {
      * @see org.komodo.spi.repository.KNode#getRepository()
      */
     @Override
-    public IRepository getRepository() {
+    public Repository getRepository() {
         return this.parent.getRepository();
     }
 
@@ -568,7 +564,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public String getStringValue() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getStringValue", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getStringValue", true, null); //$NON-NLS-1$
 
         try {
             final String result = getSession(transaction).getProperty(this.path).getString();
@@ -592,7 +588,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public String[] getStringValues() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getStringValues", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getStringValues", true, null); //$NON-NLS-1$
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -624,7 +620,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public Object getValue() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getValue", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getValue", true, null); //$NON-NLS-1$
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -652,7 +648,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public Object[] getValues() throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-getValues", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-getValues", true, null); //$NON-NLS-1$
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -685,7 +681,7 @@ class PropertyImpl implements Property {
      */
     @Override
     public void set( final Object... values ) throws KException {
-        final UnitOfWork transaction = accessRepository().createTransaction("property-set", true, null); //$NON-NLS-1$
+        final UnitOfWork transaction = getRepository().createTransaction("property-set", true, null); //$NON-NLS-1$
 
         try {
             final Session session = getSession(transaction);

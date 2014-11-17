@@ -127,7 +127,7 @@
 /*
  * A workspace item.
  */
-[tko:workspaceItem] mix:referenceable mixin
+[tko:workspaceItem] > mix:referenceable mixin
 
 /*
  * A Komodo repository. Node name can be user-defined.

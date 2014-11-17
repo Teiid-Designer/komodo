@@ -121,7 +121,7 @@ public interface Repository {
     }
 
     /**
-     * Represents one or more operations grouped together forming a {@link IRepository repository} transaction.
+     * Represents one or more operations grouped together forming a {@link Repository repository} transaction.
      */
     public interface UnitOfWork {
 
@@ -203,17 +203,17 @@ public interface Repository {
                              final String name ) throws KException;
 
     /**
-     * Add an {@link IRepositoryClient} to receive notifications from
+     * Add an {@link RepositoryClient} to receive notifications from
      *
      * @param client
      */
-    void addClient( IRepositoryClient client );
+    void addClient( RepositoryClient client );
 
     /**
      * @param observer
      *        the observer to be added
      */
-    void addObserver( IRepositoryObserver observer );
+    void addObserver( RepositoryObserver observer );
 
     /**
      * @param name
@@ -428,13 +428,13 @@ public interface Repository {
      *
      * @param client
      */
-    void removeClient( IRepositoryClient client );
+    void removeClient( RepositoryClient client );
 
     /**
      * @param observer
      *        the observer to be removed
      */
-    void removeObserver( IRepositoryObserver observer );
+    void removeObserver( RepositoryObserver observer );
 
     /**
      * @param artifactPaths

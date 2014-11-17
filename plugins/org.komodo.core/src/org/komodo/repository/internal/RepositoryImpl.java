@@ -29,35 +29,35 @@ import org.komodo.repository.Messages;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Artifact;
 import org.komodo.spi.repository.ArtifactDescriptor;
-import org.komodo.spi.repository.IRepository;
-import org.komodo.spi.repository.IRepositoryClient;
-import org.komodo.spi.repository.IRepositoryObserver;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
+import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrTools;
 
 /**
- * A {@link IRepository} implementation.
+ * A {@link Repository} implementation.
  */
-public abstract class RepositoryImpl implements IRepository {
+public abstract class RepositoryImpl implements Repository {
 
     private class ArtifactDescriptorImpl implements ArtifactDescriptor {
 
         private final String description;
         private final String path;
         private final boolean readOnly;
-        private final IRepository repository;
+        private final Repository repository;
         private final String type;
         private final String version;
 
         ArtifactDescriptorImpl( final String artifactType,
                                 final String artifactDescription,
                                 final String artifactPath,
-                                final IRepository artifactRepository,
+                                final Repository artifactRepository,
                                 final String artifactVersion,
                                 final boolean artifactReadOnly ) {
             this.type = artifactType;
@@ -104,7 +104,7 @@ public abstract class RepositoryImpl implements IRepository {
          * @see org.komodo.spi.repository.ArtifactDescriptor#getRepository()
          */
         @Override
-        public IRepository getRepository() {
+        public Repository getRepository() {
             return this.repository;
         }
 
@@ -166,7 +166,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * A unit of work analogous to a transaction.
      */
-    public static class UnitOfWorkImpl implements IRepository.UnitOfWork {
+    public static class UnitOfWorkImpl implements Repository.UnitOfWork {
 
         private final UnitOfWorkListener callback;
         private final String name;
@@ -199,7 +199,7 @@ public abstract class RepositoryImpl implements IRepository {
         /**
          * {@inheritDoc}
          *
-         * @see org.komodo.spi.repository.IRepository.UnitOfWork#commit()
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#commit()
          */
         @Override
         public void commit() {
@@ -232,7 +232,7 @@ public abstract class RepositoryImpl implements IRepository {
         /**
          * {@inheritDoc}
          *
-         * @see org.komodo.spi.repository.IRepository.UnitOfWork#getCallback()
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getCallback()
          */
         @Override
         public UnitOfWorkListener getCallback() {
@@ -242,7 +242,7 @@ public abstract class RepositoryImpl implements IRepository {
         /**
          * {@inheritDoc}
          *
-         * @see org.komodo.spi.repository.IRepository.UnitOfWork#getName()
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getName()
          */
         @Override
         public String getName() {
@@ -259,7 +259,7 @@ public abstract class RepositoryImpl implements IRepository {
         /**
          * {@inheritDoc}
          *
-         * @see org.komodo.spi.repository.IRepository.UnitOfWork#isRollbackOnly()
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#isRollbackOnly()
          */
         @Override
         public boolean isRollbackOnly() {
@@ -269,7 +269,7 @@ public abstract class RepositoryImpl implements IRepository {
         /**
          * {@inheritDoc}
          *
-         * @see org.komodo.spi.repository.IRepository.UnitOfWork#rollback()
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#rollback()
          */
         @Override
         public void rollback() {
@@ -303,18 +303,18 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * The root path of the Komodo repository library.
      */
-    static String LIBRARY_ROOT = (KOMODO_ROOT + "library/"); //$NON-NLS-1$
+    public static String LIBRARY_ROOT = (KOMODO_ROOT + "library/"); //$NON-NLS-1$
 
     protected static final KLog LOGGER = KLog.getLogger();
 
     /**
      * The root path of the Komodo repository workspace.
      */
-    static String WORKSPACE_ROOT = (KOMODO_ROOT + "workspace/"); //$NON-NLS-1$
+    public static String WORKSPACE_ROOT = (KOMODO_ROOT + "workspace/"); //$NON-NLS-1$
 
-    private final Set< IRepositoryClient > clients = new HashSet< IRepositoryClient >();
+    private final Set< RepositoryClient > clients = new HashSet< RepositoryClient >();
     private final Id id;
-    private final Set< IRepositoryObserver > observers = new HashSet< IRepositoryObserver >();
+    private final Set< RepositoryObserver > observers = new HashSet< RepositoryObserver >();
     private final Type type;
 
     protected RepositoryImpl( final Type type,
@@ -329,7 +329,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#add(java.lang.String, java.lang.String)
+     * @see org.komodo.spi.repository.Repository#add(java.lang.String, java.lang.String)
      */
     @Override
     public KomodoObject add( final String parentPath,
@@ -349,7 +349,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#add(org.komodo.spi.repository.IRepository.UnitOfWork, java.lang.String,
+     * @see org.komodo.spi.repository.Repository#add(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
      *      java.lang.String)
      */
     @Override
@@ -378,10 +378,10 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#addClient(org.komodo.spi.repository.IRepositoryClient)
+     * @see org.komodo.spi.repository.Repository#addClient(org.komodo.spi.repository.RepositoryClient)
      */
     @Override
-    public void addClient( final IRepositoryClient client ) {
+    public void addClient( final RepositoryClient client ) {
         ArgCheck.isNotNull(client, "client"); //$NON-NLS-1$
         this.clients.add(client);
     }
@@ -389,10 +389,10 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#addObserver(org.komodo.spi.repository.IRepositoryObserver)
+     * @see org.komodo.spi.repository.Repository#addObserver(org.komodo.spi.repository.RepositoryObserver)
      */
     @Override
-    public void addObserver( IRepositoryObserver observer ) {
+    public void addObserver( RepositoryObserver observer ) {
         ArgCheck.isNotNull(observer, "observer"); //$NON-NLS-1$
         this.observers.add(observer);
     }
@@ -428,7 +428,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#find(java.util.List, org.komodo.spi.repository.IRepository.KeywordCriteria,
+     * @see org.komodo.spi.repository.Repository#find(java.util.List, org.komodo.spi.repository.Repository.KeywordCriteria,
      *      java.lang.String[])
      */
     @Override
@@ -612,7 +612,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#find(java.lang.String[])
+     * @see org.komodo.spi.repository.Repository#find(java.lang.String[])
      */
     @Override
     public ArtifactDescriptor[] find( final String... artifactTypes ) throws KException {
@@ -622,10 +622,10 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#get(java.lang.String)
+     * @see org.komodo.spi.repository.Repository#get(java.lang.String)
      */
     @Override
-    public KomodoObject[] get( String parentPath ) throws KException {
+    public KomodoObject[] get( final String parentPath ) throws KException {
         final UnitOfWork transaction = createTransaction("repository-get", true, null); //$NON-NLS-1$
         final Session session = getSession(transaction);
         KomodoObject[] result = null;
@@ -707,7 +707,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#getId()
+     * @see org.komodo.spi.repository.Repository#getId()
      */
     @Override
     public Id getId() {
@@ -721,7 +721,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#getType()
+     * @see org.komodo.spi.repository.Repository#getType()
      */
     @Override
     public Type getType() {
@@ -731,7 +731,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#importFile(java.io.File, java.lang.String, java.lang.String)
+     * @see org.komodo.spi.repository.Repository#importFile(java.io.File, java.lang.String, java.lang.String)
      */
     @Override
     public KomodoObject importFile( final File file,
@@ -752,7 +752,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#importFile(org.komodo.spi.repository.IRepository.UnitOfWork, java.io.File,
+     * @see org.komodo.spi.repository.Repository#importFile(org.komodo.spi.repository.Repository.UnitOfWork, java.io.File,
      *      java.lang.String, java.lang.String)
      */
     @Override
@@ -772,7 +772,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#importResource(org.komodo.spi.repository.IRepository.UnitOfWork, java.net.URL,
+     * @see org.komodo.spi.repository.Repository#importResource(org.komodo.spi.repository.Repository.UnitOfWork, java.net.URL,
      *      java.lang.String, java.lang.String)
      */
     @Override
@@ -792,6 +792,7 @@ public abstract class RepositoryImpl implements IRepository {
         try {
             final Node parent = new JcrTools().findOrCreateNode(getSession(transaction), getAbsoluteWorkspacePath(parentPath));
             final Node newNode = parent.addNode(name);
+            newNode.addMixin(KomodoLexicon.WorkspaceItem.MIXIN_TYPE);
             return new ObjectImpl(this, newNode.getPath(), 0);
         } catch (final Exception e) {
             if (e instanceof KException) {
@@ -805,7 +806,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#importResource(java.net.URL, java.lang.String, java.lang.String)
+     * @see org.komodo.spi.repository.Repository#importResource(java.net.URL, java.lang.String, java.lang.String)
      */
     @Override
     public KomodoObject importResource( final URL url,
@@ -826,7 +827,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#notify(org.komodo.spi.repository.RepositoryClientEvent)
+     * @see org.komodo.spi.repository.Repository#notify(org.komodo.spi.repository.RepositoryClientEvent)
      */
     @Override
     public void notify( final RepositoryClientEvent event ) {
@@ -834,7 +835,7 @@ public abstract class RepositoryImpl implements IRepository {
     }
 
     protected void notifyObservers() {
-        for (IRepositoryObserver observer : this.observers) {
+        for (final RepositoryObserver observer : this.observers) {
             try {
                 // Ensure all observers are informed even if one throws an exception
                 observer.stateChanged();
@@ -847,7 +848,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#publish(boolean, org.komodo.spi.repository.ArtifactDescriptor,
+     * @see org.komodo.spi.repository.Repository#publish(boolean, org.komodo.spi.repository.ArtifactDescriptor,
      *      org.komodo.spi.repository.KomodoObject)
      */
     @Override
@@ -868,7 +869,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#publish(org.komodo.spi.repository.IRepository.UnitOfWork, boolean,
+     * @see org.komodo.spi.repository.Repository#publish(org.komodo.spi.repository.Repository.UnitOfWork, boolean,
      *      org.komodo.spi.repository.ArtifactDescriptor, org.komodo.spi.repository.KomodoObject)
      */
     @Override
@@ -934,7 +935,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#remove(java.lang.String[])
+     * @see org.komodo.spi.repository.Repository#remove(java.lang.String[])
      */
     @Override
     public void remove( final String... paths ) throws KException {
@@ -952,7 +953,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#remove(org.komodo.spi.repository.IRepository.UnitOfWork, java.lang.String[])
+     * @see org.komodo.spi.repository.Repository#remove(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
     public void remove( final UnitOfWork transaction,
@@ -983,10 +984,10 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#removeClient(org.komodo.spi.repository.IRepositoryClient)
+     * @see org.komodo.spi.repository.Repository#removeClient(org.komodo.spi.repository.RepositoryClient)
      */
     @Override
-    public void removeClient( final IRepositoryClient client ) {
+    public void removeClient( final RepositoryClient client ) {
         ArgCheck.isNotNull(client, "client"); //$NON-NLS-1$
         this.clients.remove(client);
     }
@@ -994,10 +995,10 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#removeObserver(org.komodo.spi.repository.IRepositoryObserver)
+     * @see org.komodo.spi.repository.Repository#removeObserver(org.komodo.spi.repository.RepositoryObserver)
      */
     @Override
-    public void removeObserver( final IRepositoryObserver observer ) {
+    public void removeObserver( final RepositoryObserver observer ) {
         ArgCheck.isNotNull(observer, "observer"); //$NON-NLS-1$
         this.observers.remove(observer);
     }
@@ -1005,7 +1006,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#retrieve(java.lang.String[])
+     * @see org.komodo.spi.repository.Repository#retrieve(java.lang.String[])
      */
     @Override
     public Artifact[] retrieve( final String... artifactPaths ) throws KException {
@@ -1050,7 +1051,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#unpublish(java.lang.String[])
+     * @see org.komodo.spi.repository.Repository#unpublish(java.lang.String[])
      */
     @Override
     public void unpublish( final String... artifactPaths ) throws KException {
@@ -1068,7 +1069,7 @@ public abstract class RepositoryImpl implements IRepository {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.IRepository#unpublish(org.komodo.spi.repository.IRepository.UnitOfWork, java.lang.String[])
+     * @see org.komodo.spi.repository.Repository#unpublish(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
     public void unpublish( final UnitOfWork transaction,

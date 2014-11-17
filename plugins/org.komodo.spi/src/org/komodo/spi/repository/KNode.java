@@ -41,6 +41,6 @@ public interface KNode {
      * @throws KException
      *         if an error occurs
      */
-    IRepository getRepository() throws KException;
+    Repository getRepository() throws KException;
 
 }
