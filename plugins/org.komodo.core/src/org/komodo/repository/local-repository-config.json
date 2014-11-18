@@ -1,10 +1,10 @@
 {
     "name" : "Komodo Local Repository",
-    "jndiName" : "java:jcr/KomodoLocalRepository",
+    "jndiName" : "jcr/KomodoLocalRepository",
     "monitoring" : {
         "enabled" : true
     },
-    "node-types" : [ "config/xmi.cnd", "config/med.cnd", "config/mmcore.cnd", "config/vdb.cnd", "config/TeiidSql.cnd", "config/komodo.cnd" ],
+    "node-types" : [ "org/komodo/repository/xmi.cnd", "org/komodo/repository/med.cnd", "org/komodo/repository/mmcore.cnd", "org/komodo/repository/vdb.cnd", "org/komodo/repository/TeiidSql.cnd", "org/komodo/repository/komodo.cnd" ],
     "workspaces" : {
         "default" : "komodoLocalWorkspace",
         "allowCreation" : true

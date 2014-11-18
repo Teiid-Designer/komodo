@@ -31,6 +31,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.LocalRepository;
@@ -68,7 +69,7 @@ public class TestLocalRepository {
         final RepositoryClientEvent event = RepositoryClientEvent.createStartedEvent(client);
         _repo.notify(event);
 
-        // Wait for the starting of the repository or timeout of 3 minutes
+        // Wait for the starting of the repository or timeout of 1 minute
         if (!updateLatch.await(1, TimeUnit.MINUTES)) {
             throw new RuntimeException("Local repository did not start");
         }
@@ -95,10 +96,11 @@ public class TestLocalRepository {
         return kobject.getPrimaryType().getName();
     }
 
+    @Ignore
     @Test( timeout = 60000 )
     public void testImport() throws Exception {
         // setup
-        final String name = "twitter";
+        final String name = "bareBones";
         final KomodoObject kobject = _repo.importFile(new File("resources/bare-bones.xml"), name, null);
 
         // tests
