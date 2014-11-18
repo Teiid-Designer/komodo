@@ -11,9 +11,9 @@ tmp
 
 plugins/*/launch
 plugins/*/gen
-plugins/*/lib/*.jar
+plugins/*/lib/*.*
 plugins/*/libsrc/*.jar
-plugins/libs/*/lib/*.jar
+plugins/libs/*/lib/*.*
 plugins/libs/*/libsrc/*.jar
 
 tests/*/lib/*.jar
