@@ -39,6 +39,7 @@ public class Messages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum SPI {
+        valueCannotBeEmpty,
     	valueCannotBeNull,
         invalidTargetTypeForGetTeiidMethod,
         invalidTargetTypeForGetDataSourceMethod,
@@ -60,7 +61,7 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-   
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$
@@ -98,8 +99,8 @@ public class Messages implements StringConstants {
     /**
      * Get message string with parameters
      *
-     * @param key
-     * @param parameters
+     * @param key the message key
+     * @param parameters the message parameters (can be empty)
      *
      * @return i18n string
      */

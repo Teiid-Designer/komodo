@@ -22,7 +22,7 @@
 package org.komodo.spi.constants;
 
 /**
- * 
+ *
  *
  *
  */
@@ -49,6 +49,11 @@ public interface StringConstants {
     String UNDERSCORE = "_"; //$NON-NLS-1$
 
     /**
+     * An underscore character.
+     */
+    char UNDERSCORE_CHAR = UNDERSCORE.charAt(0);
+
+    /**
      * The String "\n"
      */
     String NEW_LINE = "\n"; //$NON-NLS-1$
@@ -57,7 +62,7 @@ public interface StringConstants {
      * The String "\t"
      */
     String TAB = "\t"; //$NON-NLS-1$
-    
+
     /**
      * A Comma.
      */
@@ -82,6 +87,11 @@ public interface StringConstants {
      * A Dot.
      */
     String DOT = "."; //$NON-NLS-1$
+
+    /**
+     * A dot character.
+     */
+    char DOT_CHAR = DOT.charAt(0);
 
     /**
      * A Speech mark.
@@ -243,17 +253,17 @@ public interface StringConstants {
 	 * Parent Folder Symbol
 	 */
 	String PARENT_FOLDER_SYMBOL = ".."; //$NON-NLS-1$
-	
+
 	/**
 	 * Drive Separator
 	 */
 	String DRIVE_SEPARATOR = ":"; //$NON-NLS-1$
-	
+
 	/**
 	 * File Extension separator
 	 */
 	String FILE_EXTENSION_SEPARATOR = "."; //$NON-NLS-1$
-	
+
 	/**
 	 * File name wildcard
 	 */

@@ -2,44 +2,45 @@ package org.komodo.relational.core;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.RELATIONAL;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.StringNameValidator;
 
 
 /**
  * This class provides the RelationlStringNameRule the ability to relax the valid characters allowed for relational names.
- * 
+ *
  *
  *
  *
  */
 public class RelationalStringNameValidator extends StringNameValidator {
-	
+
 //	public static String DESIGNER_CORE_PACKAGE = ModelerCore.class.getPackage().getName();
 	@SuppressWarnings("javadoc")
 	public static char[] INVALID_CHARS = {' ', '.'};
 	@SuppressWarnings("javadoc")
 	public static char[] INVALID_QUOTED_CHARS = {' '};
-	
+
 	boolean isTable = false;
 	boolean restrictChars = false;
 
 	/**
-	 * 
+	 *
 	 */
 	public RelationalStringNameValidator() {
 		super();
 //		initializePreference();
 	}
-	
+
 	/**
 	 * @param isTable 'true' if table is being validated
 	 */
 	public RelationalStringNameValidator(boolean isTable) {
-		super(new char[] {UNDERSCORE_CHARACTER});
+		super(new char[] {StringConstants.UNDERSCORE_CHAR});
 		this.isTable = isTable;
 //		initializePreference();
 	}
-	
+
 	/**
 	 * @param isTable 'true' if table is being validated
 	 * @param restrictChars 'true' to restrict chars
@@ -48,7 +49,7 @@ public class RelationalStringNameValidator extends StringNameValidator {
 		this(isTable);
 		this.restrictChars = restrictChars;
 	}
-	
+
 //	private void initializePreference() {
 //        String value = ModelerCore.getPreferences(DESIGNER_CORE_PACKAGE).get(ValidationPreferences.RELATIONAL_NAME_CHARACTER_RESTRICTION, null);
 //
@@ -68,7 +69,7 @@ public class RelationalStringNameValidator extends StringNameValidator {
 		}
 		return super.getValidNonLetterOrDigitMessageSuffix();
 	}
-	
+
 	@Override
 	protected String isValidChar(char c, int index) {
 		if( restrictChars ) {
@@ -76,19 +77,19 @@ public class RelationalStringNameValidator extends StringNameValidator {
 		}
 		return isValidRelationalNameCharacter(c, index, false);
 	}
-	
+
 	@Override
 	protected String isValidCharInDoubleQuotes(char c, int index) {
 //		if( restrictChars ) {
 //			return super.isValidChar(c, index);
 //		}
-		
+
 		return isValidRelationalNameCharacter(c, index, true);
 	}
-	
+
 	private String isValidRelationalNameCharacter(char c, int index, boolean doubleQuoted) {
 		boolean valid = true;
-		
+
 		if( index == 0 ) {
 			valid = Character.isLetter(c);
 		} else {
@@ -108,22 +109,22 @@ public class RelationalStringNameValidator extends StringNameValidator {
 				}
 			}
 		}
-		
+
 		if( !valid ) {
 			final Object[] params = new Object[] {new Character(c), new Integer(index+1), getValidNonLetterOrDigitMessageSuffix()};
 			return Messages.getString(RELATIONAL.RelationalStringNameValidator_nameIsInvalidTheCharacterAt, params);
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * @param restrictChars the restrictChars to set
 	 */
 	public void setRestrictChars(boolean restrictChars) {
 		this.restrictChars = restrictChars;
 	}
-	
+
 	/**
 	 * Set isTable flag
 	 * @param isTable the table flag

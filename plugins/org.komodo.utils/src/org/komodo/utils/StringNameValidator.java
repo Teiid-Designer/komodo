@@ -23,6 +23,7 @@ package org.komodo.utils;
 
 import java.util.Arrays;
 import java.util.TreeMap;
+import org.komodo.spi.constants.StringConstants;
 
 
 /**
@@ -32,9 +33,8 @@ import java.util.TreeMap;
  */
 public class StringNameValidator {
 
-    public static final char UNDERSCORE_CHARACTER = '_';
-    public static final char[] DEFAULT_VALID_NON_LETTER_OR_DIGIT_CHARS = {UNDERSCORE_CHARACTER};
-    public static final char DEFAULT_REPLACEMENT_CHARACTER = UNDERSCORE_CHARACTER;
+    public static final char[] DEFAULT_VALID_NON_LETTER_OR_DIGIT_CHARS = {StringConstants.UNDERSCORE_CHAR};
+    public static final char DEFAULT_REPLACEMENT_CHARACTER = StringConstants.UNDERSCORE_CHAR;
     public static final int MAXIMUM_LENGTH = Integer.MAX_VALUE;
     public static final int DEFAULT_MAXIMUM_LENGTH = 255;
     public static final int DEFAULT_MINIMUM_LENGTH = 1;
@@ -44,7 +44,7 @@ public class StringNameValidator {
     private final boolean caseSensitive;
     private final char replacementCharacter;
     private final char[] validNonLetterOrDigitChars;
-    
+
     private final ExistingNames existingNames;
 
     /**
@@ -61,7 +61,7 @@ public class StringNameValidator {
         this.caseSensitive = caseSensitive;
         this.replacementCharacter = replacementCharacter;
         if (this.minimumLength > this.maximumLength) {
-            final String msg = Messages.getString(Messages.StringNameValidator.minLengthNotExceedMaxLength); 
+            final String msg = Messages.getString(Messages.StringNameValidator.minLengthNotExceedMaxLength);
             throw new IllegalArgumentException(msg);
         }
         if (validNonLetterOrDigitChars == null) {
@@ -190,10 +190,10 @@ public class StringNameValidator {
     public char getReplacementCharacter() {
         return replacementCharacter;
     }
-    
+
     /**
      * Check whether the name length is between {@link #getMinimumLength()} and {@link #getMaximumLength()} (inclusive).
-     * 
+     *
      * @param name the name to check; may not be null
      * @return a message stating what is wrong with the name, or null if the name is considered valid
      */
@@ -219,7 +219,7 @@ public class StringNameValidator {
      * Check whether the characters in the name are considered valid. The first character must be an alphabetic character;
      * remaining characters must be either alphabetic characters, digits or the underscore ('_') character. Any characters that
      * are in the {@link #getInvalidCharacters() invalid set} will also fail validation
-     * 
+     *
      * @param name the name to be checked; may not be null
      * @return a message stating what is wrong with the name, or null if the name is considered valid
      */
@@ -227,29 +227,29 @@ public class StringNameValidator {
         ArgCheck.isNotNull(name);
 
         // Go through the string and ensure that each character is valid ...
-        
+
         int length = name.length();
-        
+
         if (length == 0) {
         	return null;
         }
-        
+
         char c = name.charAt(0);
 
         String msg = null;
         boolean isDoubleQuoted = false;
-        
+
         if( !StringUtils.isDoubleQuoted(name) ) {
         	msg = isValidInitialChar(c);
         } else if( length > 1 ) {
         	isDoubleQuoted = true;
         	msg = isValidInitialChar(name.charAt(1));
         }
-        
+
         if (msg != null) {
         	return msg;
         }
-        
+
         for (int index = 1; index < length; index++) {
         	c = name.charAt(index);
         	if( isDoubleQuoted ) {
@@ -273,33 +273,33 @@ public class StringNameValidator {
 			if (!Character.isDigit(c) && !isValidNonLetterOrDigit(c) ) {
 			    final Object[] params = new Object[] {new Character(c), new Integer(index+1), getValidNonLetterOrDigitMessageSuffix()};
 			    return Messages.getString(Messages.StringNameValidator.onlyAlphaOrDigit, params);
-			} 
-		} 
+			}
+		}
 		return null;
 	}
-	
+
 	protected String isValidCharInDoubleQuotes(char c, int index) {
 		if ( !Character.isLetter(c)) {
-			if (c != StringUtils.Constants.DOT_CHAR && 
-				!Character.isDigit(c) && 
+			if (c != StringConstants.DOT_CHAR &&
+				!Character.isDigit(c) &&
 				!isValidNonLetterOrDigit(c) ) {
 			    final Object[] params = new Object[] {new Character(c), new Integer(index+1), getValidNonLetterOrDigitMessageSuffix()};
 			    return Messages.getString(Messages.StringNameValidator.onlyAlphaOrDigit, params);
-			} 
-		} 
+			}
+		}
 		return null;
 	}
-    
+
     protected String isValidInitialChar(char c) {
     	if (!Character.isLetter(c)) {
             final Object[] params = new Object[] {new Character(c)};
-            final String msg = Messages.getString(Messages.StringNameValidator.firstCharMustBeAlphabetic, params); 
+            final String msg = Messages.getString(Messages.StringNameValidator.firstCharMustBeAlphabetic, params);
             return msg;
         }
         return null;
     }
-    
-    
+
+
     /**
      * Allows additional non-letter or non-digit characters to be valid. Subclasses should override this method to add
      * additional valid characters.
@@ -309,7 +309,7 @@ public class StringNameValidator {
     public boolean isValidNonLetterOrDigit(char c) {
     	return Arrays.binarySearch(validNonLetterOrDigitChars, c) >= 0;
     }
-    
+
     public String getValidNonLetterOrDigitMessageSuffix() {
     	return Messages.getString(Messages.StringNameValidator.orOtherValidChars);
     }
@@ -320,7 +320,7 @@ public class StringNameValidator {
      * may not be zero-length</li> <li>The name may not have a length greater than 255 characters</li> <li>The first character
      * must be an alphabetic character; remaining characters must be either alphabetic characters, digits or the underscore ('_')
      * character</li>
-     * 
+     *
      * @param newName the name being considered
      * @return true if the name is a valid name (excluding context-sensitive naming rules), or false otherwise.
      */
@@ -343,7 +343,7 @@ public class StringNameValidator {
      * or the underscore ('_') character</li>
      * <li>The name may not contain {@link #getInvalidCharacters() invalid characters}</li>
      * </ul>
-     * 
+     *
      * @param name the name being considered
      * @return a message which is a validation error, null if the name is valid.
      */
@@ -379,7 +379,7 @@ public class StringNameValidator {
      * <p>
      * This is equivalent to calling {@link #createValidName(String, char[], int, boolean) createValidName(name,null,255,false)}.
      * </p>
-     * 
+     *
      * @param name the name; may not be null
      * @return the new name, or null if the name was already valid (i.e., would be unchanged by this method)
      */
@@ -395,7 +395,7 @@ public class StringNameValidator {
      * This is equivalent to calling {@link #createValidName(String, char[], int, boolean)
      * createValidName(name,null,255,performValidityCheck)}.
      * </p>
-     * 
+     *
      * @param name the name; may not be null
      * @param performValidityCheck true if validity checking should be performed, or false if the validity checking should be
      *        skipped
@@ -420,7 +420,7 @@ public class StringNameValidator {
 	        	index++;
 	        	if( !foundInitialChar ) {
 		        	String msg = isValidInitialChar(nextChar);
-		            
+
 		    	    if (msg == null) {
 		    	    	foundInitialChar = true;
 		    	    	changed = true;
@@ -446,13 +446,13 @@ public class StringNameValidator {
 	        	}
 	        }
         }
-        
-        
+
+
 //        if (length > 0) {
 //        	char c = name.charAt(0);
 //
 //	        String msg = isValidInitialChar(c);
-//        
+//
 //    	    if (msg != null) {
 //    	    	changed = true;
 //        		newName.setCharAt(0, this.getReplacementCharacter());
@@ -471,12 +471,12 @@ public class StringNameValidator {
             changed = true;
         	newName.append(this.getReplacementCharacter());
         }
-        
+
         if (newName.length() > maxLength) {
         	changed = true;
         	newName.delete(maxLength, newName.length());
         }
-        
+
         if (changed) {
         	return newName.toString();
         }
@@ -487,7 +487,7 @@ public class StringNameValidator {
 
     /**
      * Create a valid name that is does not match the supplied set of "existing" names.
-     * 
+     *
      * @param name the name to be made valid; may not be null
      * @return the new name, or null if the name was already valid (i.e., would be unchanged by this method)
      */
@@ -511,7 +511,7 @@ public class StringNameValidator {
 
     /**
      * Create a name that is does not match the supplied set of "existing" names.
-     * 
+     *
      * @param name the name to be made valid; may not be null
      * @return the new name, or null if the name was already unique (i.e., would be unchanged by this method)
      */
@@ -581,7 +581,7 @@ public class StringNameValidator {
 
         /**
          * {@inheritDoc}
-         * 
+         *
          * @see java.lang.Comparable#compareTo(java.lang.Object)
          */
         @Override
@@ -597,7 +597,7 @@ public class StringNameValidator {
 
         /**
          * {@inheritDoc}
-         * 
+         *
          * @see java.lang.Object#equals(java.lang.Object)
          */
         @Override
@@ -633,7 +633,7 @@ public class StringNameValidator {
 
         /**
          * {@inheritDoc}
-         * 
+         *
          * @see java.lang.Object#hashCode()
          */
         @Override
@@ -712,7 +712,7 @@ public class StringNameValidator {
 
         /**
          * {@inheritDoc}
-         * 
+         *
          * @see java.lang.Object#toString()
          */
         @Override
@@ -723,7 +723,7 @@ public class StringNameValidator {
         }
     }
 
-    //    
+    //
     // private static String getUniqueString(String name, Collection siblingNames) {
     // Iterator siblingIter = siblingNames.iterator();
     // while(siblingIter.hasNext()) {

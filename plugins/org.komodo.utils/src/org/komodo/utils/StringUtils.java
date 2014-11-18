@@ -31,27 +31,7 @@ import org.komodo.spi.constants.StringConstants;
  *
  */
 public final class StringUtils implements StringConstants {
-//
-    public interface Constants {
-//        char CARRIAGE_RETURN_CHAR = '\r';
-//        char LINE_FEED_CHAR = '\n';
-//        char NEW_LINE_CHAR = LINE_FEED_CHAR;
-//        char SPACE_CHAR = ' ';
-        char DOT_CHAR = '.';
-//        char TAB_CHAR = '\t';
-        char DQUOTE_CHAR = '"';
-//
-//        String CARRIAGE_RETURN = String.valueOf(CARRIAGE_RETURN_CHAR);
-//        String DBL_SPACE = "  "; //$NON-NLS-1$
-//        String SPACE = String.valueOf(SPACE_CHAR);
-//        String[] EMPTY_STRING_ARRAY = new String[0];
-//
-//        // all patterns below copied from Eclipse's PatternConstructor class.
-//        final Pattern PATTERN_BACK_SLASH = Pattern.compile("\\\\"); //$NON-NLS-1$
-//        final Pattern PATTERN_QUESTION = Pattern.compile("\\?"); //$NON-NLS-1$
-//        final Pattern PATTERN_STAR = Pattern.compile("\\*"); //$NON-NLS-1$
-    }
-//
+
 //    /**
 //     * The String "'"
 //     */
@@ -104,7 +84,6 @@ public final class StringUtils implements StringConstants {
      * Join string pieces and separate with a delimiter. Similar to the perl function of the same name. If strings or delimiter
      * are null, null is returned. Otherwise, at least an empty string will be returned.
      *
-     * @see #split
      * @param strings String pieces to join
      * @param delimiter Delimiter to put between string pieces
      * @return One merged string
@@ -304,6 +283,11 @@ public final class StringUtils implements StringConstants {
         return source;
     }
 
+    /**
+     * @param source the source string whose contents will be altered
+     * @param search the string to search for in source
+     * @param replace the string to substitute for search if present
+     */
     public static void replaceAll( StringBuffer source,
                                    String search,
                                    String replace ) {
@@ -931,17 +915,7 @@ public final class StringUtils implements StringConstants {
     }
 
     private static boolean isTwoDoubleQuotes( String str ) {
-        int result = 0;
-        for( char nextChar : str.toCharArray() ) {
-            if( nextChar == Constants.DQUOTE_CHAR) {
-                if( result == 2 ) {
-                    result = 1;
-                } else {
-                    result++;
-                }
-            }
-        }
-        return result == 2;
+        return "\"\"".equals(str); //$NON-NLS-1$
     }
 //
 //    /**
@@ -1368,5 +1342,5 @@ public final class StringUtils implements StringConstants {
     private StringUtils() {
         // nothing to do
     }
-    
+
 }

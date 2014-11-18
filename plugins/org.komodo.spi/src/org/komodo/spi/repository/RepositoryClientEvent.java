@@ -32,12 +32,12 @@ public final class RepositoryClientEvent {
      */
     public enum EventType {
         /**
-         * Sent when an {@link IRepositoryClient} has just started
+         * Sent when an {@link RepositoryClient} has just started
          */
         STARTED,
 
         /**
-         * Sent just prior to an {@link IRepositoryClient} shutting down 
+         * Sent just prior to an {@link RepositoryClient} shutting down
          */
         SHUTTING_DOWN,
     }
@@ -49,7 +49,7 @@ public final class RepositoryClientEvent {
     /**
      * @param eventType type of this event
      * @param source the source of this event
-     * 
+     *
      */
     public RepositoryClientEvent(EventType eventType, RepositoryClient source) {
         this.eventType = eventType;
