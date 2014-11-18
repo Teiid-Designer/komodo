@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import org.junit.Test;
-import org.komodo.modeshape.AbstractSequencerTest;
+import org.komodo.modeshape.AbstractTSqlSequencerTest;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractCompareCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractSetCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AggregateSymbol;
@@ -89,7 +89,7 @@ import org.modeshape.jcr.api.JcrConstants;
  *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public abstract class AbstractTestTeiidSqlSequencer extends AbstractSequencerTest {
+public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequencerTest {
 
     /**
      * @param teiidVersion
