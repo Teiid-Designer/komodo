@@ -23,14 +23,12 @@
  */
 package org.komodo.modeshape.test.utils;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.logging.Level;
 import javax.jcr.ImportUUIDBehavior;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -41,7 +39,6 @@ import javax.jcr.Workspace;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
 import org.modeshape.common.collection.Problems;
@@ -55,7 +52,7 @@ import org.modeshape.jcr.api.nodetype.NodeTypeManager;
  * A base class for tests that require a new JcrSession but NOT a JcrRepository for each test method.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public abstract class MultiUseAbstractTest {
+public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
 
     protected static final String DATA_DIRECTORY = File.separator + "data";
 
@@ -99,24 +96,6 @@ public abstract class MultiUseAbstractTest {
             session.save();
             session.logout();
         }
-    }
-
-    private static File configureLogPath(KLog logger) throws IOException, Exception {
-        File newLogFile = File.createTempFile("TestKLog", ".log");
-        newLogFile.deleteOnExit();
-
-        logger.setLogPath(newLogFile.getAbsolutePath());
-        logger.setLevel(java.util.logging.Level.INFO);
-        assertEquals(newLogFile.getAbsolutePath(), logger.getLogPath());
-
-        // Reduce needless output by setting log level quite high
-        logger.setLevel(Level.INFO);
-        return newLogFile;
-    }
-
-    @BeforeClass
-    public static void beforeAll() throws Exception {
-        configureLogPath(KLog.getLogger());
     }
 
     @AfterClass

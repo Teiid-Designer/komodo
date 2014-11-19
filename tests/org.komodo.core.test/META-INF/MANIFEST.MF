@@ -8,4 +8,5 @@ Fragment-Host: org.komodo.core;bundle-version="1.0.0"
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit;bundle-version="4.11.0",
- org.jboss.tools.locus.mockito;bundle-version="1.9.5"
+ org.jboss.tools.locus.mockito;bundle-version="1.9.5",
+ org.komodo.modeshape.test.utils

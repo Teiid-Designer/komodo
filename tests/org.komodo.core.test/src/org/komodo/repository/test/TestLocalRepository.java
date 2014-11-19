@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.modeshape.test.utils.AbstractLoggingTest;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.internal.RepositoryImpl;
 import org.komodo.spi.repository.Descriptor;
@@ -44,12 +45,13 @@ import org.komodo.spi.repository.RepositoryObserver;
 import org.modeshape.jcr.JcrNtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
-public class TestLocalRepository {
+public class TestLocalRepository extends AbstractLoggingTest {
 
     private static LocalRepository _repo = null;
 
     @BeforeClass
     public static void getLocalRepositoryInstance() throws Exception {
+
         _repo = LocalRepository.getInstance();
 
         final CountDownLatch updateLatch = new CountDownLatch(1);
