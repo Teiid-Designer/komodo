@@ -1,0 +1,206 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
+
+//------------------------------------------------------------------------------
+// N A M E S P A C E S
+//------------------------------------------------------------------------------
+
+<jcr='http://www.jcp.org/jcr/1.0'>
+<mix='http://www.jcp.org/jcr/mix/1.0'>
+<nt='http://www.jcp.org/jcr/nt/1.0'>
+<tko='http://www.teiid.org/komodo/1.0'>
+<tsql='http://www.teiid.org/sql/1.0'>
+<vdb = "http://www.metamatrix.com/metamodels/VirtualDatabase">
+
+/*
+ * The Komodo store includes a workspace and a library.
+ */
+[tko:komodo] > nt:unstructured
+  + tko:workspace (tko:workspace) copy
+  + tko:library (tko:library) copy
+
+/*
+ * A workspace item.
+ */
+[tko:workspaceItem] > mix:referenceable mixin
+  - tko:externalLocation (string)
+  + tko:originalFile (nt:file) copy
+
+/*
+ * A Komodo library component is versionable and referenceable.
+ */
+[tko:libraryComponent] > mix:created, mix:versionable, mix:lockable mixin
+  - tko:description (string)
+
+/*
+ * The Komodo workspace keeps track of the Teiid servers, Komodo repositories, Teiid 
+ * data sources, and other resources created and being worked on by the user.
+ */
+[tko:workspace] > nt:unstructured
+  + tko:repositories (tko:repositories) copy
+  + tko:teiids (tko:teiids) copy
+  + tko:dataSources (tko:dataSources) copy
+
+/*
+ * The repository grouping node used by the workspace. Child nodes are Komodo local or 
+ * remote/shared repositories.
+ */
+[tko:repositories] > nt:unstructured
+  + * (tko:repository) copy
+
+/*
+ * A Komodo repository. Node name can be user-defined.
+ */
+[tko:repository] > nt:unstructured, tko:workspaceItem
+  - tko:type (string) mandatory < 'LOCAL', 'SHARED'
+  + * (nt:address) copy
+
+/*
+ * The Teiid server grouping node used by the workspace. Child nodes are Teiid servers 
+ * known to the workspace.
+ */
+[tko:teiids] > nt:unstructured
+  + * (tko:teiid) copy
+
+/*
+ * A Teiid server known by the workspace. Node name can be user-defined.
+ */
+[tko:teiid] > nt:unstructured, tko:workspaceItem
+  - tko:host (string)
+  - tko:adminPort (long)
+  - tko:adminUser (string)
+  - tko:adminPswd (string) // encrypted
+  - tko:jdbcPort (long)
+  - tko:jdbcUser (string)
+  - tko:jdbcPswd (string) // encrypted
+  - tko:lastPingTime (long)
+  - tko:connected (boolean)
+
+/*
+ * The data source grouping node used by both the workspace and the library. Child nodes are data source definitions.
+ */
+[tko:dataSources] > nt:unstructured
+  + * (tko:dataSource) copy
+
+/*
+ * A data source either known by the workspace or known by the library.
+ * TODO finish this
+ */
+[tko:dataSource] > nt:unstructured, tko:workspaceItem, tko:libraryComponent
+
+/*
+ * The Komodo library identifies the Teiid artifacts intended to be reused by multiple VDBs, workspaces, or Komodo repositories.
+ */
+[tko:library] > nt:unstructured
+  + tko:schemas (tko:schemas) copy
+  + tko:vdbs (tko:vdbs) copy
+  + tko:vdbImports (tko:vdbImports) copy
+  + tko:vdbModels (tko:vdbModels) copy
+  + tko:vdbModelSources (tko:vdbModelSources) copy
+  + tko:vdbTranslators (tko:vdbTranslators) copy
+  + tko:vdbEntries (tko:vdbEntries) copy
+  + tko:dataSources (tko:dataSources) copy
+
+/*
+ * The schemas/models grouping node used by the library. Child nodes represent Teiid DDL.
+ */
+[tko:schemas] > nt:unstructured
+  + * (tko:schema) copy
+
+/*
+ * A Teiid schema/model in the workspace or in the library. Node name is the schema/model name.
+ */
+[tko:schema] > nt:unstructured, tko:libraryComponent
+  + * (tsql:languageObject) copy sns
+
+/*
+ * The VDB grouping node used by the library. Child nodes represent Teiid VDBs.
+ */
+[tko:vdbs] > nt:unstructured
+  + tko:vdb (tko:vdb) copy
+
+/*
+ * A Teiid VDB either in the workspace or in the library. Node name is the VDB name.
+ */
+[tko:vdb] > vdb:virtualDatabase, tko:libraryComponent
+
+/*
+ * The VDB imports grouping node used by the library. Child nodes represent Import VDB definitions.
+ */
+[tko:vdbImports] > nt:unstructured
+  + * (tko:vdbImport) copy
+
+/*
+ * A VDB Import VDB definition found in the library. The node name is the imported VDB's name.
+ */
+[tko:vdbImport] > vdb:importVdb, tko:libraryComponent
+
+/*
+ * The VDB manifest model grouping node used by the library. Child nodes represent VDB manifest model definitions.
+ */
+[tko:vdbModels] > nt:unstructured
+  + * (tko:vdbModel) copy sns
+
+/*
+ * A VDB manifest model definition found in the library. The node name is the model name.
+ */
+[tko:vdbModel] > nt:unstructured, tko:libraryComponent
+  - vdb:metadataType (string) = 'DDL' autocreated
+  - vdb:modelDefinition (string)
+  + * (tko:vdbModelSource) copy
+  + * (nt:file) copy
+
+/*
+ * The VDB manifest model source grouping node used by the library. Child nodes represent VDB model source definitions.
+ */
+[tko:vdbModelSources] > nt:unstructured
+  + * (tko:vdbModelSource) copy
+
+/*
+ * A VDB manifest model source definition found in the library. The node name is the model source's name.
+ */
+[tko:vdbModelSource] > nt:unstructured, tko:libraryComponent
+  - vdb:sourceTranslator (string)
+  - vdb:sourceJndiName (string)
+
+/*
+ * The VDB translator grouping node used by the library. Child nodes represent VDB translator definitions.
+ */
+[tko:vdbTranslators] > nt:unstructured
+  + * (tko:vdbTranslator) copy
+
+/*
+ * A VDB translator definition found in the library. The node name is the translator's name.
+ */
+[tko:vdbTranslator] > vdb:translator, tko:libraryComponent
+
+/*
+ * The VDB entry grouping node used by the library. Child nodes represent VDB entry definitions.
+ */
+[tko:vdbEntries] > nt:unstructured
+  + * (tko:vdbEntry) copy sns
+
+/*
+ * A VDB entry definition found in the library. The node name is the last segment of the path.
+ */
+[tko:vdbEntry] > vdb:entry, tko:libraryComponent
+

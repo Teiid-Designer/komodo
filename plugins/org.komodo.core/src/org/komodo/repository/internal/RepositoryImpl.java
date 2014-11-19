@@ -27,6 +27,7 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.core.Messages.Komodo;
 import org.komodo.repository.Messages;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Artifact;
 import org.komodo.spi.repository.ArtifactDescriptor;
 import org.komodo.spi.repository.KomodoObject;
@@ -43,7 +44,7 @@ import org.modeshape.jcr.api.JcrTools;
 /**
  * A {@link Repository} implementation.
  */
-public abstract class RepositoryImpl implements Repository {
+public abstract class RepositoryImpl implements Repository, StringConstants {
 
     private class ArtifactDescriptorImpl implements ArtifactDescriptor {
 
@@ -298,19 +299,19 @@ public abstract class RepositoryImpl implements Repository {
     /**
      * The root path of the Komodo repository.
      */
-    static String KOMODO_ROOT = "/komodo/"; //$NON-NLS-1$
+    static String KOMODO_ROOT = (FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE + FORWARD_SLASH);
 
     /**
      * The root path of the Komodo repository library.
      */
-    public static String LIBRARY_ROOT = (KOMODO_ROOT + "library/"); //$NON-NLS-1$
+    public static String LIBRARY_ROOT = (KOMODO_ROOT + KomodoLexicon.Komodo.LIBRARY + FORWARD_SLASH);
 
     protected static final KLog LOGGER = KLog.getLogger();
 
     /**
      * The root path of the Komodo repository workspace.
      */
-    public static String WORKSPACE_ROOT = (KOMODO_ROOT + "workspace/"); //$NON-NLS-1$
+    public static String WORKSPACE_ROOT = (KOMODO_ROOT + KomodoLexicon.Komodo.WORKSPACE + FORWARD_SLASH);
 
     private final Set< RepositoryClient > clients = new HashSet< RepositoryClient >();
     private final Id id;
@@ -361,9 +362,14 @@ public abstract class RepositoryImpl implements Repository {
         LOGGER.debug("adding node '{0}' to path '{1}' during transaction '{2}'", parentPath, name, transaction.getName()); //$NON-NLS-1$
 
         final String workspacePath = getAbsoluteWorkspacePath(parentPath);
+        final Session session = getSession(transaction);
 
         try {
-            final Node parent = getSession(transaction).getNode(workspacePath);
+            if (WORKSPACE_ROOT.equals(workspacePath) && !session.nodeExists(WORKSPACE_ROOT)) {
+                create(WORKSPACE_ROOT);
+            }
+
+            final Node parent = session.getNode(workspacePath);
             final Node newNode = parent.addNode(name);
             return new ObjectImpl(this, newNode.getPath(), 0);
         } catch (final Exception e) {
@@ -422,6 +428,28 @@ public abstract class RepositoryImpl implements Repository {
                 final Value value = PropertyImpl.createValue(factory, prop.getValue(), type);
                 node.setProperty(name, value);
             }
+        }
+    }
+
+    private KomodoObject create( String absolutePath ) throws KException {
+        final UnitOfWork transaction = createTransaction("repository-create", false, null); //$NON-NLS-1$
+        final Session session = getSession(transaction);
+        KomodoObject result = null;
+
+        try {
+            final Node node = new JcrTools().findOrCreateNode(session, WORKSPACE_ROOT);
+            result = new ObjectImpl(this, node.getPath(), node.getIndex());
+
+            transaction.commit();
+            return result;
+        } catch (final Exception e) {
+            transaction.rollback();
+
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
         }
     }
 
@@ -625,24 +653,18 @@ public abstract class RepositoryImpl implements Repository {
      * @see org.komodo.spi.repository.Repository#get(java.lang.String)
      */
     @Override
-    public KomodoObject[] get( final String parentPath ) throws KException {
+    public KomodoObject get( final String path ) throws KException {
         final UnitOfWork transaction = createTransaction("repository-get", true, null); //$NON-NLS-1$
         final Session session = getSession(transaction);
-        KomodoObject[] result = null;
-        final String workspacePath = getAbsoluteWorkspacePath(parentPath);
+        KomodoObject result = null;
+        final String workspacePath = getAbsoluteWorkspacePath(path);
 
         try {
             if (session.nodeExists(workspacePath)) {
-                final NodeIterator itr = session.getNode(workspacePath).getNodes();
-                result = new KomodoObject[(int)itr.getSize()];
-                int i = 0;
-
-                while (itr.hasNext()) {
-                    final Node kid = itr.nextNode();
-                    result[i++] = new ObjectImpl(this, kid.getPath(), kid.getIndex());
-                }
-            } else {
-                result = KomodoObject.EMPTY_ARRAY;
+                final Node node = session.getNode(workspacePath);
+                result = new ObjectImpl(this, workspacePath, node.getIndex());
+            } else if (WORKSPACE_ROOT.equals(workspacePath)) {
+                result = create(WORKSPACE_ROOT);
             }
 
             transaction.commit();
@@ -702,6 +724,12 @@ public abstract class RepositoryImpl implements Repository {
         }
 
         return nodePath;
+    }
+
+    private String getAbsoluteWorkspacePath( String path,
+                                             final String name ) {
+        path = getAbsoluteWorkspacePath(path);
+        return (path.endsWith("/") ? (path + name) : (path + FORWARD_SLASH + name)); //$NON-NLS-1$
     }
 
     /**
@@ -792,6 +820,9 @@ public abstract class RepositoryImpl implements Repository {
         try {
             final Node parent = new JcrTools().findOrCreateNode(getSession(transaction), getAbsoluteWorkspacePath(parentPath));
             final Node newNode = parent.addNode(name);
+            new JcrTools().uploadFile(getSession(transaction),
+                                      getAbsoluteWorkspacePath(newNode.getPath(), KomodoLexicon.WorkspaceItem.ORIGINAL_FILE),
+                                      url.openStream());
             newNode.addMixin(KomodoLexicon.WorkspaceItem.MIXIN_TYPE);
             return new ObjectImpl(this, newNode.getPath(), 0);
         } catch (final Exception e) {

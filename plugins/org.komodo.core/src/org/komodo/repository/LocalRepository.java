@@ -74,7 +74,7 @@ public class LocalRepository extends RepositoryImpl implements StringConstants {
         return instance;
     }
 
-    private State state;
+    private State state = State.UNKNOWN;
 
     private ModeshapeEngineThread engineThread;
 
@@ -92,7 +92,7 @@ public class LocalRepository extends RepositoryImpl implements StringConstants {
 
     @Override
     public boolean ping() {
-        return this.engineThread.isEngineStarted();
+        return ((this.engineThread != null) && this.engineThread.isEngineStarted());
     }
 
     private Session createSession() throws KException {

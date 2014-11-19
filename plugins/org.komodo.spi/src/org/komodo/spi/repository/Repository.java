@@ -255,14 +255,15 @@ public interface Repository {
     public ArtifactDescriptor[] find( final String... artifactTypes ) throws KException;
 
     /**
-     * @param parentPath
-     *        the path to the workspace container whose contents are being requested (can be empty if the workspace roots are
-     *        being requested)
-     * @return the requested workspace Komodo objects (never <code>null</code> but can be empty)
-     * @throws Exception
+     * The path can be workspace relative or absolute.
+     *
+     * @param path
+     *        the path to the workspace object being requested (can be empty if the workspace root)
+     * @return the requested workspace Komodo object (can be <code>null</code> if it does not exist)
+     * @throws KException
      *         if an error occurs
      */
-    public KomodoObject[] get( final String parentPath ) throws Exception;
+    public KomodoObject get( final String path ) throws KException;
 
     /**
      * @return the repository identifier (never <code>null</code>)
