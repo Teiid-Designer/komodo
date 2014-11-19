@@ -101,8 +101,6 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         // Wait for the starting of the repository or timeout of 3 minutes
         updateLatch.await(3, TimeUnit.MINUTES);
 
-        traverse(fileNode);
-
         //
         // Sequencing completed, now verify
         //
@@ -194,8 +192,6 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
 
         // Wait for the starting of the repository or timeout of 5 minutes
         updateLatch.await(5, TimeUnit.MINUTES);
-
-        traverse(fileNode);
 
         //
         // Sequencing completed, now verify
