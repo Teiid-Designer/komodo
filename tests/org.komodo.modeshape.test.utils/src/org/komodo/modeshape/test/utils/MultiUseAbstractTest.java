@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.modeshape;
+package org.komodo.modeshape.test.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -57,55 +57,18 @@ import org.modeshape.jcr.api.nodetype.NodeTypeManager;
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class MultiUseAbstractTest {
 
+    protected static final String DATA_DIRECTORY = File.separator + "data";
+
     /**
-     * Configuration of the test repository
+     * Default location of the configuration of the test repository
      */
-    private static final String TEST_REPOSITORY_CONFIG = "test-repository-config.json";
+    private static final String DEFAULT_TEST_REPOSITORY_CONFIG = DATA_DIRECTORY + File.separator + "test-repository-config.json";
 
     private static JcrRepository repository;
 
     private static JcrSession session;
 
     private static ModeShapeEngine engine;
-
-    private static void startEngine() throws Exception {
-        if (repository != null)
-            return;
-
-        engine = new ModeShapeEngine();
-        engine.start();
-
-        InputStream inputStream = MultiUseAbstractTest.class.getResourceAsStream(TEST_REPOSITORY_CONFIG);
-        RepositoryConfiguration config = RepositoryConfiguration.read(inputStream, TEST_REPOSITORY_CONFIG);
-        Problems problems = config.validate();
-        if (problems.hasErrors()) {
-            throw new RuntimeException("Problems with the configuration.");
-        }
-
-        repository = engine.deploy(config);
-        problems = repository.getStartupProblems();
-        if (problems.hasErrors() || problems.hasWarnings()) {
-            
-            Iterator<Problem> iterator = problems.iterator();
-            while(iterator.hasNext()) {
-                Problem problem = iterator.next();
-                switch (problem.getStatus()) {
-                    case ERROR:
-                        throw new RuntimeException("Error deploying repository: " + problem.getMessageString());
-                    default:
-                        KLog.getLogger().warn(problem.getMessageString(), problem.getThrowable());
-                }
-            }
-        }
-    }
-
-    private static void startRepository() throws Exception {
-        startEngine();
-
-        session = repository.login();
-        assertNotNull(session);
-        assertNotNull(session.getRootNode());
-    }
 
     private static void stopRepository() throws Exception {
         try {
@@ -143,6 +106,7 @@ public abstract class MultiUseAbstractTest {
         newLogFile.deleteOnExit();
 
         logger.setLogPath(newLogFile.getAbsolutePath());
+        logger.setLevel(java.util.logging.Level.INFO);
         assertEquals(newLogFile.getAbsolutePath(), logger.getLogPath());
 
         // Reduce needless output by setting log level quite high
@@ -153,8 +117,6 @@ public abstract class MultiUseAbstractTest {
     @BeforeClass
     public static void beforeAll() throws Exception {
         configureLogPath(KLog.getLogger());
-        startRepository();
-        clearRepository();
     }
 
     @AfterClass
@@ -162,10 +124,70 @@ public abstract class MultiUseAbstractTest {
         stopRepository();
     }
 
+    /**
+     * Provides the location of modeshape repository configuration file.
+     * By default, this returns null and the DEFAULT_TEST_REPOSITORY_CONFIG
+     * value is used instead.
+     *
+     * @see getTestConfiguration
+     * 
+     * @return the location of modeshape's test configuration file
+     */
+    protected String getTestConfigurationPath() {
+        return null;
+    }
+
+    private InputStream getTestConfiguration() {
+        String configuration = getTestConfigurationPath();
+        if (configuration == null) {
+            KLog.getLogger().info("Modeshape test configuration location path not overridden so using default: " + DEFAULT_TEST_REPOSITORY_CONFIG);
+            configuration = DEFAULT_TEST_REPOSITORY_CONFIG;
+        }
+
+        return getClass().getResourceAsStream(configuration);
+    }
+
+    private void startEngine() throws Exception {
+        if (repository != null)
+            return;
+
+        engine = new ModeShapeEngine();
+        engine.start();
+
+        InputStream inputStream = getTestConfiguration();
+        assertNotNull("Configuration file cannot be found so input stream is null", inputStream);
+        RepositoryConfiguration config = RepositoryConfiguration.read(inputStream, DEFAULT_TEST_REPOSITORY_CONFIG);
+        Problems problems = config.validate();
+        if (problems.hasErrors()) {
+            throw new RuntimeException("Problems with the configuration.");
+        }
+
+        repository = engine.deploy(config);
+        problems = repository.getStartupProblems();
+        if (problems.hasErrors() || problems.hasWarnings()) {
+            
+            Iterator<Problem> iterator = problems.iterator();
+            while(iterator.hasNext()) {
+                Problem problem = iterator.next();
+                switch (problem.getStatus()) {
+                    case ERROR:
+                        throw new RuntimeException("Error deploying repository: " + problem.getMessageString());
+                    default:
+                        KLog.getLogger().warn(problem.getMessageString(), problem.getThrowable());
+                }
+            }
+        }
+    }
+
     @Before
     public void beforeEach() throws Exception {
+        startEngine();
+        clearRepository();
+
         // create a new session for each test ...
         session = newSession();
+        assertNotNull(session);
+        assertNotNull(session.getRootNode());
     }
 
     @After
@@ -173,7 +195,8 @@ public abstract class MultiUseAbstractTest {
      // log out of the session after each test ...
         try {
             clearRepository();
-            session.logout();
+            if (session != null)
+                session.logout();
         } finally {
             session = null;
         }

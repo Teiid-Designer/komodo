@@ -22,7 +22,7 @@
 		 						 modeshape-jcr-api.jar,
 								 modeshape-common.jar,
 								 modeshape-sequencer-ddl.jar,
-								 modeshape-schematic.jar,
+								 org.modeshape.sequencer-teiid,
 		                         logback-core.jar,
 								 logback-classic.jar,
 								 slf4j-api.jar"/>

@@ -30,7 +30,7 @@ import java.util.List;
 import javax.jcr.NamespaceRegistry;
 import javax.jcr.Node;
 import org.junit.Test;
-import org.komodo.modeshape.AbstractSequencerTest;
+import org.komodo.modeshape.AbstractTSqlSequencerTest;
 import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
 import org.komodo.modeshape.teiid.TeiidSqlSequencer;
 import org.komodo.modeshape.teiid.parser.SQQueryParser;
@@ -96,7 +96,7 @@ import org.modeshape.jcr.api.nodetype.NodeTypeManager;
  *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public abstract class AbstractTestSqlNodeVisitor extends AbstractSequencerTest {
+public abstract class AbstractTestSqlNodeVisitor extends AbstractTSqlSequencerTest {
 
     protected SQQueryParser parser;
 

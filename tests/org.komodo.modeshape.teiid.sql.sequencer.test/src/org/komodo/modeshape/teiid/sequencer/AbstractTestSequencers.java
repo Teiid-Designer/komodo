@@ -30,7 +30,7 @@ import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
 import org.junit.Test;
-import org.komodo.modeshape.AbstractSequencerTest;
+import org.komodo.modeshape.AbstractTSqlSequencerTest;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractCompareCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.CompareCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ElementSymbol;
@@ -48,7 +48,7 @@ import org.modeshape.jcr.api.observation.Event;
  *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public abstract class AbstractTestSequencers extends AbstractSequencerTest {
+public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
 
     /**
      * @param teiidVersion

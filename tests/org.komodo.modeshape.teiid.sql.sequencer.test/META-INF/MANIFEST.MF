@@ -8,4 +8,5 @@ Fragment-Host: org.komodo.modeshape.teiid.sql.sequencer;bundle-version="[1.0.0,2
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit;bundle-version="4.11.0",
- org.komodo.spi
+ org.komodo.spi;bundle-version="1.0.0",
+ org.komodo.modeshape.test.utils;bundle-version="1.0.0"
