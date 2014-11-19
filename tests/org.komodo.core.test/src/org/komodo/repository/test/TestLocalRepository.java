@@ -31,7 +31,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.LocalRepository;
@@ -96,7 +95,6 @@ public class TestLocalRepository {
         return kobject.getPrimaryType().getName();
     }
 
-    @Ignore
     @Test( timeout = 60000 )
     public void testImport() throws Exception {
         // setup
