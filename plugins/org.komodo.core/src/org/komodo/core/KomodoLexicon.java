@@ -262,16 +262,6 @@ public interface KomodoLexicon extends StringConstants {
     public interface Vdb extends LibraryComponent, WorkspaceItem {
 
         /**
-         * The name of the property used for the external file location. Value is {@value} .
-         */
-        String EXTERNAL_LOCATION = Namespace.PREFIX + COLON + "externalLocation"; //$NON-NLS-1$
-
-        /**
-         * The node type name of the VDB's file child node. Value is {@value} .
-         */
-        String FILE = JcrNtLexicon.FILE.getString();
-
-        /**
          * The name and node type name of the Komodo workspace and library's VDB grouping node. Value is {@value} .
          */
         String GROUP_NODE = Namespace.PREFIX + COLON + "vdbs"; //$NON-NLS-1$
@@ -424,19 +414,9 @@ public interface KomodoLexicon extends StringConstants {
         String REPOSITORIES = Repository.GROUP_NODE;
 
         /**
-         * The name and node type name of the Komodo workspace's schema grouping node. Value is {@value} .
-         */
-        String SCHEMAS = Schema.GROUP_NODE;
-
-        /**
          * The name and node type name of the Komodo workspace's Teiid grouping node. Value is {@value} .
          */
         String TEIIDS = Teiid.GROUP_NODE;
-
-        /**
-         * The name and node type name of the Komodo workspace's VDB grouping node. Value is {@value} .
-         */
-        String VDBS = Vdb.GROUP_NODE;
 
     }
 
@@ -449,6 +429,21 @@ public interface KomodoLexicon extends StringConstants {
          * The name of the workspace item mixin. Value is {@value} .
          */
         String MIXIN_TYPE = Namespace.PREFIX + COLON + "workspaceItem"; //$NON-NLS-1$
+
+        /**
+         * The name of the external file location property. Value is {@value} .
+         */
+        String EXT_LOC = Namespace.PREFIX + COLON + "externalLocation"; //$NON-NLS-1$
+
+        /**
+         * The node type name of the file child node. Value is {@value} .
+         */
+        String FILE_NODE_TYPE = JcrNtLexicon.FILE.getString();
+
+        /**
+         * The node name of the child node that contains the original imported resource. Value is {@value} .
+         */
+        String ORIGINAL_FILE = Namespace.PREFIX + COLON + "originalFile"; //$NON-NLS-1$
 
     }
 

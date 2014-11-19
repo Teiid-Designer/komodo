@@ -379,6 +379,10 @@ class ObjectImpl implements KomodoObject {
      */
     @Override
     public KomodoObject getParent() throws KException {
+        if (RepositoryImpl.WORKSPACE_ROOT.equals(this.path)) {
+            return null;
+        }
+
         final UnitOfWork transaction = this.repository.createTransaction("kobject-getParent", true, null); //$NON-NLS-1$
 
         try {
@@ -389,10 +393,6 @@ class ObjectImpl implements KomodoObject {
 
             if (!parentPath.endsWith("/")) { //$NON-NLS-1$
                 parentPath += "/"; //$NON-NLS-1$
-            }
-
-            if (RepositoryImpl.WORKSPACE_ROOT.equals(parentPath)) {
-                return null;
             }
 
             return new ObjectImpl(this.repository, parent.getPath(), 0);
