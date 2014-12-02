@@ -28,15 +28,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.jcr.ItemVisitor;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
-import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
+import org.komodo.modeshape.AbstractNodeVisitor;
 import org.komodo.modeshape.teiid.cnd.*;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractCompareCriteria;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractSetCriteria;
@@ -153,7 +152,6 @@ import org.komodo.spi.query.sql.lang.SPParameter.ParameterInfo;
 import org.komodo.spi.query.sql.lang.SetQuery.Operation;
 import org.komodo.spi.query.sql.symbol.AggregateSymbol.Type;
 import org.komodo.spi.query.sql.symbol.ElementSymbol.DisplayMode;
-import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
@@ -167,10 +165,10 @@ import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 /**
  *
  */
-public class TeiidSqlNodeVisitor
-    implements ItemVisitor, TeiidSqlCallback, Reserved, NonReserved, Tokens {
+public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
+    implements TeiidSqlCallback, Reserved, NonReserved, Tokens {
 
-    private static final String UNDEFINED = "<undefined>"; //$NON-NLS-1$
+    protected static final String UNDEFINED = "<undefined>"; //$NON-NLS-1$
 
     protected static final String BEGIN_HINT = "/*+"; //$NON-NLS-1$
 
@@ -214,9 +212,21 @@ public class TeiidSqlNodeVisitor
 
     private StringBuilder builder;
 
-    private TeiidVersion teiidVersion;
-
     private DataTypeManager dataTypeManager;
+
+    /**
+     * Create new instance
+     *
+     * @param teiidVersion teiid version
+     */
+    public TeiidSqlNodeVisitor(TeiidVersion teiidVersion) {
+        super(teiidVersion);
+    }
+
+    @Override
+    protected String undefined() {
+        return UNDEFINED;
+    }
 
     /**
      * @return the session
@@ -226,12 +236,12 @@ public class TeiidSqlNodeVisitor
     }
 
     protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
-        TeiidVersion minVersion = getTeiidVersion().getMinimumVersion();
+        TeiidVersion minVersion = getVersion().getMinimumVersion();
         return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
     }
 
     protected boolean isLessThanTeiidVersion(Version teiidVersion) {
-        TeiidVersion maxVersion = getTeiidVersion().getMaximumVersion();
+        TeiidVersion maxVersion = getVersion().getMaximumVersion();
         return maxVersion.isLessThan(teiidVersion.get());
     }
 
@@ -240,38 +250,26 @@ public class TeiidSqlNodeVisitor
     }
 
     /**
-     * @return the teiidVersion
-     */
-    public TeiidVersion getTeiidVersion() {
-        return this.teiidVersion;
-    }
-
-    /**
      * @return data type manager service
      */
     public DataTypeManager getDataTypeManager() {
         if (dataTypeManager == null) {
             TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
-            return factory.getDataTypeManagerService(getTeiidVersion());
+            return factory.getDataTypeManagerService(getVersion());
         }
 
         return dataTypeManager;
     }
 
     /**
-     * @param teiidVersion version of teiid
      * @param node node to be visited
      * @return SQL String representation of the given node
      * @throws Exception if node causes a failure
      */
-    public String getTeiidSql(TeiidVersion teiidVersion, Node node) throws Exception {
+    public String getTeiidSql(Node node) throws Exception {
         if (node == null)
-            return UNDEFINED;
+            return undefined();
 
-        if (teiidVersion == null)
-            teiidVersion = DefaultTeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
-
-        this.teiidVersion = teiidVersion;
         this.dataTypeManager = getDataTypeManager();
         this.builder = new StringBuilder();
         this.session = node.getSession();
@@ -374,6 +372,33 @@ public class TeiidSqlNodeVisitor
         }
     }
 
+    protected boolean propertyBoolean(Node node, String propName) throws RepositoryException {
+        Property property = property(node, propName);
+        if (property == null)
+            return false;
+    
+        Boolean value = propertyValue(property, DataTypeName.BOOLEAN);
+        return value;
+    }
+
+    protected String propertyString(Node node, String propName) throws RepositoryException {
+        Property property = property(node, propName);
+        if (property == null)
+            return null;
+    
+        String value = propertyValue(property, DataTypeName.STRING);
+        return value;
+    }
+
+    protected long propertyLong(Node node, String propName) throws RepositoryException {
+        Property property = property(node, propName);
+        if (property == null)
+            return -1L;
+    
+        Long value = propertyValue(property, DataTypeName.LONG);
+        return value;
+    }
+
     protected <T> T propertyValue(Value value, DataTypeName dataTypeName) throws RepositoryException {
         Object valueObject = null;
 
@@ -422,23 +447,12 @@ public class TeiidSqlNodeVisitor
         return (T) valueObject;
     }
 
-    private <T> T propertyValue(Property property, DataTypeName dataTypeName) throws RepositoryException {
+    <T> T propertyValue(Property property, DataTypeName dataTypeName) throws RepositoryException {
         if (property == null)
             return null;
 
         Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
         return propertyValue(value, dataTypeName);
-    }
-
-    protected Property property(Node node, String propName) throws RepositoryException {
-        if (node == null || propName == null)
-            return null;
-
-        if (! node.hasProperty(propName))
-            return null;
-
-        Property property = node.getProperty(propName);
-        return property;
     }
 
     protected <T> T propertyValue(Node node, String propName, DataTypeName dataTypeName) throws RepositoryException {
@@ -447,33 +461,6 @@ public class TeiidSqlNodeVisitor
             return null;
 
         T value = propertyValue(property, dataTypeName);
-        return value;
-    }
-
-    protected boolean propertyBoolean(Node node, String propName) throws RepositoryException {
-        Property property = property(node, propName);
-        if (property == null)
-            return false;
-
-        Boolean value = propertyValue(property, DataTypeName.BOOLEAN);
-        return value;
-    }
-
-    protected String propertyString(Node node, String propName) throws RepositoryException {
-        Property property = property(node, propName);
-        if (property == null)
-            return null;
-
-        String value = propertyValue(property, DataTypeName.STRING);
-        return value;
-    }
-
-    protected long propertyLong(Node node, String propName) throws RepositoryException {
-        Property property = property(node, propName);
-        if (property == null)
-            return -1L;
-
-        Long value = propertyValue(property, DataTypeName.LONG);
         return value;
     }
 
@@ -503,54 +490,6 @@ public class TeiidSqlNodeVisitor
         }
 
         return collection;
-    }
-
-    protected String toString(Property property) throws RepositoryException {
-        Value value = property.isMultiple() ? property.getValues()[0] : property.getValue();
-        String valueString = null;
-
-        switch (value.getType()) {
-            case PropertyType.STRING:
-                valueString = value.getString();
-                break;
-            case PropertyType.DATE:
-                valueString = value.getDate().toString();
-                break;
-            case PropertyType.BINARY:
-                valueString = value.getBinary().toString();
-                break;
-            case PropertyType.DOUBLE:
-                valueString = Double.toString(value.getDouble());
-                break;
-            case PropertyType.DECIMAL:
-                valueString = value.getDecimal().toString();
-                break;
-            case PropertyType.LONG:
-                valueString = Long.toString(value.getLong());
-                break;
-            case PropertyType.BOOLEAN:
-                valueString = Boolean.toString(value.getBoolean());
-                break;
-            case PropertyType.NAME:
-                valueString = value.getString();
-                break;
-            case PropertyType.PATH:
-                valueString = value.getString();
-                break;
-            case PropertyType.REFERENCE:
-                valueString = value.getString();
-                break;
-            case PropertyType.WEAKREFERENCE:
-                valueString = value.getString();
-                break;
-            case PropertyType.URI:
-                valueString = value.getString();
-                break;
-            default:
-                valueString = UNDEFINED;
-        }
-
-        return valueString;
     }
 
     protected boolean isTeiidSqlType(NodeType nodeType) {
@@ -707,7 +646,7 @@ public class TeiidSqlNodeVisitor
     }
 
     protected String escapeSinglePart(String token) {
-        if (TeiidSQLConstants.isReservedWord(getTeiidVersion(), token)) {
+        if (TeiidSQLConstants.isReservedWord(getVersion(), token)) {
             return ID_ESCAPE_CHAR + token + ID_ESCAPE_CHAR;
         }
 
@@ -862,18 +801,10 @@ public class TeiidSqlNodeVisitor
     public void visit(Property property) {
         // Not required
     }
-
-    protected void visitChildren(Node node) throws RepositoryException {
-        NodeIterator nodeIterator = node.getNodes();
-        while (nodeIterator.hasNext()) {
-            Node child = nodeIterator.nextNode();
-            child.accept(this);
-        }
-    }
     
     protected void visit(Node node, TeiidSqlContext context) throws RepositoryException {
         if (node == null) {
-            append(UNDEFINED);
+            append(undefined());
             return;
         }
 
@@ -900,7 +831,7 @@ public class TeiidSqlNodeVisitor
 
     @Override
     public Object nullNode(TeiidSqlContext context) throws Exception {
-        append(UNDEFINED);
+        append(undefined());
 
         return null;
     }
@@ -3027,7 +2958,7 @@ public class TeiidSqlNodeVisitor
                     Property valueProp = args1.getProperty(Constant.VALUE_PROP_NAME);
                     append(toString(valueProp));
                 } else {
-                    append(UNDEFINED);
+                    append(undefined());
                 }
 
             }

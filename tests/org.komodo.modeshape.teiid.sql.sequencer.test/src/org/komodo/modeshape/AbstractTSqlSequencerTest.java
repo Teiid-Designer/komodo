@@ -182,8 +182,8 @@ public abstract class AbstractTSqlSequencerTest extends AbstractSequencerTest {
     }
 
     protected void verifySql(String expectedSql, Node topNode) throws Exception {
-        TeiidSqlNodeVisitor visitor = new TeiidSqlNodeVisitor();
-        String actualSql = visitor.getTeiidSql(getTeiidVersion(), topNode);
+        TeiidSqlNodeVisitor visitor = new TeiidSqlNodeVisitor(getTeiidVersion());
+        String actualSql = visitor.getTeiidSql(topNode);
         assertEquals(expectedSql, actualSql);
     }
 

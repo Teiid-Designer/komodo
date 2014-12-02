@@ -200,8 +200,8 @@ public abstract class AbstractTestSqlNodeVisitor extends AbstractTSqlSequencerTe
             
             sequencer.convertASTNode(astNode, outputNode);
 
-            TeiidSqlNodeVisitor visitor = new TeiidSqlNodeVisitor();
-            String actualSql = visitor.getTeiidSql(getTeiidVersion(), outputNode);
+            TeiidSqlNodeVisitor visitor = new TeiidSqlNodeVisitor(getTeiidVersion());
+            String actualSql = visitor.getTeiidSql(outputNode);
             assertEquals(expectedSql, actualSql);
             
         } catch (Exception ex) {
