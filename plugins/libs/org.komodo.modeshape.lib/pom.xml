@@ -102,6 +102,51 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.9.2</version>
+                <configuration>
+                    <connectionUrl>scm:git:https://github.com/Teiid-Designer/modeshape.git</connectionUrl>
+                    <connectionType>connection</connectionType>
+                    <checkoutDirectory>${project.build.directory}/modeshape</checkoutDirectory>
+                    <scmVersion>master</scmVersion>
+                    <scmVersionType>branch</scmVersionType>
+                    <skipCheckoutIfExists>true</skipCheckoutIfExists>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>checkout</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/forked/modeshape-sequencer-ddl</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/modeshape/sequencers/modeshape-sequencer-ddl</directory>
+                                    <includes>
+                                        <include>**/src/main/**</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-compiler-plugin</artifactId>
                 <version>${tychoVersion}</version>
@@ -256,10 +301,15 @@
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-common</artifactId>
         </dependency>
+<!--
+
+    Commented out since we build from source
+
         <dependency>
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-sequencer-ddl</artifactId>
         </dependency>
+-->
         <dependency>
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-sequencer-teiid</artifactId>
