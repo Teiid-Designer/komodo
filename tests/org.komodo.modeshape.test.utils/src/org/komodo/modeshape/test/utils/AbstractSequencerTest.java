@@ -26,6 +26,7 @@ package org.komodo.modeshape.test.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
 import java.io.File;
@@ -162,6 +163,40 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
                                             null,
                                             null,
                                             false);
+    }
+
+    /**
+     * @param countdown equivalent to number of sql query expressions to be sequenced
+     * @param pattern wilcarded pattern against which to compare the sequenced nodes
+     * @return the latch for awaiting the sequencing
+     * @throws Exception
+     */
+    protected CountDownLatch addPathLatchListener(int countdown, final String pattern) throws Exception {
+        ObservationManager manager = getObservationManager();
+        assertNotNull(manager);
+
+        final CountDownLatch updateLatch = new CountDownLatch(countdown);
+
+        manager.addEventListener(new EventListener() {
+
+            @Override
+            public void onEvent(EventIterator events) {
+                while (events.hasNext()) {
+                    try {
+                        Event event = (Event) events.nextEvent();
+
+                        String nodePath = event.getPath();
+                        if (nodePath.matches(pattern))
+                            updateLatch.countDown();
+
+                    } catch (Exception ex) {
+                        fail(ex.getMessage());
+                    }
+                }
+            }
+        }, NODE_SEQUENCED, null, true, null, null, false);
+
+        return updateLatch;
     }
 
     @Override

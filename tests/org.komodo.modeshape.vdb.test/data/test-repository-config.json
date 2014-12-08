@@ -1,0 +1,48 @@
+{
+	"name" : "Test Repository",
+	"jndiName" : "jcr/Test Repository",
+	"monitoring" : {
+		"enabled" : true
+	},
+	"node-types" :
+	[
+		"config/xmi.cnd",
+		"config/med.cnd",
+		"config/mmcore.cnd",
+		"config/vdb.cnd",
+		"config/TeiidSql.cnd",
+		"config/komodo.cnd"
+	],
+	"workspaces" : {
+		"default" : "defaultWorkspace",
+		"allowCreation" : true
+	},
+	"sequencing" : {
+		"removeDerivedContentWithOriginal" : true,
+		"threadPool" : "modeshape-workers",
+		"sequencers" : {
+			"VDB Sequencer" : {
+				"classname" : "VdbSequencer",
+				"pathExpressions" :
+				[
+					":(//*.xml/jcr:content)[@jcr:data] => /$1"
+				]
+			},
+			"DDL Sequencer" : {
+			   	"classname" : "DdlSequencer",
+			   	"pathExpressions" :
+			   	[
+					":(//*)[@vdb:modelDefinition] => /$1",
+			   	]
+			},
+		  	"Teiid SQL Sequencer" : {
+				"classname" : "org.komodo.modeshape.teiid.TeiidSqlSequencer",
+				"pathExpressions" :
+				[
+					":(//ddl:statements//*)[@ddl:queryExpression] => /$1",
+					":(//ddl:statements//*)[@teiidddl:queryExpression] => /$1"
+				]
+		   	}
+		}
+	}
+}

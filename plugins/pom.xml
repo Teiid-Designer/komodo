@@ -27,6 +27,7 @@
     <module>org.komodo.teiid.client</module>
 
     <module>org.komodo.modeshape.teiid.sql.sequencer</module>
+    <module>org.komodo.modeshape.vdb</module>
 
     <module>org.komodo.eclipse.spi</module>
     <module>org.komodo.eclipse.shell</module>

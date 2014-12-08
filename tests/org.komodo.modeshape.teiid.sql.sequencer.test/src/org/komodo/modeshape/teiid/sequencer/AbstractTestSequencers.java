@@ -22,13 +22,9 @@
 package org.komodo.modeshape.teiid.sequencer;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
-import javax.jcr.observation.EventIterator;
-import javax.jcr.observation.EventListener;
-import javax.jcr.observation.ObservationManager;
 import org.junit.Test;
 import org.komodo.modeshape.AbstractTSqlSequencerTest;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractCompareCriteria;
@@ -42,7 +38,6 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
 import org.komodo.spi.query.sql.lang.JoinType;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.modeshape.jcr.api.observation.Event;
 
 /**
  *
@@ -55,40 +50,6 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
      */
     public AbstractTestSequencers(TeiidVersion teiidVersion) {
         super(teiidVersion);
-    }
-
-    /**
-     * @param countdown equivalent to number of sql query expressions to be sequenced
-     * @param pattern wilcarded pattern against which to compare the sequenced nodes
-     * @return the latch for awaiting the sequencing
-     * @throws Exception
-     */
-    protected CountDownLatch addPathLatchListener(int countdown, final String pattern) throws Exception {
-        ObservationManager manager = getObservationManager();
-        assertNotNull(manager);
-
-        final CountDownLatch updateLatch = new CountDownLatch(countdown);
-
-        manager.addEventListener(new EventListener() {
-
-            @Override
-            public void onEvent(EventIterator events) {
-                while (events.hasNext()) {
-                    try {
-                        Event event = (Event) events.nextEvent();
-
-                        String nodePath = event.getPath();
-                        if (nodePath.matches(pattern))
-                            updateLatch.countDown();
-
-                    } catch (Exception ex) {
-                        fail(ex.getMessage());
-                    }
-                }
-            }
-        }, NODE_SEQUENCED, null, true, null, null, false);
-
-        return updateLatch;
     }
 
     @Test(timeout = 5000000)

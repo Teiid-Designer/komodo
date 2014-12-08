@@ -21,9 +21,9 @@
 								 modeshape-jcr.jar,
 		 						 modeshape-jcr-api.jar,
 								 modeshape-common.jar,
-								 modeshape-sequencer-ddl.jar,
+								 ../forked/modeshape-sequencer-ddl/src,
 								 org.modeshape.sequencer-teiid,
-		                         logback-core.jar,
+								 logback-core.jar,
 								 logback-classic.jar,
 								 slf4j-api.jar"/>
 
@@ -73,6 +73,8 @@
 	</target>
 
 	<target name="clean-internal" if="should-generate">
+		<echo message="Removing generated files ..." />
+		<delete dir="forked/modeshape-sequencer-ddl"/>
 	</target>
 
 	<target name="clean">
