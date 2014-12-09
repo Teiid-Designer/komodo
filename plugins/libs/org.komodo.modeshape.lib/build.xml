@@ -43,6 +43,8 @@
 		</restrict>
 
 		<property name="missing.libs" refid="missing.libs" />
+		<echo message="Missing libraries ${missing.libs}" />
+
 		<condition property="libs-present" value="true">
 			<length string="${missing.libs}" length="0" />
 		</condition>

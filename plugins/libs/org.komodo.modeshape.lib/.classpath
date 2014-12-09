@@ -40,7 +40,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/tika-parsers.jar" sourcepath="libsrc/tika-parsers-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xmlbeans.jar" sourcepath="libsrc/xmlbeans-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xz.jar" sourcepath="libsrc/xz-sources.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="forked/modeshape-sequencer-ddl/src/main/java">
