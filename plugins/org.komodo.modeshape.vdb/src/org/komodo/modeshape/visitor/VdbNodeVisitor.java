@@ -21,7 +21,6 @@
  */
 package org.komodo.modeshape.visitor;
 
-import static org.modeshape.sequencer.teiid.lexicon.VdbLexicon.Namespace.PREFIX;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -48,77 +47,6 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstants {
 
     /**
-     * Constants not included in the current version of the modeshape library VdbLexicon.
-     */
-    @SuppressWarnings({"javadoc", "nls"})
-    public interface ExtraVdbLexicon {
-
-        /**
-         * JCR identifiers relating to VDB manifest data roles.
-         */
-        public interface DataRole {
-            String GRANT_ALL = PREFIX + ":grantAll";
-
-            /**
-             * JCR identifiers relating to VDB manifest data role permissions.
-             */
-            public interface Permission {
-                String ALLOW_LANGUAGE = PREFIX + ":allowLanguage";
-                String CONDITIONS = PREFIX + ":conditions";
-                String MASKS = PREFIX + ":masks";
-
-                /**
-                 * JCR identifiers relating to VDB manifest data role permission conditions.
-                 */
-                public interface Condition {
-                    String CONDITION = PREFIX + ":condition";
-                    String CONSTRAINT = PREFIX + ":constraint";
-                }
-
-                /**
-                 * JCR identifiers relating to VDB manifest data role permission masks.
-                 */
-                public interface Mask {
-                    String MASK = PREFIX + ":mask";
-                    String ORDER = PREFIX + ":order";
-                }
-            }
-        }
-
-        /**
-         * JCR identifiers relating to VDB manifest sources.
-         */
-        public interface Source {
-            String SOURCE = PREFIX + ":source";
-            String NAME = PREFIX + ":sourceName";
-            String JNDI_NAME = PREFIX + ":sourceJndiName";
-            String TRANSLATOR = PREFIX + ":sourceTranslator";
-        }
-
-        /**
-         * Constants associated with the VDB namespace that identify VDB manifest identifiers.
-         */
-        public interface ManifestIds {
-            String CONNECTION_TYPE = "connection-type";
-            String GRANT_ALL = "grant-all";
-            String ALLOW_LANGUAGE = "allow-language";
-            String CONDITION = "condition";
-            String CONSTRAINT = "constraint";
-            String MASK = "mask";
-            String ORDER = "order";
-        }
-
-        /**
-         * JCR identifiers relating to the VDB manifest.
-         */
-        public interface Vdb {
-            String NAME = PREFIX + ":name";
-            String CONNECTION_TYPE = PREFIX + ":connectionType";
-            String SOURCES = PREFIX + ":sources";
-        }
-    }
-
-    /**
      * Companion XML tag for permission condition
      */
     public static String DATA_ROLE_PERMISSION_CONDITION_XML = "condition"; //$NON-NLS-1$
@@ -139,9 +67,9 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
 
         MODEL(VdbLexicon.Vdb.DECLARATIVE_MODEL, VdbLexicon.ManifestIds.MODEL),
 
-        SOURCES(ExtraVdbLexicon.Vdb.SOURCES),
+        SOURCES(VdbLexicon.Vdb.SOURCES),
 
-        SOURCE(ExtraVdbLexicon.Source.SOURCE, VdbLexicon.ManifestIds.SOURCE),
+        SOURCE(VdbLexicon.Source.SOURCE, VdbLexicon.ManifestIds.SOURCE),
 
         TRANSLATORS(VdbLexicon.Vdb.TRANSLATORS),
 
@@ -155,13 +83,13 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
 
         PERMISSION(VdbLexicon.DataRole.Permission.PERMISSION, VdbLexicon.ManifestIds.PERMISSION),
 
-        CONDITIONS(ExtraVdbLexicon.DataRole.Permission.CONDITIONS),
+        CONDITIONS(VdbLexicon.DataRole.Permission.CONDITIONS),
 
-        CONDITION(ExtraVdbLexicon.DataRole.Permission.Condition.CONDITION, ExtraVdbLexicon.ManifestIds.CONDITION),
+        CONDITION(VdbLexicon.DataRole.Permission.Condition.CONDITION, VdbLexicon.ManifestIds.CONDITION),
 
-        MASKS(ExtraVdbLexicon.DataRole.Permission.MASKS),
+        MASKS(VdbLexicon.DataRole.Permission.MASKS),
 
-        MASK(ExtraVdbLexicon.DataRole.Permission.Mask.MASK, ExtraVdbLexicon.ManifestIds.MASK),
+        MASK(VdbLexicon.DataRole.Permission.Mask.MASK, VdbLexicon.ManifestIds.MASK),
 
         UNKNOWN(UNDEFINED);
 
@@ -324,8 +252,8 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         // Condition element
         writeStartElement(NodeTypeName.MASK.getTag());
 
-        Property property = property(node, ExtraVdbLexicon.DataRole.Permission.Mask.ORDER);
-        writeAttribute(ExtraVdbLexicon.ManifestIds.ORDER, toString(property));
+        Property property = property(node, VdbLexicon.DataRole.Permission.Mask.ORDER);
+        writeAttribute(VdbLexicon.ManifestIds.ORDER, toString(property));
 
         writeCharacters(node.getName());
         writeEndElement();
@@ -338,8 +266,8 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         // Condition element
         writeStartElement(NodeTypeName.CONDITION.getTag());
 
-        Property property = property(node, ExtraVdbLexicon.DataRole.Permission.Condition.CONSTRAINT);
-        writeAttribute(ExtraVdbLexicon.ManifestIds.CONSTRAINT, toString(property));
+        Property property = property(node, VdbLexicon.DataRole.Permission.Condition.CONSTRAINT);
+        writeAttribute(VdbLexicon.ManifestIds.CONSTRAINT, toString(property));
 
         writeCharacters(node.getName());
         writeEndElement();
@@ -362,7 +290,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
             { VdbLexicon.DataRole.Permission.ALLOW_EXECUTE, VdbLexicon.ManifestIds.ALLOW_EXECUTE },
             { VdbLexicon.DataRole.Permission.ALLOW_READ, VdbLexicon.ManifestIds.ALLOW_READ },
             { VdbLexicon.DataRole.Permission.ALLOW_UPDATE, VdbLexicon.ManifestIds.ALLOW_UPDATE },
-            { ExtraVdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, ExtraVdbLexicon.ManifestIds.ALLOW_LANGUAGE }
+            { VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, VdbLexicon.ManifestIds.ALLOW_LANGUAGE }
         };
 
         for (int i = 0; i < permTags.length; ++i) {
@@ -395,8 +323,8 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         writeAttribute(VdbLexicon.ManifestIds.ANY_AUTHENTICATED, toString(authProp));
         Property tempTablesProp = property(node, VdbLexicon.DataRole.ALLOW_CREATE_TEMP_TABLES);
         writeAttribute(VdbLexicon.ManifestIds.ALLOW_CREATE_TEMP_TABLES, toString(tempTablesProp));
-        Property grantAllProp = property(node, ExtraVdbLexicon.DataRole.GRANT_ALL);
-        writeAttribute(ExtraVdbLexicon.ManifestIds.GRANT_ALL, toString(grantAllProp));
+        Property grantAllProp = property(node, VdbLexicon.DataRole.GRANT_ALL);
+        writeAttribute(VdbLexicon.ManifestIds.GRANT_ALL, toString(grantAllProp));
 
         description(node);
 
@@ -446,9 +374,9 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         // Process source attributes
         String nameProp = node.getName();
         writeAttribute(VdbLexicon.ManifestIds.NAME, nameProp);
-        Property translatorProp = property(node, ExtraVdbLexicon.Source.TRANSLATOR);
+        Property translatorProp = property(node, VdbLexicon.Source.TRANSLATOR);
         writeAttribute(VdbLexicon.ManifestIds.TRANSLATOR_NAME, toString(translatorProp));
-        Property jndiProp = property(node, ExtraVdbLexicon.Source.JNDI_NAME);
+        Property jndiProp = property(node, VdbLexicon.Source.JNDI_NAME);
         writeAttribute(VdbLexicon.ManifestIds.JNDI_NAME, toString(jndiProp));
 
         writeEndElement();
@@ -539,7 +467,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         writeStartElement(NodeTypeName.VIRTUAL_DATABASE.getTag());
 
         // Name attribute
-        Property property = property(node, ExtraVdbLexicon.Vdb.NAME);
+        Property property = property(node, VdbLexicon.Vdb.NAME);
         writeAttribute(VdbLexicon.ManifestIds.NAME, toString(property));
 
         // Version attribute
@@ -552,13 +480,13 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         description(node);
 
         // Connection Type element
-        property = property(node, ExtraVdbLexicon.Vdb.CONNECTION_TYPE);
+        property = property(node, VdbLexicon.Vdb.CONNECTION_TYPE);
         if (property != null)
-            writeElementWithText(ExtraVdbLexicon.ManifestIds.CONNECTION_TYPE, toString(property));
+            writeElementWithText(VdbLexicon.ManifestIds.CONNECTION_TYPE, toString(property));
 
         // Properties elements
-        properties(node, ExtraVdbLexicon.Vdb.NAME, VdbLexicon.Vdb.VERSION,
-                                  NodeTypeName.DESCRIPTION.getId(), ExtraVdbLexicon.Vdb.CONNECTION_TYPE);
+        properties(node, VdbLexicon.Vdb.NAME, VdbLexicon.Vdb.VERSION,
+                                  NodeTypeName.DESCRIPTION.getId(), VdbLexicon.Vdb.CONNECTION_TYPE);
 
         writeNewLine();
 

@@ -45,7 +45,6 @@ import org.komodo.modeshape.lib.LogConfigurator;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.test.utils.AbstractSequencerTest;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
-import org.komodo.modeshape.visitor.VdbNodeVisitor.ExtraVdbLexicon;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -130,7 +129,7 @@ public class TestVdbExport extends AbstractSequencerTest {
         tweetExample.setPrimaryType(VdbLexicon.Vdb.VIRTUAL_DATABASE);
         tweetExample.addMixin("mode:derived");
         tweetExample.addMixin("mix:referenceable");
-        tweetExample.setProperty(VdbNodeVisitor.ExtraVdbLexicon.Vdb.NAME, "twitter");
+        tweetExample.setProperty(VdbLexicon.Vdb.NAME, "twitter");
         tweetExample.setProperty(VdbLexicon.Vdb.DESCRIPTION, "Shows how to call Web Services");
 
         // Miscellaneous property
@@ -183,7 +182,7 @@ public class TestVdbExport extends AbstractSequencerTest {
          *          vdb:sources
          *              @jcr:primaryType=vdb:sources
          */
-        Node twitterSources = twitter.addNode(ExtraVdbLexicon.Vdb.SOURCES, ExtraVdbLexicon.Vdb.SOURCES);
+        Node twitterSources = twitter.addNode(VdbLexicon.Vdb.SOURCES, VdbLexicon.Vdb.SOURCES);
 
         /*
          *              twitter
@@ -191,9 +190,9 @@ public class TestVdbExport extends AbstractSequencerTest {
          *                  @vdb:sourceTranslator=rest
          *                  @vdb:sourceJndiName=java:/twitterDS
          */
-        Node twitterSource = twitterSources.addNode(TWITTER_MODEL, ExtraVdbLexicon.Source.SOURCE);
-        twitterSource.setProperty(ExtraVdbLexicon.Source.TRANSLATOR, REST_TRANSLATOR);
-        twitterSource.setProperty(ExtraVdbLexicon.Source.JNDI_NAME, "java:/twitterDS");
+        Node twitterSource = twitterSources.addNode(TWITTER_MODEL, VdbLexicon.Source.SOURCE);
+        twitterSource.setProperty(VdbLexicon.Source.TRANSLATOR, REST_TRANSLATOR);
+        twitterSource.setProperty(VdbLexicon.Source.JNDI_NAME, "java:/twitterDS");
 
         /*      
          *      twitterview
@@ -248,9 +247,9 @@ public class TestVdbExport extends AbstractSequencerTest {
         myVdbExample.setPrimaryType(VdbLexicon.Vdb.VIRTUAL_DATABASE);
         myVdbExample.addMixin("mode:derived");
         myVdbExample.addMixin("mix:referenceable");
-        myVdbExample.setProperty(VdbNodeVisitor.ExtraVdbLexicon.Vdb.NAME, "myVDB");
+        myVdbExample.setProperty(VdbLexicon.Vdb.NAME, "myVDB");
         myVdbExample.setProperty(VdbLexicon.Vdb.DESCRIPTION, "vdb description");
-        myVdbExample.setProperty(ExtraVdbLexicon.Vdb.CONNECTION_TYPE, "NONE");
+        myVdbExample.setProperty(VdbLexicon.Vdb.CONNECTION_TYPE, "NONE");
         myVdbExample.setProperty(VdbLexicon.Vdb.ORIGINAL_FILE, "/vdbs/" + ALL_ELEMENTS_EXAMPLE_NAME + ALL_ELEMENTS_EXAMPLE_SUFFIX);
         myVdbExample.setProperty(VdbLexicon.Vdb.PREVIEW, false);
         myVdbExample.setProperty(VdbLexicon.Vdb.VERSION, 1);
@@ -293,7 +292,7 @@ public class TestVdbExport extends AbstractSequencerTest {
          *          vdb:sources
          *              @jcr:primaryType=vdb:sources
          */
-        Node model1Sources = modelOne.addNode(ExtraVdbLexicon.Vdb.SOURCES, ExtraVdbLexicon.Vdb.SOURCES);
+        Node model1Sources = modelOne.addNode(VdbLexicon.Vdb.SOURCES, VdbLexicon.Vdb.SOURCES);
 
         /*
          *              s1
@@ -301,9 +300,9 @@ public class TestVdbExport extends AbstractSequencerTest {
          *                  @vdb:sourceTranslator=translator
          *                  @vdb:sourceJndiName=java:mybinding
          */
-        Node model1Src1 = model1Sources.addNode("s1", ExtraVdbLexicon.Source.SOURCE);
-        model1Src1.setProperty(ExtraVdbLexicon.Source.TRANSLATOR, "translator");
-        model1Src1.setProperty(ExtraVdbLexicon.Source.JNDI_NAME, "java:mybinding");
+        Node model1Src1 = model1Sources.addNode("s1", VdbLexicon.Source.SOURCE);
+        model1Src1.setProperty(VdbLexicon.Source.TRANSLATOR, "translator");
+        model1Src1.setProperty(VdbLexicon.Source.JNDI_NAME, "java:mybinding");
 
         /*
          *      model-two
@@ -327,7 +326,7 @@ public class TestVdbExport extends AbstractSequencerTest {
          *          vdb:sources
          *              @jcr:primaryType=vdb:sources
          */
-        Node model2Sources = modelTwo.addNode(ExtraVdbLexicon.Vdb.SOURCES, ExtraVdbLexicon.Vdb.SOURCES);
+        Node model2Sources = modelTwo.addNode(VdbLexicon.Vdb.SOURCES, VdbLexicon.Vdb.SOURCES);
 
         /*
          *              s1
@@ -335,9 +334,9 @@ public class TestVdbExport extends AbstractSequencerTest {
          *                  @vdb:sourceTranslator=translator
          *                  @vdb:sourceJndiName=java:binding-one
          */
-        Node model2Src1 = model2Sources.addNode("s1", ExtraVdbLexicon.Source.SOURCE);
-        model2Src1.setProperty(ExtraVdbLexicon.Source.TRANSLATOR, "translator");
-        model2Src1.setProperty(ExtraVdbLexicon.Source.JNDI_NAME, "java:binding-one");
+        Node model2Src1 = model2Sources.addNode("s1", VdbLexicon.Source.SOURCE);
+        model2Src1.setProperty(VdbLexicon.Source.TRANSLATOR, "translator");
+        model2Src1.setProperty(VdbLexicon.Source.JNDI_NAME, "java:binding-one");
 
         /*
          *              s2
@@ -345,9 +344,9 @@ public class TestVdbExport extends AbstractSequencerTest {
          *                  @vdb:sourceTranslator=translator
          *                  @vdb:sourceJndiName=java:binding-two
          */
-        Node model2Src2 = model2Sources.addNode("s2", ExtraVdbLexicon.Source.SOURCE);
-        model2Src2.setProperty(ExtraVdbLexicon.Source.TRANSLATOR, "translator");
-        model2Src2.setProperty(ExtraVdbLexicon.Source.JNDI_NAME, "java:binding-two");
+        Node model2Src2 = model2Sources.addNode("s2", VdbLexicon.Source.SOURCE);
+        model2Src2.setProperty(VdbLexicon.Source.TRANSLATOR, "translator");
+        model2Src2.setProperty(VdbLexicon.Source.JNDI_NAME, "java:binding-two");
         
         /*
          *      vdb:translators
@@ -387,7 +386,7 @@ public class TestVdbExport extends AbstractSequencerTest {
         Node dataRole1 = dataRoles.addNode("roleOne", VdbLexicon.DataRole.DATA_ROLE);
         dataRole1.setProperty(VdbLexicon.Translator.DESCRIPTION, "roleOne described");
         dataRole1.setProperty(VdbLexicon.DataRole.ANY_AUTHENTICATED, false);
-        dataRole1.setProperty(ExtraVdbLexicon.DataRole.GRANT_ALL, true);
+        dataRole1.setProperty(VdbLexicon.DataRole.GRANT_ALL, true);
         dataRole1.setProperty(VdbLexicon.DataRole.ALLOW_CREATE_TEMP_TABLES, true);
         dataRole1.setProperty(VdbLexicon.DataRole.MAPPED_ROLE_NAMES, new String[]{"ROLE1", "ROLE2"});
 
@@ -427,15 +426,15 @@ public class TestVdbExport extends AbstractSequencerTest {
          *                      vdb:conditions
          *                          @jcr:primaryType=vdb:conditions
          */
-        Node conditions = permission2.addNode(ExtraVdbLexicon.DataRole.Permission.CONDITIONS, ExtraVdbLexicon.DataRole.Permission.CONDITIONS);
+        Node conditions = permission2.addNode(VdbLexicon.DataRole.Permission.CONDITIONS, VdbLexicon.DataRole.Permission.CONDITIONS);
 
         /*
          *                          col1 = user()
          *                              @jcr:primaryType=vdb:condition
          *                              @vdb:constraint=false
          */
-        Node condition = conditions.addNode("col1 = user()", ExtraVdbLexicon.DataRole.Permission.Condition.CONDITION);
-        condition.setProperty(ExtraVdbLexicon.DataRole.Permission.Condition.CONSTRAINT, false);
+        Node condition = conditions.addNode("col1 = user()", VdbLexicon.DataRole.Permission.Condition.CONDITION);
+        condition.setProperty(VdbLexicon.DataRole.Permission.Condition.CONSTRAINT, false);
 
         /*
          *                  myTable.T2.col1
@@ -447,15 +446,15 @@ public class TestVdbExport extends AbstractSequencerTest {
          *                      vdb:masks
          *                          @jcr:primaryType=vdb:masks
          */
-        Node masks = permission3.addNode(ExtraVdbLexicon.DataRole.Permission.MASKS, ExtraVdbLexicon.DataRole.Permission.MASKS);
+        Node masks = permission3.addNode(VdbLexicon.DataRole.Permission.MASKS, VdbLexicon.DataRole.Permission.MASKS);
 
         /*
          *                          col2
          *                              @jcr:primaryType=vdb:mask
          *                              @vdb:order=1
          */
-        Node mask = masks.addNode("col2", ExtraVdbLexicon.DataRole.Permission.Mask.MASK);
-        mask.setProperty(ExtraVdbLexicon.DataRole.Permission.Mask.ORDER, 1);
+        Node mask = masks.addNode("col2", VdbLexicon.DataRole.Permission.Mask.MASK);
+        mask.setProperty(VdbLexicon.DataRole.Permission.Mask.ORDER, 1);
 
         /*
          *                  javascript
@@ -463,7 +462,7 @@ public class TestVdbExport extends AbstractSequencerTest {
          *                      @allowLanguage=true
          */
         Node permission4 = permissions.addNode("javascript", VdbLexicon.DataRole.Permission.PERMISSION);
-        permission4.setProperty(ExtraVdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, true);
+        permission4.setProperty(VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, true);
 
         session().save();
         return myVdbExample;
