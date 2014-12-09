@@ -641,7 +641,6 @@ public class TestVdbExport extends AbstractSequencerTest {
 
     @Test(timeout=180000)
     public void testBasicVdbExport() throws Exception {
-        LogConfigurator.getInstance().setLevel(Level.FINE);
         Node twitterExampleNode = createTweetExampleNode();
 
         CountDownLatch updateLatch = addPathLatchListener(1, ".*\\/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "\\/Tweet\\/" + TeiidSqlLexicon.Query.ID);

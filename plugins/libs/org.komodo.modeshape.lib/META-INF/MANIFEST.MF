@@ -4,7 +4,7 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.komodo.modeshape.lib;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %pluginProvider
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
 Bundle-ClassPath: .,
  lib/avro.jar,
@@ -33,7 +33,6 @@ Bundle-ClassPath: .,
  lib/modeshape-jcr-api.jar,
  lib/modeshape-jcr.jar,
  lib/modeshape-schematic.jar,
- lib/org.modeshape.sequencer-teiid/,
  lib/mongo-java-driver.jar,
  lib/paranamer.jar,
  lib/poi-ooxml-schemas.jar,

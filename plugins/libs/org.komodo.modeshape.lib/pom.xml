@@ -80,25 +80,6 @@
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>unpack</id>
-                        <goals>
-                             <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.modeshape</groupId>
-                                    <artifactId>modeshape-sequencer-teiid</artifactId>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.basedir}/lib/org.modeshape.sequencer-teiid</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                            <overWriteReleases>true</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -133,12 +114,13 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.basedir}/forked/modeshape-sequencer-ddl</outputDirectory>
+                            <outputDirectory>${project.basedir}/forked/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.build.directory}/modeshape/sequencers/modeshape-sequencer-ddl</directory>
+                                    <directory>${project.build.directory}/modeshape/sequencers/</directory>
                                     <includes>
-                                        <include>**/src/main/**</include>
+                                        <include>**/modeshape-sequencer-ddl/src/main/**</include>
+                                        <include>**/modeshape-sequencer-teiid/src/main/**</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -309,11 +291,12 @@
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-sequencer-ddl</artifactId>
         </dependency>
--->
         <dependency>
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-sequencer-teiid</artifactId>
         </dependency>
+
+-->
         <dependency>
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-schematic</artifactId>
