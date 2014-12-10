@@ -378,7 +378,7 @@ public class ModeshapeEngineThread extends Thread {
                 }
             } catch (final Exception e) {
                 stop = true;
-                KLog.getLogger().error(Messages.getString(Messages.LocalRepository.General_Exception), e);
+                KLog.getLogger().error(Messages.getString(Messages.LocalRepository.General_Exception), e, e.getLocalizedMessage());
             }
         }
     }
@@ -393,7 +393,7 @@ public class ModeshapeEngineThread extends Thread {
         try {
             queue.put(request);
         } catch (InterruptedException ex) {
-            KLog.getLogger().error(Messages.getString(Messages.LocalRepository.General_Exception), ex);
+            KLog.getLogger().error(Messages.getString(Messages.LocalRepository.General_Exception), ex, ex.getLocalizedMessage());
         }
     }
 }

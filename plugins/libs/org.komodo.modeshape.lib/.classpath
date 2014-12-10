@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/org.modeshape.sequencer-teiid/" sourcepath="libsrc/modeshape-sequencer-teiid-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/avro.jar" sourcepath="libsrc/avro-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec.jar" sourcepath="libsrc/commons-codec-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-compress.jar" sourcepath="libsrc/commons-compress-sources.jar"/>
@@ -49,6 +48,16 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="forked/modeshape-sequencer-ddl/src/main/resources">
+		<attributes>
+			<attribute name="ignore_optional_problems" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="forked/modeshape-sequencer-teiid/src/main/java">
+		<attributes>
+			<attribute name="ignore_optional_problems" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="forked/modeshape-sequencer-teiid/src/main/resources">
 		<attributes>
 			<attribute name="ignore_optional_problems" value="true"/>
 		</attributes>
