@@ -60,6 +60,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrSession;
@@ -143,6 +145,10 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
 
     public ObservationManager getObservationManager() {
         return observationManager;
+    }
+
+    protected TeiidVersion getTeiidVersion() {
+        return TeiidVersionProvider.getInstance().getTeiidVersion();
     }
 
     @Override

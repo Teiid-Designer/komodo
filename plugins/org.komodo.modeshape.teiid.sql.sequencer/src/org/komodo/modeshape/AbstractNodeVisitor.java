@@ -31,7 +31,10 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.type.DataTypeManager;
+import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
 /**
  *
@@ -39,6 +42,8 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 public abstract class AbstractNodeVisitor implements ItemVisitor {
 
     private TeiidVersion version;
+
+    private DataTypeManager dataTypeManager;
 
     /**
      * @param version teiid version
@@ -50,11 +55,37 @@ public abstract class AbstractNodeVisitor implements ItemVisitor {
             this.version = version;
     }
 
+    protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
+        TeiidVersion minVersion = getVersion().getMinimumVersion();
+        return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
+    }
+
+    protected boolean isLessThanTeiidVersion(Version teiidVersion) {
+        TeiidVersion maxVersion = getVersion().getMaximumVersion();
+        return maxVersion.isLessThan(teiidVersion.get());
+    }
+
+    protected boolean isTeiid87OrGreater() {
+        return isTeiidVersionOrGreater(Version.TEIID_8_7);
+    }
+
     /**
      * @return teiid version
      */
     public TeiidVersion getVersion() {
         return version;
+    }
+
+    /**
+     * @return data type manager service
+     */
+    public DataTypeManager getDataTypeManager() {
+        if (dataTypeManager == null) {
+            TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
+            return factory.getDataTypeManagerService(getVersion());
+        }
+
+        return dataTypeManager;
     }
 
     protected abstract String undefined();

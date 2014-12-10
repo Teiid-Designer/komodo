@@ -45,8 +45,6 @@ import org.komodo.modeshape.lib.LogConfigurator;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.test.utils.AbstractSequencerTest;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
-import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
@@ -64,8 +62,6 @@ import org.xml.sax.InputSource;
  */
 @SuppressWarnings({"nls", "javadoc"})
 public class TestVdbExport extends AbstractSequencerTest {
-
-    private static final TeiidVersion version = TeiidVersionProvider.getInstance().getTeiidVersion();
 
     /**
      * Tweet example file name
@@ -473,7 +469,7 @@ public class TestVdbExport extends AbstractSequencerTest {
         XMLStreamWriter xtw = null;
         xtw = xof.createXMLStreamWriter(writer);
 
-        return new VdbNodeVisitor(version, xtw);
+        return new VdbNodeVisitor(getTeiidVersion(), xtw);
     }
 
     private Document createDocument(String xml) throws Exception {
