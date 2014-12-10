@@ -13,7 +13,7 @@
         "threadPool" : "modeshape-workers",
         "sequencers" : {
         	"DDL Sequencer" : {
-               	"classname" : "DdlSequencer",
+				"classname" : "org.komodo.modeshape.lib.sequencer.KDdlSequencer",
 				"pathExpressions" : [ ":(//*.ddl/jcr:content)[@jcr:data] => /$1" ]
             },
           	"Teiid SQL Sequencer" : {
