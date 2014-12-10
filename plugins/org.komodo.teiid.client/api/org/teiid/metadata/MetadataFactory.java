@@ -32,10 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-
-import org.komodo.spi.annotation.Since;
+import org.komodo.spi.metadata.MetadataNamespaces;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.impl.DataPolicyMetadata.PermissionMetaData;
 import org.teiid.core.types.DefaultDataTypeManager;
@@ -52,20 +50,7 @@ import org.teiid.runtime.client.Messages;
  * TODO: add support for datatype import
  * TODO: add support for unique constraints
  */
-public class MetadataFactory implements Serializable {
-
-	private static final String TEIID_RESERVED = "teiid_"; //$NON-NLS-1$
-	private static final String TEIID_SF = "teiid_sf"; //$NON-NLS-1$
-	private static final String TEIID_RELATIONAL = "teiid_rel"; //$NON-NLS-1$
-	private static final String TEIID_WS = "teiid_ws"; //$NON-NLS-1$
-	private static final String TEIID_MONGO = "teiid_mongo"; //$NON-NLS-1$
-	private static final String TEIID_ODATA = "teiid_odata"; //$NON-NLS-1$
-    @Since(Version.TEIID_8_7)
-	private static final String TEIID_ACCUMULO = "teiid_accumulo"; //$NON-NLS-1$
-    @Since(Version.TEIID_8_7)
-    private static final String TEIID_EXCEL = "teiid_excel"; //$NON-NLS-1$
-    @Since(Version.TEIID_8_7)
-    private static final String TEIID_JPA = "teiid_jpa"; //$NON-NLS-1$
+public class MetadataFactory implements Serializable, MetadataNamespaces {
 
 	private static final long serialVersionUID = 8590341087771685630L;
 
@@ -86,23 +71,11 @@ public class MetadataFactory implements Serializable {
     private transient Model model;
     private transient Map<String, ? extends VDBResource> vdbResources;
     private List<Grant> grants;
-
-	public static final String SF_URI = "{http://www.teiid.org/translator/salesforce/2012}"; //$NON-NLS-1$
-	public static final String WS_URI = "{http://www.teiid.org/translator/ws/2012}"; //$NON-NLS-1$
-	public static final String MONGO_URI = "{http://www.teiid.org/translator/mongodb/2013}"; //$NON-NLS-1$
-	public static final String ODATA_URI = "{http://www.jboss.org/teiiddesigner/ext/odata/2012}"; //$NON-NLS-1$
-    @Since(Version.TEIID_8_7)
-    public static final String ACCUMULO_URI = "{http://www.teiid.org/translator/accumulo/2013}"; //$NON-NLS-1$
-    @Since(Version.TEIID_8_7)
-    public static final String EXCEL_URI = "{http://www.teiid.org/translator/excel/2014}"; //$NON-NLS-1$
-    @Since(Version.TEIID_8_7)
-    public static final String JPA_URI = "{http://www.teiid.org/translator/jpa/2014}"; //$NON-NLS-1$
-
-	public static final Map<String, String> BUILTIN_NAMESPACES;
+    public static final Map<String, String> BUILTIN_NAMESPACES;
 
 	static {
 		Map<String, String> map = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-		map.put(TEIID_RELATIONAL, AbstractMetadataRecord.RELATIONAL_URI.substring(1, AbstractMetadataRecord.RELATIONAL_URI.length()-1));
+		map.put(TEIID_RELATIONAL, RELATIONAL_URI.substring(1, RELATIONAL_URI.length()-1));
 		map.put(TEIID_SF, SF_URI.substring(1, SF_URI.length()-1));
 		map.put(TEIID_WS, WS_URI.substring(1, WS_URI.length()-1));
 		map.put(TEIID_MONGO, MONGO_URI.substring(1, MONGO_URI.length()-1));

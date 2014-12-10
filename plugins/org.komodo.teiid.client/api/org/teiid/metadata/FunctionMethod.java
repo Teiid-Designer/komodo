@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.komodo.spi.metadata.MetadataNamespaces;
 import org.teiid.query.function.metadata.FunctionCategoryConstants;
 import org.teiid.query.function.metadata.FunctionMetadataValidator;
 
@@ -54,7 +55,7 @@ import org.teiid.query.function.metadata.FunctionMetadataValidator;
  *
  * @see FunctionParameter
  */
-public class FunctionMethod extends AbstractMetadataRecord {
+public class FunctionMethod extends AbstractMetadataRecord implements MetadataNamespaces {
 	private static final long serialVersionUID = -8039086494296455152L;
 
 	private static final String NOT_ALLOWED = "NOT_ALLOWED"; //$NON-NLS-1$
@@ -367,6 +368,7 @@ public class FunctionMethod extends AbstractMetadataRecord {
      * Return string version for debugging purposes
      * @return String representation of function method
      */ 
+    @Override
     public String toString() { 
         StringBuffer str = new StringBuffer();
         if(getName() != null) { 
@@ -468,11 +470,11 @@ public class FunctionMethod extends AbstractMetadataRecord {
 	}
 
     public static void convertExtensionMetadata(Procedure procedureRecord, FunctionMethod function) {
-        String deterministic = procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI + "deterministic", true); //$NON-NLS-1$
-        boolean nullOnNull = Boolean.valueOf(procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI + "null-on-null", true)); //$NON-NLS-1$
-        String varargs = procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI + "varargs", true); //$NON-NLS-1$
-        String javaClass = procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI + "java-class", true); //$NON-NLS-1$
-        String javaMethod = procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI + "java-method", true); //$NON-NLS-1$
+        String deterministic = procedureRecord.getProperty(RELATIONAL_URI + "deterministic", true); //$NON-NLS-1$
+        boolean nullOnNull = Boolean.valueOf(procedureRecord.getProperty(RELATIONAL_URI + "null-on-null", true)); //$NON-NLS-1$
+        String varargs = procedureRecord.getProperty(RELATIONAL_URI + "varargs", true); //$NON-NLS-1$
+        String javaClass = procedureRecord.getProperty(RELATIONAL_URI + "java-class", true); //$NON-NLS-1$
+        String javaMethod = procedureRecord.getProperty(RELATIONAL_URI + "java-method", true); //$NON-NLS-1$
         if (function.getInvocationClass() == null) {
             function.setInvocationClass(javaClass);
         }
@@ -482,7 +484,7 @@ public class FunctionMethod extends AbstractMetadataRecord {
 		if (!procedureRecord.getParameters().isEmpty()) {
 			function.setProperties(procedureRecord.getProperties());
 		}
-        boolean aggregate = Boolean.valueOf(procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI + "aggregate", true)); //$NON-NLS-1$
+        boolean aggregate = Boolean.valueOf(procedureRecord.getProperty(RELATIONAL_URI + "aggregate", true)); //$NON-NLS-1$
         if (deterministic != null) {
             function.setDeterminism(Boolean.valueOf(deterministic) ? Determinism.DETERMINISTIC : Determinism.NONDETERMINISTIC);
         }
@@ -491,14 +493,14 @@ public class FunctionMethod extends AbstractMetadataRecord {
             function.getInputParameters().get(function.getInputParameterCount() - 1).setVarArg(Boolean.valueOf(varargs));
         }
         if (aggregate) {
-            boolean analytic = Boolean.valueOf(procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI + "analytic", true)); //$NON-NLS-1$
-            boolean allowsOrderBy = Boolean.valueOf(procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI
+            boolean analytic = Boolean.valueOf(procedureRecord.getProperty(RELATIONAL_URI + "analytic", true)); //$NON-NLS-1$
+            boolean allowsOrderBy = Boolean.valueOf(procedureRecord.getProperty(RELATIONAL_URI
                                                                                 + "allows-orderby", true)); //$NON-NLS-1$
-            boolean usesDistinctRows = Boolean.valueOf(procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI
+            boolean usesDistinctRows = Boolean.valueOf(procedureRecord.getProperty(RELATIONAL_URI
                                                                                    + "uses-distinct-rows", true)); //$NON-NLS-1$
-            boolean allowsDistinct = Boolean.valueOf(procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI
+            boolean allowsDistinct = Boolean.valueOf(procedureRecord.getProperty(RELATIONAL_URI
                                                                                  + "allows-distinct", true)); //$NON-NLS-1$
-            boolean decomposable = Boolean.valueOf(procedureRecord.getProperty(AbstractMetadataRecord.RELATIONAL_URI
+            boolean decomposable = Boolean.valueOf(procedureRecord.getProperty(RELATIONAL_URI
                                                                                + "decomposable", true)); //$NON-NLS-1$
             AggregateAttributes aa = new AggregateAttributes();
             aa.setAnalytic(analytic);

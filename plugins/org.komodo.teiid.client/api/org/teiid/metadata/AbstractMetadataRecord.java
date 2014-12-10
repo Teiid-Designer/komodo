@@ -59,8 +59,6 @@ public abstract class AbstractMetadataRecord implements Serializable {
 	private volatile Map<String, String> properties;
 	private String annotation;
 
-	public static final String RELATIONAL_URI = "{http://www.teiid.org/ext/relational/2012}"; //$NON-NLS-1$
-	
 	public String getUUID() {
 		if (uuid == null) {
 			uuid = String.valueOf(UUID_SEQUENCE.getAndIncrement());
