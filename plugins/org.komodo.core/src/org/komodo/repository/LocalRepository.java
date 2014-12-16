@@ -29,16 +29,14 @@ import org.komodo.repository.internal.ModeshapeEngineThread;
 import org.komodo.repository.internal.ModeshapeEngineThread.Request;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestType;
-import org.komodo.repository.internal.RepositoryImpl;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
 
 /**
  * A repository installed on the local machine, using the modeshape engine and repository.
  */
-public class LocalRepository extends RepositoryImpl implements StringConstants {
+public class LocalRepository extends RepositoryImpl {
 
     private static String LOCAL_REPOSITORY_CONFIG = "local-repository-config.json"; //$NON-NLS-1$
 
@@ -173,7 +171,7 @@ public class LocalRepository extends RepositoryImpl implements StringConstants {
         /**
          * {@inheritDoc}
          *
-         * @see org.komodo.repository.internal.RepositoryImpl.UnitOfWorkImpl#commit()
+         * @see org.komodo.repository.RepositoryImpl.UnitOfWorkImpl#commit()
          */
         @Override
         public void commit() {
@@ -224,7 +222,7 @@ public class LocalRepository extends RepositoryImpl implements StringConstants {
         /**
          * {@inheritDoc}
          *
-         * @see org.komodo.repository.internal.RepositoryImpl.UnitOfWorkImpl#rollback()
+         * @see org.komodo.repository.RepositoryImpl.UnitOfWorkImpl#rollback()
          */
         @Override
         public void rollback() {

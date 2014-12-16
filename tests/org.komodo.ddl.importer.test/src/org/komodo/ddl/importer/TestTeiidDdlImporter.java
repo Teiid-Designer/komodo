@@ -28,104 +28,104 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
-import org.komodo.relational.constants.RelationalConstants;
-import org.komodo.relational.model.Model;
-import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.legacy.Model;
+import org.komodo.relational.model.legacy.RelationalConstants;
+import org.komodo.relational.model.legacy.RelationalObject;
 
 /**
  * Test Class to test Teiid DDL import
- * 
+ *
  */
 public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
-	
+
 	private static final String TEIID_MYSQL_ACCTS = "Teiid-MySQLAccounts.ddl";  //$NON-NLS-1$
 	private static final String TEIID_FLATFILE = "Teiid-FlatFile.ddl";  //$NON-NLS-1$
-	
+
 	/**
 	 * Constructor
 	 */
 	public TestTeiidDdlImporter( ) {
 		super();
-	}	
-	
+	}
+
 	/**
      * Test Error condition - bad DDL file name supplied
      * Expected Outcome - Error message saying that the supplied file is not found
      */
     @Test
-    public void testBadDdlFile() {   	
+    public void testBadDdlFile() {
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
-    	
+
     	DdlImportService importer = DefaultDdlImportService.getInstance();
     	Model relationalModel = importer.importDdl(new File("unknown.ddl"),importOptions,importMessages); //$NON-NLS-1$
-    	
+
     	// No model created
     	Assert.assertNull("Failed - expected null model ", relationalModel); //$NON-NLS-1$
-    	
+
     	// Should have 1 error message
     	Assert.assertEquals(1, importMessages.getErrorMessages().size());
-    	
+
     	String msg = importMessages.getErrorMessages().get(0);
     	Assert.assertEquals("The specified DDL File \"unknown.ddl\" was not found",msg); //$NON-NLS-1$
     }
-    
+
 	/**
      * Test Error condition - unreadable DDL file supplied.
      * Expected Outcome - Error Message saying that the supplied file is not readable
      */
     @Test
-    public void testUnreadableDdlFile() {   	
+    public void testUnreadableDdlFile() {
     	File ddlFile = setup(TEIID_MYSQL_ACCTS);
     	ddlFile.setReadable(false);
-    	
+
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
-    	
+
     	DdlImportService importer = DefaultDdlImportService.getInstance();
     	Model relationalModel = importer.importDdl(ddlFile,importOptions,importMessages);
-    	
+
     	// Set back to readable
     	ddlFile.setReadable(true);
-    	
+
     	// No model created
     	Assert.assertNull("Failed - expected null model ", relationalModel); //$NON-NLS-1$
-    	
+
     	// Should have 1 error message
     	Assert.assertEquals(1, importMessages.getErrorMessages().size());
 
     	String msg = importMessages.getErrorMessages().get(0);
     	Assert.assertEquals("The specified DDL File \"Teiid-MySQLAccounts.ddl\" is not readable",msg); //$NON-NLS-1$
     }
-    
+
 	/**
      * Test Error condition - empty DDL string supplied
      * Expected Outcome - Error Message saying that the supplied DDL string is empty
      */
     @Test
-    public void testEmptyDdlString() {   	
+    public void testEmptyDdlString() {
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
-    	
+
     	DdlImportService importer = DefaultDdlImportService.getInstance();
     	Model relationalModel = importer.importDdl("",importOptions,importMessages); //$NON-NLS-1$
-    	
+
     	// No model created
     	Assert.assertNull("Failed - expected null model ", relationalModel); //$NON-NLS-1$
-    	
+
     	// Should have 1 error message
     	Assert.assertEquals(1, importMessages.getErrorMessages().size());
-    	
+
     	String msg = importMessages.getErrorMessages().get(0);
     	Assert.assertEquals("The supplied DDL string is empty",msg); //$NON-NLS-1$
     }
-	
+
 	/**
      * Test import of Teiid-MySQLAccounts.ddl
      * Expected outcome - successful creation
@@ -133,22 +133,22 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     @Test
     public void testDdlImport_MySQLAccts() {
     	File ddlFile = setup(TEIID_MYSQL_ACCTS);
-    	
+
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
-    	
+
     	DdlImportService importer = DefaultDdlImportService.getInstance();
     	Model relationalModel = importer.importDdl(ddlFile,importOptions,importMessages);
-    	
+
     	// Test that a Model was created
     	Assert.assertNotNull("Failed - No Model Created ", relationalModel); //$NON-NLS-1$
-    	
+
     	// Test Model name
     	String modelName = relationalModel.getName();
     	Assert.assertEquals(importOptions.getModelName(), modelName);
-    	
+
     	// ----------------------------------
     	// Test expected tables exist
     	// ----------------------------------
@@ -162,7 +162,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasTables) {
     		Assert.fail("expected tables do not match");   //$NON-NLS-1$
     	}
-    	
+
     	// ----------------------------------------
     	// Test expected columns for ACCOUNT table
     	// ----------------------------------------
@@ -178,7 +178,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasCols) {
     		Assert.fail("expected columns do not match");   //$NON-NLS-1$
     	}
-    	
+
     	// ------------------------------------------
     	// Test expected columns for CUSTOMER table
     	// ------------------------------------------
@@ -197,7 +197,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasCols) {
     		Assert.fail("expected columns do not match");   //$NON-NLS-1$
     	}
-    	
+
     	// ------------------------------------------
     	// Test expected columns for HOLDINGS table
     	// ------------------------------------------
@@ -212,7 +212,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasCols) {
     		Assert.fail("expected columns do not match");   //$NON-NLS-1$
     	}
-    	
+
     	// ------------------------------------------
     	// Test expected columns for PRODUCT table
     	// ------------------------------------------
@@ -225,7 +225,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasCols) {
     		Assert.fail("expected columns do not match");   //$NON-NLS-1$
     	}
-    	
+
     	// ------------------------------------------
     	// Test expected columns for SUBSCRIPTIONS table
     	// ------------------------------------------
@@ -238,7 +238,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasCols) {
     		Assert.fail("expected columns do not match");   //$NON-NLS-1$
     	}
-    	    	
+
     	// --------------------------------------------
     	// Test expected properties on HOLDINGS table
     	// --------------------------------------------
@@ -246,17 +246,17 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	Map<String,String> expectedProps = new HashMap<String,String>();
     	expectedProps.putAll(TestUtil.TABLE_PROPERTY_DEFAULTS);
     	expectedProps.put("NAME", "HOLDINGS"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("DESCRIPTION", null); //$NON-NLS-1$ 
+    	expectedProps.put("DESCRIPTION", null); //$NON-NLS-1$
     	expectedProps.put("SUPPORTSUPDATE", "true"); //$NON-NLS-1$ //$NON-NLS-2$
     	expectedProps.put("NAMEINSOURCE", "`accounts`.`HOLDINGS`"); //$NON-NLS-1$ //$NON-NLS-2$
-    	
+
     	// Compare object properties to expected
     	table = relationalModel.getChildWithName("HOLDINGS"); //$NON-NLS-1$
     	String result = TestUtil.compareProperties(table, expectedProps);
     	if(!result.equals("OK")) { //$NON-NLS-1$
-    		Assert.fail(result);  
+    		Assert.fail(result);
     	}
-    	    	
+
     	// -------------------------------------------------------------
     	// Test expected properties on HOLDINGS.PURCHASE_DATE column
     	// -------------------------------------------------------------
@@ -264,7 +264,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	path.add("PURCHASE_DATE"); //$NON-NLS-1$
     	RelationalObject column = table.getChildAtPath(path, RelationalConstants.TYPES.COLUMN);
     	Assert.assertNotNull(column);
-    	
+
     	// Expected properties
     	expectedProps = new HashMap<String,String>();
     	expectedProps.putAll(TestUtil.COLUMN_PROPERTY_DEFAULTS);
@@ -276,11 +276,11 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
     	// Compare object properties to expected
     	result = TestUtil.compareProperties(column, expectedProps);
-    	if(!result.equals("OK")) { //$NON-NLS-1$ 
-    		Assert.fail(result);  
+    	if(!result.equals("OK")) { //$NON-NLS-1$
+    		Assert.fail(result);
     	}
     }
-    
+
 	/**
      * Test import of Teiid-FlatFile.ddl
      * Expected outcome - successful creation
@@ -288,22 +288,22 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     @Test
     public void testDdlImport_FlatFile() {
     	File ddlFile = setup(TEIID_FLATFILE);
-    	
+
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
-    	
+
     	DdlImportService importer = DefaultDdlImportService.getInstance();
     	Model relationalModel = importer.importDdl(ddlFile,importOptions,importMessages);
-    	
+
     	// Test that a Model was created
     	Assert.assertNotNull("Failed - No Model Created ", relationalModel); //$NON-NLS-1$
-    	
+
     	// Test Model name
     	String modelName = relationalModel.getName();
     	Assert.assertEquals(importOptions.getModelName(), modelName);
-    	
+
     	// ----------------------------------
     	// Test expected procedures exist
     	// ----------------------------------
@@ -315,9 +315,9 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasProcs) {
     		Assert.fail("expected procedures do not match");   //$NON-NLS-1$
     	}
-    	
+
     	// --------------------------------------------
-    	// Test getFiles procedure has expected param 
+    	// Test getFiles procedure has expected param
     	// --------------------------------------------
     	RelationalObject proc = relationalModel.getChildWithName("getFiles"); //$NON-NLS-1$
     	List<String> itemList = new ArrayList<String>();
@@ -326,7 +326,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasParams) {
     		Assert.fail("expected parameters do not match");   //$NON-NLS-1$
     	}
-    	
+
     	// --------------------------------------------
     	// Test getFiles procedure properties
     	// --------------------------------------------
@@ -338,8 +338,8 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	expectedProps.put("DESCRIPTION", "Returns files that match the given path and pattern as BLOBs"); //$NON-NLS-1$ //$NON-NLS-2$
     	// Compare object properties to expected
     	String result = TestUtil.compareProperties(proc, expectedProps);
-    	if(!result.equals("OK")) { //$NON-NLS-1$ 
-    		Assert.fail(result);  
+    	if(!result.equals("OK")) { //$NON-NLS-1$
+    		Assert.fail(result);
     	}
 
     	// ------------------------------------------------
@@ -351,7 +351,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasRS) {
     		Assert.fail("expected result set does not match");   //$NON-NLS-1$
     	}
-    	
+
     	// -------------------------------------------------------------
     	// Test resultSet has expected columns
     	// -------------------------------------------------------------
@@ -359,7 +359,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	path.add("getFiles"); //$NON-NLS-1$
     	RelationalObject resultSet = proc.getChildAtPath(path, RelationalConstants.TYPES.RESULT_SET);
     	Assert.assertNotNull(resultSet);
-    	
+
     	itemList.clear();
     	itemList.add("file"); //$NON-NLS-1$
     	itemList.add("filePath"); //$NON-NLS-1$
@@ -367,7 +367,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	if(!hasCols) {
     		Assert.fail("expected columns do not match");   //$NON-NLS-1$
     	}
-    	
+
     	// --------------------------------------------
     	// Test procedure resultSet properties
     	// --------------------------------------------
@@ -378,9 +378,9 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	expectedProps.put("NAMEINSOURCE", "getFiles"); //$NON-NLS-1$ //$NON-NLS-2$
     	// Compare object properties to expected
     	result = TestUtil.compareProperties(resultSet, expectedProps);
-    	if(!result.equals("OK")) { //$NON-NLS-1$ 
-    		Assert.fail(result);  
+    	if(!result.equals("OK")) { //$NON-NLS-1$
+    		Assert.fail(result);
     	}
-    	
+
     }
 }

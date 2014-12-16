@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import org.komodo.relational.constants.RelationalConstants.TYPES;
-import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.legacy.RelationalObject;
+import org.komodo.relational.model.legacy.RelationalConstants.TYPES;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 

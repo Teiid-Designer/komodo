@@ -25,12 +25,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import org.komodo.relational.model.Index;
-import org.komodo.relational.model.Model;
-import org.komodo.relational.model.RelationalObject;
-import org.komodo.relational.model.Schema;
-import org.komodo.relational.model.Table;
+import org.komodo.relational.model.legacy.Index;
+import org.komodo.relational.model.legacy.Model;
+import org.komodo.relational.model.legacy.RelationalObject;
+import org.komodo.relational.model.legacy.Schema;
+import org.komodo.relational.model.legacy.Table;
 import org.komodo.spi.ddl.RelationalTypeMapping;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.postgres.PostgresDdlLexicon;

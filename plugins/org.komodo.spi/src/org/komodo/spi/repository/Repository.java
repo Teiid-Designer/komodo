@@ -172,35 +172,22 @@ public interface Repository {
     }
 
     /**
-     * Creates then commits a transaction containing only this operation.
-     *
-     * @param parentPath
-     *        the parent path where the workspace object is created (can be empty if adding at the root of the workspace)
-     * @param name
-     *        the name of the object (cannot be empty)
-     * @return the new workspace object (never <code>null</code>)
-     * @throws KException
-     *         if the parent path does not exist or an error occurs
-     */
-    public KomodoObject add( final String parentPath,
-                             final String name ) throws KException;
-
-    /**
-     * The transaction must be committed or rolled back by the caller.
-     *
      * @param transaction
-     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param parentPath
      *        the parent path where the workspace object is created (can be empty if adding at the root of the workspace)
      * @param name
      *        the name of the object (cannot be empty)
+     * @param primaryType
+     *        the primary type of the child or <code>null</code> if type is <code>nt:unstructured</code>
      * @return the new workspace object (never <code>null</code>)
      * @throws KException
      *         if the parent path does not exist or an error occurs
      */
     public KomodoObject add( final UnitOfWork transaction,
                              final String parentPath,
-                             final String name ) throws KException;
+                             final String name,
+                             final String primaryType ) throws KException;
 
     /**
      * Add an {@link RepositoryClient} to receive notifications from
@@ -231,6 +218,8 @@ public interface Repository {
                                          final UnitOfWorkListener callback ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param keywords
      *        words that should be matched to words found in the description (can be empty)
      * @param criteria
@@ -241,29 +230,50 @@ public interface Repository {
      * @throws KException
      *         if parent path does not exist or an error occurs
      */
-    public ArtifactDescriptor[] find( final List< String > keywords,
+    public ArtifactDescriptor[] find( final UnitOfWork transaction,
+                                      final List< String > keywords,
                                       final KeywordCriteria criteria,
                                       final String... artifactTypes ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param artifactTypes
      *        the artifact type(s) (can be empty if all artifacts of any type are wanted)
      * @return the requested artifacts (never <code>null</code> but can be empty)
      * @throws KException
      *         if parent path does not exist or an error occurs
      */
-    public ArtifactDescriptor[] find( final String... artifactTypes ) throws KException;
+    public ArtifactDescriptor[] find( final UnitOfWork transaction,
+                                      final String... artifactTypes ) throws KException;
 
     /**
      * The path can be workspace relative or absolute.
      *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param path
      *        the path to the workspace object being requested (can be empty if the workspace root)
      * @return the requested workspace Komodo object (can be <code>null</code> if it does not exist)
      * @throws KException
      *         if an error occurs
      */
-    public KomodoObject get( final String path ) throws KException;
+    public KomodoObject get( final UnitOfWork transaction,
+                             final String path ) throws KException;
+
+    /**
+     * Gets the {@link KomodoObject} with the specified identifier.
+     *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     * @param jcrUuid
+     *        the value of the <code>jcr:uuid</code> property (cannot be empty)
+     * @return the requested workspace Komodo object or <code>null</code> if not found
+     * @throws KException
+     *         if an error occurs
+     */
+    public KomodoObject getUsingId( final UnitOfWork transaction,
+                                    final String jcrUuid ) throws KException;
 
     /**
      * @return the repository identifier (never <code>null</code>)
@@ -281,27 +291,8 @@ public interface Repository {
     Type getType();
 
     /**
-     * Creates then commits a transaction containing only this operation.
-     *
-     * @param file
-     *        the file being added to the workspace (cannot be <code>null</code>)
-     * @param name
-     *        the name of the Komodo object to create (cannot be empty)
-     * @param parentPath
-     *        the path to where the object will be created (can be empty if creating at the workspace root)
-     * @return the Komodo object for the file (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    public KomodoObject importFile( final File file,
-                                    final String name,
-                                    final String parentPath ) throws KException;
-
-    /**
-     * The transaction must be committed or rolled back by the caller.
-     *
      * @param transaction
-     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param file
      *        the file being added to the workspace (cannot be <code>null</code>)
      * @param name
@@ -318,10 +309,8 @@ public interface Repository {
                                     final String parentPath ) throws KException;
 
     /**
-     * The transaction must be committed or rolled back by the caller.
-     *
      * @param transaction
-     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param url
      *        the resource being added to the workspace (cannot be <code>null</code>)
      * @param name
@@ -338,23 +327,6 @@ public interface Repository {
                                         final String parentPath ) throws KException;
 
     /**
-     * Creates then commits a transaction containing only this operation.
-     *
-     * @param url
-     *        the resource being added to the workspace (cannot be <code>null</code>)
-     * @param name
-     *        the name of the Komodo object to create (cannot be empty)
-     * @param parentPath
-     *        the path to where the Komodo object will be created (can be empty if creating at the workspace root)
-     * @return the Komodo object for the resource (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    public KomodoObject importResource( final URL url,
-                                        final String name,
-                                        final String parentPath ) throws KException;
-
-    /**
      * Notify the repository of the given {@link RepositoryClientEvent}
      *
      * @param event
@@ -367,26 +339,8 @@ public interface Repository {
     boolean ping();
 
     /**
-     * Creates then commits a transaction containing only this operation.
-     *
-     * @param overwrite
-     *        <code>true</code> if existing artifacts should be updated
-     * @param descriptor
-     *        the artifact descriptor (cannot be <code>null</code>)
-     * @param komodoObject
-     *        the Komodo object being added to the library (cannot be <code>null</code>)
-     * @throws KException
-     *         if artifact already exists and not in overwrite mode or an error occurs
-     */
-    public void publish( final boolean overwrite,
-                         final ArtifactDescriptor descriptor,
-                         final KomodoObject komodoObject ) throws KException;
-
-    /**
-     * The transaction must be committed or rolled back by the caller.
-     *
      * @param transaction
-     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param overwrite
      *        <code>true</code> if existing artifacts should be updated
      * @param descriptor
@@ -402,20 +356,8 @@ public interface Repository {
                          final KomodoObject komodoObject ) throws KException;
 
     /**
-     * Creates then commits a transaction containing only this operation.
-     *
-     * @param paths
-     *        the paths of the workspace objects being removed (cannot be <code>null</code> or empty)
-     * @throws KException
-     *         if a workspace path does not exist or an error occurs
-     */
-    public void remove( final String... paths ) throws KException;
-
-    /**
-     * The transaction must be committed or rolled back by the caller.
-     *
      * @param transaction
-     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param paths
      *        the paths of the workspace objects being removed (cannot be <code>null</code> or empty)
      * @throws KException
@@ -438,29 +380,20 @@ public interface Repository {
     void removeObserver( RepositoryObserver observer );
 
     /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param artifactPaths
      *        the paths of the artifacts being requested (cannot be <code>null</code> or empty)
      * @return the requested artifacts (never <code>null</code>)
      * @throws KException
      *         if an artifact does not exist or an error occurs
      */
-    public Artifact[] retrieve( final String... artifactPaths ) throws KException;
+    public Artifact[] retrieve( final UnitOfWork transaction,
+                                final String... artifactPaths ) throws KException;
 
     /**
-     * Creates then commits a transaction containing only this operation.
-     *
-     * @param artifactPaths
-     *        the paths of the the artifacts being removed (cannot be <code>null</code> or empty)
-     * @throws KException
-     *         if an artifact does not exist in the library or an error occurs
-     */
-    public void unpublish( final String... artifactPaths ) throws KException;
-
-    /**
-     * The transaction must be committed or rolled back by the caller.
-     *
      * @param transaction
-     *        the transaction this operation is being added to (cannot be <code>null</code>)
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param artifactPaths
      *        the paths of the the artifacts being removed (cannot be <code>null</code> or empty)
      * @throws KException

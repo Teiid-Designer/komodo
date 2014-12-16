@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -101,6 +101,16 @@ public class KLog implements KLogger {
             logger.log(Level.INFO, message, throwable);
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.logging.KLogger#isInfoEnabled()
+         */
+        @Override
+        public boolean isInfoEnabled() {
+            return (this.level == Level.INFO);
+        }
+
         @Override
         public void warn(String message, Object... args) {
             logger.log(Level.WARNING, message, args);
@@ -109,6 +119,16 @@ public class KLog implements KLogger {
         @Override
         public void warn(String message, Throwable throwable, Object... args) {
             logger.log(Level.WARNING, message, throwable);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.logging.KLogger#isWarnEnabled()
+         */
+        @Override
+        public boolean isWarnEnabled() {
+            return (this.level == Level.WARNING);
         }
 
         @Override
@@ -121,6 +141,16 @@ public class KLog implements KLogger {
             logger.log(Level.SEVERE, message, throwable);
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.logging.KLogger#isErrorEnabled()
+         */
+        @Override
+        public boolean isErrorEnabled() {
+            return (this.level == Level.FINE);
+        }
+
         @Override
         public void debug(String message, Object... args) {
             logger.log(Level.FINE, message, args);
@@ -129,6 +159,16 @@ public class KLog implements KLogger {
         @Override
         public void debug(String message, Throwable throwable, Object... args) {
             logger.log(Level.FINE, message, throwable);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.logging.KLogger#isDebugEnabled()
+         */
+        @Override
+        public boolean isDebugEnabled() {
+            return (this.level == Level.FINEST);
         }
 
         @Override
@@ -140,6 +180,17 @@ public class KLog implements KLogger {
         public void trace(String message, Throwable throwable, Object... args) {
             logger.log(Level.FINE, message, throwable);
         }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.logging.KLogger#isTraceEnabled()
+         */
+        @Override
+        public boolean isTraceEnabled() {
+            return (this.level == Level.FINE);
+        }
+
     }
 
     private static KLog instance;
@@ -157,7 +208,7 @@ public class KLog implements KLogger {
     private final KLogger kLogger;
 
     /**
-     * 
+     *
      */
     private KLog() {
         ServiceLoader<KLogger> loader = ServiceLoader.load(KLogger.class);
@@ -209,6 +260,16 @@ public class KLog implements KLogger {
         kLogger.info(message, throwable, args);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isInfoEnabled()
+     */
+    @Override
+    public boolean isInfoEnabled() {
+        return this.kLogger.isInfoEnabled();
+    }
+
     /* (non-Javadoc)
      * @see org.komodo.spi.logging.KLogger#warn(java.lang.String, java.lang.Object[])
      */
@@ -223,6 +284,16 @@ public class KLog implements KLogger {
     @Override
     public void warn(String message, Throwable throwable, Object... args) {
         kLogger.warn(message, throwable, args);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isWarnEnabled()
+     */
+    @Override
+    public boolean isWarnEnabled() {
+        return this.kLogger.isWarnEnabled();
     }
 
     /* (non-Javadoc)
@@ -241,6 +312,16 @@ public class KLog implements KLogger {
         kLogger.error(message, throwable, args);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isErrorEnabled()
+     */
+    @Override
+    public boolean isErrorEnabled() {
+        return this.kLogger.isErrorEnabled();
+    }
+
     /* (non-Javadoc)
      * @see org.komodo.spi.logging.KLogger#debug(java.lang.String, java.lang.Object[])
      */
@@ -257,6 +338,16 @@ public class KLog implements KLogger {
         kLogger.debug(message, throwable, args);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isDebugEnabled()
+     */
+    @Override
+    public boolean isDebugEnabled() {
+        return this.kLogger.isDebugEnabled();
+    }
+
     /* (non-Javadoc)
      * @see org.komodo.spi.logging.KLogger#trace(java.lang.String, java.lang.Object[])
      */
@@ -271,6 +362,16 @@ public class KLog implements KLogger {
     @Override
     public void trace(String message, Throwable throwable, Object... args) {
         kLogger.trace(message, throwable, args);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isTraceEnabled()
+     */
+    @Override
+    public boolean isTraceEnabled() {
+        return this.kLogger.isTraceEnabled();
     }
 
 }

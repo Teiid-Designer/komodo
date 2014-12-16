@@ -48,36 +48,6 @@ public class Messages implements StringConstants {
         }
     }
 
-    /**
-     * Messages associated with workspace and library objects and their properties.
-     */
-    @SuppressWarnings( "javadoc" )
-    public enum Komodo {
-
-        ARTIFACT_DOES_NOT_EXIST_ERROR,
-        ARTIFACT_EXISTS_ERROR,
-        ERROR_ADDING_ARTIFACT,
-        ERROR_TRYING_TO_COMMIT,
-        ERROR_TRYING_TO_ROLLBACK,
-        NO_ARTIFACT_DESCRIPTION,
-        REMOVE_WORKSPACE_OBJECT_ERROR,
-        UNABLE_TO_CONSTRUCT_PROPERTY,
-        UNABLE_TO_CONVERT_VALUE,
-        UNABLE_TO_FIND_PROPERTY,
-        UNABLE_TO_REMOVE_CHILD,
-        UNABLE_TO_REMOVE_NON_EXISTENT_WORKSPACE_ITEM,
-        UNABLE_TO_REMOVE_PROPERTY_THAT_DOES_NOT_EXIST,
-        UNABLE_TO_REMOVE_SINGLE_VALUE_PROPERTY_WITH_EMPTY_ARRAY,
-        UNABLE_TO_SET_SINGLE_VALUE_PROPERTY_WITH_MULTIPLE_VALUES,
-        UNABLE_TO_UNPUBLISH_NON_EXISTENT_ARTIFACT,
-        UNPUBLISH_ARTIFACT_ERROR;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

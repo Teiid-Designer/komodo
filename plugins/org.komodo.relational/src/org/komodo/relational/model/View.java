@@ -1,85 +1,82 @@
 /*
  * JBoss, Home of Professional Open Source.
-* See the COPYRIGHT.txt file distributed with this work for information
-* regarding copyright ownership. Some portions may be licensed
-* to Red Hat, Inc. under one or more contributor license agreements.
-*
-* This library is free software; you can redistribute it and/or
-* modify it under the terms of the GNU Lesser General Public
-* License as published by the Free Software Foundation; either
-* version 2.1 of the License, or (at your option) any later version.
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with this library; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-* 02110-1301 USA.
+ *
+ * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ *
+ * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
 package org.komodo.relational.model;
 
-
-
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
- * 
- *
- *
+ * Represents a relational model view.
  */
-public class View extends Table {
+public interface View extends Table {
 
-	/**
-	 * RelationalView constructor
-	 */
-    public View() {
-        super();
-    }
-    
     /**
-     * RelationalView constructor
-     * @param name the name
+     * An empty array of views.
      */
-    public View( String name ) {
-        super(name);
-    }
-    
-    /**
-     * @return type
-     */
-    @Override
-	public int getType() {
-        return TYPES.VIEW;
-    }
+    View[] NO_VIEWS = new View[0];
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#addForeignKey(org.komodo.relational.model.ForeignKey)
+     * @see org.komodo.relational.model.Table#addForeignKey(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      org.komodo.relational.model.Table)
+     * @throws UnsupportedOperationException
+     *         if called
      */
     @Override
-    public boolean addForeignKey( ForeignKey fk ) {
-        throw new UnsupportedOperationException("addForeignKey() not supported for Relational Views"); //$NON-NLS-1$
-    }
+    public ForeignKey addForeignKey( final UnitOfWork transaction,
+                                     final String foreignKeyName,
+                                     final Table referencedTable ) throws KException;
+
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#setPrimaryKey(org.komodo.relational.model.PrimaryKey)
+     * @see org.komodo.relational.model.Table#addUniqueConstraint(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     * @throws UnsupportedOperationException
+     *         if called
      */
     @Override
-    public boolean setPrimaryKey( PrimaryKey pk ) {
-        throw new UnsupportedOperationException("addPrimaryKey() not supported for Relational Views"); //$NON-NLS-1$
-    }
+    public UniqueConstraint addUniqueConstraint( final UnitOfWork transaction,
+                                                 final String constraintName ) throws KException;
+
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#setUniqueConstraint(org.komodo.relational.model.UniqueConstraint)
+     * @see org.komodo.relational.model.Table#removeForeignKey(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @throws UnsupportedOperationException
+     *         if called
      */
     @Override
-    public boolean setUniqueConstraint( UniqueConstraint uc ) {
-        throw new UnsupportedOperationException("addUniqueConstraint() not supported for Relational Views"); //$NON-NLS-1$
-    }
-    
+    public void removeForeignKey( final UnitOfWork transaction,
+                                  final String foreignKeyToRemove ) throws KException;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Table#removeUniqueConstraint(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     * @throws UnsupportedOperationException
+     *         if called
+     */
+    @Override
+    public void removeUniqueConstraint( final UnitOfWork transaction,
+                                        final String constraintToRemove ) throws KException;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Table#setPrimaryKey(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @throws UnsupportedOperationException
+     *         if called
+     */
+    @Override
+    public PrimaryKey setPrimaryKey( final UnitOfWork transaction,
+                                     final String newPrimaryKeyName ) throws KException;
+
 }

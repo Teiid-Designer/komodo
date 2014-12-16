@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -88,6 +88,16 @@ public class ModeshapeKLogger implements KLogger {
         getLogger().info(throwable, ti18n, args);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isInfoEnabled()
+     */
+    @Override
+    public boolean isInfoEnabled() {
+        return getLogger().isInfoEnabled();
+    }
+
     @Override
     public void warn(String message, Object... args) {
         TextI18n ti18n = getI18n(message);
@@ -98,6 +108,16 @@ public class ModeshapeKLogger implements KLogger {
     public void warn(String message, Throwable throwable, Object... args) {
         TextI18n ti18n = getI18n(message);
         getLogger().warn(throwable, ti18n, args);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isWarnEnabled()
+     */
+    @Override
+    public boolean isWarnEnabled() {
+        return isWarnEnabled();
     }
 
     @Override
@@ -112,6 +132,16 @@ public class ModeshapeKLogger implements KLogger {
         getLogger().error(throwable, ti18n, args);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isErrorEnabled()
+     */
+    @Override
+    public boolean isErrorEnabled() {
+        return getLogger().isErrorEnabled();
+    }
+
     @Override
     public void debug(String message, Object... args) {
         getLogger().debug(message, args);
@@ -120,6 +150,16 @@ public class ModeshapeKLogger implements KLogger {
     @Override
     public void debug(String message, Throwable throwable, Object... args) {
         getLogger().debug(throwable, message, args);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isDebugEnabled()
+     */
+    @Override
+    public boolean isDebugEnabled() {
+        return getLogger().isDebugEnabled();
     }
 
     @Override
@@ -131,4 +171,15 @@ public class ModeshapeKLogger implements KLogger {
     public void trace(String message, Throwable throwable, Object... args) {
         getLogger().trace(throwable, message, args);
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.logging.KLogger#isTraceEnabled()
+     */
+    @Override
+    public boolean isTraceEnabled() {
+        return getLogger().isTraceEnabled();
+    }
+
 }

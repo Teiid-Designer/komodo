@@ -27,7 +27,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Session;
-import org.komodo.core.Messages.Komodo;
 import org.komodo.repository.Messages;
 import org.komodo.spi.KException;
 import org.komodo.utils.ArgCheck;
@@ -222,7 +221,7 @@ public class ModeshapeEngineThread extends Thread {
             }
         } catch (final Exception e) {
             if (request.getCallback() == null) {
-                LOGGER.error(Messages.getString(Komodo.ERROR_TRYING_TO_COMMIT, e, commitRequest.getName()));
+                LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_COMMIT, e, commitRequest.getName()));
                 rollbackSession(request);
             } else {
                 request.getCallback().errorOccurred(e);
@@ -268,7 +267,7 @@ public class ModeshapeEngineThread extends Thread {
             }
         } catch (final Exception e) {
             if (request.getCallback() == null) {
-                LOGGER.error(Messages.getString(Komodo.ERROR_TRYING_TO_ROLLBACK, e, rollbackRequest.getName()));
+                LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_ROLLBACK, e, rollbackRequest.getName()));
             } else {
                 request.getCallback().errorOccurred(e);
             }

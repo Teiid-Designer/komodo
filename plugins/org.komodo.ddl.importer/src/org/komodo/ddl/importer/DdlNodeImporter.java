@@ -21,7 +21,7 @@
  ************************************************************************************/
 package org.komodo.ddl.importer;
 
-import org.komodo.relational.model.Model;
+import org.komodo.relational.model.legacy.Model;
 import org.modeshape.sequencer.ddl.node.AstNode;
 
 

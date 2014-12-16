@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.test.utils.AbstractLoggingTest;
 import org.komodo.repository.LocalRepository;
-import org.komodo.repository.internal.RepositoryImpl;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
@@ -84,6 +84,10 @@ public class TestLocalRepository extends AbstractLoggingTest {
         }
     }
 
+    private UnitOfWork createTransaction( final String name ) throws Exception {
+        return _repo.createTransaction("transaction", false, null);
+    }
+
     @Before
     public void assertReachable() {
         assertThat(_repo.ping(), is(true));
@@ -91,12 +95,12 @@ public class TestLocalRepository extends AbstractLoggingTest {
     }
 
     private String getPrimaryType( final KomodoObject kobject ) throws Exception {
-        return kobject.getPrimaryType().getName();
+        return kobject.getPrimaryType(null).getName();
     }
 
     private boolean hasMixin( final String mixin,
                               final KomodoObject kobject ) throws Exception {
-        for (final Descriptor descriptor : kobject.getDescriptors()) {
+        for (final Descriptor descriptor : kobject.getDescriptors(null)) {
             if (descriptor.getName().equals(mixin)) {
                 return true;
             }
@@ -109,11 +113,13 @@ public class TestLocalRepository extends AbstractLoggingTest {
     public void shouldAddWorkspaceItemAtRoot() throws Exception {
         // setup
         final String name = "shouldAddWorkspaceItemAtRoot";
-        final KomodoObject rootNode = _repo.add(null, name);
+        final UnitOfWork transaction = createTransaction(name);
+        final KomodoObject rootNode = _repo.add(transaction, null, name, null);
+        transaction.commit();
 
         // tests
         assertThat(rootNode, is(notNullValue()));
-        assertThat(rootNode.getName(), is(name));
+        assertThat(rootNode.getName(null), is(name));
         assertThat(rootNode.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + name));
     }
 
@@ -128,10 +134,12 @@ public class TestLocalRepository extends AbstractLoggingTest {
         assertThat(transaction.getName(), is(name));
         assertThat(transaction.getCallback(), is(nullValue()));
         assertThat(transaction.isRollbackOnly(), is(true));
+
+        transaction.commit();
     }
 
     @Test
-    public void shouldCreateTransaction() throws Exception {
+    public void shouldCreateUpdateTransaction() throws Exception {
         // setup
         final String name = "elvis";
         final UnitOfWork transaction = _repo.createTransaction(name, false, null);
@@ -141,21 +149,23 @@ public class TestLocalRepository extends AbstractLoggingTest {
         assertThat(transaction.getName(), is(name));
         assertThat(transaction.getCallback(), is(nullValue()));
         assertThat(transaction.isRollbackOnly(), is(false));
+
+        transaction.commit();
     }
 
     @Test( expected = KException.class )
     public void shouldFailToAddWorkspaceItemToNonexistingParent() throws Exception {
-        _repo.add("does-not-exist", "shouldFailToAddWorkspaceItemToNonexistingParent");
+        _repo.add(null, "does-not-exist", "shouldFailToAddWorkspaceItemToNonexistingParent", null);
     }
 
     @Test( expected = KException.class )
     public void shouldFailToImportNonExistentResource() throws Exception {
-        _repo.importFile(new File("resources/bogus.xml"), "shouldFailToImportNonExistentResource", null);
+        _repo.importFile(null, new File("resources/bogus.xml"), "shouldFailToImportNonExistentResource", null);
     }
 
     @Test( expected = KException.class )
     public void shouldFailToRemoveWorkspaceItemThatDoesNotExist() throws Exception {
-        _repo.remove("shouldFailToRemoveWorkspaceItemThatDoesNotExist");
+        _repo.remove(null, "shouldFailToRemoveWorkspaceItemThatDoesNotExist");
     }
 
     @Test
@@ -167,7 +177,7 @@ public class TestLocalRepository extends AbstractLoggingTest {
 
     @Test
     public void shouldGetNullWhenWorkspaceItemDoesNotExist() throws Exception {
-        final KomodoObject doesNotExist = _repo.get("shouldGetNullWhenWorkspaceItemDoesNotExist");
+        final KomodoObject doesNotExist = _repo.get(null, "shouldGetNullWhenWorkspaceItemDoesNotExist");
         assertThat(doesNotExist, is(nullValue()));
     }
 
@@ -178,72 +188,85 @@ public class TestLocalRepository extends AbstractLoggingTest {
 
     @Test
     public void shouldGetWorkspaceRoot() throws Exception {
-        final KomodoObject rootNode = _repo.get(null);
+        final KomodoObject rootNode = _repo.get(null, null);
         assertThat(rootNode, is(notNullValue()));
-        assertThat(rootNode.getName(), is(KomodoLexicon.Komodo.WORKSPACE));
+        assertThat(rootNode.getName(null), is(KomodoLexicon.Komodo.WORKSPACE));
     }
 
     @Test( timeout = 60000 )
     public void shouldImportFile() throws Exception {
         // setup
+        final UnitOfWork transaction = createTransaction("shouldImportFile");
         final String name = "bareBones";
-        final KomodoObject kobject = _repo.importFile(new File("resources/bare-bones.xml"), name, null);
+        final KomodoObject kobject = _repo.importFile(transaction, new File("resources/bare-bones.xml"), name, null);
+        transaction.commit();
 
         // tests
         assertThat(kobject, is(notNullValue()));
         assertThat(kobject.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + name));
         assertThat(kobject.getIndex(), is(0));
         assertThat(hasMixin(KomodoLexicon.WorkspaceItem.MIXIN_TYPE, kobject), is(true));
-        assertThat(kobject.getName(), is(name));
-        assertThat(kobject.getParent(), is(notNullValue()));
+        assertThat(kobject.getName(null), is(name));
+        assertThat(kobject.getParent(null), is(notNullValue()));
         assertThat(getPrimaryType(kobject), is(JcrNtLexicon.UNSTRUCTURED.getString()));
         assertThat(kobject.getRepository(), is((Repository)_repo));
-        assertThat(kobject.hasChild(KomodoLexicon.WorkspaceItem.ORIGINAL_FILE), is(true));
-        assertThat(kobject.getChild(KomodoLexicon.WorkspaceItem.ORIGINAL_FILE).getPrimaryType().getName(),
+        assertThat(kobject.hasChild(null, KomodoLexicon.WorkspaceItem.ORIGINAL_FILE), is(true));
+        assertThat(kobject.getChild(null, KomodoLexicon.WorkspaceItem.ORIGINAL_FILE).getPrimaryType(null).getName(),
                    is(JcrNtLexicon.FILE.getString()));
     }
 
     @Test
     public void shouldNotRemoveExistingItemsIfTryingToRemoveItemThatDoesNotExist() throws Exception {
-        // setup
         final String item1 = "shouldNotRemoveExistingItemsIfTryingToRemoveItemThatDoesNotExist-1";
-        _repo.add(null, item1);
         final String item2 = "shouldNotRemoveExistingItemsIfTryingToRemoveItemThatDoesNotExist-2";
-        _repo.add(null, item2);
+
+        { // setup
+            final UnitOfWork transaction = createTransaction("shouldNotRemoveExistingItemsIfTryingToRemoveItemThatDoesNotExist");
+            _repo.add(transaction, null, item1, null);
+            _repo.add(transaction, null, item2, null);
+            transaction.commit();
+        }
 
         try {
-            _repo.remove(item1, item2, "shouldNotRemoveExistingItemsIfTryingToRemoveItemThatDoesNotExist-doesNotExist");
+            final UnitOfWork transaction = createTransaction("shouldNotRemoveExistingItemsIfTryingToRemoveItemThatDoesNotExist");
+            _repo.remove(transaction,
+                         item1,
+                         item2,
+                         "shouldNotRemoveExistingItemsIfTryingToRemoveItemThatDoesNotExist-doesNotExist");
             fail();
         } catch (final KException e) {
             // tests
-            assertThat(_repo.get(item1), is(notNullValue()));
-            assertThat(_repo.get(item2), is(notNullValue()));
+            assertThat(_repo.get(null, item1), is(notNullValue()));
+            assertThat(_repo.get(null, item2), is(notNullValue()));
         }
     }
 
     @Test
     public void shouldRemoveMultipleWorkspaceRootItems() throws Exception {
         // setup
+        final UnitOfWork transaction = createTransaction("shouldRemoveMultipleWorkspaceRootItems");
         final String item1 = "shouldRemoveMultipleWorkspaceRootItems-1";
-        _repo.add(null, item1);
+        _repo.add(transaction, null, item1, null);
         final String item2 = "shouldRemoveMultipleWorkspaceRootItems-2";
-        _repo.add(null, item2);
-        _repo.remove(item1, item2);
+        _repo.add(transaction, null, item2, null);
+        _repo.remove(transaction, item1, item2);
+        transaction.commit();
 
         // tests
-        assertThat(_repo.get(item1), is(nullValue()));
-        assertThat(_repo.get(item2), is(nullValue()));
+        assertThat(_repo.get(null, item1), is(nullValue()));
+        assertThat(_repo.get(null, item2), is(nullValue()));
     }
 
     @Test
     public void shouldRemoveWorkspaceRootItem() throws Exception {
         // setup
+        final UnitOfWork transaction = createTransaction("shouldRemoveWorkspaceRootItem");
         final String name = "shouldRemoveWorkspaceRootItem";
-        _repo.add(null, name);
-        _repo.remove(name);
+        _repo.add(transaction, null, name, null);
+        _repo.remove(transaction, name);
 
         // tests
-        assertThat(_repo.get(name), is(nullValue()));
+        assertThat(_repo.get(null, name), is(nullValue()));
     }
 
 }

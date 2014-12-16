@@ -24,7 +24,7 @@ package org.komodo.ddl.importer.node;
 import org.komodo.ddl.importer.DdlNodeImporter;
 import org.komodo.ddl.importer.ImportMessages;
 import org.komodo.ddl.importer.ImportOptions;
-import org.komodo.relational.model.RelationalObjectFactory;
+import org.komodo.relational.model.legacy.RelationalObjectFactory;
 import org.modeshape.sequencer.ddl.node.AstNode;
 
 /**
