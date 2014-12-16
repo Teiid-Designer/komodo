@@ -28,6 +28,7 @@ Export-Package: org.komodo.spi,
  org.komodo.spi.runtime.version,
  org.komodo.spi.type,
  org.komodo.spi.udf,
+ org.komodo.spi.utils,
  org.komodo.spi.uuid,
  org.komodo.spi.validator,
  org.komodo.spi.xml

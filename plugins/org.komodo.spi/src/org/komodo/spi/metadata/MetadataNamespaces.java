@@ -21,13 +21,17 @@
  */
 package org.komodo.spi.metadata;
 
+import java.util.Map;
 import org.komodo.spi.annotation.Since;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.utils.KeyInValueHashMap;
+import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 
 /**
  *
  */
-public interface MetadataNamespaces {
+public interface MetadataNamespaces extends StringConstants {
 
     /**
      * Teiid Prefix
@@ -123,58 +127,70 @@ public interface MetadataNamespaces {
     /**
      * Enumerator of the namespaces
      */
-    public enum URI {
+    public class URI {
 
         /**
          * Salesforce
          */
-        SF(TEIID_SF, SF_URI),
+        public static URI SF = new URI(TEIID_SF, SF_URI);
 
         /**
          * Relational
          */
-        RELATIONAL(TEIID_RELATIONAL, RELATIONAL_URI),
+        public static URI RELATIONAL = new URI(TEIID_RELATIONAL, RELATIONAL_URI);
 
         /**
          * Web Services
          */
-        WS(TEIID_WS, WS_URI),
+        public static URI WS = new URI(TEIID_WS, WS_URI);
 
         /**
          * Mongo
          */
-        MONGO(TEIID_MONGO, MONGO_URI),
+        public static URI MONGO = new URI(TEIID_MONGO, MONGO_URI);
 
         /**
          * Odata
          */
-        ODATA(TEIID_ODATA, ODATA_URI),
+        public static URI ODATA = new URI(TEIID_ODATA, ODATA_URI);
 
         /**
          * Accumulo
          */
-        ACCUMULO(TEIID_ACCUMULO, ACCUMULO_URI),
+        public static URI ACCUMULO = new URI(TEIID_ACCUMULO, ACCUMULO_URI);
 
         /**
          * Excel
          */
-        EXCEL(TEIID_EXCEL, EXCEL_URI),
+        public static URI EXCEL = new URI(TEIID_EXCEL, EXCEL_URI);
 
         /**
          * JPA
          */
-        JPA(TEIID_JPA, JPA_URI);
+        public static URI JPA = new URI(TEIID_JPA, JPA_URI);
 
-        String prefix;
+        private String prefix;
 
-        String uri;
+        private String uri;
 
-        String unbracedURI;
+        private String unbracedURI;
 
-        private URI(String prefix, String uri) {
+        private static KeyInValueHashMap<String, URI> nsMap = null;
+
+        /**
+         * @param prefix uri prefix
+         * @param uri the uri
+         */
+        public URI(String prefix, String uri) {
             this.prefix = prefix;
             this.uri = uri;
-            this.unbracedURI = uri.replaceAll("{([\\S]+)}", "\\1"); //$NON-NLS-1$ //$NON-NLS-2$
+
+            this.unbracedURI = uri;
+            if (this.unbracedURI.startsWith(OPEN_BRACE))
+                this.unbracedURI = this.unbracedURI.substring(1);
+
+            if (this.unbracedURI.endsWith(CLOSE_BRACE))
+                this.unbracedURI = this.unbracedURI.substring(0, this.unbracedURI.length() - 1);
         }
 
         /**
@@ -197,5 +213,35 @@ public interface MetadataNamespaces {
         public String getUnbracedURI() {
             return this.unbracedURI;
         }
+
+        /**
+         * @return a map of the URIs keyed by their prefixes
+         */
+        public static Map<String, URI> map() {
+            if (nsMap == null) {
+                nsMap = new KeyInValueHashMap<String, MetadataNamespaces.URI>(new URIMapAdapter());
+                nsMap.add(SF);
+                nsMap.add(RELATIONAL);
+                nsMap.add(WS);
+                nsMap.add(MONGO);
+                nsMap.add(ODATA);
+                nsMap.add(ACCUMULO);
+                nsMap.add(EXCEL);
+                nsMap.add(JPA);
+            }
+
+            return nsMap;
+        }
     }
+
+    /**
+     * Adapter for getting the prefix key from a {@link URI} value
+     */
+    class URIMapAdapter implements KeyFromValueAdapter<String, URI> {
+        @Override
+        public String getKey(URI value) {
+            return value.getPrefix();
+        }
+    }
+
 }

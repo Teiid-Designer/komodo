@@ -175,6 +175,11 @@ public interface StringConstants {
     String HASH = "#"; //$NON-NLS-1$
 
     /**
+     * Ampersand Symbol
+     */
+    String AMPERSAND = "@"; //$NON-NLS-1$
+
+    /**
      * Open Angle Bracket
      */
 	String OPEN_ANGLE_BRACKET = "<"; //$NON-NLS-1$

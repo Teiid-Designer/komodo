@@ -29,8 +29,9 @@
                 "classname" : "org.komodo.modeshape.teiid.TeiidSqlSequencer",
                 "pathExpressions" :
                 [
-                    "://(*.ddl/ddl:statements/*)[@ddl:queryExpression] => /$1",
-                    "://(*.ddl/ddl:statements//*)[@teiidddl:queryExpression] => /$1"
+                    ":(//ddl:statements//*)[@ddl:queryExpression] => /$1",
+                    ":(//ddl:statements//*)[@teiidddl:queryExpression] => /$1",
+                    ":(//ddl:statements//*)[@teiidddl:statement] => /$1"
                 ]
             }
         }

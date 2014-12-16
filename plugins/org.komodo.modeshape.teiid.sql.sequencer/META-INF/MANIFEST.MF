@@ -11,6 +11,7 @@ Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
  org.komodo.teiid.client;bundle-version="1.0.0",
  org.komodo.utils;bundle-version="1.0.0"
 Export-Package: org.komodo.modeshape,
+ org.komodo.modeshape.teiid,
  org.komodo.modeshape.teiid.cnd,
  org.komodo.modeshape.teiid.parser
 Eclipse-RegisterBuddy: org.komodo.modeshape.lib

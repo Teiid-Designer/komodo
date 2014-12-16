@@ -172,8 +172,6 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
 
     protected static final String END_HINT = "*/"; //$NON-NLS-1$
 
-    protected static final char ID_ESCAPE_CHAR = '\"';
-
     private static final String NODE_KEY = "node"; //$NON-NLS-1$
 
     private static final String KEYWORD_KEY = "keyword"; //$NON-NLS-1$

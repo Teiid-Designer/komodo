@@ -38,6 +38,7 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
 import org.komodo.spi.query.sql.lang.JoinType;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 /**
  *
@@ -67,7 +68,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         //
 
         // DDL sequencer create the statements node
-        Node statementsNode = fileNode.getNode("ddl:statements");
+        Node statementsNode = fileNode.getNode(StandardDdlLexicon.STATEMENTS_CONTAINER);
         assertNotNull(statementsNode);
 
         // DDL Sequencer creates the 'Tweet' node 
@@ -159,7 +160,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         //
 
         // DDL sequencer create the statements node
-        Node statementsNode = fileNode.getNode("ddl:statements");
+        Node statementsNode = fileNode.getNode(StandardDdlLexicon.STATEMENTS_CONTAINER);
         assertNotNull(statementsNode);
 
         // DDL Sequencer creates the 'Tweet' node

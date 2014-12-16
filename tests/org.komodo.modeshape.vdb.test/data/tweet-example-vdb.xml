@@ -11,17 +11,17 @@
     </model>
     <model name="twitterview" type="VIRTUAL">
          <metadata type="DDL"><![CDATA[
-             CREATE VIRTUAL PROCEDURE getTweets(query varchar) RETURNS (created_on varchar(25), from_user varchar(25), to_user varchar(25),
+             CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) RETURNS TABLE (created_on varchar(25), from_user varchar(25), to_user varchar(25),
                  profile_image_url varchar(25), source varchar(25), text varchar(140)) AS
                 select tweet.* from
-                    (call twitter.invokeHTTP(action => 'GET', endpoint =>querystring('',query as "q"))) w,
+                    (EXEC twitter.invokeHTTP(action => 'GET', endpoint => querystring('', query as q))) AS w,
                     XMLTABLE('results' passing JSONTOXML('myxml', w.result) columns
                     created_on string PATH 'created_at',
                     from_user string PATH 'from_user',
                     to_user string PATH 'to_user',
                     profile_image_url string PATH 'profile_image_url',
                     source string PATH 'source',
-                    text string PATH 'text') tweet;
+                    text string PATH 'text') AS tweet;
                 CREATE VIEW Tweet AS select * FROM twitterview.getTweets;
         ]]> </metadata>
     </model>

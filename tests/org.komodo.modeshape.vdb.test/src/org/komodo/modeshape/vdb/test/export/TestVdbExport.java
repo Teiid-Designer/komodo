@@ -32,16 +32,16 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import javax.jcr.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import org.junit.Test;
-import org.komodo.modeshape.lib.LogConfigurator;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.test.utils.AbstractSequencerTest;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
@@ -474,7 +474,7 @@ public class TestVdbExport extends AbstractSequencerTest {
 
     private Document createDocument(String xml) throws Exception {
 
-        xml = xml.replaceAll(NEW_LINE, EMPTY_STRING);
+        xml = xml.replaceAll(NEW_LINE, SPACE);
         xml = xml.replaceAll(">[\\s]+<", CLOSE_ANGLE_BRACKET + OPEN_ANGLE_BRACKET);
         xml = xml.replaceAll("[\\s]+", SPACE);
         xml = xml.replaceAll("CDATA\\[[\\s]+", "CDATA[");
@@ -604,7 +604,7 @@ public class TestVdbExport extends AbstractSequencerTest {
     private boolean compareTextNode(org.w3c.dom.Text expected, org.w3c.dom.Text actual, StringBuilder errorMessages) {
         String expectedData = expected.getData().trim();
         String actualData = actual.getData().trim();
-        if (expectedData.equals(actualData))
+        if (expectedData.equalsIgnoreCase(actualData))
             return true;
 
         errorMessages.append(expected.getData() + " does not match " + actual.getData() + NEW_LINE);
@@ -634,21 +634,27 @@ public class TestVdbExport extends AbstractSequencerTest {
             fail(errorMessages.toString());
     }
 
-    @Test(timeout=180000)
+    @Test(timeout=3000000)
     public void testBasicVdbExport() throws Exception {
         Node twitterExampleNode = createTweetExampleNode();
 
-        CountDownLatch updateLatch = addPathLatchListener(1, ".*\\/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "\\/Tweet\\/" + TeiidSqlLexicon.Query.ID);
+        List<String> pathsToBeSequenced = new ArrayList<String>();
+        pathsToBeSequenced.add(".*\\/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "\\/getTweets\\/" + 
+                                                              TeiidSqlLexicon.Query.ID);
+        pathsToBeSequenced.add(".*\\/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "\\/Tweet\\/" +
+                                                              TeiidSqlLexicon.Query.ID);
+
+        CountDownLatch updateLatch = addPathLatchListener(1, pathsToBeSequenced);
 
         // Wait for the starting of the repository or timeout of 3 minutes
-        updateLatch.await(1, TimeUnit.MINUTES);
+        updateLatch.await(3, TimeUnit.MINUTES);
 
         traverse(twitterExampleNode);
 
         //
         // Sequencing completed, now verify
         //
-        Node tweet = verify(twitterExampleNode, "twitterview/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "/Tweet", TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
+        Node tweet = verify(twitterExampleNode,"twitterview/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "/Tweet", TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
         verify(tweet, TeiidSqlLexicon.Query.ID, TeiidSqlLexicon.Query.ID);
 
         //
@@ -677,22 +683,21 @@ public class TestVdbExport extends AbstractSequencerTest {
         compareDocuments(compareDoc, testDoc);
     }
 
-    @Test(timeout=180000)
+    @Test(timeout=3000000)
     public void testAllElementsVdbExport() throws Exception {
-        LogConfigurator.getInstance().setLevel(Level.FINE);
         Node allElementsNode = createAllElementsExampleNode();
 
         CountDownLatch updateLatch = addPathLatchListener(1, ".*\\/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "\\/Test\\/" + TeiidSqlLexicon.Query.ID);
 
         // Wait for the starting of the repository or timeout of 3 minutes
-        updateLatch.await(1, TimeUnit.MINUTES);
+        updateLatch.await(3, TimeUnit.MINUTES);
 
         traverse(allElementsNode);
 
         //
         // Sequencing completed, now verify
         //
-        Node testNode = verify(allElementsNode, "model-two/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "/Test", StandardDdlLexicon.TYPE_CREATE_VIEW_STATEMENT);
+        Node testNode = verify(allElementsNode, "model-two/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "/Test", TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
         verify(testNode, TeiidSqlLexicon.Query.ID, TeiidSqlLexicon.Query.ID);
 
         //
@@ -707,7 +712,6 @@ public class TestVdbExport extends AbstractSequencerTest {
         //
         String testXML = testWriter.toString();
         Document testDoc = createDocument(testXML);
-        System.out.println(testXML);
 
         //
         // Create comparison XML Document from the example xml files

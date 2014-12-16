@@ -174,7 +174,16 @@ public interface DataTypeManager {
      * @return Data type class
      */
     Class<?> getDataTypeClass(String name);
-    
+
+    /**
+     * Get the runtime data type name for the given data type id
+     *
+     * @param dataTypeId
+     *
+     * @return runtime type name or null
+     */
+    DataTypeName getDataTypeName(String dataTypeId);
+
     /**
      * Get the runtime type for the given class as a String
      *  
@@ -213,13 +222,22 @@ public interface DataTypeManager {
     
     /**
      * Get the length of the data type
-     * 
+     *
      * @param dataTypeName
-     * 
+     *
      * @return integer indicating data type limit
      */
     Integer getDataTypeLimit(String dataTypeName);
-    
+
+    /**
+     * Get the length of the data type
+     *
+     * @param dataTypeName
+     *
+     * @return integer indicating data type limit
+     */
+    int getDataTypeLimit(DataTypeName dataTypeName);
+
     /**
      * Get the valid characters of the data type
      * 

@@ -22,7 +22,8 @@
                 [
 						":(//*.tsql)/jcr:content[@jcr:data] => /tsql",
 						":(//*.ddl/ddl:statements//*)[@ddl:queryExpression] => /$1",
-						":(//*.ddl/ddl:statements//*)[@teiidddl:queryExpression] => /$1"
+						":(//*.ddl/ddl:statements//*)[@teiidddl:queryExpression] => /$1",
+						":(//*.ddl/ddl:statements//*)[@teiidddl:statement] => /$1"
                 ]
            	}
         }
