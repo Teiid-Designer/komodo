@@ -7,4 +7,5 @@ Bundle-Vendor: %Bundle-Vendor.0
 Fragment-Host: org.komodo.relational
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.junit;bundle-version="4.11.0"
+Require-Bundle: org.junit;bundle-version="4.11.0",
+ org.jboss.tools.locus.mockito;bundle-version="1.9.5"

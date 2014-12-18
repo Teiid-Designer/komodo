@@ -26,20 +26,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.legacy.RelationalObject;
 
 /**
  *
  */
 public class TestUtil {
-	
+
 	@SuppressWarnings("javadoc")
 	public static final Map<String,String> REL_OBJ_DEFAULTS = new HashMap<String,String>();
 	static {
-		REL_OBJ_DEFAULTS.put("NAME", null); //$NON-NLS-1$ 
-		REL_OBJ_DEFAULTS.put("NAMEINSOURCE", null); //$NON-NLS-1$ 
-		REL_OBJ_DEFAULTS.put("DESCRIPTION", null); //$NON-NLS-1$ 
+		REL_OBJ_DEFAULTS.put("NAME", null); //$NON-NLS-1$
+		REL_OBJ_DEFAULTS.put("NAMEINSOURCE", null); //$NON-NLS-1$
+		REL_OBJ_DEFAULTS.put("DESCRIPTION", null); //$NON-NLS-1$
 	}
 	@SuppressWarnings("javadoc")
 	public static final Map<String,String> TABLE_PROPERTY_DEFAULTS = new HashMap<String,String>();
@@ -54,14 +53,14 @@ public class TestUtil {
 	static {
 		PROCEDURE_PROPERTY_DEFAULTS.putAll(REL_OBJ_DEFAULTS);
 		PROCEDURE_PROPERTY_DEFAULTS.put("FUNCTION", "false"); //$NON-NLS-1$ //$NON-NLS-2$
-		PROCEDURE_PROPERTY_DEFAULTS.put("UPDATECOUNT", null); //$NON-NLS-1$ 
+		PROCEDURE_PROPERTY_DEFAULTS.put("UPDATECOUNT", null); //$NON-NLS-1$
 	}
 	@SuppressWarnings("javadoc")
 	public static final Map<String,String> RESULTSET_PROPERTY_DEFAULTS = new HashMap<String,String>();
 	static {
 		PROCEDURE_PROPERTY_DEFAULTS.putAll(REL_OBJ_DEFAULTS);
 		PROCEDURE_PROPERTY_DEFAULTS.put("FUNCTION", "false"); //$NON-NLS-1$ //$NON-NLS-2$
-		PROCEDURE_PROPERTY_DEFAULTS.put("UPDATECOUNT", null); //$NON-NLS-1$ 
+		PROCEDURE_PROPERTY_DEFAULTS.put("UPDATECOUNT", null); //$NON-NLS-1$
 	}
 	@SuppressWarnings("javadoc")
 	public static final Map<String,String> COLUMN_PROPERTY_DEFAULTS = new HashMap<String,String>();
@@ -70,10 +69,10 @@ public class TestUtil {
 		COLUMN_PROPERTY_DEFAULTS.put("SEARCHABILITY", "SEARCHABLE"); //$NON-NLS-1$ //$NON-NLS-2$
 		COLUMN_PROPERTY_DEFAULTS.put("SIGNED", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		COLUMN_PROPERTY_DEFAULTS.put("CHARACTEROCTETLENGTH", "0"); //$NON-NLS-1$ //$NON-NLS-2$
-		COLUMN_PROPERTY_DEFAULTS.put("DEFAULTVALUE", null); //$NON-NLS-1$ 
-		COLUMN_PROPERTY_DEFAULTS.put("CHARACTERSETNAME", null); //$NON-NLS-1$ 
-		COLUMN_PROPERTY_DEFAULTS.put("MAXIMUMVALUE", null); //$NON-NLS-1$ 
-		COLUMN_PROPERTY_DEFAULTS.put("MINIMUMVALUE", null); //$NON-NLS-1$ 
+		COLUMN_PROPERTY_DEFAULTS.put("DEFAULTVALUE", null); //$NON-NLS-1$
+		COLUMN_PROPERTY_DEFAULTS.put("CHARACTERSETNAME", null); //$NON-NLS-1$
+		COLUMN_PROPERTY_DEFAULTS.put("MAXIMUMVALUE", null); //$NON-NLS-1$
+		COLUMN_PROPERTY_DEFAULTS.put("MINIMUMVALUE", null); //$NON-NLS-1$
 		COLUMN_PROPERTY_DEFAULTS.put("AUTOINCREMENTED", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		COLUMN_PROPERTY_DEFAULTS.put("NATIVETYPE", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		COLUMN_PROPERTY_DEFAULTS.put("LENGTH", "10"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -85,13 +84,13 @@ public class TestUtil {
 		COLUMN_PROPERTY_DEFAULTS.put("DATATYPE", "string"); //$NON-NLS-1$ //$NON-NLS-2$
 		COLUMN_PROPERTY_DEFAULTS.put("CURRENCY", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		COLUMN_PROPERTY_DEFAULTS.put("RADIX", "0"); //$NON-NLS-1$ //$NON-NLS-2$
-		COLUMN_PROPERTY_DEFAULTS.put("FORMAT", null); //$NON-NLS-1$ 
-		COLUMN_PROPERTY_DEFAULTS.put("COLLATIONNAME", null); //$NON-NLS-1$ 
+		COLUMN_PROPERTY_DEFAULTS.put("FORMAT", null); //$NON-NLS-1$
+		COLUMN_PROPERTY_DEFAULTS.put("COLLATIONNAME", null); //$NON-NLS-1$
 		COLUMN_PROPERTY_DEFAULTS.put("UPDATEABLE", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		COLUMN_PROPERTY_DEFAULTS.put("CASESENSITIVE", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		COLUMN_PROPERTY_DEFAULTS.put("DISTINCTVALUECOUNT", "-1"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
     /**
      * Determine if the parent has child objects of supplied type that match the list of supplied names
      * @param parent the parent
@@ -107,12 +106,12 @@ public class TestUtil {
     			rObjs.add(relObj);
     		}
     	}
-    	
+
     	// Must have equal numbers
     	if(objectNames.size()!=rObjs.size()) {
     		return false;
     	}
-    	
+
     	for(RelationalObject rObj : rObjs) {
     		String objName = rObj.getName();
     		boolean found = false;
@@ -126,10 +125,10 @@ public class TestUtil {
     			return false;
     		}
     	}
-    	
+
     	return true;
     }
-    
+
     /**
      * Determine if the object properties match the expected properties
      * @param relObj the relational object
@@ -143,7 +142,7 @@ public class TestUtil {
     		if(!actualProps.keySet().contains(expectedName)) {
     			result = "Object properties do not contain property '"+expectedName+"'";  //$NON-NLS-1$ //$NON-NLS-2$
     			break;
-    		} 
+    		}
     		String expectedValue = expectedProps.get(expectedName);
     		String actualValue = actualProps.get(expectedName);
     		if(   (expectedValue==null && actualValue!=null)

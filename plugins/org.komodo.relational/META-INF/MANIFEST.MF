@@ -7,11 +7,10 @@ Bundle-Vendor: %pluginProvider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Localization: plugin
 Export-Package: org.komodo.relational,
- org.komodo.relational.compare,
- org.komodo.relational.constants,
- org.komodo.relational.core,
- org.komodo.relational.extension,
- org.komodo.relational.model
+ org.komodo.relational.model,
+ org.komodo.relational.model.legacy
 Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
- org.komodo.utils
+ org.komodo.utils,
+ org.komodo.core;bundle-version="1.0.0",
+ org.komodo.modeshape.lib;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy

@@ -23,8 +23,7 @@ package org.komodo.shell.api;
 
 import java.util.List;
 import java.util.Map;
-
-import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.legacy.RelationalObject;
 
 /**
  * The interface WorkspaceContext

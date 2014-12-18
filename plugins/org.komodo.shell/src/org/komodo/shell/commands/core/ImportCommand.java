@@ -10,12 +10,11 @@ package org.komodo.shell.commands.core;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.ddl.importer.DefaultDdlImportService;
 import org.komodo.ddl.importer.ImportMessages;
 import org.komodo.ddl.importer.ImportOptions;
 import org.komodo.ddl.importer.DdlImportService;
-import org.komodo.relational.model.Model;
+import org.komodo.relational.model.legacy.Model;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;

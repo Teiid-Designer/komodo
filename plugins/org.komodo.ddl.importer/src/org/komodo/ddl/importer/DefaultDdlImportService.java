@@ -27,16 +27,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.komodo.ddl.importer.Messages.DDL_IMPORTER;
 import org.komodo.ddl.importer.node.DerbyImporter;
 import org.komodo.ddl.importer.node.OracleImporter;
 import org.komodo.ddl.importer.node.PostgresImporter;
 import org.komodo.ddl.importer.node.StandardImporter;
 import org.komodo.ddl.importer.node.TeiidDdlImporter;
-import org.komodo.relational.compare.DifferenceGenerator;
-import org.komodo.relational.compare.DifferenceReport;
-import org.komodo.relational.model.Model;
+import org.komodo.relational.model.legacy.DifferenceGenerator;
+import org.komodo.relational.model.legacy.DifferenceReport;
+import org.komodo.relational.model.legacy.Model;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
 import org.modeshape.common.text.ParsingException;
@@ -186,7 +185,7 @@ public class DefaultDdlImportService implements DdlImportService {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.komodo.ddl.importer.ModelImporter#getDifferenceReport(org.komodo.relational.model.Model, org.komodo.relational.model.Model)
+	 * @see org.komodo.ddl.importer.ModelImporter#getDifferenceReport(org.komodo.relational.model.legacy.Model, org.komodo.relational.model.legacy.Model)
 	 */
 	@Override
 	public DifferenceReport getDifferenceReport(Model originalModel, Model targetModel) {

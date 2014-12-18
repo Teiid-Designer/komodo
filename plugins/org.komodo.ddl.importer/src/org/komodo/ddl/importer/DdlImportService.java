@@ -22,9 +22,8 @@
 package org.komodo.ddl.importer;
 
 import java.io.File;
-
-import org.komodo.relational.compare.DifferenceReport;
-import org.komodo.relational.model.Model;
+import org.komodo.relational.model.legacy.DifferenceReport;
+import org.komodo.relational.model.legacy.Model;
 
 /**
  *  DdlImportService interface

@@ -9,12 +9,11 @@ package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.komodo.relational.constants.RelationalConstants.TYPES;
-import org.komodo.relational.constants.RelationalConstants.TYPES_LITERAL;
-import org.komodo.relational.core.RelationalBuilder;
-import org.komodo.relational.core.RelationalBuilderImpl;
-import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.legacy.RelationalBuilder;
+import org.komodo.relational.model.legacy.RelationalBuilderImpl;
+import org.komodo.relational.model.legacy.RelationalObject;
+import org.komodo.relational.model.legacy.RelationalConstants.TYPES;
+import org.komodo.relational.model.legacy.RelationalConstants.TYPES_LITERAL;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;

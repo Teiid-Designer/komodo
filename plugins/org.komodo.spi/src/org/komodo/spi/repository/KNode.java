@@ -8,6 +8,7 @@
 package org.komodo.spi.repository;
 
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * A Komodo object.
@@ -22,19 +23,23 @@ public interface KNode {
     String getAbsolutePath() throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return the last segment of the absolute path (never empty)
      * @throws KException
      *         if an error occurs
      * @see #getAbsolutePath()
      */
-    String getName() throws KException;
+    String getName( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return the parent {@link KomodoObject Komodo object} (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    KomodoObject getParent() throws KException;
+    KomodoObject getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * @return the repository where this object is found (never <code>null</code>)
