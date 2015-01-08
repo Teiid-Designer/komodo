@@ -39,29 +39,6 @@ public class Messages {
     private static final String UNDERSCORE = "_"; //$NON-NLS-1$
 
     @SuppressWarnings( "javadoc" )
-    public enum ArgCheck {
-        isNonNegativeInt,
-        isNonPositiveInt,
-        isNegativeInt,
-        isPositiveInt,
-        isStringNonZeroLength,
-        isNonNull,
-        isNull,
-        isInstanceOf,
-        isCollectionNotEmpty,
-        isMapNotEmpty,
-        isArrayNotEmpty,
-        isNotSame,
-        contains,
-        containsKey;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
     public enum TeiidInstance {
         versionFailure,
         parentNotStartedMessage,
