@@ -23,6 +23,7 @@ import javax.jcr.ValueFactory;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.DataSource;
 import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.core.KomodoLexicon.LibraryComponent;
@@ -265,7 +266,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         /**
          * @return the JCR session used during the transaction (never <code>null</code>)
          */
-        protected Session getSession() {
+        public Session getSession() {
             return this.session;
         }
 
@@ -313,21 +314,26 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     }
 
     /**
+     * The root path of the repository.
+     */
+    private static String REPO_ROOT = (FORWARD_SLASH);
+
+    /**
      * The root path of the Komodo repository.
      */
-    static String KOMODO_ROOT = (FORWARD_SLASH + Komodo.NODE_TYPE + FORWARD_SLASH);
+    private static String KOMODO_ROOT = (REPO_ROOT + Komodo.NODE_TYPE);
 
     /**
      * The root path of the Komodo repository library.
      */
-    public static String LIBRARY_ROOT = (KOMODO_ROOT + Komodo.LIBRARY + FORWARD_SLASH);
-
-    protected static final KLog LOGGER = KLog.getLogger();
+    public static String LIBRARY_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.LIBRARY);
 
     /**
      * The root path of the Komodo repository workspace.
      */
-    public static String WORKSPACE_ROOT = (KOMODO_ROOT + Komodo.WORKSPACE + FORWARD_SLASH);
+    public static String WORKSPACE_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.WORKSPACE);
+
+    protected static final KLog LOGGER = KLog.getLogger();
 
     private final Set< RepositoryClient > clients = new HashSet< RepositoryClient >();
     private final Id id;
@@ -381,7 +387,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         try {
             if (WORKSPACE_ROOT.equals(workspacePath) && !session.nodeExists(WORKSPACE_ROOT)) {
-                create(transaction, WORKSPACE_ROOT);
+                komodoWorkspace(transaction);
             }
 
             final Node parent = session.getNode(workspacePath);
@@ -458,14 +464,30 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         }
     }
 
-    private KomodoObject create( final UnitOfWork transaction,
-                                 final String absolutePath ) throws KException {
+    private KomodoObject create( final UnitOfWork uow,
+                                 final String absolutePath, final String nodeType ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = createTransaction("repositoryimpl-create", false, null); //$NON-NLS-1$
+        }
+
         assert (transaction != null);
         final Session session = getSession(transaction);
 
         try {
-            final Node node = new JcrTools().findOrCreateNode(session, WORKSPACE_ROOT);
+            Node node;
+            if (nodeType == null)
+                node = new JcrTools().findOrCreateNode(session, absolutePath);
+            else
+                node = new JcrTools().findOrCreateNode(session, absolutePath, nodeType);
+
             final KomodoObject result = new ObjectImpl(this, node.getPath(), node.getIndex());
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return result;
         } catch (final Exception e) {
             if (e instanceof KException) {
@@ -689,10 +711,10 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Repository#get(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @see org.komodo.spi.repository.Repository#getFromWorkspace(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public KomodoObject get( final UnitOfWork uow,
+    public KomodoObject getFromWorkspace( final UnitOfWork uow,
                              final String path ) throws KException {
         UnitOfWork transaction = uow;
 
@@ -715,7 +737,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                 final Node node = session.getNode(workspacePath);
                 result = new ObjectImpl(this, workspacePath, node.getIndex());
             } else if (WORKSPACE_ROOT.equals(workspacePath)) {
-                result = create(transaction, WORKSPACE_ROOT);
+                result = komodoWorkspace(transaction);
             }
 
             if (uow == null) {
@@ -745,14 +767,14 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         String nodePath = path.trim();
 
         if (!nodePath.startsWith(LIBRARY_ROOT)) {
-            if ("/".equals(path)) { //$NON-NLS-1$
+            if (REPO_ROOT.equals(path)) {
                 return LIBRARY_ROOT;
             }
 
-            if (nodePath.charAt(0) == '/') {
-                nodePath = LIBRARY_ROOT + nodePath.substring(1); // remove leading slash
+            if (nodePath.charAt(0) == File.separatorChar) {
+                nodePath = LIBRARY_ROOT + FORWARD_SLASH + nodePath.substring(1); // remove leading slash
             } else {
-                nodePath = LIBRARY_ROOT + nodePath;
+                nodePath = LIBRARY_ROOT + FORWARD_SLASH + nodePath;
             }
         }
 
@@ -768,14 +790,14 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         String nodePath = path.trim();
 
         if (!nodePath.startsWith(WORKSPACE_ROOT)) {
-            if ("/".equals(path)) { //$NON-NLS-1$
+            if (REPO_ROOT.equals(path)) {
                 return WORKSPACE_ROOT;
             }
 
-            if (nodePath.charAt(0) == '/') {
-                nodePath = WORKSPACE_ROOT + nodePath.substring(1); // remove leading slash
+            if (nodePath.charAt(0) == File.separatorChar) {
+                nodePath = WORKSPACE_ROOT + FORWARD_SLASH + nodePath.substring(1); // remove leading slash
             } else {
-                nodePath = WORKSPACE_ROOT + nodePath;
+                nodePath = WORKSPACE_ROOT + FORWARD_SLASH + nodePath;
             }
         }
 
@@ -1243,4 +1265,28 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
     }
 
+    /**
+     * The komodo root in the repository, eg. /tko:komodo
+     *
+     * @param uow
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *
+     * @return the root komodo object
+     * @throws KException if an error occurs
+     */
+    protected KomodoObject komodoRoot(final UnitOfWork uow) throws KException {
+        return create(uow, KOMODO_ROOT, KomodoLexicon.Komodo.NODE_TYPE);
+    }
+
+    @Override
+    public KomodoObject komodoLibrary(final UnitOfWork uow) throws KException {
+        komodoRoot(uow);
+        return create(uow, LIBRARY_ROOT, KomodoLexicon.Library.NODE_TYPE);
+    }
+
+    @Override
+    public KomodoObject komodoWorkspace(final UnitOfWork uow) throws KException {
+        komodoRoot(uow);
+        return create(uow, WORKSPACE_ROOT, KomodoLexicon.Workspace.NODE_TYPE);
+    }
 }

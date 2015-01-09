@@ -7,8 +7,10 @@ Bundle-Vendor: %Bundle-Vendor.0
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit;bundle-version="4.11.0",
+ org.jboss.tools.locus.mockito;bundle-version="1.9.5",
  org.komodo.spi,
  org.komodo.modeshape.lib;bundle-version="1.0.0",
- org.komodo.utils;bundle-version="1.0.0"
+ org.komodo.utils;bundle-version="1.0.0",
+ org.komodo.core
 Export-Package: org.komodo.modeshape.test.utils
 Eclipse-RegisterBuddy: org.komodo.modeshape.lib

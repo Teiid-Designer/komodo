@@ -136,4 +136,9 @@ public interface Property extends KNode {
      */
     void set( final Object... values ) throws KException;
 
+    /**
+     * @return this property has multiple values
+     * @throws Exception
+     */
+    boolean isMultiple() throws Exception;
 }

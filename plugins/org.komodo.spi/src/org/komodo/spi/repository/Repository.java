@@ -55,7 +55,7 @@ public interface Repository {
     /**
      * Library and workspace searches using keywords will use one of these criteria.
      */
-    public enum KeywordCriteria {
+    enum KeywordCriteria {
 
         /**
          * All keywords must be present in the search result.
@@ -84,7 +84,7 @@ public interface Repository {
     /**
      * The repository state.
      */
-    public enum State {
+    enum State {
 
         /**
          * The repository cannot be reached.
@@ -106,7 +106,7 @@ public interface Repository {
     /**
      * The repository type.
      */
-    public enum Type {
+    enum Type {
 
         /**
          * The local workspace repository.
@@ -123,7 +123,7 @@ public interface Repository {
     /**
      * Represents one or more operations grouped together forming a {@link Repository repository} transaction.
      */
-    public interface UnitOfWork {
+    interface UnitOfWork {
 
         /**
          * Saves all changes made during the transaction. If this is a roll back transaction then {@link #rollback()} is called.
@@ -155,7 +155,7 @@ public interface Repository {
     /**
      * A listener notified when a unit of work completes.
      */
-    public interface UnitOfWorkListener {
+    interface UnitOfWorkListener {
 
         /**
          * @param error
@@ -184,7 +184,7 @@ public interface Repository {
      * @throws KException
      *         if the parent path does not exist or an error occurs
      */
-    public KomodoObject add( final UnitOfWork transaction,
+    KomodoObject add( final UnitOfWork transaction,
                              final String parentPath,
                              final String name,
                              final String primaryType ) throws KException;
@@ -213,7 +213,7 @@ public interface Repository {
      * @throws KException
      *         if an error occurs
      */
-    public UnitOfWork createTransaction( final String name,
+    UnitOfWork createTransaction( final String name,
                                          final boolean rollbackOnly,
                                          final UnitOfWorkListener callback ) throws KException;
 
@@ -230,7 +230,7 @@ public interface Repository {
      * @throws KException
      *         if parent path does not exist or an error occurs
      */
-    public ArtifactDescriptor[] find( final UnitOfWork transaction,
+    ArtifactDescriptor[] find( final UnitOfWork transaction,
                                       final List< String > keywords,
                                       final KeywordCriteria criteria,
                                       final String... artifactTypes ) throws KException;
@@ -244,10 +244,12 @@ public interface Repository {
      * @throws KException
      *         if parent path does not exist or an error occurs
      */
-    public ArtifactDescriptor[] find( final UnitOfWork transaction,
+    ArtifactDescriptor[] find( final UnitOfWork transaction,
                                       final String... artifactTypes ) throws KException;
 
     /**
+     * Get an object from the workspace part of the repository.
+     *
      * The path can be workspace relative or absolute.
      *
      * @param transaction
@@ -258,7 +260,7 @@ public interface Repository {
      * @throws KException
      *         if an error occurs
      */
-    public KomodoObject get( final UnitOfWork transaction,
+    KomodoObject getFromWorkspace( final UnitOfWork transaction,
                              final String path ) throws KException;
 
     /**
@@ -272,7 +274,7 @@ public interface Repository {
      * @throws KException
      *         if an error occurs
      */
-    public KomodoObject getUsingId( final UnitOfWork transaction,
+    KomodoObject getUsingId( final UnitOfWork transaction,
                                     final String jcrUuid ) throws KException;
 
     /**
@@ -303,7 +305,7 @@ public interface Repository {
      * @throws KException
      *         if an error occurs
      */
-    public KomodoObject importFile( final UnitOfWork transaction,
+    KomodoObject importFile( final UnitOfWork transaction,
                                     final File file,
                                     final String name,
                                     final String parentPath ) throws KException;
@@ -321,7 +323,7 @@ public interface Repository {
      * @throws KException
      *         if an error occurs
      */
-    public KomodoObject importResource( final UnitOfWork transaction,
+    KomodoObject importResource( final UnitOfWork transaction,
                                         final URL url,
                                         final String name,
                                         final String parentPath ) throws KException;
@@ -350,7 +352,7 @@ public interface Repository {
      * @throws KException
      *         if artifact already exists and not in overwrite mode or an error occurs
      */
-    public void publish( final UnitOfWork transaction,
+    void publish( final UnitOfWork transaction,
                          final boolean overwrite,
                          final ArtifactDescriptor descriptor,
                          final KomodoObject komodoObject ) throws KException;
@@ -363,7 +365,7 @@ public interface Repository {
      * @throws KException
      *         if a workspace path does not exist or an error occurs
      */
-    public void remove( final UnitOfWork transaction,
+    void remove( final UnitOfWork transaction,
                         final String... paths ) throws KException;
 
     /**
@@ -388,7 +390,7 @@ public interface Repository {
      * @throws KException
      *         if an artifact does not exist or an error occurs
      */
-    public Artifact[] retrieve( final UnitOfWork transaction,
+    Artifact[] retrieve( final UnitOfWork transaction,
                                 final String... artifactPaths ) throws KException;
 
     /**
@@ -399,7 +401,28 @@ public interface Repository {
      * @throws KException
      *         if an artifact does not exist in the library or an error occurs
      */
-    public void unpublish( final UnitOfWork transaction,
+    void unpublish( final UnitOfWork transaction,
                            final String... artifactPaths ) throws KException;
 
+    /**
+     * The komodo library in the repository, ie. /tko:komodo/tko:library
+     *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *
+     * @return the komodo library
+     * @throws KException if an error occurs
+     */
+    KomodoObject komodoLibrary( final UnitOfWork transaction) throws KException;
+
+    /**
+     * The komodo workspace in the repository, ie. /tko:komodo/tko:workspace
+     *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *
+     * @return the komodo workspace
+     * @throws KException if an error occurs
+     */
+    KomodoObject komodoWorkspace( final UnitOfWork transaction) throws KException;
 }
