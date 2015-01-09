@@ -60,6 +60,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrSession;
@@ -145,6 +147,10 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         return observationManager;
     }
 
+    protected TeiidVersion getTeiidVersion() {
+        return TeiidVersionProvider.getInstance().getTeiidVersion();
+    }
+
     @Override
     @Before
     public void beforeEach() throws Exception {
@@ -165,38 +171,73 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
                                             false);
     }
 
+    private class SequencerListener implements EventListener {
+
+        private final List<String> pathsToBeSequenced = new ArrayList<String>();
+
+        private final CountDownLatch updateLatch;
+
+        public SequencerListener(List<String> pathsToBeSequenced, CountDownLatch updateLatch) {
+            this.pathsToBeSequenced.addAll(pathsToBeSequenced);
+            this.updateLatch = updateLatch;
+        }
+
+        @Override
+        public void onEvent(EventIterator events) {
+            while (events.hasNext()) {
+                try {
+                    Event event = (Event)events.nextEvent();
+
+                    String nodePath = event.getPath();
+
+                    Iterator<String> pathSeqIter = pathsToBeSequenced.iterator();
+                    while (pathSeqIter.hasNext()) {
+                        String pathToBeSequenced = pathSeqIter.next();
+
+                        if (nodePath.matches(pathToBeSequenced))
+                            pathSeqIter.remove();
+                    }
+
+                    if (pathsToBeSequenced.isEmpty()) {
+                        KLog.getLogger().info("Testing latch pattern against node path: " + nodePath + ": Passed");
+                        updateLatch.countDown();
+                    } else {
+                        KLog.getLogger().info("Testing latch pattern against node path: " + nodePath + ": Failed");
+                    }
+
+                } catch (Exception ex) {
+                    fail(ex.getMessage());
+                }
+            }
+        }
+    }
+
     /**
      * @param countdown equivalent to number of sql query expressions to be sequenced
-     * @param pattern wilcarded pattern against which to compare the sequenced nodes
+     * @param pathsToBeSequenced wilcarded pattern against which to compare the sequenced nodes
      * @return the latch for awaiting the sequencing
      * @throws Exception
      */
-    protected CountDownLatch addPathLatchListener(int countdown, final String pattern) throws Exception {
+    protected CountDownLatch addPathLatchListener(int countdown, final List<String> pathsToBeSequenced) throws Exception {
         ObservationManager manager = getObservationManager();
         assertNotNull(manager);
 
         final CountDownLatch updateLatch = new CountDownLatch(countdown);
-
-        manager.addEventListener(new EventListener() {
-
-            @Override
-            public void onEvent(EventIterator events) {
-                while (events.hasNext()) {
-                    try {
-                        Event event = (Event) events.nextEvent();
-
-                        String nodePath = event.getPath();
-                        if (nodePath.matches(pattern))
-                            updateLatch.countDown();
-
-                    } catch (Exception ex) {
-                        fail(ex.getMessage());
-                    }
-                }
-            }
-        }, NODE_SEQUENCED, null, true, null, null, false);
+        manager.addEventListener(new SequencerListener(pathsToBeSequenced, updateLatch), NODE_SEQUENCED, null, true, null, null, false);
 
         return updateLatch;
+    }
+
+    /**
+     * @param countdown equivalent to number of sql query expressions to be sequenced
+     * @param pathsToBeSequenced wilcarded pattern against which to compare the sequenced nodes
+     * @return the latch for awaiting the sequencing
+     * @throws Exception
+     */
+    protected CountDownLatch addPathLatchListener(int countdown, String pathToBeSequenced) throws Exception {
+        List<String> pathsToBeSequenced = new ArrayList<String>();
+        pathsToBeSequenced.add(pathToBeSequenced);
+        return addPathLatchListener(countdown, pathsToBeSequenced);
     }
 
     @Override
@@ -379,6 +420,10 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
 
     protected void verifyBaseProperties( Node node, String primaryType, String mixinType) throws RepositoryException {
         verifyPrimaryType(node, primaryType);
+        if (mixinType == null)
+            return;
+
+        // Only if mixinType is not null do we check it
         verifyMixinType(node, mixinType);
     }
 
@@ -432,6 +477,10 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
 
     protected Node verify(Node parentNode, String relativePath, String mixinType) throws Exception {
         return verify(parentNode, relativePath, -1, mixinType);
+    }
+
+    protected Node verify(Node parentNode, String relativePath) throws Exception {
+        return verify(parentNode, relativePath, -1, null);
     }
 
     protected void expectSequencingFailure( Node sequencedNode ) throws Exception {

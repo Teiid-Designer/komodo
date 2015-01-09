@@ -37,6 +37,7 @@ import org.komodo.modeshape.AbstractNodeVisitor;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.modeshape.jcr.JcrLexicon;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -411,16 +412,17 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         // Sources
         visitChild(node, NodeTypeName.SOURCES.getId());
 
-        // metadata element
-        Property modelDefnProp = property(node, VdbLexicon.Model.MODEL_DEFINITION);
-        if (modelDefnProp != null) {
+        // Need to hand off to the DDL Visitor for extracting the DDL string
+        if (node.hasNode(StandardDdlLexicon.STATEMENTS_CONTAINER)) {
+            Node ddlStmt = node.getNode(StandardDdlLexicon.STATEMENTS_CONTAINER);
+            DdlNodeVisitor visitor = new DdlNodeVisitor(getVersion());
+            visitor.visit(ddlStmt);
+
             writeStartElement(VdbLexicon.ManifestIds.METADATA);
             Property metaTypeProp = property(node, VdbLexicon.Model.METADATA_TYPE);
             writeAttribute(VdbLexicon.ManifestIds.TYPE, toString(metaTypeProp));
 
-            // TODO
-            // Need to incorporate the DDL Visitor rather than using the modelDefinition property
-            writeCData(toString(modelDefnProp));
+            writeCData(visitor.getDdl());
 
             // end metadata tag
             writeEndElement();

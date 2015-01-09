@@ -154,13 +154,11 @@ import org.komodo.spi.query.sql.symbol.AggregateSymbol.Type;
 import org.komodo.spi.query.sql.symbol.ElementSymbol.DisplayMode;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.common.collection.EmptyIterator;
 import org.modeshape.jcr.JcrSession;
-import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
 /**
  *
@@ -173,8 +171,6 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
     protected static final String BEGIN_HINT = "/*+"; //$NON-NLS-1$
 
     protected static final String END_HINT = "*/"; //$NON-NLS-1$
-
-    protected static final char ID_ESCAPE_CHAR = '\"';
 
     private static final String NODE_KEY = "node"; //$NON-NLS-1$
 
@@ -212,8 +208,6 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
 
     private StringBuilder builder;
 
-    private DataTypeManager dataTypeManager;
-
     /**
      * Create new instance
      *
@@ -235,32 +229,6 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return this.session;
     }
 
-    protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
-        TeiidVersion minVersion = getVersion().getMinimumVersion();
-        return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
-    }
-
-    protected boolean isLessThanTeiidVersion(Version teiidVersion) {
-        TeiidVersion maxVersion = getVersion().getMaximumVersion();
-        return maxVersion.isLessThan(teiidVersion.get());
-    }
-
-    protected boolean isTeiid87OrGreater() {
-        return isTeiidVersionOrGreater(Version.TEIID_8_7);
-    }
-
-    /**
-     * @return data type manager service
-     */
-    public DataTypeManager getDataTypeManager() {
-        if (dataTypeManager == null) {
-            TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
-            return factory.getDataTypeManagerService(getVersion());
-        }
-
-        return dataTypeManager;
-    }
-
     /**
      * @param node node to be visited
      * @return SQL String representation of the given node
@@ -270,7 +238,6 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         if (node == null)
             return undefined();
 
-        this.dataTypeManager = getDataTypeManager();
         this.builder = new StringBuilder();
         this.session = node.getSession();
 

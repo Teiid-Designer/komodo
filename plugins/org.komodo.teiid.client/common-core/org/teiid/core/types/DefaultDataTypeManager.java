@@ -43,8 +43,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Since;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.BinaryType;
 import org.komodo.spi.type.DataTypeManager;
 import org.teiid.core.types.basic.AnyToObjectTransform;
@@ -528,6 +528,10 @@ public class DefaultDataTypeManager implements DataTypeManager {
     }
 
     private DefaultDataTypes findDefaultDataType(String id) {
+        if (isArrayType(id)) {
+            id = getComponentType(id);
+        }
+
         for (DefaultDataTypes defaultDataType : DefaultDataTypes.getValues(teiidVersion)) {
             if (defaultDataType.getId().equalsIgnoreCase(id)) {
                 return defaultDataType;
@@ -679,6 +683,21 @@ public class DefaultDataTypeManager implements DataTypeManager {
     }
 
     @Override
+    public DataTypeName getDataTypeName(String dataTypeId) {
+        if (dataTypeId == null)
+            return DefaultDataTypes.NULL.getDataTypeName();
+
+        DefaultDataTypes dataType = findDefaultDataType(dataTypeId);
+        if (dataType == null)
+            dataType = DefaultDataTypes.OBJECT;
+
+        if (isArrayType(dataTypeId))
+            return dataType.getDataTypeName().getArrayType();
+
+        return dataType.getDataTypeName();
+    }
+
+    @Override
     public String getDataTypeName(Class<?> typeClass) {
         if (typeClass == null) {
             return DefaultDataTypes.NULL.getId();
@@ -747,6 +766,18 @@ public class DefaultDataTypeManager implements DataTypeManager {
         }
 
         return -1;
+    }
+
+    @Override
+    public int getDataTypeLimit(DataTypeName dataTypeName) {
+        ArgCheck.isNotNull(dataTypeName);
+        ArgCheck.isTrue(AnnotationUtils.isApplicable(dataTypeName, teiidVersion),
+                        Messages.getString(Messages.ERR.ERR_100_001_0001, teiidVersion, dataTypeName));
+
+        DefaultDataTypes dataType = findDefaultDataType(dataTypeName);
+        checkDataType(dataType, dataTypeName.toString());
+
+        return dataType.getLimit();
     }
 
     @Override

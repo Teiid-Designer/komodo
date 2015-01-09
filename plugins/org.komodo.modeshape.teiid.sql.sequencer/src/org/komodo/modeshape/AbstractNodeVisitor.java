@@ -21,6 +21,11 @@
  */
 package org.komodo.modeshape;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import javax.jcr.ItemVisitor;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -30,8 +35,12 @@ import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.type.DataTypeManager;
+import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
 /**
  *
@@ -39,6 +48,8 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 public abstract class AbstractNodeVisitor implements ItemVisitor {
 
     private TeiidVersion version;
+
+    private DataTypeManager dataTypeManager;
 
     /**
      * @param version teiid version
@@ -50,6 +61,20 @@ public abstract class AbstractNodeVisitor implements ItemVisitor {
             this.version = version;
     }
 
+    protected boolean isTeiidVersionOrGreater(Version teiidVersion) {
+        TeiidVersion minVersion = getVersion().getMinimumVersion();
+        return minVersion.equals(teiidVersion.get()) || minVersion.isGreaterThan(teiidVersion.get());
+    }
+
+    protected boolean isLessThanTeiidVersion(Version teiidVersion) {
+        TeiidVersion maxVersion = getVersion().getMaximumVersion();
+        return maxVersion.isLessThan(teiidVersion.get());
+    }
+
+    protected boolean isTeiid87OrGreater() {
+        return isTeiidVersionOrGreater(Version.TEIID_8_7);
+    }
+
     /**
      * @return teiid version
      */
@@ -57,13 +82,104 @@ public abstract class AbstractNodeVisitor implements ItemVisitor {
         return version;
     }
 
+    /**
+     * @return data type manager service
+     */
+    public DataTypeManager getDataTypeManager() {
+        if (dataTypeManager == null) {
+            TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
+            return factory.getDataTypeManagerService(getVersion());
+        }
+
+        return dataTypeManager;
+    }
+
     protected abstract String undefined();
+
+    protected NodeType findMixinTypeByNamespace(Node node, String nspacePrefix) throws RepositoryException {
+        NodeType[] mixinTypes = node.getMixinNodeTypes();
+        if (mixinTypes.length == 0)
+            return null;
+
+        if (nspacePrefix == null)
+            return null;
+
+        if (! nspacePrefix.endsWith(StringConstants.COLON))
+            nspacePrefix = nspacePrefix + StringConstants.COLON;
+
+        for (NodeType mixinType : mixinTypes) {
+
+            if (mixinType.getName().startsWith(nspacePrefix))
+                return mixinType;
+        }
+
+        return null;
+    }
+
+    protected NodeType findMixinTypeById(Node node, String mixinTypeId) throws RepositoryException {
+        NodeType[] mixinTypes = node.getMixinNodeTypes();
+        if (mixinTypes.length == 0)
+            return null;
+
+        if (mixinTypeId == null)
+            return null;
+
+        for (NodeType mixinType : mixinTypes) {
+            if (mixinType.getName().equals(mixinTypeId))
+                return mixinType;
+        }
+
+        return null;
+    }
+
+    protected boolean hasMixinType(Node node, String mixinTypeId) throws RepositoryException {
+        if (node == null || mixinTypeId == null)
+            return false;
+
+        String[] components = mixinTypeId.split(StringConstants.COLON);
+        if (components == null)
+            return false;
+
+        NodeType mixinType = findMixinTypeById(node, mixinTypeId);
+        return mixinType != null ? mixinType.getName().equals(mixinTypeId) : false;
+    }
 
     protected void visitChild(Node node, String relNodePath) throws PathNotFoundException, RepositoryException {
         if (node.hasNode(relNodePath)) {
             Node child = node.getNode(relNodePath);
             child.accept(this);
         }
+    }
+
+    protected Collection<Node> getChildren(Node node) throws RepositoryException {
+        List<Node> children = new ArrayList<Node>();
+        NodeIterator nodeIterator = node.getNodes();
+
+        while (nodeIterator.hasNext()) {
+            Node child = nodeIterator.nextNode();
+            children.add(child);
+        }
+
+        return children;
+    }
+
+    protected Collection<Node> getChildren(Node node, String mixinTypeId) throws RepositoryException {
+        if (node == null)
+            return Collections.emptyList();
+
+        List<Node> children = new ArrayList<Node>();
+        NodeIterator nodeIterator = node.getNodes();
+
+        while (nodeIterator.hasNext()) {
+            Node child = nodeIterator.nextNode();
+
+            if (! hasMixinType(child, mixinTypeId))
+                continue;
+
+            children.add(child);
+        }
+
+        return children;
     }
 
     protected void visitFilteredChildren(Node node, String nodeTypeName) throws PathNotFoundException, RepositoryException {
@@ -93,6 +209,15 @@ public abstract class AbstractNodeVisitor implements ItemVisitor {
     
         Property property = node.getProperty(propName);
         return property;
+    }
+
+    protected List<Value> multiPropertyValues(Property refProp) throws RepositoryException {
+        List<Value> values = null;
+        if (! refProp.isMultiple())
+            values = Collections.singletonList(refProp.getValue());
+        else
+            values = Arrays.asList(refProp.getValues());
+        return values;
     }
 
     protected String toString(Property property) throws RepositoryException {

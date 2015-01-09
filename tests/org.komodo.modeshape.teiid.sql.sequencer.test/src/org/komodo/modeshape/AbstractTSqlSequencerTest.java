@@ -63,10 +63,6 @@ public abstract class AbstractTSqlSequencerTest extends AbstractSequencerTest {
         TeiidVersionProvider.getInstance().setTeiidVersion(teiidVersion);
     }
 
-    protected TeiidVersion getTeiidVersion() {
-        return TeiidVersionProvider.getInstance().getTeiidVersion();
-    }
-
     protected DataTypeManager getDataTypeService() {
         TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
         return factory.getDataTypeManagerService(getTeiidVersion()); 

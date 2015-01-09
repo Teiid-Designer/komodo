@@ -29,10 +29,11 @@
 				]
 			},
 			"DDL Sequencer" : {
-			   	"classname" : "DdlSequencer",
+				"classname" : "org.komodo.modeshape.lib.sequencer.KDdlSequencer",
 			   	"pathExpressions" :
 			   	[
-					":(//*)[@vdb:modelDefinition] => /$1",
+					":(//*.ddl/jcr:content)[@jcr:data] => /$1",
+					":(//*)[@vdb:modelDefinition] => /$1"
 			   	]
 			},
 		  	"Teiid SQL Sequencer" : {
@@ -41,6 +42,7 @@
 				[
 					":(//ddl:statements//*)[@ddl:queryExpression] => /$1",
 					":(//ddl:statements//*)[@teiidddl:queryExpression] => /$1"
+					":(//ddl:statements//*)[@teiidddl:statement] => /$1"
 				]
 		   	}
 		}

@@ -23,6 +23,7 @@
 package org.teiid.metadata;
 
 import org.komodo.spi.annotation.Since;
+import org.komodo.spi.metadata.MetadataNamespaces;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
@@ -87,6 +88,7 @@ public class ProcedureParameter extends BaseColumn {
 		return isVarArg;
 	}
 	
+    @Override
     public String toString() { 
         return getName()+(isVarArg?"... ":" ")+" "+getType(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }	
@@ -98,7 +100,7 @@ public class ProcedureParameter extends BaseColumn {
     	if (nativeType != null) {
     		return nativeType;
     	}
-    	nativeType = getProperty(AbstractMetadataRecord.RELATIONAL_URI + "native_type" , false); //$NON-NLS-1$
+    	nativeType = getProperty(MetadataNamespaces.RELATIONAL_URI + "native_type" , false); //$NON-NLS-1$
     	if (nativeType != null) {
     		this.setNativeType(nativeType);
     	}

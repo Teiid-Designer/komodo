@@ -24,6 +24,7 @@ package org.teiid.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.spi.metadata.MetadataNamespaces;
 
 /**
  * ForeignKeyRecordImpl
@@ -37,7 +38,7 @@ public class ForeignKey extends KeyRecord {
     private String referenceTableName;
     private List<String> referenceColumns;
 
-	public static final String ALLOW_JOIN = AbstractMetadataRecord.RELATIONAL_URI + "allow-join"; //$NON-NLS-1$
+	public static final String ALLOW_JOIN = MetadataNamespaces.RELATIONAL_URI + "allow-join"; //$NON-NLS-1$
     
     public ForeignKey() {
 		super(Type.Foreign);
@@ -59,6 +60,7 @@ public class ForeignKey extends KeyRecord {
      * @deprecated
      * @see #getReferenceKey()
      */
+    @Deprecated
     public KeyRecord getPrimaryKey() {
         return this.primaryKey;
     }
@@ -100,6 +102,7 @@ public class ForeignKey extends KeyRecord {
      * @deprecated
      * @see #setReferenceKey(KeyRecord)
      */
+    @Deprecated
     public void setPrimaryKey(KeyRecord primaryKey) {
         this.setReferenceKey(primaryKey);
     }

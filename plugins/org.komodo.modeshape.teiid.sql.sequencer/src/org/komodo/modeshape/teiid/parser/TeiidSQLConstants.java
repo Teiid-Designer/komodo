@@ -28,8 +28,8 @@ import java.util.Set;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.annotation.Since;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  *
@@ -55,6 +55,7 @@ public abstract class TeiidSQLConstants {
         String LOGICAL_OR = "||";
         String LOGICAL_AND = "&&";
         String DOLLAR = "$";
+        String ID_ESCAPE_CHAR = SPEECH_MARK;
     }
 
     public interface NonReserved {
