@@ -24,7 +24,7 @@ package org.teiid.core.util;
 
 import java.util.Collection;
 import java.util.Map;
-import org.teiid.runtime.client.Messages;
+import org.komodo.utils.Messages;
 
 
 /**

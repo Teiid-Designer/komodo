@@ -260,4 +260,11 @@ public interface KomodoObject extends KNode {
                       final String propertyName,
                       final Object... values ) throws KException;
 
+    /**
+     * Visit this object with the given visitor
+     *
+     * @param visitor the visitor
+     * @throws Exception if error occurs
+     */
+    void visit(KomodoObjectVisitor visitor) throws Exception;
 }

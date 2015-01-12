@@ -24,65 +24,32 @@ package org.komodo.repository.test;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import java.io.File;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.lang.reflect.Method;
+import javax.jcr.Node;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.modeshape.test.utils.AbstractLoggingTest;
-import org.komodo.repository.LocalRepository;
+import org.komodo.modeshape.test.utils.AbstractLocalRepositoryTest;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
+import org.komodo.repository.RepositoryTools;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.Id;
-import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.RepositoryClient;
-import org.komodo.spi.repository.RepositoryClientEvent;
-import org.komodo.spi.repository.RepositoryObserver;
 import org.modeshape.jcr.JcrNtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
-public class TestLocalRepository extends AbstractLoggingTest {
-
-    private static LocalRepository _repo = null;
-
-    @BeforeClass
-    public static void getLocalRepositoryInstance() throws Exception {
-
-        _repo = LocalRepository.getInstance();
-        assertThat(_repo.getState(), is(State.UNKNOWN));
-        assertThat(_repo.ping(), is(false));
-
-        final CountDownLatch updateLatch = new CountDownLatch(1);
-        final RepositoryObserver observer = new RepositoryObserver() {
-
-            @Override
-            public void stateChanged() {
-                updateLatch.countDown();
-            }
-        };
-
-        _repo.addObserver(observer);
-
-        // Start the repository
-        final RepositoryClient client = mock(RepositoryClient.class);
-        final RepositoryClientEvent event = RepositoryClientEvent.createStartedEvent(client);
-        _repo.notify(event);
-
-        // Wait for the starting of the repository or timeout of 1 minute
-        if (!updateLatch.await(1, TimeUnit.MINUTES)) {
-            throw new RuntimeException("Local repository did not start");
-        }
-    }
+public class TestLocalRepository extends AbstractLocalRepositoryTest implements StringConstants {
 
     private UnitOfWork createTransaction( final String name ) throws Exception {
         return _repo.createTransaction("transaction", false, null);
@@ -120,7 +87,7 @@ public class TestLocalRepository extends AbstractLoggingTest {
         // tests
         assertThat(rootNode, is(notNullValue()));
         assertThat(rootNode.getName(null), is(name));
-        assertThat(rootNode.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + name));
+        assertThat(rootNode.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + name));
     }
 
     @Test
@@ -177,7 +144,7 @@ public class TestLocalRepository extends AbstractLoggingTest {
 
     @Test
     public void shouldGetNullWhenWorkspaceItemDoesNotExist() throws Exception {
-        final KomodoObject doesNotExist = _repo.get(null, "shouldGetNullWhenWorkspaceItemDoesNotExist");
+        final KomodoObject doesNotExist = _repo.getFromWorkspace(null, "shouldGetNullWhenWorkspaceItemDoesNotExist");
         assertThat(doesNotExist, is(nullValue()));
     }
 
@@ -188,7 +155,7 @@ public class TestLocalRepository extends AbstractLoggingTest {
 
     @Test
     public void shouldGetWorkspaceRoot() throws Exception {
-        final KomodoObject rootNode = _repo.get(null, null);
+        final KomodoObject rootNode = _repo.getFromWorkspace(null, null);
         assertThat(rootNode, is(notNullValue()));
         assertThat(rootNode.getName(null), is(KomodoLexicon.Komodo.WORKSPACE));
     }
@@ -203,7 +170,7 @@ public class TestLocalRepository extends AbstractLoggingTest {
 
         // tests
         assertThat(kobject, is(notNullValue()));
-        assertThat(kobject.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + name));
+        assertThat(kobject.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + name));
         assertThat(kobject.getIndex(), is(0));
         assertThat(hasMixin(KomodoLexicon.WorkspaceItem.MIXIN_TYPE, kobject), is(true));
         assertThat(kobject.getName(null), is(name));
@@ -236,8 +203,8 @@ public class TestLocalRepository extends AbstractLoggingTest {
             fail();
         } catch (final KException e) {
             // tests
-            assertThat(_repo.get(null, item1), is(notNullValue()));
-            assertThat(_repo.get(null, item2), is(notNullValue()));
+            assertThat(_repo.getFromWorkspace(null, item1), is(notNullValue()));
+            assertThat(_repo.getFromWorkspace(null, item2), is(notNullValue()));
         }
     }
 
@@ -253,8 +220,8 @@ public class TestLocalRepository extends AbstractLoggingTest {
         transaction.commit();
 
         // tests
-        assertThat(_repo.get(null, item1), is(nullValue()));
-        assertThat(_repo.get(null, item2), is(nullValue()));
+        assertThat(_repo.getFromWorkspace(null, item1), is(nullValue()));
+        assertThat(_repo.getFromWorkspace(null, item2), is(nullValue()));
     }
 
     @Test
@@ -266,7 +233,40 @@ public class TestLocalRepository extends AbstractLoggingTest {
         _repo.remove(transaction, name);
 
         // tests
-        assertThat(_repo.get(null, name), is(nullValue()));
+        assertThat(_repo.getFromWorkspace(null, name), is(nullValue()));
+    }
+
+    private void verifyJcrNode(KomodoObject kObject) throws Exception {
+        assertTrue(kObject instanceof ObjectImpl);
+        ObjectImpl objImpl = (ObjectImpl) kObject;
+
+        Method nodeMethod = ObjectImpl.class.getDeclaredMethod("node", UnitOfWork.class);
+        nodeMethod.setAccessible(true);
+        Object node = nodeMethod.invoke(objImpl, (UnitOfWork) null);
+        assertTrue(node instanceof Node);
+    }
+
+    @Test
+    public void shouldTraverseEntireRepository() throws Exception {
+        KomodoObject komodoWksp = _repo.komodoWorkspace(null);
+        assertNotNull(komodoWksp);
+        assertEquals(FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE +
+                             FORWARD_SLASH + KomodoLexicon.Komodo.WORKSPACE,
+                             komodoWksp.getAbsolutePath());
+        verifyJcrNode(komodoWksp);
+
+        KomodoObject komodoRoot = komodoWksp.getParent(null);
+        assertNotNull(komodoRoot);
+        assertEquals(FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE, komodoRoot.getAbsolutePath());
+        verifyJcrNode(komodoRoot);
+
+        KomodoObject repoRoot = komodoRoot.getParent(null);
+        assertNotNull(repoRoot);
+        assertEquals(FORWARD_SLASH, repoRoot.getAbsolutePath());
+        verifyJcrNode(repoRoot);
+
+        String result = RepositoryTools.traverse(repoRoot);
+        assertNotNull(result);
     }
 
 }

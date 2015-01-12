@@ -70,6 +70,9 @@ public final class KEngine implements RepositoryClient, StringConstants {
      * @return the defaultRepository
      */
     public Repository getDefaultRepository() {
+        if (this.defaultRepository == null)
+            initDefaultRespository();
+
         return this.defaultRepository;
     }
 
@@ -89,8 +92,10 @@ public final class KEngine implements RepositoryClient, StringConstants {
     }
 
     /**
+     * Adds the repository to the engine. Does nothing if repository has already been added
+     *
      * @param repository the repository being added (cannot be <code>null</code>)
-     * @throws KException if the repository was not added
+     * @throws KException if error occurs
      */
     public void add(final Repository repository) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
@@ -122,16 +127,15 @@ public final class KEngine implements RepositoryClient, StringConstants {
         return Collections.unmodifiableSet(this.repositories);
     }
 
-    private void notifyListeners(final KEvent event) throws KException {
+    private void notifyListeners(final KEvent event) {
         ArgCheck.isNotNull(event);
 
         for (final KListener listener : this.listeners) {
             try {
                 listener.process(event);
             } catch (final Exception e) {
-                remove(listener);
                 // TODO i18n this
-                KLog.getLogger().error(String.format("%s unregistered listener '{0}' because it threw and exception", PREFIX, listener.getId())); //$NON-NLS-1$
+                KLog.getLogger().error(String.format("%s unregistered listener '%s' because it threw an exception", PREFIX, listener.getId())); //$NON-NLS-1$
             }
         }
     }
@@ -197,9 +201,13 @@ public final class KEngine implements RepositoryClient, StringConstants {
     /**
      * Initialise the local repository
      */
-    private void initDefaultRespository() throws KException {
+    private void initDefaultRespository() {
         defaultRepository = LocalRepository.getInstance();
-        add(defaultRepository);
+        try {
+            add(defaultRepository);
+        } catch (Exception ex) {
+            KLog.getLogger().error(ex.getLocalizedMessage(), ex);
+        }
     }
 
     /**

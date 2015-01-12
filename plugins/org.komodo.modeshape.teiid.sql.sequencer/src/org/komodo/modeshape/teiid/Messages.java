@@ -39,43 +39,6 @@ public class Messages {
     private static final String UNDERSCORE = "_"; //$NON-NLS-1$
 
     @SuppressWarnings( "javadoc" )
-    public enum ArgCheck {
-        isNonNegativeInt,
-        isNonPositiveInt,
-        isNegativeInt,
-        isPositiveInt,
-        isStringNonZeroLength,
-        isNonNull,
-        isNull,
-        isInstanceOf,
-        isCollectionNotEmpty,
-        isMapNotEmpty,
-        isArrayNotEmpty,
-        isNotSame,
-        contains,
-        containsKey;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum MMClob {
-        MMBlob_0,
-        MMBlob_1,
-        MMBlob_2,
-        MMBlob_3;
-
-        @Override
-        public String toString() {
-            // Cannot use dots in enums
-            return getEnumName(this) + DOT + name().replaceAll(UNDERSCORE, DOT);
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
     public enum TeiidSqlSequencer {
         ErrorSequencingContent,
         ErrorParsingContent;

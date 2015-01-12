@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.PropertyIterator;
 import javax.jcr.PropertyType;
 import javax.jcr.Session;
@@ -20,8 +21,10 @@ import javax.jcr.ValueFactory;
 import javax.jcr.nodetype.NodeType;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoObjectVisitor;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -29,12 +32,13 @@ import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrNtLexicon;
+import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrTools;
 
 /**
  * An implementation of a {@link KomodoObject Komodo object}.
  */
-public class ObjectImpl implements KomodoObject {
+public class ObjectImpl implements KomodoObject, StringConstants {
 
     private static final KLog LOGGER = KLog.getLogger();
 
@@ -68,6 +72,87 @@ public class ObjectImpl implements KomodoObject {
     }
 
     /**
+     * Implementation specific and not to be included on the interface!
+     *
+     * @param uow transaction for this operation. Can be null.
+     *
+     * @return the underlying object of this {@link ObjectImpl}
+     *
+     * @throws KException if an error occurs
+     */
+    protected Node node(UnitOfWork uow) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("kobject-node", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("kobject-node: transaction = {0}", uow); //$NON-NLS-1$
+        }
+
+        Node node = null;
+        Session session = getSession(transaction);
+        String absPath = getAbsolutePath();
+        PathNotFoundException throwEx = null;
+
+        try {
+
+            //
+            // Try finding the node with the conventional path as given
+            //
+            try {
+                node = session.getNode(absPath);
+            } catch (PathNotFoundException ex) {
+                // node cannot be found with convential path as given
+                throwEx = ex;
+            }
+
+            if (node == null && session instanceof JcrSession) {
+                JcrSession jcrSession = (JcrSession)session;
+
+                //
+                // Try finding the node with the path decoded
+                //
+                try {
+                    String decPath = jcrSession.decode(absPath);
+                    node = session.getNode(decPath);
+                } catch (PathNotFoundException ex) {
+                    // node cannot be found with decoded path
+                }
+
+                if (node == null) {
+                    //
+                    // Try finding the node with the path encoded
+                    //
+                    try {
+                        String encPath = jcrSession.encode(absPath);
+                        node = session.getNode(encPath);
+                    } catch (PathNotFoundException ex) {
+                        // node cannot be found with encoded path
+                    }
+                }
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            if (node == null) {
+                // throw the original path not found exception
+                throw throwEx;
+            }
+
+            // return the found node
+            return node;
+        } catch (final Exception e) {
+            throw handleError(transaction, transaction, e);
+        }
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @see org.komodo.spi.repository.KomodoObject#addChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
@@ -96,7 +181,7 @@ public class ObjectImpl implements KomodoObject {
         final String type = (StringUtils.isBlank(primaryType) ? JcrNtLexicon.UNSTRUCTURED.getString() : primaryType);
 
         try {
-            final Node node = getSession(transaction).getNode(getAbsolutePath()).addNode(name, type);
+            final Node node = node(transaction).addNode(name, type);
 
             if (uow == null) {
                 transaction.commit();
@@ -189,7 +274,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final Node node = getSession(transaction).getNode(getAbsolutePath()).getNode(name);
+            final Node node = node(transaction).getNode(name);
             final KomodoObject result = new ObjectImpl(getRepository(), node.getPath(), 0);
 
             if (uow == null) {
@@ -218,7 +303,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final NodeIterator itr = getSession(transaction).getNode(getAbsolutePath()).getNodes();
+            final NodeIterator itr = node(transaction).getNodes();
             final KomodoObject[] result = getChildren(transaction, itr);
 
             if (uow == null) {
@@ -267,7 +352,7 @@ public class ObjectImpl implements KomodoObject {
         KomodoObject[] result = null;
 
         try {
-            result = getChildren(transaction, getSession(transaction).getNode(getAbsolutePath()).getNodes(name));
+            result = getChildren(transaction, node(transaction).getNodes(name));
 
             if (uow == null) {
                 transaction.commit();
@@ -298,7 +383,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            KomodoObject[] kids = getChildren(transaction, getSession(transaction).getNode(getAbsolutePath()).getNodes());
+            KomodoObject[] kids = getChildren(transaction, node(transaction).getNodes());
 
             if (kids.length != 0) {
                 final List< KomodoObject > matches = new ArrayList< KomodoObject >(kids.length);
@@ -338,7 +423,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final Node node = getSession(transaction).getNode(getAbsolutePath());
+            final Node node = node(transaction);
             final NodeType[] nodeTypes = node.getMixinNodeTypes();
             final Descriptor[] result = new Descriptor[nodeTypes.length];
             int i = 0;
@@ -383,7 +468,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final String result = getSession(transaction).getNode(getAbsolutePath()).getName();
+            final String result = node(transaction).getName();
 
             if (uow == null) {
                 transaction.commit();
@@ -402,10 +487,6 @@ public class ObjectImpl implements KomodoObject {
      */
     @Override
     public KomodoObject getParent( final UnitOfWork uow ) throws KException {
-        if (RepositoryImpl.WORKSPACE_ROOT.equals(this.path)) {
-            return null;
-        }
-
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
@@ -415,11 +496,11 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final Node parent = getSession(transaction).getNode(getAbsolutePath()).getParent();
+            final Node parent = node(transaction).getParent();
             String parentPath = parent.getPath();
 
-            if (!parentPath.endsWith("/")) { //$NON-NLS-1$
-                parentPath += "/"; //$NON-NLS-1$
+            if (!parentPath.endsWith(FORWARD_SLASH)) {
+                parentPath += FORWARD_SLASH;
             }
 
             if (uow == null) {
@@ -448,7 +529,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final NodeType nodeType = getSession(transaction).getNode(getAbsolutePath()).getPrimaryNodeType();
+            final NodeType nodeType = node(transaction).getPrimaryNodeType();
 
             if (uow == null) {
                 transaction.commit();
@@ -478,7 +559,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final Node node = getSession(transaction).getNode(getAbsolutePath());
+            final Node node = node(transaction);
             Property result = null;
 
             if (node.hasProperty(name)) {
@@ -514,7 +595,7 @@ public class ObjectImpl implements KomodoObject {
         try {
             final List< String > names = new ArrayList< String >();
 
-            for (final PropertyIterator iter = getSession(transaction).getNode(getAbsolutePath()).getProperties(); iter.hasNext();) {
+            for (final PropertyIterator iter = node(transaction).getProperties(); iter.hasNext();) {
                 final String name = iter.nextProperty().getName();
                 names.add(name);
             }
@@ -591,7 +672,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final boolean result = getSession(transaction).getNode(getAbsolutePath()).hasNode(name);
+            final boolean result = node(transaction).hasNode(name);
 
             if (uow == null) {
                 transaction.commit();
@@ -619,7 +700,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final boolean result = getSession(transaction).getNode(getAbsolutePath()).hasNodes();
+            final boolean result = node(transaction).hasNodes();
 
             if (uow == null) {
                 transaction.commit();
@@ -705,7 +786,7 @@ public class ObjectImpl implements KomodoObject {
         assert (transaction != null);
 
         try {
-            final boolean result = getSession(transaction).getNode(getAbsolutePath()).hasProperty(name);
+            final boolean result = node(transaction).hasProperty(name);
 
             if (uow == null) {
                 transaction.commit();
@@ -734,7 +815,7 @@ public class ObjectImpl implements KomodoObject {
 
         try {
             final JcrTools tools = new JcrTools(true);
-            tools.printSubgraph(getSession(transaction).getNode(getAbsolutePath()));
+            tools.printSubgraph(node(transaction));
 
             if (uow == null) {
                 transaction.commit();
@@ -767,7 +848,7 @@ public class ObjectImpl implements KomodoObject {
         }
 
         try {
-            final Node node = getSession(transaction).getNode(getAbsolutePath());
+            final Node node = node(transaction);
 
             for (final String name : names) {
                 if (node.hasNode(name)) {
@@ -989,4 +1070,8 @@ public class ObjectImpl implements KomodoObject {
         return this.path;
     }
 
+    @Override
+    public void visit(KomodoObjectVisitor visitor) throws Exception {
+        visitor.visit(this);
+    }
 }

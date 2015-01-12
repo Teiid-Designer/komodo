@@ -64,6 +64,11 @@ public interface StringConstants {
     String TAB = "\t"; //$NON-NLS-1$
 
     /**
+     * AT sign.
+     */
+    String AT= "@"; //$NON-NLS-1$
+
+    /**
      * A Comma.
      */
     String COMMA = ","; //$NON-NLS-1$

@@ -7,12 +7,14 @@
  */
 package org.komodo.repository;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import javax.jcr.Binary;
 import javax.jcr.Node;
 import javax.jcr.PropertyType;
 import javax.jcr.Session;
@@ -75,9 +77,10 @@ public class PropertyImpl implements Property {
      * @param value
      *        the value being converted to a JCR value holder (can be <code>null</code>)
      * @return the JCR value holder (can be <code>null</code> if input is <code>null</code>)
+     * @throws Exception if an error occurs
      */
     public static Value createValue( final ValueFactory factory,
-                                     final Object value ) {
+                                     final Object value ) throws Exception {
         ArgCheck.isNotNull(factory, "factory"); //$NON-NLS-1$
 
         if (value == null ) {
@@ -106,6 +109,11 @@ public class PropertyImpl implements Property {
 
         if (value instanceof BigDecimal) {
             return factory.createValue(BigDecimal.class.cast(value));
+        }
+
+        if (value instanceof InputStream) {
+            Binary binary = factory.createBinary((InputStream) value);
+            return factory.createValue(binary);
         }
 
         return factory.createValue(value.toString());
@@ -559,7 +567,7 @@ public class PropertyImpl implements Property {
         assert (transaction != null);
 
         try {
-            final String result = getSession(transaction).getNode(getAbsolutePath()).getName();
+            final String result = getSession(transaction).getProperty(getAbsolutePath()).getName();
 
             if (uow == null) {
                 transaction.commit();
@@ -595,7 +603,7 @@ public class PropertyImpl implements Property {
         assert (transaction != null);
 
         try {
-            final Node parent = getSession(transaction).getNode(getAbsolutePath()).getParent();
+            final Node parent = getSession(transaction).getProperty(getAbsolutePath()).getParent();
             String parentPath = parent.getPath();
 
             if (!parentPath.endsWith("/")) { //$NON-NLS-1$
@@ -811,6 +819,26 @@ public class PropertyImpl implements Property {
         }
     }
 
+    @Override
+    public boolean isMultiple() throws Exception {
+        final UnitOfWork transaction = getRepository().createTransaction("property-set", false, null); //$NON-NLS-1$
+
+        try {
+            final Session session = getSession(transaction);
+            final javax.jcr.Property property = session.getProperty(this.path);
+            transaction.commit();
+            return property.isMultiple();
+        } catch (final Exception e) {
+            transaction.rollback();
+
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -820,5 +848,4 @@ public class PropertyImpl implements Property {
     public String toString() {
         return this.path;
     }
-
 }
