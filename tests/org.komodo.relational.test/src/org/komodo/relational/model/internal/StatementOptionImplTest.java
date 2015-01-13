@@ -12,7 +12,6 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
-import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.StatementOption;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 

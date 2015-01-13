@@ -14,7 +14,6 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
-import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;

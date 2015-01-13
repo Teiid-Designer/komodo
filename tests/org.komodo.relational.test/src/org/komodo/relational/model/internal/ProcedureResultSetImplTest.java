@@ -15,7 +15,6 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
-import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
 

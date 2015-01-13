@@ -5,20 +5,21 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.model;
+package org.komodo.relational.model.internal;
 
-import org.komodo.relational.model.internal.AccessPatternImpl;
-import org.komodo.relational.model.internal.ColumnImpl;
-import org.komodo.relational.model.internal.ForeignKeyImpl;
-import org.komodo.relational.model.internal.IndexImpl;
-import org.komodo.relational.model.internal.ParameterImpl;
-import org.komodo.relational.model.internal.PrimaryKeyImpl;
-import org.komodo.relational.model.internal.ProcedureImpl;
-import org.komodo.relational.model.internal.ProcedureResultSetImpl;
-import org.komodo.relational.model.internal.StatementOptionImpl;
-import org.komodo.relational.model.internal.TableImpl;
-import org.komodo.relational.model.internal.UniqueConstraintImpl;
-import org.komodo.relational.model.internal.ViewImpl;
+import org.komodo.relational.model.AccessPattern;
+import org.komodo.relational.model.Column;
+import org.komodo.relational.model.ForeignKey;
+import org.komodo.relational.model.Index;
+import org.komodo.relational.model.Parameter;
+import org.komodo.relational.model.PrimaryKey;
+import org.komodo.relational.model.Procedure;
+import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.StatementOption;
+import org.komodo.relational.model.Table;
+import org.komodo.relational.model.UniqueConstraint;
+import org.komodo.relational.model.View;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;

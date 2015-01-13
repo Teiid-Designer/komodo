@@ -14,7 +14,6 @@ import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
-import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;

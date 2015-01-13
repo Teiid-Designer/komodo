@@ -18,7 +18,6 @@ import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.PrimaryKey;
-import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;

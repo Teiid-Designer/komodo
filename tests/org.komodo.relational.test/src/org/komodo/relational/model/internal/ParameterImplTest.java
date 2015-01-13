@@ -18,7 +18,6 @@ import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
-import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;

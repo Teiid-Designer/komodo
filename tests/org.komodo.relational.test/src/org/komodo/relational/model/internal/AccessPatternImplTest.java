@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
-import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.repository.Repository.UnitOfWork;
