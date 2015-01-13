@@ -32,6 +32,7 @@ import org.komodo.repository.internal.ModeshapeEngineThread.RequestType;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.KLog;
 
 /**
  * A repository installed on the local machine, using the modeshape engine and repository.
@@ -211,7 +212,8 @@ public class LocalRepository extends RepositoryImpl {
                     @Override
                     public void errorOccurred( final Throwable error ) {
                         if (getCallback() == null) {
-                            throw new RuntimeException(error);
+                            KLog.getLogger().error(error.getMessage(), error);
+                            return; // No callback so error can only be logged
                         }
 
                         getCallback().errorOccurred(error);
@@ -232,7 +234,7 @@ public class LocalRepository extends RepositoryImpl {
                 boolean noTimeout = false;
 
                 try {
-                    noTimeout = latch.await(3, TimeUnit.SECONDS);
+                    noTimeout = latch.await(3, TimeUnit.MINUTES);
                 } catch (final Exception e) {
                     callback.equals(e);
                 }
@@ -259,7 +261,8 @@ public class LocalRepository extends RepositoryImpl {
                 @Override
                 public void errorOccurred( final Throwable error ) {
                     if (getCallback() == null) {
-                        throw new RuntimeException(error);
+                        KLog.getLogger().error(error.getMessage(), error);
+                        return; // No callback so error can only be logged
                     }
 
                     getCallback().errorOccurred(error);
@@ -281,7 +284,7 @@ public class LocalRepository extends RepositoryImpl {
             boolean noTimeout = false;
 
             try {
-                noTimeout = latch.await(3, TimeUnit.SECONDS);
+                noTimeout = latch.await(3, TimeUnit.MINUTES);
             } catch (final Exception e) {
                 callback.equals(e);
             }
