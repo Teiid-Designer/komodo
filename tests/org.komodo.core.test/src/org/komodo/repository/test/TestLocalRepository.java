@@ -139,7 +139,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest implements 
     public void shouldGetId() {
         final Id id = _repo.getId();
         assertThat(id, is(notNullValue()));
-        assertThat(id.getName(), is(StringConstants.LOCAL_REPOSITORY));
+        assertThat(id.getWorkspaceName(), is(StringConstants.DEFAULT_LOCAL_WORKSPACE_NAME));
     }
 
     @Test

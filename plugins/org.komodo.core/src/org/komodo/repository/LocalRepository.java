@@ -44,21 +44,34 @@ public class LocalRepository extends RepositoryImpl {
 
     private static class LocalRepositoryId implements Id {
 
-        private final URL configPath = LocalRepository.class.getResource(LOCAL_REPOSITORY_CONFIG);
+        private final URL configPath;
+        private final String workspaceName;
 
-        @Override
-        public String getName() {
-            return LOCAL_REPOSITORY;
+        private LocalRepositoryId(final String configPath,
+                                  final String workspaceName ) {
+            this.configPath = LocalRepository.class.getResource(configPath);
+            this.workspaceName = workspaceName;
         }
 
-        @Override
-        public String getUrl() {
-            return LOCAL_REPOSITORY;
+        private LocalRepositoryId(final URL configPathUrl,
+                                  final String workspaceName ) {
+            this.configPath = configPathUrl;
+            this.workspaceName = workspaceName;
         }
 
         @Override
         public URL getConfiguration() {
             return configPath;
+        }
+
+        @Override
+        public String getUrl() {
+            return this.configPath.toString();
+        }
+
+        @Override
+        public String getWorkspaceName() {
+            return this.workspaceName;
         }
 
     }
@@ -77,10 +90,23 @@ public class LocalRepository extends RepositoryImpl {
     private ModeshapeEngineThread engineThread;
 
     /**
-     * Create instance
+     * Create an instance if a local repository using the specified configuration file.
+     *
+     * @param configPathUrl
+     *        the URL of the configuration file (cannot be empty)
+     * @param workspaceName
+     *        the name of the repository workspace in the configuration file (cannot be empty)
+     */
+    public LocalRepository( final URL configPathUrl,
+                            final String workspaceName ) {
+        super(Type.LOCAL, new LocalRepositoryId(configPathUrl, workspaceName));
+    }
+
+    /**
+     * Create shared instance of local repository using default configuration file and workspace name.
      */
     private LocalRepository() {
-        super(Type.LOCAL, new LocalRepositoryId());
+        super(Type.LOCAL, new LocalRepositoryId(LOCAL_REPOSITORY_CONFIG, DEFAULT_LOCAL_WORKSPACE_NAME));
     }
 
     @Override
@@ -275,7 +301,7 @@ public class LocalRepository extends RepositoryImpl {
         if (engineThread != null && !engineThread.isAlive()) throw new RuntimeException(
                                                                                         Messages.getString(Messages.LocalRepository.EngineThread_Died));
 
-        engineThread = new ModeshapeEngineThread(getId().getConfiguration());
+        engineThread = new ModeshapeEngineThread(getId().getConfiguration(), getId().getWorkspaceName());
         engineThread.start();
     }
 
@@ -308,7 +334,39 @@ public class LocalRepository extends RepositoryImpl {
         if (event.getType() == RepositoryClientEvent.EventType.STARTED) {
             // Start the modeshape engine if not already started
             startRepository();
+        } else if (event.getType() == RepositoryClientEvent.EventType.SHUTTING_DOWN) {
+            stopRepository();
         }
+    }
+
+    private void stopRepository() {
+        RequestCallback callback = new RequestCallback() {
+
+            /**
+             * {@inheritDoc}
+             *
+             * @see org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback#errorOccurred(java.lang.Throwable)
+             */
+            @Override
+            public void errorOccurred( final Throwable error ) {
+                throw new RuntimeException(error);
+            }
+
+            /**
+             * {@inheritDoc}
+             *
+             * @see org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback#respond(java.lang.Object)
+             */
+            @Override
+            public void respond( final Object results ) {
+                if (!engineThread.isEngineStarted()) {
+                    LocalRepository.this.state = State.UNKNOWN;
+                    notifyObservers();
+                }
+            }
+        };
+
+        this.engineThread.accept(new Request(RequestType.STOP, callback));
     }
 
 }

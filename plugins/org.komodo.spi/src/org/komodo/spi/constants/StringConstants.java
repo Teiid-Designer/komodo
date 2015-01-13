@@ -325,8 +325,8 @@ public interface StringConstants {
   String PRIVATE = "private"; //$NON-NLS-1$
 
   /**
-   * local repository name
+   * The default local repository workspace name (cannot be empty and must match the workspace name in the config file).
    */
-  String LOCAL_REPOSITORY = "local_repository"; //$NON-NLS-1$
+  String DEFAULT_LOCAL_WORKSPACE_NAME = "komodoLocalWorkspace"; //$NON-NLS-1$
 }
 
