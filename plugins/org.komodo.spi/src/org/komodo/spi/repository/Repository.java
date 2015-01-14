@@ -42,14 +42,15 @@ public interface Repository {
         URL getConfiguration();
 
         /**
-         * @return the repository name (cannot be empty)
-         */
-        String getName();
-
-        /**
          * @return the repository URL (cannot be empty)
          */
         String getUrl();
+
+        /**
+         * @return the repository workspace name (cannot be empty)
+         */
+        String getWorkspaceName();
+
     }
 
     /**

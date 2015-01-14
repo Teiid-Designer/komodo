@@ -78,4 +78,14 @@ public final class RepositoryClientEvent {
     public static RepositoryClientEvent createStartedEvent(RepositoryClient source) {
         return new RepositoryClientEvent(EventType.STARTED, source);
     }
+
+    /**
+     * @param source the source of the new event
+     *
+     * @return event representing the given client has shut down (never <code>null</code>)
+     */
+    public static RepositoryClientEvent createShuttingDownEvent(RepositoryClient source) {
+        return new RepositoryClientEvent(EventType.SHUTTING_DOWN, source);
+    }
+
 }

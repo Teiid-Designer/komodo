@@ -192,16 +192,21 @@ public class ModeshapeEngineThread extends Thread {
     private volatile boolean stop = false;
 
     private final URL configPath;
+    private final String workspaceName;
 
     /**
      * Create this thread and give it a name
      *
      * @param configPath
      *        path to configuration file
+     * @param workspaceName
+     *        the repository workspace name (cannot be empty)
      */
-    public ModeshapeEngineThread( URL configPath ) {
+    public ModeshapeEngineThread( URL configPath,
+                                  final String workspaceName ) {
         super("Modeshape Engine Thread"); //$NON-NLS-1$
         this.configPath = configPath;
+        this.workspaceName = workspaceName;
         setDaemon(true);
     }
 
@@ -236,8 +241,8 @@ public class ModeshapeEngineThread extends Thread {
             throw new KException(Messages.getString(Messages.LocalRepository.Engine_Is_Stopped));
         }
 
-        // the workspace name must agree with the local-repository-config.json file
-        return this.repository.login(null, "komodoLocalWorkspace"); //$NON-NLS-1$
+        // the workspace name must agree with the config file
+        return this.repository.login(null, this.workspaceName);
     }
 
     private boolean isEngineStopped() {

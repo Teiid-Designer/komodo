@@ -163,9 +163,7 @@
 /*
  * A VDB manifest model definition found in the library. The node name is the model name.
  */
-[tko:vdbModel] > nt:unstructured, tko:libraryComponent
-  - vdb:metadataType (string) = 'DDL' autocreated
-  - vdb:modelDefinition (string)
+[tko:vdbModel] > vdb:declarativeModel, tko:libraryComponent
   + * (tko:vdbModelSource) copy
   + * (nt:file) copy
 
