@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.komodo.core.event.KEvent;
 import org.komodo.core.event.KListener;
+import org.komodo.modeshape.lib.LogConfigurator;
 import org.komodo.repository.LocalRepository;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -63,7 +64,12 @@ public final class KEngine implements RepositoryClient, StringConstants {
     private LocalRepository defaultRepository;
 
     private KEngine() {
-        // Nothing to do
+        // Initialise the logging system
+        try {
+            LogConfigurator.getInstance();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -84,7 +90,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
         ArgCheck.isNotNull(listener, "listener"); //$NON-NLS-1$
 
         if (this.listeners.add(listener)) {
-            KLog.getLogger().debug(String.format("%s added listener '{0}'", PREFIX, listener.getId())); //$NON-NLS-1$
+            KLog.getLogger().debug(String.format("%s added listener '%s'", PREFIX, listener.getId())); //$NON-NLS-1$
         } else {
             // TODO i18n this
             throw new KException(String.format("Listener '%s' was not added", listener.getId())); //$NON-NLS-1$
@@ -102,16 +108,13 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
         if (this.repositories.add(repository)) {
             repository.addClient(this);
-            KLog.getLogger().debug(String.format("%s added repository '{0}'", PREFIX, repository.getId())); //$NON-NLS-1$
-            notifyListeners(null); // TODO create event
+            KLog.getLogger().debug(String.format("%s added repository '%s'", PREFIX, repository.getId().getUrl())); //$NON-NLS-1$
+            notifyListeners(KEvent.repositoryAddedEvent(repository));
 
             // Notify this repository if it has started
             if (State.STARTED == state)
                 repository.notify(RepositoryClientEvent.createStartedEvent(this));
 
-        } else {
-            // TODO i18n this
-            throw new KException(String.format("Repository '%s' was not added", repository.getId())); //$NON-NLS-1$
         }
     }
 
@@ -156,7 +159,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
         ArgCheck.isNotNull(listener, "listener"); //$NON-NLS-1$
 
         if (this.listeners.remove(listener)) {
-            KLog.getLogger().debug(String.format("%s removed listener '{0}'", PREFIX, listener.getId())); //$NON-NLS-1$
+            KLog.getLogger().debug(String.format("%s removed listener '%s'", PREFIX, listener.getId())); //$NON-NLS-1$
         } else {
             // TODO i18n this
             throw new KException(String.format("Listener '%s' was not removed", listener.getId())); //$NON-NLS-1$
@@ -173,11 +176,11 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
         if (this.repositories.remove(repository)) {
             repository.removeClient(this);
-            KLog.getLogger().debug(String.format("%s removed repository '{0}'", PREFIX, repository.getId())); //$NON-NLS-1$
-            notifyListeners(null); // TODO create event
+            KLog.getLogger().debug(String.format("%s removed repository '%s'", PREFIX, repository.getId().getUrl())); //$NON-NLS-1$
+            notifyListeners(KEvent.repositoryRemovedEvent(repository));
         } else {
             // TODO i18n this
-            throw new KException(String.format("Repository '%s' was not removed", repository.getId())); //$NON-NLS-1$
+            throw new KException(String.format("Repository '%s' was not removed", repository.getId().getUrl())); //$NON-NLS-1$
         }
     }
 
@@ -189,8 +192,13 @@ public final class KEngine implements RepositoryClient, StringConstants {
             // TODO implement shutdown (write saved state, disconnect to repos, etc.)
             this.state = State.SHUTDOWN;
             KLog.getLogger().debug("Komodo engine successfully shutdown"); //$NON-NLS-1$
-            notifyRepositories(null); // TODO create event
-            notifyListeners(null); // TODO create event
+
+            // Notify any registered repositories that this engine has shutdown
+            notifyRepositories(RepositoryClientEvent.createShuttingDownEvent(this));
+
+            // Notify any 3rd-party listeners that this engine has shutdown
+            notifyListeners(KEvent.engineShutdownEvent());
+
         } catch (final Exception e) {
             this.state = State.ERROR;
             // TODO i18n this
@@ -220,13 +228,13 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
             // TODO implement start (read any saved session state, connect to repos if auto-connect, etc.)
             this.state = State.STARTED;
-            KLog.getLogger().debug("Komodo engine successfully shutdown"); //$NON-NLS-1$
+            KLog.getLogger().debug("Komodo engine successfully started"); //$NON-NLS-1$
 
             // Notify any registered repositories that this engine has started
             notifyRepositories(RepositoryClientEvent.createStartedEvent(this));
 
             // Notify any 3rd-party listeners that this engine has started
-            notifyListeners(null); // TODO create event
+            notifyListeners(KEvent.engineStartedEvent());
 
         } catch (final Exception e) {
             this.state = State.ERROR;

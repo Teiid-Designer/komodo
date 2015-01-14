@@ -22,7 +22,7 @@
 
 		<k.tpc.groupId>org.jboss.tools.integration-stack</k.tpc.groupId>
 		<k.tpc.artifactId>target-platform</k.tpc.artifactId>
-		<k.tpc.version>4.2.0.Beta1b</k.tpc.version>
+		<k.tpc.version>4.2.0.Final</k.tpc.version>
 		<k.tpc.type>target</k.tpc.type>
 		<k.tpc.classifier>base</k.tpc.classifier>
 	</properties>
