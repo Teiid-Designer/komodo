@@ -528,10 +528,6 @@ public class DefaultDataTypeManager implements DataTypeManager {
     }
 
     private DefaultDataTypes findDefaultDataType(String id) {
-        if (isArrayType(id)) {
-            id = getComponentType(id);
-        }
-
         for (DefaultDataTypes defaultDataType : DefaultDataTypes.getValues(teiidVersion)) {
             if (defaultDataType.getId().equalsIgnoreCase(id)) {
                 return defaultDataType;
@@ -687,14 +683,20 @@ public class DefaultDataTypeManager implements DataTypeManager {
         if (dataTypeId == null)
             return DefaultDataTypes.NULL.getDataTypeName();
 
-        DefaultDataTypes dataType = findDefaultDataType(dataTypeId);
+        DefaultDataTypes dataType = null;
+        boolean isArray = isArrayType(dataTypeId);
+        
+        if (isArray)
+            dataTypeId = getComponentType(dataTypeId);
+
+        dataType = findDefaultDataType(dataTypeId);
         if (dataType == null)
             dataType = DefaultDataTypes.OBJECT;
 
-        if (isArrayType(dataTypeId))
+        if (isArray)
             return dataType.getDataTypeName().getArrayType();
-
-        return dataType.getDataTypeName();
+        else
+            return dataType.getDataTypeName();
     }
 
     @Override

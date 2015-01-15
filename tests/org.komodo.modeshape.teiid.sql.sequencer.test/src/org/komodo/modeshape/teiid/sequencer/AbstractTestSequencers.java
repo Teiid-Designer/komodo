@@ -148,7 +148,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
                      .append("o.amount as amount ")
                      .append("FROM Customer C INNER JOIN o ON c.id = o.customerid; ");
 
-        CountDownLatch updateLatch = addPathLatchListener(3, ".*\\/ddl:statements\\/.*\\/tsql:query");
+        CountDownLatch updateLatch = addPathLatchListener(4, ".*\\/ddl:statements\\/.*\\/tsql:query");
 
         Node fileNode = prepareSequence(ddl.toString(), SequenceType.DDL);
 

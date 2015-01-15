@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.concurrent.Future;
 import javax.jcr.ImportUUIDBehavior;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -70,7 +71,8 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
     private static void stopRepository() throws Exception {
         try {
             clearRepository();
-            engine.shutdown();
+            Future<Boolean> shutdown = engine.shutdown();
+            shutdown.get();
         } finally {
             session = null;
             repository = null;
