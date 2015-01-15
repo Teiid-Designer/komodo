@@ -24,6 +24,7 @@ package org.komodo.repository.internal;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Session;
@@ -330,7 +331,9 @@ public class ModeshapeEngineThread extends Thread {
 
     private synchronized void stopEngine() throws Exception {
         try {
-            msEngine.shutdown();
+            Future<Boolean> shutdown = msEngine.shutdown();
+            // Await the shutdown
+            shutdown.get();
         } finally {
             repository = null;
         }

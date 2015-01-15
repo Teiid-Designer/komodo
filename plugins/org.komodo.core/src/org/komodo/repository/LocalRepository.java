@@ -363,7 +363,7 @@ public class LocalRepository extends RepositoryImpl {
             @Override
             public void respond( final Object results ) {
                 if (!engineThread.isEngineStarted()) {
-                    LocalRepository.this.state = State.UNKNOWN;
+                    LocalRepository.this.state = State.NOT_REACHABLE;
                     notifyObservers();
                 }
             }
