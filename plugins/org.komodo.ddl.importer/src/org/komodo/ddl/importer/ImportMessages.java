@@ -26,13 +26,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.komodo.spi.constants.StringConstants;
 
 
 /**
  * ImportMessages
  * Holds different types of import messages for DDL import
  */
-public class ImportMessages {
+public class ImportMessages implements StringConstants {
 
 	// Parse Error Message Details
 	private String parseErrorMessage;
@@ -90,6 +91,23 @@ public class ImportMessages {
         }
 
         return errorMessages;
+    }
+
+    /**
+     * Get the error messages
+     * @return error messages
+     */
+    public String errorMessagesToString() {
+        if (errorMessages == null)
+            return EMPTY_STRING;
+
+        StringBuffer errorMsgs = new StringBuffer();
+        for (String errorMsg : errorMessages) {
+            errorMsgs.append(errorMsg);
+            errorMsgs.append(NEW_LINE);
+        }
+
+        return errorMsgs.toString();
     }
     
     /**

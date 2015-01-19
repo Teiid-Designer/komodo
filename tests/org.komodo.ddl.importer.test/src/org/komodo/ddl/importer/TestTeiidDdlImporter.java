@@ -21,109 +21,274 @@
  ************************************************************************************/
 package org.komodo.ddl.importer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.junit.Assert;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.komodo.relational.model.legacy.Model;
-import org.komodo.relational.model.legacy.RelationalConstants;
-import org.komodo.relational.model.legacy.RelationalObject;
+import org.komodo.core.KomodoLexicon;
+import org.komodo.ddl.importer.ImportOptions.ImportType;
+import org.komodo.ddl.importer.ImportOptions.OptionKeys;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 /**
  * Test Class to test Teiid DDL import
  *
  */
+@SuppressWarnings({"nls", "javadoc"})
 public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
-	private static final String TEIID_MYSQL_ACCTS = "Teiid-MySQLAccounts.ddl";  //$NON-NLS-1$
-	private static final String TEIID_FLATFILE = "Teiid-FlatFile.ddl";  //$NON-NLS-1$
+    private static final String SEQUENCE_DDL_PATH = ".*\\/ddl:statements";
 
-	/**
-	 * Constructor
-	 */
-	public TestTeiidDdlImporter( ) {
-		super();
+	private static final String TEIID_MYSQL_ACCTS = "Teiid-MySQLAccounts.ddl"; 
+
+	private static final String TEIID_FLATFILE = "Teiid-FlatFile.ddl";
+
+    private UnitOfWork uow; 
+
+	@Before
+	public void setup() throws Exception {
+	    uow = _repo.createTransaction("test-importer", false, null);
 	}
+
+	@After
+	public void cleanup() {
+	    uow = null;
+	}
+
+    private KomodoObject executeImporter(InputStream ddlStream, String name,
+                                                                     ImportOptions importOptions,
+                                                                     ImportMessages importMessages) throws Exception {
+        assertNotNull(_repo);
+        assertNotNull(uow);
+        assertNotNull(ddlStream);
+        assertNotNull(name);
+        assertNotNull(importOptions);
+        assertNotNull(importMessages);
+
+        CountDownLatch updateLatch = addSequencePathListener(uow, 1, SEQUENCE_DDL_PATH);
+
+        DdlImporter importer = new DefaultDdlImporter(_repo, uow);
+        KomodoObject modelNode = importer.importDdl(ddlStream, name, importOptions, importMessages);
+        if (importMessages.hasError()) {
+            fail(importMessages.errorMessagesToString());
+        }
+
+        // Wait for the starting of the repository or timeout of 3 minutes
+        updateLatch.await(3, TimeUnit.MINUTES);
+
+        traverse(modelNode);
+
+        return modelNode;
+    }
+
+    private KomodoObject executeImporter(File ddlFile, ImportOptions importOptions, ImportMessages importMessages) throws Exception {
+        assertNotNull(_repo);
+        assertNotNull(uow);
+        assertNotNull(ddlFile);
+        assertNotNull(importOptions);
+        assertNotNull(importMessages);
+
+        CountDownLatch updateLatch = addSequencePathListener(uow, 1, SEQUENCE_DDL_PATH);
+
+        DdlImporter importer = new DefaultDdlImporter(_repo, uow);
+        KomodoObject modelNode = importer.importDdl(ddlFile, importOptions, importMessages);
+        if (importMessages.hasError()) {
+            return modelNode; // test should deal with consequences
+        }
+
+        traverse(modelNode);
+
+        // Wait for the starting of the repository or timeout of 3 minutes
+        // The timeout will mean the assertion fails
+        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
+
+        return modelNode;
+    }
 
 	/**
      * Test Error condition - bad DDL file name supplied
      * Expected Outcome - Error message saying that the supplied file is not found
      */
     @Test
-    public void testBadDdlFile() {
-    	// Options for the import (default)
+    public void testBadDdlFile() throws Exception {
     	ImportOptions importOptions = new ImportOptions();
-    	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
-    	DdlImportService importer = DefaultDdlImportService.getInstance();
-    	Model relationalModel = importer.importDdl(new File("unknown.ddl"),importOptions,importMessages); //$NON-NLS-1$
+    	KomodoObject modelNode = executeImporter(new File("unknown.ddl"), importOptions, importMessages);
 
     	// No model created
-    	Assert.assertNull("Failed - expected null model ", relationalModel); //$NON-NLS-1$
+    	assertNull("Failed - expected null model ", modelNode);
 
     	// Should have 1 error message
-    	Assert.assertEquals(1, importMessages.getErrorMessages().size());
+    	assertEquals(1, importMessages.getErrorMessages().size());
 
     	String msg = importMessages.getErrorMessages().get(0);
-    	Assert.assertEquals("The specified DDL File \"unknown.ddl\" was not found",msg); //$NON-NLS-1$
+    	assertEquals("The specified DDL File \"unknown.ddl\" was not found",msg);
     }
 
 	/**
      * Test Error condition - unreadable DDL file supplied.
-     * Expected Outcome - Error Message saying that the supplied file is not readable
+     * Expected Outcome - Error Message saying that the supplied file is not readable 
      */
     @Test
-    public void testUnreadableDdlFile() {
-    	File ddlFile = setup(TEIID_MYSQL_ACCTS);
-    	ddlFile.setReadable(false);
+    public void testUnreadableDdlFile() throws Exception {
+    	InputStream ddlStream = setup(TEIID_MYSQL_ACCTS);
+
+    	File tmpFile = File.createTempFile("unreadableFile", ".ddl");
+    	Files.copy(ddlStream, tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    	tmpFile.deleteOnExit();
+
+    	assertTrue(tmpFile.exists());
+    	assertTrue(tmpFile.length() > 0);
+
+    	// Make file unreadable
+    	tmpFile.setReadable(false);
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
-    	DdlImportService importer = DefaultDdlImportService.getInstance();
-    	Model relationalModel = importer.importDdl(ddlFile,importOptions,importMessages);
+    	KomodoObject modelNode = executeImporter(tmpFile, importOptions, importMessages);
 
     	// Set back to readable
-    	ddlFile.setReadable(true);
+    	tmpFile.setReadable(true);
 
     	// No model created
-    	Assert.assertNull("Failed - expected null model ", relationalModel); //$NON-NLS-1$
+    	assertNull("Failed - expected null model ", modelNode);
 
     	// Should have 1 error message
-    	Assert.assertEquals(1, importMessages.getErrorMessages().size());
+    	assertEquals(1, importMessages.getErrorMessages().size());
 
     	String msg = importMessages.getErrorMessages().get(0);
-    	Assert.assertEquals("The specified DDL File \"Teiid-MySQLAccounts.ddl\" is not readable",msg); //$NON-NLS-1$
+    	assertEquals("The specified DDL File \"" + tmpFile.getName() + "\" is not readable", msg);
     }
 
-	/**
+    /**
      * Test Error condition - empty DDL string supplied
      * Expected Outcome - Error Message saying that the supplied DDL string is empty
      */
     @Test
-    public void testEmptyDdlString() {
-    	// Options for the import (default)
-    	ImportOptions importOptions = new ImportOptions();
-    	// Saves Messages during import
-    	ImportMessages importMessages = new ImportMessages();
+    public void testEmptyDdlString() throws Exception {
+        File tmpFile = File.createTempFile("emptyFile", ".ddl");
+        tmpFile.deleteOnExit();
 
-    	DdlImportService importer = DefaultDdlImportService.getInstance();
-    	Model relationalModel = importer.importDdl("",importOptions,importMessages); //$NON-NLS-1$
+        assertTrue(tmpFile.exists());
+        assertEquals(0, tmpFile.length());
 
-    	// No model created
-    	Assert.assertNull("Failed - expected null model ", relationalModel); //$NON-NLS-1$
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
 
-    	// Should have 1 error message
-    	Assert.assertEquals(1, importMessages.getErrorMessages().size());
+        KomodoObject modelNode = executeImporter(tmpFile, importOptions, importMessages);
 
-    	String msg = importMessages.getErrorMessages().get(0);
-    	Assert.assertEquals("The supplied DDL string is empty",msg); //$NON-NLS-1$
+        // No model created
+        assertNull("Failed - expected null model ", modelNode);
+
+        // Should have 1 error message
+        assertEquals(1, importMessages.getErrorMessages().size());
+
+        String msg = importMessages.getErrorMessages().get(0);
+        assertEquals("The supplied DDL string is empty", msg);
+    }
+
+    private void verifyMySQLAcctsDdl(KomodoObject modelNode) throws Exception {
+        KomodoObject ddlStmtsNode = verify(uow, modelNode, StandardDdlLexicon.STATEMENTS_CONTAINER);
+
+        // ----------------------------------
+        // Test expected tables exist
+        // ----------------------------------
+        KomodoObject accountTableNode = verify(uow, ddlStmtsNode, "accounts.ACCOUNT", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject customerTableNode = verify(uow, ddlStmtsNode, "accounts.CUSTOMER", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject holdingsTableNode = verify(uow, ddlStmtsNode, "accounts.HOLDINGS", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject productTableNode = verify(uow, ddlStmtsNode, "accounts.PRODUCT", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject subsTableNode = verify(uow, ddlStmtsNode, "accounts.SUBSCRIPTIONS", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+
+        // ----------------------------------------
+        // Test expected columns for ACCOUNT table
+        // ----------------------------------------
+        verify(uow, accountTableNode, "ACCOUNT_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, accountTableNode, "SSN", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, accountTableNode, "STATUS", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, accountTableNode, "TYPE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, accountTableNode, "DATEOPENED", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, accountTableNode, "DATECLOSED", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+
+        // ------------------------------------------
+        // Test expected columns for CUSTOMER table
+        // ------------------------------------------
+        verify(uow, customerTableNode, "SSN", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, customerTableNode, "FIRSTNAME", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, customerTableNode, "LASTNAME", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, customerTableNode, "ST_ADDRESS", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, customerTableNode, "APT_NUMBER", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, customerTableNode, "CITY", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, customerTableNode, "STATE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, customerTableNode, "ZIPCODE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, customerTableNode, "PHONE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+
+        // ------------------------------------------
+        // Test expected columns for HOLDINGS table
+        // ------------------------------------------
+        verify(uow, holdingsTableNode, "TRANSACTION_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, holdingsTableNode, "ACCOUNT_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, holdingsTableNode, "PRODUCT_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, holdingsTableNode, "PURCHASE_DATE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, holdingsTableNode, "SHARES_COUNT", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+
+        // ------------------------------------------
+        // Test expected columns for PRODUCT table
+        // ------------------------------------------
+        verify(uow, productTableNode, "ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, productTableNode, "SYMBOL", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, productTableNode, "COMPANY_NAME", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+
+        // ------------------------------------------
+        // Test expected columns for SUBSCRIPTIONS table
+        // ------------------------------------------
+        verify(uow, subsTableNode, "value", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, subsTableNode, "type", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(uow, subsTableNode, "end_date", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+
+        // --------------------------------------------
+        // Test expected properties on HOLDINGS table
+        // --------------------------------------------
+        // Expected properties
+        KomodoObject nameInSource = verify(uow, holdingsTableNode, "NAMEINSOURCE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        verifyProperty(nameInSource, StandardDdlLexicon.VALUE, "`accounts`.`HOLDINGS`");
+
+        KomodoObject updateable = verify(uow, holdingsTableNode, "UPDATABLE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        verifyProperty(updateable, StandardDdlLexicon.VALUE, "TRUE");
+
+        // -------------------------------------------------------------
+        // Test expected properties on HOLDINGS.PURCHASE_DATE column
+        // -------------------------------------------------------------
+        KomodoObject purcharseDateNode = verify(uow, holdingsTableNode, "PURCHASE_DATE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+
+        // Expected properties
+        KomodoObject nativeType = verify(uow, purcharseDateNode, "NATIVE_TYPE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        verifyProperty(nativeType, StandardDdlLexicon.VALUE, "TIMESTAMP");
+
+        nameInSource = verify(uow, purcharseDateNode, "NAMEINSOURCE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        verifyProperty(nameInSource, StandardDdlLexicon.VALUE, "`PURCHASE_DATE`");
+
+        verifyProperty(purcharseDateNode, StandardDdlLexicon.DEFAULT_VALUE, "CURRENT_TIMESTAMP");
+        verifyProperty(purcharseDateNode, StandardDdlLexicon.NULLABLE, "NOT NULL");
+        verifyProperty(purcharseDateNode, StandardDdlLexicon.DEFAULT_OPTION, "DATETIME");
     }
 
 	/**
@@ -131,154 +296,81 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
      * Expected outcome - successful creation
      */
     @Test
-    public void testDdlImport_MySQLAccts() {
-    	File ddlFile = setup(TEIID_MYSQL_ACCTS);
+    public void testDdlImport_MySQLAcctsAsModel() throws Exception {
+        InputStream ddlStream = setup(TEIID_MYSQL_ACCTS);
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
-    	DdlImportService importer = DefaultDdlImportService.getInstance();
-    	Model relationalModel = importer.importDdl(ddlFile,importOptions,importMessages);
+    	KomodoObject modelNode = executeImporter(ddlStream, TEIID_MYSQL_ACCTS, importOptions, importMessages);
 
     	// Test that a Model was created
-    	Assert.assertNotNull("Failed - No Model Created ", relationalModel); //$NON-NLS-1$
+    	assertNotNull("Failed - No Model Created ", modelNode);
 
     	// Test Model name
-    	String modelName = relationalModel.getName();
-    	Assert.assertEquals(importOptions.getModelName(), modelName);
+    	String modelName = modelNode.getName(null);
+    	assertEquals(importOptions.getOption(OptionKeys.MODEL_NAME), modelName);
 
-    	// ----------------------------------
-    	// Test expected tables exist
-    	// ----------------------------------
-    	List<String> tableList = new ArrayList<String>();
-    	tableList.add("ACCOUNT"); //$NON-NLS-1$
-    	tableList.add("CUSTOMER"); //$NON-NLS-1$
-    	tableList.add("HOLDINGS"); //$NON-NLS-1$
-    	tableList.add("PRODUCT"); //$NON-NLS-1$
-    	tableList.add("SUBSCRIPTIONS"); //$NON-NLS-1$
-    	boolean hasTables = TestUtil.childrenMatch(relationalModel,tableList, RelationalConstants.TYPES.TABLE);
-    	if(!hasTables) {
-    		Assert.fail("expected tables do not match");   //$NON-NLS-1$
-    	}
+    	verifyMySQLAcctsDdl(modelNode);
+    }
 
-    	// ----------------------------------------
-    	// Test expected columns for ACCOUNT table
-    	// ----------------------------------------
-    	RelationalObject table = relationalModel.getChildWithName("ACCOUNT"); //$NON-NLS-1$
-    	List<String> colList = new ArrayList<String>();
-    	colList.add("ACCOUNT_ID"); //$NON-NLS-1$
-    	colList.add("SSN"); //$NON-NLS-1$
-    	colList.add("STATUS"); //$NON-NLS-1$
-    	colList.add("TYPE"); //$NON-NLS-1$
-    	colList.add("DATEOPENED"); //$NON-NLS-1$
-    	colList.add("DATECLOSED"); //$NON-NLS-1$
-    	boolean hasCols = TestUtil.childrenMatch(table, colList, RelationalConstants.TYPES.COLUMN);
-    	if(!hasCols) {
-    		Assert.fail("expected columns do not match");   //$NON-NLS-1$
-    	}
+    @Test
+    public void testDdlImport_MySQLAcctsAsSchema() throws Exception {
+        InputStream ddlStream = setup(TEIID_MYSQL_ACCTS);
 
-    	// ------------------------------------------
-    	// Test expected columns for CUSTOMER table
-    	// ------------------------------------------
-    	table = relationalModel.getChildWithName("CUSTOMER"); //$NON-NLS-1$
-    	colList = new ArrayList<String>();
-    	colList.add("SSN"); //$NON-NLS-1$
-    	colList.add("FIRSTNAME"); //$NON-NLS-1$
-    	colList.add("LASTNAME"); //$NON-NLS-1$
-    	colList.add("ST_ADDRESS"); //$NON-NLS-1$
-    	colList.add("APT_NUMBER"); //$NON-NLS-1$
-    	colList.add("CITY"); //$NON-NLS-1$
-    	colList.add("STATE"); //$NON-NLS-1$
-    	colList.add("ZIPCODE"); //$NON-NLS-1$
-    	colList.add("PHONE"); //$NON-NLS-1$
-    	hasCols = TestUtil.childrenMatch(table, colList, RelationalConstants.TYPES.COLUMN);
-    	if(!hasCols) {
-    		Assert.fail("expected columns do not match");   //$NON-NLS-1$
-    	}
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setImportType(ImportType.SCHEMA);
 
-    	// ------------------------------------------
-    	// Test expected columns for HOLDINGS table
-    	// ------------------------------------------
-    	table = relationalModel.getChildWithName("HOLDINGS"); //$NON-NLS-1$
-    	colList = new ArrayList<String>();
-    	colList.add("TRANSACTION_ID"); //$NON-NLS-1$
-    	colList.add("ACCOUNT_ID"); //$NON-NLS-1$
-    	colList.add("PRODUCT_ID"); //$NON-NLS-1$
-    	colList.add("PURCHASE_DATE"); //$NON-NLS-1$
-    	colList.add("SHARES_COUNT"); //$NON-NLS-1$
-    	hasCols = TestUtil.childrenMatch(table, colList, RelationalConstants.TYPES.COLUMN);
-    	if(!hasCols) {
-    		Assert.fail("expected columns do not match");   //$NON-NLS-1$
-    	}
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
 
-    	// ------------------------------------------
-    	// Test expected columns for PRODUCT table
-    	// ------------------------------------------
-    	table = relationalModel.getChildWithName("PRODUCT"); //$NON-NLS-1$
-    	colList = new ArrayList<String>();
-    	colList.add("ID"); //$NON-NLS-1$
-    	colList.add("SYMBOL"); //$NON-NLS-1$
-    	colList.add("COMPANY_NAME"); //$NON-NLS-1$
-    	hasCols = TestUtil.childrenMatch(table, colList, RelationalConstants.TYPES.COLUMN);
-    	if(!hasCols) {
-    		Assert.fail("expected columns do not match");   //$NON-NLS-1$
-    	}
+        KomodoObject schemaNode = executeImporter(ddlStream, TEIID_MYSQL_ACCTS, importOptions, importMessages);
 
-    	// ------------------------------------------
-    	// Test expected columns for SUBSCRIPTIONS table
-    	// ------------------------------------------
-    	table = relationalModel.getChildWithName("SUBSCRIPTIONS"); //$NON-NLS-1$
-    	colList = new ArrayList<String>();
-    	colList.add("value"); //$NON-NLS-1$
-    	colList.add("type"); //$NON-NLS-1$
-    	colList.add("end_date"); //$NON-NLS-1$
-    	hasCols = TestUtil.childrenMatch(table, colList, RelationalConstants.TYPES.COLUMN);
-    	if(!hasCols) {
-    		Assert.fail("expected columns do not match");   //$NON-NLS-1$
-    	}
+        // Test that a schema fragment was created
+        assertNotNull("Failed - No Schema Created ", schemaNode);
+        verifyPrimaryType(schemaNode, KomodoLexicon.Schema.NODE_TYPE);
 
-    	// --------------------------------------------
-    	// Test expected properties on HOLDINGS table
-    	// --------------------------------------------
-    	// Expected properties
-    	Map<String,String> expectedProps = new HashMap<String,String>();
-    	expectedProps.putAll(TestUtil.TABLE_PROPERTY_DEFAULTS);
-    	expectedProps.put("NAME", "HOLDINGS"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("DESCRIPTION", null); //$NON-NLS-1$
-    	expectedProps.put("SUPPORTSUPDATE", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("NAMEINSOURCE", "`accounts`.`HOLDINGS`"); //$NON-NLS-1$ //$NON-NLS-2$
+        // Test Model name
+        String schemaName = schemaNode.getName(null);
+        assertEquals(importOptions.getOption(OptionKeys.SCHEMA_NAME), schemaName);
 
-    	// Compare object properties to expected
-    	table = relationalModel.getChildWithName("HOLDINGS"); //$NON-NLS-1$
-    	String result = TestUtil.compareProperties(table, expectedProps);
-    	if(!result.equals("OK")) { //$NON-NLS-1$
-    		Assert.fail(result);
-    	}
+        verifyMySQLAcctsDdl(schemaNode);
+    }
 
-    	// -------------------------------------------------------------
-    	// Test expected properties on HOLDINGS.PURCHASE_DATE column
-    	// -------------------------------------------------------------
-    	List<String> path = new ArrayList<String>();
-    	path.add("PURCHASE_DATE"); //$NON-NLS-1$
-    	RelationalObject column = table.getChildAtPath(path, RelationalConstants.TYPES.COLUMN);
-    	Assert.assertNotNull(column);
+    private void verifyFlatFileDdl(KomodoObject schemaNode) throws Exception {
+        KomodoObject ddlStmtsNode = verify(uow, schemaNode, StandardDdlLexicon.STATEMENTS_CONTAINER);
 
-    	// Expected properties
-    	expectedProps = new HashMap<String,String>();
-    	expectedProps.putAll(TestUtil.COLUMN_PROPERTY_DEFAULTS);
-    	expectedProps.put("NAME", "PURCHASE_DATE"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("NATIVETYPE", "TIMESTAMP"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("NULLABLE", "NO_NULLS"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("NAMEINSOURCE", "`PURCHASE_DATE`"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("DEFAULTVALUE", "CURRENT_TIMESTAMP"); //$NON-NLS-1$ //$NON-NLS-2$
+        // ----------------------------------
+        // Test expected procedures exist
+        // ----------------------------------
+        KomodoObject getFilesProcNode = verify(uow, ddlStmtsNode, "getFiles", TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
+        verify(uow, ddlStmtsNode, "getTextFiles", TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
+        verify(uow, ddlStmtsNode, "saveFile", TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
 
-    	// Compare object properties to expected
-    	result = TestUtil.compareProperties(column, expectedProps);
-    	if(!result.equals("OK")) { //$NON-NLS-1$
-    		Assert.fail(result);
-    	}
+        // --------------------------------------------
+        // Test getFiles procedure has expected param
+        // --------------------------------------------
+        verify(uow, getFilesProcNode, "pathAndPattern", TeiidDdlLexicon.CreateProcedure.PARAMETER);
+
+        // --------------------------------------------
+        // Test getFiles procedure properties
+        // --------------------------------------------
+        // Expected properties
+        KomodoObject description = verify(uow, getFilesProcNode, "ANNOTATION", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        verifyProperty(description, StandardDdlLexicon.VALUE, "Returns files that match the given path and pattern as BLOBs");
+
+        // ------------------------------------------------
+        // Test getFiles procedure has expected resultSet
+        // ------------------------------------------------
+        KomodoObject resultSet = verify(uow, getFilesProcNode, "resultSet", TeiidDdlLexicon.CreateProcedure.RESULT_COLUMNS);
+
+        // -------------------------------------------------------------
+        // Test resultSet has expected columns
+        // -------------------------------------------------------------
+        verify(uow, resultSet, "file", TeiidDdlLexicon.CreateProcedure.RESULT_COLUMN);
+        verify(uow, resultSet, "filePath", TeiidDdlLexicon.CreateProcedure.RESULT_COLUMN);
     }
 
 	/**
@@ -286,101 +378,46 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
      * Expected outcome - successful creation
      */
     @Test
-    public void testDdlImport_FlatFile() {
-    	File ddlFile = setup(TEIID_FLATFILE);
+    public void testDdlImport_FlatFileAsModel() throws Exception {
+    	InputStream ddlStream = setup(TEIID_FLATFILE);
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
-    	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
-    	DdlImportService importer = DefaultDdlImportService.getInstance();
-    	Model relationalModel = importer.importDdl(ddlFile,importOptions,importMessages);
+        KomodoObject modelNode = executeImporter(ddlStream, TEIID_FLATFILE, importOptions, importMessages);
 
     	// Test that a Model was created
-    	Assert.assertNotNull("Failed - No Model Created ", relationalModel); //$NON-NLS-1$
+    	assertNotNull("Failed - No Model Created ", modelNode);
+    	verifyPrimaryType(modelNode, KomodoLexicon.VdbModel.NODE_TYPE);
 
     	// Test Model name
-    	String modelName = relationalModel.getName();
-    	Assert.assertEquals(importOptions.getModelName(), modelName);
+    	String modelName = modelNode.getName(null);
+    	assertEquals(importOptions.getOption(OptionKeys.MODEL_NAME), modelName);
 
-    	// ----------------------------------
-    	// Test expected procedures exist
-    	// ----------------------------------
-    	List<String> procList = new ArrayList<String>();
-    	procList.add("getFiles"); //$NON-NLS-1$
-    	procList.add("getTextFiles"); //$NON-NLS-1$
-    	procList.add("saveFile"); //$NON-NLS-1$
-    	boolean hasProcs = TestUtil.childrenMatch(relationalModel,procList, RelationalConstants.TYPES.PROCEDURE);
-    	if(!hasProcs) {
-    		Assert.fail("expected procedures do not match");   //$NON-NLS-1$
-    	}
+        verifyFlatFileDdl(modelNode);
+    }
 
-    	// --------------------------------------------
-    	// Test getFiles procedure has expected param
-    	// --------------------------------------------
-    	RelationalObject proc = relationalModel.getChildWithName("getFiles"); //$NON-NLS-1$
-    	List<String> itemList = new ArrayList<String>();
-    	itemList.add("pathAndPattern"); //$NON-NLS-1$
-    	boolean hasParams = TestUtil.childrenMatch(proc, itemList, RelationalConstants.TYPES.PARAMETER);
-    	if(!hasParams) {
-    		Assert.fail("expected parameters do not match");   //$NON-NLS-1$
-    	}
+    @Test
+    public void testDdlImport_FlatFileAsSchema() throws Exception {
+        InputStream ddlStream = setup(TEIID_FLATFILE);
 
-    	// --------------------------------------------
-    	// Test getFiles procedure properties
-    	// --------------------------------------------
-    	// Expected properties
-    	Map<String,String> expectedProps = new HashMap<String,String>();
-    	expectedProps.putAll(TestUtil.PROCEDURE_PROPERTY_DEFAULTS);
-    	expectedProps.put("NAME", "getFiles"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("NAMEINSOURCE", "getFiles"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("DESCRIPTION", "Returns files that match the given path and pattern as BLOBs"); //$NON-NLS-1$ //$NON-NLS-2$
-    	// Compare object properties to expected
-    	String result = TestUtil.compareProperties(proc, expectedProps);
-    	if(!result.equals("OK")) { //$NON-NLS-1$
-    		Assert.fail(result);
-    	}
+        // Options for the import
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setImportType(ImportType.SCHEMA);
 
-    	// ------------------------------------------------
-    	// Test getFiles procedure has expected resultSet
-    	// ------------------------------------------------
-    	itemList.clear();
-    	itemList.add("getFiles"); //$NON-NLS-1$
-    	boolean hasRS = TestUtil.childrenMatch(proc, itemList, RelationalConstants.TYPES.RESULT_SET);
-    	if(!hasRS) {
-    		Assert.fail("expected result set does not match");   //$NON-NLS-1$
-    	}
+        ImportMessages importMessages = new ImportMessages();
 
-    	// -------------------------------------------------------------
-    	// Test resultSet has expected columns
-    	// -------------------------------------------------------------
-    	List<String> path = new ArrayList<String>();
-    	path.add("getFiles"); //$NON-NLS-1$
-    	RelationalObject resultSet = proc.getChildAtPath(path, RelationalConstants.TYPES.RESULT_SET);
-    	Assert.assertNotNull(resultSet);
+        KomodoObject schemaNode = executeImporter(ddlStream, TEIID_FLATFILE, importOptions, importMessages);
 
-    	itemList.clear();
-    	itemList.add("file"); //$NON-NLS-1$
-    	itemList.add("filePath"); //$NON-NLS-1$
-    	boolean hasCols = TestUtil.childrenMatch(resultSet, itemList, RelationalConstants.TYPES.COLUMN);
-    	if(!hasCols) {
-    		Assert.fail("expected columns do not match");   //$NON-NLS-1$
-    	}
+        // Test that a Model was created
+        assertNotNull("Failed - No Schema fragment Created ", schemaNode);
+        verifyPrimaryType(schemaNode, KomodoLexicon.Schema.NODE_TYPE);
 
-    	// --------------------------------------------
-    	// Test procedure resultSet properties
-    	// --------------------------------------------
-    	// Expected properties
-    	expectedProps.clear();
-    	expectedProps.putAll(TestUtil.RESULTSET_PROPERTY_DEFAULTS);
-    	expectedProps.put("NAME", "getFiles"); //$NON-NLS-1$ //$NON-NLS-2$
-    	expectedProps.put("NAMEINSOURCE", "getFiles"); //$NON-NLS-1$ //$NON-NLS-2$
-    	// Compare object properties to expected
-    	result = TestUtil.compareProperties(resultSet, expectedProps);
-    	if(!result.equals("OK")) { //$NON-NLS-1$
-    		Assert.fail(result);
-    	}
+        // Test Schema name
+        String schemaName = schemaNode.getName(null);
+        assertEquals(importOptions.getOption(OptionKeys.SCHEMA_NAME), schemaName);
 
+        verifyFlatFileDdl(schemaNode);
     }
 }

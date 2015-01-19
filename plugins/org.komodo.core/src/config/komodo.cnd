@@ -30,6 +30,7 @@
 <tko='http://www.teiid.org/komodo/1.0'>
 <tsql='http://www.teiid.org/sql/1.0'>
 <vdb = "http://www.metamatrix.com/metamodels/VirtualDatabase">
+<mmcore = "http://www.metamatrix.com/metamodels/Core">
 
 /*
  * The Komodo store includes a workspace and a library.
@@ -127,6 +128,7 @@
  * A Teiid schema/model in the workspace or in the library. Node name is the schema/model name.
  */
 [tko:schema] > nt:unstructured, tko:libraryComponent
+  - tko:rendition (string)
   + * (tsql:languageObject) copy sns
 
 /*

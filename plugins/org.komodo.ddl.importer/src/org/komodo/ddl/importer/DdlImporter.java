@@ -22,51 +22,41 @@
 package org.komodo.ddl.importer;
 
 import java.io.File;
-import org.komodo.relational.model.legacy.DifferenceReport;
-import org.komodo.relational.model.legacy.Model;
+import java.io.InputStream;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  *  DdlImportService interface
  */
-public interface DdlImportService {
-
-	@SuppressWarnings("javadoc")
-	public static final String TEIID_DIALECT = "TEIID"; //$NON-NLS-1$
-	@SuppressWarnings("javadoc")
-	public static final String SQL92_DIALECT = "SQL92"; //$NON-NLS-1$
-	@SuppressWarnings("javadoc")
-	public static final String ORACLE_DIALECT = "ORACLE"; //$NON-NLS-1$
-	@SuppressWarnings("javadoc")
-	public static final String POSTGRES_DIALECT = "POSTGRES"; //$NON-NLS-1$
-	@SuppressWarnings("javadoc")
-	public static final String DERBY_DIALECT = "DERBY"; //$NON-NLS-1$
+public interface DdlImporter extends StringConstants {
 
 	/**
 	 * Perform the model import using the specified DDL.  The DDL constructs must be valid to put directly beneath a model.
 	 * @param ddl the DDL
 	 * @param importOptions the options for the import
 	 * @param importMessages the messages recorded during the import
-	 * @return the relational model
+	 * @return newly created root ddl node
 	 */
-	Model importDdl(String ddl, ImportOptions importOptions, ImportMessages importMessages);
-	
+	KomodoObject importDdl(String ddl, ImportOptions importOptions, ImportMessages importMessages);
+
+	/**
+     * Perform the model import using the specified DDL Stream.  The DDL constructs must be valid to put directly beneath a model.
+     * @param ddlStream the DDL input stream
+     * @param name the name of the ddl file or other such customary name
+     * @param importOptions the options for the import
+     * @param importMessages the messages recorded during the import
+	 * @return newly created root ddl node
+     */
+    KomodoObject importDdl(InputStream ddlStream, String name, ImportOptions importOptions, ImportMessages importMessages);
+
 	/**
 	 * Perform the model import using the specified DDL File.  The DDL constructs must be valid to put directly beneath a model.
 	 * @param ddlFile the DDL file
 	 * @param importOptions the options for the import
 	 * @param importMessages the messages recorded during the import
-	 * @return the relational model
+	 * @return newly created root ddl node 
 	 */
-	Model importDdl(File ddlFile, ImportOptions importOptions, ImportMessages importMessages);
-	
-	/**
-	 * Generate the difference report between the original and target models.  Differences required to change original to 
-	 * the target.
-	 * @param originalModel the original model
-	 * @param targetModel the target model
-	 * @return the differences between original and target
-	 */
-	DifferenceReport getDifferenceReport(Model originalModel, Model targetModel);
-	
+	KomodoObject importDdl(File ddlFile, ImportOptions importOptions, ImportMessages importMessages);
 
 }
