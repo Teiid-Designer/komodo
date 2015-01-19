@@ -17,13 +17,13 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.core.ListCommand;
 
 /**
  * Test Class to test ListCommand
  * 
  */
+@SuppressWarnings("javadoc")
 public class ListCommandTest extends AbstractCommandTest {
 
 	private static final String LIST_COMMAND1 = "listCommand1.txt"; //$NON-NLS-1$
@@ -39,11 +39,11 @@ public class ListCommandTest extends AbstractCommandTest {
 	
 	/**
      * Status at the workspace context root
+	 * @throws Exception 
      */
     @Test
-    public void testList1() {
-    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
-    	setup(LIST_COMMAND1, ListCommand.class, wsStatus);
+    public void testList1() throws Exception {
+    	setup(LIST_COMMAND1, ListCommand.class);
     	
     	execute();
     	
@@ -52,17 +52,15 @@ public class ListCommandTest extends AbstractCommandTest {
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("home", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
-    	teardown();
     }
     
 	/**
      * Status at the workspace Project2 context
+	 * @throws Exception 
      */
     @Test
-    public void testList2() {
-    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
-    	setup(LIST_COMMAND2, ListCommand.class, wsStatus);
+    public void testList2() throws Exception {
+    	setup(LIST_COMMAND2, ListCommand.class);
     	
     	execute();
     	
@@ -72,8 +70,6 @@ public class ListCommandTest extends AbstractCommandTest {
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("home.Project1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
-    	teardown();
     }
     
 }

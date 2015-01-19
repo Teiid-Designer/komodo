@@ -423,6 +423,11 @@ public interface KomodoLexicon extends StringConstants {
          */
         String TEIIDS = Teiid.GROUP_NODE;
 
+        /**
+         * The name and node type name of the Komodo library's VDB manifest model grouping node. Value is {@value} .
+         */
+        String VDB_MODELS = VdbModel.GROUP_NODE;
+
     }
 
     /**

@@ -20,7 +20,7 @@ public interface KNode {
      * @throws KException
      *         if an error occurs
      */
-    String getAbsolutePath() throws KException;
+    String getAbsolutePath();
 
     /**
      * @param transaction

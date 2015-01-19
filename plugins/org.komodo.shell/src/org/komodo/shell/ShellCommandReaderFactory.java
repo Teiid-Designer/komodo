@@ -44,9 +44,8 @@ public class ShellCommandReaderFactory {
      * @param args the args
      * @param factory the factory
      * @param wsStatus the workspace status
-     * @param inStream stream from which commands will be read
      * @return the shell command reader
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws Exception Signals exception has occurred.
      */
     public static ShellCommandReader createCommandReader(String[] args, ShellCommandFactory factory,
             WorkspaceStatus wsStatus) throws Exception {

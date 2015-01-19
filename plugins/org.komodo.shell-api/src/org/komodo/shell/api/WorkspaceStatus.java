@@ -25,64 +25,72 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Properties;
+import org.komodo.core.KEngine;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.TeiidInstance;
 
 /**
  * WorkspaceStatus interface.
  */
-public interface WorkspaceStatus {
+public interface WorkspaceStatus extends StringConstants {
+
+    /**
+     * The type id of the root object
+     */
+    String ROOT_TYPE = FORWARD_SLASH;
 
     @SuppressWarnings("javadoc")
-	public final String RECORDING_FILEPATH_KEY = "RECORDING_FILEPATH"; //$NON-NLS-1$
+	String RECORDING_FILEPATH_KEY = "RECORDING_FILEPATH"; //$NON-NLS-1$
 
     
 	/**
 	 * Allows set workspace properties on startup
 	 * @param props the properties
 	 */
-	public void setProperties(Properties props);
+	void setProperties(Properties props);
 
 	/**
 	 * Get the home context
 	 * @return the home context
 	 */
-	public WorkspaceContext getHomeContext();
+	WorkspaceContext getRootContext();
 	
 	/**
 	 * Set the current workspace context
 	 * @param context the current workspace context
+	 * @throws Exception if error occurs
 	 */
-	public void setCurrentContext(WorkspaceContext context);
+	void setCurrentContext(WorkspaceContext context) throws Exception;
 	
 	/**
 	 * Get the current workspace context
 	 * @return the current workspace context
 	 */
-	public WorkspaceContext getCurrentContext();
+	WorkspaceContext getCurrentContext();
 
 	/**
 	 * Toggles the recording status 'on' or 'off'
 	 * @param recordState 'true' to enable recording, 'false' to disable
 	 */
-	public void setRecordingStatus(boolean recordState);
+	void setRecordingStatus(boolean recordState);
 	
 	/**
 	 * Get the recording status
 	 * @return 'true' if recording is enabled, 'false' if not.
 	 */
-	public boolean getRecordingStatus();
+	boolean getRecordingStatus();
 
 	/**
 	 * Get the recording output file path
 	 * @return the output file
 	 */
-	public File getRecordingOutputFile();
+	File getRecordingOutputFile();
 	
 	/**
 	 * Set the Teiid URL
 	 * @param recordingOutputFilePath the recording output file path
 	 */
-	public void setRecordingOutputFile(String recordingOutputFilePath);
+	void setRecordingOutputFile(String recordingOutputFilePath);
 
     /**
      * @return the parent of the teiid instance
@@ -98,22 +106,39 @@ public interface WorkspaceStatus {
 	 * Add a WorkspaceContext Event Handler
 	 * @param handler the workspace context eventHandler
 	 */
-	public void addHandler(WorkspaceStatusEventHandler handler);
+	void addHandler(WorkspaceStatusEventHandler handler);
 
 	/**
 	 * Remove a WorkspaceContext Event Handler
 	 * @param handler the workspace context eventHandler
 	 */
-	public void removeHandler(WorkspaceStatusEventHandler handler);
+	void removeHandler(WorkspaceStatusEventHandler handler);
 
     /**
      * @return the input stream
      */
-    public InputStream getInputStream();
+    InputStream getInputStream();
 
     /**
      * @return the output stream
      */
-    public PrintStream getOutputStream();
+    PrintStream getOutputStream();
+
+    /**
+     * @return the komodo engine
+     */
+    KEngine getEngine();
+
+    /**
+     * @param contextId
+     * @return workspace context with given id
+     */
+    WorkspaceContext getWorkspaceContext(String contextId);
+
+    /**
+     * @param contextId
+     * @param context
+     */
+    void addWorkspaceContext(String contextId, WorkspaceContext context);
 
 }

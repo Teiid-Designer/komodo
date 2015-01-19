@@ -17,13 +17,13 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.core.StatusCommand;
 
 /**
  * Test Class to test StatusCommand
  * 
  */
+@SuppressWarnings("javadoc")
 public class StatusCommandTest extends AbstractCommandTest {
 
 	private static final String STATUS_COMMANDS1 = "statusCommands1.txt"; //$NON-NLS-1$
@@ -40,11 +40,11 @@ public class StatusCommandTest extends AbstractCommandTest {
 	
 	/**
      * Status at the workspace context root
+     * @throws Exception
      */
     @Test
-    public void testStatus1() {
-    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
-    	setup(STATUS_COMMANDS1, StatusCommand.class, wsStatus);
+    public void testStatus1() throws Exception {
+    	setup(STATUS_COMMANDS1, StatusCommand.class);
     	
     	execute();
     	
@@ -56,17 +56,15 @@ public class StatusCommandTest extends AbstractCommandTest {
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("home", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
-    	teardown();
     }
     
 	/**
      * Status at the workspace Project2 context
+	 * @throws Exception 
      */
     @Test
-    public void testStatus2() {
-    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
-    	setup(STATUS_COMMANDS2, StatusCommand.class, wsStatus);
+    public void testStatus2() throws Exception {
+    	setup(STATUS_COMMANDS2, StatusCommand.class);
     	
     	execute();
     	
@@ -77,17 +75,15 @@ public class StatusCommandTest extends AbstractCommandTest {
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("home.Project2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
-    	teardown();
     }
     
 	/**
      * Status at the workspace ViewModel1 context
+	 * @throws Exception 
      */
     @Test
-    public void testStatus3() {
-    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
-    	setup(STATUS_COMMANDS3, StatusCommand.class, wsStatus);
+    public void testStatus3() throws Exception {
+    	setup(STATUS_COMMANDS3, StatusCommand.class);
 
     	execute();
     	
@@ -98,8 +94,6 @@ public class StatusCommandTest extends AbstractCommandTest {
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("home.Project1.Model2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-   	
-    	teardown();
     }
    	
 }

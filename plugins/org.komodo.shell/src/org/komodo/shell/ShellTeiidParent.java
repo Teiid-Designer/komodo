@@ -150,7 +150,7 @@ public class ShellTeiidParent implements TeiidParent, IShellTeiidParent {
     }
 
     /**
-     * @param secure
+     * @param secure secure status
      */
     @Override
     public void setSecure(boolean secure) {

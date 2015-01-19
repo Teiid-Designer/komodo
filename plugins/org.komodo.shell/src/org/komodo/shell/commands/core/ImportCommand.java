@@ -7,9 +7,14 @@
 */
 package org.komodo.shell.commands.core;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
+import org.komodo.ddl.importer.DdlImporter;
+import org.komodo.ddl.importer.DefaultDdlImporter;
 import org.komodo.ddl.importer.ImportMessages;
+import org.komodo.ddl.importer.ImportOptions;
+import org.komodo.ddl.importer.ImportOptions.ImportType;
+import org.komodo.ddl.importer.ImportOptions.OptionKeys;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -17,100 +22,101 @@ import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Repository;
 
 /**
  * Import Command 
  */
 public class ImportCommand extends BuiltInShellCommand {
 
-	private static final String SUBCMD_MODEL = "MODEL"; //$NON-NLS-1$
-	
-	/**
-	 * Constructor.
-	 * @param name the command name
-	 * @param wsStatus the workspace status
-	 */
-	public ImportCommand(String name, WorkspaceStatus wsStatus) {
-		super(name, wsStatus);
-	}
+    private static final String SUBCMD_MODEL = "MODEL"; //$NON-NLS-1$
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#initValidWsContextTypes()
-	 */
-	@Override
-	public void initValidWsContextTypes() {
-		// Cannot do a create at certain Relational contexts
-		List<WorkspaceContext.Type> validTypes = new ArrayList<WorkspaceContext.Type>(1);
-		validTypes.add(WorkspaceContext.Type.PROJECT);
-		this.validWsContextTypes = validTypes;
-	}
-	
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-	public boolean execute() throws Exception {
-		boolean success = false;
-		String subcmdArg = requiredArgument(0, Messages.getString("ImportCommand.InvalidArgMsg_SubCommand")); //$NON-NLS-1$
-		
-		if (SUBCMD_MODEL.equalsIgnoreCase(subcmdArg)) { 
-			// Check required args
-			String fileNameArg = requiredArgument(1, Messages.getString("ImportCommand.InvalidArgMsg_FileName")); //$NON-NLS-1$
-			String modelNameArg = requiredArgument(2, Messages.getString("ImportCommand.InvalidArgMsg_ModelName")); //$NON-NLS-1$
+    /**
+     * Constructor.
+     * @param name the command name
+     * @param wsStatus the workspace status
+     */
+    public ImportCommand(String name, WorkspaceStatus wsStatus) {
+        super(name, wsStatus);
+    }
 
-			ImportMessages messages = importModel(fileNameArg,modelNameArg);
-			if(!messages.hasError()) {
-				print(CompletionConstants.MESSAGE_INDENT,Messages.getString("ImportCommand.ModelImportSuccessMsg", modelNameArg, fileNameArg)); //$NON-NLS-1$
-				if(getWorkspaceStatus().getRecordingStatus()) recordCommand(getArguments());
-			} else {
-				print(CompletionConstants.MESSAGE_INDENT,Messages.getString("ImportCommand.ModelImportFailedMsg", subcmdArg)); //$NON-NLS-1$
-			}
-		} else {
-			throw new InvalidCommandArgumentException(0, Messages.getString("ImportCommand.InvalidSubCommand")); //$NON-NLS-1$
-		}
+    /**
+     * @see org.komodo.shell.api.ShellCommand#execute()
+     */
+    @Override
+    public boolean execute() throws Exception {
+        boolean success = false;
+        String subcmdArg = requiredArgument(0, Messages.getString("ImportCommand.InvalidArgMsg_SubCommand")); //$NON-NLS-1$
 
-		return success;
-	}
+        if (SUBCMD_MODEL.equalsIgnoreCase(subcmdArg)) {
+            // Check required args
+            String fileNameArg = requiredArgument(1, Messages.getString("ImportCommand.InvalidArgMsg_FileName")); //$NON-NLS-1$
+            String modelNameArg = requiredArgument(2, Messages.getString("ImportCommand.InvalidArgMsg_ModelName")); //$NON-NLS-1$
 
-	/**
-	 * Import model from file and add it to the current project
-	 * @param modelFile the file containing the model DDL
-	 * @param modelName the name of the model
-	 * @return the messages from the import
-	 */
-	private ImportMessages importModel(String modelFile,String modelName) {
-		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		ImportMessages importMessages = new ImportMessages();
-		
-		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		if(currentContext.getType()==WorkspaceContext.Type.PROJECT) { 
-//			DdlImportService importService = DefaultDdlImportService.getInstance();
-//			ImportOptions importOptions = new ImportOptions();
-//			File ddlFile = new File(modelFile);
-//			Model model = importService.importDdl(ddlFile,importOptions,importMessages);
-//			model.setName(modelName);
-//			currentContext.addChild(model);
-		} 
-		
-		return importMessages;
-	}
+            ImportMessages messages = importModel(fileNameArg, modelNameArg);
+            if (!messages.hasError()) {
+                print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.ModelImportSuccessMsg", modelNameArg, fileNameArg)); //$NON-NLS-1$
+                if (getWorkspaceStatus().getRecordingStatus())
+                    recordCommand(getArguments());
+            } else {
+                print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.ModelImportFailedMsg", fileNameArg)); //$NON-NLS-1$
+                print(CompletionConstants.MESSAGE_INDENT, messages.errorMessagesToString());
+            }
+        } else {
+            throw new InvalidCommandArgumentException(0, Messages.getString("ImportCommand.InvalidSubCommand")); //$NON-NLS-1$
+        }
 
-	/**
-	 * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
-	 */
-	@Override
-	public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
+        return success;
+    }
 
-		if (getArguments().isEmpty()) {
-			if (lastArgument == null) {
-				candidates.add(SUBCMD_MODEL+StringConstants.SPACE); 
-				return 0;
-			} else if (SUBCMD_MODEL.startsWith(lastArgument.toUpperCase())) { 
-				candidates.add(SUBCMD_MODEL+StringConstants.SPACE); 
-				return 0;
-			}
-		} 
-		return -1;
-	}
+    /**
+     * Import model from file and add it to the current project
+     * @param modelFile the file containing the model DDL
+     * @param modelName the name of the model
+     * @return the messages from the import
+     * @throws Exception if error occurs
+     */
+    private ImportMessages importModel(String modelFile, String modelName) throws Exception {
+        WorkspaceStatus wsStatus = getWorkspaceStatus();
+        ImportMessages importMessages = new ImportMessages();
+
+        WorkspaceContext currentContext = wsStatus.getCurrentContext();
+        Repository repository = null;
+        try {
+            repository = currentContext.getRepository();
+        } catch (Exception ex) {
+            importMessages.addErrorMessage(ex.getLocalizedMessage());
+            return importMessages;
+        }
+
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setImportType(ImportType.MODEL);
+        importOptions.setOption(OptionKeys.MODEL_NAME, modelName);
+
+        File ddlFile = new File(modelFile);
+
+        DdlImporter importer = new DefaultDdlImporter(repository);
+        importer.importDdl(ddlFile, importOptions, importMessages);
+
+        return importMessages;
+    }
+
+    /**
+     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
+
+        if (getArguments().isEmpty()) {
+            if (lastArgument == null) {
+                candidates.add(SUBCMD_MODEL + StringConstants.SPACE);
+                return 0;
+            } else if (SUBCMD_MODEL.startsWith(lastArgument.toUpperCase())) {
+                candidates.add(SUBCMD_MODEL + StringConstants.SPACE);
+                return 0;
+            }
+        }
+        return -1;
+    }
 
 }

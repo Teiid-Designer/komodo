@@ -22,156 +22,111 @@
 package org.komodo.shell.api;
 
 import java.util.List;
-import java.util.Map;
-import org.komodo.relational.model.legacy.RelationalObject;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 
 /**
  * The interface WorkspaceContext
  */
 public interface WorkspaceContext {
-	
-	/**
-	 * The context type
-	 */
-	public enum Type {
-		@SuppressWarnings("javadoc")
-		ALL,
-		@SuppressWarnings("javadoc")
-		HOME,
-		@SuppressWarnings("javadoc")
-		PROJECT,
-		@SuppressWarnings("javadoc")
-		TABLE,
-		@SuppressWarnings("javadoc")
-		COLUMN,
-		@SuppressWarnings("javadoc")
-		PROCEDURE,
-		@SuppressWarnings("javadoc")
-		PARAMETER,
-		@SuppressWarnings("javadoc")
-		RESULT_SET,
-		@SuppressWarnings("javadoc")
-		SCHEMA,
-		@SuppressWarnings("javadoc")
-		VIEW,
-		@SuppressWarnings("javadoc")
-		UNIQUE_CONSTRAINT,
-		@SuppressWarnings("javadoc")
-		ACCESS_PATTERN,
-		@SuppressWarnings("javadoc")
-		PRIMARY_KEY,
-		@SuppressWarnings("javadoc")
-		FOREIGN_KEY,
-		@SuppressWarnings("javadoc")
-		INDEX,
-		@SuppressWarnings("javadoc")
-		MODEL
-	}
-	
-	/**
+
+    /**
+     * Represents all komodo object types
+     */
+	String ALL_TYPES = "ALL TYPES"; //$NON-NLS-1$
+
+    /**
 	 * Get the name
 	 * @return the context name
+	 * @throws Exception if error occurs
 	 */
-	public String getName();
-
-	/**
-	 * Set the name
-	 * @param name the context name
-	 */
-	public void setName(String name);
+	String getName() throws Exception;
 
 	/**
 	 * Get the type
 	 * @return the type
+	 * @throws Exception if error occurs
 	 */
-	public Type getType();
-
-	/**
-	 * Set the type
-	 * @param type the type
-	 */
-	public void setType(Type type);
+	String getType() throws Exception;
 
 	/**
 	 * Get the workspace status
 	 * @return the workspace status
 	 */
-	public WorkspaceStatus getWorkspaceStatus();
+	WorkspaceStatus getWorkspaceStatus();
 	
 	/**
 	 * Get the parent context
 	 * @return the parent
 	 */
-	public WorkspaceContext getParent();
+	WorkspaceContext getParent();
 	
 	/**
 	 * Get all children
 	 * @return the list of children
+	 * @throws Exception if error occurs
 	 */
-	public List<WorkspaceContext> getChildren();
+	List<WorkspaceContext> getChildren() throws Exception;
 
 	/**
 	 * Get the child context of the given name and type
 	 * @param name the name
 	 * @param type the type
 	 * @return the child
+	 * @throws Exception if error occurs
 	 */
-	public WorkspaceContext getChild(String name, Type type);
+	WorkspaceContext getChild(String name, String type) throws Exception;
 	
 	/**
 	 * Get the full name path for this context.  e.g. root.parentContext.thisContext
 	 * @return the full name
+	 * @throws Exception if errors occur
 	 */
-	public String getFullName();
+	String getFullName() throws Exception;
 	
 	/**
 	 * Determine if the context is within relational model
 	 * @return 'true' if relational
 	 */
-	public boolean isRelational();
-	
-	/**
-	 * Get the relational obj type which corresponds to the context type
-	 * @param ctxType the context type
-	 * @return the relational object type
-	 */
-	public int getRelationalObjTypeForWsContextType(WorkspaceContext.Type ctxType);
-	
-	/**
-	 * Get the context type type which corresponds to the relational object type
-	 * @param relObjType the relational object type
-	 * @return the context type
-	 */
-	public WorkspaceContext.Type getWsContextTypeForRelationalObjType(int relObjType);
-	
+	boolean isRelational();
+
 	/**
 	 * Get relational object at this context
-	 * @return the relationalObject, null if not applicable
+	 * @return the KomodoObject, null if not applicable
 	 */
-	public RelationalObject getRelationalObj();
-
-	/**
-	 * Get relational models at project context
-	 * @return the relationalObject list
-	 */
-	public List<RelationalObject> getModels();
+	KomodoObject getKomodoObj();
 	
 	/**
-	 * Get the property name value map at this context
-	 * @return the map of property name-value
+	 * Get the property names at this context
+	 * @return the list of property names
+	 * @throws Exception if an error occurs
 	 */
-	public Map<String,String> getPropertyNameValueMap();
+	List<String> getProperties() throws Exception;
 
 	/**
-	 * Get the valid objects that can be created at this context
-	 * @return the list of valid types
+	 * @param propertyName
+	 * @return the value of the property with this name
+	 * @throws Exception if an error occurs
 	 */
-	public List<String> getValidTypesForCreate();
+	String getPropertyValue(String propertyName) throws Exception;
 
 	/**
 	 * Add a child context
 	 * @param child the child
 	 */
-	public void addChild(Object child);
+	void addChild(Object child);
+
+    /**
+     * @return the repository
+     * @throws Exception if error occurs
+     */
+    Repository getRepository() throws Exception;
+
+    /**
+     * @param visitor
+     * @return result of visit with the visitor
+     * @throws Exception if error occurs
+     */
+    Object visit(WorkspaceContextVisitor visitor) throws Exception;
 	
 }

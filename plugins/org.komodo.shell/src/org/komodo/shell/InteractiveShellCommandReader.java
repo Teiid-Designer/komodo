@@ -18,7 +18,6 @@ package org.komodo.shell;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-
 import org.jboss.aesh.console.Console;
 import org.jboss.aesh.console.ConsoleOutput;
 import org.jboss.aesh.console.Prompt;
@@ -61,7 +60,7 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	 * @see org.komodo.shell.AbstractShellCommandReader#open()
 	 */
 	@Override
-	public void open() throws IOException {
+	public void open() throws Exception {
         Settings settings = Settings.getInstance();
         settings.setAliasEnabled(false);
         // settings.setAliasFile(new File("al"));
@@ -76,8 +75,9 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 
 	/**
 	 * Creates the ANSI compatible prompt.
+	 * @throws Exception 
 	 */
-	private String defaultAnsiPrompt() {
+	private String defaultAnsiPrompt() throws Exception {
 		String prompt = "["+this.wsStatus.getCurrentContext().getName()+"] >"; //$NON-NLS-1$ //$NON-NLS-2$
 		return ANSI_BOLD_RED+prompt+ANSI_RESET;  
 	}
@@ -118,7 +118,7 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	 * @see org.komodo.shell.api.WorkspaceStatusEventHandler#workspaceContextChanged()
 	 */
 	@Override
-	public void workspaceContextChanged() {
+	public void workspaceContextChanged() throws Exception {
 		prompt = new Prompt(defaultAnsiPrompt());
 	}
 

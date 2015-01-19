@@ -68,14 +68,10 @@ public class StdInShellCommandReader extends AbstractShellCommandReader {
 	}
 
 	/**
-	 * Read line.
-	 *
-	 * @return the string
-	 * @throws IOException Signals that an I/O exception has occurred.
 	 * @see org.komodo.shell.AbstractShellCommandReader#readLine()
 	 */
 	@Override
-	protected String readLine() throws IOException {
+	protected String readLine() throws Exception {
 		if (!stdinReader.ready()) {
 			String prompt = "["+getWorkspaceStatus().getCurrentContext().getName()+"] > "; //$NON-NLS-1$ //$NON-NLS-2$
 			getOutputStream().print(prompt);

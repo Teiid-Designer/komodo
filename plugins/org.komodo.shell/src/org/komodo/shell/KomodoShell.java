@@ -28,11 +28,19 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import org.komodo.core.KEngine;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.RepositoryObserver;
 
 
 /**
@@ -44,7 +52,7 @@ import org.komodo.spi.constants.StringConstants;
  * - utilizing different Messages class
  * 
  */
-public class KomodoShell {
+public class KomodoShell implements StringConstants {
 
     private static final String LOCALE_PROPERTY = "komodo.shell.locale"; //$NON-NLS-1$
     private static final String STARTUP_PROPERTIES_FILEPATH = "./komodoShell.properties"; //$NON-NLS-1$
@@ -73,7 +81,7 @@ public class KomodoShell {
 	        }
 	    }
 
-		final KomodoShell shell = new KomodoShell(System.in, System.out);
+		final KomodoShell shell = new KomodoShell(KEngine.getInstance(), System.in, System.out);
 		Thread shutdownHook = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -88,19 +96,26 @@ public class KomodoShell {
 		}
 	}
 
-    private final WorkspaceStatus wsStatus;
-    private final ShellCommandFactory factory;
+    private WorkspaceStatus wsStatus;
+    private ShellCommandFactory factory;
     private ShellCommandReader reader;
     private boolean shutdown = false;
 
+    private final KEngine kEngine;
+    private final InputStream inStream;
+    private final PrintStream outStream;
+
 	/**
 	 * Constructor.
+	 * @param kEngine the komodo engine for this shell
 	 * @param inStream input stream
 	 * @param outStream output stream
 	 */
-	public KomodoShell(InputStream inStream, PrintStream outStream) {
-	    wsStatus = new WorkspaceStatusImpl(inStream, outStream);
-	    factory = new ShellCommandFactory(wsStatus);
+	public KomodoShell(KEngine kEngine, InputStream inStream, PrintStream outStream) {
+	    this.kEngine = kEngine;
+        this.inStream = inStream;
+        this.outStream = outStream;
+	    
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; i<CompletionConstants.MESSAGE_INDENT; i++) {
 			sb.append(StringConstants.SPACE);
@@ -114,20 +129,27 @@ public class KomodoShell {
 	 * @throws Exception the exception
 	 */
 	public void run(String[] args) throws Exception {
-		File startupPropertiesFile = new File(STARTUP_PROPERTIES_FILEPATH);
-		if(startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead()) {
-			Properties props = new Properties();
+		// This will block and await the start of both the engine and its default repository
+		startKEngine();      
 
-			try {
-				props.load(new FileInputStream(startupPropertiesFile));
-			} catch (Exception e) {
-			    // ignore
-			}
-			wsStatus.setProperties(props);
-		}
-		
+		wsStatus = new WorkspaceStatusImpl(kEngine, inStream, outStream);
+        factory = new ShellCommandFactory(wsStatus);
+
+        File startupPropertiesFile = new File(STARTUP_PROPERTIES_FILEPATH);
+        if(startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead()) {
+            Properties props = new Properties();
+
+            try {
+                props.load(new FileInputStream(startupPropertiesFile));
+            } catch (Exception e) {
+                // ignore
+            }
+            wsStatus.setProperties(props);
+        }
+
         reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
         reader.open();
+
 		displayWelcomeMessage();
 		boolean done = false;
 		while (!done && !shutdown) {
@@ -146,45 +168,95 @@ public class KomodoShell {
 					}
 				}
 			} catch (InvalidCommandArgumentException e) {
-			    wsStatus.getOutputStream().println(msgIndentStr+Messages.getString(SHELL.INVALID_ARG, e.getMessage())); 
+			    outStream.println(msgIndentStr+Messages.getString(SHELL.INVALID_ARG, e.getMessage())); 
 				if (command != null) {
-				    wsStatus.getOutputStream().println(msgIndentStr+Messages.getString(SHELL.USAGE)); 
+				    outStream.println(msgIndentStr+Messages.getString(SHELL.USAGE)); 
     				command.printUsage(CompletionConstants.MESSAGE_INDENT);
 				}
 				if (reader.isBatch())
 				    shutdown();
 			} catch (Exception e) {
 			    String msg = "Exception Occurred: " + (e.getLocalizedMessage() == null ? e.getClass().getSimpleName() : e.getLocalizedMessage()); //$NON-NLS-1$
-			    wsStatus.getOutputStream().println(msgIndentStr + msg);
+			    displayMessage(msgIndentStr + msg + NEW_LINE);
 				if (reader.isBatch())
 				    shutdown();
 			}
 		}
 	}
 
+    private void startKEngine() throws KException, InterruptedException {
+        final Repository defaultRepo = kEngine.getDefaultRepository();
+
+		// Latch for awaiting the start of the default repository
+		final CountDownLatch updateLatch = new CountDownLatch(1);
+
+		// Observer attached to the default repository for listening for the change of state
+		RepositoryObserver stateObserver = new RepositoryObserver() {
+
+            @Override
+            public void stateChanged() {
+                updateLatch.countDown();
+            }
+        };
+		defaultRepo.addObserver(stateObserver);
+
+        displayMessage(Messages.getString(SHELL.ENGINE_STARTING));
+        kEngine.start();
+        displayMessage(SPACE + Messages.getString(SHELL.COMPONENT_STARTED)+ NEW_LINE);
+
+        displayMessage(Messages.getString(SHELL.LOCAL_REPOSITORY_STARTING));
+
+        TimerTask progressTask = new TimerTask() {
+            @Override
+            public void run() {
+                displayMessage(DOT);
+            }
+         };
+
+         Timer timer = new Timer();
+         timer.schedule(progressTask, 0, 500);
+
+        // Block the thread until the latch has counted down or timeout has been reached
+        boolean localRepoWaiting = updateLatch.await(3, TimeUnit.MINUTES);
+
+        // Cancel timer and display repository message
+        timer.cancel();
+
+        if (localRepoWaiting)
+            displayMessage(SPACE + Messages.getString(SHELL.COMPONENT_STARTED));
+        else
+            displayMessage(SPACE + Messages.getString(SHELL.LOCAL_REPOSITORY_TIMEOUT_ERROR));
+
+        displayMessage(NEW_LINE);
+        displayMessage(NEW_LINE);
+    }
+
 	/**
 	 * Shuts down the shell.
 	 */
 	public void shutdown() {
-        wsStatus.getOutputStream().print(msgIndentStr + Messages.getString(SHELL.SHUTTING_DOWN));
+	    outStream.print(msgIndentStr + Messages.getString(SHELL.SHUTTING_DOWN));
         try {
             shutdown  = true;
             this.reader.close();
         } catch (IOException e) {
             // ignore
         }
-        wsStatus.getOutputStream().println(msgIndentStr+Messages.getString(SHELL.DONE));
+        outStream.println(msgIndentStr+Messages.getString(SHELL.DONE));
+	}
+
+	private void displayMessage(String message) {
+        outStream.print(message);
 	}
 
 	/**
 	 * Displays a welcome message to the user.
 	 */
 	private void displayWelcomeMessage() {
-	    wsStatus.getOutputStream().println(
+	    displayMessage(
 				"**********************************************************************\n" + //$NON-NLS-1$
 				"  Welcome to Komodo Shell\n" + //$NON-NLS-1$
-//				"  Locale: " + Locale.getDefault().toString().trim() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
-				"**********************************************************************" //$NON-NLS-1$
+				"**********************************************************************\n" //$NON-NLS-1$
 				);
 	}
 }

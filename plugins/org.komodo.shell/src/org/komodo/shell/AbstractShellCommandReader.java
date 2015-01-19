@@ -82,11 +82,10 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 	/**
      * Open.
      *
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @see org.komodo.shell.ShellCommandReader#open()
+	 * @throws Exception error has occurred
      */
 	@Override
-	public abstract void open() throws IOException;
+	public abstract void open() throws Exception;
 
 	/**
      * Read.
@@ -158,7 +157,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-	protected abstract String readLine() throws IOException;
+	protected abstract String readLine() throws Exception;
 
 	/**
      * Close.

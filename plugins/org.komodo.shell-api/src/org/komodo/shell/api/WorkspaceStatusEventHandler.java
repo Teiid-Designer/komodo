@@ -30,8 +30,9 @@ public interface WorkspaceStatusEventHandler {
 
 	/**
 	 * Called when workspace context changes
+	 * @throws Exception if error occurrs
 	 */
-	public void workspaceContextChanged();
+	public void workspaceContextChanged() throws Exception;
 
 
 }

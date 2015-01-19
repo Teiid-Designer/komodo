@@ -30,14 +30,14 @@ import java.util.List;
 public class CommandInfo {
 	
 	private String name;
-	private List<WorkspaceContext.Type> types;
+	private List<String> types;
 	
 	/**
 	 * Constructor
 	 * @param name the command name
 	 * @param types workspace context types the command is valid for
 	 */
-	public CommandInfo(String name, List<WorkspaceContext.Type> types) {
+	public CommandInfo(String name, List<String> types) {
 		super();
 		this.name = name;
 		this.types = types;
@@ -63,7 +63,7 @@ public class CommandInfo {
 	 * Get the list of context types
 	 * @return the List of context types
 	 */
-	public List<WorkspaceContext.Type> getContextTypes() {
+	public List<String> getContextTypes() {
 		return types;
 	}
 	
@@ -71,7 +71,7 @@ public class CommandInfo {
 	 * Set the list of context types
 	 * @param contextTypes the List of context types
 	 */
-	public void setContextTypes(List<WorkspaceContext.Type> contextTypes) {
+	public void setContextTypes(List<String> contextTypes) {
 		this.types = contextTypes;
 	}	
 	

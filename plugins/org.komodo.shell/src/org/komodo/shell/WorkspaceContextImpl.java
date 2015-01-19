@@ -21,389 +21,262 @@
  ************************************************************************************/
 package org.komodo.shell;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import org.komodo.relational.model.legacy.RelationalObject;
-import org.komodo.relational.model.legacy.RelationalConstants.TYPES;
+import org.komodo.core.KomodoLexicon;
+import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.api.WorkspaceContext;
+import org.komodo.shell.api.WorkspaceContextVisitor;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.repository.Descriptor;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.Repository;
 
 /**
  * The WorkspaceContext
  */
 public class WorkspaceContextImpl implements WorkspaceContext {
-	
-	private String name;
-	private Type type;
-	private WorkspaceStatus wsStatus = null;
-	private WorkspaceContext parent = null;
-	private List<WorkspaceContext> children = new ArrayList<WorkspaceContext>();
-	private List<RelationalObject> models = new ArrayList<RelationalObject>();
-	private Map<WorkspaceContext.Type,Integer> wsContextToRelObjTypeMap;
-	
-	/**
-	 * Constructor
-	 * @param wsStatus the workspace status object
-	 * @param parent the parent context
-	 * @param name the context name
-	 * @param type the context type
-	 */
-	public WorkspaceContextImpl(WorkspaceStatus wsStatus, WorkspaceContext parent, String name, Type type) {
-		super();
-		this.wsStatus = wsStatus;
-		this.parent = parent;
-		this.name = name;
-		this.type = type;
-		
-		// Init the context to relational type mappings
-		this.wsContextToRelObjTypeMap = new HashMap<WorkspaceContext.Type,Integer>();
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.TABLE, TYPES.TABLE);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.COLUMN, TYPES.COLUMN);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.PROCEDURE, TYPES.PROCEDURE);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.PARAMETER, TYPES.PARAMETER);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.RESULT_SET, TYPES.RESULT_SET);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.SCHEMA, TYPES.SCHEMA);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.VIEW, TYPES.VIEW);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.UNIQUE_CONSTRAINT, TYPES.UC);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.ACCESS_PATTERN, TYPES.AP);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.PRIMARY_KEY, TYPES.PK);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.FOREIGN_KEY, TYPES.FK);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.INDEX, TYPES.INDEX);
-		this.wsContextToRelObjTypeMap.put(WorkspaceContext.Type.MODEL, TYPES.MODEL);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getName()
-	 */
-	@Override
-	public String getName() {
-		return this.name;
-	}
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#setName(java.lang.String)
-	 */
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+    private static String[] RELATIONAL_TYPES = {
+        KomodoLexicon.Schema.NODE_TYPE,
+        KomodoLexicon.Vdb.NODE_TYPE,
+        KomodoLexicon.VdbModel.NODE_TYPE
+    };
+    private static List<String> relationalTypes = Arrays.asList(RELATIONAL_TYPES);
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getType()
-	 */
-	@Override
-	public Type getType() {
-		return this.type;
-	}
+    private final WorkspaceStatus wsStatus;
+    private final WorkspaceContext parent;
+    private final KomodoObject repoObject;
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#setType(org.komodo.shell.api.WorkspaceContext.Type)
-	 */
-	@Override
-	public void setType(Type type) {
-		this.type=type;
-	}
+    /**
+     * @param wsStatus the workspace status object
+     * @param parent the parent context
+     * @param repoObject repository object on which this context is based
+     */
+    public WorkspaceContextImpl(WorkspaceStatus wsStatus, WorkspaceContext parent, KomodoObject repoObject) {
+        super();
+        this.wsStatus = wsStatus;
+        this.parent = parent;
+        this.repoObject = repoObject;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getParent()
-	 */
-	@Override
-	public WorkspaceContext getParent() {
-		return this.parent;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getChildren()
-	 */
-	@Override
-	public List<WorkspaceContext> getChildren() {
-		return this.children;
-	}
+    @Override
+    public Repository getRepository() throws Exception {
+        return repoObject.getRepository();
+    }
 
-	private WorkspaceContext createWorkspaceContext(RelationalObject relObj) {
-		WorkspaceContext.Type wsCtxType = getWsContextTypeForRelationalObjType(relObj.getType());
-		return new WorkspaceContextImpl(this.wsStatus,this,relObj.getName(),wsCtxType);
-	}
-	
-	/**
-	 * Get the full name path for this context.  e.g. home.parentContext.thisContext
-	 * @return the full name
-	 */
-	@Override
-	public String getFullName() {
-		List<WorkspaceContext> parentContexts = new ArrayList<WorkspaceContext>();
-		WorkspaceContext parentContext = this.parent;
-		while(parentContext!=null) {
-			parentContexts.add(0,parentContext);
-			parentContext = parentContext.getParent();
-		}
-		StringBuffer sb = new StringBuffer();
-		for(WorkspaceContext theContext : parentContexts) {
-			sb.append(theContext.getName()+"."); //$NON-NLS-1$
-		}
-		sb.append(getName());
-		return sb.toString();
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.parent == null) ? 0 : this.parent.hashCode());
+        result = prime * result + ((this.repoObject == null) ? 0 : this.repoObject.hashCode());
+        return result;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#isRelational()
-	 */
-	@Override
-	public boolean isRelational() {
-		WorkspaceContext.Type wsContextType = getType();
-		boolean isRelational = false;
-		
-		switch(wsContextType) {
-		case TABLE:
-		case COLUMN:
-		case PROCEDURE:
-		case PARAMETER:
-		case RESULT_SET:
-		case SCHEMA:
-		case VIEW:
-		case UNIQUE_CONSTRAINT:
-		case ACCESS_PATTERN:
-		case PRIMARY_KEY:
-		case FOREIGN_KEY:
-		case INDEX:
-		case MODEL:
-			isRelational=true;
-			break;
-		case ALL:
-		case HOME:
-		case PROJECT:
-		default:
-			break;
-		}
-		
-		return isRelational;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WorkspaceContextImpl other = (WorkspaceContextImpl)obj;
+        if (this.parent == null) {
+            if (other.parent != null)
+                return false;
+        } else if (!this.parent.equals(other.parent))
+            return false;
+        if (this.repoObject == null) {
+            if (other.repoObject != null)
+                return false;
+        } else if (!this.repoObject.equals(other.repoObject))
+            return false;
+        return true;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getChild(java.lang.String, org.komodo.shell.api.WorkspaceContext.Type)
-	 */
-	@Override
-	public WorkspaceContext getChild(String name, Type type) {
-		WorkspaceContext result = null;
-		for(Object child : children) {
-			WorkspaceContext ctx = (WorkspaceContext)child;
-			Type ctxType = ctx.getType();
-			String ctxName = ctx.getName();
-			if(ctxType==type && ctxName.equalsIgnoreCase(name)) {
-				result = ctx;
-				break;
-			}
-		}
-		return result;
-	}
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getRelationalObjTypeForWsContextType(org.komodo.shell.api.WorkspaceContext.Type)
-	 */
-	@Override
-	public int getRelationalObjTypeForWsContextType(Type ctxType) {
-		return this.wsContextToRelObjTypeMap.get(ctxType);
-	}
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#getName()
+     */
+    @Override
+    public String getName() throws Exception {
+        return this.repoObject.getName(null);
+    }
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getWsContextTypeForRelationalObjType(int)
-	 */
-	@Override
-	public Type getWsContextTypeForRelationalObjType(int relObjType) {
-		WorkspaceContext.Type ctxType = WorkspaceContext.Type.MODEL;
-		for(WorkspaceContext.Type wsCtxType : this.wsContextToRelObjTypeMap.keySet()) {
-			int objType = this.wsContextToRelObjTypeMap.get(wsCtxType);
-			if(objType==relObjType) {
-				ctxType = wsCtxType;
-				break;
-			}
-		}
-		return ctxType;
-	}
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#getType()
+     */
+    @Override
+    public String getType() throws Exception {
+        Descriptor descriptor = this.repoObject.getPrimaryType(null);
+        return descriptor.getName();
+    }
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getPropertyNameValueMap()
-	 */
-	@Override
-	public Map<String,String> getPropertyNameValueMap() {
-		Map<String,String> propNameValues = new HashMap<String,String>();
-		if(getType().equals(WorkspaceContext.Type.HOME)) {
-			propNameValues.put(WorkspaceStatus.RECORDING_FILEPATH_KEY,getWorkspaceStatus().getRecordingOutputFile().toString());
-		} else if(isRelational()) {
-			RelationalObject relObj = getRelationalObj();
-			Map<String,String> props = relObj.getProperties();
-			for(Object propName : props.keySet()) {
-				propNameValues.put(propName.toString(),props.get(propName.toString()));
-			}
-		}
-		return propNameValues;
-	}
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#getParent()
+     */
+    @Override
+    public WorkspaceContext getParent() {
+        return this.parent;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getValidTypesForCreate()
-	 */
-	@Override
-	public List<String> getValidTypesForCreate() {
-		List<String> types = new ArrayList<String>();
-		if(getType().equals(WorkspaceContext.Type.HOME)) {
-			types.add(WorkspaceContext.Type.PROJECT.toString());
-		} else if(getType().equals(WorkspaceContext.Type.PROJECT)) {
-			types.add(WorkspaceContext.Type.MODEL.toString());
-		} else if(getType().equals(WorkspaceContext.Type.MODEL)) {
-			types.add(WorkspaceContext.Type.TABLE.toString());
-		} else if(getType().equals(WorkspaceContext.Type.TABLE)) {
-			types.add(WorkspaceContext.Type.COLUMN.toString());
-			types.add(WorkspaceContext.Type.ACCESS_PATTERN.toString());
-			types.add(WorkspaceContext.Type.PRIMARY_KEY.toString());
-			types.add(WorkspaceContext.Type.FOREIGN_KEY.toString());
-			types.add(WorkspaceContext.Type.INDEX.toString());
-		}
-		return types;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getRelationalObj()
-	 */
-	@Override
-	public RelationalObject getRelationalObj() {
-		WorkspaceContext.Type currentCtxType = getType();
-		RelationalObject relObj = null;
-		
-		if(isRelational()) {
-			String fullName = getFullName();
-			String projName = getProjectName(fullName);
-			String modelName = getModelName(fullName);
-			
-			WorkspaceContext homeContext = this;
-			WorkspaceContext parentContext = getParent();
-			while(parentContext!=null) {
-				homeContext = parentContext;
-				parentContext = homeContext.getParent();
-			}
-			WorkspaceContext projContext = homeContext.getChild(projName, WorkspaceContext.Type.PROJECT);
-			RelationalObject modelObj = getModelObject(projContext,modelName);
-			if(projContext!=null) {
-				List<String> objPathElems = getModelObjPath(fullName);
-				if(!objPathElems.isEmpty()) {
-					int relObjType = homeContext.getRelationalObjTypeForWsContextType(currentCtxType);
-					relObj = modelObj.getChildAtPath(objPathElems,relObjType);
-				} else {
-					relObj = modelObj;
-				}
-			}
-		}
-		
-		return relObj;
-	}
-	
-	private RelationalObject getModelObject(WorkspaceContext projContext,String modelName) {
-		RelationalObject modelObject = null;
-		if(projContext!=null && projContext.getType()==WorkspaceContext.Type.PROJECT) {
-			for(RelationalObject modelObj : projContext.getModels()) {
-				if(modelObj.getType()==TYPES.MODEL && modelObj.getName().equalsIgnoreCase(modelName)) {
-					modelObject = modelObj;
-					break;
-				}
-			}
-		}
-		return modelObject;
-	}
-	
-	private String getProjectName(String fullCtx) {
-		// Get list of ctx elements
-        List<String> ctxList = getContextList(fullCtx);
-        if(ctxList.size()>1) return ctxList.get(1);
-		return null;
-	}
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#getChildren()
+     */
+    @Override
+    public List<WorkspaceContext> getChildren() throws Exception {
+        List<WorkspaceContext> childrenCtx = new ArrayList<WorkspaceContext>();
+        KomodoObject[] children = repoObject.getChildren(null);
 
-	private String getModelName(String fullCtx) {
-		// Get list of ctx elements
-        List<String> ctxList = getContextList(fullCtx);
-        if(ctxList.size()>2) return ctxList.get(2);
-		return null;
-	}
+        for (KomodoObject child : children) {
+            childrenCtx.add(new WorkspaceContextImpl(wsStatus, this, child));
+        }
 
-	private List<String> getModelObjPath(String fullCtx) {
-		List<String> pathElems = new ArrayList<String>();
-		
-		// Get list of ctx elements
-        List<String> ctxList = getContextList(fullCtx);
-        if(ctxList.size()>3) {
-            for(int i=3; i<ctxList.size(); i++) {
-             	pathElems.add(ctxList.get(i));
+        return childrenCtx;
+    }
+
+    private WorkspaceContext createWorkspaceContext(KomodoObject relObj) throws Exception {
+        WorkspaceContext context = wsStatus.getWorkspaceContext(relObj.getAbsolutePath());
+        if (context == null) {
+            context = new WorkspaceContextImpl(wsStatus, this, relObj);
+            wsStatus.addWorkspaceContext(relObj.getAbsolutePath(), context);
+        }
+
+        return context;
+    }
+
+    /**
+     * Get the full name path for this context.  e.g. home.parentContext.thisContext
+     * @return the full name
+     * @throws Exception if error occurs
+     */
+    @Override
+    public String getFullName() throws Exception {
+        List<WorkspaceContext> parentContexts = new ArrayList<WorkspaceContext>();
+        WorkspaceContext parentContext = this.parent;
+        while (parentContext != null) {
+            parentContexts.add(0, parentContext);
+            parentContext = parentContext.getParent();
+        }
+        StringBuffer sb = new StringBuffer();
+        for (WorkspaceContext theContext : parentContexts) {
+            sb.append(theContext.getName() + File.separator); //$NON-NLS-1$
+        }
+        sb.append(getName());
+        return sb.toString();
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#isRelational()
+     */
+    @Override
+    public boolean isRelational() {
+        try {
+            return relationalTypes.contains(getType());
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#getChild(java.lang.String, org.komodo.shell.api.WorkspaceContext.Type)
+     */
+    @Override
+    public WorkspaceContext getChild(String name, String type) throws Exception {
+        KomodoObject[] children = repoObject.getChildrenOfType(null, type);
+
+        for (KomodoObject child : children) {
+            String childName = child.getName(null);
+            if (childName.equalsIgnoreCase(name)) {
+                return createWorkspaceContext(child);
             }
         }
-        return pathElems;
-	}
-	
-	private List<String> getContextList(String fullCtx) {
-		// Break down the full path into a list
-        List<String> ctxList = new ArrayList<String>();
-        StringTokenizer tokenizer = new StringTokenizer( fullCtx, "." ); //$NON-NLS-1$
-        while(tokenizer.hasMoreTokens()){
-            String ctxElement = tokenizer.nextToken();
-            ctxList.add(ctxElement);
-        } 
-        return ctxList;
-	}
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getWorkspaceStatus()
-	 */
-	@Override
-	public WorkspaceStatus getWorkspaceStatus() {
-		return this.wsStatus;
-	}
+        return null;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#addChild(org.komodo.shell.api.WorkspaceContext)
-	 */
-	@Override
-	public void addChild(Object child) {
-		if(child instanceof WorkspaceContext) {
-			this.children.add((WorkspaceContext)child);
-		} else if(child instanceof RelationalObject) {
-			WorkspaceContext wCtx = createWorkspaceContext((RelationalObject)child);
-			this.children.add(wCtx);
-			// Maintain Model list if this is a project
-			if(this.getType()==WorkspaceContext.Type.PROJECT && ((RelationalObject)child).getType()==TYPES.MODEL) {
-				this.models.add((RelationalObject)child);
-			}
-			addChildren(wCtx,((RelationalObject)child).getChildren());
-		}
-	}
-	
-	private void addChildren(WorkspaceContext wCtx, Collection<RelationalObject> children) {
-		for(RelationalObject rObj : children) {
-			wCtx.addChild(rObj); 
-		}
-	}
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#getPropertyNameValueMap()
+     */
+    @Override
+    public List<String> getProperties() throws Exception {
+////        if (getType().equals(WorkspaceContext.Type.ROOT)) {
+////            propNameValues.put(WorkspaceStatus.RECORDING_FILEPATH_KEY, getWorkspaceStatus().getRecordingOutputFile().toString());
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.WorkspaceContext#getModels()
-	 */
-	@Override
-	public List<RelationalObject> getModels() {
-		if(this.getType()==WorkspaceContext.Type.PROJECT) {
-			return this.models;
-		}
-		return Collections.emptyList();
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(this.getClass().getName());
-		sb.append(" : name = ").append(getFullName()); //$NON-NLS-1$
-		return sb.toString();
-	}
+        KomodoObject relObj = getKomodoObj();
+        String[] props = relObj.getPropertyNames(null);
 
+        if (props != null)
+            return Arrays.asList(props);
+        else
+            return Collections.emptyList();
+    }
+
+    @Override
+    public String getPropertyValue(String propertyName) throws Exception {
+        KomodoObject relObj = getKomodoObj();
+        Property property = relObj.getProperty(null, propertyName);
+        return RepositoryTools.getDisplayValue(property);
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#getRelationalObj()
+     */
+    @Override
+    public KomodoObject getKomodoObj() {
+        return repoObject;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#getWorkspaceStatus()
+     */
+    @Override
+    public WorkspaceStatus getWorkspaceStatus() {
+        return this.wsStatus;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#addChild(org.komodo.shell.api.WorkspaceContext)
+     */
+    @Override
+    public void addChild(Object child) {
+//        if (child instanceof WorkspaceContext) {
+//            
+//            
+//            
+//            this.children.add((WorkspaceContext)child);
+//        } else if (child instanceof KomodoObject) {
+//            WorkspaceContext wCtx = createWorkspaceContext((KomodoObject)child);
+//            this.children.add(wCtx);
+//            addChildren(wCtx, ((KomodoObject)child).getChildren());
+//        }
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getClass().getName());
+
+        try {
+            sb.append(" : name = ").append(getFullName()); //$NON-NLS-1$
+        } catch (Exception ex) {
+            sb.append(ex.getMessage());
+        }
+
+        return sb.toString();
+    }
+
+    @Override
+    public Object visit(WorkspaceContextVisitor visitor) throws Exception {
+        return visitor.visit(this);
+    }
 }

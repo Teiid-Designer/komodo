@@ -42,6 +42,7 @@ import org.komodo.shell.commands.core.ConnectCommand;
 import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
+import org.komodo.shell.commands.core.NavigateCommand;
 import org.komodo.shell.commands.core.PropertyCommand;
 import org.komodo.shell.commands.core.RecordCommand;
 import org.komodo.shell.commands.core.StatusCommand;
@@ -81,8 +82,8 @@ public class ShellCommandFactory {
 		commandMap = new HashMap<String, ShellCommand>();
 
 		// commands
-		List<WorkspaceContext.Type> allList = new ArrayList<WorkspaceContext.Type>(1);
-		allList.add(WorkspaceContext.Type.ALL);
+		List<String> allList = new ArrayList<String>(1);
+		allList.add(WorkspaceContext.ALL_TYPES);
 		
 		StatusCommand statusCommand = new StatusCommand("status",this.wsStatus); //$NON-NLS-1$
 		commandMap.put(statusCommand.getName(), statusCommand);  
@@ -107,6 +108,9 @@ public class ShellCommandFactory {
 
 		ConnectCommand connCommand = new ConnectCommand(this.wsStatus);
         commandMap.put(connCommand.getName(), connCommand);
+
+        NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
+        commandMap.put(traverseCommand.getName(), traverseCommand);
 
 		discoverContributedCommands();
 	}
@@ -191,8 +195,9 @@ public class ShellCommandFactory {
 	/**
 	 * Get valid command names for the current context
 	 * @return List<String> list of commands for current context
+	 * @throws Exception if error occurs
 	 */
-	public List<String> getCommandsForCurrentContext( ) {
+	public List<String> getCommandsForCurrentContext( ) throws Exception {
 		List<String> commandList = new ArrayList<String>();
 		for(String mapKey : this.commandMap.keySet()) {
 			ShellCommand command = this.commandMap.get(mapKey);

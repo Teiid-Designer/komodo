@@ -69,7 +69,7 @@ public interface ShellCommand {
 	 * @param contextType the context type
 	 * @return 'true' if valid, 'false' if not.
 	 */
-	public boolean isValidForWsContext(WorkspaceContext.Type contextType);
+	public boolean isValidForWsContext(String contextType);
 	
 	/**
 	 * Called to execute the command.
@@ -132,7 +132,8 @@ public interface ShellCommand {
 	 * @param lastArgument the last arg
 	 * @param candidates the candidates
 	 * @return the cursor position
+	 * @throws Exception if errors occur
 	 */
-	public int tabCompletion(String lastArgument, List<CharSequence> candidates);
+	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception;
 
 }

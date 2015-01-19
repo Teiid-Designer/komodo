@@ -24,12 +24,17 @@ package org.komodo.shell;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.komodo.core.KEngine;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.teiid.runtime.client.instance.TCTeiidInstance;
 import org.teiid.runtime.client.instance.TCTeiidJdbcInfo;
@@ -39,7 +44,12 @@ import org.teiid.runtime.client.instance.TCTeiidJdbcInfo;
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
-    private WorkspaceContextImpl homeContext;
+    /* The library context is where all artifacts are stored */
+    private WorkspaceContextImpl rootContext;
+
+    /* Cache of context to avoid creating needless duplicate contexts */
+    private Map<String, WorkspaceContext> contextCache = new HashMap<String, WorkspaceContext>();
+
     private WorkspaceContext currentContext;
     private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
     private boolean recordingStatus = false;
@@ -47,22 +57,37 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private final InputStream inStream;
     private final PrintStream outStream;
     private ShellTeiidParent shellTeiidParent;
+    private final KEngine kEngine;
 
     /**
      * Constructor
-     * @param outStream 
-     * @param inStream 
+     * @param kEngine the komodo engine
+     * @param outStream output stream
+     * @param inStream input stream
+     * @throws Exception error on initialisation failure
      */
-    public WorkspaceStatusImpl(InputStream inStream, PrintStream outStream) {
+    public WorkspaceStatusImpl(KEngine kEngine, InputStream inStream, PrintStream outStream) throws Exception {
+        this.kEngine = kEngine;
         this.inStream = inStream;
         this.outStream = outStream;
         init();
     }
 
-    private void init() {
-        homeContext = new WorkspaceContextImpl(this, null, "home", WorkspaceContext.Type.HOME); //$NON-NLS-1$
+    private void init() throws Exception {
+        Repository repo = getEngine().getDefaultRepository();
+        KomodoObject komodoWksp = repo.komodoWorkspace(null);
 
-        currentContext = homeContext;
+        KomodoObject komodoRoot = komodoWksp.getParent(null);
+
+        rootContext = new WorkspaceContextImpl(this, null, komodoRoot);
+        contextCache.put(komodoRoot.getAbsolutePath(), rootContext);
+
+        currentContext = rootContext;
+    }
+
+    @Override
+    public KEngine getEngine() {
+        return kEngine;
     }
 
     @Override
@@ -76,6 +101,16 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
+    public WorkspaceContext getWorkspaceContext(String contextId) {
+        return contextCache.get(contextId);
+    }
+
+    @Override
+    public void addWorkspaceContext(String contextId, WorkspaceContext context) {
+        contextCache.put(contextId, context);
+    }
+
+    @Override
     public ShellTeiidParent getTeiidParent() {
         if (shellTeiidParent == null)
             shellTeiidParent = new ShellTeiidParent();
@@ -84,7 +119,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-    public void setCurrentContext(WorkspaceContext context) {
+    public void setCurrentContext(WorkspaceContext context) throws Exception {
         currentContext = context;
         fireContextChangeEvent();
     }
@@ -94,12 +129,19 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return currentContext;
     }
 
+    /**
+     * @return the contextCache
+     */
+    public Map<String, WorkspaceContext> getContextCache() {
+        return this.contextCache;
+    }
+
     /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#getHomeContext()
+     * @see org.komodo.shell.api.WorkspaceStatus#getRootContext()
      */
     @Override
-    public WorkspaceContext getHomeContext() {
-        return homeContext;
+    public WorkspaceContext getRootContext() {
+        return rootContext;
     }
 
     /**
@@ -120,8 +162,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     /**
      * Fires the context change event.
+     * @throws Exception if error occurs
      */
-    private void fireContextChangeEvent() {
+    private void fireContextChangeEvent() throws Exception {
         for (WorkspaceStatusEventHandler handler : eventHandlers) {
             handler.workspaceContextChanged();
         }
