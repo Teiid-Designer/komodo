@@ -13,13 +13,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.komodo.core.KEngine;
 import org.komodo.modeshape.teiid.parser.SQQueryParser;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.ExecutionConfigurationListener;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
-import org.komodo.utils.KLog;
 
 /**
  * This class provides static Lists of SQL syntax words. RESERVED_WORDS contains reserved SQL words, FUNCTION_NAMES contains
@@ -84,7 +84,7 @@ public class SqlSyntax {
             }
 			Collections.sort(RESERVED_WORDS);
 		} catch (Exception e) {
-			KLog.getLogger().error(e.getMessage(), e);
+			KEngine.getInstance().getErrorHandler().error(e);
 		}
 
 //        Set allFunctionNames = new HashSet();
@@ -124,7 +124,7 @@ public class SqlSyntax {
 			}
 			Collections.sort(DATATYPE_NAMES);
 		} catch (Exception e) {
-		    KLog.getLogger().error(e.getMessage(), e);
+		    KEngine.getInstance().getErrorHandler().error(e);
 		}
 
         // ALL WORDS List

@@ -23,6 +23,7 @@ import javax.jcr.ValueFactory;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
+import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.DataSource;
 import org.komodo.core.KomodoLexicon.Komodo;
@@ -980,7 +981,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                 // Ensure all observers are informed even if one throws an exception
                 observer.stateChanged();
             } catch (final Exception ex) {
-                KLog.getLogger().error(Messages.getString(Messages.LocalRepository.General_Exception), ex);
+                KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), ex);
             }
         }
     }
