@@ -17,6 +17,40 @@ import org.komodo.spi.KException;
 public interface Property extends KNode {
 
     /**
+     * The types of property value
+     */
+    enum ValueType {
+        /**
+         * {@link String} type
+         */
+        STRING,
+
+        /**
+         * {@link Long} type
+         */
+        LONG,
+
+        /**
+         * {@link BigDecimal} type
+         */
+        BIG_DECIMAL,
+
+        /**
+         * {@link Double} type
+         */
+        DOUBLE,
+
+        /**
+         * {@link Boolean} type
+         */
+        BOOLEAN,
+
+        /**
+         * {@link Calendar} type
+         */
+        CALENDAR
+    }
+    /**
      * An empty array of model properties.
      */
     Property[] NO_PROPS = {};

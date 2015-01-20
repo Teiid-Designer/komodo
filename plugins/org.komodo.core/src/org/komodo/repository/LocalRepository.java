@@ -75,6 +75,41 @@ public class LocalRepository extends RepositoryImpl {
             return this.workspaceName;
         }
 
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((this.configPath == null) ? 0 : this.configPath.hashCode());
+            result = prime * result + ((this.workspaceName == null) ? 0 : this.workspaceName.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            LocalRepositoryId other = (LocalRepositoryId)obj;
+            if (this.configPath == null) {
+                if (other.configPath != null)
+                    return false;
+            } else if (!this.configPath.equals(other.configPath))
+                return false;
+            if (this.workspaceName == null) {
+                if (other.workspaceName != null)
+                    return false;
+            } else if (!this.workspaceName.equals(other.workspaceName))
+                return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "LocalRepositoryId [configPath=" + this.configPath + ", workspaceName=" + this.workspaceName + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
     }
 
     /**

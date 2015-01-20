@@ -16,7 +16,7 @@ import org.komodo.utils.KLog;
 /**
  * A base implementation of a relational object.
  */
-abstract class RelationalObjectImpl extends ObjectImpl implements RelationalObject {
+public abstract class RelationalObjectImpl extends ObjectImpl implements RelationalObject {
 
     protected static final KLog LOGGER = KLog.getLogger();
 

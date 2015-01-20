@@ -183,6 +183,11 @@ public interface KomodoLexicon extends StringConstants {
         String GROUP_NODE = Namespace.PREFIX + COLON + "schemas"; //$NON-NLS-1$
 
         /**
+         * The name of the rendition property. Value is {@value} .
+         */
+        String RENDITION = Namespace.PREFIX + COLON + "rendition"; //$NON-NLS-1$
+
+        /**
          * The name of the language object node type for child node(s). Value is {@value} .
          */
         String LANGUAGE_OBJECT = "tsql:languageObject"; //$NON-NLS-1$

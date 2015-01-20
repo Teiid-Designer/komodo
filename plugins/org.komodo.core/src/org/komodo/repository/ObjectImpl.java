@@ -542,6 +542,64 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     }
 
     /**
+     * Convenience method for retrieving a property.
+     *
+     * @param uow the transaction. If null then a new transaction is generated.
+     * @param returnValueType the type of the return value type
+     * @param getterName name of the method name calling this method
+     * @param propertyPath relative path of the actual property
+     * @return the value of the property cast to the specified return value type
+     *
+     * @throws KException
+     */
+    protected <T> T getObjectProperty(UnitOfWork uow, Property.ValueType returnValueType,
+                                                     String getterName, String propertyPath) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction(getClass().getSimpleName() + HYPHEN + getterName, true, null);
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(getterName + ": transaction = '{0}'", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            Property result = getProperty(transaction, propertyPath);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            if (result == null) {
+                return null;
+            }
+
+            switch (returnValueType) {
+                case STRING:
+                    return (T) result.getStringValue();
+                case LONG:
+                    return (T) Long.valueOf(result.getLongValue());
+                case BIG_DECIMAL:
+                    return (T) result.getDecimalValue();
+                case DOUBLE:
+                    return (T) Double.valueOf(result.getDoubleValue());
+                case BOOLEAN:
+                    return (T) Boolean.valueOf(result.getBooleanValue());
+                case CALENDAR:
+                    return (T) result.getDateValue();
+                default:
+                    throw new UnsupportedOperationException("Further property types should be added for support in this method"); //$NON-NLS-1$        
+            }
+
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @see org.komodo.spi.repository.KomodoObject#getProperty(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
@@ -1020,6 +1078,33 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                     node.setProperty(name, PropertyImpl.createValue(factory, values[0]));
                 }
             }
+        }
+    }
+
+    protected void setObjectProperty(UnitOfWork uow, String setterName, String propertyName,
+                                            Object value) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction(getClass().getSimpleName() + HYPHEN + setterName, false, null); 
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(setterName + ": transaction = '{0}', value = '{1}'", //$NON-NLS-1$
+                         transaction.getName(),
+                         value);
+        }
+
+        try {
+            setProperty(transaction, propertyName, value);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
         }
     }
 

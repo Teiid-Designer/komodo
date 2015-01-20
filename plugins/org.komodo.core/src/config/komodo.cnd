@@ -56,9 +56,6 @@
  * data sources, and other resources created and being worked on by the user.
  */
 [tko:workspace] > nt:unstructured
-  + tko:repositories (tko:repositories) copy
-  + tko:teiids (tko:teiids) copy
-  + tko:dataSources (tko:dataSources) copy
 
 /*
  * The repository grouping node used by the workspace. Child nodes are Komodo local or 

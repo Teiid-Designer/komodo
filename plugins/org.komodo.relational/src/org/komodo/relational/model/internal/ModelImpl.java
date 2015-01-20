@@ -9,21 +9,24 @@ package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
+import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
 import org.komodo.spi.KException;
 import org.komodo.spi.Messages;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
+import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 
 /**
  * An implementation of a relational model.
@@ -41,6 +44,36 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     public ModelImpl( final Repository repository,
                       final String workspacePath ) throws KException {
         super(repository, workspacePath);
+    }
+
+    @Override
+    public String getModelType( final UnitOfWork uow ) throws KException {
+        String modelType = getObjectProperty(uow,
+                                       Property.ValueType.STRING,
+                                       "getModelType", //$NON-NLS-1$
+                                       CoreLexicon.JcrId.MODEL_TYPE);
+        
+        return modelType == null ? EMPTY_STRING : modelType;
+    }
+
+    @Override
+    public void setModelType(UnitOfWork uow, String modelType) throws KException {
+        setObjectProperty(uow, "setModelType", CoreLexicon.JcrId.MODEL_TYPE, modelType); //$NON-NLS-1$
+    }
+
+    @Override
+    public String getModelDefinition(UnitOfWork uow) throws KException {
+        String modelDefn = getObjectProperty(uow,
+                                       Property.ValueType.STRING,
+                                       "getModelDefinition", //$NON-NLS-1$
+                                       KomodoLexicon.VdbModel.MODEL_DEFINITION);
+        
+        return modelDefn == null ? EMPTY_STRING : modelDefn;
+    }
+    
+    @Override
+    public void setModelDefinition(UnitOfWork uow, String modelDefinition) throws KException {
+        setObjectProperty(uow, "setModelDefinition", KomodoLexicon.VdbModel.MODEL_DEFINITION, modelDefinition); //$NON-NLS-1$
     }
 
     /**

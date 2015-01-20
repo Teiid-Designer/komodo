@@ -18,6 +18,38 @@ public interface Model extends RelationalObject {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return model type of this model
+     * @throws KException if error occurs
+     */
+    String getModelType(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param modelType the model type
+     * @throws KException if error occurs
+     */
+    void setModelType(UnitOfWork transaction, String modelType) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return model definition of this model
+     * @throws KException if error occurs
+     */
+    String getModelDefinition(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param modelDefinition the model definition, eg. a string of ddl
+     * @throws KException  if error occurs
+     */
+    void setModelDefinition(UnitOfWork transaction, String modelDefinition) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @param functionName
      *        the name of the function to create (cannot be empty)
      * @return the new function (never <code>null</code>)
