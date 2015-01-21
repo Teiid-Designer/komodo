@@ -166,7 +166,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
         }
         StringBuffer sb = new StringBuffer();
         for (WorkspaceContext theContext : parentContexts) {
-            sb.append(theContext.getName() + File.separator); //$NON-NLS-1$
+            sb.append(theContext.getName() + File.separator);
         }
         sb.append(getName());
         return sb.toString();
@@ -223,6 +223,12 @@ public class WorkspaceContextImpl implements WorkspaceContext {
         KomodoObject relObj = getKomodoObj();
         Property property = relObj.getProperty(null, propertyName);
         return RepositoryTools.getDisplayValue(property);
+    }
+
+    @Override
+    public void setPropertyValue(String propertyName, Object value) throws Exception {
+        KomodoObject relObj = getKomodoObj();
+        relObj.setProperty(null, propertyName, value);
     }
 
     /* (non-Javadoc)

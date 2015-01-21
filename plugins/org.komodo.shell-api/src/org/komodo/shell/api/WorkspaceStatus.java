@@ -26,8 +26,8 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Properties;
 import org.komodo.core.KEngine;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.TeiidInstance;
 
 /**
  * WorkspaceStatus interface.
@@ -92,15 +92,17 @@ public interface WorkspaceStatus extends StringConstants {
 	 */
 	void setRecordingOutputFile(String recordingOutputFilePath);
 
-    /**
-     * @return the parent of the teiid instance
+	/**
+     * @return current teiid model
      */
-    IShellTeiidParent getTeiidParent();
+    Teiid getTeiid();
 
     /**
-     * @return current teiid instance
+     * Set the current teiid model
+     *
+     * @param teiid
      */
-    TeiidInstance getTeiidInstance();
+    void setTeiid(Teiid teiid);
 
 	/**
 	 * Add a WorkspaceContext Event Handler

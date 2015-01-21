@@ -21,6 +21,7 @@
  ************************************************************************************/
 package org.komodo.shell.commands.core;
 
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -58,34 +59,37 @@ public class StatusCommand extends BuiltInShellCommand implements StringConstant
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("StatusCommand.CurrentRepo", currentRepo)); //$NON-NLS-1$
 		
         // Teiid Instance info
-        TeiidInstance teiidInstance = wsStatus.getTeiidInstance();
-        String teiidUrl = teiidInstance.getUrl();
-        String teiidConnected = teiidInstance.isConnected() ?
-            Messages.getString(Messages.StatusCommand.Connected) :
-                Messages.getString(Messages.StatusCommand.NotConnected);
+        Teiid teiid = wsStatus.getTeiid();
+        if (teiid == null)
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("StatusCommand.NoCurrentTeiid")); //$NON-NLS-1$
+        else {
+            TeiidInstance teiidInstance = teiid.getTeiidInstance();
+            String teiidUrl = teiidInstance.getUrl();
+            String teiidConnected = teiidInstance.isConnected() ? Messages.getString(Messages.StatusCommand.Connected) : Messages.getString(Messages.StatusCommand.NotConnected);
 
-        String teiidJdbcUrl = teiidInstance.getTeiidJdbcInfo().getUrl();
-        /* Only test jdbc connection if teiid instance has been connected to */
-        String teiidJdbcConnected = teiidConnected;
-        if (teiidInstance.isConnected()) {
-            teiidJdbcConnected = teiidInstance.ping(ConnectivityType.JDBC).isOK() ?
-                Messages.getString(Messages.StatusCommand.PingOk) :
-                    Messages.getString(Messages.StatusCommand.PingFail);
+            String teiidJdbcUrl = teiidInstance.getTeiidJdbcInfo().getUrl();
+            /* Only test jdbc connection if teiid instance has been connected to */
+            String teiidJdbcConnected = teiidConnected;
+            if (teiidInstance.isConnected()) {
+                teiidJdbcConnected = teiidInstance.ping(ConnectivityType.JDBC).isOK() ? Messages.getString(Messages.StatusCommand.PingOk) : Messages.getString(Messages.StatusCommand.PingFail);
+            }
+
+            String currentTeiidInst = OPEN_SQUARE_BRACKET + teiidUrl + " : " + teiidConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
+            String currentTeiidJdbc = OPEN_SQUARE_BRACKET + teiidJdbcUrl + " : " + teiidJdbcConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("StatusCommand.CurrentTeiid", currentTeiidInst)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("StatusCommand.CurrentTeiidJdbc", currentTeiidJdbc)); //$NON-NLS-1$
         }
 
-        String currentTeiidInst = OPEN_SQUARE_BRACKET + teiidUrl + " : " + teiidConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
-        String currentTeiidJdbc = OPEN_SQUARE_BRACKET + teiidJdbcUrl + " : " + teiidJdbcConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
-        print(CompletionConstants.MESSAGE_INDENT, Messages.getString("StatusCommand.CurrentTeiid", currentTeiidInst)); //$NON-NLS-1$
-        print(CompletionConstants.MESSAGE_INDENT, Messages.getString("StatusCommand.CurrentTeiidJdbc", currentTeiidJdbc)); //$NON-NLS-1$
+        // Current Context
+        WorkspaceContext currentContext = wsStatus.getCurrentContext();
+        print(CompletionConstants.MESSAGE_INDENT,
+              Messages.getString("StatusCommand.CurrentContext", currentContext.getFullName())); //$NON-NLS-1$
 
-		// Current Context
-		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("StatusCommand.CurrentContext", currentContext.getFullName())); //$NON-NLS-1$
-		
-		// Echo command if recording on
-		if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
-		
-		return true;
-	}
+        // Echo command if recording on
+        if (wsStatus.getRecordingStatus())
+            recordCommand(getArguments());
+
+        return true;
+    }
 
 }

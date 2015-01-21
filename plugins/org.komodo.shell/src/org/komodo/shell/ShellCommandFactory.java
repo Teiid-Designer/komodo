@@ -38,7 +38,6 @@ import org.komodo.shell.commands.CommandNotFoundCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
 import org.komodo.shell.commands.core.CdCommand;
-import org.komodo.shell.commands.core.ConnectCommand;
 import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
@@ -46,6 +45,7 @@ import org.komodo.shell.commands.core.NavigateCommand;
 import org.komodo.shell.commands.core.PropertyCommand;
 import org.komodo.shell.commands.core.RecordCommand;
 import org.komodo.shell.commands.core.StatusCommand;
+import org.komodo.shell.commands.core.UseTeiidCommand;
 import org.komodo.utils.FileUtils;
 
 /**
@@ -106,7 +106,7 @@ public class ShellCommandFactory {
 		ImportCommand importCommand = new ImportCommand("import",this.wsStatus); //$NON-NLS-1$
 		commandMap.put(importCommand.getName(), importCommand);
 
-		ConnectCommand connCommand = new ConnectCommand(this.wsStatus);
+		UseTeiidCommand connCommand = new UseTeiidCommand(this.wsStatus);
         commandMap.put(connCommand.getName(), connCommand);
 
         NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);

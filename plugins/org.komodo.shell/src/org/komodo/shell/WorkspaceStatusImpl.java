@@ -30,14 +30,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.komodo.core.KEngine;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
-import org.komodo.spi.runtime.TeiidInstance;
-import org.teiid.runtime.client.instance.TCTeiidInstance;
-import org.teiid.runtime.client.instance.TCTeiidJdbcInfo;
 
 /**
  * Test implementation of WorkspaceStatus
@@ -56,8 +54,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private File recordingOutputFile;
     private final InputStream inStream;
     private final PrintStream outStream;
-    private ShellTeiidParent shellTeiidParent;
     private final KEngine kEngine;
+
+    private Teiid teiid;
 
     /**
      * Constructor
@@ -111,11 +110,13 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-    public ShellTeiidParent getTeiidParent() {
-        if (shellTeiidParent == null)
-            shellTeiidParent = new ShellTeiidParent();
+    public Teiid getTeiid() {
+        return teiid;
+    }
 
-        return shellTeiidParent;
+    @Override
+    public void setTeiid(Teiid teiid) {
+        this.teiid = teiid;
     }
 
     @Override
@@ -200,21 +201,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     @Override
     public void setRecordingOutputFile(String recordingOutputFilePath) {
         this.recordingOutputFile = new File(recordingOutputFilePath);
-    }
-
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#setTeiidServerUrl(java.lang.String)
-     */
-    @Override
-    public TeiidInstance getTeiidInstance() {
-        TeiidInstance teiidInstance = getTeiidParent().getTeiidInstance();
-        if (teiidInstance == null) {
-            TCTeiidJdbcInfo jdbcInfo = new TCTeiidJdbcInfo();
-            jdbcInfo.setHostProvider(getTeiidParent());
-            teiidInstance = new TCTeiidInstance(getTeiidParent(), jdbcInfo);
-        }
-
-        return teiidInstance;
     }
 
     /* (non-Javadoc)

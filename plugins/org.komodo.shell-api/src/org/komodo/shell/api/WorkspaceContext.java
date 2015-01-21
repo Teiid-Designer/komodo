@@ -111,6 +111,13 @@ public interface WorkspaceContext {
 	String getPropertyValue(String propertyName) throws Exception;
 
 	/**
+	 * @param propertyName
+	 * @param value
+	 * @throws Exception
+	 */
+	void setPropertyValue(String propertyName, Object value) throws Exception;
+
+	/**
 	 * Add a child context
 	 * @param child the child
 	 */
