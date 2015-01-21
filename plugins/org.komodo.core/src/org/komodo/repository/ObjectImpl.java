@@ -389,7 +389,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 final List< KomodoObject > matches = new ArrayList< KomodoObject >(kids.length);
 
                 for (final KomodoObject kid : kids) {
-                    if (type.equals(kid.getPrimaryType(transaction)) || kid.hasDescriptor(transaction, type)) {
+                    if (type.equals(kid.getPrimaryType(transaction).getName()) || kid.hasDescriptor(transaction, type)) {
                         matches.add(kid);
                     }
                 }
