@@ -31,6 +31,11 @@ public interface Property extends KNode {
         LONG,
 
         /**
+         * {@link Integer} type
+         */
+        INTEGER,
+
+        /**
          * {@link BigDecimal} type
          */
         BIG_DECIMAL,

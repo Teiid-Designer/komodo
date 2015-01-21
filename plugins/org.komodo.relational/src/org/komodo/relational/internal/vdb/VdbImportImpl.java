@@ -8,7 +8,6 @@
 package org.komodo.relational.internal.vdb;
 
 import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Property;
@@ -41,30 +40,7 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
      */
     @Override
     public int getVersion( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimportimpl-getVersion", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            int result = Vdb.DEFAULT_VERSION;
-            final Property property = getProperty(transaction, VdbLexicon.ImportVdb.VERSION);
-
-            if (property != null) {
-                result = (int)property.getLongValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.INTEGER, "getVersion", VdbLexicon.ImportVdb.VERSION); //$NON-NLS-1$
     }
 
     /**
@@ -74,30 +50,10 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
      */
     @Override
     public boolean isImportDataPolicies( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimportimpl-isImportDataPolicies", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = VdbImport.DEFAULT_IMPORT_DATA_POLICIES;
-            final Property property = getProperty(transaction, VdbLexicon.ImportVdb.IMPORT_DATA_POLICIES);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isImportDataPolicies", //$NON-NLS-1$
+                                 VdbLexicon.ImportVdb.IMPORT_DATA_POLICIES);
     }
 
     /**
@@ -108,29 +64,7 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
     @Override
     public void setImportDataPolicies( final UnitOfWork uow,
                                        final boolean newImportDataPolicies ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimportimpl-setImportDataPolicies", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setImportDataPolicies: transaction = '{0}', newImportDataPolicies = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newImportDataPolicies);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.ImportVdb.IMPORT_DATA_POLICIES, newImportDataPolicies);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setImportDataPolicies", VdbLexicon.ImportVdb.IMPORT_DATA_POLICIES, newImportDataPolicies); //$NON-NLS-1$
     }
 
     /**
@@ -141,29 +75,7 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
     @Override
     public void setVersion( final UnitOfWork uow,
                             final int newVersion ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimportimpl-setVersion", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setVersion: transaction = '{0}', newVersion = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newVersion);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.ImportVdb.VERSION, newVersion);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setVersion", VdbLexicon.ImportVdb.VERSION, newVersion); //$NON-NLS-1$
     }
 
 }

@@ -14,7 +14,6 @@ import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -42,30 +41,7 @@ public final class TranslatorImpl extends RelationalObjectImpl implements Transl
      */
     @Override
     public String getDescription( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("translatorimpl-getDescription", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.Translator.DESCRIPTION);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getDescription", VdbLexicon.Translator.DESCRIPTION); //$NON-NLS-1$
     }
 
     /**
@@ -75,30 +51,7 @@ public final class TranslatorImpl extends RelationalObjectImpl implements Transl
      */
     @Override
     public String getType( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("translatorimpl-getType", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.Translator.TYPE);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getType", VdbLexicon.Translator.TYPE); //$NON-NLS-1$
     }
 
     /**
@@ -109,31 +62,7 @@ public final class TranslatorImpl extends RelationalObjectImpl implements Transl
     @Override
     public void setDescription( final UnitOfWork uow,
                                 final String newDescription ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("translatorimpl-setDescription", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setDescription: transaction = '{0}', newDescription = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newDescription);
-        }
-
-        try {
-            setProperty(transaction,
-                        VdbLexicon.Translator.DESCRIPTION,
-                        StringUtils.isBlank(newDescription) ? null : newDescription);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setDescription", VdbLexicon.Translator.DESCRIPTION, newDescription); //$NON-NLS-1$
     }
 
     /**
@@ -144,30 +73,8 @@ public final class TranslatorImpl extends RelationalObjectImpl implements Transl
     @Override
     public void setType( final UnitOfWork uow,
                          final String newType ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("translatorimpl-setType", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setType: transaction = '{0}', newType = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newType);
-        }
-
-        try {
-            ArgCheck.isNotEmpty(newType, "newType"); //$NON-NLS-1$
-            setProperty(transaction, VdbLexicon.Translator.TYPE, newType);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        ArgCheck.isNotEmpty(newType, "newType"); //$NON-NLS-1$
+        setObjectProperty(uow, "setType", VdbLexicon.Translator.TYPE, newType); //$NON-NLS-1$
     }
 
 }

@@ -22,7 +22,6 @@ import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -144,30 +143,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      */
     @Override
     public String getDescription( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("dataroleimpl-getDescription", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.DESCRIPTION);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getDescription", VdbLexicon.DataRole.DESCRIPTION); //$NON-NLS-1$
     }
 
     /**
@@ -268,30 +244,10 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      */
     @Override
     public boolean isAllowCreateTempTables( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("dataroleimpl-isAllowCreateTempTables", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.ALLOW_CREATE_TEMP_TABLES);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isAllowCreateTempTables",  //$NON-NLS-1$
+                                 VdbLexicon.DataRole.ALLOW_CREATE_TEMP_TABLES);
     }
 
     /**
@@ -301,30 +257,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      */
     @Override
     public boolean isAnyAuthenticated( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("dataroleimpl-isAnyAuthenticated", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = DataRole.DEFAULT_ANY_AUTHENTICATED;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.ANY_AUTHENTICATED);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAnyAuthenticated", VdbLexicon.DataRole.ANY_AUTHENTICATED); //$NON-NLS-1$
     }
 
     /**
@@ -334,30 +267,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      */
     @Override
     public boolean isGrantAll( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("dataroleimpl-isGrantAll", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = DataRole.DEFAULT_GRANT_ALL;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.GRANT_ALL);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAnyAuthenticated", VdbLexicon.DataRole.GRANT_ALL); //$NON-NLS-1$
     }
 
     @Override
@@ -469,29 +379,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     @Override
     public void setAllowCreateTempTables( final UnitOfWork uow,
                                           final boolean newAllowCreateTempTables ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("dataroleimpl-setAllowCreateTempTables", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAllowCreateTempTables: transaction = '{0}', newAllowCreateTempTables = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAllowCreateTempTables);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.ALLOW_CREATE_TEMP_TABLES, newAllowCreateTempTables);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAllowCreateTempTables", VdbLexicon.DataRole.ALLOW_CREATE_TEMP_TABLES, newAllowCreateTempTables); //$NON-NLS-1$
     }
 
     /**
@@ -502,29 +390,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     @Override
     public void setAnyAuthenticated( final UnitOfWork uow,
                                      final boolean newAnyAuthenticated ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("dataroleimpl-setAnyAuthenticated", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAnyAuthenticated: transaction = '{0}', newAnyAuthenticated = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAnyAuthenticated);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.ANY_AUTHENTICATED, newAnyAuthenticated);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAnyAuthenticated", VdbLexicon.DataRole.ANY_AUTHENTICATED, newAnyAuthenticated); //$NON-NLS-1$
     }
 
     /**
@@ -535,29 +401,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     @Override
     public void setDescription( final UnitOfWork uow,
                                 final String newDescription ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("dataroleimpl-setDescription", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setDescription: transaction = '{0}', newDescription = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newDescription);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.DESCRIPTION, StringUtils.isBlank(newDescription) ? null : newDescription);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setDescription", VdbLexicon.DataRole.DESCRIPTION, newDescription); //$NON-NLS-1$
     }
 
     /**
@@ -568,29 +412,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     @Override
     public void setGrantAll( final UnitOfWork uow,
                              final boolean newGrantAll ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("dataroleimpl-setGrantAll", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setGrantAll: transaction = '{0}', newGrantAll = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newGrantAll);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.GRANT_ALL, newGrantAll);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setGrantAll", VdbLexicon.DataRole.GRANT_ALL, newGrantAll); //$NON-NLS-1$
     }
 
 }

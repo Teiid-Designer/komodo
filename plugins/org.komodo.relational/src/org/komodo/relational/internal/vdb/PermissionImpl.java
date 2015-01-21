@@ -229,30 +229,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowAlter( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-isAllowAlter", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = Permission.DEFAULT_ALLOW_ALTER;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_ALTER);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isAllowAlter", //$NON-NLS-1$
+                                 VdbLexicon.DataRole.Permission.ALLOW_ALTER);
     }
 
     /**
@@ -262,30 +242,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowCreate( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-isAllowCreate", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = Permission.DEFAULT_ALLOW_CREATE;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_CREATE);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isAllowCreate", //$NON-NLS-1$
+                                 VdbLexicon.DataRole.Permission.ALLOW_CREATE);
     }
 
     /**
@@ -295,30 +255,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowDelete( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-isAllowDelete", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = Permission.DEFAULT_ALLOW_DELETE;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_DELETE);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isAllowDelete", //$NON-NLS-1$
+                                 VdbLexicon.DataRole.Permission.ALLOW_DELETE);
     }
 
     /**
@@ -328,30 +268,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowExecute( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-isAllowExecute", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = Permission.DEFAULT_ALLOW_EXECUTE;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_EXECUTE);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isAllowExecute", //$NON-NLS-1$
+                                 VdbLexicon.DataRole.Permission.ALLOW_EXECUTE);
     }
 
     /**
@@ -361,30 +281,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowLanguage( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-isAllowLanguage", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = Permission.DEFAULT_ALLOW_LANGUAGE;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isAllowLanguage", //$NON-NLS-1$
+                                 VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE);
     }
 
     /**
@@ -394,30 +294,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowRead( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-isAllowRead", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = Permission.DEFAULT_ALLOW_READ;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_READ);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isAllowRead", //$NON-NLS-1$
+                                 VdbLexicon.DataRole.Permission.ALLOW_READ);
     }
 
     /**
@@ -427,30 +307,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowUpdate( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-isAllowUpdate", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = Permission.DEFAULT_ALLOW_UPDATE;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_UPDATE);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isAllowUpdate", //$NON-NLS-1$
+                                 VdbLexicon.DataRole.Permission.ALLOW_UPDATE);
     }
 
     /**
@@ -556,29 +416,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public void setAllowAlter( final UnitOfWork uow,
                                final boolean newAllowAlter ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-setAllowAlter", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAllowAlter: transaction = '{0}', newAllowAlter = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAllowAlter);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_ALTER, newAllowAlter);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAllowAlter", VdbLexicon.DataRole.Permission.ALLOW_ALTER, newAllowAlter); //$NON-NLS-1$
     }
 
     /**
@@ -589,29 +427,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public void setAllowCreate( final UnitOfWork uow,
                                 final boolean newAllowCreate ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-setAllowCreate", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAllowCreate: transaction = '{0}', newAllowCreate = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAllowCreate);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_CREATE, newAllowCreate);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAllowCreate", VdbLexicon.DataRole.Permission.ALLOW_CREATE, newAllowCreate); //$NON-NLS-1$
     }
 
     /**
@@ -622,29 +438,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public void setAllowDelete( final UnitOfWork uow,
                                 final boolean newAllowDelete ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-setAllowDelete", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAllowDelete: transaction = '{0}', newAllowDelete = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAllowDelete);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_DELETE, newAllowDelete);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAllowDelete", VdbLexicon.DataRole.Permission.ALLOW_DELETE, newAllowDelete); //$NON-NLS-1$
     }
 
     /**
@@ -655,29 +449,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public void setAllowExecute( final UnitOfWork uow,
                                  final boolean newAllowExecute ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-setAllowExecute", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAllowExecute: transaction = '{0}', newAllowExecute = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAllowExecute);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_EXECUTE, newAllowExecute);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAllowExecute", VdbLexicon.DataRole.Permission.ALLOW_EXECUTE, newAllowExecute); //$NON-NLS-1$
     }
 
     /**
@@ -688,29 +460,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public void setAllowLanguage( final UnitOfWork uow,
                                   final boolean newAllowLanguage ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-setAllowLanguage", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAllowLanguage: transaction = '{0}', newAllowLanguage = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAllowLanguage);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, newAllowLanguage);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAllowLanguage", VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, newAllowLanguage); //$NON-NLS-1$
     }
 
     /**
@@ -721,29 +471,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public void setAllowRead( final UnitOfWork uow,
                               final boolean newAllowRead ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-setAllowRead", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAllowRead: transaction = '{0}', newAllowRead = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAllowRead);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_READ, newAllowRead);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAllowRead", VdbLexicon.DataRole.Permission.ALLOW_READ, newAllowRead); //$NON-NLS-1$
     }
 
     /**
@@ -754,29 +482,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public void setAllowUpdate( final UnitOfWork uow,
                                 final boolean newAllowUpdate ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-setAllowUpdate", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAllowUpdate: transaction = '{0}', newAllowUpdate = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAllowUpdate);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.Permission.ALLOW_UPDATE, newAllowUpdate);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAllowUpdate", VdbLexicon.DataRole.Permission.ALLOW_UPDATE, newAllowUpdate); //$NON-NLS-1$
     }
 
 }

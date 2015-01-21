@@ -24,7 +24,6 @@ import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -200,30 +199,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public String getConnectionType( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-getConnectionType", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.Vdb.CONNECTION_TYPE);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getConnectionType", VdbLexicon.Vdb.CONNECTION_TYPE); //$NON-NLS-1$
     }
 
     /**
@@ -286,30 +262,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public String getDescription( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-getDescription", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.Vdb.DESCRIPTION);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getDescription", VdbLexicon.Vdb.DESCRIPTION); //$NON-NLS-1$
     }
 
     /**
@@ -425,30 +378,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public String getOriginalFilePath( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-getOriginalFilePath", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.Vdb.ORIGINAL_FILE);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getOriginalFilePath", VdbLexicon.Vdb.ORIGINAL_FILE); //$NON-NLS-1$
     }
 
     /**
@@ -511,30 +441,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public String getVdbName( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-getVdbName", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.Vdb.NAME);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getVdbName", VdbLexicon.Vdb.NAME); //$NON-NLS-1$
     }
 
     /**
@@ -544,30 +451,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public int getVersion( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbImpl-getVersion", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            int result = Vdb.DEFAULT_VERSION;
-            final Property property = getProperty(transaction, VdbLexicon.Vdb.VERSION);
-
-            if (property != null) {
-                result = (int)property.getLongValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.INTEGER, "getVersion", VdbLexicon.Vdb.VERSION); //$NON-NLS-1$
     }
 
     /**
@@ -577,30 +461,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public boolean isPreview( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-isPreview", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = Vdb.DEFAULT_PREVIEW;
-            final Property property = getProperty(transaction, VdbLexicon.Vdb.PREVIEW);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isPreview", VdbLexicon.Vdb.PREVIEW); //$NON-NLS-1$
     }
 
     /**
@@ -799,31 +660,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public void setConnectionType( final UnitOfWork uow,
                                    final String newConnectionType ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-setConnectionType", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setConnectionType: transaction = '{0}', newConnectionType = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newConnectionType);
-        }
-
-        try {
-            setProperty(transaction,
-                        VdbLexicon.Vdb.CONNECTION_TYPE,
-                        StringUtils.isBlank(newConnectionType) ? null : newConnectionType);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setConnectionType", VdbLexicon.Vdb.CONNECTION_TYPE, newConnectionType); //$NON-NLS-1$
     }
 
     /**
@@ -834,29 +671,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public void setDescription( final UnitOfWork uow,
                                 final String newDescription ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-setDescription", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setDescription: transaction = '{0}', newDescription = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newDescription);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.Vdb.DESCRIPTION, StringUtils.isBlank(newDescription) ? null : newDescription);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setDescription", VdbLexicon.Vdb.DESCRIPTION, newDescription); //$NON-NLS-1$
     }
 
     /**
@@ -867,30 +682,8 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public void setOriginalFilePath( final UnitOfWork uow,
                                      final String newOriginalFilePath ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-setOriginalFilePath", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setOriginalFilePath: transaction = '{0}', newOriginalFilePath = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newOriginalFilePath);
-        }
-
-        try {
-            ArgCheck.isNotEmpty(newOriginalFilePath, "newOriginalFilePath"); //$NON-NLS-1$
-            setProperty(transaction, VdbLexicon.Vdb.ORIGINAL_FILE, newOriginalFilePath);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        ArgCheck.isNotEmpty(newOriginalFilePath, "newOriginalFilePath"); //$NON-NLS-1$
+        setObjectProperty(uow, "setOriginalFilePath", VdbLexicon.Vdb.ORIGINAL_FILE, newOriginalFilePath); //$NON-NLS-1$
     }
 
     /**
@@ -901,29 +694,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public void setPreview( final UnitOfWork uow,
                             final boolean newPreview ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("permissionimpl-setPreview", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setPreview: transaction = '{0}', newPreview = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newPreview);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.Vdb.PREVIEW, newPreview);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setPreview", VdbLexicon.Vdb.PREVIEW, newPreview); //$NON-NLS-1$
     }
 
     /**
@@ -934,29 +705,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public void setVdbName( final UnitOfWork uow,
                             final String newVdbName ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-setVdbName", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setVdbName: transaction = '{0}', newVdbName = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newVdbName);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.Vdb.NAME, StringUtils.isBlank(newVdbName) ? null : newVdbName);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setVdbName", VdbLexicon.Vdb.NAME, newVdbName); //$NON-NLS-1$
     }
 
     /**
@@ -967,29 +716,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public void setVersion( final UnitOfWork uow,
                             final int newVersion ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-setVersion", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setVersion: transaction = '{0}', newVersion = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newVersion);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.Vdb.VERSION, newVersion);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setVersion", VdbLexicon.Vdb.VERSION, newVersion); //$NON-NLS-1$
     }
 
 }

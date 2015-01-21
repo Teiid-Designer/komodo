@@ -16,7 +16,6 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -48,13 +47,13 @@ public final class EntryImplTest extends RelationalModelTest {
         assertThat(this.entry.getPath(null), is(notNullValue()));
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyPPath() throws Exception {
         create();
         this.entry.setPath(null, StringConstants.EMPTY_STRING);
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullPath() throws Exception {
         create();
         this.entry.setPath(null, null);

@@ -13,7 +13,6 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -41,30 +40,7 @@ public final class MaskImpl extends RelationalObjectImpl implements Mask {
      */
     @Override
     public String getOrder( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("maskimpl-getOrder", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.Permission.Mask.ORDER);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getOrder", VdbLexicon.DataRole.Permission.Mask.ORDER); //$NON-NLS-1$
     }
 
     /**
@@ -75,31 +51,7 @@ public final class MaskImpl extends RelationalObjectImpl implements Mask {
     @Override
     public void setOrder( final UnitOfWork uow,
                           final String newOrder ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("maskimpl-setOrder", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setOrder: transaction = '{0}', newOrder = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newOrder);
-        }
-
-        try {
-            setProperty(transaction,
-                        VdbLexicon.DataRole.Permission.Mask.ORDER,
-                        StringUtils.isBlank(newOrder) ? null : newOrder);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setOrder", VdbLexicon.DataRole.Permission.Mask.ORDER, newOrder); //$NON-NLS-1$
     }
 
 }

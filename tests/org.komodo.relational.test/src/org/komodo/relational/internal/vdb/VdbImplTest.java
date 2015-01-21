@@ -168,13 +168,13 @@ public final class VdbImplTest extends RelationalModelTest {
         this.vdb.addTranslator(null, null, "blah");
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyOriginalFilePath() throws Exception {
         create();
         this.vdb.setOriginalFilePath(null, StringConstants.EMPTY_STRING);
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullOriginalFilePath() throws Exception {
         create();
         this.vdb.setOriginalFilePath(null, null);

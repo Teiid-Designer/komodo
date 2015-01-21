@@ -4,7 +4,7 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.komodo.eclipse.spi;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %pluginProvider
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.resources;bundle-version="[3.8.0,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.8.0,4.0.0)",

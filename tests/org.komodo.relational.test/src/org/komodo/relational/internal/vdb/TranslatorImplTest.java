@@ -16,7 +16,6 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -52,13 +51,13 @@ public final class TranslatorImplTest extends RelationalModelTest {
         assertThat(this.translator.getType(null), is(notNullValue()));
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyType() throws Exception {
         create();
         this.translator.setType(null, StringConstants.EMPTY_STRING);
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullType() throws Exception {
         create();
         this.translator.setType(null, null);

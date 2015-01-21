@@ -582,6 +582,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                     return (T) result.getStringValue();
                 case LONG:
                     return (T) Long.valueOf(result.getLongValue());
+                case INTEGER:
+                    return (T) Integer.valueOf(Long.valueOf(result.getLongValue()).intValue());
                 case BIG_DECIMAL:
                     return (T) result.getDecimalValue();
                 case DOUBLE:
@@ -591,7 +593,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 case CALENDAR:
                     return (T) result.getDateValue();
                 default:
-                    throw new UnsupportedOperationException("Further property types should be added for support in this method"); //$NON-NLS-1$        
+                    throw new UnsupportedOperationException("Further property types should be added for support in this method"); //$NON-NLS-1$
             }
 
         } catch (final Exception e) {
@@ -1086,7 +1088,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction(getClass().getSimpleName() + HYPHEN + setterName, false, null); 
+            transaction = getRepository().createTransaction(getClass().getSimpleName() + HYPHEN + setterName, false, null);
         }
 
         assert (transaction != null);

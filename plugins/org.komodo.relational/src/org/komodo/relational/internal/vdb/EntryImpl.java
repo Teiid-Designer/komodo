@@ -14,7 +14,6 @@ import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -42,30 +41,7 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
      */
     @Override
     public String getDescription( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("entryimpl-getDescription", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.Entry.DESCRIPTION);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getDescription", VdbLexicon.Entry.DESCRIPTION); //$NON-NLS-1$
     }
 
     /**
@@ -75,30 +51,7 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
      */
     @Override
     public String getPath( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("entryimpl-getPath", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, VdbLexicon.Entry.PATH);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getPath", VdbLexicon.Entry.PATH); //$NON-NLS-1$
     }
 
     /**
@@ -109,29 +62,7 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
     @Override
     public void setDescription( final UnitOfWork uow,
                                 final String newDescription ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("entryimpl-setDescription", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setDescription: transaction = '{0}', newDescription = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newDescription);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.Entry.DESCRIPTION, StringUtils.isBlank(newDescription) ? null : newDescription);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setDescription", VdbLexicon.Entry.DESCRIPTION, newDescription); //$NON-NLS-1$
     }
 
     /**
@@ -142,30 +73,8 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
     @Override
     public void setPath( final UnitOfWork uow,
                          final String newPath ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("entryimpl-setPath", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setPath: transaction = '{0}', newPath = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newPath);
-        }
-
-        try {
-            ArgCheck.isNotEmpty(newPath, "newPath"); //$NON-NLS-1$
-            setProperty(transaction, VdbLexicon.Entry.PATH, newPath);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        ArgCheck.isNotEmpty(newPath, "newPath"); //$NON-NLS-1$
+        setObjectProperty(uow, "setPath", VdbLexicon.Entry.PATH, newPath); //$NON-NLS-1$
     }
 
 }

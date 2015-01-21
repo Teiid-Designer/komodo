@@ -40,30 +40,10 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
      */
     @Override
     public boolean isConstraint( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("conditionimpl-isConstraint", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean result = Condition.DEFAULT_CONSTRAINT;
-            final Property property = getProperty(transaction, VdbLexicon.DataRole.Permission.Condition.CONSTRAINT);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.BOOLEAN,
+                                 "isConstraint",  //$NON-NLS-1$
+                                 VdbLexicon.DataRole.Permission.Condition.CONSTRAINT);
     }
 
     /**
@@ -74,29 +54,7 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
     @Override
     public void setConstraint( final UnitOfWork uow,
                                final boolean newConstraint ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("conditionimpl-setConstraint", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setConstraint: transaction = '{0}', newConstraint = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newConstraint);
-        }
-
-        try {
-            setProperty(transaction, VdbLexicon.DataRole.Permission.Condition.CONSTRAINT, newConstraint);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setConstraint", VdbLexicon.DataRole.Permission.Condition.CONSTRAINT, newConstraint); //$NON-NLS-1$
     }
 
 }

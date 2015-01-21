@@ -15,7 +15,6 @@ import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
-import org.komodo.relational.model.RelationalModelFactory;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
 import org.komodo.spi.KException;
@@ -54,7 +53,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                                        Property.ValueType.STRING,
                                        "getModelType", //$NON-NLS-1$
                                        CoreLexicon.JcrId.MODEL_TYPE);
-        
+
         return modelType == null ? EMPTY_STRING : modelType;
     }
 
@@ -69,10 +68,10 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                                        Property.ValueType.STRING,
                                        "getModelDefinition", //$NON-NLS-1$
                                        KomodoLexicon.VdbModel.MODEL_DEFINITION);
-        
+
         return modelDefn == null ? EMPTY_STRING : modelDefn;
     }
-    
+
     @Override
     public void setModelDefinition(UnitOfWork uow, String modelDefinition) throws KException {
         setObjectProperty(uow, "setModelDefinition", KomodoLexicon.VdbModel.MODEL_DEFINITION, modelDefinition); //$NON-NLS-1$
