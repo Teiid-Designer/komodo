@@ -33,19 +33,19 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.EventManager;
+import org.komodo.spi.runtime.ExecutionAdmin;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.HostProvider;
-import org.komodo.spi.runtime.ExecutionAdmin;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
+import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
-import org.komodo.spi.runtime.TeiidPropertyDefinition;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.teiid.runtime.client.Messages;
@@ -81,7 +81,7 @@ public class TCTeiidInstance implements TeiidInstance, StringConstants {
 
         @Override
         public String getUsername() {
-            return parent.getUserName();
+            return parent.getUsername();
         }
 
         @Override
@@ -148,8 +148,11 @@ public class TCTeiidInstance implements TeiidInstance, StringConstants {
      * Construct instance
      *
      * @param parent
+     * @param jdbcInfo
      */
     public TCTeiidInstance(TeiidParent parent, TeiidJdbcInfo jdbcInfo) {
+        ArgCheck.isNotNull(parent);
+        ArgCheck.isNotNull(jdbcInfo);
         initParent(parent);
         this.jdbcInfo = jdbcInfo;
     }

@@ -22,8 +22,8 @@
 package org.teiid.runtime.client.instance;
 
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
+import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.utils.ArgCheck;
 
@@ -31,9 +31,6 @@ import org.komodo.utils.ArgCheck;
  * The <code>TeiidJdbcInfo</code> defines the properties needed to make a Teiid JDBC connection.
  */
 public class TCTeiidJdbcInfo implements TeiidJdbcInfo, StringConstants {
-
-    private static final String VDB_PLACEHOLDER = "<vdbname>"; //$NON-NLS-1$
-    private static final String JDBC_TEIID_PREFIX = "jdbc:teiid:"; //$NON-NLS-1$
 
     /**
      * The name of the VDB that this connection will connect to (never empty or <code>null</code>)
@@ -176,10 +173,10 @@ public class TCTeiidJdbcInfo implements TeiidJdbcInfo, StringConstants {
      * jdbc:teiid:<vdbname>@mm<s>://host:port
      */
     @Override
-    public String getUrl() {
+    public String getUrl(String vdbName) {
         StringBuilder sb = new StringBuilder();
         sb.append(JDBC_TEIID_PREFIX);
-        sb.append(this.vdbname);
+        sb.append(vdbName);
         sb.append('@');
         sb.append(isSecure() ? MMS : MM);
         sb.append(getHostProvider().getHost());
@@ -187,6 +184,11 @@ public class TCTeiidJdbcInfo implements TeiidJdbcInfo, StringConstants {
         sb.append(getPort());
 
         return sb.toString();
+    }
+
+    @Override
+    public String getUrl() {
+        return getUrl(this.vdbname);
     }
 
 }

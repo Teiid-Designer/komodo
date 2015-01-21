@@ -62,7 +62,7 @@ public interface TeiidParent extends HostProvider {
     /**
      * @return user name used for connections
      */
-    String getUserName();
+    String getUsername();
 
     /**
      * @return password used for connections
