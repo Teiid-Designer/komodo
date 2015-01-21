@@ -186,9 +186,9 @@ public interface Repository {
      *         if the parent path does not exist or an error occurs
      */
     KomodoObject add( final UnitOfWork transaction,
-                             final String parentPath,
-                             final String name,
-                             final String primaryType ) throws KException;
+                      final String parentPath,
+                      final String name,
+                      final String primaryType ) throws KException;
 
     /**
      * Add an {@link RepositoryClient} to receive notifications from
@@ -215,8 +215,8 @@ public interface Repository {
      *         if an error occurs
      */
     UnitOfWork createTransaction( final String name,
-                                         final boolean rollbackOnly,
-                                         final UnitOfWorkListener callback ) throws KException;
+                                  final boolean rollbackOnly,
+                                  final UnitOfWorkListener callback ) throws KException;
 
     /**
      * @param transaction
@@ -232,9 +232,9 @@ public interface Repository {
      *         if parent path does not exist or an error occurs
      */
     ArtifactDescriptor[] find( final UnitOfWork transaction,
-                                      final List< String > keywords,
-                                      final KeywordCriteria criteria,
-                                      final String... artifactTypes ) throws KException;
+                               final List< String > keywords,
+                               final KeywordCriteria criteria,
+                               final String... artifactTypes ) throws KException;
 
     /**
      * @param transaction
@@ -246,7 +246,7 @@ public interface Repository {
      *         if parent path does not exist or an error occurs
      */
     ArtifactDescriptor[] find( final UnitOfWork transaction,
-                                      final String... artifactTypes ) throws KException;
+                               final String... artifactTypes ) throws KException;
 
     /**
      * Get an object from the workspace part of the repository.
@@ -262,7 +262,7 @@ public interface Repository {
      *         if an error occurs
      */
     KomodoObject getFromWorkspace( final UnitOfWork transaction,
-                             final String path ) throws KException;
+                                   final String path ) throws KException;
 
     /**
      * Gets the {@link KomodoObject} with the specified identifier.
@@ -276,7 +276,7 @@ public interface Repository {
      *         if an error occurs
      */
     KomodoObject getUsingId( final UnitOfWork transaction,
-                                    final String jcrUuid ) throws KException;
+                             final String jcrUuid ) throws KException;
 
     /**
      * @return the repository identifier (never <code>null</code>)
@@ -307,9 +307,9 @@ public interface Repository {
      *         if an error occurs
      */
     KomodoObject importFile( final UnitOfWork transaction,
-                                    final File file,
-                                    final String name,
-                                    final String parentPath ) throws KException;
+                             final File file,
+                             final String name,
+                             final String parentPath ) throws KException;
 
     /**
      * @param transaction
@@ -325,9 +325,9 @@ public interface Repository {
      *         if an error occurs
      */
     KomodoObject importResource( final UnitOfWork transaction,
-                                        final URL url,
-                                        final String name,
-                                        final String parentPath ) throws KException;
+                                 final URL url,
+                                 final String name,
+                                 final String parentPath ) throws KException;
 
     /**
      * Notify the repository of the given {@link RepositoryClientEvent}
@@ -354,9 +354,9 @@ public interface Repository {
      *         if artifact already exists and not in overwrite mode or an error occurs
      */
     void publish( final UnitOfWork transaction,
-                         final boolean overwrite,
-                         final ArtifactDescriptor descriptor,
-                         final KomodoObject komodoObject ) throws KException;
+                  final boolean overwrite,
+                  final ArtifactDescriptor descriptor,
+                  final KomodoObject komodoObject ) throws KException;
 
     /**
      * @param transaction
@@ -367,7 +367,7 @@ public interface Repository {
      *         if a workspace path does not exist or an error occurs
      */
     void remove( final UnitOfWork transaction,
-                        final String... paths ) throws KException;
+                 final String... paths ) throws KException;
 
     /**
      * Remove an {@link RepositoryClient} that we no longer wish to receive notifications from
@@ -392,7 +392,7 @@ public interface Repository {
      *         if an artifact does not exist or an error occurs
      */
     Artifact[] retrieve( final UnitOfWork transaction,
-                                final String... artifactPaths ) throws KException;
+                         final String... artifactPaths ) throws KException;
 
     /**
      * @param transaction
@@ -403,7 +403,7 @@ public interface Repository {
      *         if an artifact does not exist in the library or an error occurs
      */
     void unpublish( final UnitOfWork transaction,
-                           final String... artifactPaths ) throws KException;
+                    final String... artifactPaths ) throws KException;
 
     /**
      * The komodo library in the repository, ie. /tko:komodo/tko:library

@@ -29,6 +29,11 @@ package org.komodo.spi.constants;
 public interface StringConstants {
 
     /**
+     * An empty string array.
+     */
+    String[] EMPTY_ARRAY = new String[0];
+
+    /**
      * An empty string
      */
     String EMPTY_STRING = ""; //$NON-NLS-1$

@@ -1263,7 +1263,6 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                 throw new KException(Messages.getString(Messages.Komodo.UNPUBLISH_ARTIFACT_ERROR, absPath), e);
             }
         }
-
     }
 
     /**
