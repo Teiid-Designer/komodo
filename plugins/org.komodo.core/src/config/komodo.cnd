@@ -87,9 +87,11 @@
   - tko:adminPort (long)
   - tko:adminUser (string)
   - tko:adminPswd (string) // encrypted
+  - tko:adminSecure (boolean)
   - tko:jdbcPort (long)
   - tko:jdbcUser (string)
   - tko:jdbcPswd (string) // encrypted
+  - tko:jdbcSecure (boolean)
   - tko:lastPingTime (long)
   - tko:connected (boolean)
 
