@@ -24,6 +24,7 @@ import org.komodo.spi.repository.RepositoryObserver;
 /**
  * AbstractCommandTest
  */
+@SuppressWarnings("javadoc")
 public abstract class AbstractCommandTest {
 
     private static KEngine kEngine = KEngine.getInstance();
@@ -164,7 +165,7 @@ public abstract class AbstractCommandTest {
 				boolean success = command.execute();
 
 				if (!success && reader.isBatch()) {
-					Assert.fail("Command Execution Failed"); //$NON-NLS-1$
+					Assert.fail("Command " + command.getName() + " execution failed"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			} catch (InvalidCommandArgumentException e) {
 				Assert.fail("Failed - invalid command: "+e.getMessage()); //$NON-NLS-1$

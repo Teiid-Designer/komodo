@@ -58,6 +58,7 @@ public class UseTeiidCommand extends BuiltInShellCommand implements StringConsta
         }
 
         String nameOrId = requiredArgument(0, Messages.getString("UseTeiidCommand.invalidName")); //$NON-NLS-1$
+        String noConnect = optionalArgument(1);
         WorkspaceStatus wStatus = getWorkspaceStatus();
 
         Repository repository = wStatus.getCurrentContext().getRepository();
@@ -76,10 +77,12 @@ public class UseTeiidCommand extends BuiltInShellCommand implements StringConsta
                 wStatus.setTeiid(teiid);
                 TeiidInstance teiidInstance = teiid.getTeiidInstance();
 
-                teiidInstance.connect();
+                if (noConnect == null)
+                    teiidInstance.connect();
+
                 boolean connected = teiidInstance.isConnected();
                 print(CompletionConstants.MESSAGE_INDENT, Messages.getString("UseTeiidCommand.teiidSetOk", teiidName, connected)); //$NON-NLS-1$
-                return connected;
+                return noConnect != null ? true : connected;
             }
         }
 

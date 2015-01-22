@@ -36,40 +36,31 @@ public class ListCommandTest extends AbstractCommandTest {
 	public ListCommandTest( ) {
 		super();
 	}
-	
-	/**
-     * Status at the workspace context root
-	 * @throws Exception 
-     */
+
     @Test
     public void testList1() throws Exception {
     	setup(LIST_COMMAND1, ListCommand.class);
     	
     	execute();
     	
-    	String expectedOutput = INDENT+"Project1 [PROJECT]\n"+ //$NON-NLS-1$
-    	                        INDENT+"Project2 [PROJECT]\n"; //$NON-NLS-1$
+    	String expectedOutput = INDENT+"tko:workspace [tko:workspace]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("home", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("tko:komodo", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
-    
-	/**
-     * Status at the workspace Project2 context
-	 * @throws Exception 
-     */
+
     @Test
     public void testList2() throws Exception {
     	setup(LIST_COMMAND2, ListCommand.class);
     	
     	execute();
     	
-    	String expectedOutput = INDENT+"Model1 [MODEL]\n"+ //$NON-NLS-1$
-    			                INDENT+"Model2 [MODEL]\n"+ //$NON-NLS-1$ 
-    			                INDENT+"Model3 [MODEL]\n"; //$NON-NLS-1$ 
+    	String expectedOutput = INDENT+"Model1 [tko:vdbModel]\n"+ //$NON-NLS-1$
+    			                INDENT+"Model2 [tko:vdbModel]\n"+ //$NON-NLS-1$ 
+    			                INDENT+"Model3 [tko:vdbModel]\n"; //$NON-NLS-1$ 
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("home.Project1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
     
 }

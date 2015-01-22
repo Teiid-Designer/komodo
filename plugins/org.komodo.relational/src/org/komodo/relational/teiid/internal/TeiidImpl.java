@@ -409,8 +409,8 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow
-     * @param port
+     * @param uow the transaction
+     * @param port new value of admin port property
      * @throws KException if error occurs
      */
     @Override
@@ -430,8 +430,8 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow
-     * @param userName
+     * @param uow the transaction
+     * @param userName new value of admin username property
      * @throws KException if error occurs
      */
     @Override
@@ -451,8 +451,8 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow
-     * @param password
+     * @param uow the transaction
+     * @param password new value of admin password property
      * @throws KException if error occurs
      */
     @Override
@@ -472,8 +472,8 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow
-     * @param secure
+     * @param uow the transaction
+     * @param secure new value of admin secure property
      * @throws KException if error occurs
      */
     @Override
@@ -492,8 +492,8 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow
-     * @param port
+     * @param uow the transaction
+     * @param port new value of jdbc port property
      * @throws KException if error occurs
      */
     @Override
@@ -512,8 +512,8 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow
-     * @param userName
+     * @param uow the transaction
+     * @param userName new value of jdbc username property
      * @throws KException if error occurs
      */
     @Override
@@ -533,8 +533,8 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow
-     * @param password
+     * @param uow the transaction
+     * @param password new value of jdbc password property
      * @throws KException if error occurs
      */
     @Override
@@ -554,8 +554,8 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow
-     * @param secure
+     * @param uow the transaction
+     * @param secure new value of jdbc secure property
      * @throws KException if error occurs
      */
     @Override
@@ -570,10 +570,14 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     @Override
     public void permitListeners(boolean enable) {
+        // TODO
+        // Consider whether this is still required.
     }
 
     @Override
     public void notifyListeners(ExecutionConfigurationEvent event) {
+        // TODO
+        // Consider whether this is still required.
     }
 
     @Override

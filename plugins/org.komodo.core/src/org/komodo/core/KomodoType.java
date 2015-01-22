@@ -76,15 +76,15 @@ public enum KomodoType {
 
     @Override
     public String toString() {
-        return type.replaceAll(Namespace.PREFIX + KomodoLexicon.COLON, StringConstants.EMPTY_STRING);
+        return type.replaceAll(Namespace.PREFIX + StringConstants.COLON, StringConstants.EMPTY_STRING);
     }
 
     public static KomodoType getKType(String aType) {
         if (aType == null)
             return null;
 
-        if (! aType.startsWith(Namespace.PREFIX + KomodoLexicon.COLON))
-            aType = Namespace.PREFIX + KomodoLexicon.COLON + aType;
+        if (! aType.startsWith(Namespace.PREFIX + StringConstants.COLON))
+            aType = Namespace.PREFIX + StringConstants.COLON + aType;
 
         for (KomodoType kType : values()) {
             if (kType.type.equalsIgnoreCase(aType))

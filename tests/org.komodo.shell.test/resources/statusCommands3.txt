@@ -1,11 +1,17 @@
-# create one projects - and three models within it.
-# cd into Project1.Model2 - then get status
-create project Project1
-cd Project1
-create model Model1
-create model Model2
-create model Model3
-cd Model2
-#Status of Model2
+#status at myModel
+cd tko:workspace
+create teiid TestTeiid
+cd TestTeiid
+property set tko:host localhost
+property set tko:adminUser admin
+property set tko:adminPswd password
+property set tko:adminSecure true
+property set tko:adminPort 9999
+property set tko:jdbcUser user
+property set tko:jdbcPswd user
+property set tko:jdbcSecure true
+property set tko:jdbcPort 31000
+# Don't try and connect since this will require a working teiid instance
+# which would be better tested as an integration test
+useTeiid TestTeiid noconnect
 status
-

@@ -35,11 +35,7 @@ public class CdCommandTest extends AbstractCommandTest {
 	public CdCommandTest( ) {
 		super();
 	}
-	
-	/**
-     * Status at the workspace context root
-	 * @throws Exception 
-     */
+
     @Test
     public void testCd1() throws Exception {
     	setup(CD_COMMAND1, CdCommand.class);
@@ -47,13 +43,9 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
     	
     	// Check WorkspaceContext
-    	assertEquals("home.Project2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
     
-	/**
-     * Status at the workspace Project2 context
-	 * @throws Exception 
-     */
     @Test
     public void testCd2() throws Exception {
     	setup(CD_COMMAND2, CdCommand.class);
@@ -61,7 +53,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
     	
     	// Check WorkspaceContext
-    	assertEquals("home.Project2.MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("tko:komodo/tko:workspace/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
     
 }
