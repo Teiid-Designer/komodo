@@ -28,6 +28,7 @@ import org.komodo.core.event.KEvent;
 import org.komodo.core.event.KListener;
 import org.komodo.modeshape.lib.LogConfigurator;
 import org.komodo.repository.LocalRepository;
+import org.komodo.spi.KErrorHandler;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository;
@@ -63,6 +64,8 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
     private LocalRepository defaultRepository;
 
+    private KomodoErrorHandler errorHandler = new KomodoErrorHandler();
+
     private KEngine() {
         // Initialise the logging system
         try {
@@ -90,10 +93,9 @@ public final class KEngine implements RepositoryClient, StringConstants {
         ArgCheck.isNotNull(listener, "listener"); //$NON-NLS-1$
 
         if (this.listeners.add(listener)) {
-            KLog.getLogger().debug(String.format("%s added listener '%s'", PREFIX, listener.getId())); //$NON-NLS-1$
+            KLog.getLogger().debug(Messages.getString(Messages.KEngine.Added_Listener, PREFIX, listener.getId()));
         } else {
-            // TODO i18n this
-            throw new KException(String.format("Listener '%s' was not added", listener.getId())); //$NON-NLS-1$
+            throw new KException(Messages.getString(Messages.KEngine.Added_Listener_Failure, listener.getId()));
         }
     }
 
@@ -108,7 +110,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
         if (this.repositories.add(repository)) {
             repository.addClient(this);
-            KLog.getLogger().debug(String.format("%s added repository '%s'", PREFIX, repository.getId().getUrl())); //$NON-NLS-1$
+            KLog.getLogger().debug(Messages.getString(Messages.KEngine.Added_Repository, PREFIX, repository.getId().getUrl()));
             notifyListeners(KEvent.repositoryAddedEvent(repository));
 
             // Notify this repository if it has started
@@ -137,8 +139,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
             try {
                 listener.process(event);
             } catch (final Exception e) {
-                // TODO i18n this
-                KLog.getLogger().error(String.format("%s unregistered listener '%s' because it threw an exception", PREFIX, listener.getId())); //$NON-NLS-1$
+               getErrorHandler().error(Messages.getString(Messages.KEngine.Notify_Listeners, PREFIX, listener.getId()));
             }
         }
     }
@@ -159,10 +160,9 @@ public final class KEngine implements RepositoryClient, StringConstants {
         ArgCheck.isNotNull(listener, "listener"); //$NON-NLS-1$
 
         if (this.listeners.remove(listener)) {
-            KLog.getLogger().debug(String.format("%s removed listener '%s'", PREFIX, listener.getId())); //$NON-NLS-1$
+            KLog.getLogger().debug(Messages.getString(Messages.KEngine.Removed_Listener, PREFIX, listener.getId()));
         } else {
-            // TODO i18n this
-            throw new KException(String.format("Listener '%s' was not removed", listener.getId())); //$NON-NLS-1$
+            throw new KException(Messages.getString(Messages.KEngine.Removed_Listener_Failure, listener.getId()));
         }
     }
 
@@ -176,11 +176,10 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
         if (this.repositories.remove(repository)) {
             repository.removeClient(this);
-            KLog.getLogger().debug(String.format("%s removed repository '%s'", PREFIX, repository.getId().getUrl())); //$NON-NLS-1$
+            KLog.getLogger().debug(Messages.getString(Messages.KEngine.Removed_Repository, PREFIX, repository.getId().getUrl()));
             notifyListeners(KEvent.repositoryRemovedEvent(repository));
         } else {
-            // TODO i18n this
-            throw new KException(String.format("Repository '%s' was not removed", repository.getId().getUrl())); //$NON-NLS-1$
+            throw new KException(Messages.getString(Messages.KEngine.Removed_Repository_Failure, repository.getId().getUrl()));
         }
     }
 
@@ -201,8 +200,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
         } catch (final Exception e) {
             this.state = State.ERROR;
-            // TODO i18n this
-            throw new KException("Error during KEngine shutdown", e); //$NON-NLS-1$
+            throw new KException(Messages.getString(Messages.KEngine.Shutdown_Failure), e);
         }
     }
 
@@ -214,7 +212,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
         try {
             add(defaultRepository);
         } catch (Exception ex) {
-            KLog.getLogger().error(ex.getLocalizedMessage(), ex);
+            getErrorHandler().error(ex);
         }
     }
 
@@ -238,9 +236,23 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
         } catch (final Exception e) {
             this.state = State.ERROR;
-            // TODO i18n this
-            throw new KException("Error during KEngine startup", e); //$NON-NLS-1$
+            throw new KException(Messages.getString(Messages.KEngine.Startup_Failure), e);
         }
     }
 
+    /**
+     * @return the error handler
+     */
+    public KErrorHandler getErrorHandler() {
+        return this.errorHandler;
+    }
+
+    /**
+     * Sets the error handler implementation of the engine
+     *
+     * @param errorHandler
+     */
+    public void addErrorHandler(KErrorHandler errorHandler) {
+        this.errorHandler.add(errorHandler);
+    }
 }

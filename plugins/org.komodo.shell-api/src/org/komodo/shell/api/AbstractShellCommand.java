@@ -18,6 +18,7 @@ package org.komodo.shell.api;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.komodo.shell.api.Messages.SHELLAPI;
 import org.komodo.spi.constants.StringConstants;
@@ -36,7 +37,7 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	private WorkspaceStatus wsStatus;
 	private Arguments arguments;
 	private Writer writer;
-	protected List<WorkspaceContext.Type> validWsContextTypes;
+	protected List<String> validWsContextTypes = Collections.emptyList();
 	private String name;
 
 	/**
@@ -67,31 +68,36 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	@Override
 	public void initValidWsContextTypes() {
 		// default is valid for all workspace context types
-		List<WorkspaceContext.Type> validTypes = new ArrayList<WorkspaceContext.Type>(1);
-		validTypes.add(WorkspaceContext.Type.ALL);
+		List<String> validTypes = new ArrayList<String>(1);
+		validTypes.add(WorkspaceContext.ALL_TYPES);
 		this.validWsContextTypes = validTypes;
 	}
 
 	/**
 	 * @return the list of valid Ws context
 	 */
-	public List<WorkspaceContext.Type> getValidWsContextTypes( ) {
+	public List<String> getValidWsContextTypes( ) {
 		return this.validWsContextTypes;
 	}
 	
 	/**
-	 * @see org.komodo.shell.api.ShellCommand#isValidForWsContext(WorkspaceContext.Type)
+	 * @see org.komodo.shell.api.ShellCommand#isValidForWsContext(String)
 	 */
 	@Override
-	public boolean isValidForWsContext(WorkspaceContext.Type contextType) {
-		if(validWsContextTypes.contains(WorkspaceContext.Type.ALL)) {
+	public boolean isValidForWsContext(String contextType) {
+	    if (validWsContextTypes == null)
+	        return true;
+
+		if(validWsContextTypes.contains(WorkspaceContext.ALL_TYPES)) {
 			return true;
 		}
-		for(WorkspaceContext.Type cType : validWsContextTypes) {
-			if(cType==contextType) {
+
+		for(String cType : validWsContextTypes) {
+			if(cType.equals(contextType)) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 	
@@ -198,7 +204,7 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	 * @see org.komodo.shell.api.ShellCommand#tabCompletion(java.lang.String, java.util.List)
 	 */
 	@Override
-	public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
+	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
 		return -1;
 	}
 

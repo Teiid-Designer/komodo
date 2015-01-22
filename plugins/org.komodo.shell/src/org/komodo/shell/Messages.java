@@ -39,6 +39,11 @@ public class Messages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum SHELL {
+        COMPONENT_STARTED,
+        COMPONENT_FAILED,
+        ENGINE_STARTING,
+        LOCAL_REPOSITORY_STARTING,
+        LOCAL_REPOSITORY_TIMEOUT_ERROR,
     	COMMAND_NOT_FOUND,
     	GOOD_BYE,
     	Help_COMMAND_LIST_MSG,

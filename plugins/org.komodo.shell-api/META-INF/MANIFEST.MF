@@ -10,4 +10,5 @@ Export-Package: org.komodo.shell.api
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
  org.komodo.relational;bundle-version="1.0.0",
- org.komodo.utils;bundle-version="1.0.0"
+ org.komodo.utils;bundle-version="1.0.0",
+ org.komodo.core

@@ -96,13 +96,13 @@ public class HelpCommand extends BuiltInShellCommand {
 	/**
 	 * Prints the generic help - all commands for this workspace context
 	 */
-	private void printHelpAll() {
+	private void printHelpAll() throws Exception {
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_COMMAND_LIST_MSG)); 
 		
 		// Determine the current Workspace Context type
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		WorkspaceContext.Type currentContextType = currentContext.getType();
+		String currentContextType = currentContext.getType();
 
 		StringBuffer indentBuffer = new StringBuffer();
 		for(int i=0; i<CompletionConstants.MESSAGE_INDENT; i++) {

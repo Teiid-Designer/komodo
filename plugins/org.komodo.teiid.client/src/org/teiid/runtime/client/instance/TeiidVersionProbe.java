@@ -27,8 +27,8 @@ import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import org.komodo.spi.runtime.TeiidParent;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.utils.KLog;
 import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.admin.v8.Admin8Factory;
@@ -116,7 +116,7 @@ public class TeiidVersionProbe {
         /* Attempt to connect using the Admin8Factory */
         teiidVersion = Admin8Factory.getInstance().getTeiidVersion(parent.getHost(), 
                                                                                         parent.getPort(),
-                                                                                        parent.getUserName(),
+                                                                                        parent.getUsername(),
                                                                                         parent.getPassword());
     }
 

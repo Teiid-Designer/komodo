@@ -123,6 +123,36 @@ public class RepositoryTools implements StringConstants {
     }
 
     /**
+     * @param property
+     * @return String representation of property and its values
+     * @throws Exception 
+     */
+    public static String getDisplayValue(Property property) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        try {
+            sb.append(property.getName(null)).append('=');
+            if (property.isMultiple()) {
+                sb.append('[');
+                Object[] values = property.getValues();
+                for (int i = 0; i < values.length; ++i) {
+                    Object value = values[i];
+                    sb.append(value);
+                    if ((i + 1) < values.length)
+                        sb.append(',');
+                }
+                sb.append(']');
+            } else {
+                Object value = property.getValue();
+                sb.append(value);
+            }
+        } catch (Exception e) {
+            sb.append(" on deleted node ").append(property.getAbsolutePath()); //$NON-NLS-1$
+        }
+
+        return sb.toString();
+    }
+
+    /**
      * Traverses the graph of the given {@link KomodoObject} and returns its
      * String representation.
      *
@@ -147,36 +177,6 @@ public class RepositoryTools implements StringConstants {
 
         private final StringBuffer buffer = new StringBuffer(NEW_LINE);
 
-        /**
-         * @param property
-         * @return String representation of property and its values
-         * @throws Exception 
-         */
-        private String toString(Property property) throws Exception {
-            StringBuilder sb = new StringBuilder();
-            try {
-                sb.append(property.getName(null)).append('=');
-                if (property.isMultiple()) {
-                    sb.append('[');
-                    Object[] values = property.getValues();
-                    for (int i = 0; i < values.length; ++i) {
-                        Object value = values[i];
-                        sb.append(value);
-                        if ((i + 1) < values.length)
-                            sb.append(',');
-                    }
-                    sb.append(']');
-                } else {
-                    Object value = property.getValue();
-                    sb.append(value);
-                }
-            } catch (Exception e) {
-                sb.append(" on deleted node ").append(property.getAbsolutePath()); //$NON-NLS-1$
-            }
-
-            return sb.toString();
-        }
-
         private String createIndent(String path) {
             StringBuffer indent = new StringBuffer(TAB);
             String[] levels = path.split(File.separator);
@@ -197,7 +197,7 @@ public class RepositoryTools implements StringConstants {
 
             for (String propertyName : propertyNames) {
                 Property property = object.getProperty(null, propertyName);
-                buffer.append(indent + TAB + AT + toString(property) + NEW_LINE);
+                buffer.append(indent + TAB + AT + getDisplayValue(property) + NEW_LINE);
             }
 
             KomodoObject[] children = object.getChildren(null);

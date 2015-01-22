@@ -21,11 +21,15 @@
  */
 package org.komodo.relational.workspace;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
+import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -186,5 +190,89 @@ public class WorkspaceManager {
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param parent
+     *        the parent of the teiid object being created (cannot be <code>null</code>)
+     * @param id
+     *        the id of the teiid instance (cannot be empty)
+     * @return the teiid object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public Teiid createTeiid(UnitOfWork uow, KomodoObject parent, String id) throws KException {
+        ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction("workspacemanager-createTeiid", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final KomodoObject kobject = getRepository().add(transaction,
+                                                        parent.getAbsolutePath(),
+                                                        id,
+                                                        KomodoLexicon.Teiid.NODE_TYPE);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return new TeiidImpl(getRepository(), kobject.getAbsolutePath());
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+    * @param parent
+     *        the parent to search under (cannot be <code>null</code>)
+     * @return all {@link Teiid}s under the given parent
+     * @throws KException
+     *         if an error occurs
+     */
+    public List<Teiid> findTeiids(UnitOfWork uow, KomodoObject parent) throws KException {
+        ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction("workspacemanager-findobjectsoftype", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        List<Teiid> children = new ArrayList<Teiid>();
+
+        try {
+            // TODO
+            // Want to use search API to find the teiid instances but for now check the parent's children
+
+            KomodoObject[] kChildren = parent.getChildrenOfType(transaction, KomodoLexicon.Teiid.NODE_TYPE);
+            if (kChildren != null) {
+
+                for (KomodoObject kobject : kChildren) {
+                    children.add(new TeiidImpl(getRepository(), kobject.getAbsolutePath()));
+                }
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+
+        return children;
     }
 }

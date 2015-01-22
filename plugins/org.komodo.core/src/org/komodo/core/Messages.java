@@ -40,7 +40,17 @@ public class Messages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum KEngine {
 
-        No_Available_Repositories;
+        No_Available_Repositories,
+        Notify_Listeners,
+        Added_Listener,
+        Added_Listener_Failure,
+        Added_Repository,
+        Removed_Listener,
+        Removed_Listener_Failure,
+        Removed_Repository,
+        Removed_Repository_Failure,
+        Startup_Failure,
+        Shutdown_Failure;
 
         @Override
         public String toString() {

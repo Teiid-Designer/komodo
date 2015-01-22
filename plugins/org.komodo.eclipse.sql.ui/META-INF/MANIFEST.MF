@@ -14,4 +14,5 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.106.0",
  org.eclipse.jface.text;bundle-version="3.9.0",
  org.eclipse.ui.workbench.texteditor;bundle-version="3.9.0",
  org.komodo.utils,
- org.komodo.modeshape.teiid.sql.sequencer
+ org.komodo.modeshape.teiid.sql.sequencer,
+ org.komodo.core

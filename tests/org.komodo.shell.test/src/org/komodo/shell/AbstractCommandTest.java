@@ -1,33 +1,112 @@
 package org.komodo.shell;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.komodo.core.KEngine;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.RepositoryClient;
+import org.komodo.spi.repository.RepositoryObserver;
 
 /**
  * AbstractCommandTest
  */
 public abstract class AbstractCommandTest {
 
+    private static KEngine kEngine = KEngine.getInstance();
+
+    private static RepositoryObserver stateObserver;
+    
 	private ShellCommandFactory factory;
 	private ShellCommandReader reader;
 	private Writer writer;
 	private Writer commandWriter;
 	private Class testedCommandClass;
+    protected WorkspaceStatusImpl wsStatus;
+    
+
+    private static CountDownLatch createWaitingLatch() {
+        final Repository defaultRepo = kEngine.getDefaultRepository();
+
+        // Latch for awaiting the change of state of the default repository
+        final CountDownLatch stateLatch = new CountDownLatch(1);
+
+        if (stateObserver != null)
+            defaultRepo.removeObserver(stateObserver);
+
+        // Observer attached to the default repository for listening for the change of state
+        stateObserver = new RepositoryObserver() {
+
+            @Override
+            public void stateChanged() {
+                stateLatch.countDown();
+            }
+        };
+        defaultRepo.addObserver(stateObserver);
+        return stateLatch;
+    }
+
+    /**
+     * @param kEngine 
+     * @throws Exception 
+     */
+    @BeforeClass
+    public static void startKEngine() throws Exception {
+        CountDownLatch waitingLatch = createWaitingLatch();
+
+        kEngine.start();
+
+        // Block the thread until the latch has counted down or timeout has been reached
+        assertTrue(waitingLatch.await(3, TimeUnit.MINUTES));
+        kEngine.getDefaultRepository().removeObserver(stateObserver);
+
+        assertEquals(RepositoryClient.State.STARTED, kEngine.getState());
+        assertEquals(Repository.State.REACHABLE, kEngine.getDefaultRepository().getState());
+    }
+
+    /**
+     * @throws Exception
+     */
+    @AfterClass
+    public static void stopKEngine() throws Exception {
+        assertNotNull(kEngine);
+        CountDownLatch waitingLatch = createWaitingLatch();
+
+        kEngine.shutdown();
+
+        // Block the thread until the latch has counted down or timeout has been reached
+        assertTrue(waitingLatch.await(3, TimeUnit.MINUTES));
+        kEngine.getDefaultRepository().removeObserver(stateObserver);
+
+        assertEquals(RepositoryClient.State.SHUTDOWN, kEngine.getState());
+        assertEquals(Repository.State.NOT_REACHABLE, kEngine.getDefaultRepository().getState());
+    }
 
 	/**
 	 * Setup the test
 	 * @param commandFile the file containing the command
 	 * @param commandClass the command being tested
-	 * @param wsStatus workspace status object
+	 * @throws Exception 
 	 */
-	public void setup(String commandFile, Class commandClass,  WorkspaceStatus wsStatus) {
+	public void setup(String commandFile, Class commandClass) throws Exception {
+	    assertEquals(RepositoryClient.State.STARTED, kEngine.getState());
+        assertEquals(Repository.State.REACHABLE, kEngine.getDefaultRepository().getState());
+
+        wsStatus = new WorkspaceStatusImpl(kEngine, System.in, System.out);
+
 		this.factory = new ShellCommandFactory(wsStatus);
 		this.testedCommandClass = commandClass;
 		
@@ -47,11 +126,13 @@ public abstract class AbstractCommandTest {
 			Assert.fail("Failed - setup error: "+e.getMessage()); //$NON-NLS-1$
 		}
 	}
-	
-	/**
+
+    /**
 	 * Teardown the test
+     * @throws Exception 
 	 */
-	public void teardown( ) {
+	@After
+	public void teardown( ) throws Exception {
 		try {
 			this.reader.close();
 		} catch (IOException e) {

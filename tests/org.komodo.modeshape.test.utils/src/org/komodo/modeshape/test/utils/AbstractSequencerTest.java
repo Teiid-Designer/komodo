@@ -26,7 +26,6 @@ package org.komodo.modeshape.test.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
 import java.io.File;
@@ -143,7 +142,10 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
 
     private final KLog logger = KLog.getLogger();
 
-    public ObservationManager getObservationManager() {
+    public ObservationManager getObservationManager() throws Exception {
+        if (observationManager == null)
+            observationManager = ((Workspace)session().getWorkspace()).getObservationManager();
+
         return observationManager;
     }
 
@@ -169,47 +171,6 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
                                             null,
                                             null,
                                             false);
-    }
-
-    private class SequencerListener implements EventListener {
-
-        private final List<String> pathsToBeSequenced = new ArrayList<String>();
-
-        private final CountDownLatch updateLatch;
-
-        public SequencerListener(List<String> pathsToBeSequenced, CountDownLatch updateLatch) {
-            this.pathsToBeSequenced.addAll(pathsToBeSequenced);
-            this.updateLatch = updateLatch;
-        }
-
-        @Override
-        public void onEvent(EventIterator events) {
-            while (events.hasNext()) {
-                try {
-                    Event event = (Event)events.nextEvent();
-
-                    String nodePath = event.getPath();
-
-                    Iterator<String> pathSeqIter = pathsToBeSequenced.iterator();
-                    while (pathSeqIter.hasNext()) {
-                        String pathToBeSequenced = pathSeqIter.next();
-
-                        if (nodePath.matches(pathToBeSequenced))
-                            pathSeqIter.remove();
-                    }
-
-                    if (pathsToBeSequenced.isEmpty()) {
-                        KLog.getLogger().info("Testing latch pattern against node path: " + nodePath + ": Passed");
-                        updateLatch.countDown();
-                    } else {
-                        KLog.getLogger().info("Testing latch pattern against node path: " + nodePath + ": Failed");
-                    }
-
-                } catch (Exception ex) {
-                    fail(ex.getMessage());
-                }
-            }
-        }
     }
 
     /**

@@ -8,7 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Localization: plugin
 Export-Package: org.komodo.ddl.importer
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.komodo.utils;bundle-version="1.0.0",
- org.komodo.relational;bundle-version="1.0.0",
- org.komodo.spi;bundle-version="1.0.0",
- org.komodo.modeshape.lib;bundle-version="1.0.0"
+Require-Bundle: org.komodo.utils;bundle-version="[1.0.0,2.0.0)",
+ org.komodo.relational;bundle-version="[1.0.0,2.0.0)",
+ org.komodo.spi;bundle-version="[1.0.0,2.0.0)",
+ org.komodo.modeshape.lib;bundle-version="[1.0.0,2.0.0)",
+ org.komodo.core;bundle-version="[1.0.0,2.0.0)"

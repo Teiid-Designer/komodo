@@ -28,6 +28,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Session;
+import org.komodo.core.KEngine;
 import org.komodo.repository.Messages;
 import org.komodo.spi.KException;
 import org.komodo.utils.ArgCheck;
@@ -298,9 +299,9 @@ public class ModeshapeEngineThread extends Thread {
         if (problems.hasProblems()) {
 
             for (Problem problem : problems) {
-                KLog.getLogger().error(Messages.getString(Messages.LocalRepository.Configuration_Problem,
+                KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.Configuration_Problem,
                                                           problem.getMessageString()),
-                                       problem.getThrowable());
+                                                          problem.getThrowable());
             }
 
             // Catastrophic error if the configuration is not valid!
@@ -323,7 +324,7 @@ public class ModeshapeEngineThread extends Thread {
                         throw new Exception(Messages.getString(Messages.LocalRepository.Deployment_Failure,
                                                                problem.getMessageString()), problem.getThrowable());
                     default:
-                        KLog.getLogger().warn(problem.getMessageString(), problem.getThrowable());
+                        KEngine.getInstance().getErrorHandler().error(problem.getThrowable());
                 }
             }
         }
@@ -385,7 +386,7 @@ public class ModeshapeEngineThread extends Thread {
                 }
             } catch (final Exception e) {
                 stop = true;
-                KLog.getLogger().error(Messages.getString(Messages.LocalRepository.General_Exception), e, e.getLocalizedMessage());
+                KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), e);
             }
         }
     }
@@ -400,7 +401,7 @@ public class ModeshapeEngineThread extends Thread {
         try {
             queue.put(request);
         } catch (InterruptedException ex) {
-            KLog.getLogger().error(Messages.getString(Messages.LocalRepository.General_Exception), ex, ex.getLocalizedMessage());
+            KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), ex);
         }
     }
 }

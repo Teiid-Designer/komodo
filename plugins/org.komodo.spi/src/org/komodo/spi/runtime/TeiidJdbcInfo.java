@@ -29,18 +29,33 @@ public interface TeiidJdbcInfo extends TeiidConnectionInfo {
     /**
      * The default Teiid JDBC port number. Value is {@value} .
      */
-    public static final int DEFAULT_PORT = 31000;
+    int DEFAULT_PORT = 31000;
     /**
      * The default Teiid Admin secure protocol flag. Value is {@value} .
      */
-    public static final boolean DEFAULT_SECURE = false;
+    boolean DEFAULT_SECURE = false;
     /**
      * The default username for the Teiid Instance
      */
-    public static final String DEFAULT_JDBC_USERNAME = "user"; //$NON-NLS-1$
+    String DEFAULT_JDBC_USERNAME = "user"; //$NON-NLS-1$
     /**
      * The default password for the Teiid Instance
      */
-    public static final String DEFAULT_JDBC_PASSWORD = "user"; //$NON-NLS-1$
+    String DEFAULT_JDBC_PASSWORD = "user"; //$NON-NLS-1$
 
+    /**
+     * A placeholder for the vdb name
+     */
+    String VDB_PLACEHOLDER = "<vdbname>"; //$NON-NLS-1$
+
+    /**
+     * The jdbc teiid prefix
+     */
+    String JDBC_TEIID_PREFIX = "jdbc:teiid:"; //$NON-NLS-1$
+
+    /**
+     * @param vdbName
+     * @return the url of this teiid jdbc connection pointing to the given vdb
+     */
+    String getUrl(String vdbName);
 }

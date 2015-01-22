@@ -23,7 +23,11 @@
         "sequencers" : {
             "DDL Sequencer" : {
                 "classname" : "org.komodo.modeshape.lib.sequencer.KDdlSequencer",
-                "pathExpressions" : [ "://(*.ddl/jcr:content)[@jcr:data] => /$1" ]
+                "pathExpressions" :
+                [
+                    ":(//*)[@vdb:modelDefinition] => /$1",
+                    ":(//*)[@tko:rendition] => /$1"
+                ]
             },
             "Teiid SQL Sequencer" : {
                 "classname" : "org.komodo.modeshape.teiid.TeiidSqlSequencer",

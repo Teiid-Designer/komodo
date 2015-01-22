@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.TreeMap;
 import javax.xml.namespace.QName;
+import org.komodo.core.KEngine;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceContext;
@@ -37,15 +38,15 @@ import org.komodo.shell.commands.CommandNotFoundCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
 import org.komodo.shell.commands.core.CdCommand;
-import org.komodo.shell.commands.core.ConnectCommand;
 import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
+import org.komodo.shell.commands.core.NavigateCommand;
 import org.komodo.shell.commands.core.PropertyCommand;
 import org.komodo.shell.commands.core.RecordCommand;
 import org.komodo.shell.commands.core.StatusCommand;
+import org.komodo.shell.commands.core.UseTeiidCommand;
 import org.komodo.utils.FileUtils;
-import org.komodo.utils.KLog;
 
 /**
  * Factory used to create shell commands.
@@ -81,8 +82,8 @@ public class ShellCommandFactory {
 		commandMap = new HashMap<String, ShellCommand>();
 
 		// commands
-		List<WorkspaceContext.Type> allList = new ArrayList<WorkspaceContext.Type>(1);
-		allList.add(WorkspaceContext.Type.ALL);
+		List<String> allList = new ArrayList<String>(1);
+		allList.add(WorkspaceContext.ALL_TYPES);
 		
 		StatusCommand statusCommand = new StatusCommand("status",this.wsStatus); //$NON-NLS-1$
 		commandMap.put(statusCommand.getName(), statusCommand);  
@@ -105,8 +106,11 @@ public class ShellCommandFactory {
 		ImportCommand importCommand = new ImportCommand("import",this.wsStatus); //$NON-NLS-1$
 		commandMap.put(importCommand.getName(), importCommand);
 
-		ConnectCommand connCommand = new ConnectCommand(this.wsStatus);
+		UseTeiidCommand connCommand = new UseTeiidCommand(this.wsStatus);
         commandMap.put(connCommand.getName(), connCommand);
+
+        NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
+        commandMap.put(traverseCommand.getName(), traverseCommand);
 
 		discoverContributedCommands();
 	}
@@ -138,7 +142,7 @@ public class ShellCommandFactory {
                 ClassLoader extraCommandsCL = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
                 commandClassloaders.add(extraCommandsCL);
             } catch (IOException e) {
-                KLog.getLogger().error(e.getLocalizedMessage(), e);
+                KEngine.getInstance().getErrorHandler().error(e);
             }
         }
 
@@ -158,7 +162,7 @@ public class ShellCommandFactory {
 	        				command.setWorkspaceStatus(this.wsStatus);
 	            			commandMap.put(entry.getKey(), command);
 						} catch (Exception e) {
-						    KLog.getLogger().error(e.getLocalizedMessage(), e);
+						    KEngine.getInstance().getErrorHandler().error(e);
 						}
         			}
                 }
@@ -191,8 +195,9 @@ public class ShellCommandFactory {
 	/**
 	 * Get valid command names for the current context
 	 * @return List<String> list of commands for current context
+	 * @throws Exception if error occurs
 	 */
-	public List<String> getCommandsForCurrentContext( ) {
+	public List<String> getCommandsForCurrentContext( ) throws Exception {
 		List<String> commandList = new ArrayList<String>();
 		for(String mapKey : this.commandMap.keySet()) {
 			ShellCommand command = this.commandMap.get(mapKey);

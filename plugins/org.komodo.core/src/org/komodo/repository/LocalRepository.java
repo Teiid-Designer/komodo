@@ -25,6 +25,7 @@ import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Session;
+import org.komodo.core.KEngine;
 import org.komodo.repository.internal.ModeshapeEngineThread;
 import org.komodo.repository.internal.ModeshapeEngineThread.Request;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback;
@@ -32,7 +33,6 @@ import org.komodo.repository.internal.ModeshapeEngineThread.RequestType;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.KLog;
 
 /**
  * A repository installed on the local machine, using the modeshape engine and repository.
@@ -247,7 +247,7 @@ public class LocalRepository extends RepositoryImpl {
                     @Override
                     public void errorOccurred( final Throwable error ) {
                         if (getCallback() == null) {
-                            KLog.getLogger().error(error.getMessage(), error);
+                            KEngine.getInstance().getErrorHandler().error(error);
                             return; // No callback so error can only be logged
                         }
 
@@ -296,7 +296,7 @@ public class LocalRepository extends RepositoryImpl {
                 @Override
                 public void errorOccurred( final Throwable error ) {
                     if (getCallback() == null) {
-                        KLog.getLogger().error(error.getMessage(), error);
+                        KEngine.getInstance().getErrorHandler().error(error);
                         return; // No callback so error can only be logged
                     }
 

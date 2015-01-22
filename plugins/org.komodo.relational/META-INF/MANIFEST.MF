@@ -8,10 +8,11 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Localization: plugin
 Export-Package: org.komodo.relational,
  org.komodo.relational.model,
- org.komodo.relational.model.legacy,
+ org.komodo.relational.teiid,
  org.komodo.relational.workspace
 Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
  org.komodo.utils,
  org.komodo.core;bundle-version="1.0.0",
- org.komodo.modeshape.lib;bundle-version="1.0.0"
+ org.komodo.modeshape.lib;bundle-version="1.0.0",
+ org.komodo.teiid.client
 Bundle-ActivationPolicy: lazy

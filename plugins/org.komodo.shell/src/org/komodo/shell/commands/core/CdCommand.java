@@ -23,7 +23,6 @@ package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -36,9 +35,9 @@ import org.komodo.spi.constants.StringConstants;
  * Cd command - allows changing the workspace context
  *
  */
-public class CdCommand extends BuiltInShellCommand {
-	
-	/**
+public class CdCommand extends BuiltInShellCommand implements StringConstants {
+
+    /**
 	 * Constructor
 	 * @param name the command name
 	 * @param wsStatus the workspace status
@@ -68,10 +67,10 @@ public class CdCommand extends BuiltInShellCommand {
 			return true;
 		} 
 		
-		if(WorkspaceContext.Type.HOME.toString().equals(locArg)) { 
-			wsStatus.setCurrentContext(wsStatus.getHomeContext());
+		if(WorkspaceStatus.ROOT_TYPE.equals(locArg)) { 
+			wsStatus.setCurrentContext(wsStatus.getRootContext());
 			if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
-			return true;
+			    return true;
 		} 
 		
 		// See if matching child
@@ -100,14 +99,14 @@ public class CdCommand extends BuiltInShellCommand {
 	 * org.komodo.shell.commands.archive.AbstractArchiveCommand#validate
 	 * (java.lang.String[])
 	 */
-	protected boolean validate(String... args) {
+	protected boolean validate(String... args) throws Exception {
 		if (!validateLocationArg(args[0])) {
 			return false;
 		}
 		return true;
 	}
 	
-	private boolean validateLocationArg(String location) {
+	private boolean validateLocationArg(String location) throws Exception {
 		String locArg = location.trim();
 		if(locArg.length()==0) {
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CdCommand.locationArg_empty")); //$NON-NLS-1$
@@ -123,8 +122,8 @@ public class CdCommand extends BuiltInShellCommand {
 			} 
 			return true;
 		}
-		// cd HOME
-		if(WorkspaceContext.Type.HOME.toString().equalsIgnoreCase(locArg)) { 
+		// cd /
+		if(WorkspaceStatus.ROOT_TYPE.equalsIgnoreCase(locArg)) { 
 			return true;
 		}
 		// See if matching child
@@ -146,14 +145,14 @@ public class CdCommand extends BuiltInShellCommand {
 	 * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
 	 */
 	@Override
-	public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
+	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
 
 		if (getArguments().isEmpty()) {
 			List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
 			List<String> childNames = new ArrayList<String>(children.size());
-			if(getWorkspaceStatus().getCurrentContext().getType()!=WorkspaceContext.Type.HOME) {
+			if(getWorkspaceStatus().getCurrentContext().getType() != WorkspaceStatus.ROOT_TYPE) {
 				childNames.add(StringConstants.DOT_DOT);
-				childNames.add(WorkspaceContext.Type.HOME.toString());
+				childNames.add(WorkspaceStatus.ROOT_TYPE);
 			}
 			for(WorkspaceContext wsContext : children) {
 				childNames.add(wsContext.getName());

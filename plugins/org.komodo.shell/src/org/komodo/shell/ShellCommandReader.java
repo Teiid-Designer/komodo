@@ -16,7 +16,6 @@
 package org.komodo.shell;
 
 import java.io.IOException;
-
 import org.komodo.shell.api.ShellCommand;
 
 /**
@@ -32,9 +31,9 @@ public interface ShellCommandReader {
 
 	/**
 	 * Called to open the shell command reader.
-	 * @throws IOException the exception
+	 * @throws Exception the exception
 	 */
-	public void open() throws IOException;
+	public void open() throws Exception;
 
 	/**
 	 * Reads the next command from the input source.

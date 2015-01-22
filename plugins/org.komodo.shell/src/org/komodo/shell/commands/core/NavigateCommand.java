@@ -21,27 +21,25 @@
  ************************************************************************************/
 package org.komodo.shell.commands.core;
 
-import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
-import org.komodo.shell.CompletionConstants;
-import org.komodo.shell.Messages;
+import org.komodo.shell.TraverseWorkspaceVisitor;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * Displays a summary of the current status, including what repository the
- * user is currently connected to (if any).
+ * Displays a recursive list of the objects beneath the current context
  *
  */
-public class ListCommand extends BuiltInShellCommand {
+public class NavigateCommand extends BuiltInShellCommand {
+
+    private static final String NAVIGATE = "navigate"; //$NON-NLS-1$
 
 	/**
 	 * Constructor.
-	 * @param name the command name
 	 * @param wsStatus the workspace status
 	 */
-	public ListCommand(String name, WorkspaceStatus wsStatus) {
-		super(name,wsStatus);
+	public NavigateCommand(WorkspaceStatus wsStatus) {
+		super(NAVIGATE,wsStatus);
 	}
 
 	/**
@@ -52,26 +50,9 @@ public class ListCommand extends BuiltInShellCommand {
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		
-		List<WorkspaceContext> children = currentContext.getChildren();
-		if(children.isEmpty()) { 
-			String cType = getWorkspaceStatus().getCurrentContext().getType().toString();
-			String name = getWorkspaceStatus().getCurrentContext().getName();
-			
-			String noChildrenMsg = Messages.getString("ListCommand.noChildrenMsg",cType,name); //$NON-NLS-1$
-			if(WorkspaceStatus.ROOT_TYPE.equals(getWorkspaceStatus().getCurrentContext().getType())) {
-				noChildrenMsg = Messages.getString("ListCommand.noProjectsMsg"); //$NON-NLS-1$
-			}
-			print(CompletionConstants.MESSAGE_INDENT,noChildrenMsg); 
-		}
-
-		for(WorkspaceContext childContext : children) {
-			String childName = childContext.getName();
-			String childType = childContext.getType();
-			print(CompletionConstants.MESSAGE_INDENT, childName+" ["+childType+"]"); //$NON-NLS-1$ //$NON-NLS-2$ 
-		}
-		
-		if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
+		TraverseWorkspaceVisitor visitor = new TraverseWorkspaceVisitor();
+        Object pathway = currentContext.visit(visitor);
+        print(0, pathway.toString());
 
 		return true;
 	}

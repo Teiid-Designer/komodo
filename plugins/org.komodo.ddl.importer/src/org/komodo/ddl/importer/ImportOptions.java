@@ -21,6 +21,8 @@
  ************************************************************************************/
 package org.komodo.ddl.importer;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.komodo.utils.ModelType;
 
 /**
@@ -29,92 +31,101 @@ import org.komodo.utils.ModelType;
 public class ImportOptions {
 
 	private static final String DEFAULT_MODEL_NAME = "importedModel"; //$NON-NLS-1$
-	
-	private String parserType; 
-    private ModelType.Type modelType = ModelType.Type.getType("PHYSICAL");  //$NON-NLS-1$
-    private String modelName = DEFAULT_MODEL_NAME;  
-    private boolean createModelEntitiesForUnsupportedDdl = false;
-    private boolean setModelEntityDescription = false;
 
-    /**
-     * Set the ModelType being generated
-     * @param modelType the modelType to set
-     */
-    public void setModelType(ModelType.Type modelType) {
-        this.modelType = modelType;
-    }
-
-    /**
-     * Get the ModelType being generated
-     * @return the modelType
-     */
-    public ModelType.Type getModelType() {
-        return this.modelType;
-    }
+	private static final String DEFAULT_SCHEMA_NAME = "importedSchema"; //$NON-NLS-1$
 
 	/**
-	 * Set the parser to be used for the import.  If the parser is not specified,
-	 * scoring in performed which determines the best fit parser to use.
-	 * @param parserType the parser type to use
+	 * The type of import to be executed
 	 */
-	public void setParser(String parserType) {
-		this.parserType = parserType;
+	public static enum ImportType {
+	    /**
+	     * Import ddl into a default model
+	     */
+	    MODEL,
+
+	    /**
+	     * Import ddl as a schema fragment
+	     */
+	    SCHEMA;
 	}
 
 	/**
-	 * Get the parser which is currently set.  
-	 * @return the parser type which is set
+	 * Option keys applicable to import ddl into a model
 	 */
-	public String getParser( ) {
-		return this.parserType;
+	public static enum OptionKeys {
+	    /**
+	     * Name of model
+	     */
+	    MODEL_NAME(DEFAULT_MODEL_NAME),
+
+	    /**
+	     * Type of model, default is PHYSICAL
+	     */
+	    MODEL_TYPE(ModelType.Type.PHYSICAL),
+
+        /**
+         * Name of schema fragment
+         */
+        SCHEMA_NAME(DEFAULT_SCHEMA_NAME);
+
+	    private Object defaultValue;
+
+        /**
+	     * Constructor
+	     */
+	    private OptionKeys(Object defaultValue) {
+            this.defaultValue = defaultValue;
+	    }
+
+        /**
+         * @return default value of this model option
+         */
+        public Object defaultValue() {
+            return defaultValue;
+        }
 	}
-	
+
+	// Import as model by default
+    private ImportType importType = ImportType.MODEL;
+
+    private final Map<OptionKeys, Object> options = new HashMap<OptionKeys, Object>();
+
     /**
-     * Set the Model name
-     * @param modelName the modelName to set
+     * @return the importType
      */
-    public void setModelName(String modelName) {
-        this.modelName = modelName;
+    public ImportType getImportType() {
+        return this.importType;
     }
 
     /**
-     * Get the Model name
-     * @return the modelName
+     * @param importType type of import that should be executed
      */
-    public String getModelName() {
-        return this.modelName;
+    public void setImportType(ImportType importType) {
+        this.importType = importType;
     }
 
     /**
-     * Get the createModelEntitiesForUnsupportedDdl state
-     * @return the isCreateModelEntitiesForUnsupportedDdl
+     * @param optionName
+     * @return the option for the given model option
      */
-    public boolean isCreateModelEntitiesForUnsupportedDdl() {
-        return createModelEntitiesForUnsupportedDdl;
+    public Object getOption(OptionKeys optionName) {
+        if (optionName == null)
+            return null;
+
+        Object value = options.get(optionName);
+        if (value != null)
+            return value;
+
+        // Value is null so return defaults if applicable
+        return optionName.defaultValue();
     }
 
     /**
-     * Set the createModelEntitiesForUnsupportedDdl state
-     * @param createModelEntitiesForUnsupportedDdl option for create entities for unsupported ddl
+     * @param optionName
+     * @param value
      */
-    public void setCreateModelEntitiesForUnsupportedDdl(boolean createModelEntitiesForUnsupportedDdl) {
-        this.createModelEntitiesForUnsupportedDdl = createModelEntitiesForUnsupportedDdl;
-    }
-
-    /**
-     * Get the setModelEntityDescription state
-     * @return the setModelEntityDescription
-     */
-    public boolean isSetModelEntityDescription() {
-        return setModelEntityDescription;
-    }
-
-    /**
-     * Set the setModelEntityDescription state
-     * @param setModelEntityDescription option for set model entity descriptions
-     */
-    public void setModelEntityDescription(boolean setModelEntityDescription) {
-        this.setModelEntityDescription = setModelEntityDescription;
+    public void setOption(OptionKeys optionName, Object value) {
+        options.put(optionName, value);
     }
 
 }

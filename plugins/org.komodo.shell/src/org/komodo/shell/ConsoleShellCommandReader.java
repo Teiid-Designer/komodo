@@ -18,7 +18,6 @@ package org.komodo.shell;
 import java.io.Console;
 import java.io.IOException;
 import java.util.Map;
-
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -77,7 +76,7 @@ public class ConsoleShellCommandReader extends AbstractShellCommandReader {
 	 * @see org.komodo.shell.AbstractShellCommandReader#readLine()
 	 */
 	@Override
-	protected String readLine() throws IOException {
+	protected String readLine() throws Exception {
 		String prompt = "["+getWorkspaceStatus().getCurrentContext().getName()+"] > "; //$NON-NLS-1$ //$NON-NLS-2$
 		return console.readLine(prompt);
 	}

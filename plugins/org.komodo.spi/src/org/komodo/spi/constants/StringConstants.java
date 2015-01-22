@@ -300,6 +300,11 @@ public interface StringConstants {
   String JAVA = "java"; //$NON-NLS-1$
 
   /**
+   * DDL File Extension
+   */
+  String FILE_DDL = "ddl"; //$NON-NLS-1$
+
+  /**
    * src directory
    */
   String SRC = "src"; //$NON-NLS-1$

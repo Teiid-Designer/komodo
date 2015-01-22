@@ -17,13 +17,13 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.core.CdCommand;
 
 /**
  * Test Class to test CdCommand
  * 
  */
+@SuppressWarnings("javadoc")
 public class CdCommandTest extends AbstractCommandTest {
 
 	private static final String CD_COMMAND1 = "cdCommand1.txt"; //$NON-NLS-1$
@@ -38,34 +38,30 @@ public class CdCommandTest extends AbstractCommandTest {
 	
 	/**
      * Status at the workspace context root
+	 * @throws Exception 
      */
     @Test
-    public void testCd1() {
-    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
-    	setup(CD_COMMAND1, CdCommand.class, wsStatus);
-    	
+    public void testCd1() throws Exception {
+    	setup(CD_COMMAND1, CdCommand.class);
+
     	execute();
     	
     	// Check WorkspaceContext
     	assertEquals("home.Project2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
-    	teardown();
     }
     
 	/**
      * Status at the workspace Project2 context
+	 * @throws Exception 
      */
     @Test
-    public void testCd2() {
-    	WorkspaceStatus wsStatus = new WorkspaceStatusImpl(System.in, System.out);
-    	setup(CD_COMMAND2, CdCommand.class, wsStatus);
+    public void testCd2() throws Exception {
+    	setup(CD_COMMAND2, CdCommand.class);
     	
     	execute();
     	
     	// Check WorkspaceContext
     	assertEquals("home.Project2.MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
-    	teardown();
     }
     
 }

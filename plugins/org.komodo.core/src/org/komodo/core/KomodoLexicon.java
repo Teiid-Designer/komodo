@@ -220,6 +220,11 @@ public interface KomodoLexicon extends StringConstants {
         String ADMIN_USER = Namespace.PREFIX + COLON + "adminUser"; //$NON-NLS-1$
 
         /**
+         * The admin connection is encrypted. Value is {@value} .
+         */
+        String ADMIN_SECURE  = Namespace.PREFIX + COLON + "adminSecure"; //$NON-NLS-1$
+
+        /**
          * The name of the connected property. Value is {@value} .
          */
         String CONNECTED = Namespace.PREFIX + COLON + "connected"; //$NON-NLS-1$
@@ -253,6 +258,11 @@ public interface KomodoLexicon extends StringConstants {
          * The name of the last ping time property. Value is {@value} .
          */
         String LAST_PING_TIME = Namespace.PREFIX + COLON + "lastPingTime"; //$NON-NLS-1$
+
+        /**
+         * The jdbc connection is encrypted. Value is {@value} .
+         */
+        String JDBC_SECURE  = Namespace.PREFIX + COLON + "jdbcSecure"; //$NON-NLS-1$
 
         /**
          * The name of the Teiid node type. Value is {@value} .
@@ -404,24 +414,9 @@ public interface KomodoLexicon extends StringConstants {
     public interface Workspace {
 
         /**
-         * The name and node type name of the Komodo workspace's data source grouping node. Value is {@value} .
-         */
-        String DATA_SOURCES = DataSource.GROUP_NODE;
-
-        /**
          * The name and node type name of the Komodo workspace node. Value is {@value} .
          */
         String NODE_TYPE = Komodo.WORKSPACE;
-
-        /**
-         * The name and node type name of the Komodo workspace's repository grouping node. Value is {@value} .
-         */
-        String REPOSITORIES = Repository.GROUP_NODE;
-
-        /**
-         * The name and node type name of the Komodo workspace's Teiid grouping node. Value is {@value} .
-         */
-        String TEIIDS = Teiid.GROUP_NODE;
 
     }
 
