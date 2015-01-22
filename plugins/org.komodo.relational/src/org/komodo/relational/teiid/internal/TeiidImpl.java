@@ -23,7 +23,7 @@ package org.komodo.relational.teiid.internal;
 
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.relational.model.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Property;

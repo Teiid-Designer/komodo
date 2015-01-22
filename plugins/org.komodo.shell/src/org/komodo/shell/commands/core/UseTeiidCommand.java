@@ -30,7 +30,6 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.runtime.TeiidInstance;
 
@@ -42,7 +41,7 @@ public class UseTeiidCommand extends BuiltInShellCommand implements StringConsta
     private static final String USE_TEIID = "useTeiid"; //$NON-NLS-1$
 
     /**
-     * @param wsStatus
+     * @param wsStatus a workspace status (cannot be <code>null</code>)
      */
     public UseTeiidCommand(WorkspaceStatus wsStatus) {
         super(USE_TEIID, wsStatus);
@@ -57,15 +56,14 @@ public class UseTeiidCommand extends BuiltInShellCommand implements StringConsta
             printUsage(0);
             return false;
         }
-        
+
         String nameOrId = requiredArgument(0, Messages.getString("UseTeiidCommand.invalidName")); //$NON-NLS-1$
         WorkspaceStatus wStatus = getWorkspaceStatus();
 
         Repository repository = wStatus.getCurrentContext().getRepository();
-        KomodoObject workspace = repository.komodoWorkspace(null);
         WorkspaceManager wkspManager = WorkspaceManager.getInstance(repository);
-        
-        List<Teiid> teiids = wkspManager.findTeiids(null, workspace);
+
+        List<Teiid> teiids = wkspManager.findTeiids(null);
 
         if (teiids == null || teiids.size() == 0) {
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("UseTeiidCommand.noInstancesDefined")); //$NON-NLS-1$

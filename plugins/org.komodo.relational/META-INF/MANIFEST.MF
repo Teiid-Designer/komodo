@@ -9,6 +9,7 @@ Bundle-Localization: plugin
 Export-Package: org.komodo.relational,
  org.komodo.relational.model,
  org.komodo.relational.teiid,
+ org.komodo.relational.vdb,
  org.komodo.relational.workspace
 Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
  org.komodo.utils,

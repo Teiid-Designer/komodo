@@ -240,10 +240,11 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      */
     @Override
     public boolean equals( final Object object ) {
-        if (getClass() != object.getClass()) {
-            return false;
+        if (object instanceof KomodoObject) {
+            return this.path.equals(((ObjectImpl)object).path);
         }
-        return this.path.equals(((ObjectImpl)object).path);
+
+        return false;
     }
 
     /**
