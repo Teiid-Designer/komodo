@@ -639,7 +639,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
             // run query
             final Session session = getSession(transaction);
             final QueryManager queryMgr = session.getWorkspace().getQueryManager();
-            final Query query = queryMgr.createQuery(Query.JCR_SQL2, selectStmt);
+            final Query query = queryMgr.createQuery(selectStmt, Query.JCR_SQL2);
             final QueryResult resultSet = query.execute();
 
             // create results
@@ -1263,7 +1263,6 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                 throw new KException(Messages.getString(Messages.Komodo.UNPUBLISH_ARTIFACT_ERROR, absPath), e);
             }
         }
-
     }
 
     /**

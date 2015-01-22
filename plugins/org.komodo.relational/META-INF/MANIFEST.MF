@@ -4,11 +4,12 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.komodo.relational;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %pluginProvider
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
 Export-Package: org.komodo.relational,
  org.komodo.relational.model,
  org.komodo.relational.teiid,
+ org.komodo.relational.vdb,
  org.komodo.relational.workspace
 Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
  org.komodo.utils,

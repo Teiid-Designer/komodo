@@ -48,9 +48,29 @@ public class Messages implements StringConstants {
         COLUMN_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating a permission condition could not be removed because it was not found.
+         */
+        CONDITION_NOT_FOUND_TO_REMOVE,
+
+        /**
          * An error message indicating a constraint could not be removed.
          */
         CONSTRAINT_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * An error message indicating a VDB data role could not be removed because it was not found.
+         */
+        DATA_ROLE_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * An error message indicating a role name could not be added because it already exists.
+         */
+        DUPLICATE_ROLE_NAME,
+
+        /**
+         * An error message indicating a VDB entry could not be removed because it was not found.
+         */
+        ENTRY_NOT_FOUND_TO_REMOVE,
 
         /**
          * An error message indicating a function could not be removed.
@@ -58,9 +78,24 @@ public class Messages implements StringConstants {
         FUNCTION_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating a mapped role name could not be removed.
+         */
+        MAPPED_ROLE_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * An error message indicating a permission mask could not be removed because it was not found.
+         */
+        MASK_NOT_FOUND_TO_REMOVE,
+
+        /**
          * An error message indicating a procedure parameter could not be removed.
          */
         PARAMETER_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * An error message indicating a data role permission could not be removed.
+         */
+        PERMISSION_NOT_FOUND_TO_REMOVE,
 
         /**
          * An error message indicating a procedure could not be removed.
@@ -86,6 +121,16 @@ public class Messages implements StringConstants {
          * An error message indicating a table could not be removed.
          */
         TABLE_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * An error message indicating a VDB translator could not be removed because it was not found.
+         */
+        TRANSLATOR_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * An error message indicating an imported VDB could not be removed because it was not found.
+         */
+        VDB_IMPORT_NOT_FOUND_TO_REMOVE,
 
         /**
          * An error message indicating a view could not be removed.

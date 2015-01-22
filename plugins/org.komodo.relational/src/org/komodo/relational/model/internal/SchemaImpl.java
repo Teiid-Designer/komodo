@@ -22,6 +22,7 @@
 package org.komodo.relational.model.internal;
 
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Schema;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Property;
@@ -51,7 +52,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
                                        Property.ValueType.STRING,
                                        "getRendition", //$NON-NLS-1$
                                        KomodoLexicon.Schema.RENDITION);
-        
+
         return rendition == null ? EMPTY_STRING : rendition;
     }
 

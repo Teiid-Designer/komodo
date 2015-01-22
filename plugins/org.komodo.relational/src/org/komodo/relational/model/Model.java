@@ -16,6 +16,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Model extends RelationalObject {
 
     /**
+     * An empty array of models.
+     */
+    Model[] NO_MODELS = new Model[0];
+
+    /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return model type of this model

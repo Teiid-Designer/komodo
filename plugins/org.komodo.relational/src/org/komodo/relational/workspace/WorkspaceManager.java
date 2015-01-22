@@ -22,15 +22,28 @@
 package org.komodo.relational.workspace;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import javax.jcr.Session;
+import javax.jcr.query.Query;
+import javax.jcr.query.QueryManager;
+import javax.jcr.query.QueryResult;
+import javax.jcr.query.Row;
+import javax.jcr.query.RowIterator;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.internal.model.ModelImpl;
+import org.komodo.relational.internal.vdb.VdbImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
-import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.repository.RepositoryImpl;
+import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.Id;
@@ -38,11 +51,15 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  *
  */
 public class WorkspaceManager {
+
+    private static final String FIND_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s] WHERE ISDESCENDANTNODE('" //$NON-NLS-1$
+                                                     + RepositoryImpl.WORKSPACE_ROOT + "') ORDER BY [jcr:name] ASC"; //$NON-NLS-1$
 
     private static class WskpMgrAdapter implements KeyFromValueAdapter<Repository.Id, WorkspaceManager> {
 
@@ -234,34 +251,84 @@ public class WorkspaceManager {
     /**
      * @param uow
      *        the transaction (can be <code>null</code> if update should be automatically committed)
-    * @param parent
-     *        the parent to search under (cannot be <code>null</code>)
-     * @return all {@link Teiid}s under the given parent
+     * @param parent
+     *        the parent of the model object being created (can be <code>null</code> if VDB should be created at the workspace root)
+     * @param vdbName
+     *        the name of the VDB to create (cannot be empty)
+     * @param externalFilePath
+     *        the VDB file path on the local file system (cannot be empty)
+     * @return the VDB (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    public List<Teiid> findTeiids(UnitOfWork uow, KomodoObject parent) throws KException {
-        ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
-
+    public Vdb createVdb( final UnitOfWork uow,
+                          final KomodoObject parent,
+                          final String vdbName,
+                          final String externalFilePath ) throws KException {
         UnitOfWork transaction = uow;
 
         if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-findobjectsoftype", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction("workspacemanager-createvdb", false, null); //$NON-NLS-1$
         }
 
         assert (transaction != null);
 
-        List<Teiid> children = new ArrayList<Teiid>();
+        try {
+            String parentPath = null;
+
+            if (parent == null) {
+                parentPath = this.repository.komodoWorkspace(transaction).getAbsolutePath();
+            } else {
+                parentPath = parent.getAbsolutePath();
+            }
+
+            final Vdb result = RelationalModelFactory.createVdb(transaction,
+                                                                this.repository,
+                                                                parentPath,
+                                                                vdbName,
+                                                                externalFilePath);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    private String[] findByType( final UnitOfWork uow,
+                                 final String type ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction("workspacemanager-findByType", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        String[] result = null;
 
         try {
-            // TODO
-            // Want to use search API to find the teiid instances but for now check the parent's children
+            final String queryText = String.format(FIND_QUERY_PATTERN, type);
+            final Session session = ((UnitOfWorkImpl)transaction).getSession();
+            final QueryManager queryMgr = session.getWorkspace().getQueryManager();
+            final Query query = queryMgr.createQuery(queryText, Query.JCR_SQL2);
+            final QueryResult resultSet = query.execute();
+            final RowIterator itr = resultSet.getRows();
+            final String columnName = resultSet.getColumnNames()[0];
+            int numPaths = (int)itr.getSize();
 
-            KomodoObject[] kChildren = parent.getChildrenOfType(transaction, KomodoLexicon.Teiid.NODE_TYPE);
-            if (kChildren != null) {
+            if (numPaths == 0) {
+                result = StringConstants.EMPTY_ARRAY;
+            } else {
+                result = new String[numPaths];
+                int i = 0;
 
-                for (KomodoObject kobject : kChildren) {
-                    children.add(new TeiidImpl(getRepository(), kobject.getAbsolutePath()));
+                while (itr.hasNext()) {
+                    final Row row = itr.nextRow();
+                    result[i++] = row.getValue(columnName).getString();
                 }
             }
 
@@ -269,10 +336,57 @@ public class WorkspaceManager {
                 transaction.commit();
             }
 
+            return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
-
-        return children;
     }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @return all {@link Teiid}s in the workspace
+     * @throws KException
+     *         if an error occurs
+     */
+    public List< Teiid > findTeiids( UnitOfWork uow ) throws KException {
+        final String[] paths = findByType(uow, KomodoLexicon.Teiid.NODE_TYPE);
+
+        if (paths.length == 0) {
+            return Collections.emptyList();
+        }
+
+        final List< Teiid > result = new ArrayList<>(paths.length);
+
+        for (final String path : paths) {
+            result.add(new TeiidImpl(getRepository(), path));
+        }
+
+        return result;
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @return all {@link Teiid}s in the workspace
+     * @throws KException
+     *         if an error occurs
+     */
+    public Vdb[] findVdbs( final UnitOfWork uow ) throws KException {
+        final String[] paths = findByType(uow, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+
+        if (paths.length == 0) {
+            return Vdb.NO_VDBS;
+        }
+
+        final Vdb[] result = new Vdb[paths.length];
+        int i = 0;
+
+        for (final String path : paths) {
+            result[i++] = new VdbImpl(getRepository(), path);
+        }
+
+        return result;
+    }
+
 }

@@ -13,6 +13,8 @@ import static org.mockito.Mockito.mock;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.komodo.repository.LocalRepository;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.State;
@@ -24,6 +26,9 @@ import org.komodo.spi.repository.RepositoryObserver;
 public abstract class RelationalModelTest {
 
     protected static Repository _repo = null;
+
+    @Rule
+    public TestName name = new TestName();
 
     @BeforeClass
     public static void getLocalRepositoryInstance() throws Exception {

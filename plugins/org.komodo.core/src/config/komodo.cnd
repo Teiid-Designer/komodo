@@ -166,7 +166,6 @@
  */
 [tko:vdbModel] > vdb:declarativeModel, tko:libraryComponent
   + * (tko:vdbModelSource) copy
-  + * (nt:file) copy
 
 /*
  * The VDB manifest model source grouping node used by the library. Child nodes represent VDB model source definitions.
@@ -177,9 +176,7 @@
 /*
  * A VDB manifest model source definition found in the library. The node name is the model source's name.
  */
-[tko:vdbModelSource] > nt:unstructured, tko:libraryComponent
-  - vdb:sourceTranslator (string)
-  - vdb:sourceJndiName (string)
+[tko:vdbModelSource] > vdb:source, tko:libraryComponent
 
 /*
  * The VDB translator grouping node used by the library. Child nodes represent VDB translator definitions.
