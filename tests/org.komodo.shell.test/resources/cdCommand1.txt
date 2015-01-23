@@ -1,5 +1,4 @@
-#create a project, then cd into it
-create project Project2
-cd Project2
+#cd into workspace
+cd tko:workspace
 
 

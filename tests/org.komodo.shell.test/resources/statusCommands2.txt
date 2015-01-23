@@ -1,6 +1,7 @@
-#status at root.Project2
-create project Project2
-cd Project2
+#status at myModel
+cd tko:workspace
+create vdbModel myModel
+cd myModel
 status
 
 

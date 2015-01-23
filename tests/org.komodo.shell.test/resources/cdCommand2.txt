@@ -1,6 +1,5 @@
-#create a Project and model, then cd into the model
-create project Project2
-cd Project2
-create model MyModel
+#create a model, then cd into it
+cd tko:workspace
+create vdbModel MyModel
 cd MyModel
 

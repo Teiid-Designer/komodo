@@ -78,7 +78,7 @@ public class PropertyCommand extends BuiltInShellCommand {
                 if (getWorkspaceStatus().getRecordingStatus())
                     recordCommand(getArguments());
             } else {
-                throw new InvalidCommandArgumentException(0, Messages.getString("Property.InvalidSubCommand")); //$NON-NLS-1$
+                throw new InvalidCommandArgumentException(0, Messages.getString("PropertyCommand.InvalidSubCommand")); //$NON-NLS-1$
             }
         } catch (InvalidCommandArgumentException e) {
             throw e;

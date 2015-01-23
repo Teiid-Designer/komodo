@@ -1,10 +1,9 @@
-# create one projects - and three models within it.
-# cd into the project, then list
-create project Project1
-cd Project1
-create model Model1
-create model Model2
-create model Model3
-#Listing of Project1
+# create three models within workspace.
+# cd into the workspace, then list
+cd tko:workspace
+create vdbModel Model1
+create vdbModel Model2
+create vdbModel Model3
+#Listing of workspace
 list
 

@@ -38,10 +38,6 @@ public class StatusCommandTest extends AbstractCommandTest {
 		super();
 	}
 	
-	/**
-     * Status at the workspace context root
-     * @throws Exception
-     */
     @Test
     public void testStatus1() throws Exception {
     	setup(STATUS_COMMANDS1, StatusCommand.class);
@@ -49,19 +45,14 @@ public class StatusCommandTest extends AbstractCommandTest {
     	execute();
     	
     	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
-                                INDENT+"Current Teiid Instance  : [mm://localhost:9999 : Not Connected]\n"+ //$NON-NLS-1$
-                                INDENT+"Current Teiid Instance Jdbc  : [jdbc:teiid:<vdbname>@mm://localhost:31000 : Not Connected]\n"+ //$NON-NLS-1$
-                                INDENT+"Current Context : [home]\n"; //$NON-NLS-1$
+                                        INDENT+"Current Teiid Instance  : None set\n"+ //$NON-NLS-1$
+                                        INDENT+"Current Context : [tko:komodo]\n"; //$NON-NLS-1$
 
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("home", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("tko:komodo", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
-    
-	/**
-     * Status at the workspace Project2 context
-	 * @throws Exception 
-     */
+
     @Test
     public void testStatus2() throws Exception {
     	setup(STATUS_COMMANDS2, StatusCommand.class);
@@ -69,31 +60,25 @@ public class StatusCommandTest extends AbstractCommandTest {
     	execute();
     	
     	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
-                                INDENT+"Current Teiid Instance  : [mm://localhost:9999 : Not Connected]\n"+ //$NON-NLS-1$
-                                INDENT+"Current Teiid Instance Jdbc  : [jdbc:teiid:<vdbname>@mm://localhost:31000 : Not Connected]\n"+ //$NON-NLS-1$
-    	                        INDENT+"Current Context : [home.Project2]\n"; //$NON-NLS-1$
+                                INDENT+"Current Teiid Instance  : None set\n"+ //$NON-NLS-1$
+    	                        INDENT+"Current Context : [tko:komodo/tko:workspace/myModel]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("home.Project2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("tko:komodo/tko:workspace/myModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
-    
-	/**
-     * Status at the workspace ViewModel1 context
-	 * @throws Exception 
-     */
+
     @Test
     public void testStatus3() throws Exception {
-    	setup(STATUS_COMMANDS3, StatusCommand.class);
-
-    	execute();
-    	
-        String expectedOutput = INDENT + "Current Repo    : local Repository\n" + //$NON-NLS-1$
-                                                        INDENT + "Current Teiid Instance  : [mm://localhost:9999 : Not Connected]\n" + //$NON-NLS-1$
-                                                        INDENT + "Current Teiid Instance Jdbc  : [jdbc:teiid:<vdbname>@mm://localhost:31000 : Not Connected]\n" + //$NON-NLS-1$
-                                                        INDENT + "Current Context : [home.Project1.Model2]\n"; //$NON-NLS-1$
-    	String writerOutput = getCommandOutput();
-    	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("home.Project1.Model2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        setup(STATUS_COMMANDS3, StatusCommand.class);
+        
+        execute();
+        
+        String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
+                                INDENT+"Current Teiid Instance  : [mms://localhost:9999 : Not Connected]\n"+ //$NON-NLS-1$
+                                INDENT+"Current Teiid Instance Jdbc  : [jdbc:teiid:<vdbname>@mms://localhost:31000 : Not Connected]\n"+ //$NON-NLS-1$
+                                INDENT+"Current Context : [tko:komodo/tko:workspace/TestTeiid]\n"; //$NON-NLS-1$
+        String writerOutput = getCommandOutput();
+        assertEquals(expectedOutput,writerOutput);
+        assertEquals("tko:komodo/tko:workspace/TestTeiid", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
-   	
 }
