@@ -34,8 +34,8 @@ import javax.jcr.Node;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
-import org.komodo.modeshape.test.utils.AbstractSequencerTest;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
+import org.komodo.test.utils.AbstractSequencerTest;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 /**

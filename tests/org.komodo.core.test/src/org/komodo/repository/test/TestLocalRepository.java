@@ -35,7 +35,6 @@ import javax.jcr.Node;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.modeshape.test.utils.AbstractLocalRepositoryTest;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryTools;
@@ -46,6 +45,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.jcr.JcrNtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )

@@ -40,12 +40,12 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinPredicate;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinType;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.UnaryFromClause;
-import org.komodo.modeshape.test.utils.AbstractSequencerTest;
 import org.komodo.spi.query.sql.lang.JoinType.Types;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.spi.type.DataTypeManager;
+import org.komodo.test.utils.AbstractSequencerTest;
 import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 /**
  * Class which serves as base for various sequencer unit tests. In addition to this, it uses the sequencing events fired by

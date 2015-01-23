@@ -9,4 +9,4 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.junit;bundle-version="4.11.0",
  org.komodo.spi;bundle-version="1.0.0",
- org.komodo.modeshape.test.utils;bundle-version="1.0.0"
+ org.komodo.test.utils;bundle-version="1.0.0"
