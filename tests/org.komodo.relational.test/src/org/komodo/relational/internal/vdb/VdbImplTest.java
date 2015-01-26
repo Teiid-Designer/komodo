@@ -11,6 +11,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
+import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
@@ -27,28 +28,24 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class VdbImplTest extends RelationalModelTest {
 
-    private static int _counter = 1;
+    private static final String PATH = "/Users/sledge/hammer/MyVdb.vdb";
 
     private Vdb vdb;
+    private String vdbName;
 
-    private void create() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(this.name.getMethodName(), false, null); // won't work inside an @Before
+    @Before
+    public void init() throws Exception {
+        final UnitOfWork transaction = _repo.createTransaction(VdbImplTest.class.getSimpleName(), false, null);
 
-        final int suffix = _counter++;
-        final String path = "/Users/sledge/hammer/MyVdb.vdb";
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, ("vdb" + suffix), path);
+        this.vdbName = "vdb";
+        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, this.vdbName, PATH);
 
         transaction.commit();
-
-        assertThat(this.vdb.getPrimaryType(null).getName(), is(VdbLexicon.Vdb.VIRTUAL_DATABASE));
-        assertThat(this.vdb.getOriginalFilePath(null), is(path));
     }
 
     @Test
     public void shouldAddDataRole() throws Exception {
-        create();
-
-        final String name = ("dataRole" + _counter);
+        final String name = "dataRole";
         final DataRole dataRole = this.vdb.addDataRole(null, name);
         assertThat(dataRole, is(notNullValue()));
         assertThat(this.vdb.getDataRoles(null).length, is(1));
@@ -61,9 +58,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldAddEntry() throws Exception {
-        create();
-
-        final String name = ("entry" + _counter);
+        final String name = "entry";
         final String path = "/my/path";
         final Entry entry = this.vdb.addEntry(null, name, path);
         assertThat(entry, is(notNullValue()));
@@ -78,9 +73,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldAddImport() throws Exception {
-        create();
-
-        final String name = ("vdbImport" + _counter);
+        final String name = "vdbImport";
         final VdbImport vdbImport = this.vdb.addImport(null, name);
         assertThat(vdbImport, is(notNullValue()));
         assertThat(this.vdb.getImports(null).length, is(1));
@@ -93,9 +86,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldAddTranslator() throws Exception {
-        create();
-
-        final String name = ("translator" + _counter);
+        final String name = "translator";
         final String type = "oracle";
         final Translator translator = this.vdb.addTranslator(null, name, type);
         assertThat(translator, is(notNullValue()));
@@ -109,116 +100,112 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveCorrectName() throws Exception {
+        assertThat(this.vdb.getName(null), is(this.vdbName));
+    }
+
+    @Test
+    public void shouldHaveCorrectOriginalFilePathAfterConstruction() throws Exception {
+        assertThat(this.vdb.getOriginalFilePath(null), is(PATH));
+    }
+
+    @Test
+    public void shouldHaveCorrectPrimaryType() throws Exception {
+        assertThat(this.vdb.getPrimaryType(null).getName(), is(VdbLexicon.Vdb.VIRTUAL_DATABASE));
+    }
+
+    @Test
     public void shouldHaveDefaultPreviewValueAfterConstruction() throws Exception {
-        create();
         assertThat(this.vdb.isPreview(null), is(Vdb.DEFAULT_PREVIEW));
     }
 
     @Test
     public void shouldHaveDefaultVersionAfterConstruction() throws Exception {
-        create();
         assertThat(this.vdb.getVersion(null), is(Vdb.DEFAULT_VERSION));
     }
 
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddEmptyDataRole() throws Exception {
-        create();
         this.vdb.addDataRole(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddEmptyEntry() throws Exception {
-        create();
         this.vdb.addEntry(null, StringConstants.EMPTY_STRING, "blah");
     }
 
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddEmptyImport() throws Exception {
-        create();
         this.vdb.addImport(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddEmptyTranslator() throws Exception {
-        create();
         this.vdb.addTranslator(null, StringConstants.EMPTY_STRING, "blah");
     }
 
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddNullDataRole() throws Exception {
-        create();
         this.vdb.addDataRole(null, null);
     }
 
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddNullEntry() throws Exception {
-        create();
         this.vdb.addEntry(null, null, "blah");
     }
 
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddNullImport() throws Exception {
-        create();
         this.vdb.addImport(null, null);
     }
 
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddNullTranslator() throws Exception {
-        create();
         this.vdb.addTranslator(null, null, "blah");
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyOriginalFilePath() throws Exception {
-        create();
         this.vdb.setOriginalFilePath(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullOriginalFilePath() throws Exception {
-        create();
         this.vdb.setOriginalFilePath(null, null);
     }
 
     @Test
     public void shouldNotHaveConnectionTypeAfterConstruction() throws Exception {
-        create();
         assertThat(this.vdb.getConnectionType(null), is(nullValue()));
     }
 
     @Test
     public void shouldNotHaveDataRolesAfterConstruction() throws Exception {
-        create();
         assertThat(this.vdb.getDataRoles(null), is(notNullValue()));
         assertThat(this.vdb.getDataRoles(null).length, is(0));
     }
 
     @Test
     public void shouldNotHaveEntriesAfterConstruction() throws Exception {
-        create();
         assertThat(this.vdb.getEntries(null), is(notNullValue()));
         assertThat(this.vdb.getEntries(null).length, is(0));
     }
 
     @Test
     public void shouldNotHaveTranslatorsAfterConstruction() throws Exception {
-        create();
         assertThat(this.vdb.getTranslators(null), is(notNullValue()));
         assertThat(this.vdb.getTranslators(null).length, is(0));
     }
 
     @Test
     public void shouldNotHaveVdbImportsAfterConstruction() throws Exception {
-        create();
         assertThat(this.vdb.getImports(null), is(notNullValue()));
         assertThat(this.vdb.getImports(null).length, is(0));
     }
 
     @Test
     public void shouldRemoveDataRole() throws Exception {
-        create();
-
-        final String name = ("dataRole" + _counter);
+        final String name = "dataRole";
         this.vdb.addDataRole(null, name);
         assertThat(this.vdb.getDataRoles(null).length, is(1));
 
@@ -228,9 +215,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldRemoveEntry() throws Exception {
-        create();
-
-        final String name = ("entry" + _counter);
+        final String name = "entry";
         this.vdb.addEntry(null, name, "path");
         assertThat(this.vdb.getEntries(null).length, is(1));
 
@@ -240,9 +225,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldRemoveTranslator() throws Exception {
-        create();
-
-        final String name = ("translator" + _counter);
+        final String name = "translator";
         this.vdb.addTranslator(null, name, "oracle");
         assertThat(this.vdb.getTranslators(null).length, is(1));
 
@@ -252,9 +235,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldRemoveVdbImport() throws Exception {
-        create();
-
-        final String name = ("vdbImport" + _counter);
+        final String name = "vdbImport";
         this.vdb.addImport(null, name);
         assertThat(this.vdb.getImports(null).length, is(1));
 
@@ -264,7 +245,6 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetConnectionType() throws Exception {
-        create();
         final String newValue = "newConnectionType";
         this.vdb.setConnectionType(null, newValue);
         assertThat(this.vdb.getConnectionType(null), is(newValue));
@@ -272,7 +252,6 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetDescription() throws Exception {
-        create();
         final String newValue = "newDescription";
         this.vdb.setDescription(null, newValue);
         assertThat(this.vdb.getDescription(null), is(newValue));
@@ -280,7 +259,6 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetOriginalFilePath() throws Exception {
-        create();
         final String newValue = "newOriginalFilePath";
         this.vdb.setOriginalFilePath(null, newValue);
         assertThat(this.vdb.getOriginalFilePath(null), is(newValue));
@@ -288,7 +266,6 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetPreviewValue() throws Exception {
-        create();
         final boolean newValue = !Vdb.DEFAULT_PREVIEW;
         this.vdb.setPreview(null, newValue);
         assertThat(this.vdb.isPreview(null), is(newValue));
@@ -296,7 +273,6 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetVdbName() throws Exception {
-        create();
         final String newValue = "newName";
         this.vdb.setVdbName(null, newValue);
         assertThat(this.vdb.getVdbName(null), is(newValue));
@@ -304,7 +280,6 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetVersion() throws Exception {
-        create();
         final int newValue = (Vdb.DEFAULT_VERSION + 10);
         this.vdb.setVersion(null, newValue);
         assertThat(this.vdb.getVersion(null), is(newValue));

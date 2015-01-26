@@ -22,12 +22,14 @@ import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Index;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
@@ -36,17 +38,17 @@ public final class TableImplTest extends RelationalModelTest {
 
     private static final String NAME = "table";
 
-    private Table modelObject;
+    private Table table;
 
     @Before
     public void init() throws Exception {
-        this.modelObject = RelationalModelFactory.createTable(null, _repo, null, NAME);
+        this.table = RelationalModelFactory.createTable(null, _repo, mock(Model.class), NAME);
     }
 
     @Test
     public void shouldAddAccessPattern() throws Exception {
         final String name = "accesspattern";
-        final AccessPattern accessPattern = this.modelObject.addAccessPattern(null, name);
+        final AccessPattern accessPattern = this.table.addAccessPattern(null, name);
         assertThat(accessPattern, is(notNullValue()));
         assertThat(accessPattern.getName(null), is(name));
     }
@@ -54,17 +56,16 @@ public final class TableImplTest extends RelationalModelTest {
     @Test
     public void shouldAddColumn() throws Exception {
         final String name = "column";
-        final Column column = this.modelObject.addColumn(null, name);
+        final Column column = this.table.addColumn(null, name);
         assertThat(column, is(notNullValue()));
         assertThat(column.getName(null), is(name));
     }
 
     @Test
     public void shouldAddForeignKey() throws Exception {
-        final Table refTable = RelationalModelFactory.createTable(null, _repo, null, "refTable");
-
+        final Table refTable = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "refTable");
         final String name = "foreignKey";
-        final ForeignKey foreignKey = this.modelObject.addForeignKey(null, name, refTable);
+        final ForeignKey foreignKey = this.table.addForeignKey(null, name, refTable);
 
         assertThat(foreignKey, is(notNullValue()));
         assertThat(foreignKey.getName(null), is(name));
@@ -73,7 +74,7 @@ public final class TableImplTest extends RelationalModelTest {
     @Test
     public void shouldAddIndex() throws Exception {
         final String name = "index";
-        final Index index = this.modelObject.addIndex(null, name);
+        final Index index = this.table.addIndex(null, name);
 
         assertThat(index, is(notNullValue()));
         assertThat(index.getName(null), is(name));
@@ -83,7 +84,7 @@ public final class TableImplTest extends RelationalModelTest {
     public void shouldAddStatementOption() throws Exception {
         final String name = "statementoption";
         final String value = "statementvalue";
-        final StatementOption statementOption = this.modelObject.addStatementOption(null, name, value);
+        final StatementOption statementOption = this.table.addStatementOption(null, name, value);
         assertThat(statementOption, is(notNullValue()));
         assertThat(statementOption.getName(null), is(name));
         assertThat(statementOption.getOption(null), is(value));
@@ -92,7 +93,7 @@ public final class TableImplTest extends RelationalModelTest {
     @Test
     public void shouldAddUniqueConstraint() throws Exception {
         final String name = "uniqueConstraint";
-        final UniqueConstraint uniqueConstraint = this.modelObject.addUniqueConstraint(null, name);
+        final UniqueConstraint uniqueConstraint = this.table.addUniqueConstraint(null, name);
 
         assertThat(uniqueConstraint, is(notNullValue()));
         assertThat(uniqueConstraint.getName(null), is(name));
@@ -100,197 +101,197 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Test
     public void shouldAllowEmptyQueryExpression() throws Exception {
-        this.modelObject.setQueryExpression(null, "");
+        this.table.setQueryExpression(null, StringConstants.EMPTY_STRING);
     }
 
     @Test
     public void shouldAllowNullOnCommitValue() throws Exception {
-        this.modelObject.setOnCommitValue(null, null);
-    }
-
-    @Test
-    public void shouldAllowNullTemporaryTypeValue() throws Exception {
-        this.modelObject.setTemporaryTableType(null, null);
+        this.table.setOnCommitValue(null, null);
     }
 
     @Test
     public void shouldAllowNullQueryExpression() throws Exception {
-        this.modelObject.setQueryExpression(null, null);
+        this.table.setQueryExpression(null, null);
     }
 
     @Test
     public void shouldAllowNullSchemaElementType() throws Exception {
-        this.modelObject.setSchemaElementType(null, null);
+        this.table.setSchemaElementType(null, null);
+    }
+
+    @Test
+    public void shouldAllowNullTemporaryTypeValue() throws Exception {
+        this.table.setTemporaryTableType(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyAccessPatternName() throws Exception {
-        this.modelObject.addAccessPattern(null, "");
+        this.table.addAccessPattern(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyColumnName() throws Exception {
-        this.modelObject.addColumn(null, "");
+        this.table.addColumn(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyForeignKeyName() throws Exception {
-        this.modelObject.addForeignKey(null, "", mock(Table.class));
+        this.table.addForeignKey(null, StringConstants.EMPTY_STRING, mock(Table.class));
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyIndexName() throws Exception {
-        this.modelObject.addIndex(null, "");
+        this.table.addIndex(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionName() throws Exception {
-        this.modelObject.addStatementOption(null, "", "blah");
+        this.table.addStatementOption(null, StringConstants.EMPTY_STRING, "blah");
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionValue() throws Exception {
-        this.modelObject.addStatementOption(null, "blah", "");
+        this.table.addStatementOption(null, "blah", StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyUniqueConstraintName() throws Exception {
-        this.modelObject.addUniqueConstraint(null, "");
+        this.table.addUniqueConstraint(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullAccessPatternName() throws Exception {
-        this.modelObject.addAccessPattern(null, null);
+        this.table.addAccessPattern(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullColumnName() throws Exception {
-        this.modelObject.addColumn(null, null);
+        this.table.addColumn(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullForeignKeyName() throws Exception {
-        this.modelObject.addForeignKey(null, null, mock(Table.class));
+        this.table.addForeignKey(null, null, mock(Table.class));
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullIndexName() throws Exception {
-        this.modelObject.addIndex(null, null);
+        this.table.addIndex(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionName() throws Exception {
-        this.modelObject.addStatementOption(null, null, "blah");
+        this.table.addStatementOption(null, null, "blah");
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionValue() throws Exception {
-        this.modelObject.addStatementOption(null, "blah", null);
+        this.table.addStatementOption(null, "blah", null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullUniqueConstraintName() throws Exception {
-        this.modelObject.addUniqueConstraint(null, null);
+        this.table.addUniqueConstraint(null, null);
     }
 
     @Test( expected = KException.class )
     public void shouldFailRemovingMissingPrimaryKey() throws Exception {
-        this.modelObject.removePrimaryKey(null);
+        this.table.removePrimaryKey(null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyAccessPatternName() throws Exception {
-        this.modelObject.removeAccessPattern(null, "");
+        this.table.removeAccessPattern(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyColumnName() throws Exception {
-        this.modelObject.removeColumn(null, "");
+        this.table.removeColumn(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyForeignKeyName() throws Exception {
-        this.modelObject.removeForeignKey(null, "");
+        this.table.removeForeignKey(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyIndexName() throws Exception {
-        this.modelObject.removeIndex(null, "");
+        this.table.removeIndex(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyStatementOptionName() throws Exception {
-        this.modelObject.removeStatementOption(null, "");
+        this.table.removeStatementOption(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyUniqueConstraintName() throws Exception {
-        this.modelObject.removeUniqueConstraint(null, "");
+        this.table.removeUniqueConstraint(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveMissingPrimaryKey() throws Exception {
-        this.modelObject.removePrimaryKey(null);
+        this.table.removePrimaryKey(null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullAccessPatternName() throws Exception {
-        this.modelObject.removeAccessPattern(null, null);
+        this.table.removeAccessPattern(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullColumnName() throws Exception {
-        this.modelObject.removeColumn(null, null);
+        this.table.removeColumn(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullForeignKeyName() throws Exception {
-        this.modelObject.removeForeignKey(null, null);
+        this.table.removeForeignKey(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullIndexName() throws Exception {
-        this.modelObject.removeIndex(null, null);
+        this.table.removeIndex(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullStatementOptionName() throws Exception {
-        this.modelObject.removeStatementOption(null, null);
+        this.table.removeStatementOption(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullUniqueConstraintName() throws Exception {
-        this.modelObject.removeUniqueConstraint(null, null);
+        this.table.removeUniqueConstraint(null, null);
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownAccessPattern() throws Exception {
-        this.modelObject.removeAccessPattern(null, "unknown");
+        this.table.removeAccessPattern(null, "unknown");
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownColumn() throws Exception {
-        this.modelObject.removeColumn(null, "unknown");
+        this.table.removeColumn(null, "unknown");
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownForeignKey() throws Exception {
-        this.modelObject.removeForeignKey(null, "unknown");
+        this.table.removeForeignKey(null, "unknown");
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownIndex() throws Exception {
-        this.modelObject.removeIndex(null, "unknown");
+        this.table.removeIndex(null, "unknown");
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownStatementOption() throws Exception {
-        this.modelObject.removeStatementOption(null, "unknown");
+        this.table.removeStatementOption(null, "unknown");
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownUniqueConstraint() throws Exception {
-        this.modelObject.removeUniqueConstraint(null, "unknown");
+        this.table.removeUniqueConstraint(null, "unknown");
     }
 
     @Test
@@ -298,10 +299,10 @@ public final class TableImplTest extends RelationalModelTest {
         final int numAccessPatterns = 5;
 
         for (int i = 0; i < numAccessPatterns; ++i) {
-            this.modelObject.addAccessPattern(null, "accesspattern" + i);
+            this.table.addAccessPattern(null, "accesspattern" + i);
         }
 
-        assertThat(this.modelObject.getAccessPatterns(null).length, is(numAccessPatterns));
+        assertThat(this.table.getAccessPatterns(null).length, is(numAccessPatterns));
     }
 
     @Test
@@ -309,22 +310,22 @@ public final class TableImplTest extends RelationalModelTest {
         final int numColumns = 5;
 
         for (int i = 0; i < numColumns; ++i) {
-            this.modelObject.addColumn(null, "column" + i);
+            this.table.addColumn(null, "column" + i);
         }
 
-        assertThat(this.modelObject.getColumns(null).length, is(numColumns));
+        assertThat(this.table.getColumns(null).length, is(numColumns));
     }
 
     @Test
     public void shouldGetForeignKeys() throws Exception {
-        final Table refTable = RelationalModelFactory.createTable(null, _repo, null, "refTable");
+        final Table refTable = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "refTable");
         final int numForeignKeys = 5;
 
         for (int i = 0; i < numForeignKeys; ++i) {
-            this.modelObject.addForeignKey(null, "foreignKey" + i, refTable);
+            this.table.addForeignKey(null, "foreignKey" + i, refTable);
         }
 
-        assertThat(this.modelObject.getForeignKeys(null).length, is(numForeignKeys));
+        assertThat(this.table.getForeignKeys(null).length, is(numForeignKeys));
     }
 
     @Test
@@ -332,10 +333,10 @@ public final class TableImplTest extends RelationalModelTest {
         final int numIndexes = 5;
 
         for (int i = 0; i < numIndexes; ++i) {
-            this.modelObject.addIndex(null, "index" + i);
+            this.table.addIndex(null, "index" + i);
         }
 
-        assertThat(this.modelObject.getIndexes(null).length, is(numIndexes));
+        assertThat(this.table.getIndexes(null).length, is(numIndexes));
     }
 
     @Test
@@ -343,10 +344,10 @@ public final class TableImplTest extends RelationalModelTest {
         final int numStatementOptions = 5;
 
         for (int i = 0; i < numStatementOptions; ++i) {
-            this.modelObject.addStatementOption(null, "statementoption" + i, "statementvalue" + i);
+            this.table.addStatementOption(null, "statementoption" + i, "statementvalue" + i);
         }
 
-        assertThat(this.modelObject.getStatementOptions(null).length, is(numStatementOptions));
+        assertThat(this.table.getStatementOptions(null).length, is(numStatementOptions));
     }
 
     @Test
@@ -354,138 +355,137 @@ public final class TableImplTest extends RelationalModelTest {
         final int numUniqueConstraints = 5;
 
         for (int i = 0; i < numUniqueConstraints; ++i) {
-            this.modelObject.addUniqueConstraint(null, "foreignKey" + i);
+            this.table.addUniqueConstraint(null, "foreignKey" + i);
         }
 
-        assertThat(this.modelObject.getUniqueConstraints(null).length, is(numUniqueConstraints));
+        assertThat(this.table.getUniqueConstraints(null).length, is(numUniqueConstraints));
     }
 
     @Test
     public void shouldHaveSchemaElementTypePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat(this.modelObject.getSchemaElementType(null), is(SchemaElementType.DEFAULT_VALUE));
-        assertThat(this.modelObject.hasProperty(null, StandardDdlLexicon.DEFAULT_VALUE), is(false));
+        assertThat(this.table.getSchemaElementType(null), is(SchemaElementType.DEFAULT_VALUE));
+        assertThat(this.table.hasProperty(null, StandardDdlLexicon.DEFAULT_VALUE), is(false));
     }
 
     @Test
     public void shouldNotHaveOnCommitValueAfterConstruction() throws Exception {
-        assertThat(this.modelObject.hasProperty(null, StandardDdlLexicon.ON_COMMIT_VALUE), is(false));
-        assertThat(this.modelObject.getOnCommitValue(null), is(nullValue()));
-    }
-
-    @Test
-    public void shouldNotHaveTemporaryTypeValueAfterConstruction() throws Exception {
-        assertThat(this.modelObject.hasProperty(null, StandardDdlLexicon.TEMPORARY), is(false));
-        assertThat(this.modelObject.getTemporaryTableType(null), is(nullValue()));
+        assertThat(this.table.hasProperty(null, StandardDdlLexicon.ON_COMMIT_VALUE), is(false));
+        assertThat(this.table.getOnCommitValue(null), is(nullValue()));
     }
 
     @Test
     public void shouldNotHavePrimaryKeyAfterConstruction() throws Exception {
-        assertThat(this.modelObject.getPrimaryKey(null), is(nullValue()));
+        assertThat(this.table.getPrimaryKey(null), is(nullValue()));
     }
 
     @Test
     public void shouldNotHaveQueryExpressionAfterConstruction() throws Exception {
-        assertThat(this.modelObject.getQueryExpression(null), is(nullValue()));
+        assertThat(this.table.getQueryExpression(null), is(nullValue()));
+    }
+
+    @Test
+    public void shouldNotHaveTemporaryTypeValueAfterConstruction() throws Exception {
+        assertThat(this.table.hasProperty(null, StandardDdlLexicon.TEMPORARY), is(false));
+        assertThat(this.table.getTemporaryTableType(null), is(nullValue()));
     }
 
     @Test
     public void shouldRemoveAccessPattern() throws Exception {
         final String name = "accesspattern";
-        this.modelObject.addAccessPattern(null, name);
-        this.modelObject.removeAccessPattern(null, name);
-        assertThat(this.modelObject.getAccessPatterns(null).length, is(0));
+        this.table.addAccessPattern(null, name);
+        this.table.removeAccessPattern(null, name);
+        assertThat(this.table.getAccessPatterns(null).length, is(0));
     }
 
     @Test
     public void shouldRemoveColumn() throws Exception {
         final String name = "column";
-        this.modelObject.addColumn(null, name);
-        this.modelObject.removeColumn(null, name);
-        assertThat(this.modelObject.getColumns(null).length, is(0));
+        this.table.addColumn(null, name);
+        this.table.removeColumn(null, name);
+        assertThat(this.table.getColumns(null).length, is(0));
     }
 
     @Test
     public void shouldRemoveForeignKey() throws Exception {
-        final Table refTable = RelationalModelFactory.createTable(null, _repo, null, "refTable");
-
+        final Table refTable = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "refTable");
         final String name = "foreignKey";
-        this.modelObject.addForeignKey(null, name, refTable);
-        this.modelObject.removeForeignKey(null, name);
+        this.table.addForeignKey(null, name, refTable);
+        this.table.removeForeignKey(null, name);
 
-        assertThat(this.modelObject.getForeignKeys(null).length, is(0));
+        assertThat(this.table.getForeignKeys(null).length, is(0));
     }
 
     @Test
     public void shouldRemoveIndex() throws Exception {
         final String name = "index";
-        this.modelObject.addIndex(null, name);
-        this.modelObject.removeIndex(null, name);
+        this.table.addIndex(null, name);
+        this.table.removeIndex(null, name);
 
-        assertThat(this.modelObject.getIndexes(null).length, is(0));
+        assertThat(this.table.getIndexes(null).length, is(0));
     }
 
     @Test
     public void shouldRemovePrimaryKey() throws Exception {
-        this.modelObject.setPrimaryKey(null, "primaryKey");
-        this.modelObject.removePrimaryKey(null);
-        assertThat(this.modelObject.getPrimaryKey(null), is(nullValue()));
+        this.table.setPrimaryKey(null, "primaryKey");
+        this.table.removePrimaryKey(null);
+        assertThat(this.table.getPrimaryKey(null), is(nullValue()));
     }
 
     @Test
     public void shouldRemoveStatementOption() throws Exception {
         final String name = "statementoption";
-        this.modelObject.addStatementOption(null, name, "blah");
-        this.modelObject.removeStatementOption(null, name);
-        assertThat(this.modelObject.getStatementOptions(null).length, is(0));
+        this.table.addStatementOption(null, name, "blah");
+        this.table.removeStatementOption(null, name);
+        assertThat(this.table.getStatementOptions(null).length, is(0));
     }
 
     @Test
     public void shouldRemoveUniqueConstraint() throws Exception {
         final String name = "uniqueConstraint";
-        this.modelObject.addUniqueConstraint(null, name);
-        this.modelObject.removeUniqueConstraint(null, name);
+        this.table.addUniqueConstraint(null, name);
+        this.table.removeUniqueConstraint(null, name);
 
-        assertThat(this.modelObject.getUniqueConstraints(null).length, is(0));
+        assertThat(this.table.getUniqueConstraints(null).length, is(0));
     }
 
     @Test
     public void shouldSetOnCommitProperty() throws Exception {
         final OnCommit value = OnCommit.DELETE_ROWS;
-        this.modelObject.setOnCommitValue(null, value);
-        assertThat(this.modelObject.getOnCommitValue(null), is(value));
-        assertThat(this.modelObject.getProperty(null, StandardDdlLexicon.ON_COMMIT_VALUE).getStringValue(), is(value.toString()));
-    }
-
-    @Test
-    public void shouldSetTemporaryTableTypeProperty() throws Exception {
-        final TemporaryType value = TemporaryType.GLOBAL;
-        this.modelObject.setTemporaryTableType(null, value);
-        assertThat(this.modelObject.getTemporaryTableType(null), is(value));
-        assertThat(this.modelObject.getProperty(null, StandardDdlLexicon.TEMPORARY).getStringValue(), is(value.toString()));
+        this.table.setOnCommitValue(null, value);
+        assertThat(this.table.getOnCommitValue(null), is(value));
+        assertThat(this.table.getProperty(null, StandardDdlLexicon.ON_COMMIT_VALUE).getStringValue(), is(value.toString()));
     }
 
     @Test
     public void shouldSetPrimaryKey() throws Exception {
         final String name = "primaryKey";
-        final PrimaryKey pk = this.modelObject.setPrimaryKey(null, name);
+        final PrimaryKey pk = this.table.setPrimaryKey(null, name);
         assertThat(pk, is(notNullValue()));
         assertThat(pk.getName(null), is(name));
-        assertThat(this.modelObject.hasChild(null, name), is(true));
+        assertThat(this.table.hasChild(null, name), is(true));
     }
 
     @Test
     public void shouldSetQueryExpression() throws Exception {
         final String value = "queryexpression";
-        this.modelObject.setQueryExpression(null, value);
-        assertThat(this.modelObject.getQueryExpression(null), is(value));
+        this.table.setQueryExpression(null, value);
+        assertThat(this.table.getQueryExpression(null), is(value));
     }
 
     @Test
     public void shouldSetSchemaElementTypeProperty() throws Exception {
         final SchemaElementType value = SchemaElementType.VIRTUAL;
-        this.modelObject.setSchemaElementType(null, value);
-        assertThat(this.modelObject.getSchemaElementType(null), is(value));
-        assertThat(this.modelObject.getProperty(null, TeiidDdlLexicon.SchemaElement.TYPE).getStringValue(), is(value.toString()));
+        this.table.setSchemaElementType(null, value);
+        assertThat(this.table.getSchemaElementType(null), is(value));
+        assertThat(this.table.getProperty(null, TeiidDdlLexicon.SchemaElement.TYPE).getStringValue(), is(value.toString()));
+    }
+
+    @Test
+    public void shouldSetTemporaryTableTypeProperty() throws Exception {
+        final TemporaryType value = TemporaryType.GLOBAL;
+        this.table.setTemporaryTableType(null, value);
+        assertThat(this.table.getTemporaryTableType(null), is(value));
+        assertThat(this.table.getProperty(null, StandardDdlLexicon.TEMPORARY).getStringValue(), is(value.toString()));
     }
 
 }

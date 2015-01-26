@@ -101,8 +101,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
 
         try {
-            final Procedure result = addProcedure(transaction, functionName);
-            result.setFunction(transaction, true);
+            final Procedure result = RelationalModelFactory.createFunction(transaction, getRepository(), this, functionName);
 
             if (uow == null) {
                 transaction.commit();
@@ -138,10 +137,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
 
         try {
-            final Procedure result = RelationalModelFactory.createProcedure(transaction,
-                                                                            getRepository(),
-                                                                            getAbsolutePath(),
-                                                                            procedureName);
+            final Procedure result = RelationalModelFactory.createProcedure(transaction, getRepository(), this, procedureName);
 
             if (uow == null) {
                 transaction.commit();
@@ -177,7 +173,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
 
         try {
-            final Table result = RelationalModelFactory.createTable(transaction, getRepository(), getAbsolutePath(), tableName);
+            final Table result = RelationalModelFactory.createTable(transaction, getRepository(), this, tableName);
 
             if (uow == null) {
                 transaction.commit();
@@ -213,7 +209,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
 
         try {
-            final View result = RelationalModelFactory.createView(transaction, getRepository(), getAbsolutePath(), viewName);
+            final View result = RelationalModelFactory.createView(transaction, getRepository(), this, viewName);
 
             if (uow == null) {
                 transaction.commit();

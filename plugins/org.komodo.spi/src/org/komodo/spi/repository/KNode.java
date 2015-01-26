@@ -17,8 +17,6 @@ public interface KNode {
 
     /**
      * @return the {@link KomodoObject Komodo object's} absolute path (never empty)
-     * @throws KException
-     *         if an error occurs
      */
     String getAbsolutePath();
 

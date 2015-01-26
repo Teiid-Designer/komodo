@@ -43,7 +43,6 @@ public interface Column extends RelationalObject {
      * @return the value of the <code>collation name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
-     * @see RelationalConstants#DEFAULT_COLLATION_NAME
      */
     String getCollationName( final UnitOfWork transaction ) throws KException;
 
@@ -63,7 +62,6 @@ public interface Column extends RelationalObject {
      * @return the value of the <code>default value</code> property (can be empty)
      * @throws KException
      *         if an error occurs
-     * @see RelationalConstants#DEFAULT_VALUE
      */
     String getDefaultValue( final UnitOfWork transaction ) throws KException;
 
@@ -133,10 +131,9 @@ public interface Column extends RelationalObject {
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param newCollationName
-     *        the new value of the <code>collation name</code> property
+     *        the new value of the <code>collation name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
-     * @see RelationalConstants#DEFAULT_COLLATION_NAME
      */
     void setCollationName( final UnitOfWork transaction,
                            final String newCollationName ) throws KException;
@@ -157,10 +154,9 @@ public interface Column extends RelationalObject {
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param newDefaultValue
-     *        the new value of the <code>default value</code> property
+     *        the new value of the <code>default value</code> property (can be empty)
      * @throws KException
      *         if an error occurs
-     * @see RelationalConstants#DEFAULT_VALUE
      */
     void setDefaultValue( final UnitOfWork transaction,
                           final String newDefaultValue ) throws KException;

@@ -9,6 +9,7 @@ package org.komodo.relational.internal.vdb;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
@@ -20,39 +21,36 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class VdbImportImplTest extends RelationalModelTest {
 
-    private static int _counter = 1;
-
     private Vdb vdb;
     private VdbImport vdbImport;
 
-    private void create() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(this.name.getMethodName(), false, null); // won't work inside an @Before
+    @Before
+    public void init() throws Exception {
+        final UnitOfWork transaction = _repo.createTransaction(VdbImportImplTest.class.getSimpleName(), false, null);
 
-        final int suffix = _counter++;
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, ("vdb" + suffix), "/Users/sledge/hammer/MyVdb.vdb");
-        this.vdbImport = RelationalModelFactory.createVdbImport(transaction, _repo, this.vdb, ("entry" + suffix));
+        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb");
+        this.vdbImport = RelationalModelFactory.createVdbImport(transaction, _repo, this.vdb, "entry");
 
         transaction.commit();
+    }
 
-        assertThat(this.vdb.getPrimaryType(null).getName(), is(VdbLexicon.Vdb.VIRTUAL_DATABASE));
+    @Test
+    public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat(this.vdbImport.getPrimaryType(null).getName(), is(VdbLexicon.ImportVdb.IMPORT_VDB));
     }
 
     @Test
     public void shouldHaveDefaultImportDataPoliciesAfterConstruction() throws Exception {
-        create();
         assertThat(this.vdbImport.isImportDataPolicies(null), is(VdbImport.DEFAULT_IMPORT_DATA_POLICIES));
     }
 
     @Test
     public void shouldHaveDefaultImportDataPoliciesValueAfterConstruction() throws Exception {
-        create();
         assertThat(this.vdbImport.isImportDataPolicies(null), is(VdbImport.DEFAULT_IMPORT_DATA_POLICIES));
     }
 
     @Test
     public void shouldSetImportDataPoliciesValue() throws Exception {
-        create();
         final boolean newValue = !VdbImport.DEFAULT_IMPORT_DATA_POLICIES;
         this.vdbImport.setImportDataPolicies(null, newValue);
         assertThat(this.vdbImport.isImportDataPolicies(null), is(newValue));
@@ -60,7 +58,6 @@ public final class VdbImportImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetVersion() throws Exception {
-        create();
         final int newValue = (Vdb.DEFAULT_VERSION + 10);
         this.vdbImport.setVersion(null, newValue);
         assertThat(this.vdbImport.getVersion(null), is(newValue));

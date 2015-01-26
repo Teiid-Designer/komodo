@@ -9,11 +9,14 @@ package org.komodo.relational.internal.model;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.StatementOption;
+import org.komodo.spi.constants.StringConstants;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -21,29 +24,39 @@ public final class StatementOptionImplTest extends RelationalModelTest {
 
     private static final String NAME = "statementoption";
 
-    private StatementOption modelObject;
+    private StatementOption option;
 
     @Before
     public void init() throws Exception {
-        this.modelObject = RelationalModelFactory.createStatementOption(null, _repo, null, NAME, "initialValue");
+        this.option = RelationalModelFactory.createStatementOption(null, _repo, mock(OptionContainer.class), NAME, "initialValue");
+    }
+
+    @Test
+    public void shouldHaveCorrectDescriptor() throws Exception {
+        assertThat(this.option.hasDescriptor(null, StandardDdlLexicon.TYPE_STATEMENT_OPTION), is(true));
+    }
+
+    @Test
+    public void shouldHaveCorrectName() throws Exception {
+        assertThat(this.option.getName(null), is(NAME));
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowEmptyOptionValueProperty() throws Exception {
-        this.modelObject.setOption(null, "");
+        this.option.setOption(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowNullOptionValueProperty() throws Exception {
-        this.modelObject.setOption(null, null);
+        this.option.setOption(null, null);
     }
 
     @Test
     public void shouldSetOptionValueProperty() throws Exception {
         final String value = "optionvalue";
-        this.modelObject.setOption(null, value);
-        assertThat(this.modelObject.getOption(null), is(value));
-        assertThat(this.modelObject.getProperty(null, StandardDdlLexicon.VALUE).getStringValue(), is(value));
+        this.option.setOption(null, value);
+        assertThat(this.option.getOption(null), is(value));
+        assertThat(this.option.getProperty(null, StandardDdlLexicon.VALUE).getStringValue(), is(value));
     }
 
 }

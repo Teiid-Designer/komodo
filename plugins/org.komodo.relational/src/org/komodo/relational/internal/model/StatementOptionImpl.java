@@ -41,30 +41,7 @@ public final class StatementOptionImpl extends RelationalObjectImpl implements S
      */
     @Override
     public String getOption( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("statementoptionimpl-getOption", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, StandardDdlLexicon.VALUE);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getOption", StandardDdlLexicon.VALUE); //$NON-NLS-1$
     }
 
     /**
@@ -77,29 +54,7 @@ public final class StatementOptionImpl extends RelationalObjectImpl implements S
     public void setOption( final UnitOfWork uow,
                            final String newOption ) throws KException {
         ArgCheck.isNotEmpty(newOption, "newOption"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("statementoptionimpl-setOption", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setOption: transaction = '{0}', newOption = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newOption);
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.VALUE, newOption);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setOption", StandardDdlLexicon.VALUE, newOption); //$NON-NLS-1$
     }
 
 }

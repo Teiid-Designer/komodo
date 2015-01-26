@@ -11,6 +11,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
+import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
@@ -23,51 +24,46 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class EntryImplTest extends RelationalModelTest {
 
-    private static int _counter = 1;
-
     private Entry entry;
     private Vdb vdb;
 
-    private void create() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(this.name.getMethodName(), false, null); // won't work inside an @Before
+    @Before
+    public void init() throws Exception {
+        final UnitOfWork transaction = _repo.createTransaction(EntryImplTest.class.getSimpleName(), false, null);
 
-        final int suffix = _counter++;
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, ("vdb" + suffix), "/Users/sledge/hammer/MyVdb.vdb");
-        this.entry = RelationalModelFactory.createEntry(transaction, _repo, this.vdb, ("entry" + suffix), ("path" + suffix));
+        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb");
+        this.entry = RelationalModelFactory.createEntry(transaction, _repo, this.vdb, "entry", "path");
 
         transaction.commit();
+    }
 
-        assertThat(this.vdb.getPrimaryType(null).getName(), is(VdbLexicon.Vdb.VIRTUAL_DATABASE));
+    @Test
+    public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat(this.entry.getPrimaryType(null).getName(), is(VdbLexicon.Entry.ENTRY));
     }
 
     @Test
     public void shouldHavePathAfterConstruction() throws Exception {
-        create();
         assertThat(this.entry.getPath(null), is(notNullValue()));
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyPPath() throws Exception {
-        create();
         this.entry.setPath(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullPath() throws Exception {
-        create();
         this.entry.setPath(null, null);
     }
 
     @Test
     public void shouldNotHaveDescriptionAfterConstruction() throws Exception {
-        create();
         assertThat(this.entry.getDescription(null), is(nullValue()));
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
-        create();
         final String newValue = "newDescription";
         this.entry.setDescription(null, newValue);
         assertThat(this.entry.getDescription(null), is(newValue));
@@ -75,7 +71,6 @@ public final class EntryImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetPath() throws Exception {
-        create();
         final String newValue = "newPath";
         this.entry.setPath(null, newValue);
         assertThat(this.entry.getPath(null), is(newValue));

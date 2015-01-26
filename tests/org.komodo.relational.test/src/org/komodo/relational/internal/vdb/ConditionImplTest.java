@@ -9,6 +9,7 @@ package org.komodo.relational.internal.vdb;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
@@ -22,39 +23,35 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class ConditionImplTest extends RelationalModelTest {
 
-    private static int _counter = 1;
-
     private Condition condition;
     private DataRole dataRole;
     private Permission permission;
     private Vdb vdb;
 
-    private void create() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(this.name.getMethodName(), false, null); // won't work inside an @Before
+    @Before
+    public void init() throws Exception {
+        final UnitOfWork transaction = _repo.createTransaction(ConditionImplTest.class.getSimpleName(), false, null);
 
-        final int suffix = _counter++;
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, ("vdb" + suffix), "/Users/sledge/hammer/MyVdb.vdb");
-        this.dataRole = RelationalModelFactory.createDataRole(transaction, _repo, this.vdb, ("dataRole" + suffix));
-        this.permission = RelationalModelFactory.createPermission(transaction, _repo, this.dataRole, ("permission" + suffix));
-        this.condition = RelationalModelFactory.createCondition(transaction, _repo, this.permission, ("condition" + suffix));
+        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb");
+        this.dataRole = RelationalModelFactory.createDataRole(transaction, _repo, this.vdb, "dataRole");
+        this.permission = RelationalModelFactory.createPermission(transaction, _repo, this.dataRole, "permission");
+        this.condition = RelationalModelFactory.createCondition(transaction, _repo, this.permission, "condition");
 
         transaction.commit();
-
-        assertThat(this.vdb.getPrimaryType(null).getName(), is(VdbLexicon.Vdb.VIRTUAL_DATABASE));
-        assertThat(this.dataRole.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.DATA_ROLE));
-        assertThat(this.permission.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.PERMISSION));
-        assertThat(this.condition.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Condition.CONDITION));
     }
 
     @Test
     public void shouldHaveConstraintDefaultValueAfterConstruction() throws Exception {
-        create();
         assertThat(this.condition.isConstraint(null), is(Condition.DEFAULT_CONSTRAINT));
     }
 
     @Test
+    public void shouldHaveCorrectPrimaryType() throws Exception {
+        assertThat(this.condition.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Condition.CONDITION));
+    }
+
+    @Test
     public void shouldSetConstraintValue() throws Exception {
-        create();
         final boolean newValue = !Condition.DEFAULT_CONSTRAINT;
         this.condition.setConstraint(null, newValue);
         assertThat(this.condition.isConstraint(null), is(newValue));

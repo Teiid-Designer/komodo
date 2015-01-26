@@ -130,7 +130,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         }
 
         try {
-            final Column result = RelationalModelFactory.createColumn(transaction, getRepository(), getAbsolutePath(), columnName);
+            final Column result = RelationalModelFactory.createColumn(transaction, getRepository(), this, columnName);
 
             if (uow == null) {
                 transaction.commit();
@@ -227,8 +227,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#addStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String)
+     * @see org.komodo.relational.model.OptionContainer#addStatementOption(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String, java.lang.String)
      */
     @Override
     public StatementOption addStatementOption( final UnitOfWork uow,
@@ -253,7 +252,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         try {
             final StatementOption result = RelationalModelFactory.createStatementOption(transaction,
                                                                                         getRepository(),
-                                                                                        getAbsolutePath(),
+                                                                                        this,
                                                                                         optionName,
                                                                                         optionValue);
 
@@ -510,31 +509,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public OnCommit getOnCommitValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final String value = getObjectProperty(uow,
+                                               Property.ValueType.STRING,
+                                               "getOnCommitValue", //$NON-NLS-1$
+                                               StandardDdlLexicon.ON_COMMIT_VALUE);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("tableImpl-getOnCommitValue", true, null); //$NON-NLS-1$
+        if (StringUtils.isBlank(value)) {
+            return null;
         }
 
-        assert (transaction != null);
-
-        try {
-            OnCommit result = null;
-            final Property property = getProperty(transaction, StandardDdlLexicon.ON_COMMIT_VALUE);
-
-            if (property != null) {
-                final String value = property.getStringValue();
-                result = OnCommit.fromValue(value);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return OnCommit.fromValue(value);
     }
 
     /**
@@ -592,30 +576,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public String getQueryExpression( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("tableimpl-getColumns", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, CreateTable.QUERY_EXPRESSION);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getQueryExpression", CreateTable.QUERY_EXPRESSION); //$NON-NLS-1$
     }
 
     /**
@@ -625,37 +586,22 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public SchemaElementType getSchemaElementType( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final String value = getObjectProperty(uow,
+                                               Property.ValueType.STRING,
+                                               "getSchemaElementType", //$NON-NLS-1$
+                                               SchemaElement.TYPE);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("tableImpl-getSchemaElementType", true, null); //$NON-NLS-1$
+        if (StringUtils.isBlank(value)) {
+            return null;
         }
 
-        assert (transaction != null);
-
-        try {
-            SchemaElementType result = SchemaElementType.DEFAULT_VALUE;
-            final Property property = getProperty(transaction, SchemaElement.TYPE);
-
-            if (property != null) {
-                final String value = property.getStringValue();
-                result = SchemaElementType.fromValue(value);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return SchemaElementType.fromValue(value);
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.OptionContainer#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public StatementOption[] getStatementOptions( final UnitOfWork uow ) throws KException {
@@ -707,31 +653,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public TemporaryType getTemporaryTableType( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final String value = getObjectProperty(uow,
+                                               Property.ValueType.STRING,
+                                               "getTemporaryTableType", //$NON-NLS-1$
+                                               StandardDdlLexicon.TEMPORARY);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("tableimpl-getTemporyTableType", true, null); //$NON-NLS-1$
+        if (StringUtils.isBlank(value)) {
+            return null;
         }
 
-        assert (transaction != null);
-
-        try {
-            TemporaryType result = null;
-            final Property property = getProperty(transaction, StandardDdlLexicon.TEMPORARY);
-
-            if (property != null) {
-                final String value = property.getStringValue();
-                result = TemporaryType.fromValue(value);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return TemporaryType.fromValue(value);
     }
 
     /**
@@ -1029,8 +960,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#removeStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
+     * @see org.komodo.relational.model.OptionContainer#removeStatementOption(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
     public void removeStatementOption( final UnitOfWork uow,
@@ -1134,29 +1064,8 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public void setOnCommitValue( final UnitOfWork uow,
                                   final OnCommit newOnCommit ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("tableimpl-setOnCommitValue", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setOnCommitValue: transaction = '{0}', newOnCommit = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newOnCommit);
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.ON_COMMIT_VALUE, (newOnCommit == null) ? null : newOnCommit.toString());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final String newValue = (newOnCommit == null) ? null : newOnCommit.toString();
+        setObjectProperty(uow, "setOnCommitValue", StandardDdlLexicon.ON_COMMIT_VALUE, newValue); //$NON-NLS-1$
     }
 
     /**
@@ -1214,31 +1123,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public void setQueryExpression( final UnitOfWork uow,
                                     final String newQueryExpression ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("tableimpl-setQueryExpression", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setQueryExpression: transaction = '{0}', newQueryExpression = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newQueryExpression);
-        }
-
-        try {
-            setProperty(transaction,
-                        CreateTable.QUERY_EXPRESSION,
-                        StringUtils.isBlank(newQueryExpression) ? null : newQueryExpression);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setQueryExpression", CreateTable.QUERY_EXPRESSION, newQueryExpression); //$NON-NLS-1$
     }
 
     /**
@@ -1250,29 +1135,9 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public void setSchemaElementType( final UnitOfWork uow,
                                       final SchemaElementType newSchemaElementType ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("tableimpl-setSchemaElementType", false, null); //$NON-NLS-1$
-        }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setSchemaElementType: transaction = '{0}', newSchemaElementType = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newSchemaElementType);
-        }
-
-        try {
-            setProperty(transaction,
-                        SchemaElement.TYPE.toString(),
-                        (newSchemaElementType == null) ? SchemaElementType.DEFAULT_VALUE : newSchemaElementType.toString());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final String newValue = ((newSchemaElementType == null) ? SchemaElementType.DEFAULT_VALUE.toString()
+                                                                : newSchemaElementType.toString());
+        setObjectProperty(uow, "setSchemaElementType", SchemaElement.TYPE, newValue); //$NON-NLS-1$
     }
 
     /**
@@ -1284,29 +1149,8 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public void setTemporaryTableType( final UnitOfWork uow,
                                        final TemporaryType newTempType ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("tableimpl-setTemporaryTableType", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setTemporaryTableType: transaction = '{0}', newTempType = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newTempType);
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.TEMPORARY, (newTempType == null) ? null : newTempType.toString());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final String newValue = ((newTempType == null) ? null : newTempType.toString());
+        setObjectProperty(uow, "setTemporaryTableType", StandardDdlLexicon.TEMPORARY, newValue); //$NON-NLS-1$
     }
 
 }
