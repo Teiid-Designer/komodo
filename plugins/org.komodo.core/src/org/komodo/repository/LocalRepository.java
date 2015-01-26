@@ -41,21 +41,27 @@ public class LocalRepository extends RepositoryImpl {
 
     private static String LOCAL_REPOSITORY_CONFIG = "local-repository-config.json"; //$NON-NLS-1$
 
-    private static LocalRepository instance;
+    /**
+     * The default local repository identifier used for the production komodo engine.
+     */
+    public static final LocalRepositoryId DEFAULT_LOCAL_REPOSITORY_ID = new LocalRepositoryId(
+                                                                                              LocalRepository.class.getResource(LOCAL_REPOSITORY_CONFIG),
+                                                                                              DEFAULT_LOCAL_WORKSPACE_NAME);
 
-    private static class LocalRepositoryId implements Id {
+    /**
+     * Identifier for the local repository
+     */
+    public static class LocalRepositoryId implements Id {
 
         private final URL configPath;
+
         private final String workspaceName;
 
-        private LocalRepositoryId(final String configPath,
-                                  final String workspaceName ) {
-            this.configPath = LocalRepository.class.getResource(configPath);
-            this.workspaceName = workspaceName;
-        }
-
-        private LocalRepositoryId(final URL configPathUrl,
-                                  final String workspaceName ) {
+        /**
+         * @param configPathUrl url of configuration file
+         * @param workspaceName name of workspace
+         */
+        public LocalRepositoryId(final URL configPathUrl, final String workspaceName ) {
             this.configPath = configPathUrl;
             this.workspaceName = workspaceName;
         }
@@ -112,16 +118,7 @@ public class LocalRepository extends RepositoryImpl {
         }
     }
 
-    /**
-     * @return singleton instance
-     */
-    public static LocalRepository getInstance() {
-        if (instance == null) instance = new LocalRepository();
-
-        return instance;
-    }
-
-    private State state = State.UNKNOWN;
+    private State state = State.NOT_REACHABLE;
 
     private ModeshapeEngineThread engineThread;
 
@@ -139,10 +136,19 @@ public class LocalRepository extends RepositoryImpl {
     }
 
     /**
-     * Create shared instance of local repository using default configuration file and workspace name.
+     * Create an instance of local repository.
+     *
+     * @param repositoryId repository configuration of the instance
      */
-    private LocalRepository() {
-        super(Type.LOCAL, new LocalRepositoryId(LOCAL_REPOSITORY_CONFIG, DEFAULT_LOCAL_WORKSPACE_NAME));
+    public LocalRepository(LocalRepositoryId repositoryId) {
+        super(Type.LOCAL, repositoryId);
+    }
+
+    /**
+     * Create an instance of local repository using default configuration file and workspace name.
+     */
+    public LocalRepository() {
+        this(DEFAULT_LOCAL_REPOSITORY_ID);
     }
 
     @Override
@@ -152,7 +158,7 @@ public class LocalRepository extends RepositoryImpl {
 
     @Override
     public boolean ping() {
-        return ((this.engineThread != null) && this.engineThread.isEngineStarted());
+        return ((this.engineThread != null) && ((this.engineThread.isAlive())) && this.engineThread.isEngineStarted());
     }
 
     private Session createSession() throws KException {
@@ -367,16 +373,6 @@ public class LocalRepository extends RepositoryImpl {
         engineThread.accept(new Request(RequestType.START, callback));
     }
 
-    @Override
-    public void notify( RepositoryClientEvent event ) {
-        if (event.getType() == RepositoryClientEvent.EventType.STARTED) {
-            // Start the modeshape engine if not already started
-            startRepository();
-        } else if (event.getType() == RepositoryClientEvent.EventType.SHUTTING_DOWN) {
-            stopRepository();
-        }
-    }
-
     private void stopRepository() {
         RequestCallback callback = new RequestCallback() {
 
@@ -405,6 +401,45 @@ public class LocalRepository extends RepositoryImpl {
         };
 
         this.engineThread.accept(new Request(RequestType.STOP, callback));
+    }
+
+    private void clearRepository() {
+        RequestCallback callback = new RequestCallback() {
+
+            /**
+             * {@inheritDoc}
+             *
+             * @see org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback#errorOccurred(java.lang.Throwable)
+             */
+            @Override
+            public void errorOccurred( final Throwable error ) {
+                throw new RuntimeException(error);
+            }
+
+            /**
+             * {@inheritDoc}
+             *
+             * @see org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback#respond(java.lang.Object)
+             */
+            @Override
+            public void respond( final Object results ) {
+                notifyObservers();
+            }
+        };
+
+        this.engineThread.accept(new Request(RequestType.CLEAR, callback));
+    }
+
+    @Override
+    public void notify( RepositoryClientEvent event ) {
+        if (event.getType() == RepositoryClientEvent.EventType.STARTED) {
+            // Start the modeshape engine if not already started
+            startRepository();
+        } else if (event.getType() == RepositoryClientEvent.EventType.SHUTTING_DOWN) {
+            stopRepository();
+        } else if (event.getType() == RepositoryClientEvent.EventType.CLEAR) {
+            clearRepository();
+        }
     }
 
 }

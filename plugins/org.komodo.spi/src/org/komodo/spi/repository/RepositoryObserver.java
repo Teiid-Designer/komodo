@@ -27,8 +27,8 @@ package org.komodo.spi.repository;
 public interface RepositoryObserver {
 
     /**
-     * Repository state changed
+     * Repository event has occurred
      */
-    void stateChanged(); 
+    void eventOccurred();
 
 }

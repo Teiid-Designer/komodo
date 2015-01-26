@@ -95,12 +95,7 @@ public interface Repository {
         /**
          * The repository can be communicated with.
          */
-        REACHABLE,
-
-        /**
-         * Reaching the repository has not be tried.
-         */
-        UNKNOWN
+        REACHABLE
 
     }
 

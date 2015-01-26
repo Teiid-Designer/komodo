@@ -194,7 +194,7 @@ public class KomodoShell implements StringConstants {
 		RepositoryObserver stateObserver = new RepositoryObserver() {
 
             @Override
-            public void stateChanged() {
+            public void eventOccurred() {
                 updateLatch.countDown();
             }
         };

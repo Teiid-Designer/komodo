@@ -27,6 +27,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import org.komodo.core.KEngine;
 import org.komodo.repository.Messages;
@@ -76,7 +78,12 @@ public class ModeshapeEngineThread extends Thread {
         /**
          * Request stopping of the engine
          */
-        STOP;
+        STOP,
+
+        /**
+         * Request to clear the engine repository
+         */
+        CLEAR;
 
         static boolean isSessionRequest(final RequestType requestType) {
             return ((requestType == CREATE_SESSION) || (requestType == COMMIT_SESSION) || (requestType == ROLLBACK_SESSION));
@@ -340,6 +347,29 @@ public class ModeshapeEngineThread extends Thread {
         }
     }
 
+    private synchronized void clear()  throws Exception {
+        Session session = createSession();
+        if (session == null || !session.isLive())
+            return;
+
+        Node rootNode = session.getRootNode();
+        NodeIterator children = rootNode.getNodes();
+        while(children.hasNext()) {
+            Node child = children.nextNode();
+            try {
+                // Cannot legally remove system nodes and they are not created
+                // by the tests anyway so leave them alone
+                if (!child.isNodeType("mode:system")) //$NON-NLS-1$
+                    child.remove();
+            } catch (Exception ex) {
+                // No need to display these exceptions
+            }
+        }
+
+        session.save();
+        session.logout();
+    }
+
     @Override
     public void run() {
         while (!stop) {
@@ -360,6 +390,9 @@ public class ModeshapeEngineThread extends Thread {
                         case STOP:
                             stopEngine();
                             stop = true;
+                            break;
+                        case CLEAR:
+                            clear();
                             break;
                         case CREATE_SESSION:
                             results = createSession();

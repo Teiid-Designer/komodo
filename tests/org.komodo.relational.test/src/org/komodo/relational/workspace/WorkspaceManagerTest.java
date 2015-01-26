@@ -10,7 +10,6 @@ package org.komodo.relational.workspace;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
-import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -75,25 +74,24 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldNotAllowEmptyExternalFilePath() throws Exception {
         _mgr.createVdb(null, null, "vdbName", null);
+        assertThat(_mgr.findVdbs(null).length, is(_numVdbs));
     }
 
     @Test( expected = KException.class )
     public void shouldNotAllowEmptyVdbName() throws Exception {
         _mgr.createVdb(null, null, StringConstants.EMPTY_STRING, "externalFilePath");
+        assertThat(_mgr.findVdbs(null).length, is(_numVdbs));
     }
 
     @Test( expected = KException.class )
     public void shouldNotAllowNullExternalFilePath() throws Exception {
         _mgr.createVdb(null, null, "vdbName", null);
+        assertThat(_mgr.findVdbs(null).length, is(_numVdbs));
     }
 
     @Test( expected = KException.class )
     public void shouldNotAllowNullVdbName() throws Exception {
         _mgr.createVdb(null, null, null, "externalFilePath");
-    }
-
-    @After
-    public void verifyNumberOfWorkspaceVdbs() throws Exception {
         assertThat(_mgr.findVdbs(null).length, is(_numVdbs));
     }
 

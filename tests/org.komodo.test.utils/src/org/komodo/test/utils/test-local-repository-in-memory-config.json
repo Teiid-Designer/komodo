@@ -1,0 +1,42 @@
+{
+    "name" : "Komodo Local Repository",
+    "jndiName" : "jcr/KomodoLocalRepository",
+    "monitoring" : {
+        "enabled" : true
+    },
+    "node-types" :
+    [
+        "config/xmi.cnd",
+        "config/med.cnd",
+        "config/mmcore.cnd",
+        "config/vdb.cnd",
+        "config/TeiidSql.cnd",
+        "config/komodo.cnd"
+    ],
+    "workspaces" : {
+        "default" : "komodoLocalWorkspace",
+        "allowCreation" : true
+    },
+    "sequencing" : {
+        "removeDerivedContentWithOriginal" : true,
+        "threadPool" : "modeshape-workers",
+        "sequencers" : {
+            "DDL Sequencer" : {
+                "classname" : "org.komodo.modeshape.lib.sequencer.KDdlSequencer",
+                "pathExpressions" :
+                [
+                    ":(//*)[@vdb:modelDefinition] => /$1",
+                    ":(//*)[@tko:rendition] => /$1"
+                ]
+            },
+            "Teiid SQL Sequencer" : {
+                "classname" : "org.komodo.modeshape.teiid.TeiidSqlSequencer",
+                "pathExpressions" :
+                [
+                    ":(//ddl:statements//*)[@ddl:queryExpression] => /$1",
+                    ":(//ddl:statements//*)[@teiidddl:queryExpression] => /$1",
+                    ":(//ddl:statements//*)[@teiidddl:statement] => /$1"
+                ]
+            }
+        }
+    }}

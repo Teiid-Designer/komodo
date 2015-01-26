@@ -35,13 +35,12 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.observation.ObservationManager;
-import org.komodo.modeshape.test.utils.AbstractLocalRepositoryTest;
-import org.komodo.modeshape.test.utils.SequencerListener;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.test.utils.AbstractLocalRepositoryTest;
+import org.komodo.test.utils.SequencerListener;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
@@ -52,7 +51,7 @@ import org.modeshape.jcr.api.observation.Event.Sequencing;
  */
 @SuppressWarnings("nls")
 public abstract class AbstractDdlImporterTest extends AbstractLocalRepositoryTest
-    implements Sequencing, StringConstants {
+    implements Sequencing {
 
     protected static final String DATA_DIRECTORY = File.separator + "data"; //$NON-NLS-1$
 

@@ -40,6 +40,11 @@ public final class RepositoryClientEvent {
          * Sent just prior to an {@link RepositoryClient} shutting down
          */
         SHUTTING_DOWN,
+
+        /**
+         * Sent in order to clear the repository of all user-created objects
+         */
+        CLEAR;
     }
 
     private final EventType eventType;
@@ -86,6 +91,15 @@ public final class RepositoryClientEvent {
      */
     public static RepositoryClientEvent createShuttingDownEvent(RepositoryClient source) {
         return new RepositoryClientEvent(EventType.SHUTTING_DOWN, source);
+    }
+
+    /**
+     * @param source the source of the new event
+     *
+     * @return event representing the given client should be cleared (never <code>null</code>)
+     */
+    public static RepositoryClientEvent createClearEvent(RepositoryClient source) {
+        return new RepositoryClientEvent(EventType.CLEAR, source);
     }
 
 }

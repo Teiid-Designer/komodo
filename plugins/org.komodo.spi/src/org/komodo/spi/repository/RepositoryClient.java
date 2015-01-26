@@ -32,17 +32,12 @@ public interface RepositoryClient {
     public enum State {
 
         /**
-         * The initial state.
-         */
-        NOT_STARTED,
-
-        /**
          * Client has been successfully started.
          */
         STARTED,
 
         /**
-         * Client has been successfully shutdown.
+         * Client is shutdown.
          */
         SHUTDOWN,
 

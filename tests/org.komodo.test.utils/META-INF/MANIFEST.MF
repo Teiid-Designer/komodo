@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name.0
-Bundle-SymbolicName: org.komodo.modeshape.test.utils;singleton:=true
+Bundle-SymbolicName: org.komodo.test.utils;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %Bundle-Vendor.0
 Bundle-Localization: plugin
@@ -13,4 +13,4 @@ Require-Bundle: org.junit;bundle-version="[4.11.0,5.0.0)",
  org.komodo.utils;bundle-version="[1.0.0,2.0.0)",
  org.komodo.core;bundle-version="1.0.0"
 Eclipse-RegisterBuddy: org.komodo.modeshape.lib
-Export-Package: org.komodo.modeshape.test.utils
+Export-Package: org.komodo.test.utils

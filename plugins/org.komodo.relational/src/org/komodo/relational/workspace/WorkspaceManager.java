@@ -47,7 +47,9 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.Id;
+import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
@@ -92,6 +94,18 @@ public class WorkspaceManager {
 
     private WorkspaceManager(Repository repository) {
         this.repository = repository;
+        this.repository.addObserver(new RepositoryObserver() {
+
+            @Override
+            public void eventOccurred() {
+                // Disposal observer
+                if (getRepository() == null ||
+                     State.NOT_REACHABLE == getRepository().getState() ||
+                     ! (getRepository().ping())) {
+                    instances.remove(WorkspaceManager.this);
+                }
+            }
+        });
     }
 
     /**

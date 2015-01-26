@@ -2,11 +2,9 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -19,17 +17,15 @@ import org.komodo.shell.commands.ExitCommand;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryClient;
-import org.komodo.spi.repository.RepositoryObserver;
+import org.komodo.test.utils.AbstractLocalRepositoryTest;
 
 /**
  * AbstractCommandTest
  */
-@SuppressWarnings("javadoc")
-public abstract class AbstractCommandTest {
+@SuppressWarnings({"javadoc", "nls"})
+public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
     private static KEngine kEngine = KEngine.getInstance();
-
-    private static RepositoryObserver stateObserver;
     
 	private ShellCommandFactory factory;
 	private ShellCommandReader reader;
@@ -37,28 +33,6 @@ public abstract class AbstractCommandTest {
 	private Writer commandWriter;
 	private Class testedCommandClass;
     protected WorkspaceStatusImpl wsStatus;
-    
-
-    private static CountDownLatch createWaitingLatch() {
-        final Repository defaultRepo = kEngine.getDefaultRepository();
-
-        // Latch for awaiting the change of state of the default repository
-        final CountDownLatch stateLatch = new CountDownLatch(1);
-
-        if (stateObserver != null)
-            defaultRepo.removeObserver(stateObserver);
-
-        // Observer attached to the default repository for listening for the change of state
-        stateObserver = new RepositoryObserver() {
-
-            @Override
-            public void stateChanged() {
-                stateLatch.countDown();
-            }
-        };
-        defaultRepo.addObserver(stateObserver);
-        return stateLatch;
-    }
 
     /**
      * @param kEngine 
@@ -66,13 +40,10 @@ public abstract class AbstractCommandTest {
      */
     @BeforeClass
     public static void startKEngine() throws Exception {
-        CountDownLatch waitingLatch = createWaitingLatch();
+        assertNotNull(_repo);
 
+        kEngine.setDefaultRepository(_repo);
         kEngine.start();
-
-        // Block the thread until the latch has counted down or timeout has been reached
-        assertTrue(waitingLatch.await(3, TimeUnit.MINUTES));
-        kEngine.getDefaultRepository().removeObserver(stateObserver);
 
         assertEquals(RepositoryClient.State.STARTED, kEngine.getState());
         assertEquals(Repository.State.REACHABLE, kEngine.getDefaultRepository().getState());
@@ -84,16 +55,18 @@ public abstract class AbstractCommandTest {
     @AfterClass
     public static void stopKEngine() throws Exception {
         assertNotNull(kEngine);
-        CountDownLatch waitingLatch = createWaitingLatch();
 
+        // Reset the latch to signal when repo has been shutdown
+        _repoObserver.resetLatch();
         kEngine.shutdown();
 
-        // Block the thread until the latch has counted down or timeout has been reached
-        assertTrue(waitingLatch.await(3, TimeUnit.MINUTES));
-        kEngine.getDefaultRepository().removeObserver(stateObserver);
+        if (! _repoObserver.getLatch().await(1, TimeUnit.MINUTES)) {
+            throw new RuntimeException("Local repository was not stopped");
+        }
 
+        kEngine.setDefaultRepository(null);
         assertEquals(RepositoryClient.State.SHUTDOWN, kEngine.getState());
-        assertEquals(Repository.State.NOT_REACHABLE, kEngine.getDefaultRepository().getState());
+        assertEquals(Repository.State.NOT_REACHABLE, _repo.getState());
     }
 
 	/**
