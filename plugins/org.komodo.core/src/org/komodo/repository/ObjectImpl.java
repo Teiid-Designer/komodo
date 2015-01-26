@@ -130,7 +130,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                     try {
                         String encPath = jcrSession.encode(absPath);
                         node = session.getNode(encPath);
-                    } catch (PathNotFoundException ex) {
+                    } catch (Exception ex) {
                         // node cannot be found with encoded path
                     }
                 }
@@ -905,7 +905,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("kobject-removeChild: transaction = {0}, names = {1}", Arrays.asList(names)); //$NON-NLS-1$
+            LOGGER.debug("kobject-removeChild: transaction = {0}, names = {1}", //$NON-NLS-1$
+                                         transaction.getName(),
+                                         Arrays.asList(names));
         }
 
         try {

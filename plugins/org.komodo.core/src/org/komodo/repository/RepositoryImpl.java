@@ -720,7 +720,11 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = createTransaction("repositoryimpl-get", true, null); //$NON-NLS-1$
+            //
+            // Transaction has to be committable (hence the 'false') since is it possible that
+            // komodoWorkspace() below actually creates the workspace if it doesn't already exist
+            //
+            transaction = createTransaction("repositoryimpl-get", false, null); //$NON-NLS-1$
         }
 
         assert (transaction != null);
@@ -979,7 +983,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         for (final RepositoryObserver observer : this.observers) {
             try {
                 // Ensure all observers are informed even if one throws an exception
-                observer.stateChanged();
+                observer.eventOccurred();
             } catch (final Exception ex) {
                 KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), ex);
             }

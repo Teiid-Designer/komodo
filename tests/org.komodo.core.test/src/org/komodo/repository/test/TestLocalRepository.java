@@ -49,7 +49,7 @@ import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.jcr.JcrNtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
-public class TestLocalRepository extends AbstractLocalRepositoryTest implements StringConstants {
+public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
     private UnitOfWork createTransaction( final String name ) throws Exception {
         return _repo.createTransaction("transaction", false, null);

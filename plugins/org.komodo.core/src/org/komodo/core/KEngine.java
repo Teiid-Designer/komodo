@@ -60,9 +60,9 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
     private final Set<Repository> repositories = new HashSet<Repository>();
 
-    private State state = State.NOT_STARTED;
+    private State state = State.SHUTDOWN;
 
-    private LocalRepository defaultRepository;
+    private Repository defaultRepository;
 
     private KomodoErrorHandler errorHandler = new KomodoErrorHandler();
 
@@ -79,10 +79,46 @@ public final class KEngine implements RepositoryClient, StringConstants {
      * @return the defaultRepository
      */
     public Repository getDefaultRepository() {
-        if (this.defaultRepository == null)
-            initDefaultRespository();
+        if (this.defaultRepository == null) {
+            defaultRepository = new LocalRepository();
+            try {
+                add(defaultRepository);
+            } catch (Exception ex) {
+                getErrorHandler().error(ex);
+            }
+        }
 
         return this.defaultRepository;
+    }
+
+    /**
+     * Sets the default repository.
+     *
+     * Note: This should hardly ever be called except in testing.
+     *
+     * To use correctly a test harness should:
+     * 1. Call this with a valid repository before calling {{@link #start()}
+     * 2. When tests are completed, shutdown the engine
+     * 3. Call this again with a value of null to clear the default repository field
+     * 
+     * @param repository the default repository
+     * @throws Exception if an error occurs
+     */
+    public void setDefaultRepository(Repository repository) throws Exception {
+        ArgCheck.isTrue(State.SHUTDOWN.equals(getState()), "Engine should be shutdown before calling setDefaultRepository"); //$NON-NLS-1$
+
+        boolean clearingRepo = repository == null;
+        boolean settingNewRepo = repository != null && defaultRepository == null;
+        String failMsg = "Can only call setDefaultRepository with a null argument or if the default repository is already null"; //$NON-NLS-1$
+        ArgCheck.isTrue(clearingRepo || settingNewRepo, failMsg);
+
+        if (defaultRepository != null)
+            remove(defaultRepository); // Remove the old repository
+
+        // Set the new repository
+        defaultRepository = repository;
+        if (repository != null)
+            add(defaultRepository);
     }
 
     /**
@@ -205,24 +241,12 @@ public final class KEngine implements RepositoryClient, StringConstants {
     }
 
     /**
-     * Initialise the local repository
-     */
-    private void initDefaultRespository() {
-        defaultRepository = LocalRepository.getInstance();
-        try {
-            add(defaultRepository);
-        } catch (Exception ex) {
-            getErrorHandler().error(ex);
-        }
-    }
-
-    /**
      * @throws KException if there is an error starting the engine
      */
     public void start() throws KException {
         try {
             // Initialise the local repository
-            initDefaultRespository();
+            getDefaultRepository();
 
             // TODO implement start (read any saved session state, connect to repos if auto-connect, etc.)
             this.state = State.STARTED;
@@ -250,7 +274,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
     /**
      * Sets the error handler implementation of the engine
      *
-     * @param errorHandler
+     * @param errorHandler additional error handler to be notified of errors
      */
     public void addErrorHandler(KErrorHandler errorHandler) {
         this.errorHandler.add(errorHandler);
