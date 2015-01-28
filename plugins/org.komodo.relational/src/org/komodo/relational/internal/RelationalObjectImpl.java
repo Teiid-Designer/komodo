@@ -41,7 +41,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
      */
     @Override
     public final void setPrimaryType( final UnitOfWork uow,
-                                      final String typeName ) throws UnsupportedOperationException {
+                                      final String typeName ) {
         throw new UnsupportedOperationException();
     }
 
