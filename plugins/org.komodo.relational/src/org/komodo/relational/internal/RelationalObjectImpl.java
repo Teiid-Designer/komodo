@@ -11,6 +11,7 @@ import org.komodo.relational.model.RelationalObject;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.KLog;
 
 /**
@@ -29,6 +30,19 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
                                     final String path,
                                     final int index ) throws KException {
         super(repository, path, index);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#setPrimaryType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @throws UnsupportedOperationException
+     *         if called
+     */
+    @Override
+    public final void setPrimaryType( final UnitOfWork uow,
+                                      final String typeName ) {
+        throw new UnsupportedOperationException();
     }
 
     /**

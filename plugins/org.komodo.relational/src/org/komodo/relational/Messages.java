@@ -88,6 +88,16 @@ public class Messages implements StringConstants {
         MASK_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating the object being deleted does not have a parent.
+         */
+        OBJECT_BEING_DELETED_HAS_NULL_PARENT,
+
+        /**
+         * An error message indicating the object being deleted is not from the repository doing the delete.
+         */
+        OBJECT_BEING_DELETED_HAS_WRONG_REPOSITORY,
+
+        /**
          * An error message indicating a procedure parameter could not be removed.
          */
         PARAMETER_NOT_FOUND_TO_REMOVE,

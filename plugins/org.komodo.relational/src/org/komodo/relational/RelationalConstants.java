@@ -201,11 +201,6 @@ public interface RelationalConstants {
     boolean DEFAULT_AUTO_INCREMENTED = false;
 
     /**
-     * The default value for the <code>collation name</code> property. Value is {@value} .
-     */
-    String DEFAULT_COLLATION_NAME = null;
-
-    /**
      * The default value for the <code>datatype name</code> property. Value is {@value} .
      */
     String DEFAULT_DATATYPE_NAME = "STRING"; //$NON-NLS-1$
@@ -224,10 +219,5 @@ public interface RelationalConstants {
      * The default value for the <code>datatype scale</code> property. Value is {@value} .
      */
     int DEFAULT_SCALE = 0;
-
-    /**
-     * The default value for the <code>default value</code> property. Value is {@value} .
-     */
-    String DEFAULT_VALUE = null;
 
 }

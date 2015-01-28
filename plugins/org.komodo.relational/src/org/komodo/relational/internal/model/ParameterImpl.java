@@ -66,8 +66,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Parameter#addStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String)
+     * @see org.komodo.relational.model.OptionContainer#addStatementOption(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String, java.lang.String)
      */
     @Override
     public StatementOption addStatementOption( final UnitOfWork uow,
@@ -92,7 +91,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
         try {
             final StatementOption result = RelationalModelFactory.createStatementOption(transaction,
                                                                                         getRepository(),
-                                                                                        getAbsolutePath(),
+                                                                                        this,
                                                                                         optionName,
                                                                                         optionValue);
 
@@ -113,30 +112,16 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public String getDatatypeName( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final String value = getObjectProperty(uow,
+                                               Property.ValueType.STRING,
+                                               "getDatatypeName", //$NON-NLS-1$
+                                               StandardDdlLexicon.DATATYPE_NAME);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterImpl-getDatatypeName", true, null); //$NON-NLS-1$
+        if (StringUtils.isBlank(value)) {
+            return RelationalConstants.DEFAULT_DATATYPE_NAME;
         }
 
-        assert (transaction != null);
-
-        try {
-            String result = RelationalConstants.DEFAULT_DATATYPE_NAME;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DATATYPE_NAME);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return value;
     }
 
     /**
@@ -146,30 +131,10 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public String getDefaultValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterImpl-getDefaultValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = RelationalConstants.DEFAULT_VALUE;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DEFAULT_VALUE);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.STRING,
+                                 "getDefaultValue", //$NON-NLS-1$
+                                 StandardDdlLexicon.DEFAULT_VALUE);
     }
 
     /**
@@ -179,31 +144,16 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public Direction getDirection( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final String value =  getObjectProperty(uow,
+                                                Property.ValueType.STRING,
+                                                "getDirection", //$NON-NLS-1$
+                                                CreateProcedure.PARAMETER_TYPE);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterImpl-getDirection", true, null); //$NON-NLS-1$
+        if (StringUtils.isBlank(value)) {
+            return Direction.DEFAULT_VALUE;
         }
 
-        assert (transaction != null);
-
-        try {
-            Direction result = Direction.DEFAULT_VALUE;
-            final Property property = getProperty(transaction, CreateProcedure.PARAMETER_TYPE);
-
-            if (property != null) {
-                final String value = property.getStringValue();
-                result = Direction.fromValue(value);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return Direction.fromValue(value);
     }
 
     /**
@@ -213,30 +163,16 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public long getLength( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final Long value = getObjectProperty(uow,
+                                             Property.ValueType.LONG,
+                                             "getLength", //$NON-NLS-1$
+                                             StandardDdlLexicon.DATATYPE_LENGTH);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterImpl-getLength", true, null); //$NON-NLS-1$
+        if (value == null) {
+            return RelationalConstants.DEFAULT_LENGTH;
         }
 
-        assert (transaction != null);
-
-        try {
-            long result = RelationalConstants.DEFAULT_LENGTH;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DATATYPE_LENGTH);
-
-            if (property != null) {
-                result = property.getLongValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return value;
     }
 
     /**
@@ -246,31 +182,16 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public Nullable getNullable( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final String value =  getObjectProperty(uow,
+                                                Property.ValueType.STRING,
+                                                "getNullable", //$NON-NLS-1$
+                                                StandardDdlLexicon.NULLABLE);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterImpl-getNullable", true, null); //$NON-NLS-1$
+        if (StringUtils.isBlank(value)) {
+            return Nullable.DEFAULT_VALUE;
         }
 
-        assert (transaction != null);
-
-        try {
-            Nullable result = Nullable.DEFAULT_VALUE;
-            final Property property = getProperty(transaction, StandardDdlLexicon.NULLABLE);
-
-            if (property != null) {
-                final String value = property.getStringValue();
-                result = Nullable.fromValue(value);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return Nullable.fromValue(value);
     }
 
     /**
@@ -280,30 +201,16 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public int getPrecision( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final Integer value = getObjectProperty(uow,
+                                                Property.ValueType.INTEGER,
+                                                "getPrecision", //$NON-NLS-1$
+                                                StandardDdlLexicon.DATATYPE_PRECISION);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterImpl-getPrecision", true, null); //$NON-NLS-1$
+        if (value == null) {
+            return RelationalConstants.DEFAULT_PRECISION;
         }
 
-        assert (transaction != null);
-
-        try {
-            int result = RelationalConstants.DEFAULT_PRECISION;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DATATYPE_PRECISION);
-
-            if (property != null) {
-                result = (int)property.getLongValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return value;
     }
 
     /**
@@ -324,36 +231,22 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public int getScale( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final Integer value = getObjectProperty(uow,
+                                                Property.ValueType.INTEGER,
+                                                "getScale", //$NON-NLS-1$
+                                                StandardDdlLexicon.DATATYPE_SCALE);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterImpl-getScale", true, null); //$NON-NLS-1$
+        if (value == null) {
+            return RelationalConstants.DEFAULT_SCALE;
         }
 
-        assert (transaction != null);
-
-        try {
-            int result = RelationalConstants.DEFAULT_SCALE;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DATATYPE_SCALE);
-
-            if (property != null) {
-                result = (int)property.getLongValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return value;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Parameter#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.OptionContainer#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public StatementOption[] getStatementOptions( final UnitOfWork uow ) throws KException {
@@ -401,8 +294,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Parameter#removeStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
+     * @see org.komodo.relational.model.OptionContainer#removeStatementOption(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
     public void removeStatementOption( final UnitOfWork uow,
@@ -454,27 +346,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     @Override
     public void setDatatypeName( final UnitOfWork uow,
                                  final String newTypeName ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterimpl-setDatatypeName", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setDatatypeName: transaction = '{0}', newTypeName = '{1}'", transaction.getName(), newTypeName); //$NON-NLS-1$
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.DATATYPE_NAME, StringUtils.isBlank(newTypeName) ? null : newTypeName);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setDatatypeName", StandardDdlLexicon.DATATYPE_NAME, newTypeName); //$NON-NLS-1$
     }
 
     /**
@@ -486,29 +358,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     @Override
     public void setDefaultValue( final UnitOfWork uow,
                                  final String newDefaultValue ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterimpl-setDefaultValue", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setDefaultValue: transaction = '{0}', newDefaultValue = '{1}'", transaction.getName(), newDefaultValue); //$NON-NLS-1$
-        }
-
-        try {
-            setProperty(transaction,
-                        StandardDdlLexicon.DEFAULT_VALUE,
-                        StringUtils.isBlank(newDefaultValue) ? null : newDefaultValue);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setDefaultValue", StandardDdlLexicon.DEFAULT_VALUE, newDefaultValue); //$NON-NLS-1$
     }
 
     /**
@@ -520,27 +370,10 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     @Override
     public void setDirection( final UnitOfWork uow,
                               final Direction newDirection ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterimpl-setDirection", false, null); //$NON-NLS-1$
-        }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setDirection: transaction = '{0}', newDirection = '{1}'", transaction.getName(), newDirection); //$NON-NLS-1$
-        }
-
-        try {
-            setProperty(transaction,
-                        CreateProcedure.PARAMETER_TYPE,
-                        (newDirection == null) ? Direction.DEFAULT_VALUE : newDirection.toString());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow,
+                          "setDirection", //$NON-NLS-1$
+                          CreateProcedure.PARAMETER_TYPE,
+                          (newDirection == null) ? Direction.DEFAULT_VALUE.toString() : newDirection.toString());
     }
 
     /**
@@ -551,27 +384,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     @Override
     public void setLength( final UnitOfWork uow,
                            final long newLength ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterimpl-setLength", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setLength: transaction = '{0}', newLength = '{1}'", transaction.getName(), newLength); //$NON-NLS-1$
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.DATATYPE_LENGTH, newLength);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setLength", StandardDdlLexicon.DATATYPE_LENGTH, newLength); //$NON-NLS-1$
     }
 
     /**
@@ -583,29 +396,10 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     @Override
     public void setNullable( final UnitOfWork uow,
                              final Nullable newNullable ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterimpl-setNullable", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setNullable: transaction = '{0}', newNullable = '{1}'", transaction.getName(), newNullable); //$NON-NLS-1$
-        }
-
-        try {
-            setProperty(transaction,
-                        StandardDdlLexicon.NULLABLE,
-                        (newNullable == null) ? Nullable.DEFAULT_VALUE : newNullable.toString());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow,
+                          "setNullable", //$NON-NLS-1$
+                          StandardDdlLexicon.NULLABLE,
+                          (newNullable == null) ? Nullable.DEFAULT_VALUE.toString() : newNullable.toString());
     }
 
     /**
@@ -616,27 +410,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     @Override
     public void setPrecision( final UnitOfWork uow,
                               final int newPrecision ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterimpl-setPrecision", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setPrecision: transaction = '{0}', newPrecision = '{1}'", transaction.getName(), newPrecision); //$NON-NLS-1$
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.DATATYPE_PRECISION, newPrecision);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setPrecision", StandardDdlLexicon.DATATYPE_PRECISION, newPrecision); //$NON-NLS-1$
     }
 
     /**
@@ -647,27 +421,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     @Override
     public void setScale( final UnitOfWork uow,
                           final int newScale ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterimpl-setScale", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setScale: transaction = '{0}', newScale = '{1}'", transaction.getName(), newScale); //$NON-NLS-1$
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.DATATYPE_SCALE, newScale);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setScale", StandardDdlLexicon.DATATYPE_SCALE, newScale); //$NON-NLS-1$
     }
 
 }

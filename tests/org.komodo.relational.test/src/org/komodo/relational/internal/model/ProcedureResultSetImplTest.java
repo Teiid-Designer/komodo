@@ -14,10 +14,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class ProcedureResultSetImplTest extends RelationalModelTest {
@@ -27,7 +29,7 @@ public class ProcedureResultSetImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.parent = RelationalModelFactory.createProcedure(null, _repo, null, "procedure");
+        this.parent = RelationalModelFactory.createProcedure(null, _repo, mock(Model.class), "procedure");
         this.modelObject = RelationalModelFactory.createProcedureResultSet(null, _repo, this.parent);
     }
 
@@ -64,6 +66,11 @@ public class ProcedureResultSetImplTest extends RelationalModelTest {
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenSettingPrimaryKey() throws KException {
         this.modelObject.setPrimaryKey(null, "blah");
+    }
+
+    @Test
+    public void shouldHaveCorrectDescriptor() throws Exception {
+        assertThat(this.modelObject.hasDescriptor(null, CreateProcedure.RESULT_DATA_TYPE), is(true));
     }
 
     @Test

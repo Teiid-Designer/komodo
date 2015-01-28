@@ -12,7 +12,6 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 
 /**
@@ -50,30 +49,7 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
      */
     @Override
     public String getExpression( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("indeximpl-getExpression", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, Constraint.EXPRESSION);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getExpression", Constraint.EXPRESSION); //$NON-NLS-1$
     }
 
     /**
@@ -84,29 +60,7 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
     @Override
     public void setExpression( final UnitOfWork uow,
                                final String newExpression ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("indeximpl-setExpression", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setExpression: transaction = '{0}', newExpression = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newExpression);
-        }
-
-        try {
-            setProperty(transaction, Constraint.EXPRESSION, StringUtils.isBlank(newExpression) ? null : newExpression);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setExpression", Constraint.EXPRESSION, newExpression); //$NON-NLS-1$
     }
 
 }

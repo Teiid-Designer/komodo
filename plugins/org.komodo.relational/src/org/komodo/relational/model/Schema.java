@@ -30,6 +30,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Schema extends RelationalObject {
 
     /**
+     * An empty array of schemas.
+     */
+    Schema[] NO_SCHEMAS = new Schema[0];
+
+    /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return rendered content of this schema, eg. ddl string

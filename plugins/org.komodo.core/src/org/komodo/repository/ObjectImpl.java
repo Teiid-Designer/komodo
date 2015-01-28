@@ -1066,7 +1066,12 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                     if (multiple) {
                         setMultiValuedProperty(session, node, factory, name, values, type);
                     } else {
-                        node.setProperty(name, PropertyImpl.createValue(factory, values[0]));
+                        // remove if value is null or empty string
+                        if ((values[0] == null) || ((values[0] instanceof String) && StringUtils.isBlank((String)values[0]))) {
+                            node.getProperty(name).remove();
+                        } else {
+                            node.setProperty(name, PropertyImpl.createValue(factory, values[0]));
+                        }
                     }
                 }
             } else {
@@ -1080,7 +1085,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 if (count > 1) {
                     setMultiValuedProperty(session, node, factory, name, values, PropertyType.UNDEFINED);
                 } else {
-                    node.setProperty(name, PropertyImpl.createValue(factory, values[0]));
+                    if ((values[0] != null) && ((!(values[0] instanceof String)) || !StringUtils.isBlank((String)values[0]))) {
+                        node.setProperty(name, PropertyImpl.createValue(factory, values[0]));
+                    }
                 }
             }
         }

@@ -11,15 +11,18 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
@@ -28,17 +31,17 @@ public final class ProcedureImplTest extends RelationalModelTest {
 
     private static final String NAME = "procedure";
 
-    private Procedure modelObject;
+    private Procedure procedure;
 
     @Before
     public void init() throws Exception {
-        this.modelObject = RelationalModelFactory.createProcedure(null, _repo, null, NAME);
+        this.procedure = RelationalModelFactory.createProcedure(null, _repo, mock(Model.class), NAME);
     }
 
     @Test
     public void shouldAddParameter() throws Exception {
         final String name = "param";
-        final Parameter param = this.modelObject.addParameter(null, name);
+        final Parameter param = this.procedure.addParameter(null, name);
         assertThat(param, is(notNullValue()));
         assertThat(param.getName(null), is(name));
     }
@@ -47,7 +50,7 @@ public final class ProcedureImplTest extends RelationalModelTest {
     public void shouldAddStatementOption() throws Exception {
         final String name = "statementoption";
         final String value = "statementvalue";
-        final StatementOption statementOption = this.modelObject.addStatementOption(null, name, value);
+        final StatementOption statementOption = this.procedure.addStatementOption(null, name, value);
         assertThat(statementOption, is(notNullValue()));
         assertThat(statementOption.getName(null), is(name));
         assertThat(statementOption.getOption(null), is(value));
@@ -55,77 +58,77 @@ public final class ProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldAllowEmptyAsClause() throws Exception {
-        this.modelObject.setAsClauseStatement(null, "");
+        this.procedure.setAsClauseStatement(null, StringConstants.EMPTY_STRING);
     }
 
     @Test
     public void shouldAllowNullAsClause() throws Exception {
-        this.modelObject.setAsClauseStatement(null, null);
+        this.procedure.setAsClauseStatement(null, null);
     }
 
     @Test
     public void shouldAllowNullSchemaElementType() throws Exception {
-        this.modelObject.setSchemaElementType(null, null);
+        this.procedure.setSchemaElementType(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyParameterName() throws Exception {
-        this.modelObject.addParameter(null, "");
+        this.procedure.addParameter(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionName() throws Exception {
-        this.modelObject.addStatementOption(null, "", "blah");
+        this.procedure.addStatementOption(null, StringConstants.EMPTY_STRING, "blah");
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionValue() throws Exception {
-        this.modelObject.addStatementOption(null, "blah", "");
+        this.procedure.addStatementOption(null, "blah", StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullParameterName() throws Exception {
-        this.modelObject.addParameter(null, null);
+        this.procedure.addParameter(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionName() throws Exception {
-        this.modelObject.addStatementOption(null, null, "blah");
+        this.procedure.addStatementOption(null, null, "blah");
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionValue() throws Exception {
-        this.modelObject.addStatementOption(null, "blah", null);
+        this.procedure.addStatementOption(null, "blah", null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyParameterName() throws Exception {
-        this.modelObject.removeParameter(null, "");
+        this.procedure.removeParameter(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyStatementOptionName() throws Exception {
-        this.modelObject.removeStatementOption(null, "");
+        this.procedure.removeStatementOption(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullParameterName() throws Exception {
-        this.modelObject.removeParameter(null, null);
+        this.procedure.removeParameter(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullStatementOptionName() throws Exception {
-        this.modelObject.removeStatementOption(null, null);
+        this.procedure.removeStatementOption(null, null);
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownParameter() throws Exception {
-        this.modelObject.removeParameter(null, "unknown");
+        this.procedure.removeParameter(null, "unknown");
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownStatementOption() throws Exception {
-        this.modelObject.removeStatementOption(null, "unknown");
+        this.procedure.removeStatementOption(null, "unknown");
     }
 
     @Test
@@ -133,10 +136,10 @@ public final class ProcedureImplTest extends RelationalModelTest {
         final int numParams = 5;
 
         for (int i = 0; i < numParams; ++i) {
-            this.modelObject.addParameter(null, "param" + i);
+            this.procedure.addParameter(null, "param" + i);
         }
 
-        assertThat(this.modelObject.getParameters(null).length, is(numParams));
+        assertThat(this.procedure.getParameters(null).length, is(numParams));
     }
 
     @Test
@@ -144,79 +147,79 @@ public final class ProcedureImplTest extends RelationalModelTest {
         final int numStatementOptions = 5;
 
         for (int i = 0; i < numStatementOptions; ++i) {
-            this.modelObject.addStatementOption(null, "statementoption" + i, "statementvalue" + i);
+            this.procedure.addStatementOption(null, "statementoption" + i, "statementvalue" + i);
         }
 
-        assertThat(this.modelObject.getStatementOptions(null).length, is(numStatementOptions));
+        assertThat(this.procedure.getStatementOptions(null).length, is(numStatementOptions));
     }
 
     @Test
     public void shouldHaveProcedureDescriptorAfterConstruction() throws Exception {
-        assertThat(this.modelObject.isFunction(null), is(false));
-        assertThat(this.modelObject.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT), is(true));
-        assertThat(this.modelObject.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT), is(false));
+        assertThat(this.procedure.isFunction(null), is(false));
+        assertThat(this.procedure.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT), is(true));
+        assertThat(this.procedure.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT), is(false));
     }
 
     @Test
     public void shouldHaveResultSetAfterConstruction() throws Exception {
-        assertThat(this.modelObject.getResultSet(null), is(notNullValue()));
+        assertThat(this.procedure.getResultSet(null), is(notNullValue()));
     }
 
     @Test
     public void shouldHaveSchemaElementTypePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat(this.modelObject.getSchemaElementType(null), is(SchemaElementType.DEFAULT_VALUE));
-        assertThat(this.modelObject.hasProperty(null, StandardDdlLexicon.DEFAULT_VALUE), is(false));
+        assertThat(this.procedure.getSchemaElementType(null), is(SchemaElementType.DEFAULT_VALUE));
+        assertThat(this.procedure.hasProperty(null, StandardDdlLexicon.DEFAULT_VALUE), is(false));
     }
 
     @Test
     public void shouldNotHaveAsClauseStatementPropertyAfterConstruction() throws Exception {
-        assertThat(this.modelObject.getAsClauseStatement(null), is(nullValue()));
-        assertThat(this.modelObject.hasProperty(null, TeiidDdlLexicon.CreateProcedure.STATEMENT), is(false));
+        assertThat(this.procedure.getAsClauseStatement(null), is(nullValue()));
+        assertThat(this.procedure.hasProperty(null, TeiidDdlLexicon.CreateProcedure.STATEMENT), is(false));
     }
 
     @Test
     public void shouldNotHaveParametersAfterConstruction() throws Exception {
-        assertThat(this.modelObject.getParameters(null).length, is(0));
+        assertThat(this.procedure.getParameters(null).length, is(0));
     }
 
     @Test
     public void shouldRemoveParameter() throws Exception {
         final String name = "param";
-        this.modelObject.addParameter(null, name);
-        this.modelObject.removeParameter(null, name);
-        assertThat(this.modelObject.getParameters(null).length, is(0));
+        this.procedure.addParameter(null, name);
+        this.procedure.removeParameter(null, name);
+        assertThat(this.procedure.getParameters(null).length, is(0));
     }
 
     @Test
     public void shouldRemoveStatementOption() throws Exception {
         final String name = "statementoption";
-        this.modelObject.addStatementOption(null, name, "blah");
-        this.modelObject.removeStatementOption(null, name);
-        assertThat(this.modelObject.getStatementOptions(null).length, is(0));
+        this.procedure.addStatementOption(null, name, "blah");
+        this.procedure.removeStatementOption(null, name);
+        assertThat(this.procedure.getStatementOptions(null).length, is(0));
     }
 
     @Test
     public void shouldSetAsClauseProperty() throws Exception {
         final String value = "asclause";
-        this.modelObject.setAsClauseStatement(null, value);
-        assertThat(this.modelObject.getAsClauseStatement(null), is(value));
-        assertThat(this.modelObject.getProperty(null, TeiidDdlLexicon.CreateProcedure.STATEMENT).getStringValue(), is(value));
+        this.procedure.setAsClauseStatement(null, value);
+        assertThat(this.procedure.getAsClauseStatement(null), is(value));
+        assertThat(this.procedure.getProperty(null, TeiidDdlLexicon.CreateProcedure.STATEMENT).getStringValue(), is(value));
     }
 
     @Test
     public void shouldSetSchemaElementTypeProperty() throws Exception {
         final SchemaElementType value = SchemaElementType.VIRTUAL;
-        this.modelObject.setSchemaElementType(null, value);
-        assertThat(this.modelObject.getSchemaElementType(null), is(value));
-        assertThat(this.modelObject.getProperty(null, TeiidDdlLexicon.SchemaElement.TYPE).getStringValue(), is(value.toString()));
+        this.procedure.setSchemaElementType(null, value);
+        assertThat(this.procedure.getSchemaElementType(null), is(value));
+        assertThat(this.procedure.getProperty(null, TeiidDdlLexicon.SchemaElement.TYPE).getStringValue(), is(value.toString()));
     }
 
     @Test
     public void shouldSetToFunctionDescriptorProperty() throws Exception {
-        this.modelObject.setFunction(null, true);
-        assertThat(this.modelObject.isFunction(null), is(true));
-        assertThat(this.modelObject.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT), is(false));
-        assertThat(this.modelObject.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT), is(true));
+        this.procedure.setFunction(null, true);
+        assertThat(this.procedure.isFunction(null), is(true));
+        assertThat(this.procedure.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT), is(false));
+        assertThat(this.procedure.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT), is(true));
     }
 
 }

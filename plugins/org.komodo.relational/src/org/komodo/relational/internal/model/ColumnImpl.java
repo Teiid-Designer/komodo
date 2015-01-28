@@ -44,30 +44,10 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public String getCollationName( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-getColumns", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = RelationalConstants.DEFAULT_COLLATION_NAME;
-            final Property property = getProperty(transaction, StandardDdlLexicon.COLLATION_NAME);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.STRING,
+                                 "getCollationName", //$NON-NLS-1$
+                                 StandardDdlLexicon.COLLATION_NAME);
     }
 
     /**
@@ -77,30 +57,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public String getDatatypeName( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final String value = getObjectProperty(uow,
+                                               Property.ValueType.STRING,
+                                               "getDatatypeName", //$NON-NLS-1$
+                                               StandardDdlLexicon.DATATYPE_NAME);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-getDatatypeName", true, null); //$NON-NLS-1$
+        if (StringUtils.isBlank(value)) {
+            return RelationalConstants.DEFAULT_DATATYPE_NAME;
         }
 
-        assert (transaction != null);
-
-        try {
-            String result = RelationalConstants.DEFAULT_DATATYPE_NAME;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DATATYPE_NAME);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return value;
     }
 
     /**
@@ -110,30 +76,10 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public String getDefaultValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-getDefaultValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = RelationalConstants.DEFAULT_VALUE;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DEFAULT_VALUE);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow,
+                                 Property.ValueType.STRING,
+                                 "getDefaultValue", //$NON-NLS-1$
+                                 StandardDdlLexicon.DEFAULT_VALUE);
     }
 
     /**
@@ -143,30 +89,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public long getLength( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final Long value = getObjectProperty(uow,
+                                             Property.ValueType.LONG,
+                                             "getLength", //$NON-NLS-1$
+                                             StandardDdlLexicon.DATATYPE_LENGTH);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-getLength", true, null); //$NON-NLS-1$
+        if (value == null) {
+            return RelationalConstants.DEFAULT_LENGTH;
         }
 
-        assert (transaction != null);
-
-        try {
-            long result = RelationalConstants.DEFAULT_LENGTH;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DATATYPE_LENGTH);
-
-            if (property != null) {
-                result = property.getLongValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return value;
     }
 
     /**
@@ -176,31 +108,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public Nullable getNullable( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final String value =  getObjectProperty(uow,
+                                                Property.ValueType.STRING,
+                                                "getNullable", //$NON-NLS-1$
+                                                StandardDdlLexicon.NULLABLE);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-getNullable", true, null); //$NON-NLS-1$
+        if (StringUtils.isBlank(value)) {
+            return Nullable.DEFAULT_VALUE;
         }
 
-        assert (transaction != null);
-
-        try {
-            Nullable result = Nullable.DEFAULT_VALUE;
-            final Property property = getProperty(transaction, StandardDdlLexicon.NULLABLE);
-
-            if (property != null) {
-                final String value = property.getStringValue();
-                result = Nullable.fromValue(value);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return Nullable.fromValue(value);
     }
 
     /**
@@ -210,30 +127,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public int getPrecision( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final Integer value = getObjectProperty(uow,
+                                                Property.ValueType.INTEGER,
+                                                "getPrecision", //$NON-NLS-1$
+                                                StandardDdlLexicon.DATATYPE_PRECISION);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-getPrecision", true, null); //$NON-NLS-1$
+        if (value == null) {
+            return RelationalConstants.DEFAULT_PRECISION;
         }
 
-        assert (transaction != null);
-
-        try {
-            int result = RelationalConstants.DEFAULT_PRECISION;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DATATYPE_PRECISION);
-
-            if (property != null) {
-                result = (int)property.getLongValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return value;
     }
 
     /**
@@ -243,30 +146,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public int getScale( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final Integer value = getObjectProperty(uow,
+                                                Property.ValueType.INTEGER,
+                                                "getScale", //$NON-NLS-1$
+                                                StandardDdlLexicon.DATATYPE_SCALE);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-getScale", true, null); //$NON-NLS-1$
+        if (value == null) {
+            return RelationalConstants.DEFAULT_SCALE;
         }
 
-        assert (transaction != null);
-
-        try {
-            int result = RelationalConstants.DEFAULT_SCALE;
-            final Property property = getProperty(transaction, StandardDdlLexicon.DATATYPE_SCALE);
-
-            if (property != null) {
-                result = (int)property.getLongValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return value;
     }
 
     /**
@@ -276,30 +165,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public boolean isAutoIncremented( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final Boolean value = getObjectProperty(uow,
+                                                Property.ValueType.BOOLEAN,
+                                                "isAutoIncremented", //$NON-NLS-1$
+                                                CreateTable.AUTO_INCREMENT);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-getScale", true, null); //$NON-NLS-1$
+        if (value == null) {
+            return RelationalConstants.DEFAULT_AUTO_INCREMENTED;
         }
 
-        assert (transaction != null);
-
-        try {
-            boolean result = RelationalConstants.DEFAULT_AUTO_INCREMENTED;
-            final Property property = getProperty(transaction, CreateTable.AUTO_INCREMENT);
-
-            if (property != null) {
-                result = property.getBooleanValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return value;
     }
 
     /**
@@ -310,29 +185,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setAutoIncremented( final UnitOfWork uow,
                                     final boolean newAutoIncremented ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-setAutoIncremented", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAutoIncremented: transaction = '{0}', newAutoIncremented = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newAutoIncremented);
-        }
-
-        try {
-            setProperty(transaction, CreateTable.AUTO_INCREMENT, newAutoIncremented);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAutoIncremented", CreateTable.AUTO_INCREMENT, newAutoIncremented); //$NON-NLS-1$
     }
 
     /**
@@ -343,31 +196,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setCollationName( final UnitOfWork uow,
                                   final String newCollationName ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-setCollationName", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setCollationName: transaction = '{0}', newCollationName = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newCollationName);
-        }
-
-        try {
-            setProperty(transaction,
-                        StandardDdlLexicon.COLLATION_NAME,
-                        StringUtils.isBlank(newCollationName) ? null : newCollationName);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setCollationName", StandardDdlLexicon.COLLATION_NAME, newCollationName); //$NON-NLS-1$
     }
 
     /**
@@ -378,29 +207,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setDatatypeName( final UnitOfWork uow,
                                  final String newTypeName ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-setDatatypeName", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setDatatypeName: transaction = '{0}', newTypeName = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newTypeName);
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.DATATYPE_NAME, StringUtils.isBlank(newTypeName) ? null : newTypeName);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setDatatypeName", StandardDdlLexicon.DATATYPE_NAME, newTypeName); //$NON-NLS-1$
     }
 
     /**
@@ -411,31 +218,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setDefaultValue( final UnitOfWork uow,
                                  final String newDefaultValue ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-setDefaultValue", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setDefaultValue: transaction = '{0}', newDefaultValue = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newDefaultValue);
-        }
-
-        try {
-            setProperty(transaction,
-                        StandardDdlLexicon.DEFAULT_VALUE,
-                        StringUtils.isBlank(newDefaultValue) ? null : newDefaultValue);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setDefaultValue", StandardDdlLexicon.DEFAULT_VALUE, newDefaultValue); //$NON-NLS-1$
     }
 
     /**
@@ -446,27 +229,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setLength( final UnitOfWork uow,
                            final long newLength ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-setLength", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setLength: transaction = '{0}', newLength = '{1}'", transaction.getName(), newLength); //$NON-NLS-1$
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.DATATYPE_LENGTH, newLength);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setLength", StandardDdlLexicon.DATATYPE_LENGTH, newLength); //$NON-NLS-1$
     }
 
     /**
@@ -478,31 +241,10 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setNullable( final UnitOfWork uow,
                              final Nullable newNullable ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-setNullable", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setNullable: transaction = '{0}', newNullable = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newNullable);
-        }
-
-        try {
-            setProperty(transaction,
-                        StandardDdlLexicon.NULLABLE,
-                        (newNullable == null) ? Nullable.DEFAULT_VALUE : newNullable.toString());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow,
+                          "setNullable", //$NON-NLS-1$
+                          StandardDdlLexicon.NULLABLE,
+                          (newNullable == null) ? Nullable.DEFAULT_VALUE.toString() : newNullable.toString());
     }
 
     /**
@@ -513,29 +255,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setPrecision( final UnitOfWork uow,
                               final int newPrecision ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-setPrecision", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setPrecision: transaction = '{0}', newPrecision = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newPrecision);
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.DATATYPE_PRECISION, newPrecision);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setPrecision", StandardDdlLexicon.DATATYPE_PRECISION, newPrecision); //$NON-NLS-1$
     }
 
     /**
@@ -546,27 +266,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setScale( final UnitOfWork uow,
                           final int newScale ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("columnimpl-setScale", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setScale: transaction = '{0}', newScale = '{1}'", transaction.getName(), newScale); //$NON-NLS-1$
-        }
-
-        try {
-            setProperty(transaction, StandardDdlLexicon.DATATYPE_SCALE, newScale);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setScale", StandardDdlLexicon.DATATYPE_SCALE, newScale); //$NON-NLS-1$
     }
 
 }

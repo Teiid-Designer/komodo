@@ -31,6 +31,8 @@ import javax.jcr.query.QueryResult;
 import javax.jcr.query.Row;
 import javax.jcr.query.RowIterator;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.model.ModelImpl;
 import org.komodo.relational.internal.vdb.VdbImpl;
@@ -63,26 +65,28 @@ public class WorkspaceManager {
     private static final String FIND_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s] WHERE ISDESCENDANTNODE('" //$NON-NLS-1$
                                                      + RepositoryImpl.WORKSPACE_ROOT + "') ORDER BY [jcr:name] ASC"; //$NON-NLS-1$
 
-    private static class WskpMgrAdapter implements KeyFromValueAdapter<Repository.Id, WorkspaceManager> {
+    private static class WskpMgrAdapter implements KeyFromValueAdapter< Repository.Id, WorkspaceManager > {
 
         @Override
-        public Id getKey(WorkspaceManager value) {
+        public Id getKey( WorkspaceManager value ) {
             Repository repository = value.getRepository();
             return repository.getId();
         }
     }
 
-    private static KeyFromValueAdapter<Repository.Id, WorkspaceManager> adapter = new WskpMgrAdapter();
+    private static KeyFromValueAdapter< Repository.Id, WorkspaceManager > adapter = new WskpMgrAdapter();
 
-    private static KeyInValueHashMap<Repository.Id, WorkspaceManager> instances = new KeyInValueHashMap<Repository.Id, WorkspaceManager>(adapter);
+    private static KeyInValueHashMap< Repository.Id, WorkspaceManager > instances = new KeyInValueHashMap< Repository.Id, WorkspaceManager >(
+                                                                                                                                             adapter);
 
     private final Repository repository;
 
     /**
-     * @param repository the repository
+     * @param repository
+     *        the repository
      * @return singleton instance for the given repository
      */
-    public static WorkspaceManager getInstance(Repository repository) {
+    public static WorkspaceManager getInstance( Repository repository ) {
         WorkspaceManager instance = instances.get(repository.getId());
         if (instance == null) {
             instance = new WorkspaceManager(repository);
@@ -92,16 +96,14 @@ public class WorkspaceManager {
         return instance;
     }
 
-    private WorkspaceManager(Repository repository) {
+    private WorkspaceManager( Repository repository ) {
         this.repository = repository;
         this.repository.addObserver(new RepositoryObserver() {
 
             @Override
             public void eventOccurred() {
                 // Disposal observer
-                if (getRepository() == null ||
-                     State.NOT_REACHABLE == getRepository().getState() ||
-                     ! (getRepository().ping())) {
+                if (getRepository() == null || State.NOT_REACHABLE == getRepository().getState() || !(getRepository().ping())) {
                     instances.remove(WorkspaceManager.this);
                 }
             }
@@ -132,7 +134,7 @@ public class WorkspaceManager {
                                            final Exception e ) {
         assert (e != null);
         assert ((transactionParameter == null) && (transactionVariable != null))
-        || ((transactionParameter != null) && (transactionVariable == null));
+               || ((transactionParameter != null) && (transactionVariable == null));
 
         if (transactionParameter == null) {
             transactionVariable.rollback();
@@ -156,7 +158,9 @@ public class WorkspaceManager {
      * @throws KException
      *         if an error occurs
      */
-    public Model createModel(UnitOfWork uow, KomodoObject parent, String modelName) throws KException {
+    public Model createModel( UnitOfWork uow,
+                              KomodoObject parent,
+                              String modelName ) throws KException {
         ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(modelName, "modelName"); //$NON-NLS-1$
 
@@ -170,9 +174,9 @@ public class WorkspaceManager {
 
         try {
             final KomodoObject kobject = getRepository().add(transaction,
-                                                        parent.getAbsolutePath(),
-                                                        modelName,
-                                                        KomodoLexicon.VdbModel.NODE_TYPE);
+                                                             parent.getAbsolutePath(),
+                                                             modelName,
+                                                             KomodoLexicon.VdbModel.NODE_TYPE);
 
             if (uow == null) {
                 transaction.commit();
@@ -195,7 +199,9 @@ public class WorkspaceManager {
      * @throws KException
      *         if an error occurs
      */
-    public Schema createSchema(UnitOfWork uow, KomodoObject parent, String schemaName) throws KException {
+    public Schema createSchema( UnitOfWork uow,
+                                KomodoObject parent,
+                                String schemaName ) throws KException {
         ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(schemaName, "schemaName"); //$NON-NLS-1$
 
@@ -209,9 +215,9 @@ public class WorkspaceManager {
 
         try {
             final KomodoObject kobject = getRepository().add(transaction,
-                                                        parent.getAbsolutePath(),
-                                                        schemaName,
-                                                        KomodoLexicon.Schema.NODE_TYPE);
+                                                             parent.getAbsolutePath(),
+                                                             schemaName,
+                                                             KomodoLexicon.Schema.NODE_TYPE);
 
             if (uow == null) {
                 transaction.commit();
@@ -234,7 +240,9 @@ public class WorkspaceManager {
      * @throws KException
      *         if an error occurs
      */
-    public Teiid createTeiid(UnitOfWork uow, KomodoObject parent, String id) throws KException {
+    public Teiid createTeiid( UnitOfWork uow,
+                              KomodoObject parent,
+                              String id ) throws KException {
         ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
 
@@ -248,9 +256,9 @@ public class WorkspaceManager {
 
         try {
             final KomodoObject kobject = getRepository().add(transaction,
-                                                        parent.getAbsolutePath(),
-                                                        id,
-                                                        KomodoLexicon.Teiid.NODE_TYPE);
+                                                             parent.getAbsolutePath(),
+                                                             id,
+                                                             KomodoLexicon.Teiid.NODE_TYPE);
 
             if (uow == null) {
                 transaction.commit();
@@ -266,7 +274,8 @@ public class WorkspaceManager {
      * @param uow
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param parent
-     *        the parent of the model object being created (can be <code>null</code> if VDB should be created at the workspace root)
+     *        the parent of the model object being created (can be <code>null</code> if VDB should be created at the workspace
+     *        root)
      * @param vdbName
      *        the name of the VDB to create (cannot be empty)
      * @param externalFilePath
@@ -293,6 +302,7 @@ public class WorkspaceManager {
             if (parent == null) {
                 parentPath = this.repository.komodoWorkspace(transaction).getAbsolutePath();
             } else {
+                validateWorkspaceMember(uow, parent);
                 parentPath = parent.getAbsolutePath();
             }
 
@@ -307,6 +317,40 @@ public class WorkspaceManager {
             }
 
             return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param kobjects
+     *        the object(s) being deleted (cannot be <code>null</code>, empty, or have a <code>null</code> element)
+     * @throws KException
+     *         if an error occurs or if an object does not exist
+     */
+    public void delete( final UnitOfWork uow,
+                        final KomodoObject... kobjects ) throws KException {
+        ArgCheck.isNotEmpty(kobjects, "kobjects"); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction("workspacemanager-delete", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            for (final KomodoObject kobject : kobjects) {
+                ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
+                validateWorkspaceMember(uow, kobject);
+                kobject.getParent(transaction).removeChild(transaction, kobject.getName(transaction));
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
@@ -359,6 +403,54 @@ public class WorkspaceManager {
     /**
      * @param uow
      *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @return all {@link Model}s in the workspace (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    public Model[] findModels( final UnitOfWork uow ) throws KException {
+        final String[] paths = findByType(uow, KomodoLexicon.VdbModel.NODE_TYPE);
+
+        if (paths.length == 0) {
+            return Model.NO_MODELS;
+        }
+
+        final Model[] result = new Model[paths.length];
+        int i = 0;
+
+        for (final String path : paths) {
+            result[i++] = new ModelImpl(getRepository(), path);
+        }
+
+        return result;
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @return all {@link Model}s in the workspace (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    public Schema[] findSchemas( final UnitOfWork uow ) throws KException {
+        final String[] paths = findByType(uow, KomodoLexicon.Schema.NODE_TYPE);
+
+        if (paths.length == 0) {
+            return Schema.NO_SCHEMAS;
+        }
+
+        final Schema[] result = new Schema[paths.length];
+        int i = 0;
+
+        for (final String path : paths) {
+            result[i++] = new SchemaImpl(getRepository(), path);
+        }
+
+        return result;
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return all {@link Teiid}s in the workspace
      * @throws KException
      *         if an error occurs
@@ -382,7 +474,7 @@ public class WorkspaceManager {
     /**
      * @param uow
      *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @return all {@link Teiid}s in the workspace
+     * @return all {@link Vdb}s in the workspace (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
@@ -401,6 +493,20 @@ public class WorkspaceManager {
         }
 
         return result;
+    }
+
+    private void validateWorkspaceMember( final UnitOfWork uow,
+                                          final KomodoObject kobject ) throws KException {
+        if (!this.repository.equals(kobject.getRepository())) {
+            throw new KException(Messages.getString(Relational.OBJECT_BEING_DELETED_HAS_WRONG_REPOSITORY,
+                                                    kobject.getAbsolutePath(),
+                                                    kobject.getRepository().getId().getUrl(),
+                                                    this.repository.getId().getUrl()));
+        }
+
+        if (!kobject.getAbsolutePath().startsWith(this.repository.komodoWorkspace(uow).getAbsolutePath())) {
+            throw new KException(Messages.getString(Relational.OBJECT_BEING_DELETED_HAS_NULL_PARENT, kobject.getAbsolutePath()));
+        }
     }
 
 }

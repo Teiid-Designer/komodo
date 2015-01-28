@@ -31,6 +31,8 @@ import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Index;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Procedure;
@@ -114,8 +116,8 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
-     * @param parentPath
-     *        the path to the parent of the model object being created (can be empty if created at the root of the workspace)
+     * @param table
+     *        the table where container where the column is being created (cannot be <code>null</code>)
      * @param columnName
      *        the name of the column to create (cannot be empty)
      * @return the column model object (never <code>null</code>)
@@ -124,9 +126,10 @@ public final class RelationalModelFactory {
      */
     public static Column createColumn( final UnitOfWork uow,
                                        final Repository repository,
-                                       final String parentPath,
+                                       final Table table,
                                        final String columnName ) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(table, "table"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(columnName, "columnName"); //$NON-NLS-1$
 
         UnitOfWork transaction = uow;
@@ -138,7 +141,7 @@ public final class RelationalModelFactory {
         assert (transaction != null);
 
         try {
-            final KomodoObject kobject = repository.add(transaction, parentPath, columnName, null);
+            final KomodoObject kobject = repository.add(transaction, table.getAbsolutePath(), columnName, null);
             kobject.addDescriptor(transaction, CreateTable.TABLE_ELEMENT);
 
             if (uow == null) {
@@ -340,6 +343,49 @@ public final class RelationalModelFactory {
             }
 
             return fk;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentModel
+     *        the model where the function is being created (cannot be <code>null</code>)
+     * @param functionName
+     *        the name of the function to create (cannot be empty)
+     * @return the function model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static Procedure createFunction( final UnitOfWork uow,
+                                             final Repository repository,
+                                             final Model parentModel,
+                                             final String functionName ) throws KException {
+        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(functionName, "functionName"); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("relationalmodelfactory-createFunction", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final Procedure result = createProcedure(transaction, repository, parentModel, functionName);
+            result.setFunction(transaction, true);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
@@ -572,8 +618,8 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
-     * @param parentPath
-     *        the path to the parent of the model object being created (can be empty if created at the root of the workspace)
+     * @param parentModel
+     *        the model where the procedure is being created (cannot be <code>null</code>)
      * @param procedureName
      *        the name of the procedure to create (cannot be empty)
      * @return the procedure model object (never <code>null</code>)
@@ -582,9 +628,10 @@ public final class RelationalModelFactory {
      */
     public static Procedure createProcedure( final UnitOfWork uow,
                                              final Repository repository,
-                                             final String parentPath,
+                                             final Model parentModel,
                                              final String procedureName ) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(procedureName, "procedureName"); //$NON-NLS-1$
 
         UnitOfWork transaction = uow;
@@ -596,7 +643,7 @@ public final class RelationalModelFactory {
         assert (transaction != null);
 
         try {
-            final KomodoObject kobject = repository.add(transaction, parentPath, procedureName, null);
+            final KomodoObject kobject = repository.add(transaction, parentModel.getAbsolutePath(), procedureName, null);
             kobject.addDescriptor(transaction, CreateProcedure.PROCEDURE_STATEMENT);
             setCreateStatementProperties(transaction, kobject);
 
@@ -657,8 +704,8 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
-     * @param parentPath
-     *        the path to the parent of the model object being created (can be empty if created at the root of the workspace)
+     * @param optionContainer
+     *        the parent where the option is being created (can be empty if created at the root of the workspace)
      * @param optionName
      *        the name of the statement option to create (cannot be empty)
      * @param optionValue
@@ -669,10 +716,11 @@ public final class RelationalModelFactory {
      */
     public static StatementOption createStatementOption( final UnitOfWork uow,
                                                          final Repository repository,
-                                                         final String parentPath,
+                                                         final OptionContainer optionContainer,
                                                          final String optionName,
                                                          final String optionValue ) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(optionContainer, "optionContainer"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(optionName, "optionName"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(optionValue, "optionValue"); //$NON-NLS-1$
 
@@ -685,7 +733,7 @@ public final class RelationalModelFactory {
         assert (transaction != null);
 
         try {
-            final KomodoObject kobject = repository.add(transaction, parentPath, optionName, null);
+            final KomodoObject kobject = repository.add(transaction, optionContainer.getAbsolutePath(), optionName, null);
             kobject.addDescriptor(transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION);
 
             final StatementOption result = new StatementOptionImpl(repository, kobject.getAbsolutePath());
@@ -706,8 +754,8 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
-     * @param parentPath
-     *        the path to the parent of the model object being created (can be empty if created at the root of the workspace)
+     * @param parentModel
+     *        the model where the table is being created (cannot be <code>null</code>)
      * @param tableName
      *        the name of the table to create (cannot be empty)
      * @return the table model object (never <code>null</code>)
@@ -716,9 +764,10 @@ public final class RelationalModelFactory {
      */
     public static Table createTable( final UnitOfWork uow,
                                      final Repository repository,
-                                     final String parentPath,
+                                     final Model parentModel,
                                      final String tableName ) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(tableName, "tableName"); //$NON-NLS-1$
 
         UnitOfWork transaction = uow;
@@ -728,7 +777,7 @@ public final class RelationalModelFactory {
         }
 
         try {
-            final KomodoObject kobject = repository.add(transaction, parentPath, tableName, null);
+            final KomodoObject kobject = repository.add(transaction, parentModel.getAbsolutePath(), tableName, null);
             kobject.addDescriptor(transaction, CreateTable.TABLE_STATEMENT);
             setCreateStatementProperties(transaction, kobject);
 
@@ -941,8 +990,8 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
-     * @param parentPath
-     *        the path to the parent of the model object being created (can be empty if created at the root of the workspace)
+     * @param parentModel
+     *        the model where the view is being created (cannot be <code>null</code>)
      * @param viewName
      *        the name of the view to create (cannot be empty)
      * @return the view model object (never <code>null</code>)
@@ -951,8 +1000,11 @@ public final class RelationalModelFactory {
      */
     public static View createView( final UnitOfWork uow,
                                    final Repository repository,
-                                   final String parentPath,
+                                   final Model parentModel,
                                    final String viewName ) throws KException {
+        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(viewName, "viewName"); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (uow == null) {
@@ -960,7 +1012,7 @@ public final class RelationalModelFactory {
         }
 
         try {
-            final KomodoObject kobject = repository.add(transaction, parentPath, viewName, null);
+            final KomodoObject kobject = repository.add(transaction, parentModel.getAbsolutePath(), viewName, null);
             kobject.addDescriptor(transaction, CreateTable.VIEW_STATEMENT);
             setCreateStatementProperties(transaction, kobject);
 
@@ -991,7 +1043,7 @@ public final class RelationalModelFactory {
                                            final Exception e ) {
         assert (e != null);
         assert ((transactionParameter == null) && (transactionVariable != null))
-               || ((transactionParameter != null) && (transactionVariable == null));
+        || ((transactionParameter != null) && (transactionVariable == null));
 
         if (transactionParameter == null) {
             transactionVariable.rollback();

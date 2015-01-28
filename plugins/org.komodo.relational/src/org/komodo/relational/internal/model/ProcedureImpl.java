@@ -95,8 +95,7 @@ public final class ProcedureImpl extends RelationalObjectImpl implements Procedu
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#addStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String)
+     * @see org.komodo.relational.model.OptionContainer#addStatementOption(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String, java.lang.String)
      */
     @Override
     public StatementOption addStatementOption( final UnitOfWork uow,
@@ -121,7 +120,7 @@ public final class ProcedureImpl extends RelationalObjectImpl implements Procedu
         try {
             final StatementOption result = RelationalModelFactory.createStatementOption(transaction,
                                                                                         getRepository(),
-                                                                                        getAbsolutePath(),
+                                                                                        this,
                                                                                         optionName,
                                                                                         optionValue);
 
@@ -142,30 +141,7 @@ public final class ProcedureImpl extends RelationalObjectImpl implements Procedu
      */
     @Override
     public String getAsClauseStatement( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureImpl-getDatatypeName", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String result = null;
-            final Property property = getProperty(transaction, CreateProcedure.STATEMENT);
-
-            if (property != null) {
-                result = property.getStringValue();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return getObjectProperty(uow, Property.ValueType.STRING, "getAsClauseStatement", CreateProcedure.STATEMENT); //$NON-NLS-1$
     }
 
     /**
@@ -252,37 +228,22 @@ public final class ProcedureImpl extends RelationalObjectImpl implements Procedu
      */
     @Override
     public SchemaElementType getSchemaElementType( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+        final String value = getObjectProperty(uow,
+                                               Property.ValueType.STRING,
+                                               "getSchemaElementType", //$NON-NLS-1$
+                                               SchemaElement.TYPE);
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureImpl-getSchemaElementType", true, null); //$NON-NLS-1$
+        if (StringUtils.isBlank(value)) {
+            return null;
         }
 
-        assert (transaction != null);
-
-        try {
-            SchemaElementType result = SchemaElementType.DEFAULT_VALUE;
-            final Property property = getProperty(transaction, SchemaElement.TYPE);
-
-            if (property != null) {
-                final String value = property.getStringValue();
-                result = SchemaElementType.fromValue(value);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return SchemaElementType.fromValue(value);
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.OptionContainer#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public StatementOption[] getStatementOptions( final UnitOfWork uow ) throws KException {
@@ -405,8 +366,7 @@ public final class ProcedureImpl extends RelationalObjectImpl implements Procedu
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#removeStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
+     * @see org.komodo.relational.model.OptionContainer#removeStatementOption(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
     public void removeStatementOption( final UnitOfWork uow,
@@ -458,29 +418,7 @@ public final class ProcedureImpl extends RelationalObjectImpl implements Procedu
     @Override
     public void setAsClauseStatement( final UnitOfWork uow,
                                       final String newStatement ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-setAsClauseStatement", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setAsClauseStatement: transaction = '{0}', newStatement = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newStatement);
-        }
-
-        try {
-            setProperty(transaction, CreateProcedure.STATEMENT, StringUtils.isBlank(newStatement) ? null : newStatement);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        setObjectProperty(uow, "setAsClauseStatement", CreateProcedure.STATEMENT, newStatement); //$NON-NLS-1$
     }
 
     /**
@@ -531,29 +469,9 @@ public final class ProcedureImpl extends RelationalObjectImpl implements Procedu
     @Override
     public void setSchemaElementType( final UnitOfWork uow,
                                       final SchemaElementType newSchemaElementType ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-setSchemaElementType", false, null); //$NON-NLS-1$
-        }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setSchemaElementType: transaction = '{0}', newSchemaElementType = '{1}'", //$NON-NLS-1$
-                         transaction.getName(),
-                         newSchemaElementType);
-        }
-
-        try {
-            setProperty(transaction,
-                        SchemaElement.TYPE.toString(),
-                        (newSchemaElementType == null) ? SchemaElementType.DEFAULT_VALUE : newSchemaElementType.toString());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final String newValue = ((newSchemaElementType == null) ? SchemaElementType.DEFAULT_VALUE.toString()
+                                                                : newSchemaElementType.toString());
+        setObjectProperty(uow, "setSchemaElementType", SchemaElement.TYPE, newValue); //$NON-NLS-1$
     }
 
 }
