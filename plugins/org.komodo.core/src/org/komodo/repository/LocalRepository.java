@@ -22,6 +22,8 @@
 package org.komodo.repository;
 
 import java.net.URL;
+import java.util.Map.Entry;
+import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Session;
@@ -117,6 +119,8 @@ public class LocalRepository extends RepositoryImpl {
             return "LocalRepositoryId [configPath=" + this.configPath + ", workspaceName=" + this.workspaceName + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
     }
+
+    private WeakHashMap< Session, UnitOfWork > sessions = new WeakHashMap<>();
 
     private State state = State.NOT_REACHABLE;
 
@@ -224,7 +228,10 @@ public class LocalRepository extends RepositoryImpl {
                                          final UnitOfWorkListener callback ) throws KException {
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
         LOGGER.debug("creating transaction '{0}' with rollbackOnly = {1}", name, rollbackOnly); //$NON-NLS-1$
-        return new LocalRepositoryTransaction(name, createSession(), rollbackOnly, callback);
+        final Session session = createSession();
+        final UnitOfWork uow = new LocalRepositoryTransaction(name, session, rollbackOnly, callback);
+        this.sessions.put(session, uow);
+        return uow;
     }
 
     class LocalRepositoryTransaction extends RepositoryImpl.UnitOfWorkImpl {
@@ -399,6 +406,21 @@ public class LocalRepository extends RepositoryImpl {
                 }
             }
         };
+
+        // check session cache
+        if (!this.sessions.isEmpty()) {
+            for (final Entry< Session, UnitOfWork > entry : this.sessions.entrySet()) {
+                final Session session = entry.getKey();
+
+                // rollback and close all leftover sessions (there should not be any)
+                if (session.isLive()) {
+                    final UnitOfWork uow = entry.getValue();
+                    LOGGER.debug("LocalRepository.stopRepository: closing session for transaction '{0}'", uow.getName()); //$NON-NLS-1$
+                    uow.rollback();
+                    session.logout();
+                }
+            }
+        }
 
         this.engineThread.accept(new Request(RequestType.STOP, callback));
     }
