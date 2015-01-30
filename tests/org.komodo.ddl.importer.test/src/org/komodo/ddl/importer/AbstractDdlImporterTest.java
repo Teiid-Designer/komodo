@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import javax.jcr.Node;
 import javax.jcr.PropertyIterator;
-import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.observation.ObservationManager;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
@@ -122,15 +121,15 @@ public abstract class AbstractDdlImporterTest extends AbstractLocalRepositoryTes
     /**
      * @param property
      * @return String representation of property and its values
-     * @throws Exception 
+     * @throws Exception
      */
     private String toString(Property property) throws Exception {
         StringBuilder sb = new StringBuilder();
         try {
             sb.append(property.getName(null)).append('=');
-            if (property.isMultiple()) {
+            if (property.isMultiple(null)) {
                 sb.append('[');
-                Object[] values = property.getValues();
+                Object[] values = property.getValues(null);
                 for (int i = 0; i < values.length; ++i) {
                     Object value = values[i];
                     sb.append(value);
@@ -139,10 +138,10 @@ public abstract class AbstractDdlImporterTest extends AbstractLocalRepositoryTes
                 }
                 sb.append(']');
             } else {
-                Object value = property.getValue();
+                Object value = property.getValue(null);
                 sb.append(value);
             }
-        } catch (RepositoryException e) {
+        } catch (Exception e) {
             sb.append(" on deleted node ").append(property.getAbsolutePath());
         }
 
@@ -179,10 +178,10 @@ public abstract class AbstractDdlImporterTest extends AbstractLocalRepositoryTes
         assertNotNull(property);
 
         String value;
-        if (property.isMultiple())
-            value = property.getStringValues()[0];
+        if (property.isMultiple(null))
+            value = property.getStringValues(null)[0];
         else
-            value = property.getStringValue();
+            value = property.getStringValue(null);
 
         assertEquals(expectedValue, value);
     }

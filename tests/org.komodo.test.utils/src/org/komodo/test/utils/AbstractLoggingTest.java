@@ -40,6 +40,7 @@ public abstract class AbstractLoggingTest {
 
         logger.setLogPath(newLogFile.getAbsolutePath());
         logger.setLevel(java.util.logging.Level.INFO);
+//        logger.setLevel(java.util.logging.Level.FINE); // FINE == DEBUG
         assertEquals(newLogFile.getAbsolutePath(), logger.getLogPath());
 
         return newLogFile;

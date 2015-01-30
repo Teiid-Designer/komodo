@@ -10,6 +10,7 @@ package org.komodo.spi.repository;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Represents a {@link KomodoObject Komodo object} property.
@@ -61,111 +62,152 @@ public interface Property extends KNode {
     Property[] NO_PROPS = {};
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the value represented as a <code>boolean</code>
      * @throws KException
      *         if the property does not exist or an error occurs
      */
-    boolean getBooleanValue() throws KException;
+    boolean getBooleanValue( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the values represented as <code>boolean</code>s (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
      */
-    boolean[] getBooleanValues() throws KException;
+    boolean[] getBooleanValues( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the value represented as a date or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
      */
-    Calendar getDateValue() throws KException;
+    Calendar getDateValue( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the values represented as dates (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
      */
-    Calendar[] getDateValues() throws KException;
+    Calendar[] getDateValues( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the value represented as a <code>decimal</code> or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
      */
-    BigDecimal getDecimalValue() throws KException;
+    BigDecimal getDecimalValue( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the values represented as <code>decimal</code>s (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
      */
-    BigDecimal[] getDecimalValues() throws KException;
+    BigDecimal[] getDecimalValues( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the property descriptor (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    PropertyDescriptor getDescriptor() throws KException;
+    PropertyDescriptor getDescriptor( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the value represented as a <code>double</code> or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
      */
-    double getDoubleValue() throws KException;
+    double getDoubleValue( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the values represented as <code>double</code>s (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
      */
-    double[] getDoubleValues() throws KException;
+    double[] getDoubleValues( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the Long value of the supplied property, or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
      */
-    long getLongValue() throws KException;
+    long getLongValue( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the long values of the supplied property (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
      */
-    long[] getLongValues() throws KException;
+    long[] getLongValues( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the String value of the supplied property, or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
      */
-    String getStringValue() throws KException;
+    String getStringValue( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the String values of the supplied property (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
      */
-    String[] getStringValues() throws KException;
+    String[] getStringValues( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the value of the supplied property, or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
      */
-    Object getValue() throws KException;
+    Object getValue( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the values of the supplied property (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
      */
-    Object[] getValues() throws KException;
+    Object[] getValues( final UnitOfWork uow ) throws KException;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @return this property has multiple values
+     * @throws KException
+     *         if an error occurs
+     */
+    boolean isMultiple( final UnitOfWork uow ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * Passing in <code>null</code> will remove the existing property from its node.
      *
      * @param values
@@ -173,11 +215,7 @@ public interface Property extends KNode {
      * @throws KException
      *         if an error occurs
      */
-    void set( final Object... values ) throws KException;
+    void set(  final UnitOfWork uow,
+               final Object... values ) throws KException;
 
-    /**
-     * @return this property has multiple values
-     * @throws Exception
-     */
-    boolean isMultiple() throws Exception;
 }

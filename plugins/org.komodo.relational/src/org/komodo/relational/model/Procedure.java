@@ -51,6 +51,14 @@ public interface Procedure extends OptionContainer, RelationalObject, SchemaElem
     Parameter[] getParameters( final UnitOfWork transaction ) throws KException;
 
     /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Model getParent( final UnitOfWork transaction ) throws KException;
+
+    /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return the result set (can be <code>null</code>)

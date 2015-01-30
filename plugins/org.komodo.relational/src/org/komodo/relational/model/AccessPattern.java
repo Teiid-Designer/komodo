@@ -7,6 +7,7 @@
  */
 package org.komodo.relational.model;
 
+
 /**
  * Represents a relational model access pattern.
  */

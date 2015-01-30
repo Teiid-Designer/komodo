@@ -35,6 +35,8 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public class SchemaImpl extends RelationalObjectImpl implements Schema {
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -42,8 +44,10 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
      * @throws KException
      *         if an error occurs
      */
-    public SchemaImpl( final Repository repository, final String workspacePath ) throws KException {
-        super(repository, workspacePath);
+    public SchemaImpl( final UnitOfWork uow,
+                       final Repository repository,
+                       final String workspacePath ) throws KException {
+        super(uow, repository, workspacePath);
     }
 
     @Override
@@ -59,6 +63,18 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
     @Override
     public void setRendition(UnitOfWork uow, String rendition) throws KException {
         setObjectProperty(uow, "setRendition", KomodoLexicon.Schema.RENDITION, rendition); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    protected void validateInitialState( final UnitOfWork uow,
+                                         final String path ) throws KException {
+        validateType(uow, path, KomodoLexicon.Schema.NODE_TYPE);
     }
 
 }

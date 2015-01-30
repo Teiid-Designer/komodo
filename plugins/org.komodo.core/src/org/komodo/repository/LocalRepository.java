@@ -155,9 +155,38 @@ public class LocalRepository extends RepositoryImpl {
         this(DEFAULT_LOCAL_REPOSITORY_ID);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals( final Object obj ) {
+        if (this == obj) {
+            return true;
+        }
+
+        if ((obj == null) || !getClass().equals(obj.getClass())) {
+            return false;
+        }
+
+        final LocalRepository that = (LocalRepository)obj;
+        return getId().equals(that.getId());
+    }
+
     @Override
     public State getState() {
         return state;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
     }
 
     @Override
@@ -227,7 +256,7 @@ public class LocalRepository extends RepositoryImpl {
                                          final boolean rollbackOnly,
                                          final UnitOfWorkListener callback ) throws KException {
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-        LOGGER.debug("creating transaction '{0}' with rollbackOnly = {1}", name, rollbackOnly); //$NON-NLS-1$
+        LOGGER.debug("creating transaction {0} with rollbackOnly = {1}", name, rollbackOnly); //$NON-NLS-1$
         final Session session = createSession();
         final UnitOfWork uow = new LocalRepositoryTransaction(name, session, rollbackOnly, callback);
         this.sessions.put(session, uow);
@@ -415,7 +444,7 @@ public class LocalRepository extends RepositoryImpl {
                 // rollback and close all leftover sessions (there should not be any)
                 if (session.isLive()) {
                     final UnitOfWork uow = entry.getValue();
-                    LOGGER.debug("LocalRepository.stopRepository: closing session for transaction '{0}'", uow.getName()); //$NON-NLS-1$
+                    LOGGER.debug("LocalRepository.stopRepository: closing session for transaction {0}", uow.getName()); //$NON-NLS-1$
                     uow.rollback();
                     session.logout();
                 }

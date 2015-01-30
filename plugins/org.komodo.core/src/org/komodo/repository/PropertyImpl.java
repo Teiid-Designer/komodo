@@ -219,23 +219,18 @@ public class PropertyImpl implements Property {
     /**
      * @param propertyRepository
      *        the repository where this property is located (cannot be <code>null</code>)
-     * @param jcrProperty
-     *        the JCR property (cannot be <code>null</code>)
+     * @param propertyPath
+     *        the JCR property path (cannot be empty)
      * @throws KException
      *         if there is an error constructing the property
      */
     public PropertyImpl( final Repository propertyRepository,
-                         final javax.jcr.Property jcrProperty ) throws KException {
+                         final String propertyPath ) throws KException {
         ArgCheck.isNotNull(propertyRepository, "propertyRepository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(jcrProperty, "jcrProperty"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(propertyPath, "propertyPath"); //$NON-NLS-1$
 
         this.repository = propertyRepository;
-
-        try {
-            this.path = jcrProperty.getPath();
-        } catch (final Exception e) {
-            throw new KException(Messages.getString(Komodo.UNABLE_TO_CONSTRUCT_PROPERTY, this.path), e);
-        }
+        this.path = propertyPath;
     }
 
     /**
@@ -251,15 +246,25 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getBooleanValue()
+     * @see org.komodo.spi.repository.Property#getBooleanValue(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public boolean getBooleanValue() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getBooleanValue", true, null); //$NON-NLS-1$
+    public boolean getBooleanValue( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getBooleanValue", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final boolean result = getSession(transaction).getProperty(this.path).getBoolean();
-            transaction.commit();
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return result;
         } catch (final Exception e) {
             transaction.rollback();
@@ -275,11 +280,17 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getBooleanValues()
+     * @see org.komodo.spi.repository.Property#getBooleanValues(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public boolean[] getBooleanValues() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getBooleanValues", true, null); //$NON-NLS-1$
+    public boolean[] getBooleanValues( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getBooleanValues", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -291,7 +302,10 @@ public class PropertyImpl implements Property {
                 booleanValues[i++] = value.getBoolean();
             }
 
-            transaction.commit();
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return booleanValues;
         } catch (final Exception e) {
             transaction.rollback();
@@ -307,15 +321,25 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getDateValue()
+     * @see org.komodo.spi.repository.Property#getDateValue(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Calendar getDateValue() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getDateValue", true, null); //$NON-NLS-1$
+    public Calendar getDateValue( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getDateValue", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final Calendar result = getSession(transaction).getProperty(this.path).getDate();
-            transaction.commit();
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return result;
         } catch (final Exception e) {
             transaction.rollback();
@@ -331,11 +355,17 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getDateValues()
+     * @see org.komodo.spi.repository.Property#getDateValues(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Calendar[] getDateValues() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getDateValues", true, null); //$NON-NLS-1$
+    public Calendar[] getDateValues( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getDateValues", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -347,7 +377,10 @@ public class PropertyImpl implements Property {
                 dateValues[i++] = value.getDate();
             }
 
-            transaction.commit();
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return dateValues;
         } catch (final Exception e) {
             transaction.rollback();
@@ -363,15 +396,25 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getDecimalValue()
+     * @see org.komodo.spi.repository.Property#getDecimalValue(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public BigDecimal getDecimalValue() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getDecimalValue", true, null); //$NON-NLS-1$
+    public BigDecimal getDecimalValue( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getDecimalValue", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final BigDecimal result = getSession(transaction).getProperty(this.path).getDecimal();
-            transaction.commit();
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return result;
         } catch (final Exception e) {
             transaction.rollback();
@@ -387,11 +430,17 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getDecimalValues()
+     * @see org.komodo.spi.repository.Property#getDecimalValues(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public BigDecimal[] getDecimalValues() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getDecimalValues", true, null); //$NON-NLS-1$
+    public BigDecimal[] getDecimalValues( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getDecimalValues", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -403,7 +452,10 @@ public class PropertyImpl implements Property {
                 decimalValues[i++] = value.getDecimal();
             }
 
-            transaction.commit();
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return decimalValues;
         } catch (final Exception e) {
             transaction.rollback();
@@ -419,38 +471,26 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getDescriptor()
+     * @see org.komodo.spi.repository.Property#getDescriptor(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public PropertyDescriptor getDescriptor() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getDescriptor", true, null); //$NON-NLS-1$
+    public PropertyDescriptor getDescriptor( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getDescriptor", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            return new PropertyDescriptorImpl(property.getDefinition());
-        } catch (final Exception e) {
-            transaction.rollback();
+            final PropertyDescriptor result = new PropertyDescriptorImpl(property.getDefinition());
 
-            if (e instanceof KException) {
-                throw (KException)e;
+            if (uow == null) {
+                transaction.commit();
             }
 
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getDoubleValue()
-     */
-    @Override
-    public double getDoubleValue() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getDoubleValue", true, null); //$NON-NLS-1$
-
-        try {
-            final double result = getSession(transaction).getProperty(this.path).getDouble();
-            transaction.commit();
             return result;
         } catch (final Exception e) {
             transaction.rollback();
@@ -466,11 +506,51 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getDoubleValues()
+     * @see org.komodo.spi.repository.Property#getDoubleValue(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public double[] getDoubleValues() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getDoubleValues", true, null); //$NON-NLS-1$
+    public double getDoubleValue( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getDoubleValue", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final double result = getSession(transaction).getProperty(this.path).getDouble();
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            transaction.rollback();
+
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getDoubleValues(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public double[] getDoubleValues( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getDoubleValues", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -482,7 +562,10 @@ public class PropertyImpl implements Property {
                 doubleValues[i++] = value.getDouble();
             }
 
-            transaction.commit();
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return doubleValues;
         } catch (final Exception e) {
             transaction.rollback();
@@ -498,15 +581,25 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getLongValue()
+     * @see org.komodo.spi.repository.Property#getLongValue(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public long getLongValue() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getLongValue", true, null); //$NON-NLS-1$
+    public long getLongValue( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getLongValue", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final long result = getSession(transaction).getProperty(this.path).getLong();
-            transaction.commit();
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return result;
         } catch (final Exception e) {
             transaction.rollback();
@@ -522,11 +615,17 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getLongValues()
+     * @see org.komodo.spi.repository.Property#getLongValues(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public long[] getLongValues() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getLongValues", true, null); //$NON-NLS-1$
+    public long[] getLongValues( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getLongValues", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -538,7 +637,10 @@ public class PropertyImpl implements Property {
                 longValues[i++] = value.getLong();
             }
 
-            transaction.commit();
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return longValues;
         } catch (final Exception e) {
             transaction.rollback();
@@ -645,15 +747,25 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getStringValue()
+     * @see org.komodo.spi.repository.Property#getStringValue(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public String getStringValue() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getStringValue", true, null); //$NON-NLS-1$
+    public String getStringValue( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getStringValue", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final String result = getSession(transaction).getProperty(this.path).getString();
-            transaction.commit();
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return result;
         } catch (final Exception e) {
             transaction.rollback();
@@ -669,11 +781,17 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getStringValues()
+     * @see org.komodo.spi.repository.Property#getStringValues(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public String[] getStringValues() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getStringValues", true, null); //$NON-NLS-1$
+    public String[] getStringValues( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getStringValues", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -685,7 +803,10 @@ public class PropertyImpl implements Property {
                 stringValues[i++] = value.getString();
             }
 
-            transaction.commit();
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return stringValues;
         } catch (final Exception e) {
             transaction.rollback();
@@ -701,11 +822,17 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getValue()
+     * @see org.komodo.spi.repository.Property#getValue(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Object getValue() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getValue", true, null); //$NON-NLS-1$
+    public Object getValue( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getValue", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -713,7 +840,10 @@ public class PropertyImpl implements Property {
             final int propType = property.getType();
             final Object result = convert(value, propType);
 
-            transaction.commit();
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return result;
         } catch (final Exception e) {
             transaction.rollback();
@@ -729,11 +859,17 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#getValues()
+     * @see org.komodo.spi.repository.Property#getValues(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Object[] getValues() throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-getValues", true, null); //$NON-NLS-1$
+    public Object[] getValues( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getValues", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
@@ -746,7 +882,10 @@ public class PropertyImpl implements Property {
                 objectValues[i++] = convert(value, propType);
             }
 
-            transaction.commit();
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return objectValues;
         } catch (final Exception e) {
             transaction.rollback();
@@ -762,11 +901,53 @@ public class PropertyImpl implements Property {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Property#set(java.lang.Object[])
+     * @see org.komodo.spi.repository.Property#isMultiple(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public void set( final Object... values ) throws KException {
-        final UnitOfWork transaction = getRepository().createTransaction("property-set", true, null); //$NON-NLS-1$
+    public boolean isMultiple( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-isMultiple", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final Session session = getSession(transaction);
+            final boolean result = session.getProperty(this.path).isMultiple();
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            transaction.rollback();
+
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#set(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.Object[])
+     */
+    @Override
+    public void set( final UnitOfWork uow,
+                     final Object... values ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-set", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
 
         try {
             final Session session = getSession(transaction);
@@ -807,27 +988,9 @@ public class PropertyImpl implements Property {
                 }
             }
 
-            transaction.commit();
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
+            if (uow == null) {
+                transaction.commit();
             }
-
-            throw new KException(e);
-        }
-    }
-
-    @Override
-    public boolean isMultiple() throws Exception {
-        final UnitOfWork transaction = getRepository().createTransaction("property-set", false, null); //$NON-NLS-1$
-
-        try {
-            final Session session = getSession(transaction);
-            final javax.jcr.Property property = session.getProperty(this.path);
-            transaction.commit();
-            return property.isMultiple();
         } catch (final Exception e) {
             transaction.rollback();
 
@@ -848,4 +1011,5 @@ public class PropertyImpl implements Property {
     public String toString() {
         return this.path;
     }
+
 }

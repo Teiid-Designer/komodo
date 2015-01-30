@@ -148,7 +148,7 @@ public class KLog implements KLogger {
          */
         @Override
         public boolean isErrorEnabled() {
-            return (this.level == Level.FINE);
+            return true;
         }
 
         @Override
@@ -168,7 +168,7 @@ public class KLog implements KLogger {
          */
         @Override
         public boolean isDebugEnabled() {
-            return (this.level == Level.FINEST);
+            return (this.level == Level.FINE);
         }
 
         @Override
@@ -178,7 +178,7 @@ public class KLog implements KLogger {
 
         @Override
         public void trace(String message, Throwable throwable, Object... args) {
-            logger.log(Level.FINE, message, throwable);
+            logger.log(Level.FINEST, message, throwable);
         }
 
         /**
@@ -188,7 +188,7 @@ public class KLog implements KLogger {
          */
         @Override
         public boolean isTraceEnabled() {
-            return (this.level == Level.FINE);
+            return (this.level == Level.FINEST);
         }
 
     }

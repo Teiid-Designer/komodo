@@ -214,7 +214,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
          */
         @Override
         public void commit() {
-            LOGGER.debug("commit transaction '{0}'", getName()); //$NON-NLS-1$
+            LOGGER.debug("commit transaction {0}", getName()); //$NON-NLS-1$
 
             if (this.rollbackOnly) {
                 rollback();
@@ -225,7 +225,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                     }
 
                     this.session.save();
-                    LOGGER.debug("transaction '{0}' saved", getName()); //$NON-NLS-1$
+                    LOGGER.debug("transaction {0} saved", getName()); //$NON-NLS-1$
 
                     if (this.callback != null) {
                         this.callback.respond(this);
@@ -288,14 +288,14 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
          */
         @Override
         public void rollback() {
-            LOGGER.debug("rollback transaction '{0}'", getName()); //$NON-NLS-1$
+            LOGGER.debug("rollback transaction {0}", getName()); //$NON-NLS-1$
             try {
                 if (this.session == null) {
                     throw new KException(Messages.getString(Messages.Komodo.ERROR_SESSION_IS_CLOSED, this.name));
                 }
 
                 this.session.refresh(false);
-                LOGGER.debug("transaction '{0}' rolled back", getName()); //$NON-NLS-1$
+                LOGGER.debug("transaction {0} rolled back", getName()); //$NON-NLS-1$
 
                 if (this.callback != null) {
                     this.callback.respond(null);
@@ -377,7 +377,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("add: transaction = '{0}', parentPath = '{1}', name = '{2}'", //$NON-NLS-1$
+            LOGGER.debug("add: transaction = {0}, parentPath = {1}, name = {2}", //$NON-NLS-1$
                          transaction.getName(),
                          parentPath,
                          name);
@@ -453,13 +453,13 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                  final ValueFactory factory ) throws Exception {
         for (final String name : komodoObject.getPropertyNames(uow)) {
             final Property prop = komodoObject.getProperty(uow, name);
-            final int type = PropertyDescriptorImpl.convert(prop.getDescriptor().getType());
+            final int type = PropertyDescriptorImpl.convert(prop.getDescriptor(uow).getType());
 
-            if (prop.getDescriptor().isMultiple()) {
-                final Value[] values = PropertyImpl.createValues(factory, prop.getValues(), type);
+            if (prop.getDescriptor(uow).isMultiple()) {
+                final Value[] values = PropertyImpl.createValues(factory, prop.getValues(uow), type);
                 node.setProperty(name, values);
             } else {
-                final Value value = PropertyImpl.createValue(factory, prop.getValue(), type);
+                final Value value = PropertyImpl.createValue(factory, prop.getValue(uow), type);
                 node.setProperty(name, value);
             }
         }
@@ -520,7 +520,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("find: transaction = '{0}', keywords = '{1}', criteria = '{2}'", //$NON-NLS-1$
+            LOGGER.debug("find: transaction = {0}, keywords = {1}, criteria = {2}", //$NON-NLS-1$
                          transaction.getName(),
                          keywords,
                          criteria,
@@ -730,7 +730,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("get: transaction = '{0}', path = '{1}'", transaction.getName(), path); //$NON-NLS-1$
+            LOGGER.debug("get: transaction = {0}, path = {1}", transaction.getName(), path); //$NON-NLS-1$
         }
 
         final Session session = getSession(transaction);
@@ -857,7 +857,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getUsingId: transaction = '{0}', uuid = '{1}'", //$NON-NLS-1$
+            LOGGER.debug("getUsingId: transaction = {0}, uuid = {1}", //$NON-NLS-1$
                          transaction.getName(),
                          jcrUuid);
         }
@@ -935,7 +935,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("importResource: URL = '{0}', name = '{1}', parent = '{2}', transaction = '{3}'", //$NON-NLS-1$
+            LOGGER.debug("importResource: URL = {0}, name = {1}, parent = {2}, transaction = {3}", //$NON-NLS-1$
                          url,
                          name,
                          parentPath,
@@ -1012,7 +1012,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("publish: overwrite = '{0}', name = '{1}', library path = '{2}', transaction = '{3}'", //$NON-NLS-1$
+            LOGGER.debug("publish: overwrite = {0}, name = {1}, library path = {2}, transaction = {3}", //$NON-NLS-1$
                          overwrite,
                          komodoObject,
                          descriptor.getPath(),
@@ -1094,7 +1094,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("remove: paths = '{0}', transaction = '{1}'", //$NON-NLS-1$
+            LOGGER.debug("remove: paths = {0}, transaction = {1}", //$NON-NLS-1$
                          Arrays.asList(paths),
                          transaction.getName());
         }
@@ -1108,7 +1108,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
             try {
                 if (session.itemExists(absPath)) {
                     session.removeItem(absPath);
-                    LOGGER.debug("removed workspace node at path '{0}' in transaction '{1}'", absPath, transaction.getName()); //$NON-NLS-1$
+                    LOGGER.debug("removed workspace node at path {0} in transaction {1}", absPath, transaction.getName()); //$NON-NLS-1$
                 } else {
                     throw new KException(Messages.getString(Messages.Komodo.UNABLE_TO_REMOVE_NON_EXISTENT_WORKSPACE_ITEM, absPath));
                 }
@@ -1170,7 +1170,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("retrieve: paths = '{0}', transaction = '{1}'", //$NON-NLS-1$
+            LOGGER.debug("retrieve: paths = {0}, transaction = {1}", //$NON-NLS-1$
                          Arrays.asList(artifactPaths),
                          transaction.getName());
         }
@@ -1233,7 +1233,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unpublish: artifact paths = '{0}', transaction = '{1}'", //$NON-NLS-1$
+            LOGGER.debug("unpublish: artifact paths = {0}, transaction = {1}", //$NON-NLS-1$
                          Arrays.asList(artifactPaths),
                          transaction.getName());
         }
@@ -1247,7 +1247,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
             try {
                 if (session.itemExists(absPath)) {
                     session.removeItem(absPath);
-                    LOGGER.debug("removed library node at path '{0}' in transaction '{1}'", absPath, transaction.getName()); //$NON-NLS-1$
+                    LOGGER.debug("removed library node at path {0} in transaction {1}", absPath, transaction.getName()); //$NON-NLS-1$
                 } else {
                     throw new KException(Messages.getString(Messages.Komodo.UNABLE_TO_UNPUBLISH_NON_EXISTENT_ARTIFACT, absPath));
                 }
