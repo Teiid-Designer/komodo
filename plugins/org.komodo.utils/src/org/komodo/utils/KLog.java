@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.komodo.spi.constants.StringConstants;
@@ -59,8 +60,29 @@ public class KLog implements KLogger {
         }
 
         private void initLogger() throws IOException {
-            this.logger.setLevel(level);
+            dispose();
+
+            //
+            // Ensure this and all parent loggers have the
+            // same level set. Also, the handlers maintain
+            // their own level field so update them as well
+            // since they are responsible for publishing the
+            // log record.
+            //
+            Logger log = this.logger;
+            while(log != null) {
+                log.setLevel(level);
+                Handler[] handlers = log.getHandlers();
+                if (handlers != null) {
+                    for (Handler handler : handlers) {
+                        handler.setLevel(level);
+                    }
+                }
+                log = log.getParent();
+            }
+
             logPathHandler = new FileHandler(logPath);
+
             this.logger.addHandler(logPathHandler);
         }
 
@@ -71,6 +93,8 @@ public class KLog implements KLogger {
 
             if (logPathHandler != null)
                 logPathHandler.close();
+
+            logPathHandler = null;
         }
 
         @Override
