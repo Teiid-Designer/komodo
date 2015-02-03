@@ -10,6 +10,7 @@ package org.komodo.repository;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -25,17 +26,10 @@ import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.core.KomodoLexicon.DataSource;
 import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.core.KomodoLexicon.LibraryComponent;
-import org.komodo.core.KomodoLexicon.Schema;
-import org.komodo.core.KomodoLexicon.Vdb;
-import org.komodo.core.KomodoLexicon.VdbEntry;
-import org.komodo.core.KomodoLexicon.VdbImport;
-import org.komodo.core.KomodoLexicon.VdbModel;
-import org.komodo.core.KomodoLexicon.VdbModelSource;
-import org.komodo.core.KomodoLexicon.VdbTranslator;
 import org.komodo.core.KomodoLexicon.WorkspaceItem;
+import org.komodo.repository.search.ObjectSearcher;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Artifact;
@@ -48,7 +42,7 @@ import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
-import org.modeshape.jcr.JcrLexicon;
+import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.JcrTools;
 
 /**
@@ -182,6 +176,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         private final UnitOfWorkListener callback;
         private final String name;
         private final boolean rollbackOnly;
+        private final Repository repository;
         private Session session;
 
         /**
@@ -193,18 +188,23 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
          *        <code>true</code> if only a rollback can be done (i.e., commit not allowed)
          * @param listener
          *        the callback (can be <code>null</code>)
+         * @param repository
+         *        the repository this transaction is being enacted against (cannot be <code>null</code>)
          */
         public UnitOfWorkImpl( final String uowName,
                                final Session uowSession,
                                final boolean uowRollbackOnly,
-                               final UnitOfWorkListener listener ) {
+                               final UnitOfWorkListener listener,
+                               final Repository repository ) {
             ArgCheck.isNotEmpty(uowName, "uowName"); //$NON-NLS-1$
             ArgCheck.isNotNull(uowSession, "uowSession"); //$NON-NLS-1$
+            ArgCheck.isNotNull(repository);
 
             this.name = uowName;
             this.session = uowSession;
             this.rollbackOnly = uowRollbackOnly;
             this.callback = listener;
+            this.repository = repository;
         }
 
         /**
@@ -312,6 +312,22 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
             }
         }
 
+        @Override
+        public List<KomodoObject> query(String queryStatement) throws Exception {
+            List<KomodoObject> results = new ArrayList<KomodoObject>();
+
+            QueryManager queryMgr = session.getWorkspace().getQueryManager();
+            Query query = queryMgr.createQuery(queryStatement, Query.JCR_SQL2);
+            QueryResult result = query.execute();
+
+            NodeIterator itr = result.getNodes();
+            while (itr.hasNext()) {
+                Node node = itr.nextNode();
+                results.add(new ObjectImpl(repository, node.getPath(), node.getIndex()));
+            }
+
+            return results;
+        }
     }
 
     /**
@@ -356,6 +372,18 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         this.id = id;
     }
 
+    private UnitOfWork verifyTransaction(final UnitOfWork uow, String name, boolean rollback) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = createTransaction("repositoryimpl-" + name, rollback, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        return transaction;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -368,13 +396,8 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                              final String name,
                              final String primaryType ) throws KException {
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
 
-        if (transaction == null) {
-            transaction = createTransaction("repositoryimpl-add", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        UnitOfWork transaction = verifyTransaction(uow, "add", false); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("add: transaction = {0}, parentPath = {1}, name = {2}", //$NON-NLS-1$
@@ -467,13 +490,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
     private KomodoObject create( final UnitOfWork uow,
                                  final String absolutePath, final String nodeType ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = createTransaction("repositoryimpl-create", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        UnitOfWork transaction = verifyTransaction(uow, "create", false); //$NON-NLS-1$
         final Session session = getSession(transaction);
 
         try {
@@ -499,214 +516,69 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Repository#find(org.komodo.spi.repository.Repository.UnitOfWork, java.util.List,
-     *      org.komodo.spi.repository.Repository.KeywordCriteria, java.lang.String[])
-     */
     @Override
-    public ArtifactDescriptor[] find( final UnitOfWork uow,
-                                      final List< String > keywords,
-                                      final KeywordCriteria criteria,
-                                      final String... artifactTypes ) throws KException {
-        // TODO do we need to consider wildcards in the keywords??
-        UnitOfWork transaction = uow;
+    public List<KomodoObject> searchByKeyword( UnitOfWork uow, String type, String property,
+                                                                             KeywordCriteria keywordCriteria, 
+                                                                             String... keywords) throws KException {
 
-        if (transaction == null) {
-            transaction = createTransaction("repositoryimpl-find", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
+        UnitOfWork transaction = verifyTransaction(uow, "seachByKeyword", true); //$NON-NLS-1$
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("find: transaction = {0}, keywords = {1}, criteria = {2}", //$NON-NLS-1$
+            LOGGER.debug("find: transaction = {0}, keywords = {1}", //$NON-NLS-1$
                          transaction.getName(),
-                         keywords,
-                         criteria,
-                         (artifactTypes == null) ? "ALL" : Arrays.asList(artifactTypes)); //$NON-NLS-1$
+                         keywords);
         }
 
-        try {
-            KeywordCriteria searchCriteria = criteria;
-            final Set< String > paths = new HashSet< String >(10);
-            final String ALIAS = "ARTIFACT"; //$NON-NLS-1$
+        ArgCheck.isNotEmpty(keywords, "Search by keyword requires keywords"); //$NON-NLS-1$
 
-            boolean hasArtifactTypes = false;
-            final StringBuilder whereClause = new StringBuilder("WHERE "); //$NON-NLS-1$
+        if (keywordCriteria == null)
+            keywordCriteria = KeywordCriteria.getDefault();
 
-            // artifact type
-            if ((artifactTypes != null) && (artifactTypes.length != 0)) {
-                hasArtifactTypes = true;
-                whereClause.append(ALIAS).append(".[").append(JcrLexicon.PRIMARY_TYPE.getString()).append(" IN ("); //$NON-NLS-1$ //$NON-NLS-2$
-
-                boolean firstTime = true;
-
-                for (final String artifactType : artifactTypes) {
-                    if (!firstTime) {
-                        whereClause.append(',');
-                    }
-
-                    if (Schema.NODE_TYPE.equals(artifactType)) {
-                        paths.add(Schema.GROUP_NODE);
-                        whereClause.append(Schema.NODE_TYPE);
-                    } else if (Vdb.NODE_TYPE.equals(artifactType)) {
-                        paths.add(Vdb.GROUP_NODE);
-                        whereClause.append(Vdb.NODE_TYPE);
-                    } else if (VdbImport.NODE_TYPE.equals(artifactType)) {
-                        paths.add(VdbImport.GROUP_NODE);
-                        whereClause.append(VdbImport.NODE_TYPE);
-                    } else if (VdbModel.NODE_TYPE.equals(artifactType)) {
-                        paths.add(VdbModel.GROUP_NODE);
-                        whereClause.append(VdbModel.NODE_TYPE);
-                    } else if (VdbModelSource.NODE_TYPE.equals(artifactType)) {
-                        paths.add(VdbModelSource.GROUP_NODE);
-                        whereClause.append(VdbModelSource.NODE_TYPE);
-                    } else if (VdbTranslator.NODE_TYPE.equals(artifactType)) {
-                        paths.add(VdbTranslator.GROUP_NODE);
-                        whereClause.append(VdbTranslator.NODE_TYPE);
-                    } else if (VdbEntry.NODE_TYPE.equals(artifactType)) {
-                        paths.add(VdbEntry.GROUP_NODE);
-                        whereClause.append(VdbEntry.NODE_TYPE);
-                    } else if (DataSource.NODE_TYPE.equals(artifactType)) {
-                        paths.add(DataSource.GROUP_NODE);
-                        whereClause.append(DataSource.NODE_TYPE);
-                    }
-
-                    firstTime = false;
-                }
-
-                { // add paths to the where clause
-                    whereClause.append(") AND PATH() IN ("); //$NON-NLS-1$
-                    firstTime = true;
-
-                    for (final String path : paths) {
-                        if (!firstTime) {
-                            whereClause.append(',');
-                        }
-
-                        whereClause.append(path);
-                        firstTime = false;
-                    }
-
-                    whereClause.append(")"); //$NON-NLS-1$
-                }
-            }
-
-            // keywords
-            boolean hasKeywords = false;
-
-            if ((keywords != null) && !keywords.isEmpty()) {
-                hasKeywords = true;
-
-                if (hasArtifactTypes) {
-                    whereClause.append(" AND "); //$NON-NLS-1$
-                }
-
-                // "CONTAINS(ARTIFACT.[tko:description],'foo' 'bar')"
-                whereClause.append("CONTAINS(").append(ALIAS).append(".[").append(LibraryComponent.DESCRIPTION).append("],"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-                if (searchCriteria == null) {
-                    searchCriteria = KeywordCriteria.getDefault();
-                }
-
-                boolean firstTime = true;
-
-                for (final String keyword : keywords) {
-                    if (!firstTime && (KeywordCriteria.ANY == searchCriteria)) {
-                        whereClause.append(" OR "); //$NON-NLS-1$
-                    }
-
-                    if (KeywordCriteria.NONE == searchCriteria) {
-                        whereClause.append('-');
-                    }
-
-                    whereClause.append('\'').append(keyword).append('\'');
-                    firstTime = false;
-                }
-            }
-
-            // construct query
-            final String COLUMNS = JcrLexicon.PRIMARY_TYPE.getString() + ", " + LibraryComponent.DESCRIPTION; // TODO need other columns //$NON-NLS-1$
-            String selectStmt = "SELECT " + COLUMNS + " FROM [" + LibraryComponent.MIXIN_TYPE + "] " + ALIAS + ' '; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-            if (hasArtifactTypes || hasKeywords) {
-                selectStmt += whereClause;
-            }
-
-            LOGGER.debug("Artifact query: ", selectStmt); //$NON-NLS-1$
-
-            // run query
-            final Session session = getSession(transaction);
-            final QueryManager queryMgr = session.getWorkspace().getQueryManager();
-            final Query query = queryMgr.createQuery(selectStmt, Query.JCR_SQL2);
-            final QueryResult resultSet = query.execute();
-
-            // create results
-            ArtifactDescriptor[] result = null;
-            final NodeIterator itr = resultSet.getNodes();
-
-            if (itr.hasNext()) {
-                result = new ArtifactDescriptor[(int)itr.getSize()];
-                int i = 0;
-
-                while (itr.hasNext()) {
-                    final Node node = itr.nextNode();
-
-                    // description
-                    String description = null;
-
-                    if (node.hasProperty(LibraryComponent.DESCRIPTION)) {
-                        description = node.getProperty(LibraryComponent.DESCRIPTION).getString();
-                    } else {
-                        description = Messages.getString(Messages.Komodo.NO_ARTIFACT_DESCRIPTION, node.getName());
-                    }
-
-                    // version
-                    String version = null;
-
-                    if (node.hasProperty(JcrLexicon.VERSION_LABELS.getString())) {
-                        final Value[] labels = node.getProperty(JcrLexicon.VERSION_LABELS.getString()).getValues();
-                        version = labels[0].getString(); // TODO not sure how versions work??
-                    } else {
-                        // TODO not sure what to do here
-                        version = "1.0"; //$NON-NLS-1$
-                    }
-
-                    result[i++] = new ArtifactDescriptorImpl(node.getPrimaryNodeType().getName(), description, node.getPath(),
-                                                             this, version, true); // TODO figure out how to tell if readonly
-                }
-            } else {
-                result = ArtifactDescriptor.EMPTY;
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            if (uow == null) {
-                transaction.rollback();
-            }
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
+        ObjectSearcher searcher = new ObjectSearcher(this);
+        String typeAlias = "k1"; // where clauses need an alias so assign one to the type //$NON-NLS-1$
+        searcher.addFromType(type, typeAlias);
+        searcher.addWhereContainsClause(null, typeAlias, property, keywordCriteria, keywords);
+        List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
+        
+        return searchObjects;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Repository#find(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
-     */
     @Override
-    public ArtifactDescriptor[] find( final UnitOfWork transaction,
-                                      final String... artifactTypes ) throws KException {
-        return find(transaction, null, null, artifactTypes);
+    public List<KomodoObject> searchByType( UnitOfWork uow, String... types) throws KException {
+        ArgCheck.isNotEmpty(types, "types"); //$NON-NLS-1$
+
+        UnitOfWork transaction = verifyTransaction(uow, "searchByType", true); //$NON-NLS-1$
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("find: transaction = {0}, types = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         types);
+        }
+
+        ObjectSearcher searcher = new ObjectSearcher(this);
+        for (String type : types) {
+            searcher.addFromType(type);
+        }
+
+        List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
+        return searchObjects;
+    }
+
+    @Override
+    public List<KomodoObject> searchByPath( UnitOfWork uow, String... paths) throws KException {
+        ArgCheck.isNotEmpty(paths, "paths"); //$NON-NLS-1$
+
+        UnitOfWork transaction = verifyTransaction(uow, "searchByPath", true); //$NON-NLS-1$
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("find: transaction = {0}, paths = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         paths);
+        }
+
+        ObjectSearcher searcher = new ObjectSearcher(this);
+        searcher.addFromType(JcrConstants.NT_UNSTRUCTURED);
+        searcher.addWherePath(paths);
+
+        List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
+        return searchObjects;
     }
 
     /**
@@ -717,17 +589,11 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     @Override
     public KomodoObject getFromWorkspace( final UnitOfWork uow,
                              final String path ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            //
-            // Transaction has to be committable (hence the 'false') since is it possible that
-            // komodoWorkspace() below actually creates the workspace if it doesn't already exist
-            //
-            transaction = createTransaction("repositoryimpl-get", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        //
+        // Transaction has to be committable (hence the 'false') since is it possible that
+        // komodoWorkspace() below actually creates the workspace if it doesn't already exist
+        //
+        UnitOfWork transaction = verifyTransaction(uow, "get", false); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("get: transaction = {0}, path = {1}", transaction.getName(), path); //$NON-NLS-1$
@@ -848,13 +714,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     public KomodoObject getUsingId( final UnitOfWork uow,
                                     final String jcrUuid ) throws KException {
         ArgCheck.isNotEmpty(jcrUuid, "jcrUuid"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = createTransaction("repositoryimpl-getUsingId", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        UnitOfWork transaction = verifyTransaction(uow, "getUsingId", false); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("getUsingId: transaction = {0}, uuid = {1}", //$NON-NLS-1$
@@ -926,13 +786,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                         final String parentPath ) throws KException {
         ArgCheck.isNotNull(url, "url"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = createTransaction("repositoryimpl-importResource", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        UnitOfWork transaction = verifyTransaction(uow, "importResource", false); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("importResource: URL = {0}, name = {1}, parent = {2}, transaction = {3}", //$NON-NLS-1$
@@ -1003,13 +857,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                          final KomodoObject komodoObject ) throws KException {
         ArgCheck.isNotNull(descriptor, "descriptor"); //$NON-NLS-1$
         ArgCheck.isNotNull(komodoObject, "komodoObject"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = createTransaction("repositoryimpl-publish", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        UnitOfWork transaction = verifyTransaction(uow, "publish", false); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("publish: overwrite = {0}, name = {1}, library path = {2}, transaction = {3}", //$NON-NLS-1$
@@ -1085,13 +933,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     public void remove( final UnitOfWork uow,
                         final String... paths ) throws KException {
         ArgCheck.isNotEmpty(paths, "paths"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = createTransaction("repositoryimpl-publish", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        UnitOfWork transaction = verifyTransaction(uow, "remove", false); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("remove: paths = {0}, transaction = {1}", //$NON-NLS-1$
@@ -1161,13 +1003,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     public Artifact[] retrieve( final UnitOfWork uow,
                                 final String... artifactPaths ) throws KException {
         ArgCheck.isNotEmpty(artifactPaths, "artifactPaths"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = createTransaction("repository-retrieve", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        UnitOfWork transaction = verifyTransaction(uow, "retrieve", true); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("retrieve: paths = {0}, transaction = {1}", //$NON-NLS-1$
@@ -1224,13 +1060,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     public void unpublish( final UnitOfWork uow,
                            final String... artifactPaths ) throws KException {
         ArgCheck.isNotEmpty(artifactPaths, "artifactPaths"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = createTransaction("repository-unpublish", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        UnitOfWork transaction = verifyTransaction(uow, "unpublish", false); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("unpublish: artifact paths = {0}, transaction = {1}", //$NON-NLS-1$
