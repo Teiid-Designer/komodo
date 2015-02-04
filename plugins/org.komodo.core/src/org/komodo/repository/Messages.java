@@ -69,6 +69,17 @@ public class Messages implements StringConstants {
         ERROR_SESSION_IS_CLOSED,
         ERROR_TRYING_TO_COMMIT,
         ERROR_TRYING_TO_ROLLBACK,
+
+        /**
+         * An error message indicating the type of the object is not incorrect.
+         */
+        INCORRECT_TYPE,
+
+        /**
+         * An error message indicating the object has an incorrect property value.
+         */
+        INVALID_PROPERTY_VALUE,
+
         NO_ARTIFACT_DESCRIPTION,
         REMOVE_WORKSPACE_OBJECT_ERROR,
         UNABLE_TO_CONSTRUCT_PROPERTY,

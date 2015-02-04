@@ -34,14 +34,14 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.model.ModelImpl;
-import org.komodo.relational.internal.vdb.VdbImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
+import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
@@ -134,7 +134,8 @@ public class WorkspaceManager {
                                            final Exception e ) {
         assert (e != null);
         assert ((transactionParameter == null) && (transactionVariable != null))
-               || ((transactionParameter != null) && (transactionVariable == null));
+               || ((transactionParameter != null) && (transactionVariable == null))
+               || ((transactionParameter == transactionVariable));
 
         if (transactionParameter == null) {
             transactionVariable.rollback();
@@ -151,7 +152,7 @@ public class WorkspaceManager {
      * @param uow
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param parent
-     *        the parent of the model object being created (cannot be <code>null</code>)
+     *        the parent of the model object being created (can be <code>null</code> if creating at workspace root)
      * @param modelName
      *        the name of the model to create (cannot be empty)
      * @return the model object (never <code>null</code>)
@@ -161,7 +162,6 @@ public class WorkspaceManager {
     public Model createModel( UnitOfWork uow,
                               KomodoObject parent,
                               String modelName ) throws KException {
-        ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(modelName, "modelName"); //$NON-NLS-1$
 
         UnitOfWork transaction = uow;
@@ -173,16 +173,26 @@ public class WorkspaceManager {
         assert (transaction != null);
 
         try {
+            String parentPath = null;
+
+            if (parent == null) {
+                parentPath = this.repository.komodoWorkspace(transaction).getAbsolutePath();
+            } else {
+                validateWorkspaceMember(transaction, parent);
+                parentPath = parent.getAbsolutePath();
+            }
+
             final KomodoObject kobject = getRepository().add(transaction,
-                                                             parent.getAbsolutePath(),
+                                                             parentPath,
                                                              modelName,
                                                              KomodoLexicon.VdbModel.NODE_TYPE);
+            final Model result =  new ModelImpl(transaction, getRepository(), kobject.getAbsolutePath());
 
             if (uow == null) {
                 transaction.commit();
             }
 
-            return new ModelImpl(getRepository(), kobject.getAbsolutePath());
+            return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
@@ -218,12 +228,13 @@ public class WorkspaceManager {
                                                              parent.getAbsolutePath(),
                                                              schemaName,
                                                              KomodoLexicon.Schema.NODE_TYPE);
+            final Schema result = new SchemaImpl(transaction, getRepository(), kobject.getAbsolutePath());
 
             if (uow == null) {
                 transaction.commit();
             }
 
-            return new SchemaImpl(getRepository(), kobject.getAbsolutePath());
+            return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
@@ -259,12 +270,13 @@ public class WorkspaceManager {
                                                              parent.getAbsolutePath(),
                                                              id,
                                                              KomodoLexicon.Teiid.NODE_TYPE);
+            final Teiid result = new TeiidImpl(transaction, getRepository(), kobject.getAbsolutePath());
 
             if (uow == null) {
                 transaction.commit();
             }
 
-            return new TeiidImpl(getRepository(), kobject.getAbsolutePath());
+            return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
@@ -302,7 +314,7 @@ public class WorkspaceManager {
             if (parent == null) {
                 parentPath = this.repository.komodoWorkspace(transaction).getAbsolutePath();
             } else {
-                validateWorkspaceMember(uow, parent);
+                validateWorkspaceMember(transaction, parent);
                 parentPath = parent.getAbsolutePath();
             }
 
@@ -408,17 +420,30 @@ public class WorkspaceManager {
      *         if an error occurs
      */
     public Model[] findModels( final UnitOfWork uow ) throws KException {
-        final String[] paths = findByType(uow, KomodoLexicon.VdbModel.NODE_TYPE);
+        UnitOfWork transaction = uow;
 
-        if (paths.length == 0) {
-            return Model.NO_MODELS;
+        if (uow == null) {
+            transaction = getRepository().createTransaction("workspacemanager-findModels", true, null); //$NON-NLS-1$
         }
 
-        final Model[] result = new Model[paths.length];
-        int i = 0;
+        assert (transaction != null);
 
-        for (final String path : paths) {
-            result[i++] = new ModelImpl(getRepository(), path);
+        final String[] paths = findByType(transaction, KomodoLexicon.VdbModel.NODE_TYPE);
+        Model[] result = null;
+
+        if (paths.length == 0) {
+            result = Model.NO_MODELS;
+        } else {
+            result = new Model[paths.length];
+            int i = 0;
+
+            for (final String path : paths) {
+                result[i++] = new ModelImpl(transaction, getRepository(), path);
+            }
+        }
+
+        if (uow == null) {
+            transaction.commit();
         }
 
         return result;
@@ -432,17 +457,30 @@ public class WorkspaceManager {
      *         if an error occurs
      */
     public Schema[] findSchemas( final UnitOfWork uow ) throws KException {
-        final String[] paths = findByType(uow, KomodoLexicon.Schema.NODE_TYPE);
+        UnitOfWork transaction = uow;
 
-        if (paths.length == 0) {
-            return Schema.NO_SCHEMAS;
+        if (uow == null) {
+            transaction = getRepository().createTransaction("workspacemanager-findSchemas", true, null); //$NON-NLS-1$
         }
 
-        final Schema[] result = new Schema[paths.length];
-        int i = 0;
+        assert (transaction != null);
 
-        for (final String path : paths) {
-            result[i++] = new SchemaImpl(getRepository(), path);
+        final String[] paths = findByType(transaction, KomodoLexicon.Schema.NODE_TYPE);
+        Schema[] result = null;
+
+        if (paths.length == 0) {
+            result = Schema.NO_SCHEMAS;
+        } else {
+            result = new Schema[paths.length];
+            int i = 0;
+
+            for (final String path : paths) {
+                result[i++] = new SchemaImpl(transaction, getRepository(), path);
+            }
+        }
+
+        if (uow == null) {
+            transaction.commit();
         }
 
         return result;
@@ -456,16 +494,29 @@ public class WorkspaceManager {
      *         if an error occurs
      */
     public List< Teiid > findTeiids( UnitOfWork uow ) throws KException {
-        final String[] paths = findByType(uow, KomodoLexicon.Teiid.NODE_TYPE);
+        UnitOfWork transaction = uow;
 
-        if (paths.length == 0) {
-            return Collections.emptyList();
+        if (uow == null) {
+            transaction = getRepository().createTransaction("workspacemanager-findTeiids", true, null); //$NON-NLS-1$
         }
 
-        final List< Teiid > result = new ArrayList<>(paths.length);
+        assert (transaction != null);
 
-        for (final String path : paths) {
-            result.add(new TeiidImpl(getRepository(), path));
+        final String[] paths = findByType(transaction, KomodoLexicon.Teiid.NODE_TYPE);
+        List< Teiid > result = null;
+
+        if (paths.length == 0) {
+            result = Collections.emptyList();
+        } else {
+            result = new ArrayList<>(paths.length);
+
+            for (final String path : paths) {
+                result.add(new TeiidImpl(transaction, getRepository(), path));
+            }
+        }
+
+        if (uow == null) {
+            transaction.commit();
         }
 
         return result;
@@ -479,17 +530,30 @@ public class WorkspaceManager {
      *         if an error occurs
      */
     public Vdb[] findVdbs( final UnitOfWork uow ) throws KException {
-        final String[] paths = findByType(uow, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        UnitOfWork transaction = uow;
 
-        if (paths.length == 0) {
-            return Vdb.NO_VDBS;
+        if (uow == null) {
+            transaction = getRepository().createTransaction("workspacemanager-findVdbs", true, null); //$NON-NLS-1$
         }
 
-        final Vdb[] result = new Vdb[paths.length];
-        int i = 0;
+        assert (transaction != null);
 
-        for (final String path : paths) {
-            result[i++] = new VdbImpl(getRepository(), path);
+        final String[] paths = findByType(transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        Vdb[] result = null;
+
+        if (paths.length == 0) {
+            result = Vdb.NO_VDBS;
+        } else {
+            result = new Vdb[paths.length];
+            int i = 0;
+
+            for (final String path : paths) {
+                result[i++] = new VdbImpl(transaction, getRepository(), path);
+            }
+        }
+
+        if (uow == null) {
+            transaction.commit();
         }
 
         return result;

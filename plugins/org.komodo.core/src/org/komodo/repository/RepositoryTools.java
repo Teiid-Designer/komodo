@@ -124,16 +124,16 @@ public class RepositoryTools implements StringConstants {
 
     /**
      * @param property
+     *        the property whose display value is being requested (cannot be empty)
      * @return String representation of property and its values
-     * @throws Exception 
      */
-    public static String getDisplayValue(Property property) throws Exception {
+    public static String getDisplayValue(Property property) {
         StringBuilder sb = new StringBuilder();
         try {
             sb.append(property.getName(null)).append('=');
-            if (property.isMultiple()) {
+            if (property.isMultiple(null)) {
                 sb.append('[');
-                Object[] values = property.getValues();
+                Object[] values = property.getValues(null);
                 for (int i = 0; i < values.length; ++i) {
                     Object value = values[i];
                     sb.append(value);
@@ -142,7 +142,7 @@ public class RepositoryTools implements StringConstants {
                 }
                 sb.append(']');
             } else {
-                Object value = property.getValue();
+                Object value = property.getValue(null);
                 sb.append(value);
             }
         } catch (Exception e) {
@@ -171,7 +171,7 @@ public class RepositoryTools implements StringConstants {
      * This can do the same job as {@link JcrTools#printNode(javax.jcr.Node)}, however
      * the latter only prints to System.out while this visitor returns the string allowing
      * it to be sent to alternative {@link PrintStream}s.
-     * 
+     *
      */
     public static class TraversalOutputVisitor implements KomodoObjectVisitor {
 

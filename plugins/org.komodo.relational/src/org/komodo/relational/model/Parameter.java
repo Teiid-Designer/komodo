@@ -81,6 +81,14 @@ public interface Parameter extends OptionContainer, RelationalObject {
     Nullable getNullable( final UnitOfWork transaction ) throws KException;
 
     /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Procedure getParent( final UnitOfWork transaction ) throws KException;
+
+    /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return the value of the <code>precision</code> property

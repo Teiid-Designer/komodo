@@ -224,11 +224,11 @@ public class ModeshapeEngineThread extends Thread {
                         "commitSession called when request is not a commit session"); //$NON-NLS-1$
         final SessionRequest commitRequest = (SessionRequest)request;
         final Session session = commitRequest.getSession();
-        LOGGER.debug("commit session for request '{0}'", commitRequest.getName()); //$NON-NLS-1$
+        LOGGER.debug("commit session for request {0}", commitRequest.getName()); //$NON-NLS-1$
 
         try {
             session.save();
-            LOGGER.debug("commit session request '{0}' has been saved", commitRequest.getName()); //$NON-NLS-1$
+            LOGGER.debug("commit session request {0} has been saved", commitRequest.getName()); //$NON-NLS-1$
 
             if (request.getCallback() != null) {
                 request.getCallback().respond(null);
@@ -270,11 +270,11 @@ public class ModeshapeEngineThread extends Thread {
                         "rollbackSession called when request is not a rollback session"); //$NON-NLS-1$
         final SessionRequest rollbackRequest = (SessionRequest)request;
         final Session session = rollbackRequest.getSession();
-        LOGGER.debug("rollback session for request '{0}'", rollbackRequest.getName()); //$NON-NLS-1$
+        LOGGER.debug("rollback session for request {0}", rollbackRequest.getName()); //$NON-NLS-1$
 
         try {
             session.refresh(false);
-            LOGGER.debug("rollback session request '{0}' has been rolled back", rollbackRequest.getName()); //$NON-NLS-1$
+            LOGGER.debug("rollback session request {0} has been rolled back", rollbackRequest.getName()); //$NON-NLS-1$
 
             if (request.getCallback() != null) {
                 request.getCallback().respond(null);

@@ -158,4 +158,5 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         if (! _repoObserver.getLatch().await(1, TimeUnit.MINUTES))
             throw new RuntimeException("Local repository was not cleared");
     }
+
 }

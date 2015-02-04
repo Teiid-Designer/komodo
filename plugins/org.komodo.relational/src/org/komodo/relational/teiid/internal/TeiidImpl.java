@@ -361,12 +361,16 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     private final TeiidParentImpl teiidParent;
 
     /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository the repository
      * @param path the path
      * @throws KException if error occurs
      */
-    public TeiidImpl(Repository repository, String path) throws KException {
-        super(repository, path);
+    public TeiidImpl(final UnitOfWork uow,
+                     final Repository repository,
+                     final String path) throws KException {
+        super(uow, repository, path);
         adminInfo = new TeiidAdminInfoImpl();
         jdbcInfo = new TeiidJdbcInfoImpl();
         teiidParent = new TeiidParentImpl();
@@ -583,6 +587,18 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     @Override
     public boolean removeListener(ExecutionConfigurationListener listener) {
         return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    protected void validateInitialState( final UnitOfWork uow,
+                                         final String path ) throws KException {
+        validateType(uow, path, KomodoLexicon.Teiid.NODE_TYPE);
     }
 
 }
