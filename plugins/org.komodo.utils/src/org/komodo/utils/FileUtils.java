@@ -443,26 +443,26 @@ public class FileUtils implements StringConstants {
 //            return theFileName;
 //        }
 //    }
-//
-//    /**
-//     * @param directory
-//     */
-//    public static void removeChildrenRecursively(final File directory) {
-//        final File[] files = directory.listFiles();
-//        if (files != null) for (final File file2 : files) {
-//            final File file = file2;
-//            if (file.isDirectory()) removeDirectoryAndChildren(file);
-//            else if (!file.delete()) file.deleteOnExit();
-//        }
-//    }
-//
-//    /**
-//     * @param directory
-//     */
-//    public static void removeDirectoryAndChildren(final File directory) {
-//        removeChildrenRecursively(directory);
-//        if (!directory.delete()) directory.deleteOnExit();
-//    }
+
+    /**
+     * @param directory the directory whose children should be removed
+     */
+    public static void removeChildrenRecursively(final File directory) {
+        final File[] files = directory.listFiles();
+        if (files != null) for (final File file2 : files) {
+            final File file = file2;
+            if (file.isDirectory()) removeDirectoryAndChildren(file);
+            else if (!file.delete()) file.deleteOnExit();
+        }
+    }
+
+    /**
+     * @param directory the directory to delete
+     */
+    public static void removeDirectoryAndChildren(final File directory) {
+        removeChildrenRecursively(directory);
+        if (!directory.delete()) directory.deleteOnExit();
+    }
 //
 //    /**
 //     * Test whether it's possible to read and write files in the specified directory.

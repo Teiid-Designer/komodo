@@ -17,6 +17,16 @@
         "default" : "komodoLocalWorkspace",
         "allowCreation" : true
     },
+    "storage" : {
+        "cacheConfiguration" : "org/komodo/repository/test/infinispan-config.xml",
+        "cacheName" : "Test Repository",
+        "binaryStorage" : {
+            "minimumBinarySizeInBytes" : 4096,
+            "minimumStringSize" : 4096,
+            "directory": "target/content/binaries",
+            "type" : "file"
+        }
+    },
     "query" : {
         "enabled" : true,
         "indexing" : {

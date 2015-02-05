@@ -26,7 +26,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import java.net.URL;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -37,7 +36,6 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
-import org.komodo.spi.repository.RepositoryObserver;
 
 /**
  * Provides framework for testing an instance of the local repository
@@ -60,31 +58,6 @@ import org.komodo.spi.repository.RepositoryObserver;
 public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest implements StringConstants {
 
     private static final String TEST_REPOSITORY_CONFIG = "test-local-repository-in-memory-config.json";
-
-    protected static class LocalRepositoryObserver implements RepositoryObserver {
-
-        private CountDownLatch latch;
-
-        public LocalRepositoryObserver() {
-            resetLatch();
-        }
-
-        public void resetLatch() {
-            latch = new CountDownLatch(1);
-        }
-
-        /**
-         * @return the latch
-         */
-        public CountDownLatch getLatch() {
-            return this.latch;
-        }
-
-        @Override
-        public void eventOccurred() {
-            latch.countDown();
-        }
-    }
 
     protected static LocalRepository _repo = null;
 
