@@ -146,6 +146,16 @@ public interface Repository {
          */
         void rollback();
 
+        /**
+         * Query the repository with the given statement
+         *
+         * @param queryStatement
+         *
+         * @return the list of {@link KomodoObject}s resulting from the query
+         * @throws Exception if error occurs
+         */
+        List<KomodoObject> query(String queryStatement) throws Exception;
+
     }
 
     /**
@@ -216,32 +226,48 @@ public interface Repository {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     * @param type
+     *        the type of node to base the search on
+     * @param property
+     *        the property which will contain the keywords
+     * @param keywordCriteria
+     *        the search criteria (can be <code>null</code> if the default criteria should be used)
      * @param keywords
      *        words that should be matched to words found in the description (can be empty)
-     * @param criteria
-     *        the search criteria (can be <code>null</code> if the default criteria should be used)
-     * @param artifactTypes
-     *        the artifact type(s) (can be empty if all artifacts of any type are wanted)
-     * @return the requested artifacts (never <code>null</code> but can be empty)
+     *
+     * @return the {@link KomodoObject}s resulting from the search
+     *
      * @throws KException
      *         if parent path does not exist or an error occurs
      */
-    ArtifactDescriptor[] find( final UnitOfWork transaction,
-                               final List< String > keywords,
-                               final KeywordCriteria criteria,
-                               final String... artifactTypes ) throws KException;
+    List<KomodoObject> searchByKeyword( UnitOfWork transaction, String type, String property,
+                                                                     KeywordCriteria keywordCriteria, String... keywords) throws KException;
 
     /**
+     *
      * @param transaction
      *        the transaction (can be <code>null</code> if operation should be automatically committed)
-     * @param artifactTypes
-     *        the artifact type(s) (can be empty if all artifacts of any type are wanted)
-     * @return the requested artifacts (never <code>null</code> but can be empty)
+     * @param types the primary or mixin types to search for
+     *
+     * @return the {@link KomodoObject}s resulting from the search
+     *
      * @throws KException
      *         if parent path does not exist or an error occurs
      */
-    ArtifactDescriptor[] find( final UnitOfWork transaction,
-                               final String... artifactTypes ) throws KException;
+    List<KomodoObject> searchByType( UnitOfWork transaction, String... types) throws KException;
+
+    /**
+    *
+    * @param transaction
+    *        the transaction (can be <code>null</code> if operation should be automatically committed)
+    * @param paths the paths to search for
+    *
+    * @return the {@link KomodoObject}s resulting from the search
+    *
+    * @throws KException
+    *         if parent path does not exist or an error occurs
+    */
+    List<KomodoObject> searchByPath( UnitOfWork transaction, String... paths) throws KException;
 
     /**
      * Get an object from the workspace part of the repository.

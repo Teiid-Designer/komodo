@@ -31,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.List;
 import javax.jcr.Node;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,8 +43,10 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.Id;
+import org.komodo.spi.repository.Repository.KeywordCriteria;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.jcr.JcrNtLexicon;
@@ -269,4 +272,141 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         assertNotNull(result);
     }
 
+    @Test
+    public void shouldSearchForPrimaryType() throws Exception {
+        KomodoObject komodoWksp = _repo.komodoWorkspace(null);
+        assertNotNull(komodoWksp);
+
+        // Setup up 10 nodes to find
+        for (int i = 1; i < 6; ++i) {
+            KomodoObject child = komodoWksp.addChild(null, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+        }
+
+        for (int i = 6; i < 11; ++i) {
+            KomodoObject child = komodoWksp.addChild(null, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
+        }
+
+        KomodoObject[] testNodes = komodoWksp.getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
+        assertEquals(10, testNodes.length);
+        for (KomodoObject testKO : testNodes) {
+            Property property = testKO.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertTrue(property.getStringValue().equals("DDL") || property.getStringValue().equals("TEIIDSQL"));
+        }
+
+        // Perform the search
+        List<KomodoObject> results = _repo.searchByType(null, KomodoLexicon.VdbModel.NODE_TYPE);
+
+        // Validate the results are as exepcted
+        assertEquals(testNodes.length, results.size());
+        for (KomodoObject searchObject : results) {
+            String name = searchObject.getName(null);
+            assertTrue(name.startsWith("test"));
+
+            String indexStr = name.substring(4);
+            int index = Integer.parseInt(indexStr);
+            assertTrue(index > 0 && index < 11);
+
+            Property property = searchObject.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            if (index < 6)
+                assertEquals("DDL", property.getStringValue());
+            else
+                assertEquals("TEIIDSQL", property.getStringValue());
+        }
+    }
+
+    @Test
+    public void shouldSearchForKeyword() throws Exception {
+        KomodoObject komodoWksp = _repo.komodoWorkspace(null);
+        assertNotNull(komodoWksp);
+
+        // Setup up 10 nodes to find
+        for (int i = 1; i < 6; ++i) {
+            KomodoObject child = komodoWksp.addChild(null, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+        }
+
+        for (int i = 6; i < 11; ++i) {
+            KomodoObject child = komodoWksp.addChild(null, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
+        }
+
+        KomodoObject[] testNodes = komodoWksp.getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
+        assertEquals(10, testNodes.length);
+        for (KomodoObject testKO : testNodes) {
+            Property property = testKO.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertTrue(property.getStringValue().equals("DDL") || property.getStringValue().equals("TEIIDSQL"));
+        }
+
+        // Perform the search
+        List<KomodoObject> results = _repo.searchByKeyword(
+                                                           null, KomodoLexicon.VdbModel.NODE_TYPE,
+                                                           KomodoLexicon.VdbModel.MODEL_DEFINITION,
+                                                           KeywordCriteria.ANY,
+                                                           "DDL");
+
+        // Validate the results are as exepcted
+        assertEquals(5, results.size());
+        for (KomodoObject searchObject : results) {
+            String name = searchObject.getName(null);
+            assertTrue(name.startsWith("test"));
+
+            String indexStr = name.substring(4);
+            int index = Integer.parseInt(indexStr);
+            assertTrue(index > 0 && index < 11);
+
+            Property property = searchObject.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            if (index < 6)
+                assertEquals("DDL", property.getStringValue());
+        }
+    }
+
+    @Test
+    public void shouldSearchForPath() throws Exception {
+        KomodoObject komodoWksp = _repo.komodoWorkspace(null);
+        assertNotNull(komodoWksp);
+
+        // Setup up 10 nodes to find
+        for (int i = 1; i < 6; ++i) {
+            KomodoObject child = komodoWksp.addChild(null, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+        }
+
+        for (int i = 6; i < 11; ++i) {
+            KomodoObject child = komodoWksp.addChild(null, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
+        }
+
+        KomodoObject[] testNodes = komodoWksp.getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
+        assertEquals(10, testNodes.length);
+        for (KomodoObject testKO : testNodes) {
+            Property property = testKO.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertTrue(property.getStringValue().equals("DDL") || property.getStringValue().equals("TEIIDSQL"));
+        }
+
+        // Perform the search
+        List<KomodoObject> results = _repo.searchByPath(
+                                                           null,
+                                                           komodoWksp.getAbsolutePath() + File.separator + "test1",
+                                                           komodoWksp.getAbsolutePath() + File.separator + "test2",
+                                                           komodoWksp.getAbsolutePath() + File.separator + "test3",
+                                                           komodoWksp.getAbsolutePath() + File.separator + "test4",
+                                                           komodoWksp.getAbsolutePath() + File.separator + "test5");
+
+        // Validate the results are as exepcted
+        assertEquals(5, results.size());
+        for (KomodoObject searchObject : results) {
+            String name = searchObject.getName(null);
+            assertTrue(name.startsWith("test"));
+
+            String indexStr = name.substring(4);
+            int index = Integer.parseInt(indexStr);
+            assertTrue(index > 0 && index < 11);
+
+            Property property = searchObject.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            if (index < 6)
+                assertEquals("DDL", property.getStringValue());
+        }
+    }
 }

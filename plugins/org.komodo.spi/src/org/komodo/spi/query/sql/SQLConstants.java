@@ -21,40 +21,35 @@
  ************************************************************************************/
 package org.komodo.spi.query.sql;
 
+import org.komodo.spi.constants.StringConstants;
+
 /**
  * SqlConstants
  *
  *
  */
-public interface SQLConstants {
+public interface SQLConstants extends StringConstants {
 
-    String EMPTY_STR = ""; //$NON-NLS-1$
-    String TAB = "\t"; //$NON-NLS-1$
+    String EMPTY_STR = EMPTY_STRING;
     String TAB2 = "\t\t"; //$NON-NLS-1$
     String TAB3 = "\t\t\t"; //$NON-NLS-1$
     String TAB4 = "\t\t\t\t"; //$NON-NLS-1$
-    String CR = "\n"; //$NON-NLS-1$
+    String CR = NEW_LINE;
     String CR_1 = "\\r\\n"; //$NON-NLS-1$
     String CR_2 = "\\n"; //$NON-NLS-1$
-    String BLANK = ""; //$NON-NLS-1$
+    String BLANK = EMPTY_STRING;
     String DBL_SPACE = "  "; //$NON-NLS-1$
-    String SPACE = " "; //$NON-NLS-1$
-    String COMMA = ","; //$NON-NLS-1$
     String TRUE = "TRUE"; //$NON-NLS-1$
     String FALSE = "FALSE"; //$NON-NLS-1$
-    String RETURN = "\n"; //$NON-NLS-1$
+    String RETURN = NEW_LINE;
     String SELECT = "SELECT"; //$NON-NLS-1$
     String FROM = "FROM"; //$NON-NLS-1$
     String WHERE = "WHERE"; //$NON-NLS-1$
     String HAVING = "HAVING"; //$NON-NLS-1$
-	String DOT = "."; //$NON-NLS-1$
-	String STAR = "*"; //$NON-NLS-1$
-    String L_PAREN = "("; //$NON-NLS-1$
-    String R_PAREN = ")"; //$NON-NLS-1$
+    String L_PAREN = OPEN_BRACKET;
+    String R_PAREN = CLOSE_BRACKET;
     String S_QUOTE = "\'"; //$NON-NLS-1$
     String D_QUOTE = "\""; //$NON-NLS-1$
-    String SEMI_COLON = ";"; //$NON-NLS-1$
-    String COLON = ":"; //$NON-NLS-1$
     String BAR = "|"; //$NON-NLS-1$
     String AS = "AS"; //$NON-NLS-1$
     String COLUMNS = "COLUMNS"; //$NON-NLS-1$
@@ -72,6 +67,7 @@ public interface SQLConstants {
     String EXEC = "EXEC"; //$NON-NLS-1$
     String CONVERT = "CONVERT"; //$NON-NLS-1$
     String NULL = "NULL"; //$NON-NLS-1$
+    String IN = "IN"; //$NON-NLS-1$
     
     String ENVELOPE_NS = "http://schemas.xmlsoap.org/soap/envelope/"; //$NON-NLS-1$
     String ENVELOPE_NS_ALIAS = "soap"; //$NON-NLS-1$
@@ -104,7 +100,7 @@ public interface SQLConstants {
     String VARIABLES = "VARIABLES"; //$NON-NLS-1$
     String DVARS = "DVARS"; //$NON-NLS-1$
     
-    String DEFAULT_DELIMITER = ","; //$NON-NLS-1$
+    String DEFAULT_DELIMITER = COMMA;
     String DEFAULT_QUOTE = "\""; //$NON-NLS-1$
     String DEFAULT_ESCAPE = "\\"; //$NON-NLS-1$
     
