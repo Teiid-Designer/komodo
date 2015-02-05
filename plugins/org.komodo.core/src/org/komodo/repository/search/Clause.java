@@ -33,6 +33,11 @@ import org.komodo.utils.StringUtils;
  */
 abstract class Clause implements SQLConstants {
 
+    /**
+     * Alias property
+     */
+    protected static final String ALIAS = "alias"; //$NON-NLS-1$
+
     public enum LogicalOperator {
 
         OR,
@@ -71,6 +76,20 @@ abstract class Clause implements SQLConstants {
 
     protected void setProperty(String key, String value) {
         properties.put(key, value);
+    }
+
+    /**
+     * @return the alias
+     */
+    public String getAlias() {
+        return properties.get(ALIAS);
+    }
+
+    /**
+     * @param alias the alias to set
+     */
+    public void setAlias(String alias) {
+        setProperty(ALIAS, alias);
     }
 
     protected void appendStringValues(StringBuffer buffer, Iterator<String> valuesIter) {

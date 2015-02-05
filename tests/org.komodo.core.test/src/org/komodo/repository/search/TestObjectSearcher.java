@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.RepositoryImpl;
+import org.komodo.repository.RepositoryTools;
 import org.komodo.repository.search.Clause.LogicalOperator;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -375,12 +376,14 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         KomodoObject workspace = _repo.komodoWorkspace(null);
         assertNotNull(workspace);
 
+        System.out.println(RepositoryTools.traverse(workspace.getParent(null)));
+
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.addFromType(JcrConstants.NT_UNSTRUCTURED, "nt");
-        os.addWherePath(RepositoryImpl.WORKSPACE_ROOT);
+        os.addWherePathClause(null, "nt", RepositoryImpl.WORKSPACE_ROOT);
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
-                                     "WHERE PATH() IN('" + workspace.getAbsolutePath() + "')";
+                                     "WHERE PATH(nt) = '" + workspace.getAbsolutePath() + "'";
         assertEquals(expected, os.toString());
 
         List<KomodoObject> searchObjects = os.searchObjects(null);

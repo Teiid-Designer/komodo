@@ -34,7 +34,7 @@ import org.komodo.utils.StringUtils;
  * CONTAINS(tagged.[acme:tagName], 'foo')
  *
  */
-class ContainsClause extends Clause implements AliasPropertyClause {
+class ContainsClause extends Clause implements PropertyClause {
 
     private final Set<String> keywords = new LinkedHashSet<String>();
 
@@ -64,21 +64,6 @@ class ContainsClause extends Clause implements AliasPropertyClause {
 
         for (String keyword : keywords)
             this.keywords.add(keyword);
-    }
-
-    /**
-     * @return the alias
-     */
-    @Override
-    public String getAlias() {
-        return properties.get(ALIAS);
-    }
-
-    /**
-     * @param alias the alias to set
-     */
-    public void setAlias(String alias) {
-        properties.put(ALIAS, alias);
     }
 
     /**

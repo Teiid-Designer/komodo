@@ -22,14 +22,9 @@
 package org.komodo.repository.search;
 
 /**
- * Alias / Property clause
+ * Property clause
  */
-public interface AliasPropertyClause {
-
-    /**
-     * Alias property
-     */
-    String ALIAS = "alias"; //$NON-NLS-1$
+public interface PropertyClause {
 
     /**
      * Property property

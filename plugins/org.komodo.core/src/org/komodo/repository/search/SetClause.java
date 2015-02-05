@@ -32,7 +32,7 @@ import org.komodo.utils.StringUtils;
  *
  * alias.property IN (value1, value2, value3)
  */
-class SetClause extends Clause implements AliasPropertyClause {
+class SetClause extends Clause implements PropertyClause {
 
     private final Set<String> values = new LinkedHashSet<String>();
 
@@ -55,21 +55,6 @@ class SetClause extends Clause implements AliasPropertyClause {
 
         for (String value : values)
             this.values.add(value);
-    }
-
-    /**
-     * @return the alias
-     */
-    @Override
-    public String getAlias() {
-        return properties.get(ALIAS);
-    }
-
-    /**
-     * @param alias the alias to set
-     */
-    public void setAlias(String alias) {
-        setProperty(ALIAS, alias);
     }
 
     /**
