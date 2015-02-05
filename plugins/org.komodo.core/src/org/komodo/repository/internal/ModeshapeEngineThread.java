@@ -38,6 +38,7 @@ import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
 import org.modeshape.common.collection.Problems;
 import org.modeshape.jcr.JcrRepository;
+import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.ModeShapeEngine;
 import org.modeshape.jcr.RepositoryConfiguration;
 
@@ -245,24 +246,38 @@ public class ModeshapeEngineThread extends Thread {
         }
     }
 
-    private Session createSession() throws Exception {
-        if (isEngineStopped()) {
-            throw new KException(Messages.getString(Messages.LocalRepository.Engine_Is_Stopped));
+    private JcrSession createSession() throws Exception {
+        if (! isEngineRunning()) {
+            throw new KException(Messages.getString(Messages.LocalRepository.Engine_Not_Running));
+        }
+
+        if (! isRepositoryRunning()) {
+            throw new KException(Messages.getString(Messages.LocalRepository.Repository_Not_Running));
         }
 
         // the workspace name must agree with the config file
         return this.repository.login(null, this.workspaceName);
     }
 
-    private boolean isEngineStopped() {
-        return ModeShapeEngine.State.NOT_RUNNING.equals(msEngine.getState());
+    private boolean isEngineRunning() {
+        if (msEngine == null)
+            return false;
+
+        return ModeShapeEngine.State.RUNNING.equals(msEngine.getState());
+    }
+
+    private boolean isRepositoryRunning() {
+        if (repository == null)
+            return true;
+
+        return ModeShapeEngine.State.RUNNING.equals(repository.getState());
     }
 
     /**
-     * @return is modeshape engine started
+     * @return is modeshape engine and repository are running
      */
-    public boolean isEngineStarted() {
-        return ModeShapeEngine.State.RUNNING.equals(msEngine.getState());
+    public boolean isRunning() {
+        return isEngineRunning() && isRepositoryRunning();
     }
 
     private void rollbackSession( final Request request ) {
@@ -291,7 +306,8 @@ public class ModeshapeEngineThread extends Thread {
     }
 
     private synchronized void startEngine() throws Exception {
-        if (!isEngineStopped()) return;
+        if (isEngineRunning())
+            return;
 
         // start the ModeShape Engine
         msEngine.start();
@@ -304,15 +320,19 @@ public class ModeshapeEngineThread extends Thread {
         //
         Problems problems = config.validate();
         if (problems.hasProblems()) {
-
-            for (Problem problem : problems) {
-                KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.Configuration_Problem,
-                                                          problem.getMessageString()),
-                                                          problem.getThrowable());
+            Iterator< Problem > iterator = problems.iterator();
+            while (iterator.hasNext()) {
+                Problem problem = iterator.next();
+                switch (problem.getStatus()) {
+                    case ERROR:
+                        // Catastrophic error if the configuration is not valid!
+                        throw new Exception(Messages.getString(Messages.LocalRepository.Configuration_Problem,
+                                                                                         problem.getMessageString()),
+                                                                                         problem.getThrowable());
+                    default:
+                        KEngine.getInstance().getErrorHandler().error(problem.getThrowable());
+                }
             }
-
-            // Catastrophic error if the configuration is not valid!
-            throw new Exception(Messages.getString(Messages.LocalRepository.Configuration_Failure));
         }
 
         // Deploy configuration to engine
@@ -335,6 +355,12 @@ public class ModeshapeEngineThread extends Thread {
                 }
             }
         }
+
+        // Start the repository
+        Future<JcrRepository> startRepository = msEngine.startRepository(repository.getName());
+
+        // Await the start of the repository
+        startRepository.get(5, TimeUnit.MINUTES);
     }
 
     private synchronized void stopEngine() throws Exception {

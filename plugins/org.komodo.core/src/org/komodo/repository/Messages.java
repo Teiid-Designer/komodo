@@ -45,7 +45,8 @@ public class Messages implements StringConstants {
         Configuration_Failure,
         Deployment_Failure,
         General_Exception,
-        Engine_Is_Stopped,
+        Engine_Not_Running,
+        Repository_Not_Running,
         EngineThread_Died,
         Rollback_Timeout,
         Unable_To_Create_Session;
