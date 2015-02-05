@@ -361,25 +361,8 @@ public class ObjectSearcher implements SQLConstants {
 
         List<KomodoObject> results = Collections.emptyList();
 
-        try {
-            // execute query
-            results = transaction.query(statement);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-        } catch (final Exception e) {
-            if (uow == null) {
-                transaction.rollback();
-            }
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
+        // execute query
+        results = getRepository().query(transaction, statement);
 
         return results;
     }

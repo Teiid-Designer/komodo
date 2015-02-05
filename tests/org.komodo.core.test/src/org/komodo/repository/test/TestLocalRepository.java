@@ -292,7 +292,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         assertEquals(10, testNodes.length);
         for (KomodoObject testKO : testNodes) {
             Property property = testKO.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertTrue(property.getStringValue().equals("DDL") || property.getStringValue().equals("TEIIDSQL"));
+            assertTrue(property.getStringValue(null).equals("DDL") || property.getStringValue(null).equals("TEIIDSQL"));
         }
 
         // Perform the search
@@ -310,9 +310,9 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
             Property property = searchObject.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
             if (index < 6)
-                assertEquals("DDL", property.getStringValue());
+                assertEquals("DDL", property.getStringValue(null));
             else
-                assertEquals("TEIIDSQL", property.getStringValue());
+                assertEquals("TEIIDSQL", property.getStringValue(null));
         }
     }
 
@@ -336,7 +336,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         assertEquals(10, testNodes.length);
         for (KomodoObject testKO : testNodes) {
             Property property = testKO.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertTrue(property.getStringValue().equals("DDL") || property.getStringValue().equals("TEIIDSQL"));
+            assertTrue(property.getStringValue(null).equals("DDL") || property.getStringValue(null).equals("TEIIDSQL"));
         }
 
         // Perform the search
@@ -358,7 +358,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
             Property property = searchObject.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
             if (index < 6)
-                assertEquals("DDL", property.getStringValue());
+                assertEquals("DDL", property.getStringValue(null));
         }
     }
 
@@ -368,45 +368,30 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         assertNotNull(komodoWksp);
 
         // Setup up 10 nodes to find
-        for (int i = 1; i < 6; ++i) {
+        for (int i = 1; i <= 5; ++i) {
             KomodoObject child = komodoWksp.addChild(null, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
             child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
         }
 
-        for (int i = 6; i < 11; ++i) {
-            KomodoObject child = komodoWksp.addChild(null, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
-        }
-
         KomodoObject[] testNodes = komodoWksp.getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
-        assertEquals(10, testNodes.length);
+        assertEquals(5, testNodes.length);
         for (KomodoObject testKO : testNodes) {
             Property property = testKO.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertTrue(property.getStringValue().equals("DDL") || property.getStringValue().equals("TEIIDSQL"));
+            assertTrue(property.getStringValue(null).equals("DDL") || property.getStringValue(null).equals("TEIIDSQL"));
         }
 
         // Perform the search
-        List<KomodoObject> results = _repo.searchByPath(
-                                                           null,
-                                                           komodoWksp.getAbsolutePath() + File.separator + "test1",
-                                                           komodoWksp.getAbsolutePath() + File.separator + "test2",
-                                                           komodoWksp.getAbsolutePath() + File.separator + "test3",
-                                                           komodoWksp.getAbsolutePath() + File.separator + "test4",
-                                                           komodoWksp.getAbsolutePath() + File.separator + "test5");
-
-        // Validate the results are as exepcted
-        assertEquals(5, results.size());
-        for (KomodoObject searchObject : results) {
+        for (int i = 1; i <= 5; ++i) {
+            List<KomodoObject> results = _repo.searchByPath(null,
+                                                           komodoWksp.getAbsolutePath() + File.separator + "test" + i);
+            // Validate the results are as expected
+            assertEquals(1, results.size());
+            KomodoObject searchObject = results.iterator().next();
             String name = searchObject.getName(null);
-            assertTrue(name.startsWith("test"));
-
-            String indexStr = name.substring(4);
-            int index = Integer.parseInt(indexStr);
-            assertTrue(index > 0 && index < 11);
+            assertEquals("test" + i, name);
 
             Property property = searchObject.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            if (index < 6)
-                assertEquals("DDL", property.getStringValue());
+            assertEquals("DDL", property.getStringValue(null));
         }
     }
 }

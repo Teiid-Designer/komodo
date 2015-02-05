@@ -176,7 +176,6 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         private final UnitOfWorkListener callback;
         private final String name;
         private final boolean rollbackOnly;
-        private final Repository repository;
         private Session session;
 
         /**
@@ -188,23 +187,18 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
          *        <code>true</code> if only a rollback can be done (i.e., commit not allowed)
          * @param listener
          *        the callback (can be <code>null</code>)
-         * @param repository
-         *        the repository this transaction is being enacted against (cannot be <code>null</code>)
          */
         public UnitOfWorkImpl( final String uowName,
                                final Session uowSession,
                                final boolean uowRollbackOnly,
-                               final UnitOfWorkListener listener,
-                               final Repository repository ) {
+                               final UnitOfWorkListener listener) {
             ArgCheck.isNotEmpty(uowName, "uowName"); //$NON-NLS-1$
             ArgCheck.isNotNull(uowSession, "uowSession"); //$NON-NLS-1$
-            ArgCheck.isNotNull(repository);
 
             this.name = uowName;
             this.session = uowSession;
             this.rollbackOnly = uowRollbackOnly;
             this.callback = listener;
-            this.repository = repository;
         }
 
         /**
@@ -310,23 +304,6 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                 this.session.logout();
                 this.session = null;
             }
-        }
-
-        @Override
-        public List<KomodoObject> query(String queryStatement) throws Exception {
-            List<KomodoObject> results = new ArrayList<KomodoObject>();
-
-            QueryManager queryMgr = session.getWorkspace().getQueryManager();
-            Query query = queryMgr.createQuery(queryStatement, Query.JCR_SQL2);
-            QueryResult result = query.execute();
-
-            NodeIterator itr = result.getNodes();
-            while (itr.hasNext()) {
-                Node node = itr.nextNode();
-                results.add(new ObjectImpl(repository, node.getPath(), node.getIndex()));
-            }
-
-            return results;
         }
     }
 
@@ -514,6 +491,53 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
             throw new KException(e);
         }
+    }
+
+    @Override
+    public List<KomodoObject> query(UnitOfWork uow, String queryStatement) throws KException {
+
+        UnitOfWork transaction = verifyTransaction(uow, "query", true); //$NON-NLS-1$
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("find: transaction = {0}, query = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         queryStatement);
+        }
+
+        ArgCheck.isNotEmpty(queryStatement, "Query statement cannot be empty"); //$NON-NLS-1$
+
+        final Session session = getSession(transaction);
+
+        List<KomodoObject> results = new ArrayList<KomodoObject>();
+
+        try {
+            QueryManager queryMgr = session.getWorkspace().getQueryManager();
+            Query query = queryMgr.createQuery(queryStatement, Query.JCR_SQL2);
+            QueryResult result = query.execute();
+
+            NodeIterator itr = result.getNodes();
+            while (itr.hasNext()) {
+                Node node = itr.nextNode();
+                results.add(new ObjectImpl(this, node.getPath(), node.getIndex()));
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+        } catch (final Exception e) {
+            if (uow == null) {
+                transaction.rollback();
+            }
+
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+
+        return results;
     }
 
     @Override

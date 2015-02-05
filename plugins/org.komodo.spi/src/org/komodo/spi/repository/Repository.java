@@ -146,16 +146,6 @@ public interface Repository {
          */
         void rollback();
 
-        /**
-         * Query the repository with the given statement
-         *
-         * @param queryStatement
-         *
-         * @return the list of {@link KomodoObject}s resulting from the query
-         * @throws Exception if error occurs
-         */
-        List<KomodoObject> query(String queryStatement) throws Exception;
-
     }
 
     /**
@@ -222,6 +212,17 @@ public interface Repository {
     UnitOfWork createTransaction( final String name,
                                   final boolean rollbackOnly,
                                   final UnitOfWorkListener callback ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     * @param query
+     *        the SQL query
+     *
+     * @return the {@link KomodoObject}s resulting from the search
+     * @throws KException if error occurs
+     */
+    List<KomodoObject> query(UnitOfWork transaction, String query) throws KException;
 
     /**
      * @param transaction

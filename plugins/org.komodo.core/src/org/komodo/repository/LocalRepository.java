@@ -33,7 +33,6 @@ import org.komodo.repository.internal.ModeshapeEngineThread.Request;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback;
 import org.komodo.repository.internal.ModeshapeEngineThread.RequestType;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
 
@@ -259,7 +258,7 @@ public class LocalRepository extends RepositoryImpl {
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
         LOGGER.debug("creating transaction {0} with rollbackOnly = {1}", name, rollbackOnly); //$NON-NLS-1$
         final Session session = createSession();
-        final UnitOfWork uow = new LocalRepositoryTransaction(name, session, rollbackOnly, callback, this);
+        final UnitOfWork uow = new LocalRepositoryTransaction(name, session, rollbackOnly, callback);
         this.sessions.put(session, uow);
         return uow;
     }
@@ -269,9 +268,8 @@ public class LocalRepository extends RepositoryImpl {
         LocalRepositoryTransaction( final String uowName,
                                     final Session uowSession,
                                     final boolean uowRollbackOnly,
-                                    final UnitOfWorkListener listener,
-                                    final Repository repository ) {
-            super(uowName, uowSession, uowRollbackOnly, listener, repository);
+                                    final UnitOfWorkListener listener) {
+            super(uowName, uowSession, uowRollbackOnly, listener);
         }
 
         /**
