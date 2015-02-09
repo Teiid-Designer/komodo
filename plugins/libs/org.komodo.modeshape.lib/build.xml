@@ -18,14 +18,14 @@
 
 	<!-- Comma-separated minimum list of required libraries -->
 	<property name="libs" value="jcr.jar,
-								 modeshape-jcr.jar,
 		 						 modeshape-jcr-api.jar,
 								 modeshape-common.jar,
+								 modeshape-schematic.jar,
 								 ../forked/modeshape-sequencer-ddl/src,
 								 ../forked/modeshape-sequencer-teiid/src,
+								 ../forked/modeshape-jcr/src,
 								 logback-core.jar,
-								 logback-classic.jar,
-								 slf4j-api.jar"/>
+								 logback-classic.jar"/>
 
 	<!--
 	   Test whether all the required libraries are present
@@ -76,7 +76,9 @@
 
 	<target name="clean-internal" if="should-generate">
 		<echo message="Removing generated files ..." />
-		<delete dir="forked/modeshape-sequencer-ddl"/>
+		<delete includeEmptyDirs="true">
+		  <fileset dir="forked" includes="**/*" defaultexcludes="no"/>
+		</delete>
 	</target>
 
 	<target name="clean">
@@ -87,6 +89,5 @@
 	<target name="generate" depends="init-ant-contrib, check-work, nothing-todo, clean-internal, dependencies" if="should-generate">
 		<echo message="Generating from maven ..." />
 		<mvn dir="." args="process-sources -P download-sources" />
-
 	</target>
 </project>

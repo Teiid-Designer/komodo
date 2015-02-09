@@ -261,14 +261,14 @@ public interface Repository {
     *
     * @param transaction
     *        the transaction (can be <code>null</code> if operation should be automatically committed)
-    * @param paths the paths to search for
+    * @param path the path to search for
     *
     * @return the {@link KomodoObject}s resulting from the search
     *
     * @throws KException
     *         if parent path does not exist or an error occurs
     */
-    List<KomodoObject> searchByPath( UnitOfWork transaction, String... paths) throws KException;
+    List<KomodoObject> searchByPath( UnitOfWork transaction, String path) throws KException;
 
     /**
      * Get an object from the workspace part of the repository.
@@ -448,4 +448,5 @@ public interface Repository {
      * @throws KException if an error occurs
      */
     KomodoObject komodoWorkspace( final UnitOfWork transaction) throws KException;
+
 }

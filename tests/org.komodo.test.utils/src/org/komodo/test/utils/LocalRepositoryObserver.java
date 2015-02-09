@@ -19,30 +19,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.repository.search;
+package org.komodo.test.utils;
+
+import java.util.concurrent.CountDownLatch;
+import org.komodo.repository.LocalRepository;
+import org.komodo.spi.repository.RepositoryObserver;
 
 /**
- * Alias / Property clause
+ * A {@link RepositoryObserver} containing a latch that can be used to hold
+ * a thread until a state change in the {@link LocalRepository} has occurred
  */
-public interface AliasPropertyClause {
+public class LocalRepositoryObserver implements RepositoryObserver {
+
+    private CountDownLatch latch;
 
     /**
-     * Alias property
+     * Constructor
      */
-    String ALIAS = "alias"; //$NON-NLS-1$
+    public LocalRepositoryObserver() {
+        resetLatch();
+    }
 
     /**
-     * Property property
+     * Reset the latch
      */
-    String PROPERTY = "property"; //$NON-NLS-1$
+    public void resetLatch() {
+        latch = new CountDownLatch(1);
+    }
 
     /**
-     * @return the alias
+     * @return the latch
      */
-    String getAlias();
+    public CountDownLatch getLatch() {
+        return this.latch;
+    }
 
-    /**
-     * @return the property
-     */
-    String getProperty();
+    @Override
+    public void eventOccurred() {
+        latch.countDown();
+    }
 }

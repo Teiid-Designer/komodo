@@ -21,40 +21,40 @@
  */
 package org.komodo.repository.search;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 
 /**
  * A Path Clause
- *
- * 
  */
 class PathClause extends Clause {
 
-    private final List<String> paths = new ArrayList<String>();
+    private final static String PATH = "path"; //$NON-NLS-1$
 
     /**
      * @param parent parent searcher
      * @param operator the logical operator preceding this clause (can be null if this is the only clause)
-     * @param paths set of paths used in the clause
+     * @param alias the alias of the selector
+     * @param path path used in the clause
      */
-    public PathClause(ObjectSearcher parent, LogicalOperator operator, String... paths) {
+    public PathClause(ObjectSearcher parent, LogicalOperator operator, String alias, String path) {
         super(parent, operator);
 
-        ArgCheck.isNotEmpty(paths, "Where Path clause requires at least 1 value"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(path, "Where Path clause requires a path"); //$NON-NLS-1$
 
-        for (String path : paths) {
-            addPath(path);
-        }
+        setAlias(alias);
+        setPath(path);
+    }
+
+    public String getPath() {
+        return properties.get(PATH);
     }
 
     /**
      * @param path the path to be added
      */
-    public void addPath(String path) {
-        this.paths.add(path);
+    public void setPath(String path) {
+        properties.put(PATH, path);
     }
 
     @Override
@@ -63,17 +63,22 @@ class PathClause extends Clause {
 
         appendLogicalOperator(position, buffer);
 
+        setAlias(checkWhereAlias(getAlias()));
+
         buffer.append("PATH"); //$NON-NLS-1$
         buffer.append(OPEN_BRACKET);
+
+        if (! StringUtils.isEmpty(getAlias())) {
+            buffer.append(getAlias());
+        }
+
         buffer.append(CLOSE_BRACKET);
         buffer.append(SPACE);
-        buffer.append(IN);
-        buffer.append(OPEN_BRACKET);
-
-        Iterator<String> pathIter = paths.iterator();
-        appendStringValues(buffer, pathIter);
-
-        buffer.append(CLOSE_BRACKET);
+        buffer.append(EQUALS);
+        buffer.append(SPACE);
+        buffer.append(QUOTE_MARK);
+        buffer.append(getPath());
+        buffer.append(QUOTE_MARK);
 
         return buffer.toString();
     }

@@ -41,7 +41,7 @@
 				"pathExpressions" :
 				[
 					":(//ddl:statements//*)[@ddl:queryExpression] => /$1",
-					":(//ddl:statements//*)[@teiidddl:queryExpression] => /$1"
+					":(//ddl:statements//*)[@teiidddl:queryExpression] => /$1",
 					":(//ddl:statements//*)[@teiidddl:statement] => /$1"
 				]
 		   	}

@@ -587,19 +587,20 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     }
 
     @Override
-    public List<KomodoObject> searchByPath( UnitOfWork uow, String... paths) throws KException {
-        ArgCheck.isNotEmpty(paths, "paths"); //$NON-NLS-1$
+    public List<KomodoObject> searchByPath( UnitOfWork uow, String path) throws KException {
+        ArgCheck.isNotEmpty(path, "path"); //$NON-NLS-1$
 
         UnitOfWork transaction = verifyTransaction(uow, "searchByPath", true); //$NON-NLS-1$
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("find: transaction = {0}, paths = {1}", //$NON-NLS-1$
+            LOGGER.debug("find: transaction = {0}, path = {1}", //$NON-NLS-1$
                          transaction.getName(),
-                         paths);
+                         path);
         }
 
         ObjectSearcher searcher = new ObjectSearcher(this);
-        searcher.addFromType(JcrConstants.NT_UNSTRUCTURED);
-        searcher.addWherePath(paths);
+        String typeAlias = "k1"; // where clauses need an alias so assign one to the type //$NON-NLS-1$
+        searcher.addFromType(JcrConstants.NT_UNSTRUCTURED, typeAlias);
+        searcher.addWherePathClause(null, typeAlias, path);
 
         List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
         return searchObjects;

@@ -191,7 +191,7 @@ public class LocalRepository extends RepositoryImpl {
 
     @Override
     public boolean ping() {
-        return ((this.engineThread != null) && ((this.engineThread.isAlive())) && this.engineThread.isEngineStarted());
+        return ((this.engineThread != null) && ((this.engineThread.isAlive())) && this.engineThread.isRunning());
     }
 
     private Session createSession() throws KException {
@@ -399,7 +399,7 @@ public class LocalRepository extends RepositoryImpl {
 
             @Override
             public void respond( final Object results ) {
-                if (engineThread.isEngineStarted()) {
+                if (engineThread.isRunning()) {
                     LocalRepository.this.state = State.REACHABLE;
                     notifyObservers();
                 }
@@ -429,7 +429,7 @@ public class LocalRepository extends RepositoryImpl {
              */
             @Override
             public void respond( final Object results ) {
-                if (!engineThread.isEngineStarted()) {
+                if (!engineThread.isRunning()) {
                     LocalRepository.this.state = State.NOT_REACHABLE;
                     notifyObservers();
                 }

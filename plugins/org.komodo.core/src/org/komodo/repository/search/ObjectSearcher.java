@@ -111,12 +111,12 @@ public class ObjectSearcher implements SQLConstants {
         return fromTypes;
     }
 
-    private <T extends AliasPropertyClause> T findWhereAliasClause(Class<T> clauseType, String alias, String property) {
+    private <T extends PropertyClause> T findWhereAliasClause(Class<T> clauseType, String alias, String property) {
         for (Clause clause : whereClauses) {
             if (! (clauseType.isInstance(clause)))
                 continue;
 
-            AliasPropertyClause aliasClause = (AliasPropertyClause) clause;
+            PropertyClause aliasClause = (PropertyClause) clause;
             String clauseAlias = aliasClause.getAlias();
             if (clauseAlias == null && alias != null)
                 continue;
@@ -202,30 +202,21 @@ public class ObjectSearcher implements SQLConstants {
     }
 
     /**
-     * Add a PATH clause to the Where clause, eg. WHERE PATH() IN (path1, path2)
+     * Add a PATH clause to the Where clause, eg. WHERE PATH(alias) = 'path1'
      *
      * @param operator the AND/OR operator preceding the clause. Can be <null> if the first clause
-     * @param paths the paths to be added
+     * @param alias the alias of the selector
+     * @param path the path to be added
      * @return this search object
      */
-    public ObjectSearcher addWherePath(LogicalOperator operator, String... paths) {
+    public ObjectSearcher addWherePathClause(LogicalOperator operator, String alias, String path) {
         if (whereClauses == null)
             whereClauses = new ArrayList<Clause>();
 
-        PathClause pathClause = new PathClause(this, operator, paths);
+        PathClause pathClause = new PathClause(this, operator, alias, path);
         whereClauses.add(pathClause);
 
         return this;
-    }
-
-    /**
-     * Add a PATH clause to the Where clause, eg. WHERE PATH() IN (path1, path2)
-     *
-     * @param paths the paths to be added
-     * @return this search object
-     */
-    public ObjectSearcher addWherePath(String... paths) {
-       return addWherePath(null, paths);
     }
 
     /**

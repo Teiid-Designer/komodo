@@ -42,6 +42,7 @@ import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
+import org.komodo.repository.LocalRepository;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
@@ -94,6 +95,19 @@ public class WorkspaceManager {
         }
 
         return instance;
+    }
+
+    /**
+     * Primarily used in tests to remove the workspace manager instance
+     * from the instances cache.
+     *
+     * @param repository remove instance with given repository
+     */
+    public static void uncacheInstance(LocalRepository repository) {
+        if (repository == null)
+            return;
+
+        instances.remove(repository.getId());
     }
 
     private WorkspaceManager( Repository repository ) {

@@ -10,6 +10,7 @@ package org.komodo.relational.workspace;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
@@ -30,6 +31,12 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     @Before
     public void obtainWorkspaceManager() {
         wsMgr = WorkspaceManager.getInstance(_repo);
+    }
+
+    @After
+    public void cleanup() {
+        WorkspaceManager.uncacheInstance(_repo);
+        wsMgr = null;
     }
 
     private Model createModel( final UnitOfWork uow,
