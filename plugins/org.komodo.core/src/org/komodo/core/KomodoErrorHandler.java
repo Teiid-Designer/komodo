@@ -76,7 +76,7 @@ public class KomodoErrorHandler implements KErrorHandler {
 
     @Override
     public void error(Throwable ex) {
-        KLog.getLogger().error(ex.getLocalizedMessage(), ex);
+        KLog.getLogger().error(ex == null ? "<no message>" : ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 
         for (KErrorHandler handler : errorHandlers) {
             handler.error(ex);

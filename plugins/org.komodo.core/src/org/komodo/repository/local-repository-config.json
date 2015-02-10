@@ -17,17 +17,6 @@
         "default" : "komodoLocalWorkspace",
         "allowCreation" : true
     },
-    "query" : {
-        "enabled" : true,
-        "indexing" : {
-            "mode" : "sync",
-            "rebuildOnStartup": {
-                "when" : "if_missing",
-                "includeSystemContent": false,
-                "mode": "sync"
-            },
-        }
-    },
     "sequencing" : {
         "removeDerivedContentWithOriginal" : true,
         "threadPool" : "modeshape-workers",
