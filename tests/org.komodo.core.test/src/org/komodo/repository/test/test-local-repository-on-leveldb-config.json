@@ -18,19 +18,19 @@
         "allowCreation" : true
     },
     "storage" : {
-        "cacheConfiguration" : "org/komodo/repository/local-repository-infinispan-config.xml",
-        "cacheName" : "Komodo Cache",
+        "cacheConfiguration" : "org/komodo/repository/test/infinispan-leveldb-cachestore-config.xml",
+        "cacheName" : "Test Repository",
         "binaryStorage" : {
             "minimumBinarySizeInBytes" : 4096,
             "minimumStringSize" : 4096,
-            "directory": "${user.home}/.komodo/storage/content/binaries",
+            "directory": "target/content/binaries",
             "type" : "file"
         }
     },
     "indexProviders" : {
         "local" : {
             "classname" : "org.modeshape.jcr.index.local.LocalIndexProvider",
-            "directory" : "${user.home}/.komodo/indexes"
+            "directory" : "${java.io.tmpdir}/TestLocalLevelDBRepoPersistence/indexes"
         }
     },
     "indexes" : {

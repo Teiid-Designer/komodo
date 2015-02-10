@@ -26,12 +26,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.repository.search.TestObjectSearcher;
 import org.komodo.repository.test.TestLocalRepository;
+import org.komodo.repository.test.TestLocalRepositoryPersistence;
 
 @SuppressWarnings( "javadoc" )
 @RunWith( Suite.class )
 @Suite.SuiteClasses( {
                                         TestLocalRepository.class,
-                                        TestObjectSearcher.class
+                                        TestObjectSearcher.class,
+                                        TestLocalRepositoryPersistence.class
                                     } )
 public class AllTests {
     // nothing to do

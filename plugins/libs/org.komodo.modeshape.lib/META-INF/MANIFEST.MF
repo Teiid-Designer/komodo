@@ -32,7 +32,10 @@ Bundle-ClassPath: .,
  lib/jackson-mapper-asl.jar,
  lib/metrics-core.jar,
  lib/mongo-java-driver.jar,
- lib/netty.jar
+ lib/netty.jar,
+ lib/infinispan-cachestore-leveldb.jar,
+ lib/leveldb-api.jar,
+ lib/leveldb.jar
 Export-Package: javax.jcr,
  javax.jcr.nodetype,
  javax.jcr.observation,

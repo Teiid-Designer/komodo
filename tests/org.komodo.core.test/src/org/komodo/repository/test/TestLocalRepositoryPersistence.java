@@ -40,6 +40,7 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.LocalRepository.LocalRepositoryId;
 import org.komodo.repository.RepositoryImpl;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -56,34 +57,42 @@ import org.komodo.utils.FileUtils;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestLocalRepositoryPersistence extends AbstractLoggingTest implements StringConstants {
 
-    private static final String TEST_DATABASE = System.getProperty("java.io.tmpdir") + 
+    private static final String TEST_FILE_DATABASE = System.getProperty("java.io.tmpdir") + 
                                                                                     File.separator
-                                                                                    + "TestLocalRepoPersistence";
+                                                                                    + "TestLocalFileRepoPersistence";
 
-    private static final String TEST_REPOSITORY_CONFIG = "test-local-repository-on-file-config.json";
+    private static final String TEST_LEVELDB_DATABASE = System.getProperty("java.io.tmpdir") + 
+                                                                                    File.separator
+                                                                                    + "TestLocalLevelDBRepoPersistence";
+
+    private static final String TEST_FILE_REPOSITORY_CONFIG = "test-local-repository-on-file-config.json";
+
+    private static final String TEST_LEVELDB_REPOSITORY_CONFIG = "test-local-repository-on-leveldb-config.json";
+
+    private static final String PRODUCTION_REPOSITORY_CONFIG = "local-repository-config.json";
 
     protected LocalRepository _repo = null;
 
     protected LocalRepositoryObserver _repoObserver = null;
 
-    private File testDb() {
-        return new File(TEST_DATABASE);
+    private File testDb(String dbPath) {
+        return new File(dbPath);
     }
 
-    private boolean dbExists() {
-        File testDb = testDb();
+    private boolean dbExists(String dbPath) {
+        File testDb = testDb(dbPath);
         return testDb.exists();
     }
 
-    private void deleteDbDir() {
-        File testDb = testDb();
+    private void deleteDbDir(String dbPath) {
+        File testDb = testDb(dbPath);
         if (testDb.exists())
             FileUtils.removeDirectoryAndChildren(testDb);
     }
 
-    public void initLocalRepository() throws Exception {
+    private void initLocalRepository(Class<?> loaderClass, String configFile) throws Exception {
 
-        URL configUrl = TestLocalRepositoryPersistence.class.getResource(TEST_REPOSITORY_CONFIG);
+        URL configUrl = loaderClass.getResource(configFile);
         assertNotNull(configUrl);
 
         LocalRepositoryId id = new LocalRepositoryId(configUrl, DEFAULT_LOCAL_WORKSPACE_NAME);
@@ -106,12 +115,16 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         }
     }
 
+    private void initLocalRepository(String configFile) throws Exception {
+        initLocalRepository(TestLocalRepositoryPersistence.class, configFile);
+    }
+
     /**
      * Shutdown and destroy repo
      *
      * @throws Exception
      */
-    public void destroyLocalRepository() throws Exception {
+    private void destroyLocalRepository() throws Exception {
         assertNotNull(_repo);
         assertNotNull(_repoObserver);
 
@@ -134,24 +147,28 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
 
     @Before
     public void setup() {
-        deleteDbDir();
-        assertFalse(dbExists());
+        deleteDbDir(TEST_FILE_DATABASE);
+        assertFalse(dbExists(TEST_FILE_DATABASE));
+
+        deleteDbDir(TEST_LEVELDB_DATABASE);
+        assertFalse(dbExists(TEST_LEVELDB_DATABASE));
     }
 
     @After
     public void cleanup() throws Exception {
         destroyLocalRepository();
-        deleteDbDir();
+
+        deleteDbDir(TEST_FILE_DATABASE);
+        deleteDbDir(TEST_LEVELDB_DATABASE);
     }
 
-    @Test
-    public void testPersistenceWorkspace() throws Exception {
+    private void helpTestPersistenceWorkspace(String dbPath, String config) throws Exception, KException {
         // Ensure the file store does not already exist
-        assertFalse(dbExists());
+        assertFalse(dbExists(dbPath));
         assertNull(_repo);
 
         // Initialise the repository
-        initLocalRepository();
+        initLocalRepository(config);
         assertNotNull(_repo);
 
         // Create the komodo workspace
@@ -167,7 +184,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         destroyLocalRepository();
 
         // Restart the repository
-        initLocalRepository();
+        initLocalRepository(config);
         assertNotNull(_repo);
 
         // Find the root and workspace to confirm repo was persisted
@@ -180,15 +197,24 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
     }
 
     @Test
-    public void testPersistenceObjects() throws Exception {
+    public void testFilePersistenceWorkspace() throws Exception {        
+        helpTestPersistenceWorkspace(TEST_FILE_DATABASE, TEST_FILE_REPOSITORY_CONFIG);
+    }
+
+    @Test
+    public void testLevelDBPersistenceWorkspace() throws Exception {
+        helpTestPersistenceWorkspace(TEST_LEVELDB_DATABASE, TEST_LEVELDB_REPOSITORY_CONFIG);
+    }
+
+    private void helpTestPersistenceObjects(String dbPath, String config) throws Exception, KException {
         int testObjectCount = 5;
 
         // Ensure the file store does not already exist
-        assertFalse(dbExists());
+        assertFalse(dbExists(dbPath));
         assertNull(_repo);
 
         // Initialise the repository
-        initLocalRepository();
+        initLocalRepository(config);
         assertNotNull(_repo);
 
         // Create the komodo workspace
@@ -208,7 +234,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         destroyLocalRepository();
 
         // Restart the repository
-        initLocalRepository();
+        initLocalRepository(config);
         assertNotNull(_repo);
 
         // Find the test nodes to confirm repo was persisted
@@ -222,5 +248,28 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
             Property property = result.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
             assertEquals("DDL", property.getStringValue(null));
         }
+    }
+
+    @Test
+    public void testFilePersistenceObjects() throws Exception {
+        helpTestPersistenceObjects(TEST_FILE_DATABASE, TEST_FILE_REPOSITORY_CONFIG);
+    }
+
+    @Test
+    public void testLevelDBPersistenceObjects() throws Exception {
+        helpTestPersistenceObjects(TEST_LEVELDB_DATABASE, TEST_LEVELDB_REPOSITORY_CONFIG);
+    }
+
+    /**
+     * Test to ensure that the production repository
+     * configuration files are valid and the repository
+     * can be successfully started
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testProductionRepositoryConfiguration() throws Exception {
+        initLocalRepository(LocalRepository.class, PRODUCTION_REPOSITORY_CONFIG);
+        assertNotNull(_repo);
     }
 }

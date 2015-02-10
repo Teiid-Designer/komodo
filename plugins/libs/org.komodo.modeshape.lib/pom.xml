@@ -320,6 +320,10 @@
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-jcr-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-cachestore-leveldb</artifactId>
+        </dependency>
         <!-- Not included in modeshape bom explicitly but need it for LogConfigurator -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
