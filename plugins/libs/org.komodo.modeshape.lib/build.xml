@@ -24,6 +24,7 @@
 								 ../forked/modeshape-sequencer-ddl/src,
 								 ../forked/modeshape-sequencer-teiid/src,
 								 ../forked/modeshape-jcr/src,
+								 infinispan-cachestore-leveldb.jar,
 								 logback-core.jar,
 								 logback-classic.jar"/>
 
