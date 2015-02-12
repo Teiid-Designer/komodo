@@ -8,6 +8,7 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
@@ -15,8 +16,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.relational.RelationalConstants.OnCommit;
-import org.komodo.relational.RelationalConstants.TemporaryType;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
@@ -29,9 +28,13 @@ import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.Table.OnCommit;
+import org.komodo.relational.model.Table.TemporaryType;
 import org.komodo.relational.model.UniqueConstraint;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
@@ -40,11 +43,14 @@ public final class TableImplTest extends RelationalModelTest {
 
     private static final String NAME = "table";
 
+    private Model model;
     private Table table;
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable(null, _repo, mock(Model.class), NAME);
+        final Vdb vdb = RelationalModelFactory.createVdb(null, _repo, null, "vdb", "path");
+        this.model = RelationalModelFactory.createModel(null, _repo, vdb, "model");
+        this.table = RelationalModelFactory.createTable(null, _repo, this.model, NAME);
     }
 
     @Test
@@ -86,7 +92,7 @@ public final class TableImplTest extends RelationalModelTest {
     public void shouldAddStatementOption() throws Exception {
         final String name = "statementoption";
         final String value = "statementvalue";
-        final StatementOption statementOption = this.table.addStatementOption(null, name, value);
+        final StatementOption statementOption = this.table.setStatementOption(null, name, value);
         assertThat(statementOption, is(notNullValue()));
         assertThat(statementOption.getName(null), is(name));
         assertThat(statementOption.getOption(null), is(value));
@@ -148,12 +154,7 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionName() throws Exception {
-        this.table.addStatementOption(null, StringConstants.EMPTY_STRING, "blah");
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void shouldFailAddingEmptyStatementOptionValue() throws Exception {
-        this.table.addStatementOption(null, "blah", StringConstants.EMPTY_STRING);
+        this.table.setStatementOption(null, StringConstants.EMPTY_STRING, "blah");
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -183,12 +184,7 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionName() throws Exception {
-        this.table.addStatementOption(null, null, "blah");
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void shouldFailAddingNullStatementOptionValue() throws Exception {
-        this.table.addStatementOption(null, "blah", null);
+        this.table.setStatementOption(null, null, "blah");
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -211,6 +207,46 @@ public final class TableImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailRemovingMissingPrimaryKey() throws Exception {
         this.table.removePrimaryKey(null);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingEmptyDescriptionWhenNeverAdded() throws Exception {
+        this.table.setDescription(null, StringConstants.EMPTY_STRING);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingEmptyMaterializedTableWhenNeverAdded() throws Exception {
+        this.table.setMaterializedTable(null, StringConstants.EMPTY_STRING);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingEmptyNameInSourceWhenNeverAdded() throws Exception {
+        this.table.setNameInSource(null, StringConstants.EMPTY_STRING);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingEmptyStatementOptionValueWhenNeverAdded() throws Exception {
+        this.table.setStatementOption(null, "blah", StringConstants.EMPTY_STRING);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNullDescriptionWhenNeverAdded() throws Exception {
+        this.table.setDescription(null, null);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNullMaterializedTableWhenNeverAdded() throws Exception {
+        this.table.setMaterializedTable(null, null);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNullNameInSourceWhenNeverAdded() throws Exception {
+        this.table.setNameInSource(null, null);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNullStatementOptionValueWhenNeverAdded() throws Exception {
+        this.table.setStatementOption(null, "blah", null);
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -358,7 +394,7 @@ public final class TableImplTest extends RelationalModelTest {
         final int numStatementOptions = 5;
 
         for (int i = 0; i < numStatementOptions; ++i) {
-            this.table.addStatementOption(null, "statementoption" + i, "statementvalue" + i);
+            this.table.setStatementOption(null, "statementoption" + i, "statementvalue" + i);
         }
 
         assertThat(this.table.getStatementOptions(null).length, is(numStatementOptions));
@@ -376,9 +412,44 @@ public final class TableImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveDefaultCardinalityAfterConstruction() throws Exception {
+        assertThat(this.table.getCardinality(null), is(Table.DEFAULT_CARDINALITY));
+    }
+
+    @Test
+    public void shouldHaveDefaultMaterializedAfterConstruction() throws Exception {
+        assertThat(this.table.isMaterialized(null), is(Table.DEFAULT_MATERIALIZED));
+    }
+
+    @Test
+    public void shouldHaveDefaultUpdatableAfterConstruction() throws Exception {
+        assertThat(this.table.isUpdatable(null), is(Table.DEFAULT_UPDATABLE));
+    }
+
+    @Test
+    public void shouldHaveParentModel() throws Exception {
+        assertThat(this.table.getParent(null), is(instanceOf(Model.class)));
+        assertThat(this.table.getParent(null), is((KomodoObject)this.model));
+    }
+
+    @Test
     public void shouldHaveSchemaElementTypePropertyDefaultValueAfterConstruction() throws Exception {
         assertThat(this.table.getSchemaElementType(null), is(SchemaElementType.DEFAULT_VALUE));
         assertThat(this.table.hasProperty(null, StandardDdlLexicon.DEFAULT_VALUE), is(false));
+    }
+
+    @Test
+    public void shouldHaveStrongTypeChildren() throws Exception {
+        this.table.addAccessPattern(null, "accessPattern");
+        this.table.addColumn(null, "column");
+        this.table.addIndex(null, "index");
+        this.table.addUniqueConstraint(null, "uniqueConstraint");
+
+        assertThat(this.table.getChildren(null).length, is(4));
+        assertThat(this.table.getChildren(null)[0], is(instanceOf(AccessPattern.class)));
+        assertThat(this.table.getChildren(null)[1], is(instanceOf(Column.class)));
+        assertThat(this.table.getChildren(null)[2], is(instanceOf(Index.class)));
+        assertThat(this.table.getChildren(null)[3], is(instanceOf(UniqueConstraint.class)));
     }
 
     @Test
@@ -448,7 +519,7 @@ public final class TableImplTest extends RelationalModelTest {
     @Test
     public void shouldRemoveStatementOption() throws Exception {
         final String name = "statementoption";
-        this.table.addStatementOption(null, name, "blah");
+        this.table.setStatementOption(null, name, "blah");
         this.table.removeStatementOption(null, name);
         assertThat(this.table.getStatementOptions(null).length, is(0));
     }
@@ -460,6 +531,41 @@ public final class TableImplTest extends RelationalModelTest {
         this.table.removeUniqueConstraint(null, name);
 
         assertThat(this.table.getUniqueConstraints(null).length, is(0));
+    }
+
+    @Test
+    public void shouldSetCardinality() throws Exception {
+        final int value = 10;
+        this.table.setCardinality(null, value);
+        assertThat(this.table.getCardinality(null), is(value));
+    }
+
+    @Test
+    public void shouldSetDescription() throws Exception {
+        final String value = "description";
+        this.table.setDescription(null, value);
+        assertThat(this.table.getDescription(null), is(value));
+    }
+
+    @Test
+    public void shouldSetMaterialized() throws Exception {
+        final boolean value = !Table.DEFAULT_MATERIALIZED;
+        this.table.setMaterialized(null, value);
+        assertThat(this.table.isMaterialized(null), is(value));
+    }
+
+    @Test
+    public void shouldSetMaterializedTable() throws Exception {
+        final String value = "materializedTable";
+        this.table.setMaterializedTable(null, value);
+        assertThat(this.table.getMaterializedTable(null), is(value));
+    }
+
+    @Test
+    public void shouldSetNameInSource() throws Exception {
+        final String value = "nameInSource";
+        this.table.setNameInSource(null, value);
+        assertThat(this.table.getNameInSource(null), is(value));
     }
 
     @Test
@@ -500,6 +606,13 @@ public final class TableImplTest extends RelationalModelTest {
         this.table.setTemporaryTableType(null, value);
         assertThat(this.table.getTemporaryTableType(null), is(value));
         assertThat(this.table.getProperty(null, StandardDdlLexicon.TEMPORARY).getStringValue(null), is(value.toString()));
+    }
+
+    @Test
+    public void shouldSetUpdatable() throws Exception {
+        final boolean value = !Table.DEFAULT_UPDATABLE;
+        this.table.setUpdatable(null, value);
+        assertThat(this.table.isUpdatable(null), is(value));
     }
 
 }

@@ -83,6 +83,11 @@ public class Messages implements StringConstants {
         MAPPED_ROLE_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating a VDB model could not be removed because it was not found.
+         */
+        MODEL_NOT_FOUND_TO_REMOVE,
+
+        /**
          * An error message indicating a permission mask could not be removed because it was not found.
          */
         MASK_NOT_FOUND_TO_REMOVE,

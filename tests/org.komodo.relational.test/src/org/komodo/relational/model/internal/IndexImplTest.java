@@ -9,6 +9,7 @@ package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -87,6 +88,7 @@ public class IndexImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
+        assertThat(this.index.getParent(null), is(instanceOf(Table.class)));
         assertThat(this.index.getTable(null), is(this.table));
     }
 

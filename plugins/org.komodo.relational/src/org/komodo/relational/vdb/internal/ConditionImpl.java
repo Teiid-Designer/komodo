@@ -8,8 +8,11 @@
 package org.komodo.relational.vdb.internal;
 
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Condition;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -19,6 +22,46 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * An implementation of a VDB permission condition.
  */
 public final class ConditionImpl extends RelationalObjectImpl implements Condition {
+
+    /**
+     * The resolver of a {@link Condition}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, VdbLexicon.DataRole.Permission.Condition.CONDITION);
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Condition resolve( final UnitOfWork transaction,
+                                  final Repository repository,
+                                  final KomodoObject kobject ) throws KException {
+            return new ConditionImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
 
     /**
      * @param uow
@@ -34,6 +77,17 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
                           final Repository repository,
                           final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
+        final KomodoObject grouping = super.getParent(transaction);
+        return resolveType(transaction, grouping.getParent(transaction));
     }
 
     /**
@@ -56,18 +110,6 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
     public void setConstraint( final UnitOfWork uow,
                                final boolean newConstraint ) throws KException {
         setObjectProperty(uow, "setConstraint", VdbLexicon.DataRole.Permission.Condition.CONSTRAINT, newConstraint); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        validateType(uow, path, VdbLexicon.DataRole.Permission.Condition.CONDITION);
     }
 
 }

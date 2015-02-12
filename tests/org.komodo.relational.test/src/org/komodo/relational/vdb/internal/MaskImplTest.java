@@ -8,6 +8,7 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -59,6 +60,11 @@ public final class MaskImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat(this.mask.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Mask.MASK));
+    }
+
+    @Test
+    public void shouldHaveParentPermission() throws Exception {
+        assertThat(this.mask.getParent(null), is(instanceOf(Permission.class)));
     }
 
     @Test

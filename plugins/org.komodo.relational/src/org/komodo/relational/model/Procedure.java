@@ -13,7 +13,17 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 /**
  * Represents a relational model procedure.
  */
-public interface Procedure extends OptionContainer, RelationalObject, SchemaElement {
+public interface Procedure extends AbstractProcedure {
+
+    /**
+     * The default value for the <code>non-prepared</code> property. Value is {@value} .
+     */
+    boolean DEFAULT_NON_PREPARED = false;
+
+    /**
+     * The default value of this table's update count. Value is {@value} .
+     */
+    int DEFAULT_UPDATE_COUNT = 0;
 
     /**
      * An empty array of procedures.
@@ -22,91 +32,44 @@ public interface Procedure extends OptionContainer, RelationalObject, SchemaElem
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param parameterName
-     *        the name of the parameter being added (cannot be <code>null</code>)
-     * @return the new parameter (never <code>null</code>)
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the value of the <code>update count</code> property
      * @throws KException
      *         if an error occurs
      */
-    Parameter addParameter( final UnitOfWork transaction,
-                            final String parameterName ) throws KException;
+    int getUpdateCount( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the value of the AS clause <code>statement</code> property (can be empty)
+     * @return <code>true</code> if non-prepared
      * @throws KException
      *         if an error occurs
+     * @see #DEFAULT_NON_PREPARED
      */
-    String getAsClauseStatement( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the input parameters (never <code>null</code> but can be empty)
-     * @throws KException
-     *         if an error occurs
-     */
-    Parameter[] getParameters( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    Model getParent( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the result set (can be <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    ProcedureResultSet getResultSet( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return <code>true</code> if a function
-     * @throws KException
-     *         if an error occurs
-     */
-    boolean isFunction( final UnitOfWork transaction ) throws KException;
+    boolean isNonPrepared( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param parameterName
-     *        the name of the parameter to remove (cannot be empty)
+     * @param newNonPrepared
+     *        the new value for the <code>non-prepared</code> property
      * @throws KException
      *         if an error occurs
+     * @see #DEFAULT_NON_PREPARED
      */
-    void removeParameter( final UnitOfWork transaction,
-                          final String parameterName ) throws KException;
+    void setNonPrepared( final UnitOfWork transaction,
+                         final boolean newNonPrepared ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param newStatement
-     *        the new AS clause statement (cannot be empty)
+     * @param newUpdateCount
+     *        the new value of the <code>update count</code> property
      * @throws KException
      *         if an error occurs
      */
-    void setAsClauseStatement( final UnitOfWork transaction,
-                               final String newStatement ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param newFunction
-     *        the new value for the <code>function</code> property
-     * @throws KException
-     *         if an error occurs
-     */
-    void setFunction( final UnitOfWork transaction,
-                      final boolean newFunction ) throws KException;
+    void setUpdateCount( final UnitOfWork transaction,
+                         final int newUpdateCount ) throws KException;
 
 }

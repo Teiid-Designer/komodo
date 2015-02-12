@@ -7,12 +7,15 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.relational.model.View;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
@@ -21,6 +24,46 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
  * An implementation of a relational model view.
  */
 public final class ViewImpl extends TableImpl implements View {
+
+    /**
+     * The resolver of a {@link View}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, CreateTable.VIEW_STATEMENT);
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public View resolve( final UnitOfWork transaction,
+                             final Repository repository,
+                             final KomodoObject kobject ) throws KException {
+            return new ViewImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
 
     /**
      * @param uow
@@ -99,17 +142,6 @@ public final class ViewImpl extends TableImpl implements View {
     public PrimaryKey setPrimaryKey( final UnitOfWork transaction,
                                      final String newPrimaryKeyName ) {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        validateType(uow, path, CreateTable.VIEW_STATEMENT);
     }
 
 }

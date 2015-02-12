@@ -8,6 +8,7 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -63,6 +64,11 @@ public final class ConditionImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat(this.condition.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Condition.CONDITION));
+    }
+
+    @Test
+    public void shouldHaveParentPermission() throws Exception {
+        assertThat(this.condition.getParent(null), is(instanceOf(Permission.class)));
     }
 
     @Test

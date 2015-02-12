@@ -13,9 +13,11 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -28,6 +30,46 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * An implementation of a VDB data policy permission.
  */
 public final class PermissionImpl extends RelationalObjectImpl implements Permission {
+
+    /**
+     * The resolver of a {@link Permission}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, VdbLexicon.DataRole.Permission.PERMISSION);
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Permission resolve( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) throws KException {
+            return new PermissionImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
 
     /**
      * @param uow
@@ -115,6 +157,43 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
+        final Condition[] conditions = getConditions(uow);
+        final Mask[] masks = getMasks(uow);
+
+        final KomodoObject[] result = new KomodoObject[conditions.length + masks.length];
+        System.arraycopy(conditions, 0, result, 0, conditions.length);
+        System.arraycopy(masks, 0, result, conditions.length, masks.length);
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
+                                             final String type ) throws KException {
+
+        if (VdbLexicon.DataRole.Permission.Condition.CONDITION.equals(type)) {
+            return getConditions(uow);
+        }
+
+        if (VdbLexicon.DataRole.Permission.Mask.MASK.equals(type)) {
+            return getMasks(uow);
+        }
+
+        return KomodoObject.EMPTY_ARRAY;
     }
 
     /**
@@ -223,6 +302,17 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
+        final KomodoObject grouping = super.getParent(transaction);
+        return resolveType(transaction, grouping.getParent(transaction));
     }
 
     /**
@@ -472,18 +562,6 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     public void setAllowUpdate( final UnitOfWork uow,
                                 final boolean newAllowUpdate ) throws KException {
         setObjectProperty(uow, "setAllowUpdate", VdbLexicon.DataRole.Permission.ALLOW_UPDATE, newAllowUpdate); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        validateType(uow, path, VdbLexicon.DataRole.Permission.PERMISSION);
     }
 
 }

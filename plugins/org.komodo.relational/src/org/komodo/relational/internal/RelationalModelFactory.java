@@ -7,9 +7,11 @@
  */
 package org.komodo.relational.internal;
 
+import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
+import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.OptionContainer;
@@ -25,7 +27,9 @@ import org.komodo.relational.model.View;
 import org.komodo.relational.model.internal.AccessPatternImpl;
 import org.komodo.relational.model.internal.ColumnImpl;
 import org.komodo.relational.model.internal.ForeignKeyImpl;
+import org.komodo.relational.model.internal.FunctionImpl;
 import org.komodo.relational.model.internal.IndexImpl;
+import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.ParameterImpl;
 import org.komodo.relational.model.internal.PrimaryKeyImpl;
 import org.komodo.relational.model.internal.ProcedureImpl;
@@ -367,10 +371,10 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Procedure createFunction( final UnitOfWork uow,
-                                            final Repository repository,
-                                            final Model parentModel,
-                                            final String functionName ) throws KException {
+    public static Function createFunction( final UnitOfWork uow,
+                                           final Repository repository,
+                                           final Model parentModel,
+                                           final String functionName ) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(functionName, "functionName"); //$NON-NLS-1$
@@ -384,8 +388,11 @@ public final class RelationalModelFactory {
         assert (transaction != null);
 
         try {
-            final Procedure result = createProcedure(transaction, repository, parentModel, functionName);
-            result.setFunction(transaction, true);
+            final KomodoObject kobject = repository.add(transaction, parentModel.getAbsolutePath(), functionName, null);
+            kobject.addDescriptor(transaction, CreateProcedure.FUNCTION_STATEMENT);
+            setCreateStatementProperties(transaction, kobject);
+
+            final Function result = new FunctionImpl(transaction, repository, kobject.getAbsolutePath());
 
             if (uow == null) {
                 transaction.commit();
@@ -492,6 +499,49 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param vdb
+     *        the VDB where the model is being created (cannot be <code>null</code>)
+     * @param modelName
+     *        the name of the model to create (cannot be empty)
+     * @return the VDB import model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static Model createModel( final UnitOfWork uow,
+                                     final Repository repository,
+                                     final Vdb vdb,
+                                     final String modelName ) throws KException {
+        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(vdb, "vdb"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(modelName, "modelName"); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("relationalmodelfactory-createModel", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final KomodoObject kobject = vdb.addChild(transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
+            final Model result = new ModelImpl(transaction, repository, kobject.getAbsolutePath());
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentProcedure
      *        the procedure where the parameter model object is being created (cannot be <code>null</code>)
      * @param parameterName
@@ -502,7 +552,7 @@ public final class RelationalModelFactory {
      */
     public static Parameter createParameter( final UnitOfWork uow,
                                              final Repository repository,
-                                             final Procedure parentProcedure,
+                                             final AbstractProcedure parentProcedure,
                                              final String parameterName ) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentProcedure, "parentProcedure"); //$NON-NLS-1$
@@ -684,7 +734,7 @@ public final class RelationalModelFactory {
      */
     public static ProcedureResultSet createProcedureResultSet( final UnitOfWork uow,
                                                                final Repository repository,
-                                                               final Procedure parentProcedure ) throws KException {
+                                                               final AbstractProcedure parentProcedure ) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentProcedure, "parentProcedure"); //$NON-NLS-1$
 

@@ -7,8 +7,11 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.AccessPattern;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
@@ -17,6 +20,51 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
  * An implementation of a relational model access pattern.
  */
 public final class AccessPatternImpl extends TableConstraintImpl implements AccessPattern {
+
+    /**
+     * The resolver of a {@link AccessPattern}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, Constraint.TABLE_ELEMENT);
+                ObjectImpl.validatePropertyValue(transaction,
+                                                 repository,
+                                                 kobject,
+                                                 Constraint.TYPE,
+                                                 AccessPattern.CONSTRAINT_TYPE.toString());
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public AccessPattern resolve( final UnitOfWork transaction,
+                                      final Repository repository,
+                                      final KomodoObject kobject ) throws KException {
+            return new AccessPatternImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
 
     /**
      * @param uow
@@ -42,19 +90,6 @@ public final class AccessPatternImpl extends TableConstraintImpl implements Acce
     @Override
     public ConstraintType getConstraintType() {
         return CONSTRAINT_TYPE;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        validateType(uow, path, Constraint.TABLE_ELEMENT);
-        validatePropertyValue(uow, path, Constraint.TYPE, AccessPattern.CONSTRAINT_TYPE.toString());
     }
 
 }

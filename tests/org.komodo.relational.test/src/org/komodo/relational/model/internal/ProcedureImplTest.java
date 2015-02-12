@@ -52,7 +52,7 @@ public final class ProcedureImplTest extends RelationalModelTest {
     public void shouldAddStatementOption() throws Exception {
         final String name = "statementoption";
         final String value = "statementvalue";
-        final StatementOption statementOption = this.procedure.addStatementOption(null, name, value);
+        final StatementOption statementOption = this.procedure.setStatementOption(null, name, value);
         assertThat(statementOption, is(notNullValue()));
         assertThat(statementOption.getName(null), is(name));
         assertThat(statementOption.getOption(null), is(value));
@@ -80,12 +80,7 @@ public final class ProcedureImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionName() throws Exception {
-        this.procedure.addStatementOption(null, StringConstants.EMPTY_STRING, "blah");
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void shouldFailAddingEmptyStatementOptionValue() throws Exception {
-        this.procedure.addStatementOption(null, "blah", StringConstants.EMPTY_STRING);
+        this.procedure.setStatementOption(null, StringConstants.EMPTY_STRING, "blah");
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -95,12 +90,17 @@ public final class ProcedureImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionName() throws Exception {
-        this.procedure.addStatementOption(null, null, "blah");
+        this.procedure.setStatementOption(null, null, "blah");
     }
 
-    @Test( expected = IllegalArgumentException.class )
+    @Test( expected = KException.class )
     public void shouldFailAddingNullStatementOptionValue() throws Exception {
-        this.procedure.addStatementOption(null, "blah", null);
+        this.procedure.setStatementOption(null, "blah", null);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailASettingEmptyStatementOptionValueWhenNeverAdded() throws Exception {
+        this.procedure.setStatementOption(null, "blah", StringConstants.EMPTY_STRING);
     }
 
     @Test
@@ -113,6 +113,36 @@ public final class ProcedureImplTest extends RelationalModelTest {
                 // expected
             }
         }
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingEmptyDescriptionWhenNeverAdded() throws Exception {
+        this.procedure.setDescription(null, StringConstants.EMPTY_STRING);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingEmptyNameInSourceWhenNeverAdded() throws Exception {
+        this.procedure.setNameInSource(null, StringConstants.EMPTY_STRING);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNativeQueryWithEmptyValueWhenItWasNeverAdded() throws Exception {
+        this.procedure.setNativeQuery(null, StringConstants.EMPTY_STRING);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNullDescriptionWhenNeverAdded() throws Exception {
+        this.procedure.setDescription(null, null);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNullNameInSourceWhenNeverAdded() throws Exception {
+        this.procedure.setNameInSource(null, null);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNullNativeQueryWhenNeverAdded() throws Exception {
+        this.procedure.setNativeQuery(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -161,17 +191,15 @@ public final class ProcedureImplTest extends RelationalModelTest {
         final int numStatementOptions = 5;
 
         for (int i = 0; i < numStatementOptions; ++i) {
-            this.procedure.addStatementOption(null, "statementoption" + i, "statementvalue" + i);
+            this.procedure.setStatementOption(null, "statementoption" + i, "statementvalue" + i);
         }
 
         assertThat(this.procedure.getStatementOptions(null).length, is(numStatementOptions));
     }
 
     @Test
-    public void shouldHaveProcedureDescriptorAfterConstruction() throws Exception {
-        assertThat(this.procedure.isFunction(null), is(false));
-        assertThat(this.procedure.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT), is(true));
-        assertThat(this.procedure.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT), is(false));
+    public void shouldHaveDefaultUpdateCountAfterConstruction() throws Exception {
+        assertThat(this.procedure.getUpdateCount(null), is(Procedure.DEFAULT_UPDATE_COUNT));
     }
 
     @Test
@@ -207,7 +235,7 @@ public final class ProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldRemoveStatementOption() throws Exception {
         final String name = "statementoption";
-        this.procedure.addStatementOption(null, name, "blah");
+        this.procedure.setStatementOption(null, name, "blah");
         this.procedure.removeStatementOption(null, name);
         assertThat(this.procedure.getStatementOptions(null).length, is(0));
     }
@@ -221,6 +249,27 @@ public final class ProcedureImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldSetDescription() throws Exception {
+        final String value = "description";
+        this.procedure.setDescription(null, value);
+        assertThat(this.procedure.getDescription(null), is(value));
+    }
+
+    @Test
+    public void shouldSetNameInSource() throws Exception {
+        final String value = "nameInSource";
+        this.procedure.setNameInSource(null, value);
+        assertThat(this.procedure.getNameInSource(null), is(value));
+    }
+
+    @Test
+    public void shouldSetNativeQuery() throws Exception {
+        final String value = "nativeQuery";
+        this.procedure.setNativeQuery(null, value);
+        assertThat(this.procedure.getNativeQuery(null), is(value));
+    }
+
+    @Test
     public void shouldSetSchemaElementTypeProperty() throws Exception {
         final SchemaElementType value = SchemaElementType.VIRTUAL;
         this.procedure.setSchemaElementType(null, value);
@@ -230,11 +279,10 @@ public final class ProcedureImplTest extends RelationalModelTest {
     }
 
     @Test
-    public void shouldSetToFunctionDescriptorProperty() throws Exception {
-        this.procedure.setFunction(null, true);
-        assertThat(this.procedure.isFunction(null), is(true));
-        assertThat(this.procedure.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT), is(false));
-        assertThat(this.procedure.hasDescriptor(null, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT), is(true));
+    public void shouldSetUpdateCount() throws Exception {
+        final int value = 10;
+        this.procedure.setUpdateCount(null, value);
+        assertThat(this.procedure.getUpdateCount(null), is(value));
     }
 
 }

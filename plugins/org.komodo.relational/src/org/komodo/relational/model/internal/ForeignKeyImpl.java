@@ -9,9 +9,11 @@ package org.komodo.relational.model.internal;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Table;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -25,6 +27,51 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
  * An implementation of a relational model foreign key.
  */
 public final class ForeignKeyImpl extends TableConstraintImpl implements ForeignKey {
+
+    /**
+     * The resolver of a {@link ForeignKey}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, Constraint.FOREIGN_KEY_CONSTRAINT);
+                ObjectImpl.validatePropertyValue(transaction,
+                                                 repository,
+                                                 kobject,
+                                                 Constraint.TYPE,
+                                                 ForeignKey.CONSTRAINT_TYPE.toString());
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public ForeignKey resolve( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) throws KException {
+            return new ForeignKeyImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
 
     /**
      * @param uow
@@ -286,18 +333,6 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        validateType(uow, getAbsolutePath(), Constraint.FOREIGN_KEY_CONSTRAINT);
-        validatePropertyValue(uow, getAbsolutePath(), Constraint.TYPE, ForeignKey.CONSTRAINT_TYPE.toString());
     }
 
 }

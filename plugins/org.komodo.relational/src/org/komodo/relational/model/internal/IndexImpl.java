@@ -7,8 +7,11 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Index;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -18,6 +21,51 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
  * An implementation of a relational model index.
  */
 public final class IndexImpl extends TableConstraintImpl implements Index {
+
+    /**
+     * The resolver of a {@link Index}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, Constraint.INDEX_CONSTRAINT);
+                ObjectImpl.validatePropertyValue(transaction,
+                                                 repository,
+                                                 kobject,
+                                                 Constraint.TYPE,
+                                                 Index.CONSTRAINT_TYPE.toString());
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Index resolve( final UnitOfWork transaction,
+                              final Repository repository,
+                              final KomodoObject kobject ) throws KException {
+            return new IndexImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
 
     /**
      * @param uow
@@ -64,19 +112,6 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
     public void setExpression( final UnitOfWork uow,
                                final String newExpression ) throws KException {
         setObjectProperty(uow, "setExpression", Constraint.EXPRESSION, newExpression); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        validateType(uow, path, Constraint.INDEX_CONSTRAINT);
-        validatePropertyValue(uow, path, Constraint.TYPE, Index.CONSTRAINT_TYPE.toString());
     }
 
 }

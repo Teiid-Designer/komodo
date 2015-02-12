@@ -13,7 +13,6 @@ import static org.junit.Assert.assertThat;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
@@ -54,7 +53,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
             transaction.commit();
         }
 
-        assertThat(model.getPrimaryType(null).getName(), is(KomodoLexicon.VdbModel.NODE_TYPE));
+        assertThat(model.getPrimaryType(null).getName(), is(VdbLexicon.Vdb.DECLARATIVE_MODEL));
         assertThat(model.getName(null), is(modelName));
 
         return model;

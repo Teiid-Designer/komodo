@@ -8,6 +8,7 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -15,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.Table;
@@ -38,10 +40,9 @@ public final class ModelImplTest extends RelationalModelTest {
     @Test
     public void shouldAddFunction() throws Exception {
         final String name = "function";
-        final Procedure function = this.model.addFunction(null, name);
+        final Function function = this.model.addFunction(null, name);
         assertThat(function, is(notNullValue()));
         assertThat(function.getName(null), is(name));
-        assertThat(function.isFunction(null), is(true));
     }
 
     @Test
@@ -50,7 +51,6 @@ public final class ModelImplTest extends RelationalModelTest {
         final Procedure procedure = this.model.addProcedure(null, name);
         assertThat(procedure, is(notNullValue()));
         assertThat(procedure.getName(null), is(name));
-        assertThat(procedure.isFunction(null), is(false));
     }
 
     @Test
@@ -223,6 +223,20 @@ public final class ModelImplTest extends RelationalModelTest {
         }
 
         assertThat(this.model.getViews(null).length, is(numViews));
+    }
+
+    @Test
+    public void shouldHaveStrongTypeChildren() throws Exception {
+        this.model.addFunction(null, "function");
+        this.model.addProcedure(null, "procedure");
+        this.model.addTable(null, "table");
+        this.model.addView(null, "view");
+
+        assertThat(this.model.getChildren(null).length, is(4));
+        assertThat(this.model.getChildren(null)[0], is(instanceOf(Function.class)));
+        assertThat(this.model.getChildren(null)[1], is(instanceOf(Procedure.class)));
+        assertThat(this.model.getChildren(null)[2], is(instanceOf(Table.class)));
+        assertThat(this.model.getChildren(null)[3], is(instanceOf(View.class)));
     }
 
     @Test
