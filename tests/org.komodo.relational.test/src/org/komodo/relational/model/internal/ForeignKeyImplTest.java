@@ -9,6 +9,7 @@ package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -92,6 +93,7 @@ public class ForeignKeyImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
+        assertThat(this.foreignKey.getParent(null), is(instanceOf(Table.class)));
         assertThat(this.foreignKey.getTable(null), is(this.parentTable));
     }
 

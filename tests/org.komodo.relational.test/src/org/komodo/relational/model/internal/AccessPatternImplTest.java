@@ -8,6 +8,7 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -21,7 +22,6 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.Repository;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -34,10 +34,8 @@ public class AccessPatternImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final Repository.UnitOfWork uow = _repo.createTransaction(this.name.getMethodName(), false, null);
-        this.table = RelationalModelFactory.createTable(uow, _repo, mock(Model.class), "table");
-        this.accessPattern = RelationalModelFactory.createAccessPattern(uow, _repo, this.table, NAME);
-        uow.commit();
+        this.table = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "table");
+        this.accessPattern = RelationalModelFactory.createAccessPattern(null, _repo, this.table, NAME);
     }
 
     @Test
@@ -67,6 +65,11 @@ public class AccessPatternImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectName() throws Exception {
         assertThat(this.accessPattern.getName(null), is(NAME));
+    }
+
+    @Test
+    public void shouldHaveParentTable() throws Exception {
+        assertThat(this.accessPattern.getParent(null), is(instanceOf(Table.class)));
     }
 
     @Test

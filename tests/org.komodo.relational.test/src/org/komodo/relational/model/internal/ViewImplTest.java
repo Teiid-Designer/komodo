@@ -7,6 +7,9 @@
  */
 package org.komodo.relational.model.internal;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import org.junit.Before;
@@ -17,16 +20,21 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class ViewImplTest extends RelationalModelTest {
 
+    private Model model;
     private View view;
 
     @Before
     public void init() throws Exception {
-        this.view = RelationalModelFactory.createView(null, _repo, mock(Model.class), "view");
+        final Vdb vdb = RelationalModelFactory.createVdb(null, _repo, null, "vdb", "path");
+        this.model = RelationalModelFactory.createModel(null, _repo, vdb, "model");
+        this.view = RelationalModelFactory.createView(null, _repo, this.model, "view");
     }
 
     @Test
@@ -64,6 +72,12 @@ public class ViewImplTest extends RelationalModelTest {
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenSettingPrimaryKey() throws KException {
         this.view.setPrimaryKey(null, "blah");
+    }
+
+    @Test
+    public void shouldHaveParentModel() throws Exception {
+        assertThat(this.view.getParent(null), is(instanceOf(Model.class)));
+        assertThat(this.view.getParent(null), is((KomodoObject)this.model));
     }
 
 }

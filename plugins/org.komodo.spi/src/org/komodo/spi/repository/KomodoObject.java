@@ -78,7 +78,7 @@ public interface KomodoObject extends KNode {
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @param name
      *        the name of child(ren) being requested (cannot be empty)
-     * @return the child object(s) (never <code>null</code> or empty)
+     * @return the child object(s) (never <code>null</code> but can be empty)
      * @throws KException
      *         if the child does not exist or an error occurs
      */

@@ -7,6 +7,7 @@
  */
 package org.komodo.relational.vdb;
 
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -73,6 +74,18 @@ public interface Vdb extends RelationalObject {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param modelName
+     *        the name of the VDB being imported (cannot be empty)
+     * @return the new VDB import (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    Model addModel( final UnitOfWork transaction,
+                    final String modelName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param translatorName
      *        the name of the translator being added (cannot be empty)
      * @param translatorType
@@ -120,6 +133,15 @@ public interface Vdb extends RelationalObject {
      *         if an error occurs
      */
     Entry[] getEntries( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the VDB models (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Model[] getModels( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -211,6 +233,17 @@ public interface Vdb extends RelationalObject {
      */
     void removeImport( final UnitOfWork transaction,
                        final String importToRemove ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param modelToRemove
+     *        the name of the model being removed (cannot be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    void removeModel( final UnitOfWork transaction,
+                      final String modelToRemove ) throws KException;
 
     /**
      * @param transaction

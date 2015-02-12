@@ -12,13 +12,14 @@ import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
-import org.komodo.relational.RelationalConstants.Direction;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.StatementOption;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -37,7 +38,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     /*
 
     - teiidddl:parameterType (string) = 'IN' mandatory autocreated < 'IN', 'OUT', 'INOUT', 'VARIADIC'
-    TODO - teiidddl:result (boolean) = 'false' autocreated
+    - teiidddl:result (boolean) = 'false' autocreated
     - ddl:nullable (string) = 'NULL' mandatory autocreated < 'NULL', 'NOT NULL'
     - ddl:datatypeName (STRING)
     - ddl:datatypeLength (LONG)
@@ -49,6 +50,46 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     + * (ddl:statementOption) = ddl:statementOption
 
      */
+
+    /**
+     * The resolver of a {@link Parameter}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, CreateProcedure.PARAMETER);
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Parameter resolve( final UnitOfWork transaction,
+                                  final Repository repository,
+                                  final KomodoObject kobject ) throws KException {
+            return new ParameterImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
 
     /**
      * @param uow
@@ -69,44 +110,11 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.OptionContainer#addStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String)
+     * @see org.komodo.relational.model.OptionContainer#getCustomOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public StatementOption addStatementOption( final UnitOfWork uow,
-                                               final String optionName,
-                                               final String optionValue ) throws KException {
-        ArgCheck.isNotEmpty(optionName, "optionName"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(optionValue, "optionValue"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("parameterimpl-addStatementOption", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addStatementOption: transaction = {0}, optionName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         optionName);
-        }
-
-        try {
-            final StatementOption result = RelationalModelFactory.createStatementOption(transaction,
-                                                                                        getRepository(),
-                                                                                        this,
-                                                                                        optionName,
-                                                                                        optionValue);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+    public StatementOption[] getCustomOptions( final UnitOfWork transaction ) {
+        return StatementOption.NO_OPTIONS;
     }
 
     /**
@@ -205,7 +213,8 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
 
         try {
             final KomodoObject kobject = super.getParent(transaction);
-            final Procedure result = new ProcedureImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            assert (kobject instanceof Procedure);
+            final Procedure result = (Procedure)kobject;
 
             if (uow == null) {
                 transaction.commit();
@@ -312,6 +321,23 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.Parameter#isResult(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean isResult( final UnitOfWork transaction ) throws KException {
+        final Boolean value = getObjectProperty(transaction, Property.ValueType.BOOLEAN, "isResult", //$NON-NLS-1$
+                                                CreateProcedure.PARAMETER_RESULT_FLAG);
+
+        if (value == null) {
+            return Parameter.DEFAULT_RESULT;
+        }
+
+        return value;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.OptionContainer#removeStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */
@@ -336,11 +362,15 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
         boolean found = false;
 
         try {
-            for (final KomodoObject kobject : getChildrenOfType(transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION)) {
-                if (optionToRemove.equals(kobject.getName(transaction))) {
-                    removeChild(transaction, optionToRemove);
-                    found = true;
-                    break;
+            final StatementOption[] options = getStatementOptions(transaction);
+
+            if (options.length != 0) {
+                for (final StatementOption option : options) {
+                    if (optionToRemove.equals(option.getName(transaction))) {
+                        removeChild(transaction, optionToRemove);
+                        found = true;
+                        break;
+                    }
                 }
             }
 
@@ -384,7 +414,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      * {@inheritDoc}
      *
      * @see org.komodo.relational.model.Parameter#setDirection(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.relational.RelationalConstants.Direction)
+     *      org.komodo.relational.model.Parameter.Direction)
      */
     @Override
     public void setDirection( final UnitOfWork uow,
@@ -433,6 +463,17 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.Parameter#setResult(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
+     */
+    @Override
+    public void setResult( final UnitOfWork transaction,
+                           final boolean newResult ) throws KException {
+        setObjectProperty(transaction, "setResult", CreateProcedure.PARAMETER_RESULT_FLAG, newResult); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Parameter#setScale(org.komodo.spi.repository.Repository.UnitOfWork, int)
      */
     @Override
@@ -444,13 +485,55 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
+     * @see org.komodo.relational.model.OptionContainer#setStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, java.lang.String)
      */
     @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        validateType(uow, path, CreateProcedure.PARAMETER);
+    public StatementOption setStatementOption( final UnitOfWork uow,
+                                               final String optionName,
+                                               final String optionValue ) throws KException {
+        ArgCheck.isNotEmpty(optionName, "optionName"); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("parameterimpl-setStatementOption", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("setStatementOption: transaction = {0}, optionName = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         optionName);
+        }
+
+        try {
+            StatementOption result = null;
+
+            if (StringUtils.isBlank(optionValue)) {
+                removeStatementOption(transaction, optionName);
+            } else {
+                result = Utils.getOption(transaction, this, optionName);
+
+                if (result == null) {
+                    result = RelationalModelFactory.createStatementOption(transaction,
+                                                                          getRepository(),
+                                                                          this,
+                                                                          optionName,
+                                                                          optionValue);
+                } else {
+                    result.setOption(transaction, optionValue);
+                }
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
 }

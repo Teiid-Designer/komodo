@@ -16,13 +16,14 @@ import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalConstants;
-import org.komodo.relational.RelationalConstants.Direction;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.Parameter;
+import org.komodo.relational.model.Parameter.Direction;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
@@ -49,7 +50,7 @@ public final class ParameterImplTest extends RelationalModelTest {
     public void shouldAddStatementOption() throws Exception {
         final String name = "statementoption";
         final String value = "statementvalue";
-        final StatementOption statementOption = this.parameter.addStatementOption(null, name, value);
+        final StatementOption statementOption = this.parameter.setStatementOption(null, name, value);
         assertThat(statementOption, is(notNullValue()));
         assertThat(statementOption.getName(null), is(name));
         assertThat(statementOption.getOption(null), is(value));
@@ -87,22 +88,17 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionName() throws Exception {
-        this.parameter.addStatementOption(null, StringConstants.EMPTY_STRING, "blah");
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void shouldFailAddingEmptyStatementOptionValue() throws Exception {
-        this.parameter.addStatementOption(null, "blah", StringConstants.EMPTY_STRING);
+        this.parameter.setStatementOption(null, StringConstants.EMPTY_STRING, "blah");
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionName() throws Exception {
-        this.parameter.addStatementOption(null, null, "blah");
+        this.parameter.setStatementOption(null, null, "blah");
     }
 
-    @Test( expected = IllegalArgumentException.class )
-    public void shouldFailAddingNullStatementOptionValue() throws Exception {
-        this.parameter.addStatementOption(null, "blah", null);
+    @Test( expected = KException.class )
+    public void shouldFailAddingNullStatementOptionValueWhenNeverAdded() throws Exception {
+        this.parameter.setStatementOption(null, "blah", null);
     }
 
     @Test
@@ -115,6 +111,11 @@ public final class ParameterImplTest extends RelationalModelTest {
                 // expected
             }
         }
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingEmptyStatementOptionValueWhenNeverAdded() throws Exception {
+        this.parameter.setStatementOption(null, "blah", StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -137,7 +138,7 @@ public final class ParameterImplTest extends RelationalModelTest {
         final int numStatementOptions = 5;
 
         for (int i = 0; i < numStatementOptions; ++i) {
-            this.parameter.addStatementOption(null, "statementoption" + i, "statementvalue" + i);
+            this.parameter.setStatementOption(null, "statementoption" + i, "statementvalue" + i);
         }
 
         assertThat(this.parameter.getStatementOptions(null).length, is(numStatementOptions));
@@ -173,11 +174,16 @@ public final class ParameterImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveDefaultResultAfterConstruction() throws Exception {
+        assertThat(this.parameter.isResult(null), is(Parameter.DEFAULT_RESULT));
+    }
+
+    @Test
     public void shouldHaveDirectionPropertyDefaultValueAfterConstruction() throws Exception {
         assertThat(this.parameter.getDirection(null), is(Direction.DEFAULT_VALUE));
         assertThat(this.parameter.hasProperty(null, TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE), is(true));
         assertThat(this.parameter.getProperty(null, TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE).getStringValue(null),
-                   is(RelationalConstants.Direction.DEFAULT_VALUE.toString()));
+                   is(Direction.DEFAULT_VALUE.toString()));
     }
 
     @Test
@@ -199,10 +205,24 @@ public final class ParameterImplTest extends RelationalModelTest {
         assertThat(this.parameter.hasProperty(null, StandardDdlLexicon.DEFAULT_VALUE), is(false));
     }
 
+    public void shouldRemoveOptionWithEmptyStatementOptionValue() throws Exception {
+        final String name = "blah";
+        this.parameter.setStatementOption(null, name, "blah");
+        this.parameter.setStatementOption(null, name, StringConstants.EMPTY_STRING);
+        assertThat(OptionContainer.Utils.getOption(null, this.parameter, name), is(nullValue()));
+    }
+
+    public void shouldRemoveOptionWithNullStatementOptionValue() throws Exception {
+        final String name = "blah";
+        this.parameter.setStatementOption(null, name, "blah");
+        this.parameter.setStatementOption(null, name, null);
+        assertThat(OptionContainer.Utils.getOption(null, this.parameter, name), is(nullValue()));
+    }
+
     @Test
     public void shouldRemoveStatementOption() throws Exception {
         final String name = "statementoption";
-        this.parameter.addStatementOption(null, name, "blah");
+        this.parameter.setStatementOption(null, name, "blah");
         this.parameter.removeStatementOption(null, name);
         assertThat(this.parameter.getStatementOptions(null).length, is(0));
     }
@@ -262,6 +282,13 @@ public final class ParameterImplTest extends RelationalModelTest {
         this.parameter.setNullable(null, value);
         assertThat(this.parameter.getNullable(null), is(value));
         assertThat(this.parameter.getProperty(null, StandardDdlLexicon.NULLABLE).getStringValue(null), is(value.toString()));
+    }
+
+    @Test
+    public void shouldSetResult() throws Exception {
+        final boolean value = !Parameter.DEFAULT_RESULT;
+        this.parameter.setResult(null, value);
+        assertThat(this.parameter.isResult(null), is(value));
     }
 
 }

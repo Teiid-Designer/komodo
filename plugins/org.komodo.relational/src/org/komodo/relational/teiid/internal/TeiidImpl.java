@@ -24,8 +24,11 @@ package org.komodo.relational.teiid.internal;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -46,6 +49,46 @@ import org.teiid.runtime.client.instance.TCTeiidInstance;
  */
 public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManager {
 
+    /**
+     * The resolver of a {@link Teiid}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, KomodoLexicon.Teiid.NODE_TYPE);
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Teiid resolve( final UnitOfWork transaction,
+                              final Repository repository,
+                              final KomodoObject kobject ) throws KException {
+            return new TeiidImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
+
     private class TeiidJdbcInfoImpl implements TeiidJdbcInfo {
 
         @Override
@@ -59,13 +102,13 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setHostProvider(HostProvider hostProvider) {
+        public void setHostProvider( HostProvider hostProvider ) {
             // host provider is provided by the TeiidImpl class
             // so this should do nothing
         }
 
         @Override
-        public String getUrl(String vdbName) {
+        public String getUrl( String vdbName ) {
             StringBuilder sb = new StringBuilder();
             sb.append(JDBC_TEIID_PREFIX);
             sb.append(vdbName);
@@ -97,7 +140,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setPort(int port) {
+        public void setPort( int port ) {
             try {
                 setJdbcPort(null, port);
             } catch (KException ex) {
@@ -116,7 +159,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setUsername(String userName) {
+        public void setUsername( String userName ) {
             try {
                 setJdbcUsername(null, userName);
             } catch (KException ex) {
@@ -135,7 +178,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setPassword(String password) {
+        public void setPassword( String password ) {
             try {
                 setJdbcPassword(null, password);
             } catch (KException ex) {
@@ -154,7 +197,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setSecure(boolean secure) {
+        public void setSecure( boolean secure ) {
             try {
                 setJdbcSecure(null, secure);
             } catch (KException ex) {
@@ -187,7 +230,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setHostProvider(HostProvider hostProvider) {
+        public void setHostProvider( HostProvider hostProvider ) {
             // Nothing to do since this is the host provider
         }
 
@@ -202,7 +245,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setPort(int port) {
+        public void setPort( int port ) {
             try {
                 setAdminPort(null, port);
             } catch (KException ex) {
@@ -221,7 +264,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setUsername(String userName) {
+        public void setUsername( String userName ) {
             try {
                 setAdminUser(null, userName);
             } catch (KException ex) {
@@ -240,7 +283,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setPassword(String password) {
+        public void setPassword( String password ) {
             try {
                 setAdminPassword(null, password);
             } catch (KException ex) {
@@ -259,7 +302,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setSecure(boolean secure) {
+        public void setSecure( boolean secure ) {
             try {
                 setAdminSecure(null, secure);
             } catch (KException ex) {
@@ -285,7 +328,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
         }
 
         @Override
-        public void setTeiidInstance(TeiidInstance teiidInstance) {
+        public void setTeiidInstance( TeiidInstance teiidInstance ) {
             this.teiidInstance = teiidInstance;
         }
 
@@ -363,13 +406,16 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     /**
      * @param uow
      *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param repository the repository
-     * @param path the path
-     * @throws KException if error occurs
+     * @param repository
+     *        the repository
+     * @param path
+     *        the path
+     * @throws KException
+     *         if error occurs
      */
-    public TeiidImpl(final UnitOfWork uow,
-                     final Repository repository,
-                     final String path) throws KException {
+    public TeiidImpl( final UnitOfWork uow,
+                      final Repository repository,
+                      final String path ) throws KException {
         super(uow, repository, path);
         adminInfo = new TeiidAdminInfoImpl();
         jdbcInfo = new TeiidJdbcInfoImpl();
@@ -382,223 +428,263 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid id property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public String getId(UnitOfWork uow) throws KException {
+    public String getId( UnitOfWork uow ) throws KException {
         return getObjectProperty(uow, Property.ValueType.STRING, "getId", JcrLexicon.UUID.getString()); //$NON-NLS-1$
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid host property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public String getHost(UnitOfWork uow) throws KException {
+    public String getHost( UnitOfWork uow ) throws KException {
         return getObjectProperty(uow, Property.ValueType.STRING, "getHost", KomodoLexicon.Teiid.HOST); //$NON-NLS-1$
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid admin port property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public int getAdminPort(UnitOfWork uow) throws KException {
+    public int getAdminPort( UnitOfWork uow ) throws KException {
         Long port = getObjectProperty(uow, Property.ValueType.LONG, "getAdminPort", KomodoLexicon.Teiid.ADMIN_PORT); //$NON-NLS-1$
         return port != null ? port.intValue() : TeiidAdminInfo.DEFAULT_PORT;
     }
 
     /**
-     * @param uow the transaction
-     * @param port new value of admin port property
-     * @throws KException if error occurs
+     * @param uow
+     *        the transaction
+     * @param port
+     *        new value of admin port property
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public void setAdminPort(UnitOfWork uow, int port) throws KException {
+    public void setAdminPort( UnitOfWork uow,
+                              int port ) throws KException {
         setObjectProperty(uow, "setAdminPort", KomodoLexicon.Teiid.ADMIN_PORT, port); //$NON-NLS-1$
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid admin user property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public String getAdminUser(UnitOfWork uow) throws KException {
+    public String getAdminUser( UnitOfWork uow ) throws KException {
         String user = getObjectProperty(uow, Property.ValueType.STRING, "getAdminUser", KomodoLexicon.Teiid.ADMIN_USER); //$NON-NLS-1$
         return user != null ? user : TeiidAdminInfo.DEFAULT_ADMIN_USERNAME;
     }
 
     /**
-     * @param uow the transaction
-     * @param userName new value of admin username property
-     * @throws KException if error occurs
+     * @param uow
+     *        the transaction
+     * @param userName
+     *        new value of admin username property
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public void setAdminUser(UnitOfWork uow, String userName) throws KException {
+    public void setAdminUser( UnitOfWork uow,
+                              String userName ) throws KException {
         setObjectProperty(uow, "setAdminUser", KomodoLexicon.Teiid.ADMIN_USER, userName); //$NON-NLS-1$
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid admin password property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public String getAdminPassword(UnitOfWork uow) throws KException {
+    public String getAdminPassword( UnitOfWork uow ) throws KException {
         String password = getObjectProperty(uow, Property.ValueType.STRING, "getAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD); //$NON-NLS-1$
         return password != null ? password : TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD;
     }
 
     /**
-     * @param uow the transaction
-     * @param password new value of admin password property
-     * @throws KException if error occurs
+     * @param uow
+     *        the transaction
+     * @param password
+     *        new value of admin password property
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public void setAdminPassword(UnitOfWork uow, String password) throws KException {
+    public void setAdminPassword( UnitOfWork uow,
+                                  String password ) throws KException {
         setObjectProperty(uow, "setAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD, password); //$NON-NLS-1$
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid secure property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public boolean isAdminSecure(UnitOfWork uow) throws KException {
+    public boolean isAdminSecure( UnitOfWork uow ) throws KException {
         Boolean secure = getObjectProperty(uow, Property.ValueType.BOOLEAN, "isSecure", KomodoLexicon.Teiid.ADMIN_SECURE); //$NON-NLS-1$
         return secure != null ? secure : TeiidAdminInfo.DEFAULT_SECURE;
     }
 
     /**
-     * @param uow the transaction
-     * @param secure new value of admin secure property
-     * @throws KException if error occurs
+     * @param uow
+     *        the transaction
+     * @param secure
+     *        new value of admin secure property
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public void setAdminSecure(UnitOfWork uow, boolean secure) throws KException {
+    public void setAdminSecure( UnitOfWork uow,
+                                boolean secure ) throws KException {
         setObjectProperty(uow, "setAdminSecure", KomodoLexicon.Teiid.ADMIN_SECURE, secure); //$NON-NLS-1$
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid jdbc port property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
-    private int getJdbcPort(UnitOfWork uow) throws KException {
+    private int getJdbcPort( UnitOfWork uow ) throws KException {
         Long port = getObjectProperty(uow, Property.ValueType.LONG, "getPort", KomodoLexicon.Teiid.JDBC_PORT); //$NON-NLS-1$
         return port != null ? port.intValue() : TeiidJdbcInfo.DEFAULT_PORT;
     }
 
     /**
-     * @param uow the transaction
-     * @param port new value of jdbc port property
-     * @throws KException if error occurs
+     * @param uow
+     *        the transaction
+     * @param port
+     *        new value of jdbc port property
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public void setJdbcPort(UnitOfWork uow, int port) throws KException {
+    public void setJdbcPort( UnitOfWork uow,
+                             int port ) throws KException {
         setObjectProperty(uow, "setPort", KomodoLexicon.Teiid.JDBC_PORT, port); //$NON-NLS-1$
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid jdbc user property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
-    private String getJdbcUsername(UnitOfWork uow) throws KException {
+    private String getJdbcUsername( UnitOfWork uow ) throws KException {
         String user = getObjectProperty(uow, Property.ValueType.STRING, "getUsername", KomodoLexicon.Teiid.JDBC_USER); //$NON-NLS-1$
         return user != null ? user : TeiidJdbcInfo.DEFAULT_JDBC_USERNAME;
     }
 
     /**
-     * @param uow the transaction
-     * @param userName new value of jdbc username property
-     * @throws KException if error occurs
+     * @param uow
+     *        the transaction
+     * @param userName
+     *        new value of jdbc username property
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public void setJdbcUsername(UnitOfWork uow, String userName) throws KException {
+    public void setJdbcUsername( UnitOfWork uow,
+                                 String userName ) throws KException {
         setObjectProperty(uow, "setUsername", KomodoLexicon.Teiid.JDBC_USER, userName); //$NON-NLS-1$
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid jdbc password property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public String getJdbcPassword(UnitOfWork uow) throws KException {
+    public String getJdbcPassword( UnitOfWork uow ) throws KException {
         String password = getObjectProperty(uow, Property.ValueType.STRING, "getPassword", KomodoLexicon.Teiid.JDBC_PSWD); //$NON-NLS-1$
         return password != null ? password : TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD;
     }
 
     /**
-     * @param uow the transaction
-     * @param password new value of jdbc password property
-     * @throws KException if error occurs
+     * @param uow
+     *        the transaction
+     * @param password
+     *        new value of jdbc password property
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public void setJdbcPassword(UnitOfWork uow, String password) throws KException {
+    public void setJdbcPassword( UnitOfWork uow,
+                                 String password ) throws KException {
         setObjectProperty(uow, "setPassword", KomodoLexicon.Teiid.JDBC_PSWD, password); //$NON-NLS-1$
     }
 
     /**
-     * @param uow the transaction
+     * @param uow
+     *        the transaction
      * @return value of teiid secure property
-     * @throws KException if error occurs
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public boolean isJdbcSecure(UnitOfWork uow) throws KException {
+    public boolean isJdbcSecure( UnitOfWork uow ) throws KException {
         Boolean secure = getObjectProperty(uow, Property.ValueType.BOOLEAN, "isSecure", KomodoLexicon.Teiid.JDBC_SECURE); //$NON-NLS-1$
         return secure != null ? secure : TeiidJdbcInfo.DEFAULT_SECURE;
     }
 
     /**
-     * @param uow the transaction
-     * @param secure new value of jdbc secure property
-     * @throws KException if error occurs
+     * @param uow
+     *        the transaction
+     * @param secure
+     *        new value of jdbc secure property
+     * @throws KException
+     *         if error occurs
      */
     @Override
-    public void setJdbcSecure(UnitOfWork uow, boolean secure) throws KException {
+    public void setJdbcSecure( UnitOfWork uow,
+                               boolean secure ) throws KException {
         setObjectProperty(uow, "setSecure", KomodoLexicon.Teiid.JDBC_SECURE, secure); //$NON-NLS-1$
     }
 
     @Override
-    public boolean addListener(ExecutionConfigurationListener listener) {
+    public boolean addListener( ExecutionConfigurationListener listener ) {
         return false;
     }
 
     @Override
-    public void permitListeners(boolean enable) {
+    public void permitListeners( boolean enable ) {
         // TODO
         // Consider whether this is still required.
     }
 
     @Override
-    public void notifyListeners(ExecutionConfigurationEvent event) {
+    public void notifyListeners( ExecutionConfigurationEvent event ) {
         // TODO
         // Consider whether this is still required.
     }
 
     @Override
-    public boolean removeListener(ExecutionConfigurationListener listener) {
+    public boolean removeListener( ExecutionConfigurationListener listener ) {
         return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        validateType(uow, path, KomodoLexicon.Teiid.NODE_TYPE);
     }
 
 }

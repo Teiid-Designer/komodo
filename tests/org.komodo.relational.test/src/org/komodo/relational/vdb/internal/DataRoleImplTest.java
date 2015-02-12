@@ -8,6 +8,7 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
@@ -74,6 +75,7 @@ public final class DataRoleImplTest extends RelationalModelTest {
         assertThat(added, is(permission));
         assertThat(added.getName(null), is(name));
         assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.PERMISSION));
+        assertThat(this.dataRole.getChildren(null)[0], is(instanceOf(Permission.class)));
     }
 
     @Test
@@ -94,6 +96,18 @@ public final class DataRoleImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveDefaultGrantAllValueAfterConstruction() throws Exception {
         assertThat(this.dataRole.isGrantAll(null), is(DataRole.DEFAULT_GRANT_ALL));
+    }
+
+    @Test
+    public void shouldHaveParentVdb() throws Exception {
+        assertThat(this.dataRole.getParent(null), is(instanceOf(Vdb.class)));
+    }
+
+    @Test
+    public void shouldHaveStrongTypedChildren() throws Exception {
+        this.dataRole.addPermission(null, "permission");
+        assertThat(this.dataRole.getChildren(null).length, is(1));
+        assertThat(this.dataRole.getChildren(null)[0], is(instanceOf(Permission.class)));
     }
 
     @Test( expected = KException.class )

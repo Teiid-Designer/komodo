@@ -199,7 +199,7 @@ public class WorkspaceManager {
             final KomodoObject kobject = getRepository().add(transaction,
                                                              parentPath,
                                                              modelName,
-                                                             KomodoLexicon.VdbModel.NODE_TYPE);
+                                                             VdbLexicon.Vdb.DECLARATIVE_MODEL);
             final Model result =  new ModelImpl(transaction, getRepository(), kobject.getAbsolutePath());
 
             if (uow == null) {
@@ -442,7 +442,7 @@ public class WorkspaceManager {
 
         assert (transaction != null);
 
-        final String[] paths = findByType(transaction, KomodoLexicon.VdbModel.NODE_TYPE);
+        final String[] paths = findByType(transaction, VdbLexicon.Vdb.DECLARATIVE_MODEL);
         Model[] result = null;
 
         if (paths.length == 0) {

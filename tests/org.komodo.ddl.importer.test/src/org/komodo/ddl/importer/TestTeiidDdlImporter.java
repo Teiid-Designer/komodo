@@ -42,6 +42,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * Test Class to test Teiid DDL import
@@ -52,11 +53,11 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
     private static final String SEQUENCE_DDL_PATH = ".*\\/ddl:statements";
 
-	private static final String TEIID_MYSQL_ACCTS = "Teiid-MySQLAccounts.ddl"; 
+	private static final String TEIID_MYSQL_ACCTS = "Teiid-MySQLAccounts.ddl";
 
 	private static final String TEIID_FLATFILE = "Teiid-FlatFile.ddl";
 
-    private UnitOfWork uow; 
+    private UnitOfWork uow;
 
 	@Before
 	public void setup() throws Exception {
@@ -141,7 +142,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
 	/**
      * Test Error condition - unreadable DDL file supplied.
-     * Expected Outcome - Error Message saying that the supplied file is not readable 
+     * Expected Outcome - Error Message saying that the supplied file is not readable
      */
     @Test
     public void testUnreadableDdlFile() throws Exception {
@@ -389,7 +390,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
     	// Test that a Model was created
     	assertNotNull("Failed - No Model Created ", modelNode);
-    	verifyPrimaryType(modelNode, KomodoLexicon.VdbModel.NODE_TYPE);
+    	verifyPrimaryType(modelNode, VdbLexicon.Vdb.DECLARATIVE_MODEL);
 
     	// Test Model name
     	String modelName = modelNode.getName(null);

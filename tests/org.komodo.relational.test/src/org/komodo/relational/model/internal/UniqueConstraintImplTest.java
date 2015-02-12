@@ -8,6 +8,7 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -63,6 +64,7 @@ public class UniqueConstraintImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
+        assertThat(this.uniqueConstraint.getParent(null), is(instanceOf(Table.class)));
         assertThat(this.uniqueConstraint.getTable(null), is(this.table));
     }
 

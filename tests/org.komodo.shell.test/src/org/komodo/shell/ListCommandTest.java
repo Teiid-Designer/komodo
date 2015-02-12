@@ -21,7 +21,7 @@ import org.komodo.shell.commands.core.ListCommand;
 
 /**
  * Test Class to test ListCommand
- * 
+ *
  */
 @SuppressWarnings("javadoc")
 public class ListCommandTest extends AbstractCommandTest {
@@ -29,7 +29,7 @@ public class ListCommandTest extends AbstractCommandTest {
 	private static final String LIST_COMMAND1 = "listCommand1.txt"; //$NON-NLS-1$
 	private static final String LIST_COMMAND2 = "listCommand2.txt"; //$NON-NLS-1$
 	private static final String INDENT = getIndentStr();
-	
+
 	/**
 	 * Test for ListCommand
 	 */
@@ -40,9 +40,9 @@ public class ListCommandTest extends AbstractCommandTest {
     @Test
     public void testList1() throws Exception {
     	setup(LIST_COMMAND1, ListCommand.class);
-    	
+
     	execute();
-    	
+
     	String expectedOutput = INDENT+"tko:workspace [tko:workspace]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
@@ -52,15 +52,15 @@ public class ListCommandTest extends AbstractCommandTest {
     @Test
     public void testList2() throws Exception {
     	setup(LIST_COMMAND2, ListCommand.class);
-    	
+
     	execute();
-    	
-    	String expectedOutput = INDENT+"Model1 [tko:vdbModel]\n"+ //$NON-NLS-1$
-    			                INDENT+"Model2 [tko:vdbModel]\n"+ //$NON-NLS-1$ 
-    			                INDENT+"Model3 [tko:vdbModel]\n"; //$NON-NLS-1$ 
+
+    	String expectedOutput = INDENT+"Model1 [vdb:declarativeModel]\n"+ //$NON-NLS-1$
+    			                INDENT+"Model2 [vdb:declarativeModel]\n"+ //$NON-NLS-1$
+    			                INDENT+"Model3 [vdb:declarativeModel]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
-    
+
 }

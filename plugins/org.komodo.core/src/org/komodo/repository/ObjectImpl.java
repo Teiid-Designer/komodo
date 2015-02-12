@@ -43,6 +43,139 @@ public class ObjectImpl implements KomodoObject, StringConstants {
 
     private static final KLog LOGGER = KLog.getLogger();
 
+    /**
+     * Only one of the {@link UnitOfWork transactions} passed in should be non-<code>null</code>. Ensures that a transaction
+     * rollback occurs if the transaction was constructed within the method.
+     *
+     * @param transactionParameter
+     *        the transaction passed into the method (can be <code>null</code>)
+     * @param transactionVariable
+     *        the transaction constructed within the method (can be <code>null</code>)
+     * @param e
+     *        the error being handled (cannot be <code>null</code>)
+     * @return the error passed in if already a {@link KException} or the error passed in wrapped in a {@link KException}
+     */
+    public static KException handleError( final UnitOfWork transactionParameter,
+                                          final UnitOfWork transactionVariable,
+                                          final Exception e ) {
+        assert (e != null);
+        assert ((transactionParameter == null) && (transactionVariable != null))
+               || ((transactionParameter != null) && (transactionVariable == null))
+               || ((transactionParameter == transactionVariable));
+
+        if (transactionParameter == null) {
+            transactionVariable.rollback();
+        }
+
+        if (e instanceof KException) {
+            return (KException)e;
+        }
+
+        return new KException(e);
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the object is located (cannot be <code>null</code>)
+     * @param kobject
+     *        the object whose property value is being validated (cannot be empty)
+     * @param name
+     *        the name of the property being validated (cannot be empty)
+     * @param expectedValue
+     *        the expected value or <code>null</code> if the property should not exist
+     * @throws KException
+     *         if an error occurs or if the property value is not the expected value
+     */
+    public static void validatePropertyValue( final UnitOfWork uow,
+                                              final Repository repository,
+                                              final KomodoObject kobject,
+                                              final String name,
+                                              final Object expectedValue ) throws KException {
+        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("objectimpl-validatePropertyValue", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            boolean valid = true;
+            final Property property = kobject.getProperty(transaction, name);
+
+            if (property == null) {
+                if (expectedValue != null) {
+                    valid = ((expectedValue instanceof String) && StringUtils.isBlank((String)expectedValue));
+                }
+            } else {
+                valid = property.getValue(transaction).equals(expectedValue);
+            }
+
+            if (!valid) {
+                throw new KException(Messages.getString(Komodo.INVALID_PROPERTY_VALUE, kobject.getAbsolutePath(), name));
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the object is located (cannot be <code>null</code>)
+     * @param kobject
+     *        the object whose type is being validated (cannot be empty)
+     * @param types
+     *        the primary type or descriptor names that the object must have (cannot be <code>null</code> or empty or have a
+     *        <code>null</code> element)
+     * @throws KException
+     *         if an error occurs or if object does not have all the specified types
+     */
+    public static void validateType( final UnitOfWork uow,
+                                     final Repository repository,
+                                     final KomodoObject kobject,
+                                     final String... types ) throws KException {
+        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(types, "types"); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = repository.createTransaction("objectimpl-validateType", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            for (final String type : types) {
+                ArgCheck.isNotEmpty(type, "type"); //$NON-NLS-1$
+
+                if (!kobject.hasDescriptor(transaction, type) && !type.equals(kobject.getPrimaryType(transaction).getName())) {
+                    throw new KException(Messages.getString(Komodo.INCORRECT_TYPE,
+                                                            kobject.getAbsolutePath(),
+                                                            kobject.getClass().getSimpleName()));
+                }
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
     final int index;
     final String path;
     final Repository repository;
@@ -75,13 +208,13 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * Implementation specific and not to be included on the interface!
      *
-     * @param uow transaction for this operation. Can be null.
-     *
+     * @param uow
+     *        transaction for this operation. Can be null.
      * @return the underlying object of this {@link ObjectImpl}
-     *
-     * @throws KException if an error occurs
+     * @throws KException
+     *         if an error occurs
      */
-    protected Node node(UnitOfWork uow) throws KException {
+    protected Node node( UnitOfWork uow ) throws KException {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
@@ -546,12 +679,15 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * Convenience method for retrieving a property.
      *
-     * @param uow the transaction. If null then a new transaction is generated.
-     * @param returnValueType the type of the return value type
-     * @param getterName name of the method name calling this method
-     * @param propertyPath relative path of the actual property
+     * @param uow
+     *        the transaction. If null then a new transaction is generated.
+     * @param returnValueType
+     *        the type of the return value type
+     * @param getterName
+     *        name of the method name calling this method
+     * @param propertyPath
+     *        relative path of the actual property
      * @return the value of the property cast to the specified return value type
-     *
      * @throws KException
      */
     protected < T > T getObjectProperty( UnitOfWork uow,
@@ -598,8 +734,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                         result = (T)property.getDateValue(transaction);
                         break;
                     default:
-                        throw new UnsupportedOperationException(
-                                                                "Further property types should be added for support in this method"); //$NON-NLS-1$
+                        throw new UnsupportedOperationException("Further property types should be added for support in this method"); //$NON-NLS-1$
                 }
             }
 
@@ -694,37 +829,6 @@ public class ObjectImpl implements KomodoObject, StringConstants {
 
     protected Session getSession( final UnitOfWork transaction ) {
         return ((UnitOfWorkImpl)transaction).getSession();
-    }
-
-    /**
-     * Only one of the {@link UnitOfWork transactions} passed in should be non-<code>null</code>. Ensures that a transaction
-     * rollback occurs if the transaction was constructed within the method.
-     *
-     * @param transactionParameter
-     *        the transaction passed into the method (can be <code>null</code>)
-     * @param transactionVariable
-     *        the transaction constructed within the method (can be <code>null</code>)
-     * @param e
-     *        the error being handled (cannot be <code>null</code>)
-     * @return the error passed in if already a {@link KException} or the error passed in wrapped in a {@link KException}
-     */
-    protected KException handleError( final UnitOfWork transactionParameter,
-                                      final UnitOfWork transactionVariable,
-                                      final Exception e ) {
-        assert (e != null);
-        assert ((transactionParameter == null) && (transactionVariable != null))
-               || ((transactionParameter != null) && (transactionVariable == null))
-               || ((transactionParameter == transactionVariable));
-
-        if (transactionParameter == null) {
-            transactionVariable.rollback();
-        }
-
-        if (e instanceof KException) {
-            return (KException)e;
-        }
-
-        return new KException(e);
     }
 
     /**
@@ -918,8 +1022,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("kobject-removeChild: transaction = {0}, names = {1}", //$NON-NLS-1$
-                                         transaction.getName(),
-                                         Arrays.asList(names));
+                         transaction.getName(),
+                         Arrays.asList(names));
         }
 
         try {
@@ -1059,8 +1163,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                     if (multiple) {
                         property.remove();
                     } else {
-                        throw new KException(
-                                             Messages.getString(Messages.Komodo.UNABLE_TO_REMOVE_SINGLE_VALUE_PROPERTY_WITH_EMPTY_ARRAY,
+                        throw new KException(Messages.getString(Messages.Komodo.UNABLE_TO_REMOVE_SINGLE_VALUE_PROPERTY_WITH_EMPTY_ARRAY,
                                                                 name,
                                                                 getAbsolutePath()));
                     }
@@ -1068,8 +1171,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                     if (multiple) {
                         setMultiValuedProperty(session, node, factory, name, values, type);
                     } else {
-                        throw new KException(
-                                             Messages.getString(Messages.Komodo.UNABLE_TO_SET_SINGLE_VALUE_PROPERTY_WITH_MULTIPLE_VALUES,
+                        throw new KException(Messages.getString(Messages.Komodo.UNABLE_TO_SET_SINGLE_VALUE_PROPERTY_WITH_MULTIPLE_VALUES,
                                                                 name,
                                                                 getAbsolutePath()));
                     }
@@ -1105,8 +1207,10 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
     }
 
-    protected void setObjectProperty(UnitOfWork uow, String setterName, String propertyName,
-                                            Object value) throws KException {
+    protected void setObjectProperty( UnitOfWork uow,
+                                      String setterName,
+                                      String propertyName,
+                                      Object value ) throws KException {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
@@ -1179,101 +1283,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         return this.path;
     }
 
-    /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param workspacePath
-     *        the workspace path of the object being validated (cannot be empty)
-     * @param name
-     *        the name of the property being validated (cannot be empty)
-     * @param expectedValue
-     *        the expected value or <code>null</code> if the property should not exist
-     * @throws KException
-     *         if an error occurs or if the property value is not the expected value
-     */
-    protected void validatePropertyValue( final UnitOfWork uow,
-                                          final String workspacePath,
-                                          final String name,
-                                          final Object expectedValue ) throws KException {
-        ArgCheck.isNotEmpty(workspacePath, "workspacePath"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("relationalobjectimple-validatePropertyValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            boolean valid = true;
-            final Property property = getProperty(transaction, name);
-
-            if (property == null) {
-                if (expectedValue != null) {
-                    valid = ((expectedValue instanceof String) && StringUtils.isBlank((String)expectedValue));
-                }
-            } else {
-                valid = property.getValue(transaction).equals(expectedValue);
-            }
-
-            if (!valid) {
-                throw new KException(Messages.getString(Komodo.INVALID_PROPERTY_VALUE, workspacePath, name));
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param workspacePath
-     *        the workspace path of the object being validated (cannot be empty)
-     * @param types
-     *        the primary type or descriptor names that the object must have (cannot be <code>null</code> or empty or have a
-     *        <code>null</code> element)
-     * @throws KException
-     *         if an error occurs or if object does not have all the specified types
-     */
-    protected void validateType( final UnitOfWork uow,
-                                 final String workspacePath,
-                                 final String... types ) throws KException {
-
-        ArgCheck.isNotEmpty(workspacePath, "workspacePath"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(types, "types"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("relationalobjectimple-validateType", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            for (final String type : types) {
-                ArgCheck.isNotEmpty(type, "type"); //$NON-NLS-1$
-
-                if (!hasDescriptor(transaction, type) && !type.equals(getPrimaryType(transaction).getName())) {
-                    throw new KException(Messages.getString(Komodo.INCORRECT_TYPE, workspacePath, getClass().getSimpleName()));
-                }
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
     @Override
-    public void visit(KomodoObjectVisitor visitor) throws Exception {
+    public void visit( KomodoObjectVisitor visitor ) throws Exception {
         visitor.visit(this);
     }
 }

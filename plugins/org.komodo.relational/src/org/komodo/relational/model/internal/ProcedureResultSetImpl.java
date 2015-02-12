@@ -7,6 +7,7 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.PrimaryKey;
@@ -14,6 +15,7 @@ import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -24,6 +26,46 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
  * An implementation of a relational model procedure result set.
  */
 public final class ProcedureResultSetImpl extends TableImpl implements ProcedureResultSet {
+
+    /**
+     * The resolver of a {@link ProcedureResultSet}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, CreateProcedure.RESULT_DATA_TYPE);
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public ProcedureResultSet resolve( final UnitOfWork transaction,
+                                           final Repository repository,
+                                           final KomodoObject kobject ) throws KException {
+            return new ProcedureResultSetImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
 
     /**
      * @param uow
@@ -94,7 +136,8 @@ public final class ProcedureResultSetImpl extends TableImpl implements Procedure
 
         try {
             final KomodoObject kobject = getParent(transaction);
-            final Procedure result = new ProcedureImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            assert (kobject instanceof Procedure);
+            final Procedure result = (Procedure)kobject;
 
             if (uow == null) {
                 transaction.commit();
@@ -150,18 +193,6 @@ public final class ProcedureResultSetImpl extends TableImpl implements Procedure
     public PrimaryKey setPrimaryKey( final UnitOfWork transaction,
                                      final String newPrimaryKeyName ) {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        validateType(uow, path, CreateProcedure.RESULT_DATA_TYPE);
     }
 
 }

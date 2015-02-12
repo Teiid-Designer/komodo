@@ -9,30 +9,20 @@ package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.model.Model;
-import org.komodo.relational.model.Parameter;
+import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Procedure;
-import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.StatementOption;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringUtils;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 
 /**
  * An implementation of a relational model procedure.
  */
-public final class ProcedureImpl extends RelationalObjectImpl implements Procedure {
+public final class ProcedureImpl extends AbstractProcedureImpl implements Procedure {
 
     /*
       - teiidddl:schemaElementType (string) = 'FOREIGN' mandatory autocreated < 'FOREIGN', 'VIRTUAL'
@@ -41,6 +31,63 @@ public final class ProcedureImpl extends RelationalObjectImpl implements Procedu
       + * (ddl:statementOption) = ddl:statementOption
       - teiidddl:statement (string) -- procedure only, not function
      */
+
+    private enum StandardOptions {
+
+        NON_PREPARED( "non-prepared" ), //$NON-NLS-1$
+        UPDATECOUNT( "UPDATECOUNT" ); //$NON-NLS-1$
+
+        private final String name;
+
+        private StandardOptions( final String optionName ) {
+            this.name = optionName;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+    }
+
+    /**
+     * The resolver of a {@link Procedure}.
+     */
+    public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject kobject ) {
+            try {
+                ObjectImpl.validateType(transaction, repository, kobject, CreateProcedure.PROCEDURE_STATEMENT);
+                return true;
+            } catch (final Exception e) {
+                // not resolvable
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Procedure resolve( final UnitOfWork transaction,
+                                  final Repository repository,
+                                  final KomodoObject kobject ) throws KException {
+            return new ProcedureImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+    };
 
     /**
      * @param uow
@@ -61,464 +108,102 @@ public final class ProcedureImpl extends RelationalObjectImpl implements Procedu
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Procedure#addParameter(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @see org.komodo.relational.model.OptionContainer#getCustomOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Parameter addParameter( final UnitOfWork uow,
-                                   final String parameterName ) throws KException {
-        ArgCheck.isNotEmpty(parameterName, "parameterName"); //$NON-NLS-1$
+    public StatementOption[] getCustomOptions( final UnitOfWork uow ) throws KException {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-addParameter", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction("procedureimpl-getCustomOptions", true, null); //$NON-NLS-1$
         }
 
         assert (transaction != null);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addParameter: transaction = {0}, parameterName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         parameterName);
+        final StatementOption[] allOptions = getStatementOptions(transaction);
+
+        if (allOptions.length == 0) {
+            return allOptions;
         }
 
-        try {
-            final Parameter result = RelationalModelFactory.createParameter(transaction, getRepository(), this, parameterName);
+        final StatementOption[] superOptions = super.getCustomOptions(transaction);
+        final List< StatementOption > temp = new ArrayList<>(allOptions.length);
 
-            if (uow == null) {
-                transaction.commit();
+        for (final StatementOption option : allOptions) {
+            if (StandardOptions.valueOf(option.getName(transaction)) == null) {
+                temp.add(option);
             }
+        }
 
+        if (temp.isEmpty()) {
+            return superOptions;
+        }
+
+        final StatementOption[] result = temp.toArray(new StatementOption[temp.size()]);
+
+        if (superOptions.length == 0) {
             return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
         }
+
+        final StatementOption[] combined = new StatementOption[superOptions.length + result.length];
+        System.arraycopy(result, 0, combined, 0, result.length);
+        System.arraycopy(superOptions, 0, combined, result.length, superOptions.length);
+
+        return combined;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.OptionContainer#addStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String)
+     * @see org.komodo.relational.model.Procedure#getUpdateCount(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public StatementOption addStatementOption( final UnitOfWork uow,
-                                               final String optionName,
-                                               final String optionValue ) throws KException {
-        ArgCheck.isNotEmpty(optionName, "optionName"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(optionValue, "optionValue"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
+    public int getUpdateCount( final UnitOfWork transaction ) throws KException {
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.UPDATECOUNT.getName());
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-addStatementOption", false, null); //$NON-NLS-1$
+        if (option == null) {
+            return Procedure.DEFAULT_UPDATE_COUNT;
         }
 
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addStatementOption: transaction = {0}, optionName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         optionName);
-        }
-
-        try {
-            final StatementOption result = RelationalModelFactory.createStatementOption(transaction,
-                                                                                        getRepository(),
-                                                                                        this,
-                                                                                        optionName,
-                                                                                        optionValue);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return Integer.parseInt(option.getOption(transaction));
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Procedure#getAsClauseStatement(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.Procedure#isNonPrepared(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public String getAsClauseStatement( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getAsClauseStatement", CreateProcedure.STATEMENT); //$NON-NLS-1$
+    public boolean isNonPrepared( final UnitOfWork transaction ) throws KException {
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NON_PREPARED.getName());
+
+        if (option == null) {
+            return Procedure.DEFAULT_NON_PREPARED;
+        }
+
+        return Boolean.parseBoolean(option.getOption(transaction));
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Procedure#getParameters(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.Procedure#setNonPrepared(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
      */
     @Override
-    public Parameter[] getParameters( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureImpl-getParameters", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject[] parameters = getChildrenOfType(transaction, CreateProcedure.PARAMETER);
-            Parameter[] result = null;
-
-            if (parameters.length == 0) {
-                result = Parameter.NO_PARAMETERS;
-            }
-
-            result = new ParameterImpl[parameters.length];
-            int i = 0;
-
-            for (final KomodoObject param : parameters) {
-                result[i] = new ParameterImpl(transaction, getRepository(), param.getAbsolutePath());
-                ++i;
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+    public void setNonPrepared( final UnitOfWork transaction,
+                                final boolean newNonPrepared ) throws KException {
+        setStatementOption(transaction, StandardOptions.NON_PREPARED.getName(), Boolean.toString(newNonPrepared));
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.repository.ObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.Procedure#setUpdateCount(org.komodo.spi.repository.Repository.UnitOfWork, int)
      */
     @Override
-    public Model getParent( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-getParent", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject kobject = super.getParent(transaction);
-            final Model result = new ModelImpl(transaction, getRepository(), kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Procedure#getResultSet(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public ProcedureResultSet getResultSet( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureImpl-getResultSet", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject[] resultSets = getChildrenOfType(transaction, CreateProcedure.RESULT_SET);
-            ProcedureResultSet result = null;
-
-            // if does not exist create it
-            if (resultSets.length == 0) {
-                result = RelationalModelFactory.createProcedureResultSet(transaction, getRepository(), this);
-            } else {
-                result = new ProcedureResultSetImpl(transaction, getRepository(), resultSets[0].getAbsolutePath());
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.SchemaElement#getSchemaElementType(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public SchemaElementType getSchemaElementType( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty(uow, Property.ValueType.STRING, "getSchemaElementType", //$NON-NLS-1$
-                                               SchemaElement.TYPE);
-
-        if (StringUtils.isBlank(value)) {
-            return null;
-        }
-
-        return SchemaElementType.fromValue(value);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.OptionContainer#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public StatementOption[] getStatementOptions( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-getStatementOptions", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getStatementOptions: transaction = {0}", transaction.getName()); //$NON-NLS-1$
-        }
-
-        try {
-            final List< StatementOption > result = new ArrayList< StatementOption >();
-
-            for (final KomodoObject kobject : getChildrenOfType(transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION)) {
-                final StatementOption option = new StatementOptionImpl(transaction, getRepository(), kobject.getAbsolutePath());
-
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("getStatementOptions: transaction = {0}, found statement option = {1}", //$NON-NLS-1$
-                                 transaction.getName(),
-                                 kobject.getAbsolutePath());
-                }
-
-                result.add(option);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            if (result.isEmpty()) {
-                return StatementOption.NO_OPTIONS;
-            }
-
-            return result.toArray(new StatementOption[result.size()]);
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Procedure#isFunction(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public boolean isFunction( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureImpl-isFunction", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final boolean result = hasDescriptor(transaction, CreateProcedure.FUNCTION_STATEMENT);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Procedure#removeParameter(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    public void removeParameter( final UnitOfWork uow,
-                                 final String parameterName ) throws KException {
-        ArgCheck.isNotEmpty(parameterName, "parameterName"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-removeParameter", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeParameter: transaction = {0}, parameterName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         parameterName);
-        }
-
-        boolean found = false;
-
-        try {
-            for (final KomodoObject kobject : getChildrenOfType(transaction, CreateProcedure.PARAMETER)) {
-                if (parameterName.equals(kobject.getName(transaction))) {
-                    removeChild(transaction, parameterName);
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                throw new KException(Messages.getString(Relational.PARAMETER_NOT_FOUND_TO_REMOVE, parameterName));
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.OptionContainer#removeStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    public void removeStatementOption( final UnitOfWork uow,
-                                       final String optionToRemove ) throws KException {
-        ArgCheck.isNotEmpty(optionToRemove, "optionToRemove"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-removeStatementOption", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeStatementOption: transaction = {0}, optionToRemove = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         optionToRemove);
-        }
-
-        boolean found = false;
-
-        try {
-            for (final KomodoObject kobject : getChildrenOfType(transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION)) {
-                if (optionToRemove.equals(kobject.getName(transaction))) {
-                    removeChild(transaction, optionToRemove);
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                throw new KException(Messages.getString(Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove));
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Procedure#setAsClauseStatement(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    public void setAsClauseStatement( final UnitOfWork uow,
-                                      final String newStatement ) throws KException {
-        setObjectProperty(uow, "setAsClauseStatement", CreateProcedure.STATEMENT, newStatement); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Procedure#setFunction(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
-     */
-    @Override
-    public void setFunction( final UnitOfWork uow,
-                             final boolean newFunction ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-setFunction", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setFunction: transaction = {0}, newFunction = {1}", transaction.getName(), newFunction); //$NON-NLS-1$
-        }
-
-        try {
-            if (newFunction != isFunction(transaction)) {
-                if (newFunction) {
-                    removeDescriptor(transaction, CreateProcedure.PROCEDURE_STATEMENT);
-                    addDescriptor(transaction, CreateProcedure.FUNCTION_STATEMENT);
-                } else {
-                    removeDescriptor(transaction, CreateProcedure.FUNCTION_STATEMENT);
-                    addDescriptor(transaction, CreateProcedure.PROCEDURE_STATEMENT);
-                }
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.SchemaElement#setSchemaElementType(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.relational.model.SchemaElement.SchemaElementType)
-     */
-    @Override
-    public void setSchemaElementType( final UnitOfWork uow,
-                                      final SchemaElementType newSchemaElementType ) throws KException {
-        final String newValue = ((newSchemaElementType == null) ? SchemaElementType.DEFAULT_VALUE.toString() : newSchemaElementType.toString());
-        setObjectProperty(uow, "setSchemaElementType", SchemaElement.TYPE, newValue); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#validateInitialState(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    protected void validateInitialState( final UnitOfWork uow,
-                                         final String path ) throws KException {
-        // must be either a procedure or a function
-        try {
-            validateType(uow, path, CreateProcedure.PROCEDURE_STATEMENT);
-        } catch (final KException e) {
-            validateType(uow, path, CreateProcedure.FUNCTION_STATEMENT);
-        }
+    public void setUpdateCount( final UnitOfWork transaction,
+                                final int newUpdateCount ) throws KException {
+        setStatementOption(transaction, StandardOptions.UPDATECOUNT.getName(), Integer.toString(newUpdateCount));
     }
 
 }

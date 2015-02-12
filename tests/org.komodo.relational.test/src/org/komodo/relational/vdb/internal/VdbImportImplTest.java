@@ -8,6 +8,7 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -62,6 +63,11 @@ public final class VdbImportImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveDefaultImportDataPoliciesValueAfterConstruction() throws Exception {
         assertThat(this.vdbImport.isImportDataPolicies(null), is(VdbImport.DEFAULT_IMPORT_DATA_POLICIES));
+    }
+
+    @Test
+    public void shouldHaveParentVdb() throws Exception {
+        assertThat(this.vdbImport.getParent(null), is(instanceOf(Vdb.class)));
     }
 
     @Test

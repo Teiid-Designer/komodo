@@ -8,6 +8,7 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
@@ -55,6 +56,11 @@ public final class TranslatorImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat(this.translator.getPrimaryType(null).getName(), is(VdbLexicon.Translator.TRANSLATOR));
+    }
+
+    @Test
+    public void shouldHaveParentVdb() throws Exception {
+        assertThat(this.translator.getParent(null), is(instanceOf(Vdb.class)));
     }
 
     @Test

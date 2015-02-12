@@ -8,6 +8,7 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
@@ -17,6 +18,7 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Translator;
@@ -56,6 +58,7 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat(added, is(dataRole));
         assertThat(added.getName(null), is(name));
         assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.DATA_ROLE));
+        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(DataRole.class)));
     }
 
     @Test
@@ -71,6 +74,7 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat(added.getName(null), is(name));
         assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.Entry.ENTRY));
         assertThat(added.getPath(null), is(path));
+        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(Entry.class)));
     }
 
     @Test
@@ -84,6 +88,21 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat(added, is(vdbImport));
         assertThat(added.getName(null), is(name));
         assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.ImportVdb.IMPORT_VDB));
+        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(VdbImport.class)));
+    }
+
+    @Test
+    public void shouldAddModel() throws Exception {
+        final String name = "model";
+        final Model model = this.vdb.addModel(null, name);
+        assertThat(model, is(notNullValue()));
+        assertThat(this.vdb.getModels(null).length, is(1));
+
+        final Model added = this.vdb.getModels(null)[0];
+        assertThat(added, is(model));
+        assertThat(added.getName(null), is(name));
+        assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.Vdb.DECLARATIVE_MODEL));
+        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(Model.class)));
     }
 
     @Test
@@ -138,6 +157,19 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat(this.vdb.getVersion(null), is(Vdb.DEFAULT_VERSION));
     }
 
+    @Test
+    public void shouldHaveStrongTypedChildren() throws Exception {
+        this.vdb.addDataRole(null, "dataRole");
+        this.vdb.addEntry(null, "entry", "path");
+        this.vdb.addImport(null, "vdbImport");
+        this.vdb.addModel(null, "model");
+        assertThat(this.vdb.getChildren(null).length, is(4));
+        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(DataRole.class)));
+        assertThat(this.vdb.getChildren(null)[1], is(instanceOf(Entry.class)));
+        assertThat(this.vdb.getChildren(null)[2], is(instanceOf(VdbImport.class)));
+        assertThat(this.vdb.getChildren(null)[3], is(instanceOf(Model.class)));
+    }
+
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddEmptyDataRole() throws Exception {
         this.vdb.addDataRole(null, StringConstants.EMPTY_STRING);
@@ -151,6 +183,11 @@ public final class VdbImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddEmptyImport() throws Exception {
         this.vdb.addImport(null, StringConstants.EMPTY_STRING);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldNotBeAbleToAddEmptyModel() throws Exception {
+        this.vdb.addModel(null, StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = KException.class )
@@ -171,6 +208,11 @@ public final class VdbImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddNullImport() throws Exception {
         this.vdb.addImport(null, null);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldNotBeAbleToAddNullModel() throws Exception {
+        this.vdb.addModel(null, null);
     }
 
     @Test( expected = KException.class )
@@ -206,6 +248,12 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldNotHaveModelsAfterConstruction() throws Exception {
+        assertThat(this.vdb.getModels(null), is(notNullValue()));
+        assertThat(this.vdb.getModels(null).length, is(0));
+    }
+
+    @Test
     public void shouldNotHaveTranslatorsAfterConstruction() throws Exception {
         assertThat(this.vdb.getTranslators(null), is(notNullValue()));
         assertThat(this.vdb.getTranslators(null).length, is(0));
@@ -235,6 +283,16 @@ public final class VdbImplTest extends RelationalModelTest {
 
         this.vdb.removeEntry(null, name);
         assertThat(this.vdb.getEntries(null).length, is(0));
+    }
+
+    @Test
+    public void shouldRemoveModel() throws Exception {
+        final String name = "model";
+        this.vdb.addModel(null, name);
+        assertThat(this.vdb.getModels(null).length, is(1));
+
+        this.vdb.removeModel(null, name);
+        assertThat(this.vdb.getModels(null).length, is(0));
     }
 
     @Test

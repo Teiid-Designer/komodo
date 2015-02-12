@@ -8,6 +8,7 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -55,6 +56,7 @@ public final class PermissionImplTest extends RelationalModelTest {
         assertThat(added, is(condition));
         assertThat(added.getName(null), is(name));
         assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Condition.CONDITION));
+        assertThat(this.permission.getChildren(null)[0], is(instanceOf(Condition.class)));
     }
 
     @Test
@@ -68,6 +70,16 @@ public final class PermissionImplTest extends RelationalModelTest {
         assertThat(added, is(mask));
         assertThat(added.getName(null), is(name));
         assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Mask.MASK));
+        assertThat(this.permission.getChildren(null)[0], is(instanceOf(Mask.class)));
+    }
+
+    @Test
+    public void shouldHaveStrongTypedChildren() throws Exception {
+        this.permission.addMask(null, "mask");
+        this.permission.addCondition(null, "condition");
+        assertThat(this.permission.getChildren(null).length, is(2));
+        assertThat(this.permission.getChildren(null)[0], is(instanceOf(Condition.class)));
+        assertThat(this.permission.getChildren(null)[1], is(instanceOf(Mask.class)));
     }
 
     @Test
@@ -120,6 +132,11 @@ public final class PermissionImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveDefaultAllowUpdateValueAfterConstruction() throws Exception {
         assertThat(this.permission.isAllowUpdate(null), is(Permission.DEFAULT_ALLOW_UPDATE));
+    }
+
+    @Test
+    public void shouldHaveParentDataRole() throws Exception {
+        assertThat(this.permission.getParent(null), is(instanceOf(DataRole.class)));
     }
 
     @Test( expected = KException.class )
