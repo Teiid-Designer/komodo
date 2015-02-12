@@ -16,6 +16,6 @@ Require-Bundle: org.komodo.shell-api;bundle-version="1.0.0",
  org.komodo.spi;bundle-version="1.0.0",
  org.komodo.shell.lib;bundle-version="1.0.0",
  org.komodo.relational;bundle-version="1.0.0",
- org.komodo.ddl.importer;bundle-version="1.0.0",
+ org.komodo.importer;bundle-version="1.0.0",
  org.komodo.teiid.client;bundle-version="1.0.0",
  org.komodo.core;bundle-version="1.0.0"

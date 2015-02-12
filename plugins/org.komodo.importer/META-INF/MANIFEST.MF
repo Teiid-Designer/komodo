@@ -1,12 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
-Bundle-SymbolicName: org.komodo.ddl.importer;singleton:=true
+Bundle-SymbolicName: org.komodo.importer;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
-Export-Package: org.komodo.ddl.importer
+Export-Package: org.komodo.importer,
+ org.komodo.importer.ddl
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.komodo.utils;bundle-version="[1.0.0,2.0.0)",
  org.komodo.relational;bundle-version="[1.0.0,2.0.0)",

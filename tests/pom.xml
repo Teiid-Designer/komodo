@@ -19,7 +19,7 @@
     <module>org.komodo.teiid.client.test</module>
     <module>org.komodo.utils.test</module>
     <module>org.komodo.relational.test</module>
-    <module>org.komodo.ddl.importer.test</module>
+    <module>org.komodo.importer.test</module>
     <module>org.komodo.shell.test</module>
 
     <module>org.komodo.modeshape.teiid.sql.sequencer.test</module>

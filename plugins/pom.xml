@@ -21,7 +21,7 @@
     <module>org.komodo.relational</module>
     <module>org.komodo.utils</module>
     <module>org.komodo.utils.logger.modeshape</module>
-    <module>org.komodo.ddl.importer</module>
+    <module>org.komodo.importer</module>
     <module>org.komodo.shell-api</module>
     <module>org.komodo.shell</module>
     <module>org.komodo.teiid.client</module>

@@ -19,10 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.ddl.importer;
+package org.komodo.importer;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.komodo.importer.ddl.TestTeiidDdlImporter;
 
 /**
  * Suite for all unit tests

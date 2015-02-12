@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.ddl.importer;
+package org.komodo.importer.ddl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -36,8 +36,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.ddl.importer.ImportOptions.ImportType;
-import org.komodo.ddl.importer.ImportOptions.OptionKeys;
+import org.komodo.importer.ddl.ImportOptions.ImportType;
+import org.komodo.importer.ddl.ImportOptions.OptionKeys;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;

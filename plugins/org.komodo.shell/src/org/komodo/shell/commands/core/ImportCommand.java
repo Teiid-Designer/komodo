@@ -9,12 +9,12 @@ package org.komodo.shell.commands.core;
 
 import java.io.File;
 import java.util.List;
-import org.komodo.ddl.importer.DdlImporter;
-import org.komodo.ddl.importer.DefaultDdlImporter;
-import org.komodo.ddl.importer.ImportMessages;
-import org.komodo.ddl.importer.ImportOptions;
-import org.komodo.ddl.importer.ImportOptions.ImportType;
-import org.komodo.ddl.importer.ImportOptions.OptionKeys;
+import org.komodo.importer.ddl.DdlImporter;
+import org.komodo.importer.ddl.DefaultDdlImporter;
+import org.komodo.importer.ddl.ImportMessages;
+import org.komodo.importer.ddl.ImportOptions;
+import org.komodo.importer.ddl.ImportOptions.ImportType;
+import org.komodo.importer.ddl.ImportOptions.OptionKeys;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;

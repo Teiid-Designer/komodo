@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.ddl.importer;
+package org.komodo.importer.ddl;
 
 import java.util.HashMap;
 import java.util.Map;
