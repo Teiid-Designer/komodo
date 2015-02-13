@@ -32,20 +32,23 @@ import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.observation.Event;
 
 /**
- * Listener that checks newly sequenced nodes to see if they equals given paths
+ * Listener that checks new nodes to see if they equals given paths
  */
-public class SequencerListener implements EventListener {
+public class NodePathListener implements EventListener {
 
-    private final List<String> pathsToBeSequenced = new ArrayList<String>();
+    private final List<String> paths = new ArrayList<String>();
+
+    private final int pathsSize;
 
     private final CountDownLatch updateLatch;
 
     /**
-     * @param pathsToBeSequenced paths to look for during sequencing
+     * @param paths paths to look for during sequencing
      * @param updateLatch countdown latch to change when paths are found
      */
-    public SequencerListener(List<String> pathsToBeSequenced, CountDownLatch updateLatch) {
-        this.pathsToBeSequenced.addAll(pathsToBeSequenced);
+    public NodePathListener(List<String> paths, CountDownLatch updateLatch) {
+        this.paths.addAll(paths);
+        this.pathsSize = paths.size();
         this.updateLatch = updateLatch;
     }
 
@@ -57,24 +60,26 @@ public class SequencerListener implements EventListener {
 
                 String nodePath = event.getPath();
 
-                Iterator<String> pathSeqIter = pathsToBeSequenced.iterator();
-                while (pathSeqIter.hasNext()) {
-                    String pathToBeSequenced = pathSeqIter.next();
+                Iterator<String> pathIter = paths.iterator();
+                while (pathIter.hasNext()) {
+                    String path = pathIter.next();
 
-                    if (nodePath.matches(pathToBeSequenced))
-                        pathSeqIter.remove();
-                }
-
-                if (pathsToBeSequenced.isEmpty()) {
-                    KLog.getLogger().info("Testing latch pattern against node path: " + nodePath + ": Passed"); //$NON-NLS-1$ //$NON-NLS-2$
-                    updateLatch.countDown();
-                } else {
-                    KLog.getLogger().info("Testing latch pattern against node path: " + nodePath + ": Failed"); //$NON-NLS-1$ //$NON-NLS-2$
+                    if (nodePath.matches(path))
+                        pathIter.remove();
                 }
 
             } catch (Exception ex) {
                 fail(ex.getMessage());
             }
         }
+
+        if (paths.isEmpty() && updateLatch.getCount() > 0) {
+            KLog.getLogger().info("All paths have been found. Setting latch to continue: Passed"); //$NON-NLS-1$
+
+            for (int i = 0 ; i < pathsSize; ++i) {
+                updateLatch.countDown();
+            }
+        }
+
     }
 }

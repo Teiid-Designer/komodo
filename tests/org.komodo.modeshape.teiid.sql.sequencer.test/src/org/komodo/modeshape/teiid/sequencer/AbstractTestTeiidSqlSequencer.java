@@ -24,6 +24,8 @@ package org.komodo.modeshape.teiid.sequencer;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import org.junit.Test;
@@ -91,6 +93,12 @@ import org.modeshape.jcr.api.JcrConstants;
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequencerTest {
 
+    protected static final String TSQL_QUERY = "\\/tsql[0-9]+\\.tsql\\/tsql:query";
+
+    protected static final String TSQL_PROC_CMD = "\\/tsql[0-9]+\\.tsql\\/tsql:createProcedureCommand";
+
+    protected static final String TSQL_INSERT = "\\/tsql[0-9]+\\.tsql\\/tsql:insert";
+
     /**
      * @param teiidVersion
      */
@@ -98,8 +106,12 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
         super(teiidVersion);
     }
 
-    protected Node sequenceSql(String text) throws Exception {
+    protected Node sequenceSql(String text, String seqRegEx) throws Exception {
+        CountDownLatch updateLatch = addPathLatchListener(1, seqRegEx);
+
         Node fileNode = prepareSequence(text, SequenceType.TSQL);
+
+        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
 
         Node contentNode = fileNode.getNode(JcrConstants.JCR_CONTENT);
         assertNotNull(contentNode);
@@ -107,17 +119,13 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
         Property content = contentNode.getProperty(JcrConstants.JCR_DATA);
         assertNotNull(content);
 
-        // Run the sequencer manually
-        boolean success = session().sequence(SequenceType.TSQL.getSequencerName(), content, fileNode);
-        assertTrue(success);
-
         return fileNode;
     }
 
     @Test
     public void testInnerJoin() throws Exception {
         String sql =  "SELECT * FROM g1 inner join g2 on g1.a1=g2.a2";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
         
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -158,7 +166,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testCrossJoin() throws Exception {
         String sql = "SELECT * FROM g1 cross join g2";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
         Node selectNode = verify(queryNode, Query.SELECT_REF_NAME, Select.ID);
@@ -179,7 +187,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testFromClauses() throws Exception {
         String sql = "SELECT * FROM (g1 cross join g2), g3";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
         Node selectNode = verify(queryNode, Query.SELECT_REF_NAME, Select.ID);
@@ -202,7 +210,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testMultiCrossJoin() throws Exception {
         String sql = "SELECT * FROM (g1 cross join g2) cross join g3";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
         Node selectNode = verify(queryNode, Query.SELECT_REF_NAME, Select.ID);
@@ -228,7 +236,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testMultiCrossJoin2() throws Exception {
         String sql = "SELECT * FROM (g1 cross join g2) cross join (g3 cross join g4)";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -260,7 +268,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testMultiCrossJoin3() throws Exception {
         String sql = "SELECT * FROM g1 cross join (g2 cross join g3)";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -287,7 +295,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testMixedJoin() throws Exception {
         String sql = "SELECT * FROM g1 cross join (g2 cross join g3), g4";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -315,7 +323,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testMixedJoin2() throws Exception {
         String sql = "SELECT * FROM g1 cross join (g2 cross join g3), g4, g5 cross join g6";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -350,7 +358,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testMixedJoin3() throws Exception {
         String sql = "SELECT * FROM g1, g2 inner join g3 on g2.a=g3.a";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -384,7 +392,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testRightOuterJoinWithAliases() throws Exception {
         String sql = "Select myG.a myA, myH.b from g myG right outer join h myH on myG.x=myH.x";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -416,7 +424,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testRightJoinWithAliases() throws Exception {
         String sql = "Select myG.a myA, myH.b from g myG right join h myH on myG.x=myH.x";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -448,7 +456,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testLeftOuterJoinWithAliases() throws Exception {
         String sql = "Select myG.a myA, myH.b from g myG left outer join h myH on myG.x=myH.x";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -480,7 +488,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testLeftJoinWithAliases() throws Exception {
         String sql = "Select myG.a myA, myH.b from g myG left outer join h myH on myG.x=myH.x";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -512,7 +520,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testFullOuterJoinWithAliases() throws Exception {
         String sql = "Select myG.a myA, myH.b from g myG full outer join h myH on myG.x=myH.x";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -544,7 +552,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testFullJoin() throws Exception {
         String sql = "Select myG.a myA, myH.b from g myG full join h myH on myG.x=myH.x";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -578,7 +586,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testConversionFunction() throws Exception {
         String sql = "SELECT CONVERT(a, string) FROM g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -599,7 +607,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testConversionFunction2() throws Exception {
         String sql = "SELECT CONVERT(CONVERT(a, timestamp), string) FROM g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -627,7 +635,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testMultiFunction() throws Exception {
         String sql = "SELECT 5 + length(concat(a, 'x')) FROM g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -654,7 +662,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testAliasedFunction() throws Exception {
         String sql = "SELECT REPLACE(a, 'x', 'y') AS y FROM g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -675,7 +683,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testCastFunction() throws Exception {
         String sql = "SELECT cast(a as string) FROM g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -695,7 +703,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testMultiCastFunction() throws Exception {
         String sql = "SELECT cast(cast(a as timestamp) as string) FROM g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -718,7 +726,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testLeftFunction() throws Exception {
         String sql = "SELECT left(fullname, 3) as x FROM sys.groups";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -739,7 +747,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testRightFunction() throws Exception {
         String sql = "SELECT right(fullname, 3) AS x FROM sys.groups";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -760,7 +768,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testInsertIntoSelect() throws Exception {
         String sql = "insert into tempA SELECT 1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_INSERT);
 
         Node insertNode = verify(fileNode, Insert.ID, Insert.ID);
         Node gsNode = verify(insertNode, TargetedCommand.GROUP_REF_NAME, GroupSymbol.ID);
@@ -781,7 +789,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testGroupByHaving() throws Exception {
         String sql = "SELECT a FROM m.g GROUP BY b, c HAVING b=5";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -807,7 +815,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testAggregateFunction() throws Exception {
         String sql = "SELECT COUNT(a) AS c FROM m.g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -827,7 +835,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testHavingFunction() throws Exception {
         String sql = "SELECT a FROM m.g GROUP BY a HAVING COUNT(b) > 0";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -857,7 +865,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testArithmeticNullFunction() throws Exception {
         String sql = "SELECT 5-null, a.g1.c1 FROM a.g1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -878,7 +886,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testStringLiteral() throws Exception {
         String sql = "SELECT 'abc' FROM a.g1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -896,7 +904,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testStringLiteralEscapedTick() throws Exception {
         String sql = "SELECT 'O''Leary' FROM a.g1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -914,7 +922,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testStringLiteralEscapedTick2() throws Exception {
         String sql = "SELECT '''abc''' FROM a.g1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -932,7 +940,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testStringLiteralEscapedTick3() throws Exception {
         String sql = "SELECT 'a''b''c' FROM a.g1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -950,7 +958,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testStringLiteralEscapedTick4() throws Exception {
         String sql = "SELECT \" \"\" \" FROM a.g1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -967,7 +975,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testLongLiteral() throws Exception {
         String sql = "SELECT 123456789012 FROM a.g1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -985,7 +993,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testDateLiteral1() throws Exception {
         String sql = "SELECT {d'2002-10-02'} FROM m.g1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1003,7 +1011,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testTimeLiteral1() throws Exception {
         String sql = "SELECT {t'11:10:00'} FROM m.g1";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1022,7 +1030,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     public void testBooleanLiteralTrue() throws Exception {
         Boolean expected = Boolean.TRUE;
         String sql = "SELECT {b'true'}";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1039,7 +1047,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     public void testBooleanLiteralTrue2() throws Exception {
         Boolean expected = Boolean.TRUE;
         String sql = "SELECT TRUE";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1056,7 +1064,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     public void testBooleanLiteralFalse() throws Exception {
         Boolean expected = Boolean.FALSE;
         String sql = "SELECT {b'false'}";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1073,7 +1081,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     public void testBooleanLiteralFalse2() throws Exception {
         Boolean expected = Boolean.FALSE;
         String sql = "SELECT {b'false'}";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1089,7 +1097,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testBooleanLiteralUnknown() throws Exception {
         String sql = "SELECT {b'unknown'}";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1106,7 +1114,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testSelectDistinct() throws Exception {
         String sql = "SELECT DISTINCT a FROM g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1124,7 +1132,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testSelectAll() throws Exception {
         String sql = "SELECT ALL a FROM g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1145,7 +1153,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testAliasInFrom() throws Exception {
         String sql = "SELECT myG.a FROM g AS myG";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1162,7 +1170,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testAliasesInFrom() throws Exception {
         String sql = "SELECT myG.*, myH.b FROM g AS myG, h AS myH";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1182,7 +1190,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testHiddenAliasesInFrom() throws Exception {
         String sql = "SELECT myG.*, myH.b FROM g myG, h myH";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1204,7 +1212,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testIsNullCriteria1() throws Exception {
         String sql = "Select a From db.g Where a IS NULL";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1224,7 +1232,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testIsNullCriteria2() throws Exception {
         String sql = "Select a From db.g Where a IS NOT NULL";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1245,7 +1253,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testNotIsNullCriteria() throws Exception {
         String sql = "Select a From db.g Where Not a IS NULL";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1267,7 +1275,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testStringNotEqualDoubleTicks() throws Exception {
         String sql = "SELECT a from db.g where a <> \"value\"";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1289,7 +1297,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testNotEquals2() throws Exception {
         String sql = "SELECT a from db.g where a != 'value'";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1311,7 +1319,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testPartlyQuotedGroup() throws Exception {
         String sql = "SELECT a from db.\"g\" where a = 5";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1333,7 +1341,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testXMLCriteriaWithAttribute() throws Exception {
         String sql = "SELECT * FROM model.doc WHERE ab.cd.@ef = 'abc'";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1355,7 +1363,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testBetween1() throws Exception {
         String sql = "SELECT a from db.g where a BETWEEN 1000 AND 2000";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1377,7 +1385,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testSetCriteria0() throws Exception {
         String sql = "SELECT a FROM db.g WHERE b IN (1000,5000)";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1401,7 +1409,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testOrderByDesc() throws Exception {
         String sql = "SELECT a FROM db.g WHERE b = aString ORDER BY c desc";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1428,7 +1436,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testOrderByNullOrdering() throws Exception {
         String sql = "SELECT a FROM db.g WHERE b = aString ORDER BY c NULLS FIRST,d desc nulls last";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1463,7 +1471,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testLikeWithEscape() throws Exception {
         String sql = "SELECT a from db.g where b like '#String' escape '#'";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1485,7 +1493,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testNoFromClause() throws Exception {
         String sql = "SELECT a, 5";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1502,7 +1510,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testInsertWithReference() throws Exception {
         String sql = "INSERT INTO m.g (a) VALUES (?)";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_INSERT);
 
         Node insertNode = verify(fileNode, Insert.ID, Insert.ID);
         Node gsNode = verify(insertNode, TargetedCommand.GROUP_REF_NAME, GroupSymbol.ID);
@@ -1519,7 +1527,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testIfStatement() throws Exception {
         String sql = deriveProcPrefix(false) + "IF(c = 5) BEGIN DECLARE short a; END ELSE BEGIN DECLARE short b; END END";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_PROC_CMD);
 
         Node procNode = verify(fileNode, CreateProcedureCommand.ID, CreateProcedureCommand.ID);
         Node outerBlkNode = verify(procNode, CreateProcedureCommand.BLOCK_REF_NAME, Block.ID);
@@ -1556,7 +1564,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testDynamicCommandStatement() throws Exception {
         String sql = deriveProcPrefix(false) + "exec string 'SELECT a1 FROM g WHERE a2 = 5' as a1 string into #g; END";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_PROC_CMD);
 
         Node procNode = verify(fileNode, CreateProcedureCommand.ID, CreateProcedureCommand.ID);
         Node outerBlkNode = verify(procNode, CreateProcedureCommand.BLOCK_REF_NAME, Block.ID);
@@ -1578,7 +1586,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testSubquerySetCriteriaWithExec() throws Exception {
         String sql = "SELECT a FROM db.g WHERE b IN (EXEC m.sq1())";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1609,7 +1617,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testSubquerySetCriteriaWithUnion() throws Exception {
         String sql = "SELECT a FROM db.g WHERE b IN (SELECT x1 FROM db.g2 UNION ALL SELECT x2 FROM db.g3)";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1645,7 +1653,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testLoopStatement() throws Exception {
         String sql = deriveProcPrefix(false) + "LOOP ON (SELECT c1, c2 FROM m.g) AS mycursor BEGIN DECLARE integer x; x=mycursor.c1; END END";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_PROC_CMD);
 
         Node procNode = verify(fileNode, CreateProcedureCommand.ID, CreateProcedureCommand.ID);
         Node outerBlkNode = verify(procNode, CreateProcedureCommand.BLOCK_REF_NAME, Block.ID);
@@ -1682,7 +1690,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testXmlElement() throws Exception {
         String sql = "SELECT xmlelement(name \"table\", 'x') FROM g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1701,7 +1709,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testXmlElementWithAttributes() throws Exception {
         String sql = "SELECT xmlelement(y, xmlattributes('a' as val)) from g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1723,7 +1731,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testTextTable() throws Exception {
         String sql = "SELECT * from texttable(file columns x string, y date delimiter ',' escape '\"' header skip 10) as x";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
@@ -1755,7 +1763,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     @Test
     public void testWindowFunction() throws Exception {
         String sql = "select row_number() over (partition by x order by y) from g";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 

@@ -228,7 +228,12 @@ public class ModeshapeEngineThread extends Thread {
         LOGGER.debug("commit session for request {0}", commitRequest.getName()); //$NON-NLS-1$
 
         try {
-            session.save();
+            //
+            // Only bother to save if we actually have changes to save
+            //
+            if (session.hasPendingChanges())
+                session.save();
+
             LOGGER.debug("commit session request {0} has been saved", commitRequest.getName()); //$NON-NLS-1$
 
             if (request.getCallback() != null) {
@@ -392,8 +397,11 @@ public class ModeshapeEngineThread extends Thread {
             }
         }
 
-        session.save();
-        session.logout();
+        Request saveRequest = new ModeshapeEngineThread.SessionRequest(RequestType.COMMIT_SESSION,
+                                                                                                                       null,
+                                                                                                                       session,
+                                                                                                                       "Clearing-Session"); //$NON-NLS-1$
+        commitSession(saveRequest);
     }
 
     @Override

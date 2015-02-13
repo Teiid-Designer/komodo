@@ -20,7 +20,7 @@
             	"classname" : "org.komodo.modeshape.teiid.TeiidSqlSequencer",
             	"pathExpressions" :
                 [
-						":(//*.tsql)/jcr:content[@jcr:data] => /tsql",
+						":(//*.tsql/jcr:content)[@jcr:data] => /$1",
 						":(//*.ddl/ddl:statements//*)[@ddl:queryExpression] => /$1",
 						":(//*.ddl/ddl:statements//*)[@teiidddl:queryExpression] => /$1",
 						":(//*.ddl/ddl:statements//*)[@teiidddl:statement] => /$1"

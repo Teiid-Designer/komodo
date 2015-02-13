@@ -63,7 +63,6 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrLexicon;
-import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.observation.Event;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
@@ -158,19 +157,6 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
     public void beforeEach() throws Exception {
         super.beforeEach();
         rootNode = session().getRootNode();
-        addSequencingListeners(session());
-    }
-
-    protected void addSequencingListeners( JcrSession session ) throws RepositoryException {
-        observationManager = ((Workspace)session.getWorkspace()).getObservationManager();
-        observationManager.addEventListener(new SequencingListener(), NODE_SEQUENCED, null, true, null, null, false);
-        observationManager.addEventListener(new SequencingFailureListener(),
-                                            NODE_SEQUENCING_FAILURE,
-                                            null,
-                                            true,
-                                            null,
-                                            null,
-                                            false);
     }
 
     /**
@@ -184,7 +170,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         assertNotNull(manager);
 
         final CountDownLatch updateLatch = new CountDownLatch(countdown);
-        manager.addEventListener(new SequencerListener(pathsToBeSequenced, updateLatch), NODE_SEQUENCED, null, true, null, null, false);
+        manager.addEventListener(new NodePathListener(pathsToBeSequenced, updateLatch), NODE_SEQUENCED, null, true, null, null, false);
 
         return updateLatch;
     }

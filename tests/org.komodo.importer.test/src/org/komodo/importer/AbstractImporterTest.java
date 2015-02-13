@@ -44,7 +44,7 @@ import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
-import org.komodo.test.utils.SequencerListener;
+import org.komodo.test.utils.NodePathListener;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
@@ -57,7 +57,7 @@ import org.modeshape.jcr.api.observation.Event.Sequencing;
 public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest implements Sequencing {
 
     protected static final String DATA_DIRECTORY = File.separator + "data"; //$NON-NLS-1$
-    private SequencerListener sequencerListener;
+    private NodePathListener nodePathListener;
 
     protected InputStream setup(String fileName) {
         InputStream stream = getClass().getResourceAsStream(DATA_DIRECTORY + File.separator + fileName);
@@ -78,8 +78,8 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest i
 
         final CountDownLatch updateLatch = new CountDownLatch(pathsToBeSequenced.length);
         List<String> seqPaths = Arrays.asList(pathsToBeSequenced);
-        sequencerListener = new SequencerListener(seqPaths, updateLatch);
-        manager.addEventListener(sequencerListener, NODE_SEQUENCED, null, true, null, null, false);
+        nodePathListener = new NodePathListener(seqPaths, updateLatch);
+        manager.addEventListener(nodePathListener, NODE_SEQUENCED, null, true, null, null, false);
         return updateLatch;
     }
 
