@@ -208,6 +208,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
             for (EventListenerIterator it = observationManager.getRegisteredEventListeners(); it.hasNext();) {
                 observationManager.removeEventListener(it.nextEventListener());
             }
+            observationManager = null;
         }
         super.afterEach();
         cleanupData();

@@ -25,20 +25,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.importer.ddl.ImportOptions.ImportType;
-import org.komodo.importer.ddl.ImportOptions.OptionKeys;
+import org.komodo.importer.AbstractImporterTest;
+import org.komodo.importer.ImportMessages;
+import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.ImportType;
+import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
@@ -49,7 +48,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  *
  */
 @SuppressWarnings({"nls", "javadoc"})
-public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
+public class TestTeiidDdlImporter extends AbstractImporterTest {
 
     private static final String SEQUENCE_DDL_PATH = ".*\\/ddl:statements";
 
@@ -57,67 +56,21 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
 	private static final String TEIID_FLATFILE = "Teiid-FlatFile.ddl";
 
-    private UnitOfWork uow;
-
-	@Before
-	public void setup() throws Exception {
-	    uow = _repo.createTransaction("test-importer", false, null);
+	@Override
+	protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
+	                                                             File file, ImportOptions importOptions,
+	                                                             ImportMessages importMessages) {
+        DdlImporter importer = new DdlImporter(_repo, uow);
+        return importer.importDdl(file, importOptions, importMessages);
 	}
 
-	@After
-	public void cleanup() {
-	    uow = null;
+	@Override
+	protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
+	                                                             InputStream inputStream, ImportOptions importOptions,
+	                                                             ImportMessages importMessages) {
+	    DdlImporter importer = new DdlImporter(_repo, uow);
+        return importer.importDdl(inputStream, importOptions, importMessages);
 	}
-
-    private KomodoObject executeImporter(InputStream ddlStream, String name,
-                                                                     ImportOptions importOptions,
-                                                                     ImportMessages importMessages) throws Exception {
-        assertNotNull(_repo);
-        assertNotNull(uow);
-        assertNotNull(ddlStream);
-        assertNotNull(name);
-        assertNotNull(importOptions);
-        assertNotNull(importMessages);
-
-        CountDownLatch updateLatch = addSequencePathListener(uow, 1, SEQUENCE_DDL_PATH);
-
-        DdlImporter importer = new DefaultDdlImporter(_repo, uow);
-        KomodoObject modelNode = importer.importDdl(ddlStream, name, importOptions, importMessages);
-        if (importMessages.hasError()) {
-            fail(importMessages.errorMessagesToString());
-        }
-
-        // Wait for the starting of the repository or timeout of 3 minutes
-        updateLatch.await(3, TimeUnit.MINUTES);
-
-        traverse(modelNode);
-
-        return modelNode;
-    }
-
-    private KomodoObject executeImporter(File ddlFile, ImportOptions importOptions, ImportMessages importMessages) throws Exception {
-        assertNotNull(_repo);
-        assertNotNull(uow);
-        assertNotNull(ddlFile);
-        assertNotNull(importOptions);
-        assertNotNull(importMessages);
-
-        CountDownLatch updateLatch = addSequencePathListener(uow, 1, SEQUENCE_DDL_PATH);
-
-        DdlImporter importer = new DefaultDdlImporter(_repo, uow);
-        KomodoObject modelNode = importer.importDdl(ddlFile, importOptions, importMessages);
-        if (importMessages.hasError()) {
-            return modelNode; // test should deal with consequences
-        }
-
-        traverse(modelNode);
-
-        // Wait for the starting of the repository or timeout of 3 minutes
-        // The timeout will mean the assertion fails
-        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
-
-        return modelNode;
-    }
 
 	/**
      * Test Error condition - bad DDL file name supplied
@@ -126,6 +79,8 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     @Test
     public void testBadDdlFile() throws Exception {
     	ImportOptions importOptions = new ImportOptions();
+    	importOptions.setImportType(ImportType.MODEL);
+
     	ImportMessages importMessages = new ImportMessages();
 
     	KomodoObject modelNode = executeImporter(new File("unknown.ddl"), importOptions, importMessages);
@@ -137,7 +92,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	assertEquals(1, importMessages.getErrorMessages().size());
 
     	String msg = importMessages.getErrorMessages().get(0);
-    	assertEquals("The specified DDL File \"unknown.ddl\" was not found",msg);
+    	assertEquals("The specified File \"unknown.ddl\" was not found",msg);
     }
 
 	/**
@@ -160,6 +115,8 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
+        importOptions.setImportType(ImportType.MODEL);
+
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
@@ -175,7 +132,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
     	assertEquals(1, importMessages.getErrorMessages().size());
 
     	String msg = importMessages.getErrorMessages().get(0);
-    	assertEquals("The specified DDL File \"" + tmpFile.getName() + "\" is not readable", msg);
+    	assertEquals("The specified File \"" + tmpFile.getName() + "\" is not readable", msg);
     }
 
     /**
@@ -192,6 +149,8 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
+        importOptions.setImportType(ImportType.MODEL);
+
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
@@ -204,87 +163,87 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
         assertEquals(1, importMessages.getErrorMessages().size());
 
         String msg = importMessages.getErrorMessages().get(0);
-        assertEquals("The supplied DDL string is empty", msg);
+        assertEquals("The supplied content string is empty", msg);
     }
 
     private void verifyMySQLAcctsDdl(KomodoObject modelNode) throws Exception {
-        KomodoObject ddlStmtsNode = verify(uow, modelNode, StandardDdlLexicon.STATEMENTS_CONTAINER);
+        KomodoObject ddlStmtsNode = verify(modelNode, StandardDdlLexicon.STATEMENTS_CONTAINER);
 
         // ----------------------------------
         // Test expected tables exist
         // ----------------------------------
-        KomodoObject accountTableNode = verify(uow, ddlStmtsNode, "accounts.ACCOUNT", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
-        KomodoObject customerTableNode = verify(uow, ddlStmtsNode, "accounts.CUSTOMER", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
-        KomodoObject holdingsTableNode = verify(uow, ddlStmtsNode, "accounts.HOLDINGS", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
-        KomodoObject productTableNode = verify(uow, ddlStmtsNode, "accounts.PRODUCT", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
-        KomodoObject subsTableNode = verify(uow, ddlStmtsNode, "accounts.SUBSCRIPTIONS", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject accountTableNode = verify(ddlStmtsNode, "accounts.ACCOUNT", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject customerTableNode = verify(ddlStmtsNode, "accounts.CUSTOMER", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject holdingsTableNode = verify(ddlStmtsNode, "accounts.HOLDINGS", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject productTableNode = verify(ddlStmtsNode, "accounts.PRODUCT", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject subsTableNode = verify(ddlStmtsNode, "accounts.SUBSCRIPTIONS", TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
 
         // ----------------------------------------
         // Test expected columns for ACCOUNT table
         // ----------------------------------------
-        verify(uow, accountTableNode, "ACCOUNT_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, accountTableNode, "SSN", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, accountTableNode, "STATUS", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, accountTableNode, "TYPE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, accountTableNode, "DATEOPENED", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, accountTableNode, "DATECLOSED", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(accountTableNode, "ACCOUNT_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(accountTableNode, "SSN", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(accountTableNode, "STATUS", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(accountTableNode, "TYPE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(accountTableNode, "DATEOPENED", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(accountTableNode, "DATECLOSED", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
 
         // ------------------------------------------
         // Test expected columns for CUSTOMER table
         // ------------------------------------------
-        verify(uow, customerTableNode, "SSN", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, customerTableNode, "FIRSTNAME", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, customerTableNode, "LASTNAME", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, customerTableNode, "ST_ADDRESS", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, customerTableNode, "APT_NUMBER", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, customerTableNode, "CITY", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, customerTableNode, "STATE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, customerTableNode, "ZIPCODE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, customerTableNode, "PHONE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(customerTableNode, "SSN", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(customerTableNode, "FIRSTNAME", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(customerTableNode, "LASTNAME", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(customerTableNode, "ST_ADDRESS", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(customerTableNode, "APT_NUMBER", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(customerTableNode, "CITY", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(customerTableNode, "STATE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(customerTableNode, "ZIPCODE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(customerTableNode, "PHONE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
 
         // ------------------------------------------
         // Test expected columns for HOLDINGS table
         // ------------------------------------------
-        verify(uow, holdingsTableNode, "TRANSACTION_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, holdingsTableNode, "ACCOUNT_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, holdingsTableNode, "PRODUCT_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, holdingsTableNode, "PURCHASE_DATE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, holdingsTableNode, "SHARES_COUNT", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(holdingsTableNode, "TRANSACTION_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(holdingsTableNode, "ACCOUNT_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(holdingsTableNode, "PRODUCT_ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(holdingsTableNode, "PURCHASE_DATE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(holdingsTableNode, "SHARES_COUNT", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
 
         // ------------------------------------------
         // Test expected columns for PRODUCT table
         // ------------------------------------------
-        verify(uow, productTableNode, "ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, productTableNode, "SYMBOL", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, productTableNode, "COMPANY_NAME", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(productTableNode, "ID", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(productTableNode, "SYMBOL", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(productTableNode, "COMPANY_NAME", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
 
         // ------------------------------------------
         // Test expected columns for SUBSCRIPTIONS table
         // ------------------------------------------
-        verify(uow, subsTableNode, "value", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, subsTableNode, "type", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        verify(uow, subsTableNode, "end_date", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(subsTableNode, "value", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(subsTableNode, "type", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        verify(subsTableNode, "end_date", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
 
         // --------------------------------------------
         // Test expected properties on HOLDINGS table
         // --------------------------------------------
         // Expected properties
-        KomodoObject nameInSource = verify(uow, holdingsTableNode, "NAMEINSOURCE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        KomodoObject nameInSource = verify(holdingsTableNode, "NAMEINSOURCE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
         verifyProperty(nameInSource, StandardDdlLexicon.VALUE, "`accounts`.`HOLDINGS`");
 
-        KomodoObject updateable = verify(uow, holdingsTableNode, "UPDATABLE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        KomodoObject updateable = verify(holdingsTableNode, "UPDATABLE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
         verifyProperty(updateable, StandardDdlLexicon.VALUE, "TRUE");
 
         // -------------------------------------------------------------
         // Test expected properties on HOLDINGS.PURCHASE_DATE column
         // -------------------------------------------------------------
-        KomodoObject purcharseDateNode = verify(uow, holdingsTableNode, "PURCHASE_DATE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        KomodoObject purcharseDateNode = verify(holdingsTableNode, "PURCHASE_DATE", TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
 
         // Expected properties
-        KomodoObject nativeType = verify(uow, purcharseDateNode, "NATIVE_TYPE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        KomodoObject nativeType = verify(purcharseDateNode, "NATIVE_TYPE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
         verifyProperty(nativeType, StandardDdlLexicon.VALUE, "TIMESTAMP");
 
-        nameInSource = verify(uow, purcharseDateNode, "NAMEINSOURCE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        nameInSource = verify(purcharseDateNode, "NAMEINSOURCE", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
         verifyProperty(nameInSource, StandardDdlLexicon.VALUE, "`PURCHASE_DATE`");
 
         verifyProperty(purcharseDateNode, StandardDdlLexicon.DEFAULT_VALUE, "CURRENT_TIMESTAMP");
@@ -302,17 +261,21 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
+        importOptions.setImportType(ImportType.MODEL);
+    	importOptions.setOption(OptionKeys.NAME, TEIID_MYSQL_ACCTS);
+
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
-    	KomodoObject modelNode = executeImporter(ddlStream, TEIID_MYSQL_ACCTS, importOptions, importMessages);
+    	KomodoObject modelNode = executeImporter(ddlStream, importOptions,
+    	                                                                       importMessages, SEQUENCE_DDL_PATH);
 
     	// Test that a Model was created
     	assertNotNull("Failed - No Model Created ", modelNode);
 
     	// Test Model name
     	String modelName = modelNode.getName(null);
-    	assertEquals(importOptions.getOption(OptionKeys.MODEL_NAME), modelName);
+    	assertEquals(importOptions.getOption(OptionKeys.NAME), modelName);
 
     	verifyMySQLAcctsDdl(modelNode);
     }
@@ -323,11 +286,13 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
         ImportOptions importOptions = new ImportOptions();
         importOptions.setImportType(ImportType.SCHEMA);
+        importOptions.setOption(OptionKeys.NAME, TEIID_MYSQL_ACCTS);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject schemaNode = executeImporter(ddlStream, TEIID_MYSQL_ACCTS, importOptions, importMessages);
+        KomodoObject schemaNode = executeImporter(ddlStream, importOptions,
+                                                                                 importMessages, SEQUENCE_DDL_PATH);
 
         // Test that a schema fragment was created
         assertNotNull("Failed - No Schema Created ", schemaNode);
@@ -335,43 +300,43 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
         // Test Model name
         String schemaName = schemaNode.getName(null);
-        assertEquals(importOptions.getOption(OptionKeys.SCHEMA_NAME), schemaName);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), schemaName);
 
         verifyMySQLAcctsDdl(schemaNode);
     }
 
     private void verifyFlatFileDdl(KomodoObject schemaNode) throws Exception {
-        KomodoObject ddlStmtsNode = verify(uow, schemaNode, StandardDdlLexicon.STATEMENTS_CONTAINER);
+        KomodoObject ddlStmtsNode = verify(schemaNode, StandardDdlLexicon.STATEMENTS_CONTAINER);
 
         // ----------------------------------
         // Test expected procedures exist
         // ----------------------------------
-        KomodoObject getFilesProcNode = verify(uow, ddlStmtsNode, "getFiles", TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
-        verify(uow, ddlStmtsNode, "getTextFiles", TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
-        verify(uow, ddlStmtsNode, "saveFile", TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
+        KomodoObject getFilesProcNode = verify(ddlStmtsNode, "getFiles", TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
+        verify(ddlStmtsNode, "getTextFiles", TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
+        verify(ddlStmtsNode, "saveFile", TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
 
         // --------------------------------------------
         // Test getFiles procedure has expected param
         // --------------------------------------------
-        verify(uow, getFilesProcNode, "pathAndPattern", TeiidDdlLexicon.CreateProcedure.PARAMETER);
+        verify(getFilesProcNode, "pathAndPattern", TeiidDdlLexicon.CreateProcedure.PARAMETER);
 
         // --------------------------------------------
         // Test getFiles procedure properties
         // --------------------------------------------
         // Expected properties
-        KomodoObject description = verify(uow, getFilesProcNode, "ANNOTATION", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
+        KomodoObject description = verify(getFilesProcNode, "ANNOTATION", StandardDdlLexicon.TYPE_STATEMENT_OPTION);
         verifyProperty(description, StandardDdlLexicon.VALUE, "Returns files that match the given path and pattern as BLOBs");
 
         // ------------------------------------------------
         // Test getFiles procedure has expected resultSet
         // ------------------------------------------------
-        KomodoObject resultSet = verify(uow, getFilesProcNode, "resultSet", TeiidDdlLexicon.CreateProcedure.RESULT_COLUMNS);
+        KomodoObject resultSet = verify(getFilesProcNode, "resultSet", TeiidDdlLexicon.CreateProcedure.RESULT_COLUMNS);
 
         // -------------------------------------------------------------
         // Test resultSet has expected columns
         // -------------------------------------------------------------
-        verify(uow, resultSet, "file", TeiidDdlLexicon.CreateProcedure.RESULT_COLUMN);
-        verify(uow, resultSet, "filePath", TeiidDdlLexicon.CreateProcedure.RESULT_COLUMN);
+        verify(resultSet, "file", TeiidDdlLexicon.CreateProcedure.RESULT_COLUMN);
+        verify(resultSet, "filePath", TeiidDdlLexicon.CreateProcedure.RESULT_COLUMN);
     }
 
 	/**
@@ -384,9 +349,14 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
+        importOptions.setImportType(ImportType.MODEL);
+
+    	importOptions.setOption(OptionKeys.NAME, TEIID_FLATFILE);
+
     	ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject modelNode = executeImporter(ddlStream, TEIID_FLATFILE, importOptions, importMessages);
+        KomodoObject modelNode = executeImporter(ddlStream, importOptions,
+                                                                               importMessages, SEQUENCE_DDL_PATH);
 
     	// Test that a Model was created
     	assertNotNull("Failed - No Model Created ", modelNode);
@@ -394,7 +364,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
     	// Test Model name
     	String modelName = modelNode.getName(null);
-    	assertEquals(importOptions.getOption(OptionKeys.MODEL_NAME), modelName);
+    	assertEquals(importOptions.getOption(OptionKeys.NAME), modelName);
 
         verifyFlatFileDdl(modelNode);
     }
@@ -406,10 +376,12 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
         // Options for the import
         ImportOptions importOptions = new ImportOptions();
         importOptions.setImportType(ImportType.SCHEMA);
+        importOptions.setOption(OptionKeys.NAME, TEIID_FLATFILE);
 
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject schemaNode = executeImporter(ddlStream, TEIID_FLATFILE, importOptions, importMessages);
+        KomodoObject schemaNode = executeImporter(ddlStream, importOptions,
+                                                                                  importMessages, SEQUENCE_DDL_PATH);
 
         // Test that a Model was created
         assertNotNull("Failed - No Schema fragment Created ", schemaNode);
@@ -417,7 +389,7 @@ public class TestTeiidDdlImporter extends AbstractDdlImporterTest {
 
         // Test Schema name
         String schemaName = schemaNode.getName(null);
-        assertEquals(importOptions.getOption(OptionKeys.SCHEMA_NAME), schemaName);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), schemaName);
 
         verifyFlatFileDdl(schemaNode);
     }

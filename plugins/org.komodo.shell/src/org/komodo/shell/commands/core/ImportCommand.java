@@ -9,12 +9,12 @@ package org.komodo.shell.commands.core;
 
 import java.io.File;
 import java.util.List;
+import org.komodo.importer.ImportMessages;
+import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.ImportType;
+import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.ddl.DdlImporter;
-import org.komodo.importer.ddl.DefaultDdlImporter;
-import org.komodo.importer.ddl.ImportMessages;
-import org.komodo.importer.ddl.ImportOptions;
-import org.komodo.importer.ddl.ImportOptions.ImportType;
-import org.komodo.importer.ddl.ImportOptions.OptionKeys;
+import org.komodo.importer.vdb.VdbImporter;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -29,7 +29,9 @@ import org.komodo.spi.repository.Repository;
  */
 public class ImportCommand extends BuiltInShellCommand {
 
-    private static final String SUBCMD_MODEL = "MODEL"; //$NON-NLS-1$
+    private static final String SUBCMD_DDL = "DDL"; //$NON-NLS-1$
+
+    private static final String SUBCMD_VDB = "VDB"; //$NON-NLS-1$
 
     /**
      * Constructor.
@@ -48,7 +50,7 @@ public class ImportCommand extends BuiltInShellCommand {
         boolean success = false;
         String subcmdArg = requiredArgument(0, Messages.getString("ImportCommand.InvalidArgMsg_SubCommand")); //$NON-NLS-1$
 
-        if (SUBCMD_MODEL.equalsIgnoreCase(subcmdArg)) {
+        if (SUBCMD_DDL.equalsIgnoreCase(subcmdArg)) {
             // Check required args
             String fileNameArg = requiredArgument(1, Messages.getString("ImportCommand.InvalidArgMsg_FileName")); //$NON-NLS-1$
             String modelNameArg = requiredArgument(2, Messages.getString("ImportCommand.InvalidArgMsg_ModelName")); //$NON-NLS-1$
@@ -59,7 +61,21 @@ public class ImportCommand extends BuiltInShellCommand {
                 if (getWorkspaceStatus().getRecordingStatus())
                     recordCommand(getArguments());
             } else {
-                print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.ModelImportFailedMsg", fileNameArg)); //$NON-NLS-1$
+                print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.ImportFailedMsg", fileNameArg)); //$NON-NLS-1$
+                print(CompletionConstants.MESSAGE_INDENT, messages.errorMessagesToString());
+            }
+        } else if (SUBCMD_VDB.equalsIgnoreCase(subcmdArg)) {
+            // Check required args
+            String fileNameArg = requiredArgument(1, Messages.getString("ImportCommand.InvalidArgMsg_FileName")); //$NON-NLS-1$
+
+            ImportMessages messages = importVdb(fileNameArg);
+            if (!messages.hasError()) {
+                print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.VdbImportSuccessMsg", fileNameArg)); //$NON-NLS-1$
+                if (getWorkspaceStatus().getRecordingStatus())
+                    recordCommand(getArguments());
+                success = true;
+            } else {
+                print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.ImportFailedMsg", fileNameArg)); //$NON-NLS-1$
                 print(CompletionConstants.MESSAGE_INDENT, messages.errorMessagesToString());
             }
         } else {
@@ -91,12 +107,43 @@ public class ImportCommand extends BuiltInShellCommand {
 
         ImportOptions importOptions = new ImportOptions();
         importOptions.setImportType(ImportType.MODEL);
-        importOptions.setOption(OptionKeys.MODEL_NAME, modelName);
+        importOptions.setOption(OptionKeys.NAME, modelName);
 
         File ddlFile = new File(modelFile);
 
-        DdlImporter importer = new DefaultDdlImporter(repository);
+        DdlImporter importer = new DdlImporter(repository);
         importer.importDdl(ddlFile, importOptions, importMessages);
+
+        return importMessages;
+    }
+
+    /**
+     * Import vdb from file and add it to the current project
+     * @param vdbFile the file containing the vdb xml
+     * @return the messages from the import
+     * @throws Exception if error occurs
+     */
+    private ImportMessages importVdb(String vdbFile) throws Exception {
+        WorkspaceStatus wsStatus = getWorkspaceStatus();
+        ImportMessages importMessages = new ImportMessages();
+
+        WorkspaceContext currentContext = wsStatus.getCurrentContext();
+        Repository repository = null;
+        try {
+            repository = currentContext.getRepository();
+        } catch (Exception ex) {
+            importMessages.addErrorMessage(ex.getLocalizedMessage());
+            return importMessages;
+        }
+
+        File xmlFile = new File(vdbFile);
+
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setImportType(ImportType.VDB);
+        importOptions.setOption(OptionKeys.NAME, xmlFile.getName());
+
+        VdbImporter importer = new VdbImporter(repository);
+        importer.importVdb(xmlFile, importOptions, importMessages);
 
         return importMessages;
     }
@@ -109,10 +156,8 @@ public class ImportCommand extends BuiltInShellCommand {
 
         if (getArguments().isEmpty()) {
             if (lastArgument == null) {
-                candidates.add(SUBCMD_MODEL + StringConstants.SPACE);
-                return 0;
-            } else if (SUBCMD_MODEL.startsWith(lastArgument.toUpperCase())) {
-                candidates.add(SUBCMD_MODEL + StringConstants.SPACE);
+                candidates.add(SUBCMD_DDL + StringConstants.SPACE);
+                candidates.add(SUBCMD_VDB + StringConstants.SPACE);
                 return 0;
             }
         }

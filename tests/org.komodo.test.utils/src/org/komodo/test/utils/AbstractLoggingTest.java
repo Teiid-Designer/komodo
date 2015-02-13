@@ -46,6 +46,16 @@ public abstract class AbstractLoggingTest {
         return newLogFile;
     }
 
+    /**
+     * Sets the {@link KLog} level to the desired level
+     *
+     * @param level
+     * @throws Exception
+     */
+    public void setLoggingLevel(java.util.logging.Level level) throws Exception {
+        KLog.getLogger().setLevel(level);
+    }
+
     @BeforeClass
     public static void initLogging() throws Exception {
         // Initialises logging and reduces modeshape logging from DEBUG to INFO

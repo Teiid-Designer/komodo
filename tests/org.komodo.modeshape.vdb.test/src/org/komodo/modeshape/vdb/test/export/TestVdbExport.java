@@ -206,16 +206,16 @@ public class TestVdbExport extends AbstractSequencerTest {
         twitterView.setProperty(VdbLexicon.Model.VISIBLE, true);
 
         StringBuffer modelDefinition = new StringBuffer();
-        modelDefinition.append("CREATE VIRTUAL PROCEDURE getTweets(query varchar) ")
-                                .append("RETURNS (created_on varchar(25), from_user varchar(25), ")
+        modelDefinition.append("CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) ")
+                                .append("RETURNS TABLE (created_on varchar(25), from_user varchar(25), ")
                                 .append("to_user varchar(25), profile_image_url varchar(25), source ")
                                 .append("varchar(25), text varchar(140)) AS select tweet.* from ")
-                                .append("(call twitter.invokeHTTP(")
-                                .append("action => 'GET', endpoint =>querystring(\'',query as \"q\"))) w, ")
+                                .append("(EXEC twitter.invokeHTTP(")
+                                .append("action => 'GET', endpoint => querystring(\'', query as q))) AS w, ")
                                 .append("XMLTABLE('results' passing JSONTOXML('myxml', w.result) columns ")
                                 .append("created_on string PATH 'created_at', from_user string PATH 'from_user', ")
                                 .append("to_user string PATH 'to_user', profile_image_url string PATH 'profile_image_url', ")
-                                .append("source string PATH 'source', text string PATH 'text') tweet; ")
+                                .append("source string PATH 'source', text string PATH 'text') AS tweet; ")
                                 .append("CREATE VIEW Tweet AS select * FROM twitterview.getTweets;");
         twitterView.setProperty(VdbLexicon.Model.MODEL_DEFINITION, modelDefinition.toString());
         session().save();

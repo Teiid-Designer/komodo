@@ -22,6 +22,7 @@
 package org.komodo.modeshape.teiid.sequencer;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
@@ -61,7 +62,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         Node fileNode = prepareSequence(ddl, SequenceType.DDL);
 
         // Wait for the starting of the repository or timeout of 3 minutes
-        updateLatch.await(3, TimeUnit.MINUTES);
+        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
 
         //
         // Sequencing completed, now verify
@@ -153,7 +154,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         Node fileNode = prepareSequence(ddl.toString(), SequenceType.DDL);
 
         // Wait for the starting of the repository or timeout of 5 minutes
-        updateLatch.await(5, TimeUnit.MINUTES);
+        assertTrue(updateLatch.await(5, TimeUnit.MINUTES));
 
         //
         // Sequencing completed, now verify

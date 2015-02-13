@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.importer.ddl;
+package org.komodo.importer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,52 +30,57 @@ import org.komodo.utils.ModelType;
  */
 public class ImportOptions {
 
-	private static final String DEFAULT_MODEL_NAME = "importedModel"; //$NON-NLS-1$
+    private static final String DEFAULT_ARTEFACT_NAME = "<imported>"; //$NON-NLS-1$
 
-	private static final String DEFAULT_SCHEMA_NAME = "importedSchema"; //$NON-NLS-1$
+    private static final String DEFAULT_VDB_FILE_PATH = "<not available>"; //$NON-NLS-1$
 
-	/**
-	 * The type of import to be executed
-	 */
-	public static enum ImportType {
-	    /**
-	     * Import ddl into a default model
-	     */
-	    MODEL,
-
-	    /**
-	     * Import ddl as a schema fragment
-	     */
-	    SCHEMA;
-	}
-
-	/**
-	 * Option keys applicable to import ddl into a model
-	 */
-	public static enum OptionKeys {
-	    /**
-	     * Name of model
-	     */
-	    MODEL_NAME(DEFAULT_MODEL_NAME),
-
-	    /**
-	     * Type of model, default is PHYSICAL
-	     */
-	    MODEL_TYPE(ModelType.Type.PHYSICAL),
-
+    /**
+     * The type of import to be executed
+     */
+    public static enum ImportType {
         /**
-         * Name of schema fragment
+         * Import ddl into a default model
          */
-        SCHEMA_NAME(DEFAULT_SCHEMA_NAME);
-
-	    private Object defaultValue;
+        MODEL,
 
         /**
-	     * Constructor
-	     */
-	    private OptionKeys(Object defaultValue) {
+         * Import ddl as a schema fragment
+         */
+        SCHEMA,
+
+        /**
+         * Import vdb
+         */
+        VDB;
+    }
+
+    /**
+     * Option keys applicable to import ddl into a model
+     */
+    public static enum OptionKeys {
+        /**
+         * Name of artefact
+         */
+        NAME(DEFAULT_ARTEFACT_NAME),
+
+        /**
+         * Type of model, default is PHYSICAL
+         */
+        MODEL_TYPE(ModelType.Type.PHYSICAL),
+
+        /**
+         * Location of vdb file
+         */
+        VDB_FILE_PATH(DEFAULT_VDB_FILE_PATH);
+
+        private Object defaultValue;
+
+        /**
+         * Constructor
+         */
+        private OptionKeys(Object defaultValue) {
             this.defaultValue = defaultValue;
-	    }
+        }
 
         /**
          * @return default value of this model option
@@ -83,10 +88,10 @@ public class ImportOptions {
         public Object defaultValue() {
             return defaultValue;
         }
-	}
+    }
 
-	// Import as model by default
-    private ImportType importType = ImportType.MODEL;
+    // Import as model by default
+    private ImportType importType;
 
     private final Map<OptionKeys, Object> options = new HashMap<OptionKeys, Object>();
 
@@ -105,7 +110,7 @@ public class ImportOptions {
     }
 
     /**
-     * @param optionName
+     * @param optionName name of the option
      * @return the option for the given model option
      */
     public Object getOption(OptionKeys optionName) {
@@ -121,8 +126,8 @@ public class ImportOptions {
     }
 
     /**
-     * @param optionName
-     * @param value
+     * @param optionName name of the option
+     * @param value value of the option
      */
     public void setOption(OptionKeys optionName, Object value) {
         options.put(optionName, value);

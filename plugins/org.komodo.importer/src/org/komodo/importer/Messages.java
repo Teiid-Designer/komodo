@@ -19,41 +19,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.importer.ddl;
+package org.komodo.importer;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
 import org.komodo.spi.constants.StringConstants;
 
 /**
- * Messages for the DDL importer plugin
+ * Messages for the importer plugin
  */
 public class Messages implements StringConstants {
 
-	private static final String BUNDLE_NAME = Messages.class.getPackage().getName()
-			+ DOT
-			+ Messages.class.getSimpleName().toLowerCase();
+    private static final String BUNDLE_NAME = Messages.class.getPackage().getName()
+                                                                                + DOT + Messages.class.getSimpleName().toLowerCase();
 
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
     @SuppressWarnings( "javadoc" )
-    public enum DDL_IMPORTER {
-    	entityNotFoundMsg,
-    	fkTableRefNotFoundMsg,
-    	noDDLImporterRegisteredMsg,
-    	errorDdlFileNotFoundMsg,
-    	errorDdlFileNotReadableMsg,
-    	errorReadingDdlFileMsg,
-    	errorEmptyDdlMsg,
-    	errorConvertingAstToRelationalMsg,
-    	MODEL;
+    public enum IMPORTER {
+        errorFileNotFoundMsg,
+        errorFileNotReadableMsg,
+        errorEmptyMsg;
 
-    	@Override
-    	public String toString() {
-    		return getEnumName(this) + DOT + name();
-    	}
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
     }
 
     private static String getEnumName(Enum<?> enumValue) {
@@ -111,7 +103,7 @@ public class Messages implements StringConstants {
 
         return MessageFormat.format(text, parameters);
     }
-    
+
     /**
      * Look up a message in the i18n resource message bundle by key, then format the
      * message with the given params and return the result.
@@ -119,20 +111,20 @@ public class Messages implements StringConstants {
      * @param parameters the parameters
      * @return the message
      */
-    public static String getString(String key, Object ... parameters) {
-    	String text = null;
+    public static String getString(String key, Object... parameters) {
+        String text = null;
         try {
-        	text = RESOURCE_BUNDLE.getString(key);
+            text = RESOURCE_BUNDLE.getString(key);
         } catch (final Exception err) {
             if (err instanceof NullPointerException) {
-            	text = "<No message available>"; //$NON-NLS-1$
+                text = "<No message available>"; //$NON-NLS-1$
             } else if (err instanceof MissingResourceException) {
-            	text = OPEN_ANGLE_BRACKET + "Missing message for key \"" + key + "\" in: " + BUNDLE_NAME + CLOSE_ANGLE_BRACKET; //$NON-NLS-1$ //$NON-NLS-2$
+                text = OPEN_ANGLE_BRACKET + "Missing message for key \"" + key + "\" in: " + BUNDLE_NAME + CLOSE_ANGLE_BRACKET; //$NON-NLS-1$ //$NON-NLS-2$
             } else {
-            	text = err.getLocalizedMessage();
+                text = err.getLocalizedMessage();
             }
         }
-        
+
         // Check the trivial cases ...
         if (text == null) {
             return OPEN_ANGLE_BRACKET + key + CLOSE_ANGLE_BRACKET;
@@ -143,5 +135,5 @@ public class Messages implements StringConstants {
 
         return MessageFormat.format(text, parameters);
     }
-    
+
 }
