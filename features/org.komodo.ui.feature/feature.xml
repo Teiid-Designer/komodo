@@ -37,7 +37,7 @@
       <import plugin="org.komodo.shell-api" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.komodo.shell.lib" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.komodo.relational" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.komodo.ddl.importer" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.komodo.importer" version="1.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin

@@ -55,7 +55,7 @@ public class TestTeiid87SqlSequencer extends TestTeiid86SqlSequencer {
     @Test
     public void testStoredQuery2SanityCheck() throws Exception {
         String sql = "BEGIN exec proc1('param1'); END";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_PROC_CMD);
 
         Node createProcNode = verify(fileNode, CreateProcedureCommand.ID, CreateProcedureCommand.ID);
         Node outerBlkNode = verify(createProcNode, CreateProcedureCommand.BLOCK_REF_NAME, Block.ID);

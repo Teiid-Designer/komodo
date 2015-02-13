@@ -83,7 +83,7 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         _repo.notify(event);
 
         // Wait for the starting of the repository or timeout of 1 minute
-        if (!_repoObserver.getLatch().await(1, TimeUnit.MINUTES)) {
+        if (!_repoObserver.getLatch().await(100, TimeUnit.MINUTES)) {
             throw new RuntimeException("Local repository did not start");
         }
     }

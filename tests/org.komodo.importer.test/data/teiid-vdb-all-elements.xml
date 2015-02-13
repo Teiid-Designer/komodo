@@ -1,0 +1,70 @@
+<vdb name="myVDB" version="1">
+    <description>vdb description</description>
+    <connection-type>NONE</connection-type>
+    <property name="vdb-property2" value="vdb-value2"></property>
+    <property name="vdb-property" value="vdb-value"></property>
+    <import-vdb name="x" version="2" import-data-policies="false"/>
+    <model name="model-one" type="PHYSICAL" visible="false">
+        <description>model description</description>
+        <property name="model-prop" value="model-value-override"></property>
+        <source name="s1" translator-name="translator" connection-jndi-name="java:mybinding"></source>
+    </model>
+    <model name="model-two" type="VIRTUAL">
+        <property name="model-prop" value="model-value"></property>
+        <source name="s1" translator-name="translator" connection-jndi-name="java:binding-one"></source>
+        <source name="s2" translator-name="translator" connection-jndi-name="java:binding-two"></source>
+        <metadata type="DDL"><![CDATA[
+        											CREATE VIEW Test AS SELECT * FROM Test.getTest;
+        ]]></metadata>
+    </model>
+    <translator name="oracleOverride" type="oracle" description="hello world">
+        <property name="my-property" value="my-value"></property>
+    </translator>
+    <data-role name="roleOne" any-authenticated="false" grant-all="true" allow-create-temporary-tables="true">
+        <description>roleOne described</description>
+        <permission>
+            <resource-name>myTable.T1</resource-name>
+            <allow-alter>false</allow-alter>
+            <allow-create>false</allow-create>
+            <allow-delete>false</allow-delete>
+            <allow-execute>false</allow-execute>
+            <allow-read>true</allow-read>
+            <allow-update>false</allow-update>
+            <allow-language>false</allow-language>
+        </permission>
+        <permission>
+            <resource-name>myTable.T2</resource-name>
+           	<allow-alter>true</allow-alter>
+			<allow-create>true</allow-create>
+			<allow-delete>true</allow-delete>
+			<allow-execute>true</allow-execute>
+			<allow-read>false</allow-read>
+			<allow-update>true</allow-update>
+			<allow-language>false</allow-language>
+            <condition constraint="false">col1 = user()</condition>
+        </permission>
+        <permission>
+            <resource-name>myTable.T2.col1</resource-name>
+            <allow-alter>false</allow-alter>
+			<allow-create>false</allow-create>
+			<allow-delete>false</allow-delete>
+			<allow-execute>false</allow-execute>
+			<allow-read>false</allow-read>
+			<allow-update>false</allow-update>
+			<allow-language>false</allow-language>
+            <mask order="1">col2</mask>
+        </permission>
+        <permission>
+            <resource-name>javascript</resource-name>
+            <allow-alter>false</allow-alter>
+            <allow-create>false</allow-create>
+            <allow-delete>false</allow-delete>
+            <allow-execute>false</allow-execute>
+            <allow-read>false</allow-read>
+            <allow-update>false</allow-update>
+            <allow-language>true</allow-language>
+        </permission>
+        <mapped-role-name>ROLE1</mapped-role-name>
+        <mapped-role-name>ROLE2</mapped-role-name>
+    </data-role>
+</vdb>

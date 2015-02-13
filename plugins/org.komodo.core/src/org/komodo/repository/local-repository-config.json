@@ -63,6 +63,13 @@
         "removeDerivedContentWithOriginal" : true,
         "threadPool" : "modeshape-workers",
         "sequencers" : {
+            "VDB Dynamic Sequencer" : {
+				"classname" : "org.modeshape.sequencer.teiid.VdbDynamicSequencer",
+				"pathExpressions" :
+				[
+					":(//*.xml/jcr:content)[@jcr:data] => /$1"
+				]
+			},
             "DDL Sequencer" : {
                 "classname" : "org.komodo.modeshape.lib.sequencer.KDdlSequencer",
                 "pathExpressions" :

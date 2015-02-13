@@ -28,8 +28,8 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.GroupBy;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
 import org.komodo.modeshape.teiid.sequencer.v84.TestTeiid84SqlSequencer;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  *
@@ -53,7 +53,7 @@ public class TestTeiid85SqlSequencer extends TestTeiid84SqlSequencer {
     @Test
     public void testGroupByRollup() throws Exception {
         String sql = "SELECT a FROM m.g GROUP BY rollup(b, c)";
-        Node fileNode = sequenceSql(sql);
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
 
         Node queryNode = verify(fileNode, Query.ID, Query.ID);
 
