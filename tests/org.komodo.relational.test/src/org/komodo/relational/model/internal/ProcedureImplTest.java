@@ -285,4 +285,16 @@ public final class ProcedureImplTest extends RelationalModelTest {
         assertThat(this.procedure.getUpdateCount(null), is(value));
     }
 
+    @Test
+    public void shouldHaveDefaultNonPreparedAfterConstruction() throws Exception {
+        assertThat(this.procedure.isNonPrepared(null), is(Procedure.DEFAULT_NON_PREPARED));
+    }
+
+    @Test
+    public void shouldSetNonPrepared() throws Exception {
+        final boolean value = !Procedure.DEFAULT_NON_PREPARED;
+        this.procedure.setNonPrepared(null, value);
+        assertThat(this.procedure.isNonPrepared(null), is(value));
+    }
+
 }

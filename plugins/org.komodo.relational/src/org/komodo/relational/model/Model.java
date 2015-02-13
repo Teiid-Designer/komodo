@@ -69,6 +69,15 @@ public interface Model extends RelationalObject {
                   final String viewName ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the value of the <code>description</code> property (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getDescription( final UnitOfWork transaction ) throws KException;
+
+    /**
      * No functions are returned.
      *
      * @param transaction
@@ -169,6 +178,17 @@ public interface Model extends RelationalObject {
      */
     void removeView( final UnitOfWork transaction,
                      final String viewName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param newDescription
+     *        the new value of the <code>description</code> property (can only be empty when removing)
+     * @throws KException
+     *         if an error occurs
+     */
+    void setDescription( final UnitOfWork transaction,
+                         final String newDescription ) throws KException;
 
     /**
      * @param transaction

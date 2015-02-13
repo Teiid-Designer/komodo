@@ -5,6 +5,7 @@ import org.junit.runners.Suite;
 import org.komodo.relational.model.internal.AccessPatternImplTest;
 import org.komodo.relational.model.internal.ColumnImplTest;
 import org.komodo.relational.model.internal.ForeignKeyImplTest;
+import org.komodo.relational.model.internal.FunctionImplTest;
 import org.komodo.relational.model.internal.IndexImplTest;
 import org.komodo.relational.model.internal.ModelImplTest;
 import org.komodo.relational.model.internal.ParameterImplTest;
@@ -12,6 +13,7 @@ import org.komodo.relational.model.internal.PrimaryKeyImplTest;
 import org.komodo.relational.model.internal.ProcedureImplTest;
 import org.komodo.relational.model.internal.ProcedureResultSetImplTest;
 import org.komodo.relational.model.internal.StatementOptionImplTest;
+import org.komodo.relational.model.internal.TableConstraintTest;
 import org.komodo.relational.model.internal.TableImplTest;
 import org.komodo.relational.model.internal.UniqueConstraintImplTest;
 import org.komodo.relational.model.internal.ViewImplTest;
@@ -31,9 +33,11 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    // Model
 	AccessPatternImplTest.class,
 	ColumnImplTest.class,
 	ForeignKeyImplTest.class,
+	FunctionImplTest.class,
     IndexImplTest.class,
     ModelImplTest.class,
     ParameterImplTest.class,
@@ -41,9 +45,12 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
     ProcedureImplTest.class,
     ProcedureResultSetImplTest.class,
     StatementOptionImplTest.class,
+    TableConstraintTest.class,
     TableImplTest.class,
     UniqueConstraintImplTest.class,
     ViewImplTest.class,
+
+    // VDB
     ConditionImplTest.class,
     DataRoleImplTest.class,
     EntryImplTest.class,
@@ -52,6 +59,8 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
     TranslatorImplTest.class,
     VdbImplTest.class,
     VdbImportImplTest.class,
+
+    // Workspace
     WorkspaceManagerTest.class,
     })
 public class AllTests {

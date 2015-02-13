@@ -31,6 +31,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon.Vdb;
 
 /**
  * An implementation of a relational model.
@@ -705,6 +706,27 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     public void setModelType( final UnitOfWork uow,
                               final String modelType ) throws KException {
         setObjectProperty(uow, "setModelType", CoreLexicon.JcrId.MODEL_TYPE, modelType); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#getDescription(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getDescription( UnitOfWork transaction ) throws KException {
+        return getObjectProperty(transaction, Property.ValueType.STRING, "getDescription", Vdb.DESCRIPTION); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#setDescription(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setDescription( UnitOfWork transaction,
+                                String newDescription ) throws KException {
+        setObjectProperty(transaction, "setDescription", Vdb.DESCRIPTION, newDescription); //$NON-NLS-1$
     }
 
 }
