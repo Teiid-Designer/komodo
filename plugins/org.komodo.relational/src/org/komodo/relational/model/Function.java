@@ -63,6 +63,11 @@ public interface Function extends AbstractProcedure {
     boolean DEFAULT_AGGREGATE = false;
 
     /**
+     * The default value for the <code>allows distinct</code> property. Value is {@value} .
+     */
+    boolean DEFAULT_ALLOWS_DISTINCT = false;
+
+    /**
      * The default value for the <code>allows order by</code> property. Value is {@value} .
      */
     boolean DEFAULT_ALLOWS_ORDER_BY = false;
@@ -146,7 +151,17 @@ public interface Function extends AbstractProcedure {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return <code>true</code> if the function allows order by
+     * @return <code>true</code> if the function allows the DISTINCT keyword
+     * @throws KException
+     *         if an error occurs
+     * @see #DEFAULT_ALLOWS_DISTINCT
+     */
+    boolean isAllowsDistinct( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return <code>true</code> if the function supports the ORDER BY clause
      * @throws KException
      *         if an error occurs
      * @see #DEFAULT_ALLOWS_ORDER_BY
@@ -218,6 +233,18 @@ public interface Function extends AbstractProcedure {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param newAllowsDistinct
+     *        the new value for the <code>allows distinct</code> property
+     * @throws KException
+     *         if an error occurs
+     * @see #DEFAULT_ALLOWS_DISTINCT
+     */
+    void setAllowsDistinct( final UnitOfWork transaction,
+                            final boolean newAllowsDistinct ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param newAllowsOrderBy
      *        the new value for the <code>allows order by</code> property
      * @throws KException
@@ -270,7 +297,7 @@ public interface Function extends AbstractProcedure {
      * @throws KException
      *         if an error occurs
      */
-    void setDeterminims( final UnitOfWork transaction,
+    void setDeterminism( final UnitOfWork transaction,
                          final Determinism newDeterminism ) throws KException;
 
     /**

@@ -237,6 +237,22 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.Function#isAllowsDistinct(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean isAllowsDistinct( final UnitOfWork transaction ) throws KException {
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.ALLOWS_DISTINCT.getName());
+
+        if (option == null) {
+            return Function.DEFAULT_ALLOWS_DISTINCT;
+        }
+
+        return Boolean.parseBoolean(option.getOption(transaction));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Function#isAllowsOrderBy(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
@@ -344,6 +360,17 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.Function#setAllowsDistinct(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
+     */
+    @Override
+    public void setAllowsDistinct( final UnitOfWork transaction,
+                                   final boolean newAllowsDistinct ) throws KException {
+        setStatementOption(transaction, StandardOptions.ALLOWS_DISTINCT.getName(), Boolean.toString(newAllowsDistinct));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Function#setAllowsOrderBy(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
      */
     @Override
@@ -388,11 +415,11 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Function#setDeterminims(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.relational.model.Function#setDeterminism(org.komodo.spi.repository.Repository.UnitOfWork,
      *      org.komodo.relational.model.Function.Determinism)
      */
     @Override
-    public void setDeterminims( final UnitOfWork transaction,
+    public void setDeterminism( final UnitOfWork transaction,
                                 final Determinism newDeterminism ) throws KException {
         final String value = ((newDeterminism == null) ? Determinism.DEFAULT_VALUE.toString() : newDeterminism.toString());
         setStatementOption(transaction, StandardOptions.DETERMINISM.getName(), value);

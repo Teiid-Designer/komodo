@@ -10,6 +10,7 @@ package org.komodo.relational.model.internal;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -23,6 +24,7 @@ import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class ModelImplTest extends RelationalModelTest {
@@ -69,9 +71,23 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat(view.getName(null), is(name));
     }
 
+    @Test
+    public void shouldAllowEmptyDescriptionWhenRemoving() throws Exception {
+        this.model.setDescription(null, "blah");
+        this.model.setDescription(null, StringConstants.EMPTY_STRING);
+        assertThat(this.model.getDescription(null), is(nullValue()));
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyFunctionName() throws Exception {
         this.model.addFunction(null, "");
+    }
+
+    @Test
+    public void shouldAllowNullDescriptionWhenRemoving() throws Exception {
+        this.model.setDescription(null, "blah");
+        this.model.setDescription(null, null);
+        assertThat(this.model.getDescription(null), is(nullValue()));
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -269,6 +285,13 @@ public final class ModelImplTest extends RelationalModelTest {
         this.model.addView(null, name);
         this.model.removeView(null, name);
         assertThat(this.model.getViews(null).length, is(0));
+    }
+
+    @Test
+    public void shouldSetDescription() throws Exception {
+        final String value = "description";
+        this.model.setDescription(null, value);
+        assertThat(this.model.getDescription(null), is(value));
     }
 
 }
