@@ -257,7 +257,7 @@ public class SqlEditorPanel extends SashForm
      */
     public void clear() {
         savedSql = EMPTY_STRING;
-        panelSqlText = null;
+        panelSqlText = savedSql;
         refreshWithDisplayComponent();
     }
 
@@ -269,6 +269,7 @@ public class SqlEditorPanel extends SashForm
     public void setText( final String sql ) {
         this.eventSource = this;
 
+        panelSqlText = sql;
         // Refresh the EditorPanel, using the queryDisplayComponent
         refreshWithDisplayComponent();
     }

@@ -16,3 +16,5 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.106.0",
  org.komodo.utils,
  org.komodo.modeshape.teiid.sql.sequencer,
  org.komodo.core
+Export-Package: org.komodo.eclipse.sql.ui.editor,
+ org.komodo.eclipse.sql.ui.editor.panel
