@@ -23,6 +23,7 @@ import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.Vdb.VdbManifest;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -118,6 +119,73 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat(added.getName(null), is(name));
         assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.Translator.TRANSLATOR));
         assertThat(added.getType(null), is(type));
+    }
+
+    @Test
+    public void shouldCreateManifestForEmptyVdb() throws Exception {
+        final VdbManifest manifest = this.vdb.createManifest(null);
+        assertThat(manifest, is(notNullValue()));
+        assertThat(manifest.asDocument(), is(notNullValue()));
+    }
+
+    @Test
+    public void shouldCreateManifestForVdb() throws Exception {
+        { // setup
+            final UnitOfWork transaction = _repo.createTransaction(this.name.getMethodName(), false, null);
+            this.vdb.setVdbName(transaction, "twitter");
+            this.vdb.setVersion(transaction, 1);
+            this.vdb.setDescription(transaction, "Shows how to call Web Services");
+            this.vdb.setProperty(transaction, "UseConnectorMetadata", "cached");
+
+            final Model twitter = this.vdb.addModel(transaction, "twitter");
+            twitter.setModelType(transaction, "PHYSICAL");
+
+            final Model twitterview = this.vdb.addModel(transaction, "twitterview");
+            twitterview.setModelType(transaction, "VIRTUAL");
+
+            final Translator translator = this.vdb.addTranslator(transaction, "rest", "ws");
+            translator.setProperty(transaction, "DefaultBinding", "HTTP");
+
+            transaction.commit();
+        }
+
+        final VdbManifest manifest = this.vdb.createManifest(null);
+        assertThat(manifest, is(notNullValue()));
+        assertThat(manifest.asDocument(), is(notNullValue()));
+    }
+
+    @Test
+    public void shouldExportEmptyVdb() throws Exception {
+        final String manifest = this.vdb.export(null);
+        assertThat(manifest, is(notNullValue()));
+        assertThat(manifest.isEmpty(), is(false));
+    }
+
+    @Test
+    public void shouldExportVdb() throws Exception {
+        { // setup
+            final UnitOfWork transaction = _repo.createTransaction(this.name.getMethodName(), false, null);
+            this.vdb.setVdbName(transaction, "twitter");
+            this.vdb.setVersion(transaction, 1);
+            this.vdb.setDescription(transaction, "Shows how to call Web Services");
+            this.vdb.setProperty(transaction, "UseConnectorMetadata", "cached");
+
+            final Model twitter = this.vdb.addModel(transaction, "twitter");
+            twitter.setModelType(transaction, "PHYSICAL");
+
+            final Model twitterview = this.vdb.addModel(transaction, "twitterview");
+            twitterview.setModelType(transaction, "VIRTUAL");
+
+            final Translator translator = this.vdb.addTranslator(transaction, "rest", "ws");
+            translator.setProperty(transaction, "DefaultBinding", "HTTP");
+
+            transaction.commit();
+        }
+
+        // test
+        final String manifest = this.vdb.export(null);
+        assertThat(manifest, is(notNullValue()));
+        assertThat(manifest.isEmpty(), is(false));
     }
 
     @Test

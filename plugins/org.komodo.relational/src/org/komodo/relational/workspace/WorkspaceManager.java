@@ -325,9 +325,7 @@ public class WorkspaceManager {
         try {
             String parentPath = null;
 
-            if (parent == null) {
-                parentPath = this.repository.komodoWorkspace(transaction).getAbsolutePath();
-            } else {
+            if (parent != null) {
                 validateWorkspaceMember(transaction, parent);
                 parentPath = parent.getAbsolutePath();
             }

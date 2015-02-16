@@ -10,12 +10,28 @@ package org.komodo.relational.vdb;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.w3c.dom.Document;
 
 /**
  * Represents a virtual database manifest.
  */
-public interface Vdb extends RelationalObject {
+public interface Vdb extends Exportable, RelationalObject {
+
+    /**
+     * Represents a VDB XML manifest file.
+     */
+    public interface VdbManifest extends Exportable {
+
+        /**
+         * @return the manifest as an XML document (never <code>null</code>)
+         * @throws KException
+         *         if an error occurs
+         */
+        Document asDocument() throws KException;
+
+    }
 
     /**
      * The default value indicating if this VDB is a preview VDB. Value is {@value} .
@@ -97,6 +113,15 @@ public interface Vdb extends RelationalObject {
     Translator addTranslator( final UnitOfWork transaction,
                               final String translatorName,
                               final String translatorType ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the VDB XML manifest representing the current state of the VDB (never null)
+     * @throws KException
+     *         if an error occurs
+     */
+    VdbManifest createManifest( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
