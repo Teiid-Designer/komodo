@@ -15,6 +15,7 @@
  */
 package org.komodo.shell.commands;
 
+import org.komodo.core.KEngine;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -62,8 +63,15 @@ public class ExitCommand extends BuiltInShellCommand {
 	 */
 	@Override
 	public boolean execute() throws Exception {
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.GOOD_BYE)); 
-		System.exit(0);
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.GOOD_BYE));
+
+		KEngine engine = this.getWorkspaceStatus().getEngine();
+		if (engine != null) {
+		    engine.shutdownAndWait();
+		}
+
+		getWorkspaceStatus().getShell().exit();
+
         return true;
 	}
 
