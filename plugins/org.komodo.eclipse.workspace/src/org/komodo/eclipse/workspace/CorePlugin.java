@@ -1,0 +1,363 @@
+package org.komodo.eclipse.workspace;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.komodo.core.KEngine;
+import org.komodo.relational.RelationalConstants;
+import org.komodo.relational.model.Column;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Parameter;
+import org.komodo.relational.model.Procedure;
+import org.komodo.relational.model.Table;
+import org.komodo.relational.model.Parameter.Direction;
+import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Permission;
+import org.komodo.relational.vdb.Translator;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.LocalRepository;
+import org.komodo.repository.LocalRepository.LocalRepositoryId;
+import org.komodo.shell.Messages;
+import org.komodo.shell.Messages.SHELL;
+import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.RepositoryObserver;
+import org.modeshape.sequencer.teiid.lexicon.CoreLexicon.ModelType;
+import org.osgi.framework.BundleContext;
+
+/**
+ * The activator class controls the plug-in life cycle
+ */
+public class CorePlugin extends AbstractUIPlugin implements StringConstants {
+
+	// The plug-in ID
+	public static final String PLUGIN_ID = "org.komodo.eclipse.workspace"; //$NON-NLS-1$
+	
+	private static final String CORE_REPOSITORY_CONFIG = "workspace-core-plugin-repository-in-memory-config.json";
+
+	// The shared instance
+	private static CorePlugin plugin;
+	
+	private static KEngine kEngine;
+	
+	private static WorkspaceManager wsManager;
+	
+	/**
+	 * The constructor
+	 */
+	public CorePlugin() {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+	 */
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		plugin = this;
+		
+		kEngine = KEngine.getInstance();
+		
+		try {
+			startKEngine();
+			
+			//loadTestWorkspace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+	 */
+	public void stop(BundleContext context) throws Exception {
+		plugin = null;
+		super.stop(context);
+		
+		try {
+			kEngine.shutdown();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Returns the shared instance
+	 *
+	 * @return the shared instance
+	 */
+	public static CorePlugin getDefault() {
+		return plugin;
+	}
+	
+	public static KEngine getKEngine() {
+		return kEngine;
+	}
+	
+	public static WorkspaceManager getWorkspaceManager() {
+		return wsManager;
+	}
+	
+	 private void startKEngine() throws KException, InterruptedException {
+        final Repository defaultRepo = kEngine.getDefaultRepository();
+
+		// Latch for awaiting the start of the default repository
+		final CountDownLatch updateLatch = new CountDownLatch(1);
+
+		// Observer attached to the default repository for listening for the change of state
+		RepositoryObserver stateObserver = new RepositoryObserver() {
+
+            @Override
+            public void eventOccurred() {
+                updateLatch.countDown();
+            }
+        };
+		defaultRepo.addObserver(stateObserver);
+
+        System.out.println(Messages.getString(SHELL.ENGINE_STARTING));
+        kEngine.start();
+        System.out.println(SPACE + Messages.getString(SHELL.COMPONENT_STARTED)+ NEW_LINE);
+
+        System.out.println(Messages.getString(SHELL.LOCAL_REPOSITORY_STARTING));
+
+        TimerTask progressTask = new TimerTask() {
+            @Override
+            public void run() {
+            	System.out.println(DOT);
+            }
+         };
+
+         Timer timer = new Timer();
+         timer.schedule(progressTask, 0, 1000);
+
+        // Block the thread until the latch has counted down or timeout has been reached
+        boolean localRepoWaiting = updateLatch.await(5, TimeUnit.MINUTES);
+
+        // Cancel timer and display repository message
+        timer.cancel();
+
+        if (localRepoWaiting)
+        	System.out.println(SPACE + Messages.getString(SHELL.COMPONENT_STARTED));
+        else
+        	System.out.println(SPACE + Messages.getString(SHELL.LOCAL_REPOSITORY_TIMEOUT_ERROR));
+
+        System.out.println(NEW_LINE);
+        System.out.println(NEW_LINE);
+        
+		 wsManager = WorkspaceManager.getInstance(defaultRepo);
+		 
+		 System.out.println("Workspace Manager Intialized");
+	 }
+	 
+    private void addToRegistry(ImageRegistry registry, final String imagePath) {
+        registry.put(imagePath, getImageDescriptor(imagePath));
+    }
+
+    @Override
+    protected void initializeImageRegistry(ImageRegistry registry) {
+        super.initializeImageRegistry(registry);
+
+        /*
+         * Initilialise these descriptors since they are required frequently and from app start
+         */
+        addToRegistry(registry, CoreConstants.Images.KOMODO_ICON);
+    }
+    
+
+    /**
+     * Retrieves the image associated with the specified key from the {@link org.eclipse.jface.resource.ImageRegistry image
+     * registry}, creating the image and registering it if it doesn't already exist. A null key will cause the descriptor for the
+     * "No image" image to be returned.
+     * 
+     * @param key The key associated with the image to retrieve. This must be in the form of the path to the image file relative
+     *        to this plug-in's folder; may be null.
+     * @return The image associated with the specified key.
+     * @since 4.0
+     */
+    public final Image getImage( final String key ) {
+        final ImageRegistry registry = getImageRegistry();
+        Image img = registry.get(key);
+        if (img != null) {
+            return img;
+        }
+        try {
+            createImageDescriptor(key);
+            img = registry.get(key);
+            return img != null ? img : ImageDescriptor.getMissingImageDescriptor().createImage();
+        } catch (final SWTException err) {
+        	err.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves the image descriptor associated with the specified key from the {@link org.eclipse.jface.resource.ImageRegistry
+     * image registry}, creating the descriptor and registering it if it doesn't already exist. A null key will cause the
+     * descriptor for the "No image" image to be returned.
+     * 
+     * @param key The key associated with the image descriptor to retrieve. This must be in the form of the path to the image file
+     *        relative to this plug-in's folder; may be null.
+     * @return The image descriptor associated with the specified key.
+     * @since 4.0
+     */
+    public final ImageDescriptor getImageDescriptor( final String key ) {
+        final ImageRegistry registry = getImageRegistry();
+        final ImageDescriptor descriptor = registry.getDescriptor(key);
+        if (descriptor != null) {
+            return descriptor;
+        }
+        return createImageDescriptor(key);
+    }
+    
+    /**
+     * @since 4.0
+     */
+    private ImageDescriptor createImageDescriptor( final String key ) {
+        try {
+            final URL url = new URL(getBundle().getEntry("/").toString() + key); //$NON-NLS-1$
+            final ImageDescriptor descriptor = ImageDescriptor.createFromURL(url);
+            final ImageRegistry registry = getImageRegistry();
+            registry.put(key, descriptor);
+            return descriptor;
+        } catch (final MalformedURLException err) {
+        	err.printStackTrace();
+            return null;
+        }
+    }
+	
+    public static UnitOfWork getTransaction(String ID) {
+
+    	try {
+			return CorePlugin.getKEngine().getDefaultRepository().createTransaction(ID, false, null);
+		} catch (KException e) {
+			e.printStackTrace();
+		}
+    	
+    	return null;
+    }
+    
+    public static void loadTestWorkspace() {
+		Repository repo = CorePlugin.getKEngine().getDefaultRepository();
+		
+		try {
+			UnitOfWork transaction = repo.createTransaction("GET WORKSPACE", false, null);
+			Vdb vdb = wsManager.createVdb(transaction, null, "ProductsVDB", "extPath");
+			vdb.setDescription(transaction, "Description for ProductsVDB");
+			DataRole role = vdb.addDataRole(transaction, "Full Access Data Role");
+			Permission perm = role.addPermission(transaction, "Read-Only");
+			Translator trans = vdb.addTranslator(transaction, "my oracle override", "oracle");
+			Model model = wsManager.createModel(transaction, vdb, "ProductModel");
+			model.setProperty(transaction, "vdb:description", "Description for ProductModel....");
+			Table table = model.addTable(transaction, "productData");
+			table.addColumn(transaction, "ID");
+			table.addColumn(transaction, "Value");
+			table.addColumn(transaction, "Reference");
+			table = model.addTable(transaction, "productInfo");
+			table.addColumn(transaction, "ID");
+			table.addColumn(transaction, "vendor");
+			table.addColumn(transaction, "quantity");
+			Column col = table.addColumn(transaction, "weight");
+			col.setDatatypeName(transaction, "integer");
+			
+			vdb = wsManager.createVdb(transaction, null, "BooksVdb", "extPath");
+			model = wsManager.createModel(transaction, vdb, "BooksSource");
+			table = model.addTable(transaction, "books");
+			table.addColumn(transaction, "title");
+			table.addColumn(transaction, "author");
+			table.addColumn(transaction, "publisherID");
+			table = model.addTable(transaction, "publishers");
+			table.addColumn(transaction, "publisherID");
+			table.addColumn(transaction, "name");
+			table.addColumn(transaction, "address");
+			Procedure proc = model.addProcedure(transaction, "getProductData");
+			Parameter param = proc.addParameter(transaction, "PRODUCT_ID");
+			param.setDirection(transaction, Direction.IN);
+			
+			param = proc.addParameter(transaction, "CATEGORY");
+			param.setDirection(transaction, Direction.IN);
+//			param = proc.addParameter(transaction, "PRODUCT_DATA");
+//			param.setDirection(transaction, Direction.RETURN);
+			
+			model = wsManager.createModel(transaction, vdb, "BooksViews");
+			model.setModelType(transaction, ModelType.VIRTUAL);
+			table = model.addView(transaction, "booksViewInfo");
+			table.addColumn(transaction, "column_1");
+			table.addColumn(transaction, "column_2");
+			table.addColumn(transaction, "column_3");
+			table = model.addView(transaction, "booksSummaryData");
+			table.addColumn(transaction, "column_a");
+			table.addColumn(transaction, "column_b");
+			proc = model.addProcedure(transaction, "getBooksInfo");
+			proc.addParameter(transaction, "isbn");
+			proc.addParameter(transaction, "authorID");
+			proc.addParameter(transaction, "publisherID");
+			
+			transaction.commit();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public static KomodoObject getWorkspaceRoot() {
+		Repository repo = CorePlugin.getKEngine().getDefaultRepository();
+		
+		try {
+			KomodoObject rootNode = repo.komodoWorkspace(null);
+			return rootNode;
+		} catch (KException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+    }
+    
+
+    protected static LocalRepository _repo = null;
+
+    protected static LocalRepositoryObserver _repoObserver = null;
+    
+    protected static class LocalRepositoryObserver implements RepositoryObserver {
+
+        private CountDownLatch latch;
+
+        public LocalRepositoryObserver() {
+            resetLatch();
+        }
+
+        public void resetLatch() {
+            latch = new CountDownLatch(1);
+        }
+
+        /**
+         * @return the latch
+         */
+        public CountDownLatch getLatch() {
+            return this.latch;
+        }
+
+        @Override
+        public void eventOccurred() {
+            latch.countDown();
+        }
+    }
+	    
+}

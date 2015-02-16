@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+     <category
+            name="%komodoCategory"
+            id="org.komodo.eclipse.ui">
+      </category>
+      <view
+            allowMultiple="false"
+            icon="icons/full/obj16/dragon_blue_16x16.png"
+            category="org.komodo.eclipse.ui"
+            class="org.komodo.eclipse.workspace.ui.WorkspaceView"
+            id="org.komodo.eclipse.workspace.ui.workspaceView"
+            name="Workspace"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.komodo.eclipse.workspace.ui.editor.KWorkspaceEditor"
+            default="false"
+            extensions="kws"
+            id="org.komodo.eclipse.workspace.ui.editor.kWorkspaceEditor"
+            name="Komodo Workspace Editor">
+      </editor>
+   </extension>
+<!-- Komodo Perspective -->
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="Komodo"
+            icon="icons/full/obj16/dragon_blue_16x16.png"
+            class="org.komodo.eclipse.workspace.ui.perspective.KomodoPerspectiveFactory"
+            id="komodoPerspective">
+      </perspective>
+   </extension>
+</plugin>
