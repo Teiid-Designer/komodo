@@ -7,8 +7,15 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
+import org.komodo.modeshape.visitor.VdbNodeVisitor;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.internal.RelationalModelFactory;
@@ -27,13 +34,85 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  * An implementation of a virtual database manifest.
  */
 public final class VdbImpl extends RelationalObjectImpl implements Vdb {
+
+    private class VdbManifestImpl implements VdbManifest {
+
+        private final String xml;
+
+        VdbManifestImpl( final UnitOfWork transaction,
+                         final VdbImpl vdb ) throws KException {
+            final StringWriter writer = new StringWriter();
+
+            try {
+                final XMLOutputFactory xof = XMLOutputFactory.newInstance();
+                final XMLStreamWriter xsw = xof.createXMLStreamWriter(writer);
+
+                final VdbNodeVisitor visitor = new VdbNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion(), xsw);
+                visitor.visit(vdb.node(transaction));
+            } catch (final Exception e) {
+                throw new KException(e);
+            }
+
+            // Create an XML Document from the filled writer
+            this.xml = writer.toString();
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("VdbImpl#VdbManifestImpl: transaction = {0}, xml = {1}", //$NON-NLS-1$
+                             transaction.getName(),
+                             this.xml);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.vdb.Vdb.VdbManifest#asDocument()
+         */
+        @Override
+        public Document asDocument() throws KException {
+            String xmlText = this.xml.replaceAll(NEW_LINE, SPACE);
+            xmlText = xmlText.replaceAll(">[\\s]+<", CLOSE_ANGLE_BRACKET + OPEN_ANGLE_BRACKET); //$NON-NLS-1$
+            xmlText = xmlText.replaceAll("[\\s]+", SPACE); //$NON-NLS-1$
+            xmlText = xmlText.replaceAll("CDATA\\[[\\s]+", "CDATA["); //$NON-NLS-1$ //$NON-NLS-2$
+            xmlText = xmlText.replaceAll("; \\]\\]", ";]]"); //$NON-NLS-1$ //$NON-NLS-2$
+
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setIgnoringElementContentWhitespace(true);
+            dbf.setIgnoringComments(true);
+
+            try {
+                final DocumentBuilder db = dbf.newDocumentBuilder();
+                final Document doc = db.parse(new InputSource(new StringReader(xmlText)));
+                doc.setXmlStandalone(true);
+                doc.normalizeDocument();
+
+                return doc;
+            } catch (final Exception e) {
+                throw new KException(e);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork)
+         */
+        @Override
+        public String export( final UnitOfWork transaction ) {
+            return this.xml;
+        }
+
+    }
 
     /**
      * The resolver of a {@link Vdb}.
@@ -89,6 +168,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
                     final Repository repository,
                     final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+        setVdbName(uow, getName(uow));
     }
 
     /**
@@ -201,6 +281,41 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.vdb.Vdb#addModel(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public Model addModel( final UnitOfWork uow,
+                           final String modelName ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("vdbimpl-addModel", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("addModel: transaction = {0}, modelName = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         modelName);
+        }
+
+        try {
+            final Model result = RelationalModelFactory.createModel(transaction, getRepository(), this, modelName);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.vdb.Vdb#addTranslator(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
      *      java.lang.String)
      */
@@ -228,6 +343,70 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
                                                                               this,
                                                                               translatorName,
                                                                               translatorType);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.vdb.Vdb#createManifest(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public VdbManifest createManifest( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("vdbimpl-createManifest", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("createManifest: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            final VdbManifest result = new VdbManifestImpl(transaction, this);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String export( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("vdbimpl-export", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("vdbimpl-export: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            final String result = createManifest(transaction).export(transaction);
 
             if (uow == null) {
                 transaction.commit();
@@ -482,6 +661,54 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.vdb.Vdb#getModels(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Model[] getModels( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("vdbimpl-getModels", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("getModels: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            final List< Model > result = new ArrayList<>();
+
+            for (final KomodoObject kobject : super.getChildrenOfType(transaction, VdbLexicon.Vdb.DECLARATIVE_MODEL)) {
+                final Model model = new ModelImpl(transaction, getRepository(), kobject.getAbsolutePath());
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("getModels: transaction = {0}, found model = {1}", //$NON-NLS-1$
+                                 transaction.getName(),
+                                 kobject.getAbsolutePath());
+                }
+
+                result.add(model);
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            if (result.isEmpty()) {
+                return Model.NO_MODELS;
+            }
+
+            return result.toArray(new Model[result.size()]);
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.vdb.Vdb#getOriginalFilePath(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
@@ -728,6 +955,56 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.vdb.Vdb#removeModel(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void removeModel( final UnitOfWork uow,
+                             final String modelToRemove ) throws KException {
+        ArgCheck.isNotEmpty(modelToRemove, "modelToRemove"); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("vdbimpl-removeModel", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("removeModel: transaction = {0}, modelToRemove = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         modelToRemove);
+        }
+
+        boolean found = false;
+
+        try {
+            final Model[] models = getModels(transaction);
+
+            if (models.length != 0) {
+                for (final Model model : models) {
+                    if (modelToRemove.equals(model.getName(transaction))) {
+                        removeChild(transaction, modelToRemove);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                throw new KException(Messages.getString(Relational.MODEL_NOT_FOUND_TO_REMOVE, modelToRemove));
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.vdb.Vdb#removeTranslator(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
@@ -841,139 +1118,6 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     public void setVersion( final UnitOfWork uow,
                             final int newVersion ) throws KException {
         setObjectProperty(uow, "setVersion", VdbLexicon.Vdb.VERSION, newVersion); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.vdb.Vdb#addModel(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    public Model addModel( final UnitOfWork uow,
-                           final String modelName ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-addModel", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addModel: transaction = {0}, modelName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         modelName);
-        }
-
-        try {
-            final Model result = RelationalModelFactory.createModel(transaction, getRepository(), this, modelName);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.vdb.Vdb#getModels(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public Model[] getModels( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-getModels", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getModels: transaction = {0}", transaction.getName()); //$NON-NLS-1$
-        }
-
-        try {
-            final List< Model > result = new ArrayList<>();
-
-            for (final KomodoObject kobject : super.getChildrenOfType(transaction, VdbLexicon.Vdb.DECLARATIVE_MODEL)) {
-                final Model model = new ModelImpl(transaction, getRepository(), kobject.getAbsolutePath());
-
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("getModels: transaction = {0}, found model = {1}", //$NON-NLS-1$
-                                 transaction.getName(),
-                                 kobject.getAbsolutePath());
-                }
-
-                result.add(model);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            if (result.isEmpty()) {
-                return Model.NO_MODELS;
-            }
-
-            return result.toArray(new Model[result.size()]);
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.vdb.Vdb#removeModel(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    public void removeModel( final UnitOfWork uow,
-                             final String modelToRemove ) throws KException {
-        ArgCheck.isNotEmpty(modelToRemove, "modelToRemove"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimpl-removeModel", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeModel: transaction = {0}, modelToRemove = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         modelToRemove);
-        }
-
-        boolean found = false;
-
-        try {
-            final Model[] models = getModels(transaction);
-
-            if (models.length != 0) {
-                for (final Model model : models) {
-                    if (modelToRemove.equals(model.getName(transaction))) {
-                        removeChild(transaction, modelToRemove);
-                        found = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!found) {
-                throw new KException(Messages.getString(Relational.MODEL_NOT_FOUND_TO_REMOVE, modelToRemove));
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
     }
 
 }
