@@ -60,6 +60,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
@@ -990,8 +991,18 @@ public final class RelationalModelFactory {
         assert (transaction != null);
 
         try {
+            // make sure path is in the library
+            String parentPath = parentWorkspacePath;
+            final String workspacePath = repository.komodoWorkspace(transaction).getAbsolutePath();
+
+            if (StringUtils.isBlank(parentWorkspacePath)) {
+                parentPath = workspacePath;
+            } else if (!parentPath.startsWith(workspacePath)) {
+                parentPath = (workspacePath + parentPath);
+            }
+
             final KomodoObject kobject = repository.add(transaction,
-                                                        parentWorkspacePath,
+                                                        parentPath,
                                                         vdbName,
                                                         VdbLexicon.Vdb.VIRTUAL_DATABASE);
             final Vdb result = new VdbImpl(transaction, repository, kobject.getAbsolutePath());
