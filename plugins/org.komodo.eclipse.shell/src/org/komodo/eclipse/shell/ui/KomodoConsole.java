@@ -29,18 +29,21 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.komodo.core.KEngine;
-import org.komodo.shell.KomodoShell;
+import org.komodo.shell.DefaultKomodoShell;
+import org.komodo.shell.api.KomodoShellParent;
 import org.osgi.framework.Bundle;
 
 /**
  *
  */
-public class KomodoConsole extends IOConsole {
+public class KomodoConsole extends IOConsole implements KomodoShellParent {
 
     private static final String PLUGIN_ID = "org.komodo.shell"; //$NON-NLS-1$
 
@@ -50,12 +53,12 @@ public class KomodoConsole extends IOConsole {
 
         private final PrintStream outStream;
 
-        private KomodoShell shell;
+        private DefaultKomodoShell shell;
 
         public KomodoShellThread(InputStream inStream, PrintStream outStream) {
             this.setDaemon(true);
             this.outStream = outStream;
-            shell = new KomodoShell(KEngine.getInstance(), inStream, outStream);
+            shell = new DefaultKomodoShell(KomodoConsole.this, KEngine.getInstance(), inStream, outStream);
         }
 
         @Override
@@ -121,5 +124,22 @@ public class KomodoConsole extends IOConsole {
         }
 
         super.dispose();
+    }
+
+    @Override
+    public void exit() {
+        boolean closed = false;
+        try {
+            IWorkbench workbench = PlatformUI.getWorkbench();
+            if (workbench == null)
+                System.exit(0);
+
+            closed = workbench.close();
+        } catch (Exception ex) {
+            // Not really bothered given we are shutting down
+        }
+
+        if (! closed)
+            System.exit(1);
     }
 }

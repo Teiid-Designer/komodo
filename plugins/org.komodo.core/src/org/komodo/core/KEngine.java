@@ -24,6 +24,11 @@ package org.komodo.core;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.komodo.core.event.KEvent;
 import org.komodo.core.event.KListener;
 import org.komodo.modeshape.lib.LogConfigurator;
@@ -224,7 +229,6 @@ public final class KEngine implements RepositoryClient, StringConstants {
      */
     public void shutdown() throws KException {
         try {
-            // TODO implement shutdown (write saved state, disconnect to repos, etc.)
             this.state = State.SHUTDOWN;
             KLog.getLogger().debug("Komodo engine successfully shutdown"); //$NON-NLS-1$
 
@@ -238,6 +242,60 @@ public final class KEngine implements RepositoryClient, StringConstants {
             this.state = State.ERROR;
             throw new KException(Messages.getString(Messages.KEngine.Shutdown_Failure), e);
         }
+    }
+
+    /**
+     * Shutdown the engine and wait for it and all repositories to
+     * be disconnected, including the local repository which should
+     * be shutdown as well.
+     *
+     * @throws Exception if shutdown fails
+     */
+    public void shutdownAndWait() throws Exception {
+        Callable shutdownTask = new Callable() {
+
+            @Override
+            public Object call() throws Exception {
+                shutdown();
+
+                boolean shutdown = false;
+                while(!shutdown) {
+                    if (! RepositoryClient.State.SHUTDOWN.equals(KEngine.this.getState())) {
+                        Thread.sleep(5);
+                        continue;
+                    }
+
+                    int reposShutdown = 0;
+                    for (Repository repository : getRepositories()) {
+                        if (Repository.State.REACHABLE.equals(repository.getState()))
+                            break;
+
+                        reposShutdown++;
+                    }
+
+                    if (reposShutdown == getRepositories().size())
+                        shutdown = true;
+                    else
+                        Thread.sleep(5);
+                }
+
+                return shutdown;
+            }
+        };
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<String> future = executor.submit(shutdownTask);
+
+        KLog.getLogger().info("Starting shutdown procedure ..."); //$NON-NLS-1$
+
+        //
+        // Hold the thread until shutdown is complete
+        //
+        future.get(5, TimeUnit.MINUTES);
+
+        KLog.getLogger().info("Shutdown completed."); //$NON-NLS-1$
+
+        executor.shutdownNow();
     }
 
     /**

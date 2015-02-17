@@ -22,12 +22,13 @@
 package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * A schema fragment
  */
-public interface Schema extends RelationalObject {
+public interface Schema extends RelationalObject, Exportable {
 
     /**
      * An empty array of schemas.

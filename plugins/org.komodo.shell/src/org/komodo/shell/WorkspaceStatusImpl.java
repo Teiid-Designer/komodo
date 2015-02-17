@@ -31,6 +31,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
@@ -42,6 +43,8 @@ import org.komodo.spi.repository.Repository;
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
+    private final KomodoShell shell;
+
     /* The library context is where all artifacts are stored */
     private WorkspaceContextImpl rootContext;
 
@@ -52,23 +55,16 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
     private boolean recordingStatus = false;
     private File recordingOutputFile;
-    private final InputStream inStream;
-    private final PrintStream outStream;
-    private final KEngine kEngine;
 
     private Teiid teiid;
 
     /**
      * Constructor
-     * @param kEngine the komodo engine
-     * @param outStream output stream
-     * @param inStream input stream
+     * @param shell parent shell
      * @throws Exception error on initialisation failure
      */
-    public WorkspaceStatusImpl(KEngine kEngine, InputStream inStream, PrintStream outStream) throws Exception {
-        this.kEngine = kEngine;
-        this.inStream = inStream;
-        this.outStream = outStream;
+    public WorkspaceStatusImpl(KomodoShell shell) throws Exception {
+        this.shell = shell;
         init();
     }
 
@@ -85,18 +81,23 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
+    public KomodoShell getShell() {
+        return shell;
+    }
+
+    @Override
     public KEngine getEngine() {
-        return kEngine;
+        return shell.getEngine();
     }
 
     @Override
     public InputStream getInputStream() {
-        return inStream;
+        return shell.getInputStream();
     }
 
     @Override
     public PrintStream getOutputStream() {
-        return outStream;
+        return shell.getOutputStream();
     }
 
     @Override

@@ -143,4 +143,9 @@ public interface WorkspaceStatus extends StringConstants {
      */
     void addWorkspaceContext(String contextId, WorkspaceContext context);
 
+    /**
+     * @return the parent komodo shell
+     */
+    KomodoShell getShell();
+
 }

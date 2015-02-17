@@ -12,12 +12,14 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.komodo.core.KEngine;
 import org.komodo.shell.api.InvalidCommandArgumentException;
+import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
+import org.mockito.Mockito;
 
 /**
  * AbstractCommandTest
@@ -79,8 +81,12 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	    assertEquals(RepositoryClient.State.STARTED, kEngine.getState());
         assertEquals(Repository.State.REACHABLE, kEngine.getDefaultRepository().getState());
 
-        wsStatus = new WorkspaceStatusImpl(kEngine, System.in, System.out);
+        KomodoShell komodoShell = Mockito.mock(KomodoShell.class);
+        Mockito.when(komodoShell.getEngine()).thenReturn(kEngine);
+        Mockito.when(komodoShell.getInputStream()).thenReturn(System.in);
+        Mockito.when(komodoShell.getOutputStream()).thenReturn(System.out);
 
+        wsStatus = new WorkspaceStatusImpl(komodoShell);
 		this.factory = new ShellCommandFactory(wsStatus);
 		this.testedCommandClass = commandClass;
 		

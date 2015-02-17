@@ -40,7 +40,6 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.jcr.api.JcrConstants;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -275,9 +274,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
                                 
         verifyProperty(twitterView, VdbLexicon.Model.MODEL_DEFINITION, modelDefinition.toString());
 
-        KomodoObject ddlStatements = verify(twitterView, StandardDdlLexicon.STATEMENTS_CONTAINER);
-
-        KomodoObject getTweets = verify(ddlStatements, "getTweets");
+        KomodoObject getTweets = verify(twitterView, "getTweets");
 
         KomodoObject getTweetsQuery = verify(getTweets, TeiidSqlLexicon.Query.ID);
         verify(getTweetsQuery, TeiidSqlLexicon.From.ID, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.From.ID);
@@ -296,7 +293,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         ImportMessages importMessages = new ImportMessages();
 
         KomodoObject vdbNode = executeImporter(vdbStream, importOptions, importMessages,
-                                                                            ".*\\/ddl:statements\\/getTweets\\/tsql:query");
+                                                                            ".*\\/getTweets\\/tsql:query");
 
         // Test that a vdb was created
         assertNotNull("Failed - No Vdb Created ", vdbNode);
@@ -539,9 +536,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         KomodoObject permission4 = verify(permissions, "javascript", VdbLexicon.DataRole.Permission.PERMISSION);
         verifyProperty(permission4, VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, Boolean.TRUE.toString());
 
-        KomodoObject ddlStatements = verify(modelTwo, StandardDdlLexicon.STATEMENTS_CONTAINER);
-
-        KomodoObject test = verify(ddlStatements, "Test");
+        KomodoObject test = verify(modelTwo, "Test");
 
         KomodoObject testQuery = verify(test, TeiidSqlLexicon.Query.ID);
         verify(testQuery, TeiidSqlLexicon.From.ID, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.From.ID);
@@ -561,7 +556,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         ImportMessages importMessages = new ImportMessages();
 
         KomodoObject vdbNode = executeImporter(vdbStream, importOptions, importMessages,
-                                                                            ".*\\/ddl:statements/Test/tsql:query");
+                                                                            ".*\\/Test/tsql:query");
 
         // Test that a vdb was created
         assertNotNull("Failed - No Vdb Created ", vdbNode);

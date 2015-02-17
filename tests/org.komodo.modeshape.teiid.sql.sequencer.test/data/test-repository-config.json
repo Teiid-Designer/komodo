@@ -21,9 +21,9 @@
             	"pathExpressions" :
                 [
 						":(//*.tsql/jcr:content)[@jcr:data] => /$1",
-						":(//*.ddl/ddl:statements//*)[@ddl:queryExpression] => /$1",
-						":(//*.ddl/ddl:statements//*)[@teiidddl:queryExpression] => /$1",
-						":(//*.ddl/ddl:statements//*)[@teiidddl:statement] => /$1"
+						":(//*.ddl//*)[@ddl:queryExpression] => /$1",
+						":(//*.ddl//*)[@teiidddl:queryExpression] => /$1",
+						":(//*.ddl//*)[@teiidddl:statement] => /$1"
                 ]
            	}
         }

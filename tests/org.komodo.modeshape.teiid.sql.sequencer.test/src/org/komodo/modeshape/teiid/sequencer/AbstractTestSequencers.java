@@ -39,7 +39,6 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
 import org.komodo.spi.query.sql.lang.JoinType;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 /**
  *
@@ -56,7 +55,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
 
     @Test(timeout = 5000000)
     public void testBasicDDLStatement() throws Exception {
-        CountDownLatch updateLatch = addPathLatchListener(1, ".*\\/ddl:statements\\/Tweet\\/tsql:query");
+        CountDownLatch updateLatch = addPathLatchListener(1, ".*\\/Tweet\\/tsql:query");
 
         String ddl =  "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";        
         Node fileNode = prepareSequence(ddl, SequenceType.DDL);
@@ -68,12 +67,8 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         // Sequencing completed, now verify
         //
 
-        // DDL sequencer create the statements node
-        Node statementsNode = fileNode.getNode(StandardDdlLexicon.STATEMENTS_CONTAINER);
-        assertNotNull(statementsNode);
-
         // DDL Sequencer creates the 'Tweet' node 
-        Node tweetNode = statementsNode.getNode("Tweet");
+        Node tweetNode = fileNode.getNode("Tweet");
         assertNotNull(tweetNode);
 
         // TSQL Sequencer is triggered from the Tweet node's queryExpression property
@@ -149,7 +144,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
                      .append("o.amount as amount ")
                      .append("FROM Customer C INNER JOIN o ON c.id = o.customerid; ");
 
-        CountDownLatch updateLatch = addPathLatchListener(4, ".*\\/ddl:statements\\/.*\\/tsql:query");
+        CountDownLatch updateLatch = addPathLatchListener(4, ".*\\/tsql:query");
 
         Node fileNode = prepareSequence(ddl.toString(), SequenceType.DDL);
 
@@ -160,12 +155,8 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         // Sequencing completed, now verify
         //
 
-        // DDL sequencer create the statements node
-        Node statementsNode = fileNode.getNode(StandardDdlLexicon.STATEMENTS_CONTAINER);
-        assertNotNull(statementsNode);
-
         // DDL Sequencer creates the 'Tweet' node
-        Node tweetNode = statementsNode.getNode("Tweet");
+        Node tweetNode = fileNode.getNode("Tweet");
         assertNotNull(tweetNode);
         Node queryNode = verify(tweetNode, Query.ID, Query.ID);
         Node selectNode = verify(queryNode, Query.SELECT_REF_NAME, Select.ID);
@@ -174,7 +165,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "twitterview.getTweets");
 
         // DDL Sequencer create the 'PARTS_VIEWS.PARTS' node
-        Node partsNode = statementsNode.getNode("PARTS_VIEWS.PARTS");
+        Node partsNode = fileNode.getNode("PARTS_VIEWS.PARTS");
         assertNotNull(partsNode);
         queryNode = verify(partsNode, Query.ID, Query.ID);
         selectNode = verify(queryNode, Query.SELECT_REF_NAME, Select.ID);
@@ -190,7 +181,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         verifyElementSymbol(criteriaNode, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME, "a.id");
 
         // DDL Sequencer create the 'PRODUCT_VIEWS.CustomerOrders' node
-        Node productNode = statementsNode.getNode("PRODUCT_VIEWS.CustomerOrders");
+        Node productNode = fileNode.getNode("PRODUCT_VIEWS.CustomerOrders");
         assertNotNull(productNode);
         queryNode = verify(productNode, Query.ID, Query.ID);
         selectNode = verify(queryNode, Query.SELECT_REF_NAME, Select.ID);
