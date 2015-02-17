@@ -36,7 +36,6 @@ import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.test.utils.AbstractSequencerTest;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 /**
  *
@@ -47,7 +46,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
     /**
      *
      */
-    private static final String SEQUENCE_DDL_PATH = "\\/ddl[0-9]+\\.ddl\\/ddl:statements";
+    private static final String SEQUENCE_DDL_PATH = "\\/ddl[0-9]+\\.ddl\\/";
 
     /*
      * Since the options arguments can occur in any order when the visitor
@@ -127,13 +126,12 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
         assertNotNull(fileNode);
 
         // Wait for the sequencing of the file node or timeout of 3 minutes
-        updateLatch.await(3, TimeUnit.MINUTES);
+        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
 
-        Node ddlStmtsNode = verify(fileNode, StandardDdlLexicon.STATEMENTS_CONTAINER);
         traverse(fileNode);
 
         DdlNodeVisitor visitor = new DdlNodeVisitor(getTeiidVersion());
-        visitor.visit(ddlStmtsNode);
+        visitor.visit(fileNode);
 
         compare(expected, visitor);
     }
@@ -154,7 +152,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 TAB + "INDEX(e6)" + NEW_LINE +
                 ") OPTIONS (ANNOTATION 'Test Table', CARDINALITY '12', FOO 'BAR', UPDATABLE 'true', UUID 'uuid2');";
 
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
     }
 
     @Test(timeout = 5000000)
@@ -166,7 +164,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 TAB + "PRIMARY KEY(e1, e2)" + NEW_LINE +
                 ");";
 
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
     }
 
     @Test(timeout = 5000000)
@@ -179,7 +177,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 TAB + "ACCESSPATTERN(e2, e3)," + NEW_LINE +
                 TAB + "UNIQUE(e1) OPTIONS (x 'true')" + NEW_LINE +
                 ");";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
     }
 
     @Test(timeout = 5000000)
@@ -196,7 +194,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 TAB + "FOREIGN KEY(g2e1, g2e2) REFERENCES G1 (\"g1-e1\", g1e2)" + NEW_LINE +
                 ");";
 
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
     }
 
     @Test(timeout = 5000000)
@@ -214,7 +212,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 TAB + "FOREIGN KEY(g2e1, g2e2) REFERENCES G1" + NEW_LINE +
                 ");";
 
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
     }
 
     @Test(timeout = 5000000)
@@ -231,7 +229,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 TAB + "PRIMARY KEY(g2e1, g2e2)," + NEW_LINE +
                 TAB + "FOREIGN KEY(g2e1, g2e2) REFERENCES G1 OPTIONS (NAMEINSOURCE 'g1Relationship')" + NEW_LINE +
                 ");";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1", SEQUENCE_DDL_PATH + "G2");
     }
 
     @Test(timeout = 5000000)
@@ -244,7 +242,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 "AS" + NEW_LINE +
                 "SELECT * FROM PM1.G1;";
 
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "\\/V1\\/tsql:query", SEQUENCE_DDL_PATH + "\\/FOO\\/tsql:query");
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "V1\\/tsql:query", SEQUENCE_DDL_PATH + "FOO\\/tsql:query");
     }
 
     @Test(timeout = 5000000)
@@ -255,7 +253,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 ") OPTIONS (CARDINALITY '1234567954432')" + NEW_LINE +
                 "AS" + NEW_LINE +
                 "SELECT e1, e2 FROM foo.bar;";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "\\/G1\\/tsql:query");
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1\\/tsql:query");
     }
 
     @Test(timeout = 5000000)
@@ -272,34 +270,34 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 "BEGIN ATOMIC" + NEW_LINE +
                 "INSERT INTO g1 (e1, e2) VALUES (1, 'trig');" + NEW_LINE +
                 "END;";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "\\/G1\\/tsql:query");
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1\\/tsql:query");
     }
 
     @Test(timeout = 5000000)
     public void testSourceProcedure() throws Exception {
         String ddl = "CREATE FOREIGN PROCEDURE myProc(OUT p1 boolean, IN p2 varchar, INOUT p3 bigdecimal) RETURNS TABLE (r1 string, r2 bigdecimal)" + NEW_LINE +
                 "OPTIONS (UUID 'uuid', ANNOTATION 'desc', NAMEINSOURCE 'nis', UPDATECOUNT '2', RANDOM 'any')";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myProc");
     }
 
     @Test( timeout = 5000000 )
     public void testPushdownFunctionNoArgs() throws Exception {
         String ddl = "CREATE FOREIGN FUNCTION SourceFunc() RETURNS integer" + NEW_LINE +
                 "OPTIONS (UUID 'hello world');";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "SourceFunc");
     }
 
     @Test( timeout = 5000000 )
     public void testNonPushdownFunction() throws Exception {
         String ddl = "CREATE VIRTUAL FUNCTION SourceFunc(p1 integer, p2 varchar) RETURNS integer" + NEW_LINE +
                 "OPTIONS (JAVA_CLASS 'foo', JAVA_METHOD 'bar');";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "SourceFunc");
     }
 
     @Test( timeout = 5000000 )
     public void testSourceProcedureVariadic() throws Exception {
         String ddl = "CREATE FOREIGN PROCEDURE myProc(OUT p1 boolean, VARIADIC p3 bigdecimal) RETURNS TABLE (r1 string, r2 bigdecimal)";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myProc");
     }
 
     @Test( timeout = 5000000 )
@@ -312,7 +310,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                             ")" + NEW_LINE +
                             "AS" + NEW_LINE +
                             "SELECT e1, e2 FROM foo.bar;";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "\\/G1\\/tsql:query");
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1\\/tsql:query");
     }
 
     @Test( timeout = 5000000 )
@@ -326,7 +324,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                             ") OPTIONS (\"teiid_rel:x\" 'false', \"n1:z\" 'stringval')" + NEW_LINE +
                             "AS" + NEW_LINE +
                             "SELECT e1, e2 FROM foo.bar;";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "\\/G1\\/tsql:query");
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1\\/tsql:query");
     }
 
     @Test( timeout = 5000000 )
@@ -336,13 +334,13 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                             TAB + "y SERIAL," + NEW_LINE +
                             TAB + "PRIMARY KEY(x)" + NEW_LINE +
                             ")";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myTemp");
     }
 
     @Test( timeout = 5000000 )
     public void testArrayTypes() throws Exception {
         String ddl = "CREATE FOREIGN PROCEDURE myProc(OUT p1 boolean, IN p2 string, INOUT p3 bigdecimal) RETURNS TABLE (r1 string(100)[], r2 bigdecimal[][])";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH);
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myProc");
     }
 
 }

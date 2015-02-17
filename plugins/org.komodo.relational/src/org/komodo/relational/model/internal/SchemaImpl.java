@@ -34,7 +34,6 @@ import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 /**
  * A named schema fragment
@@ -129,16 +128,10 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
         try {
             StringBuffer result = new StringBuffer();
             Node schemaNode = node(transaction);
-            Node ddlContainer = null;
 
-            if (schemaNode.hasNode(StandardDdlLexicon.STATEMENTS_CONTAINER))
-                ddlContainer = schemaNode.getNode(StandardDdlLexicon.STATEMENTS_CONTAINER);
-
-            if (ddlContainer != null) {
-                DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion());
-                visitor.visit(ddlContainer);
-                result.append(visitor.getDdl());
-            }
+            DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion());
+            visitor.visit(schemaNode);
+            result.append(visitor.getDdl());
 
             if (uow == null) {
                 transaction.commit();

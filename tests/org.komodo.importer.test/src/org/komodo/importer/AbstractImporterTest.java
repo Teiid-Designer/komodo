@@ -53,6 +53,7 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
     protected static final String DATA_DIRECTORY = File.separator + "data"; //$NON-NLS-1$
 
     protected InputStream setup(String fileName) {
+
         InputStream stream = getClass().getResourceAsStream(DATA_DIRECTORY + File.separator + fileName);
         assertNotNull(stream);
         return stream;
@@ -88,8 +89,6 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         assertNotNull(content);
         assertNotNull(importOptions);
         assertNotNull(importMessages);
-
-//        setLoggingLevel(Level.ALL);
 
         UnitOfWork uow = _repo.createTransaction("test-importer", false, null);
         Session session = session(uow);

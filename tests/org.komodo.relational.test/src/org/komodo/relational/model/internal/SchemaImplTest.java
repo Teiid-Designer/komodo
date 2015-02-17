@@ -16,7 +16,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import javax.jcr.Session;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,11 +35,11 @@ public class SchemaImplTest extends RelationalModelTest {
                                                                         TAB + "e2 varchar" + NEW_LINE +
                                                                         ") OPTIONS (CARDINALITY '1234567954432')" + NEW_LINE +
                                                                         "AS" + NEW_LINE +
-                                                                        "SELECT e1, e2 FROM foo.bar;";
+                                                                        "SELECT e1, e2 FROM foo.bar;\n";
 
-    private static final String SEQUENCE_DDL_PATH = ".*\\/ddl:statements";
+    private static final String SEQUENCE_DDL_PROBLEM = ".*\\/ddl.+problem";
 
-    private static final String SEQUENCE_TEIID_SQL_PATH = ".*\\/ddl:statements\\/G1\\/tsql:query";
+    private static final String SEQUENCE_TEIID_SQL_PATH = ".*\\/G1\\/tsql:query";
 
     private static final String NAME = "schema";
 
@@ -58,8 +57,6 @@ public class SchemaImplTest extends RelationalModelTest {
     private void setRenditionValueAwaitSequencing(String value, String... sequencerPaths) throws Exception {
         UnitOfWork transaction = _repo.createTransaction("schematests-setrendition-value", false, null);
         assertNotNull(transaction);
-
-        setLoggingLevel(Level.FINE);
 
         Session session = session(transaction);
 
@@ -132,8 +129,8 @@ public class SchemaImplTest extends RelationalModelTest {
     }
 
     @Test
-    public void shouldExportEmptyDdl2() throws Exception {
-        setRenditionValueAwaitSequencing("This is not ddl syntax", SEQUENCE_DDL_PATH);
+    public void shouldExportInvalidDdl() throws Exception {
+        setRenditionValueAwaitSequencing("This is not ddl syntax", SEQUENCE_DDL_PROBLEM);
 
         final String fragment = this.schema.export(null);
         assertThat(fragment, is(notNullValue()));

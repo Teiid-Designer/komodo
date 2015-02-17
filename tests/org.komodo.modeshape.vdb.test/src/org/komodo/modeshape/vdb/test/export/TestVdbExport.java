@@ -45,7 +45,6 @@ import org.junit.Test;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
 import org.komodo.test.utils.AbstractSequencerTest;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -639,10 +638,8 @@ public class TestVdbExport extends AbstractSequencerTest {
         Node twitterExampleNode = createTweetExampleNode();
 
         List<String> pathsToBeSequenced = new ArrayList<String>();
-        pathsToBeSequenced.add(".*\\/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "\\/getTweets\\/" + 
-                                                              TeiidSqlLexicon.Query.ID);
-        pathsToBeSequenced.add(".*\\/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "\\/Tweet\\/" +
-                                                              TeiidSqlLexicon.Query.ID);
+        pathsToBeSequenced.add(".*\\/getTweets\\/" + TeiidSqlLexicon.Query.ID);
+        pathsToBeSequenced.add(".*\\/Tweet\\/" + TeiidSqlLexicon.Query.ID);
 
         CountDownLatch updateLatch = addPathLatchListener(1, pathsToBeSequenced);
 
@@ -654,7 +651,7 @@ public class TestVdbExport extends AbstractSequencerTest {
         //
         // Sequencing completed, now verify
         //
-        Node tweet = verify(twitterExampleNode,"twitterview/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "/Tweet", TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
+        Node tweet = verify(twitterExampleNode,"twitterview/Tweet", TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
         verify(tweet, TeiidSqlLexicon.Query.ID, TeiidSqlLexicon.Query.ID);
 
         //
@@ -687,7 +684,7 @@ public class TestVdbExport extends AbstractSequencerTest {
     public void testAllElementsVdbExport() throws Exception {
         Node allElementsNode = createAllElementsExampleNode();
 
-        CountDownLatch updateLatch = addPathLatchListener(1, ".*\\/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "\\/Test\\/" + TeiidSqlLexicon.Query.ID);
+        CountDownLatch updateLatch = addPathLatchListener(1, ".*\\/Test\\/" + TeiidSqlLexicon.Query.ID);
 
         // Wait for the starting of the repository or timeout of 3 minutes
         updateLatch.await(3, TimeUnit.MINUTES);
@@ -697,7 +694,7 @@ public class TestVdbExport extends AbstractSequencerTest {
         //
         // Sequencing completed, now verify
         //
-        Node testNode = verify(allElementsNode, "model-two/" + StandardDdlLexicon.STATEMENTS_CONTAINER + "/Test", TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
+        Node testNode = verify(allElementsNode, "model-two/Test", TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
         verify(testNode, TeiidSqlLexicon.Query.ID, TeiidSqlLexicon.Query.ID);
 
         //
