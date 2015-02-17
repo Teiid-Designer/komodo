@@ -7,6 +7,7 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.relational.vdb.ModelSource;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -14,6 +15,21 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  * Represents a relational model.
  */
 public interface Model extends RelationalObject {
+
+    /**
+     * The type of a model.
+     */
+    enum Type {
+
+        PHYSICAL,
+        VIRTUAL;
+
+        /**
+         * The default model type. Value is {@value} .
+         */
+        public static final Type DEFAULT = PHYSICAL;
+
+    }
 
     /**
      * An empty array of models.
@@ -43,6 +59,18 @@ public interface Model extends RelationalObject {
      */
     Procedure addProcedure( final UnitOfWork transaction,
                             final String procedureName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param sourceName
+     *        the name of the model source to create (cannot be empty)
+     * @return the new model source (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    ModelSource addSource( final UnitOfWork transaction,
+                           final String sourceName ) throws KException;
 
     /**
      * @param transaction
@@ -95,16 +123,17 @@ public interface Model extends RelationalObject {
      * @throws KException
      *         if error occurs
      */
-    String getModelDefinition( UnitOfWork transaction ) throws KException;
+    String getModelDefinition( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return model type of this model
+     * @return model type of this model (never <code>null</code>)
      * @throws KException
      *         if error occurs
+     * @see Type#DEFAULT
      */
-    String getModelType( UnitOfWork transaction ) throws KException;
+    Type getModelType( final UnitOfWork transaction ) throws KException;
 
     /**
      * No functions are returned.
@@ -116,6 +145,15 @@ public interface Model extends RelationalObject {
      *         if an error occurs
      */
     Procedure[] getProcedures( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the model sources found in this model (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    ModelSource[] getSources( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -156,6 +194,17 @@ public interface Model extends RelationalObject {
      */
     void removeProcedure( final UnitOfWork transaction,
                           final String procedureName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param sourceName
+     *        the name of the model source being deleted (cannot be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    void removeSource( final UnitOfWork transaction,
+                       final String sourceName ) throws KException;
 
     /**
      * @param transaction
@@ -204,12 +253,13 @@ public interface Model extends RelationalObject {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @param modelType
-     *        the model type
+     * @param newModelType
+     *        the new model type (can be <code>null</code>)
      * @throws KException
      *         if error occurs
+     * @see Type#DEFAULT
      */
-    void setModelType( UnitOfWork transaction,
-                       String modelType ) throws KException;
+    void setModelType( final UnitOfWork transaction,
+                       final Type newModelType ) throws KException;
 
 }

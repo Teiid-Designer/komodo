@@ -21,6 +21,7 @@ import org.komodo.relational.vdb.internal.ConditionImplTest;
 import org.komodo.relational.vdb.internal.DataRoleImplTest;
 import org.komodo.relational.vdb.internal.EntryImplTest;
 import org.komodo.relational.vdb.internal.MaskImplTest;
+import org.komodo.relational.vdb.internal.ModelSourceImplTest;
 import org.komodo.relational.vdb.internal.PermissionImplTest;
 import org.komodo.relational.vdb.internal.TranslatorImplTest;
 import org.komodo.relational.vdb.internal.VdbImplTest;
@@ -55,6 +56,7 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
     DataRoleImplTest.class,
     EntryImplTest.class,
     MaskImplTest.class,
+    ModelSourceImplTest.class,
     PermissionImplTest.class,
     TranslatorImplTest.class,
     VdbImplTest.class,

@@ -101,6 +101,15 @@ public interface Permission extends RelationalObject {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the target resource name (never empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getResourceName( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return <code>true</code> if this permission allows alter
      * @throws KException
      *         if an error occurs

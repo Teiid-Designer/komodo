@@ -19,6 +19,8 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
+import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.internal.ModelSourceImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.Messages;
@@ -169,6 +171,42 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.Model#addSource(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public ModelSource addSource( final UnitOfWork uow,
+                                  final String sourceName ) throws KException {
+        ArgCheck.isNotEmpty(sourceName, "sourceName"); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("modelimpl-addSource", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("addSource: transaction = {0}, tableName = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         sourceName);
+        }
+
+        try {
+            final ModelSource result = RelationalModelFactory.createModelSource(transaction, getRepository(), this, sourceName);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Model#addTable(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
@@ -249,12 +287,25 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         final Procedure[] procedures = getProcedures(uow);
         final Table[] tables = getTables(uow);
         final View[] views = getViews(uow);
+        final ModelSource[] sources = getSources(uow);
 
-        final KomodoObject[] result = new KomodoObject[functions.length + procedures.length + tables.length + views.length];
-        System.arraycopy(functions, 0, result, 0, functions.length);
-        System.arraycopy(procedures, 0, result, functions.length, procedures.length);
-        System.arraycopy(tables, 0, result, functions.length + procedures.length, tables.length);
-        System.arraycopy(views, 0, result, functions.length + procedures.length + tables.length, views.length);
+        final KomodoObject[] result = new KomodoObject[functions.length + procedures.length + tables.length + views.length
+                                                       + sources.length];
+
+        int start = 0;
+        System.arraycopy(functions, 0, result, start, functions.length);
+
+        start = functions.length;
+        System.arraycopy(procedures, 0, result, start, procedures.length);
+
+        start += procedures.length;
+        System.arraycopy(tables, 0, result, start, tables.length);
+
+        start += tables.length;
+        System.arraycopy(views, 0, result, start, views.length);
+
+        start += sources.length;
+        System.arraycopy(sources, 0, result, start, sources.length);
 
         return result;
     }
@@ -285,7 +336,21 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             return getViews(uow);
         }
 
+        if (VdbLexicon.Source.SOURCE.equals(type)) {
+            return getSources(uow);
+        }
+
         return KomodoObject.EMPTY_ARRAY;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#getDescription(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getDescription( final UnitOfWork transaction ) throws KException {
+        return getObjectProperty(transaction, Property.ValueType.STRING, "getDescription", Vdb.DESCRIPTION); //$NON-NLS-1$
     }
 
     /**
@@ -344,12 +409,17 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         return modelDefn == null ? EMPTY_STRING : modelDefn;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#getModelType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
     @Override
-    public String getModelType( final UnitOfWork uow ) throws KException {
-        final String modelType = getObjectProperty(uow, Property.ValueType.STRING, "getModelType", //$NON-NLS-1$
-                                                   CoreLexicon.JcrId.MODEL_TYPE);
-
-        return modelType == null ? EMPTY_STRING : modelType;
+    public Type getModelType( final UnitOfWork uow ) throws KException {
+        final String value = getObjectProperty(uow, Property.ValueType.STRING, "getModelType", //$NON-NLS-1$
+                                               CoreLexicon.JcrId.MODEL_TYPE);
+        final Type modelType = ((value == null) ? null : Type.valueOf(value));
+        return ((modelType == null) ? Type.DEFAULT : modelType);
     }
 
     /**
@@ -395,6 +465,59 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             }
 
             return result.toArray(new Procedure[result.size()]);
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#getSources(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public ModelSource[] getSources( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("modelimpl-getSources", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("getSources: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            ModelSource[] result = null;
+
+            if (hasChild(transaction, VdbLexicon.Vdb.SOURCES)) {
+                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.SOURCES);
+                final List< ModelSource > temp = new ArrayList<>();
+
+                for (final KomodoObject kobject : grouping.getChildrenOfType(transaction, VdbLexicon.Source.SOURCE)) {
+                    final ModelSource translator = new ModelSourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
+
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("getSources: transaction = {0}, found model source = {1}", //$NON-NLS-1$
+                                     transaction.getName(),
+                                     kobject.getAbsolutePath());
+                    }
+
+                    temp.add(translator);
+                }
+
+                result = temp.toArray(new ModelSource[temp.size()]);
+            } else {
+                result = ModelSource.NO_SOURCES;
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
@@ -599,6 +722,57 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.Model#removeSource(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void removeSource( final UnitOfWork uow,
+                              final String sourceToRemove ) throws KException {
+        ArgCheck.isNotEmpty(sourceToRemove, "sourceToRemove"); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("modelimpl-removeSource", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("removeSource: transaction = {0}, sourceToRemove = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         sourceToRemove);
+        }
+
+        boolean found = false;
+
+        try {
+            final ModelSource[] sources = getSources(transaction);
+
+            if (sources.length != 0) {
+                for (final ModelSource source : sources) {
+                    if (sourceToRemove.equals(source.getName(transaction))) {
+                        final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.SOURCES);
+                        grouping.removeChild(transaction, sourceToRemove);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                throw new KException(Messages.getString(Relational.MODEL_SOURCE_NOT_FOUND_TO_REMOVE, sourceToRemove));
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Model#removeTable(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
@@ -696,37 +870,33 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
     }
 
-    @Override
-    public void setModelDefinition( final UnitOfWork uow,
-                                    final String modelDefinition ) throws KException {
-        setObjectProperty(uow, "setModelDefinition", KomodoLexicon.VdbModel.MODEL_DEFINITION, modelDefinition); //$NON-NLS-1$
-    }
-
-    @Override
-    public void setModelType( final UnitOfWork uow,
-                              final String modelType ) throws KException {
-        setObjectProperty(uow, "setModelType", CoreLexicon.JcrId.MODEL_TYPE, modelType); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Model#getDescription(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public String getDescription( UnitOfWork transaction ) throws KException {
-        return getObjectProperty(transaction, Property.ValueType.STRING, "getDescription", Vdb.DESCRIPTION); //$NON-NLS-1$
-    }
-
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.relational.model.Model#setDescription(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public void setDescription( UnitOfWork transaction,
-                                String newDescription ) throws KException {
+    public void setDescription( final UnitOfWork transaction,
+                                final String newDescription ) throws KException {
         setObjectProperty(transaction, "setDescription", Vdb.DESCRIPTION, newDescription); //$NON-NLS-1$
+    }
+
+    @Override
+    public void setModelDefinition( final UnitOfWork uow,
+                                    final String modelDefinition ) throws KException {
+        setObjectProperty(uow, "setModelDefinition", KomodoLexicon.VdbModel.MODEL_DEFINITION, modelDefinition); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#setModelType(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.relational.model.Model.Type)
+     */
+    @Override
+    public void setModelType( final UnitOfWork uow,
+                              final Type newModelType ) throws KException {
+        final Type modelType = ((newModelType == null) ? Type.DEFAULT : newModelType);
+        setObjectProperty(uow, "setModelType", CoreLexicon.JcrId.MODEL_TYPE, modelType.toString()); //$NON-NLS-1$
     }
 
 }

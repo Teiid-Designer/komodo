@@ -168,7 +168,6 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
                     final Repository repository,
                     final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
-        setVdbName(uow, getName(uow));
     }
 
     /**

@@ -19,9 +19,11 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
+import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -45,6 +47,14 @@ public final class ModelImplTest extends RelationalModelTest {
         final Function function = this.model.addFunction(null, name);
         assertThat(function, is(notNullValue()));
         assertThat(function.getName(null), is(name));
+    }
+
+    @Test
+    public void shouldAddSource() throws Exception {
+        final String name = "source";
+        final ModelSource source = this.model.addSource(null, name);
+        assertThat(source, is(notNullValue()));
+        assertThat(source.getName(null), is(name));
     }
 
     @Test
@@ -80,7 +90,7 @@ public final class ModelImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyFunctionName() throws Exception {
-        this.model.addFunction(null, "");
+        this.model.addFunction(null, EMPTY_STRING);
     }
 
     @Test
@@ -90,19 +100,31 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat(this.model.getDescription(null), is(nullValue()));
     }
 
+    @Test
+    public void shouldAllowNullModelTypeWhenSettingToDefaultValue() throws Exception {
+        this.model.setModelType(null, Type.VIRTUAL);
+        this.model.setModelType(null, null);
+        assertThat(this.model.getModelType(null), is(Type.DEFAULT));
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyProcedureName() throws Exception {
-        this.model.addProcedure(null, "");
+        this.model.addProcedure(null, EMPTY_STRING);
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailAddingEmptySourceName() throws Exception {
+        this.model.addProcedure(null, EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyTableName() throws Exception {
-        this.model.addTable(null, "");
+        this.model.addTable(null, EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyViewName() throws Exception {
-        this.model.addView(null, "");
+        this.model.addView(null, EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -113,6 +135,11 @@ public final class ModelImplTest extends RelationalModelTest {
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullProcedureName() throws Exception {
         this.model.addProcedure(null, null);
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailAddingNullSourceName() throws Exception {
+        this.model.addSource(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -139,22 +166,27 @@ public final class ModelImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyFunctionName() throws Exception {
-        this.model.removeFunction(null, "");
+        this.model.removeFunction(null, EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyProcedureName() throws Exception {
-        this.model.removeProcedure(null, "");
+        this.model.removeProcedure(null, EMPTY_STRING);
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailTryingToRemoveEmptySourceName() throws Exception {
+        this.model.removeSource(null, EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyTableName() throws Exception {
-        this.model.removeTable(null, "");
+        this.model.removeTable(null, EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyViewName() throws Exception {
-        this.model.removeView(null, "");
+        this.model.removeView(null, EMPTY_STRING);
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -165,6 +197,11 @@ public final class ModelImplTest extends RelationalModelTest {
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullProcedureName() throws Exception {
         this.model.removeProcedure(null, null);
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailTryingToRemoveNullSourceName() throws Exception {
+        this.model.removeSource(null, null);
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -185,6 +222,11 @@ public final class ModelImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownProcedure() throws Exception {
         this.model.removeProcedure(null, "unknown");
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailTryingToRemoveUnknownSource() throws Exception {
+        this.model.removeSource(null, "unknown");
     }
 
     @Test( expected = KException.class )
@@ -220,6 +262,17 @@ public final class ModelImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldGetSources() throws Exception {
+        final int numSources = 5;
+
+        for (int i = 0; i < numSources; ++i) {
+            this.model.addSource(null, "source" + i);
+        }
+
+        assertThat(this.model.getSources(null).length, is(numSources));
+    }
+
+    @Test
     public void shouldGetTables() throws Exception {
         final int numTables = 5;
 
@@ -247,12 +300,14 @@ public final class ModelImplTest extends RelationalModelTest {
         this.model.addProcedure(null, "procedure");
         this.model.addTable(null, "table");
         this.model.addView(null, "view");
+        this.model.addSource(null, "source");
 
-        assertThat(this.model.getChildren(null).length, is(4));
+        assertThat(this.model.getChildren(null).length, is(5));
         assertThat(this.model.getChildren(null)[0], is(instanceOf(Function.class)));
         assertThat(this.model.getChildren(null)[1], is(instanceOf(Procedure.class)));
         assertThat(this.model.getChildren(null)[2], is(instanceOf(Table.class)));
         assertThat(this.model.getChildren(null)[3], is(instanceOf(View.class)));
+        assertThat(this.model.getChildren(null)[4], is(instanceOf(ModelSource.class)));
     }
 
     @Test
@@ -269,6 +324,14 @@ public final class ModelImplTest extends RelationalModelTest {
         this.model.addProcedure(null, name);
         this.model.removeProcedure(null, name);
         assertThat(this.model.getProcedures(null).length, is(0));
+    }
+
+    @Test
+    public void shouldRemoveSource() throws Exception {
+        final String name = "source";
+        this.model.addSource(null, name);
+        this.model.removeSource(null, name);
+        assertThat(this.model.getSources(null).length, is(0));
     }
 
     @Test
@@ -292,6 +355,13 @@ public final class ModelImplTest extends RelationalModelTest {
         final String value = "description";
         this.model.setDescription(null, value);
         assertThat(this.model.getDescription(null), is(value));
+    }
+
+    @Test
+    public void shouldSetModelType() throws Exception {
+        final Type value = Type.VIRTUAL;
+        this.model.setModelType(null, value);
+        assertThat(this.model.getModelType(null), is(value));
     }
 
 }
