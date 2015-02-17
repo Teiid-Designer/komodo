@@ -139,6 +139,12 @@ public final class PermissionImplTest extends RelationalModelTest {
         assertThat(this.permission.getParent(null), is(instanceOf(DataRole.class)));
     }
 
+    @Test
+    public void shouldHaveResourceName() throws Exception {
+        assertThat(this.permission.getResourceName(null), is(notNullValue()));
+        assertThat(this.permission.getResourceName(null), is(this.permission.getName(null)));
+    }
+
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddEmptyCondition() throws Exception {
         this.permission.addCondition(null, StringConstants.EMPTY_STRING);

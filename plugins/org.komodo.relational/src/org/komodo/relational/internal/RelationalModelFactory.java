@@ -42,6 +42,7 @@ import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Mask;
+import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -50,6 +51,7 @@ import org.komodo.relational.vdb.internal.ConditionImpl;
 import org.komodo.relational.vdb.internal.DataRoleImpl;
 import org.komodo.relational.vdb.internal.EntryImpl;
 import org.komodo.relational.vdb.internal.MaskImpl;
+import org.komodo.relational.vdb.internal.ModelSourceImpl;
 import org.komodo.relational.vdb.internal.PermissionImpl;
 import org.komodo.relational.vdb.internal.TranslatorImpl;
 import org.komodo.relational.vdb.internal.VdbImpl;
@@ -543,6 +545,53 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentModel
+     *        the model where the model source is being created (cannot be <code>null</code>)
+     * @param sourceName
+     *        the name of the model source to create (cannot be empty)
+     * @return the model source object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static ModelSource createModelSource( final UnitOfWork uow,
+                                                 final Repository repository,
+                                                 final Model parentModel,
+                                                 final String sourceName ) throws KException {
+        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(sourceName, "sourceName"); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("relationalmodelfactory-createModelSource", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final KomodoObject grouping = RepositoryTools.findOrCreateChild(transaction,
+                                                                            parentModel,
+                                                                            VdbLexicon.Vdb.SOURCES,
+                                                                            VdbLexicon.Vdb.SOURCES);
+            final KomodoObject kobject = grouping.addChild(transaction, sourceName, VdbLexicon.Source.SOURCE);
+            final ModelSource result = new ModelSourceImpl(transaction, repository, kobject.getAbsolutePath());
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentProcedure
      *        the procedure where the parameter model object is being created (cannot be <code>null</code>)
      * @param parameterName
@@ -1001,12 +1050,10 @@ public final class RelationalModelFactory {
                 parentPath = (workspacePath + parentPath);
             }
 
-            final KomodoObject kobject = repository.add(transaction,
-                                                        parentPath,
-                                                        vdbName,
-                                                        VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            final KomodoObject kobject = repository.add(transaction, parentPath, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             final Vdb result = new VdbImpl(transaction, repository, kobject.getAbsolutePath());
             result.setOriginalFilePath(transaction, externalFilePath);
+            result.setVdbName(transaction, vdbName);
 
             if (uow == null) {
                 transaction.commit();
@@ -1126,7 +1173,7 @@ public final class RelationalModelFactory {
                                            final Exception e ) {
         assert (e != null);
         assert ((transactionParameter == null) && (transactionVariable != null))
-               || ((transactionParameter != null) && (transactionVariable == null));
+        || ((transactionParameter != null) && (transactionVariable == null));
 
         if (transactionParameter == null) {
             transactionVariable.rollback();

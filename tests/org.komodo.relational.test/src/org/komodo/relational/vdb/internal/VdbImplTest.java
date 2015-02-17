@@ -138,10 +138,10 @@ public final class VdbImplTest extends RelationalModelTest {
             this.vdb.setProperty(transaction, "UseConnectorMetadata", "cached");
 
             final Model twitter = this.vdb.addModel(transaction, "twitter");
-            twitter.setModelType(transaction, "PHYSICAL");
+            twitter.setModelType(transaction, Model.Type.PHYSICAL);
 
             final Model twitterview = this.vdb.addModel(transaction, "twitterview");
-            twitterview.setModelType(transaction, "VIRTUAL");
+            twitterview.setModelType(transaction, Model.Type.VIRTUAL);
 
             final Translator translator = this.vdb.addTranslator(transaction, "rest", "ws");
             translator.setProperty(transaction, "DefaultBinding", "HTTP");
@@ -171,10 +171,10 @@ public final class VdbImplTest extends RelationalModelTest {
             this.vdb.setProperty(transaction, "UseConnectorMetadata", "cached");
 
             final Model twitter = this.vdb.addModel(transaction, "twitter");
-            twitter.setModelType(transaction, "PHYSICAL");
+            twitter.setModelType(transaction, Model.Type.PHYSICAL);
 
             final Model twitterview = this.vdb.addModel(transaction, "twitterview");
-            twitterview.setModelType(transaction, "VIRTUAL");
+            twitterview.setModelType(transaction, Model.Type.VIRTUAL);
 
             final Translator translator = this.vdb.addTranslator(transaction, "rest", "ws");
             translator.setProperty(transaction, "DefaultBinding", "HTTP");
