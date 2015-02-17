@@ -318,6 +318,16 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.vdb.Permission#getResourceName(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getResourceName( final UnitOfWork transaction ) throws KException {
+        return getName(transaction);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.vdb.Permission#isAllowAlter(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

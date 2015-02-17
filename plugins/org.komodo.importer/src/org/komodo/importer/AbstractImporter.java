@@ -163,12 +163,12 @@ public abstract class AbstractImporter implements StringConstants {
         KomodoObject workspace = getRepository().komodoWorkspace(transaction);
         KomodoObject resultNode = null;
         String name = importOptions.getOption(OptionKeys.NAME).toString();
-        
+
         switch(importOptions.getImportType()) {
             case MODEL:
                 ModelType.Type modelType = (ModelType.Type) importOptions.getOption(OptionKeys.MODEL_TYPE);
                 Model model = wkspManager.createModel(transaction, workspace, name);
-                model.setModelType(transaction, modelType.toString());
+                model.setModelType(transaction, Model.Type.valueOf(modelType.toString()));
                 model.setModelDefinition(transaction, content);
                 model.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
                 resultNode = model;

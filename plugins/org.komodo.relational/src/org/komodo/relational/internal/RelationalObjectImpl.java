@@ -30,6 +30,7 @@ import org.komodo.relational.vdb.internal.ConditionImpl;
 import org.komodo.relational.vdb.internal.DataRoleImpl;
 import org.komodo.relational.vdb.internal.EntryImpl;
 import org.komodo.relational.vdb.internal.MaskImpl;
+import org.komodo.relational.vdb.internal.ModelSourceImpl;
 import org.komodo.relational.vdb.internal.PermissionImpl;
 import org.komodo.relational.vdb.internal.TranslatorImpl;
 import org.komodo.relational.vdb.internal.VdbImpl;
@@ -172,6 +173,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
             _resolvers.put(DataRoleImpl.class, DataRoleImpl.RESOLVER);
             _resolvers.put(EntryImpl.class, EntryImpl.RESOLVER);
             _resolvers.put(MaskImpl.class, MaskImpl.RESOLVER);
+            _resolvers.put(ModelSourceImpl.class, ModelSourceImpl.RESOLVER);
             _resolvers.put(PermissionImpl.class, PermissionImpl.RESOLVER);
             _resolvers.put(TranslatorImpl.class, TranslatorImpl.RESOLVER);
             _resolvers.put(VdbImpl.class, VdbImpl.RESOLVER);
