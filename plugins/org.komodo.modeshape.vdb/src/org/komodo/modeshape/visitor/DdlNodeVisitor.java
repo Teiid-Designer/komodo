@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
@@ -912,47 +911,31 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
             return;
 
         //
-        // DDL Statements Container
-        //
-        if (StandardDdlLexicon.STATEMENTS_CONTAINER.equals(node.getName())) {
-            NodeIterator nodeIterator = node.getNodes();
-
-            for (int i = 0; nodeIterator.hasNext(); ++i) {
-                if (i > 0) {
-                    append(NEW_LINE);
-                }
-
-                Node child = nodeIterator.nextNode();
-                child.accept(this);
-            }
-
-            return;
-        }
-
-        //
         // Teiid DDL Nodes
         //
         NodeType tddlMixinType = findMixinTypeByNamespace(node, TeiidDdlLexicon.Namespace.PREFIX);
-        if (tddlMixinType == null)
-            return;
-
         MixinTypeName typeName = MixinTypeName.findName(tddlMixinType);
         try {
             switch (typeName) {
                 case CREATE_TABLE:
                     table(node);
+                    append(NEW_LINE);
                     break;
                 case CREATE_VIEW:
                     view(node);
+                    append(NEW_LINE);
                     break;
                 case OPTION_NAMESPACE:
                     optionNamespace(node);
+                    append(NEW_LINE);
                     break;
                 case CREATE_PROCEDURE:
                     procedure(node);
+                    append(NEW_LINE);
                     break;
                 case CREATE_FUNCTION:
                     function(node);
+                    append(NEW_LINE);
                     break;
                 case UNKNOWN:
                 default:

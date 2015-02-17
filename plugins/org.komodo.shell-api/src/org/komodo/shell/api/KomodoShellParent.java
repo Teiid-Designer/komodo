@@ -19,36 +19,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.relational.model;
-
-import org.komodo.spi.KException;
-import org.komodo.spi.repository.Exportable;
-import org.komodo.spi.repository.Repository.UnitOfWork;
+package org.komodo.shell.api;
 
 /**
- * A schema fragment
+ *
  */
-public interface Schema extends RelationalObject, Exportable {
+public interface KomodoShellParent {
 
     /**
-     * An empty array of schemas.
+     * Exit the shell
      */
-    Schema[] NO_SCHEMAS = new Schema[0];
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return rendered content of this schema, eg. ddl string
-     * @throws KException if error occurs
-     */
-    String getRendition(UnitOfWork transaction) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @param rendition rendered content of this schema, eg. ddl string
-     * @throws KException if error occurs
-     */
-    void setRendition(UnitOfWork transaction, String rendition) throws KException;
+    public void exit();
 
 }

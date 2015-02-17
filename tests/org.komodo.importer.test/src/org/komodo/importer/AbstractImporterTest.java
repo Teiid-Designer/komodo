@@ -34,53 +34,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.jcr.Node;
-import javax.jcr.PropertyIterator;
 import javax.jcr.Session;
-import javax.jcr.observation.ObservationManager;
-import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
-import org.komodo.test.utils.NodePathListener;
-import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
-import org.modeshape.jcr.api.observation.Event.Sequencing;
+
 
 /**
  * AbstractImporterTest
  */
 @SuppressWarnings( {"nls"} )
-public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest implements Sequencing {
+public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
 
     protected static final String DATA_DIRECTORY = File.separator + "data"; //$NON-NLS-1$
-    private NodePathListener nodePathListener;
 
     protected InputStream setup(String fileName) {
+
         InputStream stream = getClass().getResourceAsStream(DATA_DIRECTORY + File.separator + fileName);
         assertNotNull(stream);
         return stream;
-    }
-
-    /**
-     * @param countdown equivalent to number of sql query expressions to be sequenced
-     * @param pathsToBeSequenced wilcarded patterns against which to compare the sequenced nodes
-     * @return the latch for awaiting the sequencing
-     * @throws Exception
-     */
-    protected CountDownLatch addSequencePathListener(UnitOfWork uow, final String... pathsToBeSequenced) throws Exception {
-        Session session = session(uow);
-        ObservationManager manager = session.getWorkspace().getObservationManager();
-        assertNotNull(manager);
-
-        final CountDownLatch updateLatch = new CountDownLatch(pathsToBeSequenced.length);
-        List<String> seqPaths = Arrays.asList(pathsToBeSequenced);
-        nodePathListener = new NodePathListener(seqPaths, updateLatch);
-        manager.addEventListener(nodePathListener, NODE_SEQUENCED, null, true, null, null, false);
-        return updateLatch;
     }
 
     protected abstract KomodoObject runImporter(Repository repository,
@@ -113,8 +89,6 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest i
         assertNotNull(content);
         assertNotNull(importOptions);
         assertNotNull(importMessages);
-
-//        setLoggingLevel(Level.ALL);
 
         UnitOfWork uow = _repo.createTransaction("test-importer", false, null);
         Session session = session(uow);
@@ -149,87 +123,6 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest i
         traverse(kObject);
 
         return kObject;
-    }
-
-    private void traverse(String tabs, Node node, StringBuffer buffer) throws Exception {
-        buffer.append(tabs + node.getName() + NEW_LINE);
-
-        PropertyIterator propertyIterator = node.getProperties();
-        while (propertyIterator.hasNext()) {
-            javax.jcr.Property property = propertyIterator.nextProperty();
-            buffer.append(tabs + TAB + "@" + property.toString() + NEW_LINE);
-        }
-
-        javax.jcr.NodeIterator children = node.getNodes();
-        while (children.hasNext()) {
-            traverse(tabs + TAB, children.nextNode(), buffer);
-        }
-    }
-
-    protected void traverse(UnitOfWork uow) throws Exception {
-        Session session = session(uow);
-        StringBuffer buffer = new StringBuffer(NEW_LINE);
-        traverse(TAB, session.getRootNode(), buffer);
-        KLog.getLogger().info(buffer.toString());
-    }
-
-    private Session session(UnitOfWork uow) throws Exception {
-        if (!(uow instanceof UnitOfWorkImpl))
-            throw new Exception("Attempt to extract session from unit of work which is not a UnitOfWorkImpl");
-
-        Session session = ((UnitOfWorkImpl)uow).getSession();
-        return session;
-    }
-
-    /**
-     * @param property
-     * @return String representation of property and its values
-     * @throws Exception
-     */
-    private String toString(Property property) throws Exception {
-        StringBuilder sb = new StringBuilder();
-        try {
-            sb.append(property.getName(null)).append('=');
-            if (property.isMultiple(null)) {
-                sb.append('[');
-                Object[] values = property.getValues(null);
-                for (int i = 0; i < values.length; ++i) {
-                    Object value = values[i];
-                    sb.append(value);
-                    if ((i + 1) < values.length)
-                        sb.append(',');
-                }
-                sb.append(']');
-            } else {
-                Object value = property.getValue(null);
-                sb.append(value);
-            }
-        } catch (Exception e) {
-            sb.append(" on deleted node ").append(property.getAbsolutePath());
-        }
-
-        return sb.toString();
-    }
-
-    private void traverse(String tabs, KomodoObject kObject, StringBuffer buffer) throws Exception {
-        buffer.append(tabs + kObject.getName(null) + NEW_LINE);
-
-        String[] propertyNames = kObject.getPropertyNames(null);
-
-        for (String propertyName : propertyNames) {
-            Property property = kObject.getProperty(null, propertyName);
-            buffer.append(tabs + TAB + "@" + toString(property) + NEW_LINE);
-        }
-
-        KomodoObject[] children = kObject.getChildren(null);
-        for (int i = 0; i < children.length; ++i)
-            traverse(tabs + TAB, children[i], buffer);
-    }
-
-    protected void traverse(KomodoObject kObject) throws Exception {
-        StringBuffer buffer = new StringBuffer(NEW_LINE);
-        traverse(TAB, kObject, buffer);
-        KLog.getLogger().info(buffer.toString());
     }
 
     protected String enc(String input) throws Exception {

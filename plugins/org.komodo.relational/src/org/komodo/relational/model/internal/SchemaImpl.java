@@ -21,7 +21,9 @@
  */
 package org.komodo.relational.model.internal;
 
+import javax.jcr.Node;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Schema;
@@ -31,6 +33,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 
 /**
  * A named schema fragment
@@ -105,6 +108,39 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
     public void setRendition( UnitOfWork uow,
                               String rendition ) throws KException {
         setObjectProperty(uow, "setRendition", KomodoLexicon.Schema.RENDITION, rendition); //$NON-NLS-1$
+    }
+
+    @Override
+    public String export(UnitOfWork uow) throws KException {
+        // Is there a situation where this schema fragment is just Teiid SQL?
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("schemaimpl-export", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("schemaimpl-export: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            StringBuffer result = new StringBuffer();
+            Node schemaNode = node(transaction);
+
+            DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion());
+            visitor.visit(schemaNode);
+            result.append(visitor.getDdl());
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result.toString();
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
 }

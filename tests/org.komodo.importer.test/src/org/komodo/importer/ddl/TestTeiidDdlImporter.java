@@ -51,8 +51,6 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 @SuppressWarnings({"nls", "javadoc"})
 public class TestTeiidDdlImporter extends AbstractImporterTest {
 
-    private static final String SEQUENCE_DDL_PATH = ".*\\/ddl:statements";
-
 	private static final String TEIID_MYSQL_ACCTS = "Teiid-MySQLAccounts.ddl";
 
 	private static final String TEIID_FLATFILE = "Teiid-FlatFile.ddl";
@@ -168,16 +166,15 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     }
 
     private void verifyMySQLAcctsDdl(KomodoObject modelNode) throws Exception {
-        KomodoObject ddlStmtsNode = verify(modelNode, StandardDdlLexicon.STATEMENTS_CONTAINER);
 
         // ----------------------------------
         // Test expected tables exist
         // ----------------------------------
-        KomodoObject accountTableNode = verify(ddlStmtsNode, "accounts.ACCOUNT", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
-        KomodoObject customerTableNode = verify(ddlStmtsNode, "accounts.CUSTOMER", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
-        KomodoObject holdingsTableNode = verify(ddlStmtsNode, "accounts.HOLDINGS", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
-        KomodoObject productTableNode = verify(ddlStmtsNode, "accounts.PRODUCT", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
-        KomodoObject subsTableNode = verify(ddlStmtsNode, "accounts.SUBSCRIPTIONS", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject accountTableNode = verify(modelNode, "accounts.ACCOUNT", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject customerTableNode = verify(modelNode, "accounts.CUSTOMER", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject holdingsTableNode = verify(modelNode, "accounts.HOLDINGS", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject productTableNode = verify(modelNode, "accounts.PRODUCT", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+        KomodoObject subsTableNode = verify(modelNode, "accounts.SUBSCRIPTIONS", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
 
         // ----------------------------------------
         // Test expected columns for ACCOUNT table
@@ -268,8 +265,14 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
-    	KomodoObject modelNode = executeImporter(ddlStream, importOptions,
-    	                                                                       importMessages, SEQUENCE_DDL_PATH);
+        KomodoObject modelNode = executeImporter(ddlStream,
+                                                                               importOptions,
+                                                                               importMessages,
+                                                                               ".*\\/accounts.ACCOUNT",
+                                                                               ".*\\/accounts.CUSTOMER",
+                                                                               ".*\\/accounts.HOLDINGS",
+                                                                               ".*\\/accounts.PRODUCT",
+                                                                               ".*\\/accounts.SUBSCRIPTIONS");
 
     	// Test that a Model was created
     	assertNotNull("Failed - No Model Created ", modelNode);
@@ -292,8 +295,14 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject schemaNode = executeImporter(ddlStream, importOptions,
-                                                                                 importMessages, SEQUENCE_DDL_PATH);
+        KomodoObject schemaNode = executeImporter(ddlStream,
+                                                                                 importOptions,
+                                                                                 importMessages,
+                                                                                 ".*\\/accounts.ACCOUNT",
+                                                                                 ".*\\/accounts.CUSTOMER",
+                                                                                 ".*\\/accounts.HOLDINGS",
+                                                                                 ".*\\/accounts.PRODUCT",
+                                                                                 ".*\\/accounts.SUBSCRIPTIONS");
 
         // Test that a schema fragment was created
         assertNotNull("Failed - No Schema Created ", schemaNode);
@@ -307,14 +316,12 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     }
 
     private void verifyFlatFileDdl(KomodoObject schemaNode) throws Exception {
-        KomodoObject ddlStmtsNode = verify(schemaNode, StandardDdlLexicon.STATEMENTS_CONTAINER);
-
         // ----------------------------------
         // Test expected procedures exist
         // ----------------------------------
-        KomodoObject getFilesProcNode = verify(ddlStmtsNode, "getFiles", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
-        verify(ddlStmtsNode, "getTextFiles", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
-        verify(ddlStmtsNode, "saveFile", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
+        KomodoObject getFilesProcNode = verify(schemaNode, "getFiles", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
+        verify(schemaNode, "getTextFiles", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
+        verify(schemaNode, "saveFile", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
 
         // --------------------------------------------
         // Test getFiles procedure has expected param
@@ -357,7 +364,10 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	ImportMessages importMessages = new ImportMessages();
 
         KomodoObject modelNode = executeImporter(ddlStream, importOptions,
-                                                                               importMessages, SEQUENCE_DDL_PATH);
+                                                                               importMessages,
+                                                                               ".*\\/getFiles",
+                                                                               ".*\\/getTextFiles",
+                                                                               ".*\\/saveFile");
 
     	// Test that a Model was created
     	assertNotNull("Failed - No Model Created ", modelNode);
@@ -382,7 +392,10 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         ImportMessages importMessages = new ImportMessages();
 
         KomodoObject schemaNode = executeImporter(ddlStream, importOptions,
-                                                                                  importMessages, SEQUENCE_DDL_PATH);
+                                                                                  importMessages,
+                                                                                  ".*\\/getFiles",
+                                                                                  ".*\\/getTextFiles",
+                                                                                  ".*\\/saveFile");
 
         // Test that a Model was created
         assertNotNull("Failed - No Schema fragment Created ", schemaNode);

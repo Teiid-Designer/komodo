@@ -19,36 +19,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.relational.model;
+package org.komodo.shell.api;
 
-import org.komodo.spi.KException;
-import org.komodo.spi.repository.Exportable;
-import org.komodo.spi.repository.Repository.UnitOfWork;
+import java.io.InputStream;
+import java.io.PrintStream;
+import org.komodo.core.KEngine;
+import org.komodo.spi.constants.StringConstants;
 
 /**
- * A schema fragment
+ *
  */
-public interface Schema extends RelationalObject, Exportable {
+public interface KomodoShell extends StringConstants {
 
     /**
-     * An empty array of schemas.
+     * @return the shell's komodo engine
      */
-    Schema[] NO_SCHEMAS = new Schema[0];
+    KEngine getEngine();
 
     /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return rendered content of this schema, eg. ddl string
-     * @throws KException if error occurs
+     * @return the shell's input stream
      */
-    String getRendition(UnitOfWork transaction) throws KException;
+    InputStream getInputStream();
 
     /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @param rendition rendered content of this schema, eg. ddl string
-     * @throws KException if error occurs
+     * @return the shell's output stream
      */
-    void setRendition(UnitOfWork transaction, String rendition) throws KException;
+    PrintStream getOutputStream();
+
+    /**
+     * Exit the shell
+     */
+    void exit();
+    
 
 }
