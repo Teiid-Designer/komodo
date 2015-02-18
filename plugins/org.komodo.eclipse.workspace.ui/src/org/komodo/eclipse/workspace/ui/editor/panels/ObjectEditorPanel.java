@@ -46,6 +46,7 @@ import org.komodo.eclipse.workspace.ui.common.util.UILabelUtil;
 import org.komodo.eclipse.workspace.ui.common.util.UiLabelConstants;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.AddNameObjectDialog;
+import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.RelationalObjectEditorUtil;
 import org.komodo.eclipse.workspace.ui.explorer.WorkspaceTreeViewer;
 import org.komodo.eclipse.workspace.util.RelationalIdentifier;
 import org.komodo.relational.model.Model;
@@ -75,6 +76,7 @@ public class ObjectEditorPanel extends Composite {
     private StyledTextEditor descriptionTextEditor;
 	IAction refreshTreeAction;
 	IAction deleteObjectAction;
+	Button applyDescriptionButton;
 	
 	private IKObjectChangeListener listener;
 	
@@ -147,19 +149,30 @@ public class ObjectEditorPanel extends Composite {
         GridLayoutFactory.swtDefaults().margins(1,  1).numColumns(4).equalWidth(false).applyTo(buttonPanel);
 
         
-        Button applyButton = new Button(buttonPanel, SWT.PUSH);
-        applyButton.setText("Apply");
-        applyButton.addSelectionListener(new SelectionListener() {
+        applyDescriptionButton = new Button(buttonPanel, SWT.PUSH);
+        applyDescriptionButton.setText("Apply");
+        applyDescriptionButton.addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				boolean changed = ObjectEditorUtils.setDescription(getTargetObject(), descriptionTextEditor.getText());
+				boolean changed = false;
+				try {
+					changed = RelationalObjectEditorUtil.setDescription(null, getTargetObject(), descriptionTextEditor.getText());
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				if( changed ) {
+					applyDescriptionButton.setEnabled(false);
+            		applyDescriptionButton.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
+				}
+				
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+        applyDescriptionButton.setEnabled(false);
         
         GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).margins(5, 5).applyTo(thePanel);
         GridDataFactory.fillDefaults().grab(true, true).applyTo(thePanel);
@@ -172,17 +185,10 @@ public class ObjectEditorPanel extends Composite {
 
             @Override
             public void modifyText(ModifyEvent e) {
-            	try {
-					KomodoObject ko = getTargetObject();
-					if( ko instanceof Vdb ) {
-						((Vdb)ko).setDescription(null,  descriptionTextEditor.getText());
-					} else {
-						getTargetObject().setProperty(null, "vdb:description", descriptionTextEditor.getText() );
-					}
-				} catch (KException e1) {
-					e1.printStackTrace();
-				}
-
+            	if( ! descriptionTextEditor.getText().isEmpty() ) {
+            		applyDescriptionButton.setEnabled(true);
+            		applyDescriptionButton.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_RED));
+            	}
             }
         });
 
@@ -235,10 +241,10 @@ public class ObjectEditorPanel extends Composite {
         GridLayoutFactory.fillDefaults().numColumns(1).margins(5, 5).applyTo(thePanel);
         GridDataFactory.fillDefaults().grab(true, true).applyTo(thePanel);
     	this.wsTreeViewer = new WorkspaceTreeViewer(thePanel, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        Object item1 = wsTreeViewer.getTree().getItem(0);
-        if( item1 != null ) {
-      	  
-        }
+//        Object item1 = wsTreeViewer.getTree().getItem(0);
+//        if( item1 != null ) {
+//      	  
+//        }
     	this.wsTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         final MenuManager actionMenu = new MenuManager();
@@ -293,6 +299,17 @@ public class ObjectEditorPanel extends Composite {
 							 }
 						};
 						actionMenu.add(newPAction);
+						final NewObjectAction vAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.VIEW, node);
+						IAction newVAction = new Action(vAction.getText(), vAction.getImageDescriptor()) {
+							 @Override
+						     public void run() {
+								 boolean completed = vAction.execute();
+								 if( completed ) {
+									 wsTreeViewer.refresh();
+								 }
+							 }
+						};
+						actionMenu.add(newVAction);
 					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.VDB )) {
 						final NewObjectAction mAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.MODEL, node);
 						IAction newMAction = new Action(mAction.getText(), mAction.getImageDescriptor()) {

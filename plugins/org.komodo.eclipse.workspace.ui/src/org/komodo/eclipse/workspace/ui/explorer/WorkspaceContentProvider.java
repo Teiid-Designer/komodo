@@ -11,9 +11,10 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.KLog;
 
 public class WorkspaceContentProvider implements ITreeContentProvider {
-
+	
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
@@ -44,13 +45,8 @@ public class WorkspaceContentProvider implements ITreeContentProvider {
 			Repository repo = CorePlugin.getKEngine().getDefaultRepository();
 			
 			try {
-				KomodoObject wsNode = repo.komodoWorkspace(null);
-				Vdb[] vdbs = CorePlugin.getWorkspaceManager().findVdbs(null);
-				System.out.println("  WSCP getElements()");
-				for( Vdb vdb:vdbs) {
-					System.out.println("   >>>  VDB class = " + vdb.getClass());
-				}
-				return vdbs;
+//				KomodoObject wsNode = repo.komodoWorkspace(null);
+				return CorePlugin.getWorkspaceManager().findVdbs(null);
 	//			return wsNode.getChildren(null);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -62,17 +58,20 @@ public class WorkspaceContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
+		boolean debug = false;
 		
 		if( parentElement instanceof KomodoObject ) {
 			KomodoObject ko = (KomodoObject)parentElement;
-			try {
-				String parentClass = parentElement.getClass().toString();
-				if( parentClass.equalsIgnoreCase("org.komodo.repository.ObjectImpl")) {
-					System.out.println("  WSCP getChildren() parent name = [" + ko.getName(null) + "] = " + parentElement.getClass());
+			if( debug ) {
+				try {
+					String parentClass = parentElement.getClass().toString();
+					if( parentClass.equalsIgnoreCase("org.komodo.repository.ObjectImpl")) {
+						KLog.getLogger().debug("  WSCP getChildren() parent name = [" + ko.getName(null) + "] = " + parentElement.getClass(), new Object[0]);
+					}
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
 			KomodoObject[] children = new KomodoObject[0];
 
@@ -81,15 +80,17 @@ public class WorkspaceContentProvider implements ITreeContentProvider {
 			} catch (KException e) {
 				e.printStackTrace();
 			}
-			
-			try {
-				for( KomodoObject obj:children) {
-					System.out.println("   >>>  Child name = [" + obj.getName(null) + "] class = " + obj.getClass());
+			if( debug ) {
+				try {
+					for( KomodoObject obj:children) {
+						KLog.getLogger().debug("   >>>  Child name = [" + obj.getName(null) + "] class = " + obj.getClass(), new Object[0]);
+					}
+				} catch (KException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (KException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+			
 			return children;
 		}
 		return null;

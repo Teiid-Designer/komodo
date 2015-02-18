@@ -95,7 +95,11 @@ public class ViewEditorPanel extends ObjectEditorPanel implements ViewerElementC
 		setSynching(true);
 		
 		refreshColumnsViewer();
-		// TODO: this.supportsUpdateCB.setSelection(getTable().getUpdatable());
+		try {
+			this.supportsUpdateCB.setSelection(getView().isUpdatable(null));
+		} catch (KException e1) {
+			e1.printStackTrace();
+		}
 		// TODO: this.materializedCB.setSelection(getTable().getMaterialized());
 		
 		try {

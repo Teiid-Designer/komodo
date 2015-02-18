@@ -190,7 +190,6 @@ public class TableEditorPanel extends ObjectEditorPanel implements ViewerElement
                             getShell(), 
                             "Problem setting supports update for table",  e1.getMessage());
 				}
-//                handleInfoChanged();
             }
         });
 
@@ -501,8 +500,16 @@ public class TableEditorPanel extends ObjectEditorPanel implements ViewerElement
 		setSynching(true);
 		
 		refreshColumnsViewer();
-		// TODO: this.supportsUpdateCB.setSelection(getTable().getUpdatable());
-		// TODO: this.materializedCB.setSelection(getTable().getMaterialized());
+		try {
+			this.supportsUpdateCB.setSelection(getTable().isUpdatable(null));
+		} catch (KException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			this.materializedCB.setSelection(getTable().isMaterialized(null));
+		} catch (KException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			String nis = getTable().getNameInSource(null);
 			if( nis == null ) nis = StringUtils.EMPTY_STRING;

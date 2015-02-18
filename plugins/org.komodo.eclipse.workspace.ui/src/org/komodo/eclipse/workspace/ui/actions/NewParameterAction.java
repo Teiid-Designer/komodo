@@ -13,6 +13,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 public class NewParameterAction extends NewObjectAction {
@@ -29,7 +30,7 @@ public class NewParameterAction extends NewObjectAction {
 				parent instanceof Procedure || 
 				parent instanceof Function, "parameter can only be added to a procedure or function");
 		
-		AddNameObjectDialog dialog = new AddNameObjectDialog(getShell(), "Add Parameter", "newParameter");
+		AddNameObjectDialog dialog = new AddNameObjectDialog(getShell(), "Add Parameter", StringUtils.EMPTY_STRING);
 		dialog.open();
 		boolean completed = false;
 		if( dialog.getReturnCode() == IDialogConstants.OK_ID ) {

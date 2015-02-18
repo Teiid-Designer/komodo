@@ -10,6 +10,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 
 public class NewColumnAction extends NewObjectAction {
 
@@ -26,7 +27,7 @@ public class NewColumnAction extends NewObjectAction {
 //				parent instanceof View ||
 //				parent instanceof ProcedureResultSet, "column can only be added to a table, view or result set");
 		
-		AddNameObjectDialog dialog = new AddNameObjectDialog(getShell(), "Add Column", "newColumn");
+		AddNameObjectDialog dialog = new AddNameObjectDialog(getShell(), "Add Column", StringUtils.EMPTY_STRING);
 		dialog.open();
 		boolean completed = false;
 		if( dialog.getReturnCode() == IDialogConstants.OK_ID ) {

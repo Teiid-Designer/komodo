@@ -172,5 +172,33 @@ public class RelationalIdentifier implements CoreConstants.RelationalType, CoreC
 		}
 		return null;
 	}
+	
+	public static boolean isVirtual(KomodoObject ko) {
+		switch(RelationalIdentifier.getType(ko)) {
+			case MODEL: {
+				try {
+					Property type = (ko).getProperty(null, CoreLexicon.JcrId.MODEL_TYPE);
+					if( type != null && type.getStringValue(null).equalsIgnoreCase(ModelType.VIRTUAL)) {
+						return true;
+					}
+				} catch (KException e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+			case TABLE:
+			case PROCEDURE:
+				try {
+					return isVirtual(ko.getParent(null));
+				} catch (KException e) {
+					e.printStackTrace();
+				}
+				return false;
+				
+			case VIEW: return true;
+
+		}
+		return false;
+	}
 
 }

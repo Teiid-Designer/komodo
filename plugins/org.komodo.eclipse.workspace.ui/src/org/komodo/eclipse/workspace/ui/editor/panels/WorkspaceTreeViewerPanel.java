@@ -26,6 +26,7 @@ import org.komodo.eclipse.workspace.ui.actions.NewColumnAction;
 import org.komodo.eclipse.workspace.ui.actions.NewObjectAction;
 import org.komodo.eclipse.workspace.ui.actions.NewObjectActionFactory;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.AddNameObjectDialog;
+import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ShowStringDialog;
 import org.komodo.eclipse.workspace.ui.explorer.WorkspaceTreeViewer;
 import org.komodo.eclipse.workspace.util.RelationalIdentifier;
 import org.komodo.relational.model.Model;
@@ -102,17 +103,19 @@ public class WorkspaceTreeViewerPanel extends Composite {
 							};
 							actionMenu.add(newParmeter);
 					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.MODEL )) {
-						final NewObjectAction tAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.TABLE, node);
-						IAction newTable = new Action(tAction.getText(), tAction.getImageDescriptor()) {
-							 @Override
-						     public void run() {
-								 boolean completed = tAction.execute();
-								 if( completed ) {
-									 wsTreeViewer.refresh();
+						if( !RelationalIdentifier.isVirtual(node)) {
+							final NewObjectAction tAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.TABLE, node);
+							IAction newTable = new Action(tAction.getText(), tAction.getImageDescriptor()) {
+								 @Override
+							     public void run() {
+									 boolean completed = tAction.execute();
+									 if( completed ) {
+										 wsTreeViewer.refresh();
+									 }
 								 }
-							 }
-						};
-						actionMenu.add(newTable);
+							};
+							actionMenu.add(newTable);
+						}
 						final NewObjectAction pAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.PROCEDURE, node);
 						IAction newPAction = new Action(pAction.getText(), pAction.getImageDescriptor()) {
 							 @Override
@@ -124,6 +127,17 @@ public class WorkspaceTreeViewerPanel extends Composite {
 							 }
 						};
 						actionMenu.add(newPAction);
+						final NewObjectAction vAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.VIEW, node);
+						IAction newVAction = new Action(vAction.getText(), vAction.getImageDescriptor()) {
+							 @Override
+						     public void run() {
+								 boolean completed = vAction.execute();
+								 if( completed ) {
+									 wsTreeViewer.refresh();
+								 }
+							 }
+						};
+						actionMenu.add(newVAction);
 					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.VDB )) {
 						final NewObjectAction mAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.MODEL, node);
 						IAction newMAction = new Action(mAction.getText(), mAction.getImageDescriptor()) {
@@ -139,7 +153,17 @@ public class WorkspaceTreeViewerPanel extends Composite {
 						IAction showVdbContents = new Action("Show VDB Contents") {
 							 @Override
 						     public void run() {
-								 MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Show VDB Contents", "Not Yet Implemented....");
+								 try {
+									String ddlXmlString = ((Vdb)node).export(null);
+									if( ddlXmlString == null || ddlXmlString.isEmpty() ) {
+										ddlXmlString = "< No VDB contents >";
+									}
+									ShowStringDialog dialog = new ShowStringDialog(getShell(), "Dynamic VDB Contents", ddlXmlString);
+									dialog.open();
+								} catch (KException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 							 }
 						};
 						actionMenu.add(showVdbContents);
@@ -212,7 +236,7 @@ public class WorkspaceTreeViewerPanel extends Composite {
 		
         //this.wsTreeViewer.setInput(getRootNode());
         
-        System.out.println(" Finished creating WS Tree Viewer");
+        //System.out.println(" Finished creating WS Tree Viewer");
     }
 	
 	private KomodoObject getRootNode() {

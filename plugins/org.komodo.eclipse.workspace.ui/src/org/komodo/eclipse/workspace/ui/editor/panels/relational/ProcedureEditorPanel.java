@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.komodo.eclipse.workspace.CoreConstants;
+import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.Messages;
 import org.komodo.eclipse.workspace.ui.common.table.TableViewerBuilder;
 import org.komodo.eclipse.workspace.ui.common.util.CoreStringUtil;
@@ -604,7 +605,7 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
 	
 	
 	private void refreshParametersViewer() {
-		if( isVisible() && columnsViewer != null ) {
+		if( isVisible() && parametersViewer != null ) {
 //			columnsViewer.getTable().clearAll();
 	        KomodoObject targetKO = getTargetObject();
 	        
@@ -690,7 +691,7 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
 		@Override
 		public Image getImage(Object element) {
 			if( this.columnNumber == 0 ) {
-				return null; // UiPlugin.getDefault().getImage(UiConstants.Images.COLUMN_ICON);
+				return CorePlugin.getDefault().getImage(CoreConstants.Images.PARAMETER_ICON);
 			}
 			return null;
 		}

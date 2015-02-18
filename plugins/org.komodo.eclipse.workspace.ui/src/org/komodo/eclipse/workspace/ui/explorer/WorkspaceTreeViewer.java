@@ -23,10 +23,14 @@ public class WorkspaceTreeViewer  extends TreeViewer {
       setContentProvider(new WorkspaceContentProvider());
       setLabelProvider( new WorkspaceLabelProvider());
       super.setInput(Collections.EMPTY_LIST);
-      Object item1 = getTree().getItem(0);
-      if( item1 != null ) {
-    	  
-      }
+
+//      if( getTree().getItemCount() > 0 ) {
+//    	  Object item1 = getTree().getItem(0);
+//    	  if( item1 != null ) {
+//    	  }
+//    	  }
+//          
+//      }
   }
 
 }

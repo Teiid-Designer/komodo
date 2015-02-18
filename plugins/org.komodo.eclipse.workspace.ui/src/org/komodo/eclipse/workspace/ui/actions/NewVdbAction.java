@@ -9,6 +9,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.StringUtils;
 
 public class NewVdbAction extends NewObjectAction {
 
@@ -20,7 +21,7 @@ public class NewVdbAction extends NewObjectAction {
 
 	@Override
 	boolean runInTransaction(KomodoObject parent) {
-		AddNameObjectDialog dialog = new AddNameObjectDialog(getShell(), "Add VDB", "newVDB");
+		AddNameObjectDialog dialog = new AddNameObjectDialog(getShell(), "Add VDB", StringUtils.EMPTY_STRING);
 		dialog.open();
 		boolean completed = false;
 		if( dialog.getReturnCode() == IDialogConstants.OK_ID ) {

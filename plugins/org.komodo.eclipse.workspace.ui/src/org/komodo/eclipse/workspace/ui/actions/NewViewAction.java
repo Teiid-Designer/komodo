@@ -11,6 +11,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 
 public class NewViewAction extends NewObjectAction {
 
@@ -24,7 +25,7 @@ public class NewViewAction extends NewObjectAction {
 	boolean runInTransaction(KomodoObject parent) {
 		ArgCheck.isInstanceOf(Model.class, parent);
 		
-		AddNameObjectDialog dialog = new AddNameObjectDialog(getShell(), "Add View", "newView");
+		AddNameObjectDialog dialog = new AddNameObjectDialog(getShell(), "Add View", StringUtils.EMPTY_STRING);
 		dialog.open();
 		boolean completed = false;
 		if( dialog.getReturnCode() == IDialogConstants.OK_ID ) {
@@ -38,8 +39,7 @@ public class NewViewAction extends NewObjectAction {
 				MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error Adding View", ex.getMessage());
 			}
 		}
-		MessageDialog.openWarning(getShell(), "New View Action", "Not Yet Implemented");
-		return false;
+		return completed;
 	}
 
 }

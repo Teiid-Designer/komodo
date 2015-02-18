@@ -32,7 +32,7 @@ public class VdbEditorPanel extends ObjectEditorPanel {
 //	Text nameText;
 	
 	private TabItem generalPropertiesTab;
-    private StyledTextEditor descriptionTextEditor;
+//    private StyledTextEditor descriptionTextEditor;
     private Label validationDateTimeLabel;
     private Label validationVersionLabel;
 	
@@ -123,17 +123,17 @@ public class VdbEditorPanel extends ObjectEditorPanel {
         	GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(validationVersionLabel);
         }
 
-        final Group descGroup = WidgetFactory.createGroup(thePanel, UILabelUtil.getLabel(UiLabelConstants.LABEL_IDS.DESCRIPTION), GridData.FILL_BOTH, 2);
-        descriptionTextEditor = new StyledTextEditor(descGroup, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP | SWT.BORDER);
-        GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 120).minSize(SWT.DEFAULT, 30).applyTo(descriptionTextEditor.getTextWidget());
-        descriptionTextEditor.setText(""); //$NON-NLS-1$
-        descriptionTextEditor.getTextWidget().addModifyListener(new ModifyListener() {
-
-            @Override
-            public void modifyText(ModifyEvent e) {
-//                getRelationalReference().setDescription(descriptionTextEditor.getText());
-            }
-        });
+//        final Group descGroup = WidgetFactory.createGroup(thePanel, UILabelUtil.getLabel(UiLabelConstants.LABEL_IDS.DESCRIPTION), GridData.FILL_BOTH, 2);
+//        descriptionTextEditor = new StyledTextEditor(descGroup, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP | SWT.BORDER);
+//        GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 120).minSize(SWT.DEFAULT, 30).applyTo(descriptionTextEditor.getTextWidget());
+//        descriptionTextEditor.setText(""); //$NON-NLS-1$
+//        descriptionTextEditor.getTextWidget().addModifyListener(new ModifyListener() {
+//
+//            @Override
+//            public void modifyText(ModifyEvent e) {
+////                getRelationalReference().setDescription(descriptionTextEditor.getText());
+//            }
+//        });
 
         return thePanel;
 	}

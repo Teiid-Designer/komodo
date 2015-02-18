@@ -44,6 +44,7 @@ import org.komodo.eclipse.workspace.ui.editor.panels.relational.TableEditorPanel
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.ViewEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.VirtualProcedureEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.AddNameObjectDialog;
+import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ShowStringDialog;
 import org.komodo.eclipse.workspace.ui.editor.panels.vdb.DataPolicyEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.vdb.DataSourceEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.vdb.FileEntryEditorPanel;
@@ -196,17 +197,19 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
     							};
     							actionMenu.add(newParmeter);
     					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.MODEL )) {
-    						final NewObjectAction tAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.TABLE, node);
-    						IAction newTable = new Action(tAction.getText(), tAction.getImageDescriptor()) {
-    							 @Override
-    						     public void run() {
-    								 boolean completed = tAction.execute();
-    								 if( completed ) {
-    									 wsTreeViewer.refresh();
-    								 }
-    							 }
-    						};
-    						actionMenu.add(newTable);
+    						if( !RelationalIdentifier.isVirtual(node)) {
+	    						final NewObjectAction tAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.TABLE, node);
+	    						IAction newTable = new Action(tAction.getText(), tAction.getImageDescriptor()) {
+	    							 @Override
+	    						     public void run() {
+	    								 boolean completed = tAction.execute();
+	    								 if( completed ) {
+	    									 wsTreeViewer.refresh();
+	    								 }
+	    							 }
+	    						};
+	    						actionMenu.add(newTable);
+    						}
     						final NewObjectAction pAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.PROCEDURE, node);
     						IAction newPAction = new Action(pAction.getText(), pAction.getImageDescriptor()) {
     							 @Override
@@ -231,12 +234,22 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
     						};
     						actionMenu.add(newMAction);
     						IAction showVdbContents = new Action("Show VDB Contents") {
-    							 @Override
-    						     public void run() {
-    								 MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Show VDB Contents", "Not Yet Implemented....");
-    							 }
-    						};
-    						actionMenu.add(showVdbContents);
+   							 @Override
+   						     public void run() {
+   								 try {
+   									String ddlXmlString = ((Vdb)node).export(null);
+   									if( ddlXmlString == null || ddlXmlString.isEmpty() ) {
+   										ddlXmlString = "< No VDB contents >";
+   									}
+   									ShowStringDialog dialog = new ShowStringDialog(getShell(), "Dynamic VDB Contents", ddlXmlString);
+   									dialog.open();
+   								} catch (KException e) {
+   									// TODO Auto-generated catch block
+   									e.printStackTrace();
+   								}
+   							 }
+   						};
+   						actionMenu.add(showVdbContents);
     					}
     					
     					actionMenu.add(new Separator());
@@ -341,7 +354,7 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 
     private void createEditorPanels( Composite parent ) {
 	    	editorPanels = new ArrayList<ObjectEditorPanel>();
-	    	ObjectEditorPanel panel = new VdbEditorPanel(parent, SWT.NONE, RelationalIdentifier.VDB, this);
+//	    	ObjectEditorPanel panel = new VdbEditorPanel(parent, SWT.NONE, RelationalIdentifier.VDB, this);
 	    	editorPanels.add(new VdbEditorPanel(parent, SWT.NONE, RelationalIdentifier.VDB, this));
 	    	editorPanels.add(new ModelEditorPanel(parent, SWT.NONE, RelationalIdentifier.MODEL, this));
 	    	editorPanels.add(new TableEditorPanel(parent, SWT.NONE, RelationalIdentifier.TABLE, this));

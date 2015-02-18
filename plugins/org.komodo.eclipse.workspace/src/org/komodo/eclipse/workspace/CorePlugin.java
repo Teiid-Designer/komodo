@@ -2,6 +2,7 @@ package org.komodo.eclipse.workspace;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.ResultSetMetaData;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -18,8 +19,10 @@ import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
+import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.Parameter.Direction;
+import org.komodo.relational.model.View;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Translator;
@@ -35,6 +38,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryObserver;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon.ModelType;
 import org.osgi.framework.BundleContext;
 
@@ -261,7 +265,8 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 			Vdb vdb = wsManager.createVdb(transaction, null, "ProductsVDB", "extPath");
 			vdb.setDescription(transaction, "Description for ProductsVDB");
 			DataRole role = vdb.addDataRole(transaction, "Full Access Data Role");
-			Permission perm = role.addPermission(transaction, "Read-Only");
+			role.setProperty(transaction, VdbLexicon.DataRole.MAPPED_ROLE_NAMES, (Object[])new String[]{"ROLE1", "ROLE2"});
+			Permission perm = role.addPermission(transaction, "ProductModel.productData");
 			Translator trans = vdb.addTranslator(transaction, "my oracle override", "oracle");
 			Model model = wsManager.createModel(transaction, vdb, "ProductModel");
 			model.setProperty(transaction, "vdb:description", "Description for ProductModel....");
@@ -276,6 +281,15 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 			Column col = table.addColumn(transaction, "weight");
 			col.setDatatypeName(transaction, "integer");
 			
+//			Procedure proc = model.addProcedure(transaction, "getProductData");
+//			Parameter param = proc.addParameter(transaction, "PRODUCT_ID");
+//			param.setDirection(transaction, Direction.IN);
+//			
+//			param = proc.addParameter(transaction, "CATEGORY");
+//			param.setDirection(transaction, Direction.IN);
+//			ProcedureResultSet rs = proc.getResultSet(transaction);
+//			rs.addColumn(transaction, "c1");
+			
 			vdb = wsManager.createVdb(transaction, null, "BooksVdb", "extPath");
 			model = wsManager.createModel(transaction, vdb, "BooksSource");
 			table = model.addTable(transaction, "books");
@@ -286,28 +300,25 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 			table.addColumn(transaction, "publisherID");
 			table.addColumn(transaction, "name");
 			table.addColumn(transaction, "address");
-			Procedure proc = model.addProcedure(transaction, "getProductData");
-			Parameter param = proc.addParameter(transaction, "PRODUCT_ID");
-			param.setDirection(transaction, Direction.IN);
+
 			
-			param = proc.addParameter(transaction, "CATEGORY");
-			param.setDirection(transaction, Direction.IN);
 //			param = proc.addParameter(transaction, "PRODUCT_DATA");
 //			param.setDirection(transaction, Direction.RETURN);
 			
 			model = wsManager.createModel(transaction, vdb, "BooksViews");
-			model.setModelType(transaction, ModelType.VIRTUAL);
-			table = model.addView(transaction, "booksViewInfo");
-			table.addColumn(transaction, "column_1");
-			table.addColumn(transaction, "column_2");
-			table.addColumn(transaction, "column_3");
-			table = model.addView(transaction, "booksSummaryData");
-			table.addColumn(transaction, "column_a");
-			table.addColumn(transaction, "column_b");
-			proc = model.addProcedure(transaction, "getBooksInfo");
-			proc.addParameter(transaction, "isbn");
-			proc.addParameter(transaction, "authorID");
-			proc.addParameter(transaction, "publisherID");
+			model.setModelType(transaction, Model.Type.VIRTUAL);
+			View view = model.addView(transaction, "booksViewInfo");
+			view.addColumn(transaction, "column_1");
+			view.addColumn(transaction, "column_2");
+			view.addColumn(transaction, "column_3");
+			view.setQueryExpression(transaction, "SELECT * FROM books WHERE title = 'Gone With The Wind'");
+			view = model.addView(transaction, "booksSummaryData");
+			view.addColumn(transaction, "column_a");
+			view.addColumn(transaction, "column_b");
+//			Procedure proc = model.addProcedure(transaction, "getBooksInfo");
+//			proc.addParameter(transaction, "isbn");
+//			proc.addParameter(transaction, "authorID");
+//			proc.addParameter(transaction, "publisherID");
 			
 			transaction.commit();
 		} catch (Exception e) {
