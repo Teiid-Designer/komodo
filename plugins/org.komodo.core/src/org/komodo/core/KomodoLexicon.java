@@ -9,11 +9,24 @@ package org.komodo.core;
 
 import org.komodo.spi.constants.StringConstants;
 import org.modeshape.jcr.JcrNtLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 /**
  * Constants for the JCR names of node types and properties related to the Komodo engine.
  */
 public interface KomodoLexicon extends StringConstants {
+
+    /**
+     * JCR names that relate to the Teiid DDL namespace.
+     */
+    public interface TeiidDdl extends TeiidDdlLexicon.CreateProcedure {
+
+        /**
+         * The node type name for a result set.
+         */
+        String RESULT_SET_NODE_TYPE = TeiidDdlLexicon.Namespace.PREFIX + ":resultSet"; //$NON-NLS-1$
+
+    }
 
     /**
      * The JCR names associated with a data source node type.

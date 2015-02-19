@@ -133,6 +133,11 @@ public class Messages implements StringConstants {
         REFERENCED_TABLE_NOT_FOUND,
 
         /**
+         * An error message indicating a procedure result set could not be removed.
+         */
+        RESULT_SET_NOT_FOUND_TO_REMOVE,
+
+        /**
          * An error message indicating a statement option could not be removed.
          */
         STATEMENT_OPTION_NOT_FOUND_TO_REMOVE,

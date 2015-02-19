@@ -92,4 +92,14 @@ public final class AccessPatternImpl extends TableConstraintImpl implements Acce
         return CONSTRAINT_TYPE;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
 }

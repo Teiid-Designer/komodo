@@ -43,9 +43,21 @@ public final class ProcedureResultSetImpl extends TableImpl implements Procedure
                                    final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, CreateProcedure.RESULT_DATA_TYPE);
-                return true;
-            } catch (final Exception e) {
+                if (CreateProcedure.RESULT_SET.equals(kobject.getName(transaction))) {
+                    // must be one of two types
+                    try {
+                        ObjectImpl.validateType(transaction, repository, kobject, CreateProcedure.RESULT_DATA_TYPE);
+                        return true;
+                    } catch (final Exception e) {
+                        try {
+                            ObjectImpl.validateType(transaction, repository, kobject, CreateProcedure.RESULT_COLUMNS);
+                            return true;
+                        } catch (final Exception e1) {
+                            // not resolvable
+                        }
+                    }
+                }
+            } catch (final KException e) {
                 // not resolvable
             }
 

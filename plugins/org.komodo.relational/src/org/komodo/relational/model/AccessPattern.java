@@ -13,6 +13,8 @@ package org.komodo.relational.model;
  */
 public interface AccessPattern extends TableConstraint {
 
+    int TYPE_ID = AccessPattern.class.hashCode();
+
     /**
      * The constraint type for an access pattern. Value is {@value} .
      */
