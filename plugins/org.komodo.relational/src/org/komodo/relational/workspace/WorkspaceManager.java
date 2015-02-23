@@ -616,71 +616,101 @@ public class WorkspaceManager {
         return result;
     }
 
-    public < T extends KomodoObject > T resolve( final UnitOfWork transaction,
+    /**
+     * @param <T>
+     *        the desired outcome class
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param kobject
+     *        the object being resolved (cannot be <code>null</code>_
+     * @param resolvedClass
+     *        the class the object should be resolved to (cannot be <code>null</code>)
+     * @return the strong typed object of the desired type
+     * @throws KException
+     *         if a resolver could not be found, if the object was not resolvable, or if an error occurred
+     */
+    public < T extends KomodoObject > T resolve( final UnitOfWork uow,
                                                  final KomodoObject kobject,
-                                                 final Class< T > adaptedClass ) throws KException {
+                                                 final Class< T > resolvedClass ) throws KException {
+        ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
+        ArgCheck.isNotNull(resolvedClass, "resolvedClass"); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction("workspacemanager-resolve", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
         TypeResolver resolver = null;
 
         // model
-        if (AccessPattern.class.equals(adaptedClass)) {
+        if (AccessPattern.class.equals(resolvedClass)) {
             resolver = AccessPatternImpl.RESOLVER;
-        } else if (ForeignKey.class.equals(adaptedClass)) {
+        } else if (ForeignKey.class.equals(resolvedClass)) {
             resolver = ForeignKeyImpl.RESOLVER;
-        } else if (Function.class.equals(adaptedClass)) {
+        } else if (Function.class.equals(resolvedClass)) {
             resolver = FunctionImpl.RESOLVER;
-        } else if (Index.class.equals(adaptedClass)) {
+        } else if (Index.class.equals(resolvedClass)) {
             resolver = IndexImpl.RESOLVER;
-        } else if (Model.class.equals(adaptedClass)) {
+        } else if (Model.class.equals(resolvedClass)) {
             resolver = ModelImpl.RESOLVER;
-        } else if (Parameter.class.equals(adaptedClass)) {
+        } else if (Parameter.class.equals(resolvedClass)) {
             resolver = ParameterImpl.RESOLVER;
-        } else if (PrimaryKey.class.equals(adaptedClass)) {
+        } else if (PrimaryKey.class.equals(resolvedClass)) {
             resolver = PrimaryKeyImpl.RESOLVER;
-        } else if (Procedure.class.equals(adaptedClass)) {
+        } else if (Procedure.class.equals(resolvedClass)) {
             resolver = ProcedureImpl.RESOLVER;
-        } else if (ProcedureResultSet.class.equals(adaptedClass)) {
+        } else if (ProcedureResultSet.class.equals(resolvedClass)) {
             resolver = ProcedureResultSetImpl.RESOLVER;
-        } else if (Schema.class.equals(adaptedClass)) {
+        } else if (Schema.class.equals(resolvedClass)) {
             resolver = SchemaImpl.RESOLVER;
-        } else if (Table.class.equals(adaptedClass)) {
+        } else if (Table.class.equals(resolvedClass)) {
             resolver = TableImpl.RESOLVER;
-        } else if (UniqueConstraint.class.equals(adaptedClass)) {
+        } else if (UniqueConstraint.class.equals(resolvedClass)) {
             resolver = UniqueConstraintImpl.RESOLVER;
-        } else if (View.class.equals(adaptedClass)) {
+        } else if (View.class.equals(resolvedClass)) {
             resolver = ViewImpl.RESOLVER;
-        } else if (Teiid.class.equals(adaptedClass)) {
+        } else if (Teiid.class.equals(resolvedClass)) {
             resolver = TeiidImpl.RESOLVER;
-        } else if (Condition.class.equals(adaptedClass)) {
+        } else if (Condition.class.equals(resolvedClass)) {
             resolver = ConditionImpl.RESOLVER;
-        } else if (DataRole.class.equals(adaptedClass)) {
+        } else if (DataRole.class.equals(resolvedClass)) {
             resolver = DataRoleImpl.RESOLVER;
-        } else if (Entry.class.equals(adaptedClass)) {
+        } else if (Entry.class.equals(resolvedClass)) {
             resolver = EntryImpl.RESOLVER;
-        } else if (Mask.class.equals(adaptedClass)) {
+        } else if (Mask.class.equals(resolvedClass)) {
             resolver = MaskImpl.RESOLVER;
-        } else if (ModelSource.class.equals(adaptedClass)) {
+        } else if (ModelSource.class.equals(resolvedClass)) {
             resolver = ModelSourceImpl.RESOLVER;
-        } else if (Permission.class.equals(adaptedClass)) {
+        } else if (Permission.class.equals(resolvedClass)) {
             resolver = PermissionImpl.RESOLVER;
-        } else if (Translator.class.equals(adaptedClass)) {
+        } else if (Translator.class.equals(resolvedClass)) {
             resolver = TranslatorImpl.RESOLVER;
-        } else if (Vdb.class.equals(adaptedClass)) {
+        } else if (Vdb.class.equals(resolvedClass)) {
             resolver = VdbImpl.RESOLVER;
-        } else if (VdbImport.class.equals(adaptedClass)) {
+        } else if (VdbImport.class.equals(resolvedClass)) {
             resolver = VdbImportImpl.RESOLVER;
         }
 
         if (resolver == null) {
-            // TODO fix this exception
-            throw new KException(Messages.getString(Relational.OBJECT_BEING_DELETED_HAS_NULL_PARENT, kobject.getAbsolutePath()));
+            throw new KException(Messages.getString(Relational.TYPE_RESOLVER_NOT_FOUND, kobject.getClass().getName()));
         }
 
         if (!resolver.resolvable(transaction, this.repository, kobject)) {
-            // TODO fix this exception
-            throw new KException(Messages.getString(Relational.OBJECT_BEING_DELETED_HAS_NULL_PARENT, kobject.getAbsolutePath()));
+            throw new KException(Messages.getString(Relational.OBJECT_NOT_RESOLVABLE,
+                                                    kobject.getAbsolutePath(),
+                                                    resolver.getClass().getName()));
         }
 
-        return (T)resolver.resolve(transaction, this.repository, kobject);
+        final T result = (T)resolver.resolve(transaction, this.repository, kobject);
+
+        if (uow == null) {
+            transaction.commit();
+        }
+
+        return result;
     }
 
     private void validateWorkspaceMember( final UnitOfWork uow,

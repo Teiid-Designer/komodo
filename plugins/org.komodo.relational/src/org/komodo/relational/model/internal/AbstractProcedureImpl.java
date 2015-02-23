@@ -131,23 +131,32 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        return getParameters(uow);
-    }
+        UnitOfWork transaction = uow;
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
-                                             final String type ) throws KException {
-        if (CreateProcedure.PARAMETER.equals(type)) {
-            return getParameters(uow);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("abstractprocedureimpl-getChildren", true, null); //$NON-NLS-1$
         }
 
-        return KomodoObject.EMPTY_ARRAY;
+        assert (transaction != null);
+
+        try {
+            final KomodoObject[] params = getParameters(transaction);
+            final ProcedureResultSet resultSet = getResultSet(transaction, false);
+            final KomodoObject[] result = new KomodoObject[params.length + ((resultSet == null) ? 0 : 1)];
+            System.arraycopy(params, 0, result, 0, params.length);
+
+            if (resultSet != null) {
+                result[params.length] = resultSet;
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -165,21 +174,29 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
         assert (transaction != null);
 
-        final StatementOption[] options = getStatementOptions(transaction);
+        try {
+            StatementOption[] result = getStatementOptions(transaction);
 
-        if (options.length == 0) {
-            return options;
-        }
+            if (result.length != 0) {
+                final List< StatementOption > temp = new ArrayList<>(result.length);
 
-        final List< StatementOption > result = new ArrayList<>(options.length);
+                for (final StatementOption option : result) {
+                    if (StandardOptions.valueOf(option.getName(transaction)) == null) {
+                        temp.add(option);
+                    }
+                }
 
-        for (final StatementOption option : options) {
-            if (StandardOptions.valueOf(option.getName(transaction)) == null) {
-                result.add(option);
+                result = temp.toArray(new StatementOption[temp.size()]);
             }
-        }
 
-        return result.toArray(new StatementOption[result.size()]);
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -304,27 +321,34 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.AbstractProcedure#getResultSet(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.AbstractProcedure#getResultSet(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
      */
     @Override
-    public ProcedureResultSet getResultSet( final UnitOfWork uow ) throws KException {
+    public ProcedureResultSet getResultSet( final UnitOfWork uow,
+                                            final boolean create ) throws KException {
         UnitOfWork transaction = uow;
 
-        if (transaction == null) {
+        if (uow == null) {
             transaction = getRepository().createTransaction("procedureImpl-getResultSet", true, null); //$NON-NLS-1$
         }
 
         assert (transaction != null);
 
         try {
-            final KomodoObject[] resultSets = super.getChildrenOfType(transaction, CreateProcedure.RESULT_SET);
+            KomodoObject[] kids = getChildrenOfType(transaction, CreateProcedure.RESULT_COLUMNS);
+
+            if (kids.length == 0) {
+                kids = getChildrenOfType(transaction, CreateProcedure.RESULT_DATA_TYPE);
+            }
+
             ProcedureResultSet result = null;
 
-            // if does not exist create it
-            if (resultSets.length == 0) {
-                result = RelationalModelFactory.createProcedureResultSet(transaction, getRepository(), this);
+            if (kids.length == 0) {
+                if (create) {
+                    result = RelationalModelFactory.createProcedureResultSet(transaction, getRepository(), this);
+                }
             } else {
-                result = new ProcedureResultSetImpl(transaction, getRepository(), resultSets[0].getAbsolutePath());
+                result = new ProcedureResultSetImpl(transaction, getRepository(), kids[0].getAbsolutePath());
             }
 
             if (uow == null) {
@@ -444,6 +468,42 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
             if (!found) {
                 throw new KException(Messages.getString(Relational.PARAMETER_NOT_FOUND_TO_REMOVE, parameterName));
             }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.AbstractProcedure#removeResultSet(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public void removeResultSet( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction("abstractprocedureimpl-removeResultSet", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("removeResultSet: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            final ProcedureResultSet resultSet = getResultSet(transaction, false);
+
+            if (resultSet == null) {
+                throw new KException(Messages.getString(Relational.RESULT_SET_NOT_FOUND_TO_REMOVE, getName(transaction)));
+            }
+
+            removeChild(transaction, CreateProcedure.RESULT_SET);
 
             if (uow == null) {
                 transaction.commit();

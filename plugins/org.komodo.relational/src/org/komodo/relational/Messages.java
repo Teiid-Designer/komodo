@@ -108,6 +108,11 @@ public class Messages implements StringConstants {
         OBJECT_BEING_DELETED_HAS_WRONG_REPOSITORY,
 
         /**
+         * An object could not be resolved by the type resolver.
+         */
+        OBJECT_NOT_RESOLVABLE,
+
+        /**
          * An error message indicating a procedure parameter could not be removed.
          */
         PARAMETER_NOT_FOUND_TO_REMOVE,
@@ -133,6 +138,11 @@ public class Messages implements StringConstants {
         REFERENCED_TABLE_NOT_FOUND,
 
         /**
+         * An error message indicating a procedure result set could not be removed.
+         */
+        RESULT_SET_NOT_FOUND_TO_REMOVE,
+
+        /**
          * An error message indicating a statement option could not be removed.
          */
         STATEMENT_OPTION_NOT_FOUND_TO_REMOVE,
@@ -141,6 +151,11 @@ public class Messages implements StringConstants {
          * An error message indicating a table could not be removed.
          */
         TABLE_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * A type resolver for a relational object was not found.
+         */
+        TYPE_RESOLVER_NOT_FOUND,
 
         /**
          * An error message indicating a VDB translator could not be removed because it was not found.

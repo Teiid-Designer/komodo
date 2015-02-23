@@ -166,34 +166,68 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        final Condition[] conditions = getConditions(uow);
-        final Mask[] masks = getMasks(uow);
+        UnitOfWork transaction = uow;
 
-        final KomodoObject[] result = new KomodoObject[conditions.length + masks.length];
-        System.arraycopy(conditions, 0, result, 0, conditions.length);
-        System.arraycopy(masks, 0, result, conditions.length, masks.length);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("permissionimpl-getChildren", true, null); //$NON-NLS-1$
+        }
 
-        return result;
+        assert (transaction != null);
+
+        try {
+            final Condition[] conditions = getConditions(transaction);
+            final Mask[] masks = getMasks(transaction);
+
+            final KomodoObject[] result = new KomodoObject[conditions.length + masks.length];
+            System.arraycopy(conditions, 0, result, 0, conditions.length);
+            System.arraycopy(masks, 0, result, conditions.length, masks.length);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
      */
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
                                              final String type ) throws KException {
+        UnitOfWork transaction = uow;
 
-        if (VdbLexicon.DataRole.Permission.Condition.CONDITION.equals(type)) {
-            return getConditions(uow);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("permissionimpl-getChildrenOfType", true, null); //$NON-NLS-1$
         }
 
-        if (VdbLexicon.DataRole.Permission.Mask.MASK.equals(type)) {
-            return getMasks(uow);
-        }
+        assert (transaction != null);
 
-        return KomodoObject.EMPTY_ARRAY;
+        try {
+            KomodoObject[] result = null;
+
+            if (VdbLexicon.DataRole.Permission.Condition.CONDITION.equals(type)) {
+                result = getConditions(transaction);
+            } else if (VdbLexicon.DataRole.Permission.Mask.MASK.equals(type)) {
+                result = getMasks(transaction);
+            } else {
+                result = KomodoObject.EMPTY_ARRAY;
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -310,9 +344,27 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
-        final KomodoObject grouping = super.getParent(transaction);
-        return resolveType(transaction, grouping.getParent(transaction));
+    public KomodoObject getParent( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("permissionimpl-getParent", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final KomodoObject grouping = super.getParent(transaction);
+            final KomodoObject result = resolveType(transaction, grouping.getParent(transaction));
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**

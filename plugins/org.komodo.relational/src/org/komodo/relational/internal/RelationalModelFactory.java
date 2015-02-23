@@ -801,8 +801,7 @@ public final class RelationalModelFactory {
                                                         parentProcedure.getAbsolutePath(),
                                                         CreateProcedure.RESULT_SET,
                                                         null);
-            kobject.addDescriptor(transaction, CreateProcedure.RESULT_DATA_TYPE);
-
+            kobject.addDescriptor(transaction, CreateProcedure.RESULT_COLUMNS);
             final ProcedureResultSet result = new ProcedureResultSetImpl(transaction, repository, kobject.getAbsolutePath());
 
             if (uow == null) {

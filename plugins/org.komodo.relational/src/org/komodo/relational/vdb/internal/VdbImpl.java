@@ -424,25 +424,41 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        final DataRole[] dataRoles = getDataRoles(uow);
-        final Entry[] entries = getEntries(uow);
-        final VdbImport[] imports = getImports(uow);
-        final Model[] models = getModels(uow);
-        final Translator[] translators = getTranslators(uow);
+        UnitOfWork transaction = uow;
 
-        final KomodoObject[] result = new KomodoObject[dataRoles.length + entries.length + imports.length + models.length
-                                                       + translators.length];
-        System.arraycopy(dataRoles, 0, result, 0, dataRoles.length);
-        System.arraycopy(entries, 0, result, dataRoles.length, entries.length);
-        System.arraycopy(imports, 0, result, dataRoles.length + entries.length, imports.length);
-        System.arraycopy(models, 0, result, dataRoles.length + entries.length + imports.length, models.length);
-        System.arraycopy(translators,
-                         0,
-                         result,
-                         dataRoles.length + entries.length + imports.length + models.length,
-                         translators.length);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("vdbimpl-getChildren", true, null); //$NON-NLS-1$
+        }
 
-        return result;
+        assert (transaction != null);
+
+        try {
+            final DataRole[] dataRoles = getDataRoles(transaction);
+            final Entry[] entries = getEntries(transaction);
+            final VdbImport[] imports = getImports(transaction);
+            final Model[] models = getModels(transaction);
+            final Translator[] translators = getTranslators(transaction);
+
+            final KomodoObject[] result = new KomodoObject[dataRoles.length + entries.length + imports.length + models.length
+                                                           + translators.length];
+            System.arraycopy(dataRoles, 0, result, 0, dataRoles.length);
+            System.arraycopy(entries, 0, result, dataRoles.length, entries.length);
+            System.arraycopy(imports, 0, result, dataRoles.length + entries.length, imports.length);
+            System.arraycopy(models, 0, result, dataRoles.length + entries.length + imports.length, models.length);
+            System.arraycopy(translators,
+                             0,
+                             result,
+                             dataRoles.length + entries.length + imports.length + models.length,
+                             translators.length);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -454,28 +470,39 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
                                              final String type ) throws KException {
+        UnitOfWork transaction = uow;
 
-        if (VdbLexicon.DataRole.DATA_ROLE.equals(type)) {
-            return getDataRoles(uow);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("dataroleimpl-getChildrenOfType", true, null); //$NON-NLS-1$
         }
 
-        if (VdbLexicon.Entry.ENTRY.equals(type)) {
-            return getEntries(uow);
-        }
+        assert (transaction != null);
 
-        if (VdbLexicon.ImportVdb.IMPORT_VDB.equals(type)) {
-            return getImports(uow);
-        }
+        try {
+            KomodoObject[] result = null;
 
-        if (VdbLexicon.Vdb.DECLARATIVE_MODEL.equals(type)) {
-            return getModels(uow);
-        }
+            if (VdbLexicon.DataRole.DATA_ROLE.equals(type)) {
+                result = getDataRoles(transaction);
+            } else if (VdbLexicon.Entry.ENTRY.equals(type)) {
+                result = getEntries(transaction);
+            } else if (VdbLexicon.ImportVdb.IMPORT_VDB.equals(type)) {
+                result = getImports(transaction);
+            } else if (VdbLexicon.Vdb.DECLARATIVE_MODEL.equals(type)) {
+                result = getModels(transaction);
+            } else if (VdbLexicon.Translator.TRANSLATOR.equals(type)) {
+                result = getTranslators(transaction);
+            } else {
+                result = KomodoObject.EMPTY_ARRAY;
+            }
 
-        if (VdbLexicon.Translator.TRANSLATOR.equals(type)) {
-            return getTranslators(uow);
-        }
+            if (uow == null) {
+                transaction.commit();
+            }
 
-        return KomodoObject.EMPTY_ARRAY;
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**

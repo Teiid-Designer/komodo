@@ -142,7 +142,7 @@ public interface KomodoObject extends KNode {
     String[] getPropertyNames( final UnitOfWork transaction ) throws KException;
 
     /**
-     * @return the unique object type identifier
+     * @return a unique identifier for the object class
      */
     int getTypeId();
 

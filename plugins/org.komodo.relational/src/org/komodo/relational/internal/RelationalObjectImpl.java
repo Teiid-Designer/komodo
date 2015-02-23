@@ -91,20 +91,37 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow,
                                        final String name ) throws KException {
-        final KomodoObject[] kobjects = super.getChildren(uow, name);
+        UnitOfWork transaction = uow;
 
-        if (kobjects.length == 0) {
-            return kobjects;
+        if (uow == null) {
+            transaction = getRepository().createTransaction("relationalobjectimpl-getChildren", true, null); //$NON-NLS-1$
         }
 
-        final KomodoObject[] result = new KomodoObject[kobjects.length];
-        int i = 0;
+        assert (transaction != null);
 
-        for (final KomodoObject kobject : kobjects) {
-            result[i++] = resolveType(uow, kobject);
+        try {
+            KomodoObject[] result = null;
+            final KomodoObject[] kids = super.getChildren(transaction, name);
+
+            if (kids.length == 0) {
+                result = kids;
+            } else {
+                result = new KomodoObject[kids.length];
+                int i = 0;
+
+                for (final KomodoObject kobject : kids) {
+                    result[i++] = resolveType(transaction, kobject);
+                }
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
         }
-
-        return result;
     }
 
     /**
@@ -115,20 +132,37 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
                                              final String type ) throws KException {
-        final KomodoObject[] kobjects = super.getChildrenOfType(uow, type);
+        UnitOfWork transaction = uow;
 
-        if (kobjects.length == 0) {
-            return kobjects;
+        if (uow == null) {
+            transaction = getRepository().createTransaction("relationalobjectimpl-getChildrenOfType", true, null); //$NON-NLS-1$
         }
 
-        final KomodoObject[] result = new KomodoObject[kobjects.length];
-        int i = 0;
+        assert (transaction != null);
 
-        for (final KomodoObject kobject : kobjects) {
-            result[i++] = resolveType(uow, kobject);
+        try {
+            KomodoObject[] result = null;
+            final KomodoObject[] kobjects = super.getChildrenOfType(uow, type);
+
+            if (kobjects.length == 0) {
+                result = kobjects;
+            } else {
+                result = new KomodoObject[kobjects.length];
+                int i = 0;
+
+                for (final KomodoObject kobject : kobjects) {
+                    result[i++] = resolveType(uow, kobject);
+                }
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
         }
-
-        return result;
     }
 
     /**
@@ -138,13 +172,25 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
      */
     @Override
     public KomodoObject getParent( final UnitOfWork uow ) throws KException {
-        final KomodoObject kobject = super.getParent(uow);
+        UnitOfWork transaction = uow;
 
-        if (kobject == null) {
-            return null;
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("relationalobjectimpl-getParent", true, null); //$NON-NLS-1$
         }
 
-        return resolveType(uow, kobject);
+        assert (transaction != null);
+
+        try {
+            KomodoObject result = super.getParent(uow);
+
+            if (result != null) {
+                result = resolveType(uow, result);
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     private Map< Class< ? extends RelationalObject >, TypeResolver > getResolvers() {

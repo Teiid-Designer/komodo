@@ -11,6 +11,8 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -21,6 +23,7 @@ import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Descriptor;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -84,7 +87,24 @@ public class ProcedureResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat(this.procedureResultSet.hasDescriptor(null, CreateProcedure.RESULT_DATA_TYPE), is(true));
+        final List< String > valid = Arrays.asList(new String[] {CreateProcedure.RESULT_COLUMNS, CreateProcedure.RESULT_DATA_TYPE});
+        boolean pass = false;
+
+        for (final Descriptor mixin : this.procedureResultSet.getDescriptors(null)) {
+            if (valid.contains(mixin.getName())) {
+                pass = true;
+                break;
+            }
+        }
+
+        if (!pass) {
+            fail();
+        }
+    }
+
+    @Test
+    public void shouldHaveCorrectName() throws Exception {
+        assertThat(this.procedureResultSet.getName(null), is(CreateProcedure.RESULT_SET));
     }
 
     @Test

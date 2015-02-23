@@ -364,11 +364,13 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldResolveProcedureResultSet() throws Exception {
-        final Model model = createModel(null, null, "model");
-        final Procedure procedure = model.addProcedure(null, "procedure");
-        final ProcedureResultSet resultSet = procedure.getResultSet(null);
+        final Repository.UnitOfWork uow = _repo.createTransaction(this.name.getMethodName(), false, null);
+        final Model model = createModel(uow, null, "model");
+        final Procedure procedure = model.addProcedure(uow, "procedure");
+        final ProcedureResultSet resultSet = procedure.getResultSet(uow, true);
         final KomodoObject kobject = new ObjectImpl(_repo, resultSet.getAbsolutePath(), resultSet.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, ProcedureResultSet.class), is(instanceOf(ProcedureResultSet.class)));
+        assertThat(this.wsMgr.resolve(uow, kobject, ProcedureResultSet.class), is(instanceOf(ProcedureResultSet.class)));
+        uow.commit();
     }
 
     @Test
