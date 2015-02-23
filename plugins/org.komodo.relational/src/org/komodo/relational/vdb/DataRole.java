@@ -17,6 +17,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface DataRole extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = DataRole.class.hashCode();
+
+    /**
      * The default value for the <code>create temporary tables</code> property. Value is {@value} .
      */
     boolean DEFAULT_ALLOW_CREATE_TEMP_TABLES = false;

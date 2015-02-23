@@ -106,6 +106,16 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Index#setExpression(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override

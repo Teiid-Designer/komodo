@@ -16,6 +16,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Procedure extends AbstractProcedure {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Procedure.class.hashCode();
+
+    /**
      * The default value for the <code>non-prepared</code> property. Value is {@value} .
      */
     boolean DEFAULT_NON_PREPARED = false;

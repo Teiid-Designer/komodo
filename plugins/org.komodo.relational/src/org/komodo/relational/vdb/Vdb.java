@@ -20,6 +20,11 @@ import org.w3c.dom.Document;
 public interface Vdb extends Exportable, RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Vdb.class.hashCode();
+
+    /**
      * Represents a VDB XML manifest file.
      */
     public interface VdbManifest extends Exportable {

@@ -283,31 +283,46 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        final Function[] functions = getFunctions(uow);
-        final Procedure[] procedures = getProcedures(uow);
-        final Table[] tables = getTables(uow);
-        final View[] views = getViews(uow);
-        final ModelSource[] sources = getSources(uow);
+        UnitOfWork transaction = uow;
 
-        final KomodoObject[] result = new KomodoObject[functions.length + procedures.length + tables.length + views.length
-                                                       + sources.length];
+        if (uow == null) {
+            transaction = getRepository().createTransaction("modelimpl-getChildren", true, null); //$NON-NLS-1$
+        }
 
-        int start = 0;
-        System.arraycopy(functions, 0, result, start, functions.length);
+        assert (transaction != null);
 
-        start = functions.length;
-        System.arraycopy(procedures, 0, result, start, procedures.length);
+        try {
+            final Function[] functions = getFunctions(transaction);
+            final Procedure[] procedures = getProcedures(transaction);
+            final Table[] tables = getTables(transaction);
+            final View[] views = getViews(transaction);
+            final ModelSource[] sources = getSources(transaction);
+            final KomodoObject[] result = new KomodoObject[functions.length + procedures.length + tables.length + views.length
+                                                           + sources.length];
 
-        start += procedures.length;
-        System.arraycopy(tables, 0, result, start, tables.length);
+            int start = 0;
+            System.arraycopy(functions, 0, result, start, functions.length);
 
-        start += tables.length;
-        System.arraycopy(views, 0, result, start, views.length);
+            start = functions.length;
+            System.arraycopy(procedures, 0, result, start, procedures.length);
 
-        start += sources.length;
-        System.arraycopy(sources, 0, result, start, sources.length);
+            start += procedures.length;
+            System.arraycopy(tables, 0, result, start, tables.length);
 
-        return result;
+            start += tables.length;
+            System.arraycopy(views, 0, result, start, views.length);
+
+            start += sources.length;
+            System.arraycopy(sources, 0, result, start, sources.length);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -319,28 +334,37 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
                                              final String type ) throws KException {
+        UnitOfWork transaction = uow;
 
-        if (CreateProcedure.FUNCTION_STATEMENT.equals(type)) {
-            return getFunctions(uow);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("modelimpl-getChildrenOfType", true, null); //$NON-NLS-1$
         }
 
-        if (CreateProcedure.PROCEDURE_STATEMENT.equals(type)) {
-            return getProcedures(uow);
-        }
+        assert (transaction != null);
 
-        if (CreateTable.TABLE_STATEMENT.equals(type)) {
-            return getTables(uow);
-        }
+        try {
+            KomodoObject[] result = KomodoObject.EMPTY_ARRAY;
 
-        if (CreateTable.VIEW_STATEMENT.equals(type)) {
-            return getViews(uow);
-        }
+            if (CreateProcedure.FUNCTION_STATEMENT.equals(type)) {
+                result = getFunctions(transaction);
+            } else if (CreateProcedure.PROCEDURE_STATEMENT.equals(type)) {
+                result = getProcedures(transaction);
+            } else if (CreateTable.TABLE_STATEMENT.equals(type)) {
+                result = getTables(transaction);
+            } else if (CreateTable.VIEW_STATEMENT.equals(type)) {
+                result = getViews(transaction);
+            } else if (VdbLexicon.Source.SOURCE.equals(type)) {
+                result = getSources(transaction);
+            }
 
-        if (VdbLexicon.Source.SOURCE.equals(type)) {
-            return getSources(uow);
-        }
+            if (uow == null) {
+                transaction.commit();
+            }
 
-        return KomodoObject.EMPTY_ARRAY;
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -569,6 +593,16 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**
@@ -890,7 +924,8 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Model#setModelType(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.relational.model.Model.Type)
+     * @see org.komodo.relational.model.Model#setModelType(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.relational.model.Model.Type)
      */
     @Override
     public void setModelType( final UnitOfWork uow,

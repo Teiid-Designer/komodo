@@ -138,36 +138,44 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
 
         assert (transaction != null);
 
-        final StatementOption[] allOptions = getStatementOptions(transaction);
+        try {
+            StatementOption[] result = StatementOption.NO_OPTIONS;
+            StatementOption[] allOptions = getStatementOptions(transaction);
 
-        if (allOptions.length == 0) {
-            return allOptions;
-        }
+            if (allOptions.length != 0) {
+                final List< StatementOption > temp = new ArrayList<>(allOptions.length);
 
-        final StatementOption[] superOptions = super.getCustomOptions(transaction);
-        final List< StatementOption > temp = new ArrayList<>(allOptions.length);
+                for (final StatementOption option : allOptions) {
+                    if (StandardOptions.valueOf(option.getName(transaction)) == null) {
+                        temp.add(option);
+                    }
+                }
 
-        for (final StatementOption option : allOptions) {
-            if (StandardOptions.valueOf(option.getName(transaction)) == null) {
-                temp.add(option);
+                final StatementOption[] superOptions = super.getCustomOptions(transaction);
+
+                if (temp.isEmpty()) {
+                    result = superOptions;
+                } else {
+                    final StatementOption[] thisOptions = temp.toArray(new StatementOption[temp.size()]);
+
+                    if (superOptions.length == 0) {
+                        result = thisOptions;
+                    } else {
+                        result = new StatementOption[superOptions.length + thisOptions.length];
+                        System.arraycopy(superOptions, 0, result, 0, superOptions.length);
+                        System.arraycopy(thisOptions, 0, result, superOptions.length, thisOptions.length);
+                    }
+                }
             }
-        }
 
-        if (temp.isEmpty()) {
-            return superOptions;
-        }
+            if (uow == null) {
+                transaction.commit();
+            }
 
-        final StatementOption[] result = temp.toArray(new StatementOption[temp.size()]);
-
-        if (superOptions.length == 0) {
             return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
         }
-
-        final StatementOption[] combined = new StatementOption[superOptions.length + result.length];
-        System.arraycopy(result, 0, combined, 0, result.length);
-        System.arraycopy(superOptions, 0, combined, result.length, superOptions.length);
-
-        return combined;
     }
 
     /**
@@ -216,6 +224,16 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
         }
 
         return option.getOption(transaction);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**

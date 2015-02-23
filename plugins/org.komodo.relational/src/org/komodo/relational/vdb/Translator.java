@@ -17,6 +17,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Translator extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Translator.class.hashCode();
+
+    /**
      * The default value for a translator type. Value is {@value} .
      */
     String DEFAULT_TYPE = "oracle"; //$NON-NLS-1$

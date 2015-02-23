@@ -152,21 +152,29 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
 
         assert (transaction != null);
 
-        final StatementOption[] options = getStatementOptions(transaction);
+        try {
+            StatementOption[] result = getStatementOptions(transaction);
 
-        if (options.length == 0) {
-            return options;
-        }
+            if (result.length != 0) {
+                final List< StatementOption > temp = new ArrayList<>(result.length);
 
-        final List< StatementOption > result = new ArrayList<>(options.length);
+                for (final StatementOption option : result) {
+                    if (StandardOptions.valueOf(option.getName(transaction)) == null) {
+                        temp.add(option);
+                    }
+                }
 
-        for (final StatementOption option : options) {
-            if (StandardOptions.valueOf(option.getName(transaction)) == null) {
-                result.add(option);
+                result = temp.toArray(new StatementOption[temp.size()]);
             }
-        }
 
-        return result.toArray(new StatementOption[result.size()]);
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -455,6 +463,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**

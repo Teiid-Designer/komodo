@@ -19,6 +19,11 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants.TeiidReserved
 public interface Parameter extends OptionContainer, RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Parameter.class.hashCode();
+
+    /**
      * Represents a
      */
     public enum Direction {

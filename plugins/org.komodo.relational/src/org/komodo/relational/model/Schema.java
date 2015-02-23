@@ -31,6 +31,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Schema extends RelationalObject, Exportable {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Schema.class.hashCode();
+
+    /**
      * An empty array of schemas.
      */
     Schema[] NO_SCHEMAS = new Schema[0];

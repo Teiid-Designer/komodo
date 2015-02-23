@@ -16,6 +16,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface ProcedureResultSet extends Table {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = ProcedureResultSet.class.hashCode();
+
+    /**
      * {@inheritDoc}
      *
      * @see org.komodo.relational.model.Table#addAccessPattern(org.komodo.spi.repository.Repository.UnitOfWork,

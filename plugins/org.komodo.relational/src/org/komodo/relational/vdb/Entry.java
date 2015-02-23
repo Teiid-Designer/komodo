@@ -17,6 +17,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Entry extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Entry.class.hashCode();
+
+    /**
      * An empty array of VDB entries.
      */
     Entry[] NO_ENTRIES = new Entry[0];

@@ -15,8 +15,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * A class that determines if a {@link KomodoObject} can be converted into a strong typed relational object.
+ *
+ * @param <T>
+ *        the {@link RelationalObject} subclass
  */
-public interface TypeResolver {
+public interface TypeResolver< T extends RelationalObject > {
 
     /**
      * @param transaction
@@ -32,7 +35,6 @@ public interface TypeResolver {
                         final KomodoObject kobject );
 
     /**
-     *
      * @param transaction
      *        the transaction (can be <code>null</code> if the operation should be automatically committed)
      * @param repository
@@ -44,8 +46,8 @@ public interface TypeResolver {
      *         if the object cannot be resolved or if an error occurs
      * @see #resolvable(UnitOfWork, Repository, KomodoObject)
      */
-    RelationalObject resolve( final UnitOfWork transaction,
-                              final Repository repository,
-                              final KomodoObject kobject ) throws KException;
+    T resolve( final UnitOfWork transaction,
+               final Repository repository,
+               final KomodoObject kobject ) throws KException;
 
 }

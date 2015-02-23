@@ -188,23 +188,61 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        return getPermissions(uow);
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction("dataroleimpl-getChildren", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final KomodoObject[] result = getPermissions(transaction);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
      */
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
                                              final String type ) throws KException {
+        UnitOfWork transaction = uow;
 
-        if (VdbLexicon.DataRole.Permission.PERMISSION.equals(type)) {
-            return getPermissions(uow);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("dataroleimpl-getChildrenOfType", true, null); //$NON-NLS-1$
         }
 
-        return KomodoObject.EMPTY_ARRAY;
+        assert (transaction != null);
+
+        try {
+            KomodoObject[] result = null;
+
+            if (VdbLexicon.DataRole.Permission.PERMISSION.equals(type)) {
+                result = getPermissions(transaction);
+            } else {
+                result = KomodoObject.EMPTY_ARRAY;
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -260,9 +298,27 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
-        final KomodoObject grouping = super.getParent(transaction);
-        return resolveType(transaction, grouping.getParent(transaction));
+    public KomodoObject getParent( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("dataroleimpl-getParent", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final KomodoObject grouping = super.getParent(transaction);
+            final KomodoObject result = resolveType(transaction, grouping.getParent(transaction));
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -317,6 +373,16 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**
