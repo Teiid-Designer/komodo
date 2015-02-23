@@ -93,6 +93,16 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.vdb.Condition#isConstraint(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

@@ -16,6 +16,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Table extends OptionContainer, RelationalObject, SchemaElement {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Table.class.hashCode();
+
+    /**
      * The on commit value.
      */
     public enum OnCommit {

@@ -17,6 +17,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Permission extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Permission.class.hashCode();
+
+    /**
      * The default value indicating if this permission allows alter. Value is {@value} .
      */
     boolean DEFAULT_ALLOW_ALTER = false;

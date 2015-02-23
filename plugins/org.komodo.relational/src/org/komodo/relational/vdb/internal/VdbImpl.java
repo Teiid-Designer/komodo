@@ -771,6 +771,16 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.vdb.Vdb#getVdbName(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

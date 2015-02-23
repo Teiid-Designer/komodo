@@ -16,6 +16,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface ForeignKey extends TableConstraint {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = ForeignKey.class.hashCode();
+
+    /**
      * The constraint type for a foreign key. Value is {@value} .
      */
     ConstraintType CONSTRAINT_TYPE = ConstraintType.FOREIGN_KEY;

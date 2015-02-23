@@ -114,6 +114,16 @@ public final class TranslatorImpl extends RelationalObjectImpl implements Transl
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.vdb.Translator#setDescription(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override

@@ -113,6 +113,16 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.vdb.ModelSource#setJndiName(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override

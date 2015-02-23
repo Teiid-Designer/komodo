@@ -17,6 +17,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface ModelSource extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = ModelSource.class.hashCode();
+
+    /**
      * An empty array of model sources.
      */
     ModelSource[] NO_SOURCES = new ModelSource[0];

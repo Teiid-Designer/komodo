@@ -574,6 +574,16 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Model#getViews(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

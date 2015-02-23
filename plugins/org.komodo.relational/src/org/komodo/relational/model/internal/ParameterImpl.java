@@ -321,6 +321,16 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Parameter#isResult(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

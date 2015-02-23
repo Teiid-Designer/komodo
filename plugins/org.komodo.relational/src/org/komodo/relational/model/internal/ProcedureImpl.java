@@ -155,6 +155,16 @@ public final class ProcedureImpl extends AbstractProcedureImpl implements Proced
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Procedure#getUpdateCount(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

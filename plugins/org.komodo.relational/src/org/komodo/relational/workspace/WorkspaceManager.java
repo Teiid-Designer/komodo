@@ -34,14 +34,53 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.internal.TypeResolver;
+import org.komodo.relational.model.AccessPattern;
+import org.komodo.relational.model.ForeignKey;
+import org.komodo.relational.model.Function;
+import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Parameter;
+import org.komodo.relational.model.PrimaryKey;
+import org.komodo.relational.model.Procedure;
+import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.Schema;
+import org.komodo.relational.model.Table;
+import org.komodo.relational.model.UniqueConstraint;
+import org.komodo.relational.model.View;
+import org.komodo.relational.model.internal.AccessPatternImpl;
+import org.komodo.relational.model.internal.ForeignKeyImpl;
+import org.komodo.relational.model.internal.FunctionImpl;
+import org.komodo.relational.model.internal.IndexImpl;
 import org.komodo.relational.model.internal.ModelImpl;
+import org.komodo.relational.model.internal.ParameterImpl;
+import org.komodo.relational.model.internal.PrimaryKeyImpl;
+import org.komodo.relational.model.internal.ProcedureImpl;
+import org.komodo.relational.model.internal.ProcedureResultSetImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
+import org.komodo.relational.model.internal.TableImpl;
+import org.komodo.relational.model.internal.UniqueConstraintImpl;
+import org.komodo.relational.model.internal.ViewImpl;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
+import org.komodo.relational.vdb.Condition;
+import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Entry;
+import org.komodo.relational.vdb.Mask;
+import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.Permission;
+import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.VdbImport;
+import org.komodo.relational.vdb.internal.ConditionImpl;
+import org.komodo.relational.vdb.internal.DataRoleImpl;
+import org.komodo.relational.vdb.internal.EntryImpl;
+import org.komodo.relational.vdb.internal.MaskImpl;
+import org.komodo.relational.vdb.internal.ModelSourceImpl;
+import org.komodo.relational.vdb.internal.PermissionImpl;
+import org.komodo.relational.vdb.internal.TranslatorImpl;
 import org.komodo.relational.vdb.internal.VdbImpl;
+import org.komodo.relational.vdb.internal.VdbImportImpl;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
@@ -268,7 +307,6 @@ public class WorkspaceManager {
     public Teiid createTeiid( UnitOfWork uow,
                               KomodoObject parent,
                               String id ) throws KException {
-        ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
 
         UnitOfWork transaction = uow;
@@ -280,8 +318,15 @@ public class WorkspaceManager {
         assert (transaction != null);
 
         try {
+            String parentPath = null;
+
+            if (parent != null) {
+                validateWorkspaceMember(transaction, parent);
+                parentPath = parent.getAbsolutePath();
+            }
+
             final KomodoObject kobject = getRepository().add(transaction,
-                                                             parent.getAbsolutePath(),
+                                                             parentPath,
                                                              id,
                                                              KomodoLexicon.Teiid.NODE_TYPE);
             final Teiid result = new TeiidImpl(transaction, getRepository(), kobject.getAbsolutePath());
@@ -569,6 +614,73 @@ public class WorkspaceManager {
         }
 
         return result;
+    }
+
+    public < T extends KomodoObject > T resolve( final UnitOfWork transaction,
+                                                 final KomodoObject kobject,
+                                                 final Class< T > adaptedClass ) throws KException {
+        TypeResolver resolver = null;
+
+        // model
+        if (AccessPattern.class.equals(adaptedClass)) {
+            resolver = AccessPatternImpl.RESOLVER;
+        } else if (ForeignKey.class.equals(adaptedClass)) {
+            resolver = ForeignKeyImpl.RESOLVER;
+        } else if (Function.class.equals(adaptedClass)) {
+            resolver = FunctionImpl.RESOLVER;
+        } else if (Index.class.equals(adaptedClass)) {
+            resolver = IndexImpl.RESOLVER;
+        } else if (Model.class.equals(adaptedClass)) {
+            resolver = ModelImpl.RESOLVER;
+        } else if (Parameter.class.equals(adaptedClass)) {
+            resolver = ParameterImpl.RESOLVER;
+        } else if (PrimaryKey.class.equals(adaptedClass)) {
+            resolver = PrimaryKeyImpl.RESOLVER;
+        } else if (Procedure.class.equals(adaptedClass)) {
+            resolver = ProcedureImpl.RESOLVER;
+        } else if (ProcedureResultSet.class.equals(adaptedClass)) {
+            resolver = ProcedureResultSetImpl.RESOLVER;
+        } else if (Schema.class.equals(adaptedClass)) {
+            resolver = SchemaImpl.RESOLVER;
+        } else if (Table.class.equals(adaptedClass)) {
+            resolver = TableImpl.RESOLVER;
+        } else if (UniqueConstraint.class.equals(adaptedClass)) {
+            resolver = UniqueConstraintImpl.RESOLVER;
+        } else if (View.class.equals(adaptedClass)) {
+            resolver = ViewImpl.RESOLVER;
+        } else if (Teiid.class.equals(adaptedClass)) {
+            resolver = TeiidImpl.RESOLVER;
+        } else if (Condition.class.equals(adaptedClass)) {
+            resolver = ConditionImpl.RESOLVER;
+        } else if (DataRole.class.equals(adaptedClass)) {
+            resolver = DataRoleImpl.RESOLVER;
+        } else if (Entry.class.equals(adaptedClass)) {
+            resolver = EntryImpl.RESOLVER;
+        } else if (Mask.class.equals(adaptedClass)) {
+            resolver = MaskImpl.RESOLVER;
+        } else if (ModelSource.class.equals(adaptedClass)) {
+            resolver = ModelSourceImpl.RESOLVER;
+        } else if (Permission.class.equals(adaptedClass)) {
+            resolver = PermissionImpl.RESOLVER;
+        } else if (Translator.class.equals(adaptedClass)) {
+            resolver = TranslatorImpl.RESOLVER;
+        } else if (Vdb.class.equals(adaptedClass)) {
+            resolver = VdbImpl.RESOLVER;
+        } else if (VdbImport.class.equals(adaptedClass)) {
+            resolver = VdbImportImpl.RESOLVER;
+        }
+
+        if (resolver == null) {
+            // TODO fix this exception
+            throw new KException(Messages.getString(Relational.OBJECT_BEING_DELETED_HAS_NULL_PARENT, kobject.getAbsolutePath()));
+        }
+
+        if (!resolver.resolvable(transaction, this.repository, kobject)) {
+            // TODO fix this exception
+            throw new KException(Messages.getString(Relational.OBJECT_BEING_DELETED_HAS_NULL_PARENT, kobject.getAbsolutePath()));
+        }
+
+        return (T)resolver.resolve(transaction, this.repository, kobject);
     }
 
     private void validateWorkspaceMember( final UnitOfWork uow,

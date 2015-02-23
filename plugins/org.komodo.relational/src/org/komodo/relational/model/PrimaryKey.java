@@ -13,6 +13,11 @@ package org.komodo.relational.model;
 public interface PrimaryKey extends TableConstraint {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = PrimaryKey.class.hashCode();
+
+    /**
      * The constraint type for a primary key. Value is {@value} .
      */
     ConstraintType CONSTRAINT_TYPE = ConstraintType.PRIMARY_KEY;

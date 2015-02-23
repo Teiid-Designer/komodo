@@ -16,6 +16,12 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  * Represents a relational model column.
  */
 public interface Column extends OptionContainer, RelationalObject {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = Column.class.hashCode();
+
     /*
       - teiidddl:autoIncrement (boolean) = 'false'
       - ddl:nullable (string) = 'NULL' mandatory autocreated < 'NULL', 'NOT NULL'

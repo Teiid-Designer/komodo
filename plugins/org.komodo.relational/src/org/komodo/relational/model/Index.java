@@ -16,6 +16,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Index extends TableConstraint {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Index.class.hashCode();
+
+    /**
      * The constraint type for an index. Value is {@value} .
      */
     ConstraintType CONSTRAINT_TYPE = ConstraintType.INDEX;

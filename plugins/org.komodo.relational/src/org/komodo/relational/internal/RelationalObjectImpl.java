@@ -208,7 +208,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     }
 
     protected KomodoObject resolveType( final UnitOfWork transaction,
-                                      final KomodoObject kobject ) throws KException {
+                                        final KomodoObject kobject ) throws KException {
         final Repository repository = getRepository();
 
         for (final TypeResolver resolver : getResolvers().values()) {

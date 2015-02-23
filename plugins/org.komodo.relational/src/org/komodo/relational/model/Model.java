@@ -17,6 +17,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Model extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Model.class.hashCode();
+
+    /**
      * The type of a model.
      */
     enum Type {

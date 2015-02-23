@@ -32,6 +32,11 @@ import org.komodo.spi.runtime.TeiidInstance;
 public interface Teiid extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Teiid.class.hashCode();
+
+    /**
      * @return the teiid instance
      */
     TeiidInstance getTeiidInstance();

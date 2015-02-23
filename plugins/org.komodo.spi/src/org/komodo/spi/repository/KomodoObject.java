@@ -142,6 +142,11 @@ public interface KomodoObject extends KNode {
     String[] getPropertyNames( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @return the unique object type identifier
+     */
+    int getTypeId();
+
+    /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @param name

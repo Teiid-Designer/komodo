@@ -533,6 +533,16 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
      * @param uow
      *        the transaction
      * @return value of teiid secure property

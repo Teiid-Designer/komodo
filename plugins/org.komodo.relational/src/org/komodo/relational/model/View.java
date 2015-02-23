@@ -16,6 +16,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface View extends Table {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = View.class.hashCode();
+
+    /**
      * An empty array of views.
      */
     View[] NO_VIEWS = new View[0];

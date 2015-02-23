@@ -17,6 +17,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Condition extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Condition.class.hashCode();
+
+    /**
      * The default value indicating if this condition is a constraint. Value is {@value} .
      */
     boolean DEFAULT_CONSTRAINT = true;

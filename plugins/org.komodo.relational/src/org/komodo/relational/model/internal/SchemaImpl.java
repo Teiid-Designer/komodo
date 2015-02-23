@@ -104,6 +104,16 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
         return rendition == null ? EMPTY_STRING : rendition;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
     @Override
     public void setRendition( UnitOfWork uow,
                               String rendition ) throws KException {

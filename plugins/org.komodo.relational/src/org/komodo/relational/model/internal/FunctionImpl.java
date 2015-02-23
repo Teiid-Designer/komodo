@@ -221,6 +221,16 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Function#isAggregate(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

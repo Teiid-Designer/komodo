@@ -16,6 +16,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Function extends AbstractProcedure {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Function.class.hashCode();
+
+    /**
      * The categories of a function's determinism.
      */
     public enum Determinism {

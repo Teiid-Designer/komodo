@@ -17,6 +17,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface VdbImport extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = VdbImport.class.hashCode();
+
+    /**
      * The default value indicating if the data policies should be imported. Value is {@value} .
      */
     boolean DEFAULT_IMPORT_DATA_POLICIES = true;

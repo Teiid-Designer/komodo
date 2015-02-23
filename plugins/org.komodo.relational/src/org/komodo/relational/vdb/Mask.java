@@ -17,6 +17,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Mask extends RelationalObject {
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = Mask.class.hashCode();
+
+    /**
      * An empty array of masks.
      */
     Mask[] NO_MASKS = new Mask[0];
