@@ -101,8 +101,32 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-    public WorkspaceContext getWorkspaceContext(String contextId) {
-        return contextCache.get(contextId);
+    public WorkspaceContext getWorkspaceContext(String contextPath) {
+        if (contextPath == null)
+            return null;
+
+        WorkspaceContext context = contextCache.get(contextPath);
+        if (context != null)
+            return context;
+
+        if (FORWARD_SLASH.equals(contextPath))
+            return getRootContext();
+
+        //
+        // Need to hunt for the path
+        // contextPath should be of the form /tko:komodo/tko:workspace/vdb/.../...
+        //
+        String[] contexts = contextPath.split("\\/"); //$NON-NLS-1$
+        context = getRootContext();
+        for (int i = 0; i < contexts.length; ++i) {
+            try {
+                context = context.getChild(contexts[i]);
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+
+        return context;
     }
 
     @Override

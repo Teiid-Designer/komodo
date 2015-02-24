@@ -7,12 +7,17 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Condition;
+import org.komodo.relational.vdb.Permission;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -27,6 +32,16 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
      * The resolver of a {@link Condition}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return ConditionImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -61,6 +76,16 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
             return new ConditionImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Condition create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Permission parentPerm = adapter.adapt(transaction, parent, Permission.class);
+            return RelationalModelFactory.createCondition(transaction, parent.getRepository(), parentPerm, id);
+        }
+
     };
 
     /**
@@ -77,6 +102,11 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
                           final Repository repository,
                           final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return KomodoType.VDB_CONDITION;
     }
 
     /**

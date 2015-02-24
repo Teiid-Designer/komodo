@@ -23,6 +23,7 @@ package org.komodo.relational.teiid;
 
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.TeiidInstance;
 
@@ -35,6 +36,11 @@ public interface Teiid extends RelationalObject {
      * The type identifier.
      */
     int TYPE_ID = Teiid.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.TEIID;
 
     /**
      * @return the teiid instance

@@ -24,12 +24,15 @@ package org.komodo.relational.model.internal;
 import javax.jcr.Node;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Schema;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -44,6 +47,16 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
      * The resolver of a {@link Schema}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return SchemaImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -78,6 +91,14 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
             return new SchemaImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Schema create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            return RelationalModelFactory.createSchema(transaction, parent.getRepository(), parent.getAbsolutePath(), id);
+        }
+
     };
 
     /**
@@ -94,6 +115,11 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
                        final Repository repository,
                        final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     @Override

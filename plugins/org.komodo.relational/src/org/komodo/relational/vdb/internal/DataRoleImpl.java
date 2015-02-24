@@ -11,15 +11,19 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -35,6 +39,16 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      * The resolver of a {@link DataRole}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return DataRoleImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -69,6 +83,16 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
             return new DataRoleImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public DataRole create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Vdb parentVdb = adapter.adapt(transaction, parent, Vdb.class);
+            return RelationalModelFactory.createDataRole(transaction, parent.getRepository(), parentVdb, id);
+        }
+
     };
 
     /**
@@ -85,6 +109,11 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
                          final Repository repository,
                          final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return KomodoType.VDB_DATA_ROLE;
     }
 
     /**

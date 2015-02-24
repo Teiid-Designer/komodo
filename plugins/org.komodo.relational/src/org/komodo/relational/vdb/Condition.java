@@ -9,6 +9,7 @@ package org.komodo.relational.vdb;
 
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -20,6 +21,11 @@ public interface Condition extends RelationalObject {
      * The type identifier.
      */
     int TYPE_ID = Condition.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.VDB_CONDITION;
 
     /**
      * The default value indicating if this condition is a constraint. Value is {@value} .

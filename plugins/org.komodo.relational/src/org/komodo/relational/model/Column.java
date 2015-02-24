@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -22,7 +23,12 @@ public interface Column extends OptionContainer, RelationalObject {
      */
     int TYPE_ID = Column.class.hashCode();
 
-    /*
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.COLUMN;
+
+    /**
       - teiidddl:autoIncrement (boolean) = 'false'
       - ddl:nullable (string) = 'NULL' mandatory autocreated < 'NULL', 'NOT NULL'
       - ddl:datatypeName (STRING)

@@ -9,6 +9,7 @@ package org.komodo.relational.vdb;
 
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -20,6 +21,11 @@ public interface VdbImport extends RelationalObject {
      * The type identifier.
      */
     int TYPE_ID = VdbImport.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.VDB_IMPORT;
 
     /**
      * The default value indicating if the data policies should be imported. Value is {@value} .

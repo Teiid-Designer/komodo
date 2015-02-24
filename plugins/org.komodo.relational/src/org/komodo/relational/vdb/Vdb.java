@@ -11,6 +11,7 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.w3c.dom.Document;
 
@@ -23,6 +24,11 @@ public interface Vdb extends Exportable, RelationalObject {
      * The type identifier.
      */
     int TYPE_ID = Vdb.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.VDB;
 
     /**
      * Represents a VDB XML manifest file.

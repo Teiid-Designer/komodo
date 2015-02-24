@@ -10,7 +10,7 @@ package org.komodo.shell.commands.core;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.core.KomodoType;
+import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
@@ -19,7 +19,11 @@ import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  *
@@ -72,44 +76,46 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         return true;
     }
 
-    /**
-     * Sets a property on the artifact.
-     * @param artifact
-     * @param propName
-     * @param propValue
-     */
     private void create(String objType, String objName) throws Exception {
         WorkspaceStatus wsStatus = getWorkspaceStatus();
 
         WorkspaceContext currentContext = wsStatus.getCurrentContext();
-
-        KomodoType kType = KomodoType.getKType(objType);
-        if (kType == null)
-            throw new Exception(Messages.getString("CreateCommand.notValidType", objType)); //$NON-NLS-1$
-
         Repository repository = wsStatus.getCurrentContext().getRepository();
         WorkspaceManager wkspManager = WorkspaceManager.getInstance(repository);
         KomodoObject parent = currentContext.getKomodoObj();
 
+        KomodoType kType = KomodoType.getKomodoType(objType);
         switch (kType) {
-            case SCHEMA:
-                wkspManager.createSchema(null, parent, objName);
+            case FOREIGN_KEY:
+                String TableRefPath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_FKTableRefPath")); //$NON-NLS-1$
+
+                WorkspaceContext otherTableContext = wsStatus.getWorkspaceContext(TableRefPath);
+                if (otherTableContext == null)
+                    throw new Exception(Messages.getString("CreateCommand.invalidForeignKeyRefPath", TableRefPath)); //$NON-NLS-1$
+
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, otherTableContext.getKomodoObj()));
                 break;
-            case VDB_MODEL:
-                wkspManager.createModel(null, parent, objName);
+            case STATEMENT_OPTION:
+                String optionValue = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_StatementOptionValue")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(StandardDdlLexicon.VALUE, optionValue));
                 break;
-            case DATA_SOURCE:
-            case REPOSITORY:
-            case TEIID:
-                wkspManager.createTeiid(null, parent, objName);
-                break;
-            case VDB:
             case VDB_ENTRY:
-            case VDB_IMPORT:
-            case VDB_MODEL_SOURCE:
+                String entryPath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_EntryPath")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Entry.PATH, entryPath));
+                break;
             case VDB_TRANSLATOR:
+                String transType = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_TranslatorType")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Translator.TYPE, transType));
+                break;
+            case VDB: {
+                String filePath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_VdbFilePath")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, filePath));
+                break;
+            }
+            case UNKNOWN:
+                throw new Exception(Messages.getString("CreateCommand.notValidType", objType)); //$NON-NLS-1$
             default:
-                throw new UnsupportedOperationException(Messages.getString("CreateCommand.unsupported", kType.toString())); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType);
         }
     }
 
@@ -120,7 +126,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
 
         if (getArguments().isEmpty()) {
-            List<String> validTypes = KomodoType.getAllTypeNames();
+            List<String> validTypes = KomodoType.getTypes();
             for (String type : validTypes) {
                 if (lastArgument == null || type.startsWith(lastArgument.toUpperCase())) {
                     candidates.add(type + " "); //$NON-NLS-1$

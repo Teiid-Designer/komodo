@@ -7,12 +7,17 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Entry;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -28,6 +33,16 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
      * The resolver of a {@link Entry}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return EntryImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -62,6 +77,18 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
             return new EntryImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Entry create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Object entryPathValue = properties.getValue(VdbLexicon.Entry.PATH);
+            String entryPath = entryPathValue == null ? null : entryPathValue.toString();
+            Vdb parentVdb = adapter.adapt(transaction, parent, Vdb.class);
+            return RelationalModelFactory.createEntry(transaction, parent.getRepository(), parentVdb, id, entryPath);
+        }
+
     };
 
     /**
@@ -78,6 +105,11 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
                       final Repository repository,
                       final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return KomodoType.VDB_ENTRY;
     }
 
     /**

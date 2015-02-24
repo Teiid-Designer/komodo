@@ -9,12 +9,17 @@ package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
@@ -54,6 +59,16 @@ public final class ProcedureImpl extends AbstractProcedureImpl implements Proced
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return ProcedureImpl.class;
+        }
+
         /**
          * {@inheritDoc}
          *
@@ -87,6 +102,16 @@ public final class ProcedureImpl extends AbstractProcedureImpl implements Proced
             return new ProcedureImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Procedure create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Model parentModel = adapter.adapt(transaction, parent, Model.class);
+            return RelationalModelFactory.createProcedure(transaction, parent.getRepository(), parentModel, id);
+        }
+
     };
 
     /**
@@ -103,6 +128,11 @@ public final class ProcedureImpl extends AbstractProcedureImpl implements Proced
                           final Repository repository,
                           final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**

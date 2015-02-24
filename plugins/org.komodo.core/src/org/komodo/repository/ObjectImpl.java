@@ -10,6 +10,7 @@ package org.komodo.repository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
@@ -19,6 +20,7 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import javax.jcr.nodetype.NodeType;
+import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
 import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
@@ -26,6 +28,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoObjectVisitor;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -35,6 +38,9 @@ import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrNtLexicon;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrTools;
+import org.modeshape.sequencer.ddl.DdlConstants;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 /**
  * An implementation of a {@link KomodoObject Komodo object}.
@@ -199,6 +205,74 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         this.repository = komodoRepository;
         this.path = path;
         this.index = index;
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("getTypeIdentifier", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        List<Descriptor> descriptors = new ArrayList<Descriptor>();
+        descriptors.add(getPrimaryType(transaction));
+        descriptors.addAll(Arrays.asList(getDescriptors(transaction)));
+
+        KomodoTypeRegistry registry  = KomodoTypeRegistry.getInstance();
+        Set<TypeIdentifier> identifiers = null;
+        for (Descriptor descriptor : descriptors) {
+            String name = descriptor.getName();
+            identifiers = registry.getIdentifiers(name);
+            if (! identifiers.isEmpty())
+                break;
+        }
+
+        KomodoType result;
+        if (identifiers == null)
+            result = KomodoType.UNKNOWN;
+        else if (identifiers.size() == 1)
+            result = identifiers.iterator().next().getKomodoType();
+        else {
+            //
+            // Only lexicon id with multiple identifiers is TABLE_ELEMENT
+            //
+
+            // ACCESS_PATTERN, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+            //
+            // COLUMN, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+            //
+            // PRIMARY_KEY, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+            //
+            // UNIQUE_CONSTRAINT, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+
+            String accessPatternConstraint = TeiidDdlConstants.TeiidNonReservedWord.ACCESSPATTERN.toDdl();
+            String primaryKeyConstraint = DdlConstants.PRIMARY_KEY;
+            String uniqueConstraint = TeiidDdlConstants.TeiidReservedWord.UNIQUE.toDdl();
+
+            Property constProperty = getProperty(transaction, TeiidDdlLexicon.Constraint.TYPE);
+            if (constProperty == null)
+                result = KomodoType.UNKNOWN;
+            else {
+                String constType = constProperty.getStringValue(transaction);
+                if (accessPatternConstraint.equals(constType))
+                    result = KomodoType.ACCESS_PATTERN;
+                else if (primaryKeyConstraint.equals(constType))
+                    result = KomodoType.PRIMARY_KEY;
+                else if (uniqueConstraint.equals(constType))
+                    result = KomodoType.UNIQUE_CONSTRAINT;
+                else
+                    result = KomodoType.COLUMN;
+            }
+        }
+
+        if (uow == null) {
+            transaction.commit();
+        }
+
+        return result;
     }
 
     ObjectImpl accessOuter() {

@@ -9,6 +9,9 @@ package org.komodo.relational.model.internal;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
@@ -16,6 +19,7 @@ import org.komodo.relational.model.Table;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -32,6 +36,16 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
      * The resolver of a {@link ForeignKey}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return ForeignKeyImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -71,6 +85,18 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
             return new ForeignKeyImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public ForeignKey create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Object keyRefValue = properties.getValue(Constraint.FOREIGN_KEY_CONSTRAINT);
+            Table parentTable = adapter.adapt(transaction, parent, Table.class);
+            Table keyRef = adapter.adapt(transaction, keyRefValue, Table.class);
+            return RelationalModelFactory.createForeignKey(transaction, parent.getRepository(), parentTable, id, keyRef);
+        }
+
     };
 
     /**
@@ -87,6 +113,11 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
                            final Repository repository,
                            final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**
