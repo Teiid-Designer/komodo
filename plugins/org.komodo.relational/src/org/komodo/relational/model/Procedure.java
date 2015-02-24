@@ -8,6 +8,7 @@
 package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -19,6 +20,11 @@ public interface Procedure extends AbstractProcedure {
      * The type identifier.
      */
     int TYPE_ID = Procedure.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.PROCEDURE;
 
     /**
      * The default value for the <code>non-prepared</code> property. Value is {@value} .

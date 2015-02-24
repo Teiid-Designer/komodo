@@ -33,60 +33,26 @@ import javax.jcr.query.RowIterator;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.RelationalProperty;
+import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.TypeResolver;
-import org.komodo.relational.model.AccessPattern;
-import org.komodo.relational.model.ForeignKey;
-import org.komodo.relational.model.Function;
-import org.komodo.relational.model.Index;
+import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.relational.model.Model;
-import org.komodo.relational.model.Parameter;
-import org.komodo.relational.model.PrimaryKey;
-import org.komodo.relational.model.Procedure;
-import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.Schema;
-import org.komodo.relational.model.Table;
-import org.komodo.relational.model.UniqueConstraint;
-import org.komodo.relational.model.View;
-import org.komodo.relational.model.internal.AccessPatternImpl;
-import org.komodo.relational.model.internal.ForeignKeyImpl;
-import org.komodo.relational.model.internal.FunctionImpl;
-import org.komodo.relational.model.internal.IndexImpl;
 import org.komodo.relational.model.internal.ModelImpl;
-import org.komodo.relational.model.internal.ParameterImpl;
-import org.komodo.relational.model.internal.PrimaryKeyImpl;
-import org.komodo.relational.model.internal.ProcedureImpl;
-import org.komodo.relational.model.internal.ProcedureResultSetImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
-import org.komodo.relational.model.internal.TableImpl;
-import org.komodo.relational.model.internal.UniqueConstraintImpl;
-import org.komodo.relational.model.internal.ViewImpl;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
-import org.komodo.relational.vdb.Condition;
-import org.komodo.relational.vdb.DataRole;
-import org.komodo.relational.vdb.Entry;
-import org.komodo.relational.vdb.Mask;
-import org.komodo.relational.vdb.ModelSource;
-import org.komodo.relational.vdb.Permission;
-import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.relational.vdb.VdbImport;
-import org.komodo.relational.vdb.internal.ConditionImpl;
-import org.komodo.relational.vdb.internal.DataRoleImpl;
-import org.komodo.relational.vdb.internal.EntryImpl;
-import org.komodo.relational.vdb.internal.MaskImpl;
-import org.komodo.relational.vdb.internal.ModelSourceImpl;
-import org.komodo.relational.vdb.internal.PermissionImpl;
-import org.komodo.relational.vdb.internal.TranslatorImpl;
 import org.komodo.relational.vdb.internal.VdbImpl;
-import org.komodo.relational.vdb.internal.VdbImportImpl;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.State;
@@ -95,12 +61,13 @@ import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
+import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  *
  */
-public class WorkspaceManager {
+public class WorkspaceManager implements StringConstants {
 
     private static final String FIND_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s] WHERE ISDESCENDANTNODE('" //$NON-NLS-1$
                                                      + RepositoryImpl.WORKSPACE_ROOT + "') ORDER BY [jcr:name] ASC"; //$NON-NLS-1$
@@ -118,7 +85,6 @@ public class WorkspaceManager {
 
     private static KeyInValueHashMap< Repository.Id, WorkspaceManager > instances = new KeyInValueHashMap< Repository.Id, WorkspaceManager >(
                                                                                                                                              adapter);
-
     private final Repository repository;
 
     /**
@@ -215,40 +181,11 @@ public class WorkspaceManager {
     public Model createModel( UnitOfWork uow,
                               KomodoObject parent,
                               String modelName ) throws KException {
-        ArgCheck.isNotEmpty(modelName, "modelName"); //$NON-NLS-1$
+        KomodoObject kobject = create(uow, parent, modelName, KomodoType.MODEL);
+        if (! (kobject instanceof Model))
+           return null;
 
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-createModel", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String parentPath = null;
-
-            if (parent == null) {
-                parentPath = this.repository.komodoWorkspace(transaction).getAbsolutePath();
-            } else {
-                validateWorkspaceMember(transaction, parent);
-                parentPath = parent.getAbsolutePath();
-            }
-
-            final KomodoObject kobject = getRepository().add(transaction,
-                                                             parentPath,
-                                                             modelName,
-                                                             VdbLexicon.Vdb.DECLARATIVE_MODEL);
-            final Model result =  new ModelImpl(transaction, getRepository(), kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return (Model) kobject;
     }
 
     /**
@@ -265,32 +202,11 @@ public class WorkspaceManager {
     public Schema createSchema( UnitOfWork uow,
                                 KomodoObject parent,
                                 String schemaName ) throws KException {
-        ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(schemaName, "schemaName"); //$NON-NLS-1$
+        KomodoObject kobject = create(uow, parent, schemaName, KomodoType.SCHEMA);
+        if (! (kobject instanceof Schema))
+           return null;
 
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-createSchema", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject kobject = getRepository().add(transaction,
-                                                             parent.getAbsolutePath(),
-                                                             schemaName,
-                                                             KomodoLexicon.Schema.NODE_TYPE);
-            final Schema result = new SchemaImpl(transaction, getRepository(), kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return (Schema) kobject;
     }
 
     /**
@@ -307,38 +223,11 @@ public class WorkspaceManager {
     public Teiid createTeiid( UnitOfWork uow,
                               KomodoObject parent,
                               String id ) throws KException {
-        ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
+        KomodoObject kobject = create(uow, parent, id, KomodoType.TEIID);
+        if (! (kobject instanceof Teiid))
+           return null;
 
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-createTeiid", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            String parentPath = null;
-
-            if (parent != null) {
-                validateWorkspaceMember(transaction, parent);
-                parentPath = parent.getAbsolutePath();
-            }
-
-            final KomodoObject kobject = getRepository().add(transaction,
-                                                             parentPath,
-                                                             id,
-                                                             KomodoLexicon.Teiid.NODE_TYPE);
-            final Teiid result = new TeiidImpl(transaction, getRepository(), kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return (Teiid) kobject;
     }
 
     /**
@@ -359,36 +248,64 @@ public class WorkspaceManager {
                           final KomodoObject parent,
                           final String vdbName,
                           final String externalFilePath ) throws KException {
+        ArgCheck.isNotNull(externalFilePath, "externalFilePath"); //$NON-NLS-1$
+
+        RelationalProperty filePathProperty = new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE,
+                                                                                                         externalFilePath);
+
+        KomodoObject kobject = create(uow, parent, vdbName, KomodoType.VDB, filePathProperty);
+        if (! (kobject instanceof Model))
+           return null;
+
+        return (Vdb) kobject;
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param parent
+     *        the parent of the new object (cannot be <code>null</code>)
+     * @param id
+     *        the identifier of the object (cannot be <code>null</code>)
+     * @param type
+     *        the type of the object (cannot be <code>null</code>)
+     * @param properties
+     *        any additional properties required for construction
+     *
+     * @return new object
+     * @throws KException if an error occurs
+     */
+    public KomodoObject create(UnitOfWork uow,
+                                                  KomodoObject parent,
+                                                  String id,
+                                                  KomodoType type,
+                                                  RelationalProperty... properties) throws KException {
+        ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
+        ArgCheck.isNotNull(type);
+
+        RelationalProperties relProperties = new RelationalProperties();
+        if (properties != null) {
+            for (RelationalProperty property : properties) {
+                relProperties.add(property);
+            }
+        }
+
         UnitOfWork transaction = uow;
 
         if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-createvdb", false, null); //$NON-NLS-1$
+            String logType = KomodoType.UNKNOWN.equals(type) ? "object" : type.toString(); //$NON-NLS-1$
+            transaction = getRepository().createTransaction("workspacemanager-create" + logType, false, null); //$NON-NLS-1$
         }
 
         assert (transaction != null);
 
-        try {
-            String parentPath = null;
+        TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
+        TypeResolver resolver = registry.getResolver(type);
+        if (resolver == null)
+            return parent.addChild(transaction, id, JcrConstants.NT_UNSTRUCTURED);
 
-            if (parent != null) {
-                validateWorkspaceMember(transaction, parent);
-                parentPath = parent.getAbsolutePath();
-            }
-
-            final Vdb result = RelationalModelFactory.createVdb(transaction,
-                                                                this.repository,
-                                                                parentPath,
-                                                                vdbName,
-                                                                externalFilePath);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        return resolver.create(transaction, parent, id, relProperties);
     }
 
     /**
@@ -617,24 +534,30 @@ public class WorkspaceManager {
     }
 
     /**
+     * Attempts to adapt the given object to a relational model typed class.
+     * If the object is not an instance of {@link KomodoObject} then null is
+     * returned.
+     *
+     * The type id of the {@link KomodoObject} is extracted and the correct
+     * relational model object created. If the latter is not assignable from the
+     * given adapted class then it is concluded the adaption should fail and
+     * null is returned, otherwise the new object is retured.
+     *
      * @param <T>
      *        the desired outcome class
      * @param uow
      *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param kobject
-     *        the object being resolved (cannot be <code>null</code>_
+     * @param object
+     *        the object being resolved
      * @param resolvedClass
      *        the class the object should be resolved to (cannot be <code>null</code>)
      * @return the strong typed object of the desired type
      * @throws KException
      *         if a resolver could not be found, if the object was not resolvable, or if an error occurred
      */
-    public < T extends KomodoObject > T resolve( final UnitOfWork uow,
-                                                 final KomodoObject kobject,
-                                                 final Class< T > resolvedClass ) throws KException {
-        ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
-        ArgCheck.isNotNull(resolvedClass, "resolvedClass"); //$NON-NLS-1$
-
+    public <T extends KomodoObject> T resolve(final UnitOfWork uow,
+                                                                              final Object object,
+                                                                              final Class<T> resolvedClass) throws KException {
         UnitOfWork transaction = uow;
 
         if (uow == null) {
@@ -643,74 +566,14 @@ public class WorkspaceManager {
 
         assert (transaction != null);
 
-        TypeResolver resolver = null;
-
-        // model
-        if (AccessPattern.class.equals(resolvedClass)) {
-            resolver = AccessPatternImpl.RESOLVER;
-        } else if (ForeignKey.class.equals(resolvedClass)) {
-            resolver = ForeignKeyImpl.RESOLVER;
-        } else if (Function.class.equals(resolvedClass)) {
-            resolver = FunctionImpl.RESOLVER;
-        } else if (Index.class.equals(resolvedClass)) {
-            resolver = IndexImpl.RESOLVER;
-        } else if (Model.class.equals(resolvedClass)) {
-            resolver = ModelImpl.RESOLVER;
-        } else if (Parameter.class.equals(resolvedClass)) {
-            resolver = ParameterImpl.RESOLVER;
-        } else if (PrimaryKey.class.equals(resolvedClass)) {
-            resolver = PrimaryKeyImpl.RESOLVER;
-        } else if (Procedure.class.equals(resolvedClass)) {
-            resolver = ProcedureImpl.RESOLVER;
-        } else if (ProcedureResultSet.class.equals(resolvedClass)) {
-            resolver = ProcedureResultSetImpl.RESOLVER;
-        } else if (Schema.class.equals(resolvedClass)) {
-            resolver = SchemaImpl.RESOLVER;
-        } else if (Table.class.equals(resolvedClass)) {
-            resolver = TableImpl.RESOLVER;
-        } else if (UniqueConstraint.class.equals(resolvedClass)) {
-            resolver = UniqueConstraintImpl.RESOLVER;
-        } else if (View.class.equals(resolvedClass)) {
-            resolver = ViewImpl.RESOLVER;
-        } else if (Teiid.class.equals(resolvedClass)) {
-            resolver = TeiidImpl.RESOLVER;
-        } else if (Condition.class.equals(resolvedClass)) {
-            resolver = ConditionImpl.RESOLVER;
-        } else if (DataRole.class.equals(resolvedClass)) {
-            resolver = DataRoleImpl.RESOLVER;
-        } else if (Entry.class.equals(resolvedClass)) {
-            resolver = EntryImpl.RESOLVER;
-        } else if (Mask.class.equals(resolvedClass)) {
-            resolver = MaskImpl.RESOLVER;
-        } else if (ModelSource.class.equals(resolvedClass)) {
-            resolver = ModelSourceImpl.RESOLVER;
-        } else if (Permission.class.equals(resolvedClass)) {
-            resolver = PermissionImpl.RESOLVER;
-        } else if (Translator.class.equals(resolvedClass)) {
-            resolver = TranslatorImpl.RESOLVER;
-        } else if (Vdb.class.equals(resolvedClass)) {
-            resolver = VdbImpl.RESOLVER;
-        } else if (VdbImport.class.equals(resolvedClass)) {
-            resolver = VdbImportImpl.RESOLVER;
-        }
-
-        if (resolver == null) {
-            throw new KException(Messages.getString(Relational.TYPE_RESOLVER_NOT_FOUND, kobject.getClass().getName()));
-        }
-
-        if (!resolver.resolvable(transaction, this.repository, kobject)) {
-            throw new KException(Messages.getString(Relational.OBJECT_NOT_RESOLVABLE,
-                                                    kobject.getAbsolutePath(),
-                                                    resolver.getClass().getName()));
-        }
-
-        final T result = (T)resolver.resolve(transaction, this.repository, kobject);
+        AdapterFactory adapter = new AdapterFactory(getRepository());
+        T kobject = adapter.adapt(transaction, object, resolvedClass);
 
         if (uow == null) {
             transaction.commit();
         }
 
-        return result;
+        return kobject;
     }
 
     private void validateWorkspaceMember( final UnitOfWork uow,

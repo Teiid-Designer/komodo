@@ -7,6 +7,7 @@
  */
 package org.komodo.relational.internal;
 
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
@@ -20,6 +21,7 @@ import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
@@ -34,10 +36,13 @@ import org.komodo.relational.model.internal.ParameterImpl;
 import org.komodo.relational.model.internal.PrimaryKeyImpl;
 import org.komodo.relational.model.internal.ProcedureImpl;
 import org.komodo.relational.model.internal.ProcedureResultSetImpl;
+import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.relational.model.internal.StatementOptionImpl;
 import org.komodo.relational.model.internal.TableImpl;
 import org.komodo.relational.model.internal.UniqueConstraintImpl;
 import org.komodo.relational.model.internal.ViewImpl;
+import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Entry;
@@ -819,6 +824,58 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentWorkspacePath
+     *        the parent path (can be empty)
+     * @param schemaName
+     *        the name of the schema fragment to create (cannot be empty)
+     * @return the Schema model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static Schema createSchema( final UnitOfWork uow,
+                                 final Repository repository,
+                                 final String parentWorkspacePath,
+                                 final String schemaName) throws KException {
+        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(schemaName, "schemaName"); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("relationalmodelfactory-createSchema", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            // make sure path is in the library
+            String parentPath = parentWorkspacePath;
+            final String workspacePath = repository.komodoWorkspace(transaction).getAbsolutePath();
+
+            if (StringUtils.isBlank(parentWorkspacePath)) {
+                parentPath = workspacePath;
+            } else if (!parentPath.startsWith(workspacePath)) {
+                parentPath = (workspacePath + parentPath);
+            }
+
+            final KomodoObject kobject = repository.add(transaction, parentPath, schemaName, KomodoLexicon.Schema.NODE_TYPE);
+            final Schema result = new SchemaImpl(transaction, repository, kobject.getAbsolutePath());
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param optionContainer
      *        the parent where the option is being created (can be empty if created at the root of the workspace)
      * @param optionName
@@ -897,6 +954,58 @@ public final class RelationalModelFactory {
             setCreateStatementProperties(transaction, kobject);
 
             final Table result = new TableImpl(transaction, repository, kobject.getAbsolutePath());
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentWorkspacePath
+     *        the parent path (can be empty)
+     * @param id
+     *        the name of the schema fragment to create (cannot be empty)
+     * @return the Teiid model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static Teiid createTeiid( final UnitOfWork uow,
+                                 final Repository repository,
+                                 final String parentWorkspacePath,
+                                 final String id) throws KException {
+        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("relationalmodelfactory-createTeiid", false, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            // make sure path is in the library
+            String parentPath = parentWorkspacePath;
+            final String workspacePath = repository.komodoWorkspace(transaction).getAbsolutePath();
+
+            if (StringUtils.isBlank(parentWorkspacePath)) {
+                parentPath = workspacePath;
+            } else if (!parentPath.startsWith(workspacePath)) {
+                parentPath = (workspacePath + parentPath);
+            }
+
+            final KomodoObject kobject = repository.add(transaction, parentPath, id, KomodoLexicon.Teiid.NODE_TYPE);
+            final Teiid result = new TeiidImpl(transaction, repository, kobject.getAbsolutePath());
 
             if (uow == null) {
                 transaction.commit();

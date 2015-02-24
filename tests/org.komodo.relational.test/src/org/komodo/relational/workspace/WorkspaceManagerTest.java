@@ -10,11 +10,15 @@ package org.komodo.relational.workspace;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.RelationalProperty;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Function;
@@ -41,8 +45,11 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -61,9 +68,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         wsMgr = null;
     }
 
-    private Model createModel( final UnitOfWork uow,
-                               final KomodoObject parent,
-                               final String modelName ) throws Exception {
+    private Model createModel(final UnitOfWork uow, final KomodoObject parent, final String modelName) throws Exception {
         UnitOfWork transaction = uow;
 
         if (uow == null) {
@@ -235,11 +240,11 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         assertThat(this.wsMgr.findVdbs(null).length, is(0));
     }
 
-    @Test(expected = KException.class)
+    @Test
     public void shouldNotResolveAsVdb() throws Exception {
         final Model model = createModel(null, null, "model");
         final KomodoObject kobject = new ObjectImpl(_repo, model.getAbsolutePath(), model.getIndex());
-        this.wsMgr.resolve(null, kobject, Vdb.class);
+        assertNull(this.wsMgr.resolve(null, kobject, Vdb.class));
     }
 
     @Test
@@ -426,4 +431,198 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         assertThat(this.wsMgr.resolve(null, kobject, View.class), is(instanceOf(View.class)));
     }
 
+    @Test
+    public void shouldAdaptAllRelationalObjects() throws Exception {
+        KomodoObject workspace = _repo.komodoWorkspace(null);
+        Vdb vdb = RelationalModelFactory.createVdb(null, _repo, workspace.getAbsolutePath(), "testControlVdb", "/test1");
+        Model model = RelationalModelFactory.createModel(null, _repo, vdb, "testControlModel");
+        Table table = RelationalModelFactory.createTable(null, _repo, model, "testControlTable");
+        KomodoObject o = null;
+
+        // Null object should safely return null
+        assertNull(wsMgr.resolve(null, o, Vdb.class));
+
+        // Vdb should always equal vdb
+        o = vdb;
+        Vdb vdb1 = wsMgr.resolve(null, o, Vdb.class);
+        assertNotNull(vdb1);
+
+        // ObjectImpl referencing a vdb should be able to be adapted to a Vdb
+        ObjectImpl vdbObj = new ObjectImpl(_repo, vdb.getAbsolutePath(), 0);
+        Vdb vdb2 = wsMgr.resolve(null, vdbObj, Vdb.class);
+        assertNotNull(vdb2);
+
+        // Model should always equal model
+        o = model;
+        Model model1 = wsMgr.resolve(null, o, Model.class);
+        assertNotNull(model1);
+
+        // ObjectImpl referencing a model should be able to be adapted to a Model
+        ObjectImpl modelObj = new ObjectImpl(_repo, model.getAbsolutePath(), 0);
+        Model model2 = wsMgr.resolve(null, modelObj, Model.class);
+        assertNotNull(model2);
+
+        // Table should always equal table
+        o = table;
+        Table table1 = wsMgr.resolve(null, o, Table.class);
+        assertNotNull(table1);
+
+        // ObjectImpl referencing a table should be able to be adapted to a Table
+        ObjectImpl tableObj = new ObjectImpl(_repo, table.getAbsolutePath(), 0);
+        Table table2 = wsMgr.resolve(null, tableObj, Table.class);
+        assertNotNull(table2);
+    }
+
+    @Test
+    public void shouldCreateAllRelationalObjects() throws Exception {
+        KomodoObject workspace = _repo.komodoWorkspace(null);
+        Vdb vdb = RelationalModelFactory.createVdb(null, _repo, workspace.getAbsolutePath(), "testControlVdb", "/test1");
+        Model model = RelationalModelFactory.createModel(null, _repo, vdb, "testControlModel");
+        Table table = RelationalModelFactory.createTable(null, _repo, model, "testControlTable");
+        Procedure procedure = RelationalModelFactory.createProcedure(null, _repo, model, "testControlProcedure");
+        DataRole dataRole = RelationalModelFactory.createDataRole(null, _repo, vdb, "testControlDataRole");
+        Permission permission = RelationalModelFactory.createPermission(null, _repo, dataRole, "testControlPermission");
+
+        for (KomodoType type : KomodoType.values()) {
+            String id = "test" + type.getType();
+            switch (type) {
+                case FOREIGN_KEY: {
+                    Table refTable = RelationalModelFactory.createTable(null, _repo, model, "testRefTable");
+                    KomodoObject result = wsMgr.create(null, table, id, type, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, refTable));
+                    assertNotNull(result);
+                    break;
+                }
+                case STATEMENT_OPTION: {
+                    String optionValue = "testOptionValue";
+                    KomodoObject result = wsMgr.create(null, table, id, type, new RelationalProperty(StandardDdlLexicon.VALUE, optionValue));
+                    assertNotNull(result);
+                    break;
+                }
+                case VDB_ENTRY: {
+                    String entryPath = "testEntryPath";
+                    KomodoObject result = wsMgr.create(null, vdb, id, type, new RelationalProperty(VdbLexicon.Entry.PATH, entryPath));
+                    assertNotNull(result);
+                    break;
+                }
+                case VDB_TRANSLATOR: {
+                    String transType = "testTranslatorType";
+                    KomodoObject result = wsMgr.create(null, vdb, id, type, new RelationalProperty(VdbLexicon.Translator.TYPE, transType));
+                    assertNotNull(result);
+                    break;
+                }
+                case VDB: {
+                    String filePath = "/test2";
+                    KomodoObject result = wsMgr.create(null, workspace, "test" + id, type, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, filePath));
+                    assertNotNull(result);
+                    break;
+                }
+                case ACCESS_PATTERN: {
+                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case COLUMN: {
+                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case FUNCTION: {
+                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case INDEX: {
+                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case MODEL: {
+                    KomodoObject result = wsMgr.create(null, vdb, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case PARAMETER: {
+                    KomodoObject result = wsMgr.create(null, procedure, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case PRIMARY_KEY: {
+                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case PROCEDURE: {
+                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case PROCEDURE_RESULT_SET: {
+                    KomodoObject result = wsMgr.create(null, procedure, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case SCHEMA: {
+                    KomodoObject result = wsMgr.create(null, workspace, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case TABLE: {
+                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case TEIID: {
+                    KomodoObject result = wsMgr.create(null, workspace, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case UNIQUE_CONSTRAINT: {
+                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case VDB_CONDITION: {
+                    KomodoObject result = wsMgr.create(null, permission, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case VDB_DATA_ROLE: {
+                    KomodoObject result = wsMgr.create(null, vdb, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case VDB_IMPORT: {
+                    KomodoObject result = wsMgr.create(null, vdb, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case VDB_MASK: {
+                    KomodoObject result = wsMgr.create(null, permission, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case VDB_MODEL_SOURCE: {
+                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case VDB_PERMISSION: {
+                    KomodoObject result = wsMgr.create(null, dataRole, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case VIEW: {
+                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case UNKNOWN:
+                default: {
+                    KomodoObject result = wsMgr.create(null, workspace, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+            }
+        }
+    }
 }

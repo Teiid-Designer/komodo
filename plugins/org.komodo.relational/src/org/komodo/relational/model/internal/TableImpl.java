@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
@@ -18,6 +20,7 @@ import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Index;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
@@ -25,6 +28,7 @@ import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -69,6 +73,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return TableImpl.class;
+        }
+
         /**
          * {@inheritDoc}
          *
@@ -102,6 +116,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
             return new TableImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Table create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Model parentModel = adapter.adapt(transaction, parent, Model.class);
+            return RelationalModelFactory.createTable(transaction, parent.getRepository(), parentModel, id);
+        }
+
     };
 
     /**
@@ -118,6 +142,11 @@ public class TableImpl extends RelationalObjectImpl implements Table {
                       final Repository repository,
                       final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**

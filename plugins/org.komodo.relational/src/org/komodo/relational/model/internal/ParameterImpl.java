@@ -13,6 +13,8 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
@@ -22,6 +24,7 @@ import org.komodo.relational.model.StatementOption;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -56,6 +59,16 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return ParameterImpl.class;
+        }
+
         /**
          * {@inheritDoc}
          *
@@ -89,6 +102,16 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
             return new ParameterImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Parameter create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Procedure parentProc = adapter.adapt(transaction, parent, Procedure.class);
+            return RelationalModelFactory.createParameter(transaction, parent.getRepository(), parentProc, id);
+        }
+
     };
 
     /**
@@ -105,6 +128,11 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
                           final Repository repository,
                           final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**

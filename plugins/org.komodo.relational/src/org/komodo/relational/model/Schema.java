@@ -23,6 +23,7 @@ package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -34,6 +35,11 @@ public interface Schema extends RelationalObject, Exportable {
      * The type identifier.
      */
     int TYPE_ID = Schema.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.SCHEMA;
 
     /**
      * An empty array of schemas.

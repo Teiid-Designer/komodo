@@ -21,6 +21,14 @@ public interface KomodoObject extends KNode {
     KomodoObject[] EMPTY_ARRAY = new KomodoObject[0];
 
     /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @return Type identifier of this komodo object
+     * @throws KException if error occurs
+     */
+    KomodoType getTypeIdentifier(UnitOfWork transaction) throws KException;
+
+    /**
      * Adds a child with the supplied name and primary type.
      *
      * @param transaction

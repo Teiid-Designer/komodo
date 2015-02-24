@@ -7,11 +7,16 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Index;
+import org.komodo.relational.model.Table;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -26,6 +31,16 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
      * The resolver of a {@link Index}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return IndexImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -65,6 +80,16 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
             return new IndexImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Index create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Table parentTable = adapter.adapt(transaction, parent, Table.class);
+            return RelationalModelFactory.createIndex(transaction, parent.getRepository(), parentTable, id);
+        }
+
     };
 
     /**
@@ -81,6 +106,11 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
                       final Repository repository,
                       final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**

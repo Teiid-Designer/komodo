@@ -8,6 +8,7 @@
 package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -19,6 +20,11 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
      * The type identifier.
      */
     int TYPE_ID = Table.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.TABLE;
 
     /**
      * The on commit value.

@@ -7,12 +7,17 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -27,6 +32,16 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
      * The resolver of a {@link VdbImport}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return VdbImportImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -61,6 +76,16 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
             return new VdbImportImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public VdbImport create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Vdb parentVdb = adapter.adapt(transaction, parent, Vdb.class);
+            return RelationalModelFactory.createVdbImport(transaction, parent.getRepository(), parentVdb, id);
+        }
+
     };
 
     /**
@@ -77,6 +102,11 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
                           final Repository repository,
                           final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return KomodoType.VDB_IMPORT;
     }
 
     /**
