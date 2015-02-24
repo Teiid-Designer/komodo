@@ -11,11 +11,13 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Model;
@@ -24,9 +26,11 @@ import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
 import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class ModelImplTest extends RelationalModelTest {
@@ -38,7 +42,15 @@ public final class ModelImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final WorkspaceManager wsMgr = WorkspaceManager.getInstance(_repo);
-        this.model = wsMgr.createModel(null, null, NAME);
+
+        KomodoObject workspace = _repo.komodoWorkspace(null);
+        assertNotNull(_repo.getFromWorkspace(null, workspace.getAbsolutePath()));
+
+        Vdb vdb = RelationalModelFactory.createVdb(null, _repo, workspace.getAbsolutePath(), "parentVdb", "/test1");
+        assertNotNull(_repo.getFromWorkspace(null, vdb.getAbsolutePath()));
+
+        this.model = wsMgr.createModel(null, vdb, NAME);
+        assertNotNull(_repo.getFromWorkspace(null, model.getAbsolutePath()));
     }
 
     @Test

@@ -7,9 +7,7 @@
 */
 package org.komodo.shell.commands.core;
 
-import java.util.ArrayList;
 import java.util.List;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
@@ -40,28 +38,12 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
     }
 
     /**
-     * @see org.komodo.shell.api.ShellCommand#initValidWsContextTypes()
-     */
-    @Override
-    public void initValidWsContextTypes() {
-        List<String> validTypes = new ArrayList<String>(1);
-        validTypes.add(KomodoLexicon.Komodo.WORKSPACE);
-        this.validWsContextTypes = validTypes;
-    }
-
-    /**
      * @see org.komodo.shell.api.ShellCommand#execute()
      */
     @Override
     public boolean execute() throws Exception {
         String subcmdArg = requiredArgument(0, Messages.getString("CreateCommand.InvalidArgMsg_SubCommand")); //$NON-NLS-1$
         String objNameArg = requiredArgument(1, Messages.getString("CreateCommand.InvalidArgMsg_ObjectName")); //$NON-NLS-1$
-
-        // Check that creating a type is valid at this context
-        if (!this.validWsContextTypes.contains(getWorkspaceStatus().getCurrentContext().getName())) {
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("CreateCommand.ErrorInvalidTypeAtContext", subcmdArg.toUpperCase())); //$NON-NLS-1$
-            return false;
-        }
 
         try {
             create(subcmdArg, objNameArg);
@@ -108,7 +90,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Translator.TYPE, transType));
                 break;
             case VDB: {
-                String filePath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_VdbFilePath")); //$NON-NLS-1$
+                String filePath = optionalArgument(2, Messages.getString("CreateCommand.DefaultVdb_VdbFilePath")); //$NON-NLS-1$
                 wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, filePath));
                 break;
             }

@@ -42,7 +42,6 @@ import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.repository.ObjectImpl;
-import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -117,6 +116,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         final String externalFilePath = "extPath";
         final Vdb vdb = this.wsMgr.createVdb(transaction, parent, vdbName, externalFilePath);
+        assertNotNull(vdb);
 
         assertThat(vdb.getPrimaryType(transaction).getName(), is(VdbLexicon.Vdb.VIRTUAL_DATABASE));
         assertThat(vdb.getName(transaction), is(vdbName));
@@ -161,7 +161,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldFindModels() throws Exception {
-        final Vdb parent = createVdb(null, null, "vdb");
+        Vdb parent = createVdb(null, null, "vdb");
         final String prefix = this.name.getMethodName();
         int suffix = 0;
 
@@ -172,9 +172,12 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         // create under a folder
         final KomodoObject folder = _repo.add(null, parent.getAbsolutePath(), "folder", null);
+        assertNotNull(_repo.getFromWorkspace(null, folder.getAbsolutePath()));
 
         for (int i = 0; i < 7; ++i) {
-            createModel(null, folder, (prefix + ++suffix));
+            suffix++;
+            parent = createVdb(null, folder, "vdb" + suffix);
+            createModel(null, parent, (prefix + suffix));
         }
 
         assertThat(this.wsMgr.findModels(null).length, is(suffix));
@@ -200,22 +203,22 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         assertThat(this.wsMgr.findVdbs(null).length, is(suffix));
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = Exception.class )
     public void shouldNotAllowEmptyExternalFilePath() throws Exception {
         this.wsMgr.createVdb(null, null, "vdbName", StringConstants.EMPTY_STRING);
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = Exception.class )
     public void shouldNotAllowEmptyVdbName() throws Exception {
         this.wsMgr.createVdb(null, null, StringConstants.EMPTY_STRING, "externalFilePath");
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = Exception.class )
     public void shouldNotAllowNullExternalFilePath() throws Exception {
         this.wsMgr.createVdb(null, null, "vdbName", null);
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = Exception.class )
     public void shouldNotAllowNullVdbName() throws Exception {
         this.wsMgr.createVdb(null, null, null, "externalFilePath");
     }
@@ -242,7 +245,8 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldNotResolveAsVdb() throws Exception {
-        final Model model = createModel(null, null, "model");
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
         final KomodoObject kobject = new ObjectImpl(_repo, model.getAbsolutePath(), model.getIndex());
         assertNull(this.wsMgr.resolve(null, kobject, Vdb.class));
     }
@@ -294,7 +298,8 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldResolveFunction() throws Exception {
-        final Model model = createModel(null, null, "model");
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
         final Function function = model.addFunction(null, "function");
         final KomodoObject kobject = new ObjectImpl(_repo, function.getAbsolutePath(), function.getIndex());
         assertThat(this.wsMgr.resolve(null, kobject, Function.class), is(instanceOf(Function.class)));
@@ -320,14 +325,16 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldResolveModel() throws Exception {
-        final Model model = createModel(null, null, "model");
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
         final KomodoObject kobject = new ObjectImpl(_repo, model.getAbsolutePath(), model.getIndex());
         assertThat(this.wsMgr.resolve(null, kobject, Model.class), is(instanceOf(Model.class)));
     }
 
     @Test
     public void shouldResolveModelSource() throws Exception {
-        final Model model = createModel(null, null, "model");
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
         final ModelSource source = model.addSource(null, "source");
         final KomodoObject kobject = new ObjectImpl(_repo, source.getAbsolutePath(), source.getIndex());
         assertThat(this.wsMgr.resolve(null, kobject, ModelSource.class), is(instanceOf(ModelSource.class)));
@@ -335,7 +342,8 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldResolveParameter() throws Exception {
-        final Model model = createModel(null, null, "model");
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
         final Procedure procedure = model.addProcedure(null, "procedure");
         final Parameter param = procedure.addParameter(null, "param");
         final KomodoObject kobject = new ObjectImpl(_repo, param.getAbsolutePath(), param.getIndex());
@@ -361,7 +369,8 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldResolveProcedure() throws Exception {
-        final Model model = createModel(null, null, "model");
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
         final Procedure procedure = model.addProcedure(null, "procedure");
         final KomodoObject kobject = new ObjectImpl(_repo, procedure.getAbsolutePath(), procedure.getIndex());
         assertThat(this.wsMgr.resolve(null, kobject, Procedure.class), is(instanceOf(Procedure.class)));
@@ -370,7 +379,8 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     @Test
     public void shouldResolveProcedureResultSet() throws Exception {
         final Repository.UnitOfWork uow = _repo.createTransaction(this.name.getMethodName(), false, null);
-        final Model model = createModel(uow, null, "model");
+        final Vdb vdb = createVdb(uow, null, "vdb");
+        final Model model = createModel(uow, vdb, "model");
         final Procedure procedure = model.addProcedure(uow, "procedure");
         final ProcedureResultSet resultSet = procedure.getResultSet(uow, true);
         final KomodoObject kobject = new ObjectImpl(_repo, resultSet.getAbsolutePath(), resultSet.getIndex());
@@ -425,7 +435,8 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldResolveView() throws Exception {
-        final Model model = createModel(null, null, "model");
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
         final View view = model.addView(null, "view");
         final KomodoObject kobject = new ObjectImpl(_repo, view.getAbsolutePath(), view.getIndex());
         assertThat(this.wsMgr.resolve(null, kobject, View.class), is(instanceOf(View.class)));

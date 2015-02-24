@@ -178,9 +178,8 @@ public class WorkspaceManager implements StringConstants {
      * @throws KException
      *         if an error occurs
      */
-    public Model createModel( UnitOfWork uow,
-                              KomodoObject parent,
-                              String modelName ) throws KException {
+    public Model createModel( UnitOfWork uow, KomodoObject parent, String modelName ) throws KException {
+
         KomodoObject kobject = create(uow, parent, modelName, KomodoType.MODEL);
         if (! (kobject instanceof Model))
            return null;
@@ -199,9 +198,11 @@ public class WorkspaceManager implements StringConstants {
      * @throws KException
      *         if an error occurs
      */
-    public Schema createSchema( UnitOfWork uow,
-                                KomodoObject parent,
-                                String schemaName ) throws KException {
+    public Schema createSchema( UnitOfWork uow, KomodoObject parent, String schemaName ) throws KException {
+
+        if (parent == null)
+            parent = getRepository().komodoWorkspace(uow);
+
         KomodoObject kobject = create(uow, parent, schemaName, KomodoType.SCHEMA);
         if (! (kobject instanceof Schema))
            return null;
@@ -220,9 +221,11 @@ public class WorkspaceManager implements StringConstants {
      * @throws KException
      *         if an error occurs
      */
-    public Teiid createTeiid( UnitOfWork uow,
-                              KomodoObject parent,
-                              String id ) throws KException {
+    public Teiid createTeiid( UnitOfWork uow, KomodoObject parent, String id ) throws KException {
+
+        if (parent == null)
+            parent = getRepository().komodoWorkspace(uow);
+
         KomodoObject kobject = create(uow, parent, id, KomodoType.TEIID);
         if (! (kobject instanceof Teiid))
            return null;
@@ -245,16 +248,19 @@ public class WorkspaceManager implements StringConstants {
      *         if an error occurs
      */
     public Vdb createVdb( final UnitOfWork uow,
-                          final KomodoObject parent,
-                          final String vdbName,
-                          final String externalFilePath ) throws KException {
+                                         KomodoObject parent,
+                                         final String vdbName,
+                                         final String externalFilePath ) throws KException {
         ArgCheck.isNotNull(externalFilePath, "externalFilePath"); //$NON-NLS-1$
 
         RelationalProperty filePathProperty = new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE,
                                                                                                          externalFilePath);
 
+        if (parent == null)
+            parent = getRepository().komodoWorkspace(uow);
+
         KomodoObject kobject = create(uow, parent, vdbName, KomodoType.VDB, filePathProperty);
-        if (! (kobject instanceof Model))
+        if (! (kobject instanceof Vdb))
            return null;
 
         return (Vdb) kobject;
@@ -280,6 +286,7 @@ public class WorkspaceManager implements StringConstants {
                                                   String id,
                                                   KomodoType type,
                                                   RelationalProperty... properties) throws KException {
+
         ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
         ArgCheck.isNotNull(type);
@@ -292,7 +299,6 @@ public class WorkspaceManager implements StringConstants {
         }
 
         UnitOfWork transaction = uow;
-
         if (uow == null) {
             String logType = KomodoType.UNKNOWN.equals(type) ? "object" : type.toString(); //$NON-NLS-1$
             transaction = getRepository().createTransaction("workspacemanager-create" + logType, false, null); //$NON-NLS-1$
@@ -300,12 +306,24 @@ public class WorkspaceManager implements StringConstants {
 
         assert (transaction != null);
 
-        TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
-        TypeResolver resolver = registry.getResolver(type);
-        if (resolver == null)
-            return parent.addChild(transaction, id, JcrConstants.NT_UNSTRUCTURED);
+        KomodoObject result = null;
+        try {
+            TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
+            TypeResolver resolver = registry.getResolver(type);
+            if (resolver == null)
+                return parent.addChild(transaction, id, JcrConstants.NT_UNSTRUCTURED);
 
-        return resolver.create(transaction, parent, id, relProperties);
+            result = resolver.create(transaction, parent, id, relProperties);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+        } catch (Exception ex) {
+            throw handleError(uow, transaction, ex);
+        }
+
+        return result;
     }
 
     /**

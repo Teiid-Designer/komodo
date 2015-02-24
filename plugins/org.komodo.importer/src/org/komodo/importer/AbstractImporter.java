@@ -166,29 +166,33 @@ public abstract class AbstractImporter implements StringConstants {
 
         switch(importOptions.getImportType()) {
             case MODEL:
+            {
                 ModelType.Type modelType = (ModelType.Type) importOptions.getOption(OptionKeys.MODEL_TYPE);
-                Model model = wkspManager.createModel(transaction, workspace, name);
+                Vdb vdb = wkspManager.createVdb(transaction, workspace, "vdb-for-" + name, name); //$NON-NLS-1$
+                Model model = wkspManager.createModel(transaction, vdb, name);
                 model.setModelType(transaction, Model.Type.valueOf(modelType.toString()));
                 model.setModelDefinition(transaction, content);
                 model.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
                 resultNode = model;
                 break;
-
+            }
             case SCHEMA:
+            {
                 Schema schema = wkspManager.createSchema(transaction, workspace, name);
                 schema.setRendition(transaction, content);
                 schema.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
                 resultNode = schema;
                 break;
-
+            }
             case VDB:
+            {
                 String vdbFilePath = importOptions.getOption(OptionKeys.VDB_FILE_PATH).toString();
                 Vdb vdb = wkspManager.createVdb(transaction, workspace, name, vdbFilePath);
                 KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
                 fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
                 resultNode = vdb;
                 break;
-
+            }
             default:
                 break;
         }

@@ -1,5 +1,6 @@
-#create a model, then cd into it
+#create a vdb and a model, then cd into it
 cd tko:workspace
-create vdbModel MyModel
+create vdb MyVdb
+cd MyVdb
+create model MyModel
 cd MyModel
-
