@@ -23,12 +23,15 @@ package org.komodo.relational.teiid.internal;
 
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -53,6 +56,16 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      * The resolver of a {@link Teiid}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return TeiidImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -85,6 +98,14 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
                               final Repository repository,
                               final KomodoObject kobject ) throws KException {
             return new TeiidImpl(transaction, repository, kobject.getAbsolutePath());
+        }
+
+        @Override
+        public Teiid create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            return RelationalModelFactory.createTeiid(transaction, parent.getRepository(), parent.getAbsolutePath(), id);
         }
 
     };
@@ -423,6 +444,11 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return KomodoType.TEIID;
+    }
+
+    @Override
     public TeiidInstance getTeiidInstance() {
         return teiidParent.getTeiidInstance();
     }
@@ -530,6 +556,16 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     public void setAdminPassword( UnitOfWork uow,
                                   String password ) throws KException {
         setObjectProperty(uow, "setAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD, password); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**

@@ -53,7 +53,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
     	
     	// Check WorkspaceContext
-    	assertEquals("tko:komodo/tko:workspace/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("tko:komodo/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
     
 }

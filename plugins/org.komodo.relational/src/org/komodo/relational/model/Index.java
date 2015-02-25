@@ -8,12 +8,23 @@
 package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Represents a relational model index.
  */
 public interface Index extends TableConstraint {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = Index.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.INDEX;
 
     /**
      * The constraint type for an index. Value is {@value} .

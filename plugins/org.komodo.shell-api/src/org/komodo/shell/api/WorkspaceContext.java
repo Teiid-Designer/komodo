@@ -69,6 +69,14 @@ public interface WorkspaceContext {
 	List<WorkspaceContext> getChildren() throws Exception;
 
 	/**
+     * Get the child context of the given name
+     * @param name the name
+     * @return the child
+     * @throws Exception if error occurs
+     */
+    WorkspaceContext getChild(String name) throws Exception;
+
+	/**
 	 * Get the child context of the given name and type
 	 * @param name the name
 	 * @param type the type

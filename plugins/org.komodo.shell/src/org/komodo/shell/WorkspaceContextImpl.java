@@ -188,6 +188,23 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      * @see org.komodo.shell.api.WorkspaceContext#getChild(java.lang.String, org.komodo.shell.api.WorkspaceContext.Type)
      */
     @Override
+    public WorkspaceContext getChild(String name) throws Exception {
+        KomodoObject[] children = repoObject.getChildren(null);
+
+        for (KomodoObject child : children) {
+            String childName = child.getName(null);
+            if (childName.equalsIgnoreCase(name)) {
+                return createWorkspaceContext(child);
+            }
+        }
+
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceContext#getChild(java.lang.String, org.komodo.shell.api.WorkspaceContext.Type)
+     */
+    @Override
     public WorkspaceContext getChild(String name, String type) throws Exception {
         KomodoObject[] children = repoObject.getChildrenOfType(null, type);
 

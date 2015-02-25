@@ -83,11 +83,13 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param create <code>true</code> if the result set should be created if does not exist
      * @return the result set (can be <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    ProcedureResultSet getResultSet( final UnitOfWork transaction ) throws KException;
+    ProcedureResultSet getResultSet( final UnitOfWork transaction,
+                                     final boolean create ) throws KException;
 
     /**
      * @param transaction
@@ -99,6 +101,14 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
      */
     void removeParameter( final UnitOfWork transaction,
                           final String parameterName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @throws KException
+     *         if there is no result set to remove or if an error occurs
+     */
+    void removeResultSet( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction

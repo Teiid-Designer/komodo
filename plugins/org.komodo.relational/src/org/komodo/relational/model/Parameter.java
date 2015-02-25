@@ -9,6 +9,7 @@ package org.komodo.relational.model;
 
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants.TeiidNonReservedWord;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants.TeiidReservedWord;
@@ -17,6 +18,16 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants.TeiidReserved
  * Represents a relational model procedure parameter.
  */
 public interface Parameter extends OptionContainer, RelationalObject {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = Parameter.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.PARAMETER;
 
     /**
      * Represents a

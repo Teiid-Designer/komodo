@@ -7,6 +7,9 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.ForeignKey;
@@ -18,6 +21,7 @@ import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
@@ -32,6 +36,16 @@ public final class ProcedureResultSetImpl extends TableImpl implements Procedure
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        @Override
+        public KomodoType identifier() {
+            return ProcedureResultSet.IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return ProcedureResultSetImpl.class;
+        }
+
         /**
          * {@inheritDoc}
          *
@@ -43,9 +57,22 @@ public final class ProcedureResultSetImpl extends TableImpl implements Procedure
                                    final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, CreateProcedure.RESULT_DATA_TYPE);
-                return true;
-            } catch (final Exception e) {
+                // must have the right name
+                if (CreateProcedure.RESULT_SET.equals(kobject.getName(transaction))) {
+                    // must be one of two types
+                    try {
+                        ObjectImpl.validateType(transaction, repository, kobject, CreateProcedure.RESULT_DATA_TYPE);
+                        return true;
+                    } catch (final Exception e) {
+                        try {
+                            ObjectImpl.validateType(transaction, repository, kobject, CreateProcedure.RESULT_COLUMNS);
+                            return true;
+                        } catch (final Exception e1) {
+                            // not resolvable
+                        }
+                    }
+                }
+            } catch (final KException e) {
                 // not resolvable
             }
 
@@ -65,6 +92,16 @@ public final class ProcedureResultSetImpl extends TableImpl implements Procedure
             return new ProcedureResultSetImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public ProcedureResultSet create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Procedure parentProc = adapter.adapt(transaction, parent, Procedure.class);
+            return RelationalModelFactory.createProcedureResultSet(transaction, parent.getRepository(), parentProc);
+        }
+
     };
 
     /**
@@ -81,6 +118,11 @@ public final class ProcedureResultSetImpl extends TableImpl implements Procedure
                                    final Repository repository,
                                    final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**

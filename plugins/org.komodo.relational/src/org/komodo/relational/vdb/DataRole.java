@@ -9,12 +9,23 @@ package org.komodo.relational.vdb;
 
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Represents a VDB data role.
  */
 public interface DataRole extends RelationalObject {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = DataRole.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.VDB_DATA_ROLE;
 
     /**
      * The default value for the <code>create temporary tables</code> property. Value is {@value} .

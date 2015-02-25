@@ -7,11 +7,23 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.spi.repository.KomodoType;
+
 
 /**
  * Represents a relational model access pattern.
  */
 public interface AccessPattern extends TableConstraint {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = AccessPattern.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.ACCESS_PATTERN;
 
     /**
      * The constraint type for an access pattern. Value is {@value} .

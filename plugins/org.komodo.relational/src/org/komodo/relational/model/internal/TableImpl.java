@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
@@ -18,6 +20,7 @@ import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Index;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
@@ -25,6 +28,7 @@ import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -69,6 +73,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return TableImpl.class;
+        }
+
         /**
          * {@inheritDoc}
          *
@@ -102,6 +116,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
             return new TableImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Table create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Model parentModel = adapter.adapt(transaction, parent, Model.class);
+            return RelationalModelFactory.createTable(transaction, parent.getRepository(), parentModel, id);
+        }
+
     };
 
     /**
@@ -118,6 +142,11 @@ public class TableImpl extends RelationalObjectImpl implements Table {
                       final Repository repository,
                       final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**
@@ -394,22 +423,39 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        final AccessPattern[] accessPatterns = getAccessPatterns(uow);
-        final Column[] columns = getColumns(uow);
-        final ForeignKey[] foreignKeys = getForeignKeys(uow);
-        final Index[] indexes = getIndexes(uow);
-        final UniqueConstraint[] uniqueConstraints = getUniqueConstraints(uow);
+        UnitOfWork transaction = uow;
 
-        final int size = accessPatterns.length + columns.length + foreignKeys.length + indexes.length + uniqueConstraints.length;
-        final KomodoObject[] result = new KomodoObject[size];
-        System.arraycopy(accessPatterns, 0, result, 0, accessPatterns.length);
-        System.arraycopy(columns, 0, result, accessPatterns.length, columns.length);
-        System.arraycopy(foreignKeys, 0, result, accessPatterns.length + columns.length, foreignKeys.length);
-        System.arraycopy(indexes, 0, result, accessPatterns.length + columns.length + foreignKeys.length, indexes.length);
-        System.arraycopy(uniqueConstraints, 0, result, accessPatterns.length + columns.length + foreignKeys.length
-                                                       + indexes.length, uniqueConstraints.length);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("tableimpl-getChildren", true, null); //$NON-NLS-1$
+        }
 
-        return result;
+        assert (transaction != null);
+
+        try {
+            final AccessPattern[] accessPatterns = getAccessPatterns(transaction);
+            final Column[] columns = getColumns(transaction);
+            final ForeignKey[] foreignKeys = getForeignKeys(transaction);
+            final Index[] indexes = getIndexes(transaction);
+            final UniqueConstraint[] uniqueConstraints = getUniqueConstraints(transaction);
+
+            final int size = accessPatterns.length + columns.length + foreignKeys.length + indexes.length
+                             + uniqueConstraints.length;
+            final KomodoObject[] result = new KomodoObject[size];
+            System.arraycopy(accessPatterns, 0, result, 0, accessPatterns.length);
+            System.arraycopy(columns, 0, result, accessPatterns.length, columns.length);
+            System.arraycopy(foreignKeys, 0, result, accessPatterns.length + columns.length, foreignKeys.length);
+            System.arraycopy(indexes, 0, result, accessPatterns.length + columns.length + foreignKeys.length, indexes.length);
+            System.arraycopy(uniqueConstraints, 0, result, accessPatterns.length + columns.length + foreignKeys.length
+                                                           + indexes.length, uniqueConstraints.length);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -421,31 +467,46 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
                                              final String type ) throws KException {
+        UnitOfWork transaction = uow;
 
-        if (CreateTable.TABLE_ELEMENT.equals(type)) {
-            return getColumns(uow);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("tableimpl-getChildrenOfType", true, null); //$NON-NLS-1$
         }
 
-        if (Constraint.TABLE_ELEMENT.equals(type)) {
-            final AccessPattern[] accessPatterns = getAccessPatterns(uow);
-            final ForeignKey[] foreignKeys = getForeignKeys(uow);
-            final Index[] indexes = getIndexes(uow);
-            final UniqueConstraint[] uniqueConstraints = getUniqueConstraints(uow);
+        assert (transaction != null);
 
-            final int size = accessPatterns.length + foreignKeys.length + indexes.length + uniqueConstraints.length;
-            final KomodoObject[] result = new KomodoObject[size];
-            System.arraycopy(accessPatterns, 0, result, 0, accessPatterns.length);
-            System.arraycopy(foreignKeys, 0, result, accessPatterns.length, foreignKeys.length);
-            System.arraycopy(indexes, 0, result, accessPatterns.length + foreignKeys.length, indexes.length);
-            System.arraycopy(uniqueConstraints,
-                             0,
-                             result,
-                             accessPatterns.length + foreignKeys.length + indexes.length,
-                             uniqueConstraints.length);
+        try {
+            KomodoObject[] result = KomodoObject.EMPTY_ARRAY;
+
+            if (CreateTable.TABLE_ELEMENT.equals(type)) {
+                result = getColumns(transaction);
+            } else if (Constraint.TABLE_ELEMENT.equals(type)) {
+                final AccessPattern[] accessPatterns = getAccessPatterns(transaction);
+                final ForeignKey[] foreignKeys = getForeignKeys(transaction);
+                final Index[] indexes = getIndexes(transaction);
+                final UniqueConstraint[] uniqueConstraints = getUniqueConstraints(transaction);
+
+                final int size = accessPatterns.length + foreignKeys.length + indexes.length + uniqueConstraints.length;
+                final KomodoObject[] temp = new KomodoObject[size];
+                System.arraycopy(accessPatterns, 0, temp, 0, accessPatterns.length);
+                System.arraycopy(foreignKeys, 0, temp, accessPatterns.length, foreignKeys.length);
+                System.arraycopy(indexes, 0, temp, accessPatterns.length + foreignKeys.length, indexes.length);
+                System.arraycopy(uniqueConstraints,
+                                 0,
+                                 temp,
+                                 accessPatterns.length + foreignKeys.length + indexes.length,
+                                 uniqueConstraints.length);
+                result = temp;
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
             return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
         }
-
-        return KomodoObject.EMPTY_ARRAY;
     }
 
     /**
@@ -457,7 +518,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     public Column[] getColumns( final UnitOfWork uow ) throws KException {
         UnitOfWork transaction = uow;
 
-        if (transaction == null) {
+        if (uow == null) {
             transaction = getRepository().createTransaction("tableimpl-getColumns", true, null); //$NON-NLS-1$
         }
 
@@ -511,21 +572,29 @@ public class TableImpl extends RelationalObjectImpl implements Table {
 
         assert (transaction != null);
 
-        final StatementOption[] options = getStatementOptions(transaction);
+        try {
+            StatementOption[] result = getStatementOptions(transaction);
 
-        if (options.length == 0) {
-            return options;
-        }
+            if (result.length != 0) {
+                final List< StatementOption > temp = new ArrayList<>(result.length);
 
-        final List< StatementOption > result = new ArrayList<>(options.length);
+                for (final StatementOption option : result) {
+                    if (StandardOptions.valueOf(option.getName(transaction)) == null) {
+                        temp.add(option);
+                    }
+                }
 
-        for (final StatementOption option : options) {
-            if (StandardOptions.valueOf(option.getName(transaction)) == null) {
-                result.add(option);
+                result = temp.toArray(new StatementOption[temp.size()]);
             }
-        }
 
-        return result.toArray(new StatementOption[result.size()]);
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -827,6 +896,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         }
 
         return TemporaryType.fromValue(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**

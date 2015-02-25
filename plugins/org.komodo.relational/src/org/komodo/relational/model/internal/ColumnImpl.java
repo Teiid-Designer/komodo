@@ -13,14 +13,18 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.StatementOption;
+import org.komodo.relational.model.Table;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -59,6 +63,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return ColumnImpl.class;
+        }
+
         /**
          * {@inheritDoc}
          *
@@ -92,6 +106,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
             return new ColumnImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Column create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Table parentTable = adapter.adapt(transaction, parent, Table.class);
+            return RelationalModelFactory.createColumn(transaction, parent.getRepository(), parentTable, id);
+        }
+
     };
 
     /**
@@ -108,6 +132,11 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
                        final Repository repository,
                        final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**
@@ -152,21 +181,29 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
 
         assert (transaction != null);
 
-        final StatementOption[] options = getStatementOptions(transaction);
+        try {
+            StatementOption[] result = getStatementOptions(transaction);
 
-        if (options.length == 0) {
-            return options;
-        }
+            if (result.length != 0) {
+                final List< StatementOption > temp = new ArrayList<>(result.length);
 
-        final List< StatementOption > result = new ArrayList<>(options.length);
+                for (final StatementOption option : result) {
+                    if (StandardOptions.valueOf(option.getName(transaction)) == null) {
+                        temp.add(option);
+                    }
+                }
 
-        for (final StatementOption option : options) {
-            if (StandardOptions.valueOf(option.getName(transaction)) == null) {
-                result.add(option);
+                result = temp.toArray(new StatementOption[temp.size()]);
             }
-        }
 
-        return result.toArray(new StatementOption[result.size()]);
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -455,6 +492,16 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**

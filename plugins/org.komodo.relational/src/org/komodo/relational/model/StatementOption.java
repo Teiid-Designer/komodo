@@ -8,12 +8,18 @@
 package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Represents a DDL statement option from a relational model.
  */
 public interface StatementOption extends RelationalObject {
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.STATEMENT_OPTION;
 
     /**
      * An empty collection of index constraints.

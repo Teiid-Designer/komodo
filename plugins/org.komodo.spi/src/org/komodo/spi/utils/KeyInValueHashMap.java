@@ -111,7 +111,7 @@ public class KeyInValueHashMap<K, V> extends AbstractMap<K, V> {
      *
      * @param adapter that can convert from the value into the key
      */
-    public KeyInValueHashMap(KeyFromValueAdapter adapter) {
+    public KeyInValueHashMap(KeyFromValueAdapter<K, V> adapter) {
         this.adapter = adapter;
     }
 

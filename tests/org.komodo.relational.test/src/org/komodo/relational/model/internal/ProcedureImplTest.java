@@ -12,7 +12,6 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -23,10 +22,13 @@ import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StatementOption;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Repository;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class ProcedureImplTest extends RelationalModelTest {
@@ -37,7 +39,9 @@ public final class ProcedureImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.procedure = RelationalModelFactory.createProcedure(null, _repo, mock(Model.class), NAME);
+        final Vdb vdb = RelationalModelFactory.createVdb(null, _repo, null, "vdb", "externalFilePath");
+        final Model model = RelationalModelFactory.createModel(null, _repo, vdb, "model");
+        this.procedure = RelationalModelFactory.createProcedure(null, _repo, model, NAME);
     }
 
     @Test
@@ -71,6 +75,20 @@ public final class ProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldAllowNullSchemaElementType() throws Exception {
         this.procedure.setSchemaElementType(null, null);
+    }
+
+    @Test
+    public void shouldCreateResultSet() throws Exception {
+        assertThat(this.procedure.getResultSet(null, true), is(notNullValue()));
+    }
+
+    @Test
+    public void shouldDeleteResultSet() throws Exception {
+        final Repository.UnitOfWork uow = _repo.createTransaction(this.name.getMethodName(), false, null);
+        this.procedure.getResultSet(uow, true); // create
+        this.procedure.removeResultSet(uow); // delete
+        assertThat(this.procedure.getResultSet(uow, false), is(nullValue()));
+        uow.commit();
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -145,6 +163,11 @@ public final class ProcedureImplTest extends RelationalModelTest {
         this.procedure.setNativeQuery(null, null);
     }
 
+    @Test( expected = KException.class )
+    public void shouldFailToDeleteResultSetIfItDoesNotExist() throws Exception {
+        this.procedure.removeResultSet(null);
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyParameterName() throws Exception {
         this.procedure.removeParameter(null, StringConstants.EMPTY_STRING);
@@ -184,6 +207,7 @@ public final class ProcedureImplTest extends RelationalModelTest {
         }
 
         assertThat(this.procedure.getParameters(null).length, is(numParams));
+        assertThat(this.procedure.getChildrenOfType(null, CreateProcedure.PARAMETER).length, is(numParams));
     }
 
     @Test
@@ -203,11 +227,6 @@ public final class ProcedureImplTest extends RelationalModelTest {
     }
 
     @Test
-    public void shouldHaveResultSetAfterConstruction() throws Exception {
-        assertThat(this.procedure.getResultSet(null), is(notNullValue()));
-    }
-
-    @Test
     public void shouldHaveSchemaElementTypePropertyDefaultValueAfterConstruction() throws Exception {
         assertThat(this.procedure.getSchemaElementType(null), is(SchemaElementType.DEFAULT_VALUE));
         assertThat(this.procedure.hasProperty(null, StandardDdlLexicon.DEFAULT_VALUE), is(false));
@@ -222,6 +241,11 @@ public final class ProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldNotHaveParametersAfterConstruction() throws Exception {
         assertThat(this.procedure.getParameters(null).length, is(0));
+    }
+
+    @Test
+    public void shouldNotHaveResultSetAfterConstruction() throws Exception {
+        assertThat(this.procedure.getResultSet(null, false), is(nullValue()));
     }
 
     @Test

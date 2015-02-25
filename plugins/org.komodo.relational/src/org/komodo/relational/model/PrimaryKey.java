@@ -7,10 +7,22 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.spi.repository.KomodoType;
+
 /**
  * Represents a relational model primary key.
  */
 public interface PrimaryKey extends TableConstraint {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = PrimaryKey.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.PRIMARY_KEY;
 
     /**
      * The constraint type for a primary key. Value is {@value} .

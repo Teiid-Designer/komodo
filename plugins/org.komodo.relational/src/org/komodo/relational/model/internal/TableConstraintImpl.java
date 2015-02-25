@@ -99,8 +99,8 @@ abstract class TableConstraintImpl extends RelationalObjectImpl implements Table
      * @see org.komodo.repository.ObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public KomodoObject[] getChildrenOfType( UnitOfWork uow,
-                                             String type ) {
+    public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
+                                             final String type ) {
         return KomodoObject.EMPTY_ARRAY; // table constraints do not have children
     }
 

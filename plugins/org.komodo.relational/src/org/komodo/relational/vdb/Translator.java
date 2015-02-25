@@ -9,12 +9,23 @@ package org.komodo.relational.vdb;
 
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Represents a VDB translator.
  */
 public interface Translator extends RelationalObject {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = Translator.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.VDB_TRANSLATOR;
 
     /**
      * The default value for a translator type. Value is {@value} .

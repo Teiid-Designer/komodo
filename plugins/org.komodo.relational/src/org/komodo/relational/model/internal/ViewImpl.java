@@ -7,8 +7,12 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.ForeignKey;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
@@ -16,6 +20,7 @@ import org.komodo.relational.model.View;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
@@ -29,6 +34,16 @@ public final class ViewImpl extends TableImpl implements View {
      * The resolver of a {@link View}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return View.IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return ViewImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -63,6 +78,16 @@ public final class ViewImpl extends TableImpl implements View {
             return new ViewImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public View create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Model parentModel = adapter.adapt(transaction, parent, Model.class);
+            return RelationalModelFactory.createView(transaction, parent.getRepository(), parentModel, id);
+        }
+
     };
 
     /**
@@ -79,6 +104,11 @@ public final class ViewImpl extends TableImpl implements View {
                      final Repository repository,
                      final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**

@@ -7,10 +7,22 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.spi.repository.KomodoType;
+
 /**
  * Represents a relational model unique constraint.
  */
 public interface UniqueConstraint extends TableConstraint {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = UniqueConstraint.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.UNIQUE_CONSTRAINT;
 
     /**
      * The constraint type for a unique constraint. Value is {@value} .

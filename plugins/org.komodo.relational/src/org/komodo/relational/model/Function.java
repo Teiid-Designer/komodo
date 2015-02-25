@@ -8,12 +8,23 @@
 package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Represents a user-defined scalar function.
  */
 public interface Function extends AbstractProcedure {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = Function.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.FUNCTION;
 
     /**
      * The categories of a function's determinism.

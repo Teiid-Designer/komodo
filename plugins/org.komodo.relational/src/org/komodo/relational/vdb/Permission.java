@@ -9,12 +9,23 @@ package org.komodo.relational.vdb;
 
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Represents a VDB data policy permission.
  */
 public interface Permission extends RelationalObject {
+
+    /**
+     * The type identifier.
+     */
+    int TYPE_ID = Permission.class.hashCode();
+
+    /**
+     * Identifier of this object
+     */
+    KomodoType IDENTIFIER = KomodoType.VDB_PERMISSION;
 
     /**
      * The default value indicating if this permission allows alter. Value is {@value} .

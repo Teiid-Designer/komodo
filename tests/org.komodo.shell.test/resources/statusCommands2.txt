@@ -1,7 +1,9 @@
-#status at myModel
+#status at MyModel
 cd tko:workspace
-create vdbModel myModel
-cd myModel
+create vdb MyVdb
+cd MyVdb
+create model MyModel
+cd MyModel
 status
 
 

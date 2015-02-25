@@ -9,12 +9,17 @@ package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Function;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
@@ -56,6 +61,16 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return FunctionImpl.class;
+        }
+
         /**
          * {@inheritDoc}
          *
@@ -89,6 +104,16 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
             return new FunctionImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Function create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Model parentModel = adapter.adapt(transaction, parent, Model.class);
+            return RelationalModelFactory.createFunction(transaction, parent.getRepository(), parentModel, id);
+        }
+
     };
 
     /**
@@ -105,6 +130,11 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
                          final Repository repository,
                          final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**
@@ -138,36 +168,44 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
 
         assert (transaction != null);
 
-        final StatementOption[] allOptions = getStatementOptions(transaction);
+        try {
+            StatementOption[] result = StatementOption.NO_OPTIONS;
+            StatementOption[] allOptions = getStatementOptions(transaction);
 
-        if (allOptions.length == 0) {
-            return allOptions;
-        }
+            if (allOptions.length != 0) {
+                final List< StatementOption > temp = new ArrayList<>(allOptions.length);
 
-        final StatementOption[] superOptions = super.getCustomOptions(transaction);
-        final List< StatementOption > temp = new ArrayList<>(allOptions.length);
+                for (final StatementOption option : allOptions) {
+                    if (StandardOptions.valueOf(option.getName(transaction)) == null) {
+                        temp.add(option);
+                    }
+                }
 
-        for (final StatementOption option : allOptions) {
-            if (StandardOptions.valueOf(option.getName(transaction)) == null) {
-                temp.add(option);
+                final StatementOption[] superOptions = super.getCustomOptions(transaction);
+
+                if (temp.isEmpty()) {
+                    result = superOptions;
+                } else {
+                    final StatementOption[] thisOptions = temp.toArray(new StatementOption[temp.size()]);
+
+                    if (superOptions.length == 0) {
+                        result = thisOptions;
+                    } else {
+                        result = new StatementOption[superOptions.length + thisOptions.length];
+                        System.arraycopy(superOptions, 0, result, 0, superOptions.length);
+                        System.arraycopy(thisOptions, 0, result, superOptions.length, thisOptions.length);
+                    }
+                }
             }
-        }
 
-        if (temp.isEmpty()) {
-            return superOptions;
-        }
+            if (uow == null) {
+                transaction.commit();
+            }
 
-        final StatementOption[] result = temp.toArray(new StatementOption[temp.size()]);
-
-        if (superOptions.length == 0) {
             return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
         }
-
-        final StatementOption[] combined = new StatementOption[superOptions.length + result.length];
-        System.arraycopy(result, 0, combined, 0, result.length);
-        System.arraycopy(superOptions, 0, combined, result.length, superOptions.length);
-
-        return combined;
     }
 
     /**
@@ -216,6 +254,16 @@ public class FunctionImpl extends AbstractProcedureImpl implements Function {
         }
 
         return option.getOption(transaction);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**

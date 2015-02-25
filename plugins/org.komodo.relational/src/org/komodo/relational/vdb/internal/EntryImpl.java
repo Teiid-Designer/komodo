@@ -7,12 +7,17 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Entry;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -28,6 +33,16 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
      * The resolver of a {@link Entry}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return EntryImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -62,6 +77,18 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
             return new EntryImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Entry create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Object entryPathValue = properties.getValue(VdbLexicon.Entry.PATH);
+            String entryPath = entryPathValue == null ? null : entryPathValue.toString();
+            Vdb parentVdb = adapter.adapt(transaction, parent, Vdb.class);
+            return RelationalModelFactory.createEntry(transaction, parent.getRepository(), parentVdb, id, entryPath);
+        }
+
     };
 
     /**
@@ -80,6 +107,11 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
         super(uow, repository, workspacePath);
     }
 
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return KomodoType.VDB_ENTRY;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -96,9 +128,27 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
      * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
-        final KomodoObject grouping = super.getParent(transaction);
-        return resolveType(transaction, grouping.getParent(transaction));
+    public KomodoObject getParent( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("entryimpl-getParent", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        try {
+            final KomodoObject grouping = super.getParent(transaction);
+            final KomodoObject result = resolveType(transaction, grouping.getParent(transaction));
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -109,6 +159,16 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
     @Override
     public String getPath( final UnitOfWork uow ) throws KException {
         return getObjectProperty(uow, Property.ValueType.STRING, "getPath", VdbLexicon.Entry.PATH); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**

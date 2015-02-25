@@ -61,10 +61,10 @@ public class StatusCommandTest extends AbstractCommandTest {
     	
     	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
                                 INDENT+"Current Teiid Instance  : None set\n"+ //$NON-NLS-1$
-    	                        INDENT+"Current Context : [tko:komodo/tko:workspace/myModel]\n"; //$NON-NLS-1$
+    	                        INDENT+"Current Context : [tko:komodo/tko:workspace/MyVdb/MyModel]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("tko:komodo/tko:workspace/myModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("tko:komodo/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test

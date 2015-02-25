@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
@@ -20,11 +22,13 @@ import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
 import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.ModelSourceImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.Messages;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -33,7 +37,6 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon.Vdb;
 
 /**
  * An implementation of a relational model.
@@ -44,6 +47,16 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      * The resolver of a {@link Model}.
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
+
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+
+        @Override
+        public Class<? extends KomodoObject> owningClass() {
+            return ModelImpl.class;
+        }
 
         /**
          * {@inheritDoc}
@@ -78,6 +91,16 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             return new ModelImpl(transaction, repository, kobject.getAbsolutePath());
         }
 
+        @Override
+        public Model create(UnitOfWork transaction,
+                                                      KomodoObject parent,
+                                                      String id,
+                                                      RelationalProperties properties) throws KException {
+            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
+            Vdb parentVdb = adapter.adapt(transaction, parent, Vdb.class);
+            return RelationalModelFactory.createModel(transaction, parent.getRepository(), parentVdb, id);
+        }
+
     };
 
     /**
@@ -94,6 +117,11 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                       final Repository repository,
                       final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return RESOLVER.identifier();
     }
 
     /**
@@ -283,31 +311,46 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        final Function[] functions = getFunctions(uow);
-        final Procedure[] procedures = getProcedures(uow);
-        final Table[] tables = getTables(uow);
-        final View[] views = getViews(uow);
-        final ModelSource[] sources = getSources(uow);
+        UnitOfWork transaction = uow;
 
-        final KomodoObject[] result = new KomodoObject[functions.length + procedures.length + tables.length + views.length
-                                                       + sources.length];
+        if (uow == null) {
+            transaction = getRepository().createTransaction("modelimpl-getChildren", true, null); //$NON-NLS-1$
+        }
 
-        int start = 0;
-        System.arraycopy(functions, 0, result, start, functions.length);
+        assert (transaction != null);
 
-        start = functions.length;
-        System.arraycopy(procedures, 0, result, start, procedures.length);
+        try {
+            final Function[] functions = getFunctions(transaction);
+            final Procedure[] procedures = getProcedures(transaction);
+            final Table[] tables = getTables(transaction);
+            final View[] views = getViews(transaction);
+            final ModelSource[] sources = getSources(transaction);
+            final KomodoObject[] result = new KomodoObject[functions.length + procedures.length + tables.length + views.length
+                                                           + sources.length];
 
-        start += procedures.length;
-        System.arraycopy(tables, 0, result, start, tables.length);
+            int start = 0;
+            System.arraycopy(functions, 0, result, start, functions.length);
 
-        start += tables.length;
-        System.arraycopy(views, 0, result, start, views.length);
+            start = functions.length;
+            System.arraycopy(procedures, 0, result, start, procedures.length);
 
-        start += sources.length;
-        System.arraycopy(sources, 0, result, start, sources.length);
+            start += procedures.length;
+            System.arraycopy(tables, 0, result, start, tables.length);
 
-        return result;
+            start += tables.length;
+            System.arraycopy(views, 0, result, start, views.length);
+
+            start += sources.length;
+            System.arraycopy(sources, 0, result, start, sources.length);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -319,28 +362,37 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
                                              final String type ) throws KException {
+        UnitOfWork transaction = uow;
 
-        if (CreateProcedure.FUNCTION_STATEMENT.equals(type)) {
-            return getFunctions(uow);
+        if (uow == null) {
+            transaction = getRepository().createTransaction("modelimpl-getChildrenOfType", true, null); //$NON-NLS-1$
         }
 
-        if (CreateProcedure.PROCEDURE_STATEMENT.equals(type)) {
-            return getProcedures(uow);
-        }
+        assert (transaction != null);
 
-        if (CreateTable.TABLE_STATEMENT.equals(type)) {
-            return getTables(uow);
-        }
+        try {
+            KomodoObject[] result = KomodoObject.EMPTY_ARRAY;
 
-        if (CreateTable.VIEW_STATEMENT.equals(type)) {
-            return getViews(uow);
-        }
+            if (CreateProcedure.FUNCTION_STATEMENT.equals(type)) {
+                result = getFunctions(transaction);
+            } else if (CreateProcedure.PROCEDURE_STATEMENT.equals(type)) {
+                result = getProcedures(transaction);
+            } else if (CreateTable.TABLE_STATEMENT.equals(type)) {
+                result = getTables(transaction);
+            } else if (CreateTable.VIEW_STATEMENT.equals(type)) {
+                result = getViews(transaction);
+            } else if (VdbLexicon.Source.SOURCE.equals(type)) {
+                result = getSources(transaction);
+            }
 
-        if (VdbLexicon.Source.SOURCE.equals(type)) {
-            return getSources(uow);
-        }
+            if (uow == null) {
+                transaction.commit();
+            }
 
-        return KomodoObject.EMPTY_ARRAY;
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
     /**
@@ -350,7 +402,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      */
     @Override
     public String getDescription( final UnitOfWork transaction ) throws KException {
-        return getObjectProperty(transaction, Property.ValueType.STRING, "getDescription", Vdb.DESCRIPTION); //$NON-NLS-1$
+        return getObjectProperty(transaction, Property.ValueType.STRING, "getDescription", VdbLexicon.Vdb.DESCRIPTION); //$NON-NLS-1$
     }
 
     /**
@@ -569,6 +621,16 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     /**
@@ -878,7 +940,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public void setDescription( final UnitOfWork transaction,
                                 final String newDescription ) throws KException {
-        setObjectProperty(transaction, "setDescription", Vdb.DESCRIPTION, newDescription); //$NON-NLS-1$
+        setObjectProperty(transaction, "setDescription", VdbLexicon.Vdb.DESCRIPTION, newDescription); //$NON-NLS-1$
     }
 
     @Override
@@ -890,7 +952,8 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Model#setModelType(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.relational.model.Model.Type)
+     * @see org.komodo.relational.model.Model#setModelType(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.relational.model.Model.Type)
      */
     @Override
     public void setModelType( final UnitOfWork uow,

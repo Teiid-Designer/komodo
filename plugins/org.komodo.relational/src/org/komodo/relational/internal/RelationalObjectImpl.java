@@ -7,34 +7,7 @@
  */
 package org.komodo.relational.internal;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.komodo.relational.model.RelationalObject;
-import org.komodo.relational.model.internal.AccessPatternImpl;
-import org.komodo.relational.model.internal.ColumnImpl;
-import org.komodo.relational.model.internal.ForeignKeyImpl;
-import org.komodo.relational.model.internal.FunctionImpl;
-import org.komodo.relational.model.internal.IndexImpl;
-import org.komodo.relational.model.internal.ModelImpl;
-import org.komodo.relational.model.internal.ParameterImpl;
-import org.komodo.relational.model.internal.PrimaryKeyImpl;
-import org.komodo.relational.model.internal.ProcedureImpl;
-import org.komodo.relational.model.internal.ProcedureResultSetImpl;
-import org.komodo.relational.model.internal.SchemaImpl;
-import org.komodo.relational.model.internal.StatementOptionImpl;
-import org.komodo.relational.model.internal.TableImpl;
-import org.komodo.relational.model.internal.UniqueConstraintImpl;
-import org.komodo.relational.model.internal.ViewImpl;
-import org.komodo.relational.teiid.internal.TeiidImpl;
-import org.komodo.relational.vdb.internal.ConditionImpl;
-import org.komodo.relational.vdb.internal.DataRoleImpl;
-import org.komodo.relational.vdb.internal.EntryImpl;
-import org.komodo.relational.vdb.internal.MaskImpl;
-import org.komodo.relational.vdb.internal.ModelSourceImpl;
-import org.komodo.relational.vdb.internal.PermissionImpl;
-import org.komodo.relational.vdb.internal.TranslatorImpl;
-import org.komodo.relational.vdb.internal.VdbImpl;
-import org.komodo.relational.vdb.internal.VdbImportImpl;
 import org.komodo.repository.Messages;
 import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.ObjectImpl;
@@ -49,7 +22,8 @@ import org.komodo.utils.KLog;
  */
 public abstract class RelationalObjectImpl extends ObjectImpl implements RelationalObject {
 
-    private static Map< Class< ? extends RelationalObject >, TypeResolver > _resolvers;
+    private static TypeResolverRegistry _resolverRegistry;
+
     protected static final KLog LOGGER = KLog.getLogger();
 
     /**
@@ -91,20 +65,37 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow,
                                        final String name ) throws KException {
-        final KomodoObject[] kobjects = super.getChildren(uow, name);
+        UnitOfWork transaction = uow;
 
-        if (kobjects.length == 0) {
-            return kobjects;
+        if (uow == null) {
+            transaction = getRepository().createTransaction("relationalobjectimpl-getChildren", true, null); //$NON-NLS-1$
         }
 
-        final KomodoObject[] result = new KomodoObject[kobjects.length];
-        int i = 0;
+        assert (transaction != null);
 
-        for (final KomodoObject kobject : kobjects) {
-            result[i++] = resolveType(uow, kobject);
+        try {
+            KomodoObject[] result = null;
+            final KomodoObject[] kids = super.getChildren(transaction, name);
+
+            if (kids.length == 0) {
+                result = kids;
+            } else {
+                result = new KomodoObject[kids.length];
+                int i = 0;
+
+                for (final KomodoObject kobject : kids) {
+                    result[i++] = resolveType(transaction, kobject);
+                }
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
         }
-
-        return result;
     }
 
     /**
@@ -115,20 +106,37 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
                                              final String type ) throws KException {
-        final KomodoObject[] kobjects = super.getChildrenOfType(uow, type);
+        UnitOfWork transaction = uow;
 
-        if (kobjects.length == 0) {
-            return kobjects;
+        if (uow == null) {
+            transaction = getRepository().createTransaction("relationalobjectimpl-getChildrenOfType", true, null); //$NON-NLS-1$
         }
 
-        final KomodoObject[] result = new KomodoObject[kobjects.length];
-        int i = 0;
+        assert (transaction != null);
 
-        for (final KomodoObject kobject : kobjects) {
-            result[i++] = resolveType(uow, kobject);
+        try {
+            KomodoObject[] result = null;
+            final KomodoObject[] kobjects = super.getChildrenOfType(uow, type);
+
+            if (kobjects.length == 0) {
+                result = kobjects;
+            } else {
+                result = new KomodoObject[kobjects.length];
+                int i = 0;
+
+                for (final KomodoObject kobject : kobjects) {
+                    result[i++] = resolveType(uow, kobject);
+                }
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
         }
-
-        return result;
     }
 
     /**
@@ -138,52 +146,32 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
      */
     @Override
     public KomodoObject getParent( final UnitOfWork uow ) throws KException {
-        final KomodoObject kobject = super.getParent(uow);
+        UnitOfWork transaction = uow;
 
-        if (kobject == null) {
-            return null;
+        if (transaction == null) {
+            transaction = getRepository().createTransaction("relationalobjectimpl-getParent", true, null); //$NON-NLS-1$
         }
 
-        return resolveType(uow, kobject);
+        assert (transaction != null);
+
+        try {
+            KomodoObject result = super.getParent(uow);
+
+            if (result != null) {
+                result = resolveType(uow, result);
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError(uow, transaction, e);
+        }
     }
 
-    private Map< Class< ? extends RelationalObject >, TypeResolver > getResolvers() {
-        if (_resolvers == null) {
-            _resolvers = new HashMap<>();
+    private TypeResolverRegistry getResolverRegistry() {
+        if (_resolverRegistry == null)
+            _resolverRegistry = TypeResolverRegistry.getInstance();
 
-            // Relational
-            _resolvers.put(AccessPatternImpl.class, AccessPatternImpl.RESOLVER);
-            _resolvers.put(ColumnImpl.class, ColumnImpl.RESOLVER);
-            _resolvers.put(ForeignKeyImpl.class, ForeignKeyImpl.RESOLVER);
-            _resolvers.put(FunctionImpl.class, FunctionImpl.RESOLVER);
-            _resolvers.put(IndexImpl.class, IndexImpl.RESOLVER);
-            _resolvers.put(ModelImpl.class, ModelImpl.RESOLVER);
-            _resolvers.put(ParameterImpl.class, ParameterImpl.RESOLVER);
-            _resolvers.put(PrimaryKeyImpl.class, PrimaryKeyImpl.RESOLVER);
-            _resolvers.put(ProcedureImpl.class, ProcedureImpl.RESOLVER);
-            _resolvers.put(ProcedureResultSetImpl.class, ProcedureResultSetImpl.RESOLVER);
-            _resolvers.put(SchemaImpl.class, SchemaImpl.RESOLVER);
-            _resolvers.put(StatementOptionImpl.class, StatementOptionImpl.RESOLVER);
-            _resolvers.put(TableImpl.class, TableImpl.RESOLVER);
-            _resolvers.put(UniqueConstraintImpl.class, UniqueConstraintImpl.RESOLVER);
-            _resolvers.put(ViewImpl.class, ViewImpl.RESOLVER);
-
-            // VDB
-            _resolvers.put(ConditionImpl.class, ConditionImpl.RESOLVER);
-            _resolvers.put(DataRoleImpl.class, DataRoleImpl.RESOLVER);
-            _resolvers.put(EntryImpl.class, EntryImpl.RESOLVER);
-            _resolvers.put(MaskImpl.class, MaskImpl.RESOLVER);
-            _resolvers.put(ModelSourceImpl.class, ModelSourceImpl.RESOLVER);
-            _resolvers.put(PermissionImpl.class, PermissionImpl.RESOLVER);
-            _resolvers.put(TranslatorImpl.class, TranslatorImpl.RESOLVER);
-            _resolvers.put(VdbImpl.class, VdbImpl.RESOLVER);
-            _resolvers.put(VdbImportImpl.class, VdbImportImpl.RESOLVER);
-
-            // Teiid
-            _resolvers.put(TeiidImpl.class, TeiidImpl.RESOLVER);
-        }
-
-        return _resolvers;
+        return _resolverRegistry;
     }
 
     private final void internalValidateInitialState( final UnitOfWork uow,
@@ -208,12 +196,19 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     }
 
     protected KomodoObject resolveType( final UnitOfWork transaction,
-                                      final KomodoObject kobject ) throws KException {
+                                        final KomodoObject kobject ) throws KException {
         final Repository repository = getRepository();
 
-        for (final TypeResolver resolver : getResolvers().values()) {
-            if (resolver.resolvable(transaction, repository, kobject)) {
-                return resolver.resolve(transaction, repository, kobject);
+        TypeResolver resolver = getResolverRegistry().getResolver(kobject.getTypeIdentifier(transaction));
+        if (resolver != null && resolver.resolvable(transaction, repository, kobject))
+            return resolver.resolve(transaction, repository, kobject);
+
+        // Failed with the type identifier so try to be safe than sorry
+        // and iterate through all resolvers to check this object is really
+        // not resolvable.
+        for (final TypeResolver aResolver : getResolverRegistry().getResolvers()) {
+            if (aResolver.resolvable(transaction, repository, kobject)) {
+                return aResolver.resolve(transaction, repository, kobject);
             }
         }
 
@@ -253,7 +248,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
      */
     protected void validateInitialState( final UnitOfWork transaction,
                                          final KomodoObject kobject ) throws KException {
-        final TypeResolver resolver = getResolvers().get(kobject.getClass());
+        final TypeResolver resolver = getResolverRegistry().getResolver(kobject.getClass());
 
         if ((resolver != null) && !resolver.resolvable(transaction, getRepository(), kobject)) {
             throw new KException(Messages.getString(Komodo.INCORRECT_TYPE,
