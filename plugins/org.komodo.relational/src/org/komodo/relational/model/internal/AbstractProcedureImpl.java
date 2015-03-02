@@ -16,8 +16,11 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Parameter;
-import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.PushdownFunction;
 import org.komodo.relational.model.StatementOption;
+import org.komodo.relational.model.StoredProcedure;
+import org.komodo.relational.model.UserDefinedFunction;
+import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -30,23 +33,35 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 
 /**
- * An implementation of a relational model procedure.
+ * A base implementation of a relational model procedure or function.
  */
 abstract class AbstractProcedureImpl extends RelationalObjectImpl implements AbstractProcedure {
 
-    /*
-      - teiidddl:schemaElementType (string) = 'FOREIGN' mandatory autocreated < 'FOREIGN', 'VIRTUAL'
-      + * (teiidddl:procedureParameter) = teiidddl:procedureParameter
-      + resultSet (teiidddl:resultSet)
-      + * (ddl:statementOption) = ddl:statementOption
-      - teiidddl:statement (string) -- procedure only, not function
-     */
+    static Class< ? extends AbstractProcedure > getProcedureType( final UnitOfWork transaction,
+                                                                  final KomodoObject kobject ) throws KException {
+        final Repository repo = kobject.getRepository();
+        Class< ? extends AbstractProcedure > clazz = null;
+
+        if (PushdownFunctionImpl.RESOLVER.resolvable( transaction, repo, kobject )) {
+            clazz = PushdownFunction.class;
+        } else if (UserDefinedFunctionImpl.RESOLVER.resolvable( transaction, repo, kobject )) {
+            clazz = UserDefinedFunction.class;
+        } else if (StoredProcedureImpl.RESOLVER.resolvable( transaction, repo, kobject )) {
+            clazz = StoredProcedure.class;
+        } else if (VirtualProcedureImpl.RESOLVER.resolvable( transaction, repo, kobject )) {
+            clazz = VirtualProcedure.class;
+        } else {
+            throw new KException( Messages.getString( Relational.UNEXPECTED_PROCEDURE_TYPE, kobject.getAbsolutePath() ) );
+        }
+
+        return clazz;
+    }
 
     protected enum StandardOptions {
 
         ANNOTATION( "ANNOTATION" ), //$NON-NLS-1$
         NAMEINSOURCE( "NAMEINSOURCE" ), //$NON-NLS-1$
-        NATIVE_QUERY( "native-query" ), //$NON-NLS-1$
+        UPDATECOUNT( "UPDATECOUNT" ), //$NON-NLS-1$
         UUID( "UUID" ); //$NON-NLS-1$
 
         private final String name;
@@ -55,7 +70,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
             this.name = optionName;
         }
 
-        public String getName() {
+        protected String getName() {
             return this.name;
         }
 
@@ -74,7 +89,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     protected AbstractProcedureImpl( final UnitOfWork uow,
                                      final Repository repository,
                                      final String workspacePath ) throws KException {
-        super(uow, repository, workspacePath);
+        super( uow, repository, workspacePath );
     }
 
     /**
@@ -86,23 +101,23 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public Parameter addParameter( final UnitOfWork uow,
                                    final String parameterName ) throws KException {
-        ArgCheck.isNotEmpty(parameterName, "parameterName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( parameterName, "parameterName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("abstractprocedureimpl-addParameter", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "abstractprocedureimpl-addParameter", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addParameter: transaction = {0}, parameterName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         parameterName);
+            LOGGER.debug( "addParameter: transaction = {0}, parameterName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          parameterName );
         }
 
         try {
-            final Parameter result = RelationalModelFactory.createParameter(transaction, getRepository(), this, parameterName);
+            final Parameter result = RelationalModelFactory.createParameter( transaction, getRepository(), this, parameterName );
 
             if (uow == null) {
                 transaction.commit();
@@ -110,18 +125,8 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.AbstractProcedure#getAsClauseStatement(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public String getAsClauseStatement( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getAsClauseStatement", CreateProcedure.STATEMENT); //$NON-NLS-1$
     }
 
     /**
@@ -134,20 +139,13 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         UnitOfWork transaction = uow;
 
         if (uow == null) {
-            transaction = getRepository().createTransaction("abstractprocedureimpl-getChildren", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "abstractprocedureimpl-getChildren", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         try {
-            final KomodoObject[] params = getParameters(transaction);
-            final ProcedureResultSet resultSet = getResultSet(transaction, false);
-            final KomodoObject[] result = new KomodoObject[params.length + ((resultSet == null) ? 0 : 1)];
-            System.arraycopy(params, 0, result, 0, params.length);
-
-            if (resultSet != null) {
-                result[params.length] = resultSet;
-            }
+            final KomodoObject[] result = getParameters( transaction );
 
             if (uow == null) {
                 transaction.commit();
@@ -155,7 +153,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -169,24 +167,24 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("abstractprocedureimpl-getCustomOptions", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "abstractprocedureimpl-getCustomOptions", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         try {
-            StatementOption[] result = getStatementOptions(transaction);
+            StatementOption[] result = getStatementOptions( transaction );
 
             if (result.length != 0) {
-                final List< StatementOption > temp = new ArrayList<>(result.length);
+                final List< StatementOption > temp = new ArrayList<>( result.length );
 
                 for (final StatementOption option : result) {
-                    if (StandardOptions.valueOf(option.getName(transaction)) == null) {
-                        temp.add(option);
+                    if (StandardOptions.valueOf( option.getName( transaction ) ) == null) {
+                        temp.add( option );
                     }
                 }
 
-                result = temp.toArray(new StatementOption[temp.size()]);
+                result = temp.toArray( new StatementOption[temp.size()] );
             }
 
             if (uow == null) {
@@ -195,7 +193,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -206,13 +204,13 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public String getDescription( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.ANNOTATION.getName());
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ANNOTATION.getName() );
 
         if (option == null) {
             return null;
         }
 
-        return option.getOption(transaction);
+        return option.getOption( transaction );
     }
 
     /**
@@ -222,29 +220,13 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public String getNameInSource( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NAMEINSOURCE.getName());
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NAMEINSOURCE.getName() );
 
         if (option == null) {
             return null;
         }
 
-        return option.getOption(transaction);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Procedure#getNativeQuery(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public String getNativeQuery( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NATIVE_QUERY.getName());
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption(transaction);
+        return option.getOption( transaction );
     }
 
     /**
@@ -257,13 +239,13 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureImpl-getParameters", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "procedureImpl-getParameters", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         try {
-            final KomodoObject[] parameters = super.getChildrenOfType(transaction, CreateProcedure.PARAMETER);
+            final KomodoObject[] parameters = super.getChildrenOfType( transaction, CreateProcedure.PARAMETER );
             Parameter[] result = null;
 
             if (parameters.length == 0) {
@@ -274,7 +256,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
             int i = 0;
 
             for (final KomodoObject param : parameters) {
-                result[i] = new ParameterImpl(transaction, getRepository(), param.getAbsolutePath());
+                result[i] = new ParameterImpl( transaction, getRepository(), param.getAbsolutePath() );
                 ++i;
             }
 
@@ -284,7 +266,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -298,15 +280,15 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("procedureimpl-getParent", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "procedureimpl-getParent", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         try {
-            final KomodoObject kobject = super.getParent(transaction);
-            assert (kobject instanceof Model);
-            final Model result = (Model)kobject;
+            final KomodoObject kobject = super.getParent( transaction );
+            assert ( kobject instanceof Model );
+            final Model result = ( Model )kobject;
 
             if (uow == null) {
                 transaction.commit();
@@ -314,50 +296,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.AbstractProcedure#getResultSet(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
-     */
-    @Override
-    public ProcedureResultSet getResultSet( final UnitOfWork uow,
-                                            final boolean create ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("procedureImpl-getResultSet", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            KomodoObject[] kids = getChildrenOfType(transaction, CreateProcedure.RESULT_COLUMNS);
-
-            if (kids.length == 0) {
-                kids = getChildrenOfType(transaction, CreateProcedure.RESULT_DATA_TYPE);
-            }
-
-            ProcedureResultSet result = null;
-
-            if (kids.length == 0) {
-                if (create) {
-                    result = RelationalModelFactory.createProcedureResultSet(transaction, getRepository(), this);
-                }
-            } else {
-                result = new ProcedureResultSetImpl(transaction, getRepository(), kids[0].getAbsolutePath());
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -368,14 +307,14 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public SchemaElementType getSchemaElementType( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty(uow, Property.ValueType.STRING, "getSchemaElementType", //$NON-NLS-1$
-                                               SchemaElement.TYPE);
+        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getSchemaElementType", //$NON-NLS-1$
+                                                SchemaElement.TYPE );
 
-        if (StringUtils.isBlank(value)) {
+        if (StringUtils.isBlank( value )) {
             return null;
         }
 
-        return SchemaElementType.fromValue(value);
+        return SchemaElementType.fromValue( value );
     }
 
     /**
@@ -388,28 +327,28 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("abstractprocedureimpl-getStatementOptions", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "abstractprocedureimpl-getStatementOptions", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getStatementOptions: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+            LOGGER.debug( "getStatementOptions: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
         }
 
         try {
             final List< StatementOption > result = new ArrayList< StatementOption >();
 
-            for (final KomodoObject kobject : super.getChildrenOfType(transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION)) {
-                final StatementOption option = new StatementOptionImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            for (final KomodoObject kobject : super.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION )) {
+                final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
 
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("getStatementOptions: transaction = {0}, found statement option = {1}", //$NON-NLS-1$
-                                 transaction.getName(),
-                                 kobject.getAbsolutePath());
+                    LOGGER.debug( "getStatementOptions: transaction = {0}, found statement option = {1}", //$NON-NLS-1$
+                                  transaction.getName(),
+                                  kobject.getAbsolutePath() );
                 }
 
-                result.add(option);
+                result.add( option );
             }
 
             if (uow == null) {
@@ -420,10 +359,42 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
                 return StatementOption.NO_OPTIONS;
             }
 
-            return result.toArray(new StatementOption[result.size()]);
+            return result.toArray( new StatementOption[result.size()] );
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.AbstractProcedure#getUpdateCount(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public int getUpdateCount( final UnitOfWork transaction ) throws KException {
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UPDATECOUNT.getName() );
+
+        if (option == null) {
+            return AbstractProcedure.DEFAULT_UPDATE_COUNT;
+        }
+
+        return Integer.parseInt( option.getOption( transaction ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.AbstractProcedure#getUuid(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getUuid( final UnitOfWork transaction ) throws KException {
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.getName() );
+
+        if (option == null) {
+            return null;
+        }
+
+        return option.getOption( transaction );
     }
 
     /**
@@ -435,30 +406,30 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void removeParameter( final UnitOfWork uow,
                                  final String parameterName ) throws KException {
-        ArgCheck.isNotEmpty(parameterName, "parameterName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( parameterName, "parameterName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("abstractprocedureimpl-removeParameter", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "abstractprocedureimpl-removeParameter", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeParameter: transaction = {0}, parameterName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         parameterName);
+            LOGGER.debug( "removeParameter: transaction = {0}, parameterName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          parameterName );
         }
 
         boolean found = false;
 
         try {
-            final Parameter[] parameters = getParameters(transaction);
+            final Parameter[] parameters = getParameters( transaction );
 
             if (parameters.length != 0) {
                 for (final Parameter parameter : parameters) {
-                    if (parameterName.equals(parameter.getName(transaction))) {
-                        removeChild(transaction, parameterName);
+                    if (parameterName.equals( parameter.getName( transaction ) )) {
+                        removeChild( transaction, parameterName );
                         found = true;
                         break;
                     }
@@ -466,50 +437,14 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
             }
 
             if (!found) {
-                throw new KException(Messages.getString(Relational.PARAMETER_NOT_FOUND_TO_REMOVE, parameterName));
+                throw new KException( Messages.getString( Relational.PARAMETER_NOT_FOUND_TO_REMOVE, parameterName ) );
             }
 
             if (uow == null) {
                 transaction.commit();
             }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.AbstractProcedure#removeResultSet(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public void removeResultSet( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("abstractprocedureimpl-removeResultSet", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeResultSet: transaction = {0}", transaction.getName()); //$NON-NLS-1$
-        }
-
-        try {
-            final ProcedureResultSet resultSet = getResultSet(transaction, false);
-
-            if (resultSet == null) {
-                throw new KException(Messages.getString(Relational.RESULT_SET_NOT_FOUND_TO_REMOVE, getName(transaction)));
-            }
-
-            removeChild(transaction, CreateProcedure.RESULT_SET);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -522,30 +457,30 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void removeStatementOption( final UnitOfWork uow,
                                        final String optionToRemove ) throws KException {
-        ArgCheck.isNotEmpty(optionToRemove, "optionToRemove"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( optionToRemove, "optionToRemove" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("abstractprocedureimpl-removeStatementOption", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "abstractprocedureimpl-removeStatementOption", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeStatementOption: transaction = {0}, optionToRemove = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         optionToRemove);
+            LOGGER.debug( "removeStatementOption: transaction = {0}, optionToRemove = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          optionToRemove );
         }
 
         boolean found = false;
 
         try {
-            final StatementOption[] options = getStatementOptions(transaction);
+            final StatementOption[] options = getStatementOptions( transaction );
 
             if (options.length != 0) {
                 for (final StatementOption option : options) {
-                    if (optionToRemove.equals(option.getName(transaction))) {
-                        removeChild(transaction, optionToRemove);
+                    if (optionToRemove.equals( option.getName( transaction ) )) {
+                        removeChild( transaction, optionToRemove );
                         found = true;
                         break;
                     }
@@ -553,27 +488,15 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
             }
 
             if (!found) {
-                throw new KException(Messages.getString(Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove));
+                throw new KException( Messages.getString( Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove ) );
             }
 
             if (uow == null) {
                 transaction.commit();
             }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.AbstractProcedure#setAsClauseStatement(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    public void setAsClauseStatement( final UnitOfWork uow,
-                                      final String newStatement ) throws KException {
-        setObjectProperty(uow, "setAsClauseStatement", CreateProcedure.STATEMENT, newStatement); //$NON-NLS-1$
     }
 
     /**
@@ -585,7 +508,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setDescription( final UnitOfWork transaction,
                                 final String newDescription ) throws KException {
-        setStatementOption(transaction, StandardOptions.ANNOTATION.getName(), newDescription);
+        setStatementOption( transaction, StandardOptions.ANNOTATION.getName(), newDescription );
     }
 
     /**
@@ -597,19 +520,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setNameInSource( final UnitOfWork transaction,
                                  final String newNameInSource ) throws KException {
-        setStatementOption(transaction, StandardOptions.NAMEINSOURCE.getName(), newNameInSource);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Procedure#setNativeQuery(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    public void setNativeQuery( final UnitOfWork transaction,
-                                final String newNativeQuery ) throws KException {
-        setStatementOption(transaction, StandardOptions.NATIVE_QUERY.getName(), newNativeQuery);
+        setStatementOption( transaction, StandardOptions.NAMEINSOURCE.getName(), newNameInSource );
     }
 
     /**
@@ -621,8 +532,8 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setSchemaElementType( final UnitOfWork uow,
                                       final SchemaElementType newSchemaElementType ) throws KException {
-        final String newValue = ((newSchemaElementType == null) ? SchemaElementType.DEFAULT_VALUE.toString() : newSchemaElementType.toString());
-        setObjectProperty(uow, "setSchemaElementType", SchemaElement.TYPE, newValue); //$NON-NLS-1$
+        final String newValue = ( ( newSchemaElementType == null ) ? SchemaElementType.DEFAULT_VALUE.toString() : newSchemaElementType.toString() );
+        setObjectProperty( uow, "setSchemaElementType", SchemaElement.TYPE, newValue ); //$NON-NLS-1$
     }
 
     /**
@@ -635,37 +546,37 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     public StatementOption setStatementOption( final UnitOfWork uow,
                                                final String optionName,
                                                final String optionValue ) throws KException {
-        ArgCheck.isNotEmpty(optionName, "optionName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( optionName, "optionName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("abstractprocedureimpl-setStatementOption", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "abstractprocedureimpl-setStatementOption", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("setStatementOption: transaction = {0}, optionName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         optionName);
+            LOGGER.debug( "setStatementOption: transaction = {0}, optionName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          optionName );
         }
 
         try {
             StatementOption result = null;
 
-            if (StringUtils.isBlank(optionValue)) {
-                removeStatementOption(transaction, optionName);
+            if (StringUtils.isBlank( optionValue )) {
+                removeStatementOption( transaction, optionName );
             } else {
-                result = Utils.getOption(transaction, this, optionName);
+                result = Utils.getOption( transaction, this, optionName );
 
                 if (result == null) {
-                    result = RelationalModelFactory.createStatementOption(transaction,
-                                                                          getRepository(),
-                                                                          this,
-                                                                          optionName,
-                                                                          optionValue);
+                    result = RelationalModelFactory.createStatementOption( transaction,
+                                                                           getRepository(),
+                                                                           this,
+                                                                           optionName,
+                                                                           optionValue );
                 } else {
-                    result.setOption(transaction, optionValue);
+                    result.setOption( transaction, optionValue );
                 }
             }
 
@@ -675,8 +586,31 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.AbstractProcedure#setUpdateCount(org.komodo.spi.repository.Repository.UnitOfWork, int)
+     */
+    @Override
+    public void setUpdateCount( final UnitOfWork transaction,
+                                final int newUpdateCount ) throws KException {
+        setStatementOption( transaction, StandardOptions.UPDATECOUNT.getName(), Integer.toString( newUpdateCount ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.AbstractProcedure#setUuid(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public void setUuid( final UnitOfWork transaction,
+                         final String newUuid ) throws KException {
+        setStatementOption( transaction, StandardOptions.UUID.getName(), newUuid );
     }
 
 }

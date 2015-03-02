@@ -20,11 +20,11 @@ import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Parameter.Direction;
-import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -38,11 +38,11 @@ public final class ParameterImplTest extends RelationalModelTest {
     private static final String NAME = "parameter";
 
     private Parameter parameter;
-    private Procedure procedure;
+    private AbstractProcedure procedure;
 
     @Before
     public void init() throws Exception {
-        this.procedure = RelationalModelFactory.createProcedure(null, _repo, mock(Model.class), "procedure");
+        this.procedure = RelationalModelFactory.createVirtualProcedure(null, _repo, mock(Model.class), "procedure");
         this.parameter = RelationalModelFactory.createParameter(null, _repo, this.procedure, NAME);
     }
 
@@ -196,7 +196,7 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveParentProcedureAfterConstruction() throws Exception {
-        assertThat(this.parameter.getProcedure(null), is(this.procedure));
+        assertThat((AbstractProcedure)this.parameter.getParent(null), is(this.procedure));
     }
 
     @Test

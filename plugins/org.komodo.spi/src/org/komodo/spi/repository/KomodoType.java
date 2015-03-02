@@ -101,9 +101,14 @@ public enum KomodoType {
     FOREIGN_KEY,
 
     /**
-     * Function
+     * Pushdown Function
      */
-    FUNCTION,
+    PUSHDOWN_FUNCTION,
+
+    /**
+     * UDF
+     */
+    USER_DEFINED_FUNCTION,
 
     /**
      * Index
@@ -126,14 +131,24 @@ public enum KomodoType {
     PRIMARY_KEY,
 
     /**
-     * Procedure
+     * Stored Procedure
      */
-    PROCEDURE,
+    STORED_PROCEDURE,
 
     /**
-     * Procedure Result Set
+     * Virtual Procedure
      */
-    PROCEDURE_RESULT_SET,
+    VIRTUAL_PROCEDURE,
+
+    /**
+     * Data type Result Set
+     */
+    DATA_TYPE_RESULT_SET,
+
+    /**
+     * Tabular Result Set
+     */
+    TABULAR_RESULT_SET,
 
     /**
      * Statement Option

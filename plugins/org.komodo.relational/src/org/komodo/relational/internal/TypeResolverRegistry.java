@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -28,19 +28,22 @@ import java.util.Map;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.internal.AccessPatternImpl;
 import org.komodo.relational.model.internal.ColumnImpl;
+import org.komodo.relational.model.internal.DataTypeResultSetImpl;
 import org.komodo.relational.model.internal.ForeignKeyImpl;
-import org.komodo.relational.model.internal.FunctionImpl;
 import org.komodo.relational.model.internal.IndexImpl;
 import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.ParameterImpl;
 import org.komodo.relational.model.internal.PrimaryKeyImpl;
-import org.komodo.relational.model.internal.ProcedureImpl;
-import org.komodo.relational.model.internal.ProcedureResultSetImpl;
+import org.komodo.relational.model.internal.PushdownFunctionImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.relational.model.internal.StatementOptionImpl;
+import org.komodo.relational.model.internal.StoredProcedureImpl;
 import org.komodo.relational.model.internal.TableImpl;
+import org.komodo.relational.model.internal.TabularResultSetImpl;
 import org.komodo.relational.model.internal.UniqueConstraintImpl;
+import org.komodo.relational.model.internal.UserDefinedFunctionImpl;
 import org.komodo.relational.model.internal.ViewImpl;
+import org.komodo.relational.model.internal.VirtualProcedureImpl;
 import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.internal.ConditionImpl;
 import org.komodo.relational.vdb.internal.DataRoleImpl;
@@ -57,7 +60,7 @@ import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 
 /**
- * 
+ *
  */
 public class TypeResolverRegistry {
 
@@ -92,9 +95,9 @@ public class TypeResolverRegistry {
 
         index(KomodoType.COLUMN, ColumnImpl.RESOLVER);
 
-        index(KomodoType.FOREIGN_KEY, ForeignKeyImpl.RESOLVER);
+        index(KomodoType.DATA_TYPE_RESULT_SET, DataTypeResultSetImpl.RESOLVER);
 
-        index(KomodoType.FUNCTION, FunctionImpl.RESOLVER);
+        index(KomodoType.FOREIGN_KEY, ForeignKeyImpl.RESOLVER);
 
         index(KomodoType.INDEX, IndexImpl.RESOLVER);
 
@@ -104,19 +107,25 @@ public class TypeResolverRegistry {
 
         index(KomodoType.PRIMARY_KEY, PrimaryKeyImpl.RESOLVER);
 
-        index(KomodoType.PROCEDURE, ProcedureImpl.RESOLVER);
-
-        index(KomodoType.PROCEDURE_RESULT_SET, ProcedureResultSetImpl.RESOLVER);
+        index(KomodoType.PUSHDOWN_FUNCTION, PushdownFunctionImpl.RESOLVER);
 
         index(KomodoType.SCHEMA, SchemaImpl.RESOLVER);
 
         index(KomodoType.STATEMENT_OPTION, StatementOptionImpl.RESOLVER);
 
+        index(KomodoType.STORED_PROCEDURE, StoredProcedureImpl.RESOLVER);
+
         index(KomodoType.TABLE, TableImpl.RESOLVER);
+
+        index(KomodoType.TABULAR_RESULT_SET, TabularResultSetImpl.RESOLVER);
 
         index(KomodoType.TEIID, TeiidImpl.RESOLVER);
 
         index(KomodoType.UNIQUE_CONSTRAINT, UniqueConstraintImpl.RESOLVER);
+
+        index(KomodoType.USER_DEFINED_FUNCTION, UserDefinedFunctionImpl.RESOLVER);
+
+        index(KomodoType.VIRTUAL_PROCEDURE, VirtualProcedureImpl.RESOLVER);
 
         index(KomodoType.VDB, VdbImpl.RESOLVER);
 
@@ -160,7 +169,7 @@ public class TypeResolverRegistry {
      * @return all registered resolvers
      */
     public Collection<TypeResolver> getResolvers() {
-      return Collections.unmodifiableCollection(kClassIndex.values());  
+      return Collections.unmodifiableCollection(kClassIndex.values());
     }
 
     /**

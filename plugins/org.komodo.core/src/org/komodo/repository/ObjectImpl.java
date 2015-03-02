@@ -23,6 +23,7 @@ import javax.jcr.nodetype.NodeType;
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
 import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
+import org.komodo.repository.search.ObjectSearcher;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
@@ -582,7 +583,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
                                              final String type ) throws KException {
-        ArgCheck.isNotEmpty(type, "primaryType"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(type, "type"); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
@@ -592,25 +593,15 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         assert (transaction != null);
 
         try {
-            KomodoObject[] kids = getChildren(transaction, node(transaction).getNodes());
-
-            if (kids.length != 0) {
-                final List< KomodoObject > matches = new ArrayList< KomodoObject >(kids.length);
-
-                for (final KomodoObject kid : kids) {
-                    if (type.equals(kid.getPrimaryType(transaction).getName()) || kid.hasDescriptor(transaction, type)) {
-                        matches.add(kid);
-                    }
-                }
-
-                kids = matches.toArray(new KomodoObject[matches.size()]);
-            }
+            final ObjectSearcher searcher = new ObjectSearcher(this.repository);
+            searcher.addFromType( type );
+            final List< KomodoObject > result = searcher.searchObjects( transaction );
 
             if (uow == null) {
                 transaction.commit();
             }
 
-            return kids;
+            return result.toArray(new KomodoObject[result.size()]);
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }

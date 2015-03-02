@@ -56,8 +56,8 @@ public interface Model extends RelationalObject {
      * @throws KException
      *         if an error occurs
      */
-    Function addFunction( final UnitOfWork transaction,
-                          final String functionName ) throws KException;
+    PushdownFunction addPushdownFunction( final UnitOfWork transaction,
+                                          final String functionName ) throws KException;
 
     /**
      * @param transaction
@@ -68,8 +68,32 @@ public interface Model extends RelationalObject {
      * @throws KException
      *         if an error occurs
      */
-    Procedure addProcedure( final UnitOfWork transaction,
-                            final String procedureName ) throws KException;
+    StoredProcedure addStoredProcedure( final UnitOfWork transaction,
+                                        final String procedureName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param functionName
+     *        the name of the function to create (cannot be empty)
+     * @return the new function (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    UserDefinedFunction addUserDefinedFunction( final UnitOfWork transaction,
+                                                final String functionName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param procedureName
+     *        the name of the procedure to create (cannot be empty)
+     * @return the new procedure (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    VirtualProcedure addVirtualProcedure( final UnitOfWork transaction,
+                                          final String procedureName ) throws KException;
 
     /**
      * @param transaction
@@ -142,7 +166,7 @@ public interface Model extends RelationalObject {
      * @return model type of this model (never <code>null</code>)
      * @throws KException
      *         if error occurs
-     * @see Type#DEFAULT
+     * @see Type#DEFAULT_VALUE
      */
     Type getModelType( final UnitOfWork transaction ) throws KException;
 
@@ -268,7 +292,7 @@ public interface Model extends RelationalObject {
      *        the new model type (can be <code>null</code>)
      * @throws KException
      *         if error occurs
-     * @see Type#DEFAULT
+     * @see Type#DEFAULT_VALUE
      */
     void setModelType( final UnitOfWork transaction,
                        final Type newModelType ) throws KException;

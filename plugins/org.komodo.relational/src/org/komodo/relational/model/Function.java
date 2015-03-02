@@ -8,23 +8,12 @@
 package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Represents a user-defined scalar function.
  */
 public interface Function extends AbstractProcedure {
-
-    /**
-     * The type identifier.
-     */
-    int TYPE_ID = Function.class.hashCode();
-
-    /**
-     * Identifier of this object
-     */
-    KomodoType IDENTIFIER = KomodoType.FUNCTION;
 
     /**
      * The categories of a function's determinism.
@@ -116,38 +105,11 @@ public interface Function extends AbstractProcedure {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if the query should be automatically committed)
-     * @return the value of the <code>category</code> property (can be empty)
-     * @throws KException
-     *         if an error occurs
-     */
-    String getCategory( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
      * @return the value of the <code>determinism</code> property (can be empty)
      * @throws KException
      *         if an error occurs
      */
     Determinism getDeterminism( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
-     * @return the value of the <code>Java class name</code> property (can be empty)
-     * @throws KException
-     *         if an error occurs
-     */
-    String getJavaClass( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
-     * @return the value of the <code>Java method name</code> property (can be empty)
-     * @throws KException
-     *         if an error occurs
-     */
-    String getJavaMethod( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -279,17 +241,6 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
-     * @param newCategory
-     *        the new value of the <code>category</code> property (can only be empty when removing)
-     * @throws KException
-     *         if an error occurs
-     */
-    void setCategory( final UnitOfWork transaction,
-                      final String newCategory ) throws KException;
-
-    /**
-     * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param newDecomposable
      *        the new value for the <code>decomposable</code> property
@@ -310,28 +261,6 @@ public interface Function extends AbstractProcedure {
      */
     void setDeterminism( final UnitOfWork transaction,
                          final Determinism newDeterminism ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
-     * @param newJavaClass
-     *        the new value of the <code>Java class name</code> property (can only be empty when removing)
-     * @throws KException
-     *         if an error occurs
-     */
-    void setJavaClass( final UnitOfWork transaction,
-                       final String newJavaClass ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
-     * @param newJavaMethod
-     *        the new value of the <code>Java method name</code> property (can only be empty when removing)
-     * @throws KException
-     *         if an error occurs
-     */
-    void setJavaMethod( final UnitOfWork transaction,
-                        final String newJavaMethod ) throws KException;
 
     /**
      * @param transaction

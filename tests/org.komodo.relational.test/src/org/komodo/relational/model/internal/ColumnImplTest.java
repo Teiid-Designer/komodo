@@ -313,7 +313,7 @@ public final class ColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetDatatypeLengthProperty() throws Exception {
-        final long value = 10;
+        final long value = (RelationalConstants.DEFAULT_LENGTH + 10);
         this.column.setLength(null, value);
         assertThat(this.column.getLength(null), is(value));
         assertThat(this.column.getProperty(null, StandardDdlLexicon.DATATYPE_LENGTH).getLongValue(null), is(value));
