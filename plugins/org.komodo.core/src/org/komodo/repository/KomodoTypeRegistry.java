@@ -116,9 +116,9 @@ public class KomodoTypeRegistry {
 
         index(KomodoType.COLUMN, TeiidDdlLexicon.Constraint.TABLE_ELEMENT);
 
-        index(KomodoType.FOREIGN_KEY, TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT);
+        index(KomodoType.DATA_TYPE_RESULT_SET, TeiidDdlLexicon.CreateProcedure.RESULT_DATA_TYPE);
 
-        index(KomodoType.FUNCTION, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT);
+        index(KomodoType.FOREIGN_KEY, TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT);
 
         index(KomodoType.INDEX, TeiidDdlLexicon.Constraint.INDEX_CONSTRAINT);
 
@@ -128,19 +128,25 @@ public class KomodoTypeRegistry {
 
         index(KomodoType.PRIMARY_KEY, TeiidDdlLexicon.Constraint.TABLE_ELEMENT);
 
-        index(KomodoType.PROCEDURE, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
-
-        index(KomodoType.PROCEDURE_RESULT_SET, TeiidDdlLexicon.CreateProcedure.RESULT_SET);
+        index(KomodoType.PUSHDOWN_FUNCTION, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT);
 
         index(KomodoType.SCHEMA, KomodoLexicon.Schema.NODE_TYPE);
 
         index(KomodoType.STATEMENT_OPTION, StandardDdlLexicon.TYPE_STATEMENT_OPTION);
 
+        index(KomodoType.STORED_PROCEDURE, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
+
         index(KomodoType.TABLE, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+
+        index(KomodoType.TABULAR_RESULT_SET, TeiidDdlLexicon.CreateProcedure.RESULT_COLUMNS);
 
         index(KomodoType.TEIID, KomodoLexicon.Teiid.NODE_TYPE);
 
         index(KomodoType.UNIQUE_CONSTRAINT, TeiidDdlLexicon.Constraint.TABLE_ELEMENT);
+
+        index(KomodoType.USER_DEFINED_FUNCTION, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT);
+
+        index(KomodoType.VIRTUAL_PROCEDURE, TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT);
 
         index(KomodoType.VDB, VdbLexicon.Vdb.VIRTUAL_DATABASE);
 

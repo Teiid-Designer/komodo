@@ -11,36 +11,43 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
+import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.ForeignKey;
-import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.PrimaryKey;
-import org.komodo.relational.model.Procedure;
-import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.PushdownFunction;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.relational.model.Schema;
+import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StatementOption;
+import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.TabularResultSet;
 import org.komodo.relational.model.UniqueConstraint;
+import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.View;
+import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.relational.model.internal.AccessPatternImpl;
 import org.komodo.relational.model.internal.ColumnImpl;
+import org.komodo.relational.model.internal.DataTypeResultSetImpl;
 import org.komodo.relational.model.internal.ForeignKeyImpl;
-import org.komodo.relational.model.internal.FunctionImpl;
 import org.komodo.relational.model.internal.IndexImpl;
 import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.ParameterImpl;
 import org.komodo.relational.model.internal.PrimaryKeyImpl;
-import org.komodo.relational.model.internal.ProcedureImpl;
-import org.komodo.relational.model.internal.ProcedureResultSetImpl;
+import org.komodo.relational.model.internal.PushdownFunctionImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.relational.model.internal.StatementOptionImpl;
+import org.komodo.relational.model.internal.StoredProcedureImpl;
 import org.komodo.relational.model.internal.TableImpl;
+import org.komodo.relational.model.internal.TabularResultSetImpl;
 import org.komodo.relational.model.internal.UniqueConstraintImpl;
+import org.komodo.relational.model.internal.UserDefinedFunctionImpl;
 import org.komodo.relational.model.internal.ViewImpl;
+import org.komodo.relational.model.internal.VirtualProcedureImpl;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Condition;
@@ -72,6 +79,7 @@ import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -271,6 +279,49 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentProcedure
+     *        the procedure where the procedure result set model object is being created (cannot be <code>null</code>)
+     * @return the procedure result set model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static DataTypeResultSet createDataTypeResultSet( final UnitOfWork uow,
+                                                             final Repository repository,
+                                                             final AbstractProcedure parentProcedure ) throws KException {
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentProcedure, "parentProcedure" ); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction( "relationalmodelfactory-createDataTypeResultSet", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        try {
+            final KomodoObject kobject = repository.add( transaction,
+                                                         parentProcedure.getAbsolutePath(),
+                                                         CreateProcedure.RESULT_SET,
+                                                         null );
+            kobject.addDescriptor( transaction, CreateProcedure.RESULT_DATA_TYPE );
+            final DataTypeResultSet result = new DataTypeResultSetImpl( transaction, repository, kobject.getAbsolutePath() );
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentVdb
      *        the VDB where the entry model object is being created (cannot be <code>null</code>)
      * @param entryName
@@ -367,6 +418,8 @@ public final class RelationalModelFactory {
     }
 
     /**
+     * This is Teiid's <code>Create Foreign Function</code> command.
+     *
      * @param uow
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
@@ -379,28 +432,29 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Function createFunction( final UnitOfWork uow,
-                                           final Repository repository,
-                                           final Model parentModel,
-                                           final String functionName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(functionName, "functionName"); //$NON-NLS-1$
+    public static PushdownFunction createPushdownFunction( final UnitOfWork uow,
+                                                           final Repository repository,
+                                                           final Model parentModel,
+                                                           final String functionName ) throws KException {
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( functionName, "functionName" ); //$NON-NLS-1$
 
         UnitOfWork transaction = uow;
 
         if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createFunction", false, null); //$NON-NLS-1$
+            transaction = repository.createTransaction( "relationalmodelfactory-createPushdownFunction", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         try {
-            final KomodoObject kobject = repository.add(transaction, parentModel.getAbsolutePath(), functionName, null);
-            kobject.addDescriptor(transaction, CreateProcedure.FUNCTION_STATEMENT);
-            setCreateStatementProperties(transaction, kobject);
+            final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), functionName, null );
+            kobject.addDescriptor( transaction, CreateProcedure.FUNCTION_STATEMENT );
+            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.toString() );
+            setCreateStatementProperties( transaction, kobject );
 
-            final Function result = new FunctionImpl(transaction, repository, kobject.getAbsolutePath());
+            final PushdownFunction result = new PushdownFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
 
             if (uow == null) {
                 transaction.commit();
@@ -408,7 +462,7 @@ public final class RelationalModelFactory {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -731,6 +785,8 @@ public final class RelationalModelFactory {
     }
 
     /**
+     * This is Teiid's <code>Create Foreign Procedure</code> command.
+     *
      * @param uow
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
@@ -743,28 +799,29 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Procedure createProcedure( final UnitOfWork uow,
-                                             final Repository repository,
-                                             final Model parentModel,
-                                             final String procedureName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(procedureName, "procedureName"); //$NON-NLS-1$
+    public static StoredProcedure createStoredProcedure( final UnitOfWork uow,
+                                                         final Repository repository,
+                                                         final Model parentModel,
+                                                         final String procedureName ) throws KException {
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( procedureName, "procedureName" ); //$NON-NLS-1$
 
         UnitOfWork transaction = uow;
 
         if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createProcedure", false, null); //$NON-NLS-1$
+            transaction = repository.createTransaction( "relationalmodelfactory-createStoredProcedure", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         try {
-            final KomodoObject kobject = repository.add(transaction, parentModel.getAbsolutePath(), procedureName, null);
-            kobject.addDescriptor(transaction, CreateProcedure.PROCEDURE_STATEMENT);
-            setCreateStatementProperties(transaction, kobject);
+            final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), procedureName, null );
+            kobject.addDescriptor( transaction, CreateProcedure.PROCEDURE_STATEMENT );
+            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.toString() );
+            setCreateStatementProperties( transaction, kobject );
 
-            final Procedure result = new ProcedureImpl(transaction, repository, kobject.getAbsolutePath());
+            final StoredProcedure result = new StoredProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
 
             if (uow == null) {
                 transaction.commit();
@@ -772,50 +829,7 @@ public final class RelationalModelFactory {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
-    }
-
-    /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param repository
-     *        the repository where the model object will be created (cannot be <code>null</code>)
-     * @param parentProcedure
-     *        the procedure where the procedure result set model object is being created (cannot be <code>null</code>)
-     * @return the procedure result set model object (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    public static ProcedureResultSet createProcedureResultSet( final UnitOfWork uow,
-                                                               final Repository repository,
-                                                               final AbstractProcedure parentProcedure ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentProcedure, "parentProcedure"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createProcedureResultSet", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject kobject = repository.add(transaction,
-                                                        parentProcedure.getAbsolutePath(),
-                                                        CreateProcedure.RESULT_SET,
-                                                        null);
-            kobject.addDescriptor(transaction, CreateProcedure.RESULT_COLUMNS);
-            final ProcedureResultSet result = new ProcedureResultSetImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -970,6 +984,49 @@ public final class RelationalModelFactory {
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentProcedure
+     *        the procedure where the procedure result set model object is being created (cannot be <code>null</code>)
+     * @return the procedure result set model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static TabularResultSet createTabularResultSet( final UnitOfWork uow,
+                                                           final Repository repository,
+                                                           final AbstractProcedure parentProcedure ) throws KException {
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentProcedure, "parentProcedure" ); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction( "relationalmodelfactory-createTabularResultSet", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        try {
+            final KomodoObject kobject = repository.add( transaction,
+                                                         parentProcedure.getAbsolutePath(),
+                                                         CreateProcedure.RESULT_SET,
+                                                         null );
+            kobject.addDescriptor( transaction, CreateProcedure.RESULT_COLUMNS );
+            final TabularResultSet result = new TabularResultSetImpl( transaction, repository, kobject.getAbsolutePath() );
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentWorkspacePath
      *        the parent path (can be empty)
      * @param id
@@ -1112,6 +1169,55 @@ public final class RelationalModelFactory {
             return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * This is Teiid's <code>Create Virtual Function</code> command.
+     *
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentModel
+     *        the model where the function is being created (cannot be <code>null</code>)
+     * @param functionName
+     *        the name of the function to create (cannot be empty)
+     * @return the function model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static UserDefinedFunction createUserDefinedFunction( final UnitOfWork uow,
+                                                                 final Repository repository,
+                                                                 final Model parentModel,
+                                                                 final String functionName ) throws KException {
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( functionName, "functionName" ); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction( "relationalmodelfactory-createUserDefinedFunction", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        try {
+            final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), functionName, null );
+            kobject.addDescriptor( transaction, CreateProcedure.FUNCTION_STATEMENT );
+            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.toString() );
+            setCreateStatementProperties( transaction, kobject );
+
+            final UserDefinedFunction result = new UserDefinedFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -1261,6 +1367,55 @@ public final class RelationalModelFactory {
             return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * This is Teiid's <code>Create Virtual Procedure</code> command.
+     *
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentModel
+     *        the model where the procedure is being created (cannot be <code>null</code>)
+     * @param procedureName
+     *        the name of the procedure to create (cannot be empty)
+     * @return the procedure model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static VirtualProcedure createVirtualProcedure( final UnitOfWork uow,
+                                                           final Repository repository,
+                                                           final Model parentModel,
+                                                           final String procedureName ) throws KException {
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( procedureName, "procedureName" ); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction( "relationalmodelfactory-createVirtualProcedure", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        try {
+            final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), procedureName, null );
+            kobject.addDescriptor( transaction, CreateProcedure.PROCEDURE_STATEMENT );
+            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.toString() );
+            setCreateStatementProperties( transaction, kobject );
+
+            final VirtualProcedure result = new VirtualProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
         }
     }
 

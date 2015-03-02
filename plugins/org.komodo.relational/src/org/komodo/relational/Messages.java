@@ -138,7 +138,7 @@ public class Messages implements StringConstants {
         REFERENCED_TABLE_NOT_FOUND,
 
         /**
-         * An error message indicating a procedure result set could not be removed.
+         * An error message indicating a result set could not be removed.
          */
         RESULT_SET_NOT_FOUND_TO_REMOVE,
 
@@ -161,6 +161,16 @@ public class Messages implements StringConstants {
          * An error message indicating a VDB translator could not be removed because it was not found.
          */
         TRANSLATOR_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * An error message indicating an unexpected procedure type was found.
+         */
+        UNEXPECTED_PROCEDURE_TYPE,
+
+        /**
+         * An error message indicating an unexpected result set type was found.
+         */
+        UNEXPECTED_RESULT_SET_TYPE,
 
         /**
          * An error message indicating an imported VDB could not be removed because it was not found.

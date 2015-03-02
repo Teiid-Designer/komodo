@@ -11,9 +11,14 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
- * Represents a relational model procedure.
+ * Represents a relational model procedure or function.
  */
 public interface AbstractProcedure extends OptionContainer, RelationalObject, SchemaElement {
+
+    /**
+     * The default value of this table's update count. Value is {@value} .
+     */
+    int DEFAULT_UPDATE_COUNT = 0;
 
     /**
      * @param transaction
@@ -30,16 +35,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the value of the AS clause <code>statement</code> property (can be empty)
-     * @throws KException
-     *         if an error occurs
-     */
-    String getAsClauseStatement( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the value of the <code>description</code> property (can be empty)
+     * @return the value of the <code>annotation</code> option (can be empty)
      * @throws KException
      *         if an error occurs
      */
@@ -48,20 +44,11 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if the query should be automatically committed)
-     * @return the value of the <code>name in source</code> property (can be empty)
+     * @return the value of the <code>name in source</code> option (can be empty)
      * @throws KException
      *         if an error occurs
      */
     String getNameInSource( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the value of the <code>native query</code> property (can be empty)
-     * @throws KException
-     *         if an error occurs
-     */
-    String getNativeQuery( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -83,13 +70,20 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @param create <code>true</code> if the result set should be created if does not exist
-     * @return the result set (can be <code>null</code>)
+     * @return the value of the <code>update count</code> option
      * @throws KException
      *         if an error occurs
      */
-    ProcedureResultSet getResultSet( final UnitOfWork transaction,
-                                     final boolean create ) throws KException;
+    int getUpdateCount( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the value of the <code>UUID</code> option (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getUuid( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -105,27 +99,8 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @throws KException
-     *         if there is no result set to remove or if an error occurs
-     */
-    void removeResultSet( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param newStatement
-     *        the new AS clause statement (cannot be empty)
-     * @throws KException
-     *         if an error occurs
-     */
-    void setAsClauseStatement( final UnitOfWork transaction,
-                               final String newStatement ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param newDescription
-     *        the new value of the <code>description</code> property (can only be empty when removing)
+     *        the new value of the <code>annotation</code> option (can only be empty when removing)
      * @throws KException
      *         if an error occurs
      */
@@ -136,7 +111,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
      * @param transaction
      *        the transaction (can be <code>null</code> if the update should be automatically committed)
      * @param newNameInSource
-     *        the new name in source (can only be empty when removing)
+     *        the new name in source option (can only be empty when removing)
      * @throws KException
      *         if an error occurs
      */
@@ -146,12 +121,23 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param newNativeQuery
-     *        the new value of the <code>native query</code> property (can only be empty when removing)
+     * @param newUpdateCount
+     *        the new value of the <code>update count</code> option
      * @throws KException
      *         if an error occurs
      */
-    void setNativeQuery( final UnitOfWork transaction,
-                         final String newNativeQuery ) throws KException;
+    void setUpdateCount( final UnitOfWork transaction,
+                         final int newUpdateCount ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param newUuid
+     *        the new value of the <code>UUID</code> option (can only be empty when removing)
+     * @throws KException
+     *         if an error occurs
+     */
+    void setUuid( final UnitOfWork transaction,
+                  final String newUuid ) throws KException;
 
 }

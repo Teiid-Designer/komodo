@@ -11,38 +11,35 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import java.util.Arrays;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
-import org.komodo.relational.model.Procedure;
-import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.TabularResultSet;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.Descriptor;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 @SuppressWarnings( {"javadoc", "nls"} )
-public class ProcedureResultSetImplTest extends RelationalModelTest {
+public class TabularResultSetImplTest extends RelationalModelTest {
 
-    private Procedure procedure;
-    private ProcedureResultSet procedureResultSet;
+    private StoredProcedure procedure;
+    private TabularResultSet resultSet;
 
     @Before
     public void init() throws Exception {
-        this.procedure = RelationalModelFactory.createProcedure(null, _repo, mock(Model.class), "procedure");
-        this.procedureResultSet = RelationalModelFactory.createProcedureResultSet(null, _repo, this.procedure);
+        this.procedure = RelationalModelFactory.createStoredProcedure(null, _repo, mock(Model.class), "procedure");
+        this.resultSet = RelationalModelFactory.createTabularResultSet(null, _repo, this.procedure);
     }
 
     @Test
-    public void shouldFailConstructionIfNotProcedureResultSet() {
+    public void shouldFailConstructionIfNotDataTypeResultSet() {
         if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
             try {
-                new ProcedureResultSetImpl(null, _repo, this.procedure.getAbsolutePath());
+                new TabularResultSetImpl(null, _repo, this.procedure.getAbsolutePath());
                 fail();
             } catch (final KException e) {
                 // expected
@@ -52,64 +49,42 @@ public class ProcedureResultSetImplTest extends RelationalModelTest {
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenAddingAccessPattern() throws KException {
-        this.procedureResultSet.addAccessPattern(null, "blah");
+        this.resultSet.addAccessPattern(null, "blah");
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenAddingForeignKey() throws KException {
-        this.procedureResultSet.addForeignKey(null, "blah", mock(Table.class));
+        this.resultSet.addForeignKey(null, "blah", mock(Table.class));
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenAddingUniqueConstraint() throws KException {
-        this.procedureResultSet.addUniqueConstraint(null, "blah");
+        this.resultSet.addUniqueConstraint(null, "blah");
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenRemovingAccessPattern() throws KException {
-        this.procedureResultSet.removeAccessPattern(null, "blah");
+        this.resultSet.removeAccessPattern(null, "blah");
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenRemovingForeignKey() throws KException {
-        this.procedureResultSet.removeForeignKey(null, "blah");
+        this.resultSet.removeForeignKey(null, "blah");
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenRemovingUniqueConstraint() throws KException {
-        this.procedureResultSet.removeUniqueConstraint(null, "blah");
+        this.resultSet.removeUniqueConstraint(null, "blah");
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenSettingPrimaryKey() throws KException {
-        this.procedureResultSet.setPrimaryKey(null, "blah");
-    }
-
-    @Test
-    public void shouldHaveCorrectDescriptor() throws Exception {
-        final List< String > valid = Arrays.asList(new String[] {CreateProcedure.RESULT_COLUMNS, CreateProcedure.RESULT_DATA_TYPE});
-        boolean pass = false;
-
-        for (final Descriptor mixin : this.procedureResultSet.getDescriptors(null)) {
-            if (valid.contains(mixin.getName())) {
-                pass = true;
-                break;
-            }
-        }
-
-        if (!pass) {
-            fail();
-        }
+        this.resultSet.setPrimaryKey(null, "blah");
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat(this.procedureResultSet.getName(null), is(CreateProcedure.RESULT_SET));
-    }
-
-    @Test
-    public void shouldHaveParentProcedureAfterConstruction() throws Exception {
-        assertThat(this.procedureResultSet.getProcedure(null), is(this.procedure));
+        assertThat(this.resultSet.getName(null), is(CreateProcedure.RESULT_SET));
     }
 
 }
