@@ -19,7 +19,9 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.AccessPattern;
+import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Index;
@@ -28,9 +30,14 @@ import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.PushdownFunction;
+import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.TabularResultSet;
 import org.komodo.relational.model.UniqueConstraint;
+import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.View;
+import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
@@ -278,6 +285,18 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldResolveDataTypeResultSet() throws Exception {
+        final Repository.UnitOfWork uow = _repo.createTransaction(this.name.getMethodName(), false, null);
+        final Vdb vdb = createVdb(uow, null, "vdb");
+        final Model model = createModel(uow, vdb, "model");
+        final StoredProcedure procedure = model.addStoredProcedure(uow, "procedure");
+        final ProcedureResultSet resultSet = procedure.setResultSet(uow, false);
+        final KomodoObject kobject = new ObjectImpl(_repo, resultSet.getAbsolutePath(), resultSet.getIndex());
+        assertThat(this.wsMgr.resolve(uow, kobject, DataTypeResultSet.class), is(instanceOf(DataTypeResultSet.class)));
+        uow.commit();
+    }
+
+    @Test
     public void shouldResolveEntry() throws Exception {
         final Vdb vdb = createVdb(null, null, "vdb");
         final Entry entry = vdb.addEntry(null, "entry", "path");
@@ -294,15 +313,6 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         final KomodoObject kobject = new ObjectImpl(_repo, foreignKey.getAbsolutePath(), foreignKey.getIndex());
         assertThat(this.wsMgr.resolve(uow, kobject, ForeignKey.class), is(instanceOf(ForeignKey.class)));
         uow.commit();
-    }
-
-    @Test
-    public void shouldResolveFunction() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
-        final Function function = model.addFunction(null, "function");
-        final KomodoObject kobject = new ObjectImpl(_repo, function.getAbsolutePath(), function.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Function.class), is(instanceOf(Function.class)));
     }
 
     @Test
@@ -344,7 +354,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     public void shouldResolveParameter() throws Exception {
         final Vdb vdb = createVdb(null, null, "vdb");
         final Model model = createModel(null, vdb, "model");
-        final Procedure procedure = model.addProcedure(null, "procedure");
+        final Procedure procedure = model.addVirtualProcedure(null, "procedure");
         final Parameter param = procedure.addParameter(null, "param");
         final KomodoObject kobject = new ObjectImpl(_repo, param.getAbsolutePath(), param.getIndex());
         assertThat(this.wsMgr.resolve(null, kobject, Parameter.class), is(instanceOf(Parameter.class)));
@@ -368,23 +378,32 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
-    public void shouldResolveProcedure() throws Exception {
+    public void shouldResolvePushdownFunction() throws Exception {
         final Vdb vdb = createVdb(null, null, "vdb");
         final Model model = createModel(null, vdb, "model");
-        final Procedure procedure = model.addProcedure(null, "procedure");
-        final KomodoObject kobject = new ObjectImpl(_repo, procedure.getAbsolutePath(), procedure.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Procedure.class), is(instanceOf(Procedure.class)));
+        final Function function = model.addPushdownFunction(null, "function");
+        final KomodoObject kobject = new ObjectImpl(_repo, function.getAbsolutePath(), function.getIndex());
+        assertThat(this.wsMgr.resolve(null, kobject, PushdownFunction.class), is(instanceOf(PushdownFunction.class)));
     }
 
     @Test
-    public void shouldResolveProcedureResultSet() throws Exception {
+    public void shouldResolveStoredProcedure() throws Exception {
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
+        final Procedure procedure = model.addStoredProcedure(null, "procedure");
+        final KomodoObject kobject = new ObjectImpl(_repo, procedure.getAbsolutePath(), procedure.getIndex());
+        assertThat(this.wsMgr.resolve(null, kobject, StoredProcedure.class), is(instanceOf(StoredProcedure.class)));
+    }
+
+    @Test
+    public void shouldResolveTabularResultSet() throws Exception {
         final Repository.UnitOfWork uow = _repo.createTransaction(this.name.getMethodName(), false, null);
         final Vdb vdb = createVdb(uow, null, "vdb");
         final Model model = createModel(uow, vdb, "model");
-        final Procedure procedure = model.addProcedure(uow, "procedure");
-        final ProcedureResultSet resultSet = procedure.getResultSet(uow, true);
+        final StoredProcedure procedure = model.addStoredProcedure(uow, "procedure");
+        final ProcedureResultSet resultSet = procedure.setResultSet(uow, true);
         final KomodoObject kobject = new ObjectImpl(_repo, resultSet.getAbsolutePath(), resultSet.getIndex());
-        assertThat(this.wsMgr.resolve(uow, kobject, ProcedureResultSet.class), is(instanceOf(ProcedureResultSet.class)));
+        assertThat(this.wsMgr.resolve(uow, kobject, TabularResultSet.class), is(instanceOf(TabularResultSet.class)));
         uow.commit();
     }
 
@@ -419,6 +438,15 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldResolveUserDefinedFunction() throws Exception {
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
+        final Function function = model.addUserDefinedFunction(null, "function");
+        final KomodoObject kobject = new ObjectImpl(_repo, function.getAbsolutePath(), function.getIndex());
+        assertThat(this.wsMgr.resolve(null, kobject, UserDefinedFunction.class), is(instanceOf(UserDefinedFunction.class)));
+    }
+
+    @Test
     public void shouldResolveVdb() throws Exception {
         final Vdb vdb = createVdb(null, null, "vdb");
         final KomodoObject kobject = new ObjectImpl(_repo, vdb.getAbsolutePath(), vdb.getIndex());
@@ -440,6 +468,15 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         final View view = model.addView(null, "view");
         final KomodoObject kobject = new ObjectImpl(_repo, view.getAbsolutePath(), view.getIndex());
         assertThat(this.wsMgr.resolve(null, kobject, View.class), is(instanceOf(View.class)));
+    }
+
+    @Test
+    public void shouldResolveVirtualProcedure() throws Exception {
+        final Vdb vdb = createVdb(null, null, "vdb");
+        final Model model = createModel(null, vdb, "model");
+        final Procedure procedure = model.addVirtualProcedure(null, "procedure");
+        final KomodoObject kobject = new ObjectImpl(_repo, procedure.getAbsolutePath(), procedure.getIndex());
+        assertThat(this.wsMgr.resolve(null, kobject, VirtualProcedure.class), is(instanceOf(VirtualProcedure.class)));
     }
 
     @Test
@@ -485,12 +522,22 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldCreateDataTypeResultSet() throws Exception {
+        final Vdb parent = createVdb(null, null, this.name.getMethodName() + "Vdb");
+        final Model model = createModel(null, parent, this.name.getMethodName() + "Model");
+        final AbstractProcedure procedure = RelationalModelFactory.createVirtualProcedure(null, _repo, model, "procedure");
+        final KomodoObject result = wsMgr.create(null, procedure, "resultSet", KomodoType.DATA_TYPE_RESULT_SET);
+        assertNotNull(result);
+        assertThat(result, is(instanceOf(DataTypeResultSet.class)));
+    }
+
+    @Test
     public void shouldCreateAllRelationalObjects() throws Exception {
         KomodoObject workspace = _repo.komodoWorkspace(null);
         Vdb vdb = RelationalModelFactory.createVdb(null, _repo, workspace.getAbsolutePath(), "testControlVdb", "/test1");
         Model model = RelationalModelFactory.createModel(null, _repo, vdb, "testControlModel");
         Table table = RelationalModelFactory.createTable(null, _repo, model, "testControlTable");
-        Procedure procedure = RelationalModelFactory.createProcedure(null, _repo, model, "testControlProcedure");
+        AbstractProcedure procedure = RelationalModelFactory.createVirtualProcedure(null, _repo, model, "testControlProcedure");
         DataRole dataRole = RelationalModelFactory.createDataRole(null, _repo, vdb, "testControlDataRole");
         Permission permission = RelationalModelFactory.createPermission(null, _repo, dataRole, "testControlPermission");
 
@@ -537,7 +584,12 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
                     assertNotNull(result);
                     break;
                 }
-                case FUNCTION: {
+                case PUSHDOWN_FUNCTION: {
+                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case USER_DEFINED_FUNCTION: {
                     KomodoObject result = wsMgr.create(null, model, "test" + id, type);
                     assertNotNull(result);
                     break;
@@ -562,14 +614,26 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
                     assertNotNull(result);
                     break;
                 }
-                case PROCEDURE: {
+                case STORED_PROCEDURE: {
                     KomodoObject result = wsMgr.create(null, model, "test" + id, type);
                     assertNotNull(result);
+                    assertThat(result, is(instanceOf(StoredProcedure.class)));
                     break;
                 }
-                case PROCEDURE_RESULT_SET: {
+                case VIRTUAL_PROCEDURE: {
+                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    assertNotNull(result);
+                    assertThat(result, is(instanceOf(VirtualProcedure.class)));
+                    break;
+                }
+                case DATA_TYPE_RESULT_SET: {
+                    // since this and tabular result set expect the same name must run in different test
+                    break;
+                }
+                case TABULAR_RESULT_SET: {
                     KomodoObject result = wsMgr.create(null, procedure, "test" + id, type);
                     assertNotNull(result);
+                    assertThat(result, is(instanceOf(TabularResultSet.class)));
                     break;
                 }
                 case SCHEMA: {

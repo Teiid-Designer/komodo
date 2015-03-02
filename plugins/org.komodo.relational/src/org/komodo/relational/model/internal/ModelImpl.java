@@ -19,8 +19,13 @@ import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
+import org.komodo.relational.model.PushdownFunction;
+import org.komodo.relational.model.SchemaElement.SchemaElementType;
+import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.View;
+import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.ModelSourceImpl;
@@ -35,6 +40,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -54,7 +60,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
 
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< ? extends KomodoObject > owningClass() {
             return ModelImpl.class;
         }
 
@@ -69,7 +75,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                                    final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, VdbLexicon.Vdb.DECLARATIVE_MODEL);
+                ObjectImpl.validateType( transaction, repository, kobject, VdbLexicon.Vdb.DECLARATIVE_MODEL );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -88,17 +94,17 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         public Model resolve( final UnitOfWork transaction,
                               final Repository repository,
                               final KomodoObject kobject ) throws KException {
-            return new ModelImpl(transaction, repository, kobject.getAbsolutePath());
+            return new ModelImpl( transaction, repository, kobject.getAbsolutePath() );
         }
 
         @Override
-        public Model create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
-            Vdb parentVdb = adapter.adapt(transaction, parent, Vdb.class);
-            return RelationalModelFactory.createModel(transaction, parent.getRepository(), parentVdb, id);
+        public Model create( UnitOfWork transaction,
+                             KomodoObject parent,
+                             String id,
+                             RelationalProperties properties ) throws KException {
+            AdapterFactory adapter = new AdapterFactory( parent.getRepository() );
+            Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
+            return RelationalModelFactory.createModel( transaction, parent.getRepository(), parentVdb, id );
         }
 
     };
@@ -116,39 +122,43 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     public ModelImpl( final UnitOfWork uow,
                       final Repository repository,
                       final String workspacePath ) throws KException {
-        super(uow, repository, workspacePath);
+        super( uow, repository, workspacePath );
     }
 
     @Override
-    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+    public KomodoType getTypeIdentifier( UnitOfWork uow ) {
         return RESOLVER.identifier();
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Model#addFunction(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @see org.komodo.relational.model.Model#addPushdownFunction(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
      */
     @Override
-    public Function addFunction( final UnitOfWork uow,
-                                 final String functionName ) throws KException {
-        ArgCheck.isNotEmpty(functionName, "functionName"); //$NON-NLS-1$
+    public PushdownFunction addPushdownFunction( final UnitOfWork uow,
+                                                 final String functionName ) throws KException {
+        ArgCheck.isNotEmpty( functionName, "functionName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-addFunction", false, null); //$NON-NLS-1$
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "modelimpl-addPushdownFunction", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addFunction: transaction = {0}, functionName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         functionName);
+            LOGGER.debug( "addPushdownFunction: transaction = {0}, functionName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          functionName );
         }
 
         try {
-            final Function result = RelationalModelFactory.createFunction(transaction, getRepository(), this, functionName);
+            final PushdownFunction result = RelationalModelFactory.createPushdownFunction( transaction,
+                                                                                           getRepository(),
+                                                                                           this,
+                                                                                           functionName );
 
             if (uow == null) {
                 transaction.commit();
@@ -156,35 +166,39 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Model#addProcedure(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @see org.komodo.relational.model.Model#addUserDefinedFunction(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
      */
     @Override
-    public Procedure addProcedure( final UnitOfWork uow,
-                                   final String procedureName ) throws KException {
-        ArgCheck.isNotEmpty(procedureName, "procedureName"); //$NON-NLS-1$
+    public UserDefinedFunction addUserDefinedFunction( final UnitOfWork uow,
+                                                       final String functionName ) throws KException {
+        ArgCheck.isNotEmpty( functionName, "functionName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-addProcedure", false, null); //$NON-NLS-1$
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "modelimpl-addUserDefinedFunction", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addProcedure: transaction = {0}, procedureName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         procedureName);
+            LOGGER.debug( "addUserDefinedFunction: transaction = {0}, functionName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          functionName );
         }
 
         try {
-            final Procedure result = RelationalModelFactory.createProcedure(transaction, getRepository(), this, procedureName);
+            final UserDefinedFunction result = RelationalModelFactory.createUserDefinedFunction( transaction,
+                                                                                                 getRepository(),
+                                                                                                 this,
+                                                                                                 functionName );
 
             if (uow == null) {
                 transaction.commit();
@@ -192,7 +206,87 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#addStoredProcedure(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public StoredProcedure addStoredProcedure( final UnitOfWork uow,
+                                               final String procedureName ) throws KException {
+        ArgCheck.isNotEmpty( procedureName, "procedureName" ); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "modelimpl-addStoredProcedure", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug( "addStoredProcedure: transaction = {0}, procedureName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          procedureName );
+        }
+
+        try {
+            final StoredProcedure result = RelationalModelFactory.createStoredProcedure( transaction,
+                                                                                         getRepository(),
+                                                                                         this,
+                                                                                         procedureName );
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#addVirtualProcedure(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public VirtualProcedure addVirtualProcedure( final UnitOfWork uow,
+                                                 final String procedureName ) throws KException {
+        ArgCheck.isNotEmpty( procedureName, "procedureName" ); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "modelimpl-addVirtualProcedure", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug( "addVirtualProcedure: transaction = {0}, procedureName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          procedureName );
+        }
+
+        try {
+            final VirtualProcedure result = RelationalModelFactory.createVirtualProcedure( transaction,
+                                                                                           getRepository(),
+                                                                                           this,
+                                                                                           procedureName );
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -204,23 +298,23 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public ModelSource addSource( final UnitOfWork uow,
                                   final String sourceName ) throws KException {
-        ArgCheck.isNotEmpty(sourceName, "sourceName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( sourceName, "sourceName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-addSource", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-addSource", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addSource: transaction = {0}, tableName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         sourceName);
+            LOGGER.debug( "addSource: transaction = {0}, tableName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          sourceName );
         }
 
         try {
-            final ModelSource result = RelationalModelFactory.createModelSource(transaction, getRepository(), this, sourceName);
+            final ModelSource result = RelationalModelFactory.createModelSource( transaction, getRepository(), this, sourceName );
 
             if (uow == null) {
                 transaction.commit();
@@ -228,7 +322,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -240,23 +334,23 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public Table addTable( final UnitOfWork uow,
                            final String tableName ) throws KException {
-        ArgCheck.isNotEmpty(tableName, "tableName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( tableName, "tableName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-addTable", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-addTable", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addTable: transaction = {0}, tableName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         tableName);
+            LOGGER.debug( "addTable: transaction = {0}, tableName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          tableName );
         }
 
         try {
-            final Table result = RelationalModelFactory.createTable(transaction, getRepository(), this, tableName);
+            final Table result = RelationalModelFactory.createTable( transaction, getRepository(), this, tableName );
 
             if (uow == null) {
                 transaction.commit();
@@ -264,7 +358,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -276,23 +370,23 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public View addView( final UnitOfWork uow,
                          final String viewName ) throws KException {
-        ArgCheck.isNotEmpty(viewName, "viewName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( viewName, "viewName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-viewName", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-viewName", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("addView: transaction = {0}, viewName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         viewName);
+            LOGGER.debug( "addView: transaction = {0}, viewName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          viewName );
         }
 
         try {
-            final View result = RelationalModelFactory.createView(transaction, getRepository(), this, viewName);
+            final View result = RelationalModelFactory.createView( transaction, getRepository(), this, viewName );
 
             if (uow == null) {
                 transaction.commit();
@@ -300,7 +394,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -314,34 +408,34 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         UnitOfWork transaction = uow;
 
         if (uow == null) {
-            transaction = getRepository().createTransaction("modelimpl-getChildren", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-getChildren", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         try {
-            final Function[] functions = getFunctions(transaction);
-            final Procedure[] procedures = getProcedures(transaction);
-            final Table[] tables = getTables(transaction);
-            final View[] views = getViews(transaction);
-            final ModelSource[] sources = getSources(transaction);
+            final Function[] functions = getFunctions( transaction );
+            final Procedure[] procedures = getProcedures( transaction );
+            final Table[] tables = getTables( transaction );
+            final View[] views = getViews( transaction );
+            final ModelSource[] sources = getSources( transaction );
             final KomodoObject[] result = new KomodoObject[functions.length + procedures.length + tables.length + views.length
                                                            + sources.length];
 
             int start = 0;
-            System.arraycopy(functions, 0, result, start, functions.length);
+            System.arraycopy( functions, 0, result, start, functions.length );
 
             start = functions.length;
-            System.arraycopy(procedures, 0, result, start, procedures.length);
+            System.arraycopy( procedures, 0, result, start, procedures.length );
 
             start += procedures.length;
-            System.arraycopy(tables, 0, result, start, tables.length);
+            System.arraycopy( tables, 0, result, start, tables.length );
 
             start += tables.length;
-            System.arraycopy(views, 0, result, start, views.length);
+            System.arraycopy( views, 0, result, start, views.length );
 
             start += sources.length;
-            System.arraycopy(sources, 0, result, start, sources.length);
+            System.arraycopy( sources, 0, result, start, sources.length );
 
             if (uow == null) {
                 transaction.commit();
@@ -349,7 +443,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -365,24 +459,24 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         UnitOfWork transaction = uow;
 
         if (uow == null) {
-            transaction = getRepository().createTransaction("modelimpl-getChildrenOfType", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-getChildrenOfType", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         try {
             KomodoObject[] result = KomodoObject.EMPTY_ARRAY;
 
-            if (CreateProcedure.FUNCTION_STATEMENT.equals(type)) {
-                result = getFunctions(transaction);
-            } else if (CreateProcedure.PROCEDURE_STATEMENT.equals(type)) {
-                result = getProcedures(transaction);
-            } else if (CreateTable.TABLE_STATEMENT.equals(type)) {
-                result = getTables(transaction);
-            } else if (CreateTable.VIEW_STATEMENT.equals(type)) {
-                result = getViews(transaction);
-            } else if (VdbLexicon.Source.SOURCE.equals(type)) {
-                result = getSources(transaction);
+            if (CreateProcedure.FUNCTION_STATEMENT.equals( type )) {
+                result = getFunctions( transaction );
+            } else if (CreateProcedure.PROCEDURE_STATEMENT.equals( type )) {
+                result = getProcedures( transaction );
+            } else if (CreateTable.TABLE_STATEMENT.equals( type )) {
+                result = getTables( transaction );
+            } else if (CreateTable.VIEW_STATEMENT.equals( type )) {
+                result = getViews( transaction );
+            } else if (VdbLexicon.Source.SOURCE.equals( type )) {
+                result = getSources( transaction );
             }
 
             if (uow == null) {
@@ -391,7 +485,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -402,7 +496,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      */
     @Override
     public String getDescription( final UnitOfWork transaction ) throws KException {
-        return getObjectProperty(transaction, Property.ValueType.STRING, "getDescription", VdbLexicon.Vdb.DESCRIPTION); //$NON-NLS-1$
+        return getObjectProperty( transaction, Property.ValueType.STRING, "getDescription", VdbLexicon.Vdb.DESCRIPTION ); //$NON-NLS-1$
     }
 
     /**
@@ -415,28 +509,40 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-getFunctions", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-getFunctions", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getFunctions: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+            LOGGER.debug( "getFunctions: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
         }
 
         try {
             final List< Function > result = new ArrayList< Function >();
 
-            for (final KomodoObject kobject : super.getChildrenOfType(transaction, CreateProcedure.FUNCTION_STATEMENT)) {
-                final Function function = new FunctionImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            for (final KomodoObject kobject : super.getChildrenOfType( transaction, CreateProcedure.FUNCTION_STATEMENT )) {
+                final Property prop = kobject.getProperty( transaction, SchemaElement.TYPE );
+                assert ( prop != null );
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("getFunctions: transaction = {0}, found function = {1}", //$NON-NLS-1$
-                                 transaction.getName(),
-                                 kobject.getAbsolutePath());
+                final String value = prop.getStringValue( transaction );
+                final SchemaElementType schemaType = SchemaElementType.fromValue( value );
+                Function function = null;
+
+                if (schemaType == SchemaElementType.FOREIGN) {
+                    function = new PushdownFunctionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+                } else if (schemaType == SchemaElementType.VIRTUAL) {
+                    function = new UserDefinedFunctionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
                 }
 
-                result.add(function);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug( "getFunctions: transaction = {0}, found function = {1}, type = {2}", //$NON-NLS-1$
+                                  transaction.getName(),
+                                  kobject.getAbsolutePath(),
+                                  value );
+                }
+
+                result.add( function );
             }
 
             if (uow == null) {
@@ -447,16 +553,16 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                 return Function.NO_FUNCTIONS;
             }
 
-            return result.toArray(new Function[result.size()]);
+            return result.toArray( new Function[result.size()] );
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
     @Override
     public String getModelDefinition( final UnitOfWork uow ) throws KException {
-        final String modelDefn = getObjectProperty(uow, Property.ValueType.STRING, "getModelDefinition", //$NON-NLS-1$
-                                                   KomodoLexicon.VdbModel.MODEL_DEFINITION);
+        final String modelDefn = getObjectProperty( uow, Property.ValueType.STRING, "getModelDefinition", //$NON-NLS-1$
+                                                    KomodoLexicon.VdbModel.MODEL_DEFINITION );
 
         return modelDefn == null ? EMPTY_STRING : modelDefn;
     }
@@ -468,10 +574,10 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      */
     @Override
     public Type getModelType( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty(uow, Property.ValueType.STRING, "getModelType", //$NON-NLS-1$
-                                               CoreLexicon.JcrId.MODEL_TYPE);
-        final Type modelType = ((value == null) ? null : Type.valueOf(value));
-        return ((modelType == null) ? Type.DEFAULT : modelType);
+        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getModelType", //$NON-NLS-1$
+                                                CoreLexicon.JcrId.MODEL_TYPE );
+        final Type modelType = ( ( value == null ) ? null : Type.valueOf( value ) );
+        return ( ( modelType == null ) ? Type.DEFAULT : modelType );
     }
 
     /**
@@ -484,28 +590,39 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-getProcedures", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-getProcedures", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getProcedures: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+            LOGGER.debug( "getProcedures: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
         }
 
         try {
             final List< Procedure > result = new ArrayList< Procedure >();
 
-            for (final KomodoObject kobject : super.getChildrenOfType(transaction, CreateProcedure.PROCEDURE_STATEMENT)) {
-                final Procedure procedure = new ProcedureImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            for (final KomodoObject kobject : super.getChildrenOfType( transaction, CreateProcedure.PROCEDURE_STATEMENT )) {
+                final Property prop = kobject.getProperty( transaction, SchemaElement.TYPE );
+                assert ( prop != null );
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("getProcedures: transaction = {0}, found procedure = {1}", //$NON-NLS-1$
-                                 transaction.getName(),
-                                 kobject.getAbsolutePath());
+                final String value = prop.getStringValue( transaction );
+                final SchemaElementType schemaType = SchemaElementType.fromValue( value );
+                Procedure procedure = null;
+
+                if (schemaType == SchemaElementType.FOREIGN) {
+                    procedure = new StoredProcedureImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+                } else {
+                    procedure = new VirtualProcedureImpl( transaction, getRepository(), kobject.getAbsolutePath() );
                 }
 
-                result.add(procedure);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug( "getProcedures: transaction = {0}, found procedure = {1}", //$NON-NLS-1$
+                                  transaction.getName(),
+                                  kobject.getAbsolutePath() );
+                }
+
+                result.add( procedure );
             }
 
             if (uow == null) {
@@ -516,9 +633,9 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                 return Procedure.NO_PROCEDURES;
             }
 
-            return result.toArray(new Procedure[result.size()]);
+            return result.toArray( new Procedure[result.size()] );
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -532,35 +649,35 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-getSources", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-getSources", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getSources: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+            LOGGER.debug( "getSources: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
         }
 
         try {
             ModelSource[] result = null;
 
-            if (hasChild(transaction, VdbLexicon.Vdb.SOURCES)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.SOURCES);
+            if (hasChild( transaction, VdbLexicon.Vdb.SOURCES )) {
+                final KomodoObject grouping = getChild( transaction, VdbLexicon.Vdb.SOURCES );
                 final List< ModelSource > temp = new ArrayList<>();
 
-                for (final KomodoObject kobject : grouping.getChildrenOfType(transaction, VdbLexicon.Source.SOURCE)) {
-                    final ModelSource translator = new ModelSourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
+                for (final KomodoObject kobject : grouping.getChildrenOfType( transaction, VdbLexicon.Source.SOURCE )) {
+                    final ModelSource translator = new ModelSourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
 
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("getSources: transaction = {0}, found model source = {1}", //$NON-NLS-1$
-                                     transaction.getName(),
-                                     kobject.getAbsolutePath());
+                        LOGGER.debug( "getSources: transaction = {0}, found model source = {1}", //$NON-NLS-1$
+                                      transaction.getName(),
+                                      kobject.getAbsolutePath() );
                     }
 
-                    temp.add(translator);
+                    temp.add( translator );
                 }
 
-                result = temp.toArray(new ModelSource[temp.size()]);
+                result = temp.toArray( new ModelSource[temp.size()] );
             } else {
                 result = ModelSource.NO_SOURCES;
             }
@@ -571,7 +688,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -585,28 +702,28 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-getTables", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-getTables", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getTables: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+            LOGGER.debug( "getTables: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
         }
 
         try {
             final List< Table > result = new ArrayList< Table >();
 
-            for (final KomodoObject kobject : super.getChildrenOfType(transaction, CreateTable.TABLE_STATEMENT)) {
-                final Table table = new TableImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            for (final KomodoObject kobject : super.getChildrenOfType( transaction, CreateTable.TABLE_STATEMENT )) {
+                final Table table = new TableImpl( transaction, getRepository(), kobject.getAbsolutePath() );
 
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("getTables: transaction = {0}, found procedure = {1}", //$NON-NLS-1$
-                                 transaction.getName(),
-                                 kobject.getAbsolutePath());
+                    LOGGER.debug( "getTables: transaction = {0}, found procedure = {1}", //$NON-NLS-1$
+                                  transaction.getName(),
+                                  kobject.getAbsolutePath() );
                 }
 
-                result.add(table);
+                result.add( table );
             }
 
             if (uow == null) {
@@ -617,9 +734,9 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                 return Table.NO_TABLES;
             }
 
-            return result.toArray(new Table[result.size()]);
+            return result.toArray( new Table[result.size()] );
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -643,28 +760,28 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-getViews", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-getViews", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getViews: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+            LOGGER.debug( "getViews: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
         }
 
         try {
             final List< View > result = new ArrayList< View >();
 
-            for (final KomodoObject kobject : super.getChildrenOfType(transaction, CreateTable.VIEW_STATEMENT)) {
-                final View view = new ViewImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            for (final KomodoObject kobject : super.getChildrenOfType( transaction, CreateTable.VIEW_STATEMENT )) {
+                final View view = new ViewImpl( transaction, getRepository(), kobject.getAbsolutePath() );
 
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("getViews: transaction = {0}, found view = {1}", //$NON-NLS-1$
-                                 transaction.getName(),
-                                 kobject.getAbsolutePath());
+                    LOGGER.debug( "getViews: transaction = {0}, found view = {1}", //$NON-NLS-1$
+                                  transaction.getName(),
+                                  kobject.getAbsolutePath() );
                 }
 
-                result.add(view);
+                result.add( view );
             }
 
             if (uow == null) {
@@ -675,9 +792,9 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                 return View.NO_VIEWS;
             }
 
-            return result.toArray(new View[result.size()]);
+            return result.toArray( new View[result.size()] );
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -689,30 +806,30 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public void removeFunction( final UnitOfWork uow,
                                 final String functionName ) throws KException {
-        ArgCheck.isNotEmpty(functionName, "functionName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( functionName, "functionName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-removeFunction", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-removeFunction", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeFunction: transaction = {0}, functionName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         functionName);
+            LOGGER.debug( "removeFunction: transaction = {0}, functionName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          functionName );
         }
 
         boolean found = false;
 
         try {
-            final Function[] functions = getFunctions(transaction);
+            final Function[] functions = getFunctions( transaction );
 
             if (functions.length != 0) {
                 for (final Function function : functions) {
-                    if (functionName.equals(function.getName(transaction))) {
-                        removeChild(transaction, functionName);
+                    if (functionName.equals( function.getName( transaction ) )) {
+                        removeChild( transaction, functionName );
                         found = true;
                         break;
                     }
@@ -720,14 +837,14 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             }
 
             if (!found) {
-                throw new KException(Messages.getString(Relational.FUNCTION_NOT_FOUND_TO_REMOVE, functionName));
+                throw new KException( Messages.getString( Relational.FUNCTION_NOT_FOUND_TO_REMOVE, functionName ) );
             }
 
             if (uow == null) {
                 transaction.commit();
             }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -739,30 +856,30 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public void removeProcedure( final UnitOfWork uow,
                                  final String procedureName ) throws KException {
-        ArgCheck.isNotEmpty(procedureName, "procedureName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( procedureName, "procedureName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-removeProcedure", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-removeProcedure", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeProcedure: transaction = {0}, procedureName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         procedureName);
+            LOGGER.debug( "removeProcedure: transaction = {0}, procedureName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          procedureName );
         }
 
         boolean found = false;
 
         try {
-            final Procedure[] procedures = getProcedures(transaction);
+            final Procedure[] procedures = getProcedures( transaction );
 
             if (procedures.length != 0) {
                 for (final Procedure procedure : procedures) {
-                    if (procedureName.equals(procedure.getName(transaction))) {
-                        removeChild(transaction, procedureName);
+                    if (procedureName.equals( procedure.getName( transaction ) )) {
+                        removeChild( transaction, procedureName );
                         found = true;
                         break;
                     }
@@ -770,14 +887,14 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             }
 
             if (!found) {
-                throw new KException(Messages.getString(Relational.PROCEDURE_NOT_FOUND_TO_REMOVE, procedureName));
+                throw new KException( Messages.getString( Relational.PROCEDURE_NOT_FOUND_TO_REMOVE, procedureName ) );
             }
 
             if (uow == null) {
                 transaction.commit();
             }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -789,31 +906,31 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public void removeSource( final UnitOfWork uow,
                               final String sourceToRemove ) throws KException {
-        ArgCheck.isNotEmpty(sourceToRemove, "sourceToRemove"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( sourceToRemove, "sourceToRemove" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-removeSource", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-removeSource", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeSource: transaction = {0}, sourceToRemove = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         sourceToRemove);
+            LOGGER.debug( "removeSource: transaction = {0}, sourceToRemove = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          sourceToRemove );
         }
 
         boolean found = false;
 
         try {
-            final ModelSource[] sources = getSources(transaction);
+            final ModelSource[] sources = getSources( transaction );
 
             if (sources.length != 0) {
                 for (final ModelSource source : sources) {
-                    if (sourceToRemove.equals(source.getName(transaction))) {
-                        final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.SOURCES);
-                        grouping.removeChild(transaction, sourceToRemove);
+                    if (sourceToRemove.equals( source.getName( transaction ) )) {
+                        final KomodoObject grouping = getChild( transaction, VdbLexicon.Vdb.SOURCES );
+                        grouping.removeChild( transaction, sourceToRemove );
                         found = true;
                         break;
                     }
@@ -821,14 +938,14 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             }
 
             if (!found) {
-                throw new KException(Messages.getString(Relational.MODEL_SOURCE_NOT_FOUND_TO_REMOVE, sourceToRemove));
+                throw new KException( Messages.getString( Relational.MODEL_SOURCE_NOT_FOUND_TO_REMOVE, sourceToRemove ) );
             }
 
             if (uow == null) {
                 transaction.commit();
             }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -840,30 +957,30 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public void removeTable( final UnitOfWork uow,
                              final String tableName ) throws KException {
-        ArgCheck.isNotEmpty(tableName, "tableName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( tableName, "tableName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-removeTable", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-removeTable", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeTable: transaction = {0}, tableName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         tableName);
+            LOGGER.debug( "removeTable: transaction = {0}, tableName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          tableName );
         }
 
         boolean found = false;
 
         try {
-            final Table[] tables = getTables(transaction);
+            final Table[] tables = getTables( transaction );
 
             if (tables.length != 0) {
                 for (final Table table : tables) {
-                    if (tableName.equals(table.getName(transaction))) {
-                        removeChild(transaction, tableName);
+                    if (tableName.equals( table.getName( transaction ) )) {
+                        removeChild( transaction, tableName );
                         found = true;
                         break;
                     }
@@ -871,14 +988,14 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             }
 
             if (!found) {
-                throw new KException(Messages.getString(Relational.TABLE_NOT_FOUND_TO_REMOVE, tableName));
+                throw new KException( Messages.getString( Relational.TABLE_NOT_FOUND_TO_REMOVE, tableName ) );
             }
 
             if (uow == null) {
                 transaction.commit();
             }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -890,30 +1007,30 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public void removeView( final UnitOfWork uow,
                             final String viewName ) throws KException {
-        ArgCheck.isNotEmpty(viewName, "viewName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( viewName, "viewName" ); //$NON-NLS-1$
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelimpl-removeView", false, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelimpl-removeView", false, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("removeView: transaction = {0}, viewName = {1}", //$NON-NLS-1$
-                         transaction.getName(),
-                         viewName);
+            LOGGER.debug( "removeView: transaction = {0}, viewName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          viewName );
         }
 
         boolean found = false;
 
         try {
-            final View[] views = getViews(transaction);
+            final View[] views = getViews( transaction );
 
             if (views.length != 0) {
                 for (final View view : views) {
-                    if (viewName.equals(view.getName(transaction))) {
-                        removeChild(transaction, viewName);
+                    if (viewName.equals( view.getName( transaction ) )) {
+                        removeChild( transaction, viewName );
                         found = true;
                         break;
                     }
@@ -921,14 +1038,14 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             }
 
             if (!found) {
-                throw new KException(Messages.getString(Relational.VIEW_NOT_FOUND_TO_REMOVE, viewName));
+                throw new KException( Messages.getString( Relational.VIEW_NOT_FOUND_TO_REMOVE, viewName ) );
             }
 
             if (uow == null) {
                 transaction.commit();
             }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -940,13 +1057,13 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public void setDescription( final UnitOfWork transaction,
                                 final String newDescription ) throws KException {
-        setObjectProperty(transaction, "setDescription", VdbLexicon.Vdb.DESCRIPTION, newDescription); //$NON-NLS-1$
+        setObjectProperty( transaction, "setDescription", VdbLexicon.Vdb.DESCRIPTION, newDescription ); //$NON-NLS-1$
     }
 
     @Override
     public void setModelDefinition( final UnitOfWork uow,
                                     final String modelDefinition ) throws KException {
-        setObjectProperty(uow, "setModelDefinition", KomodoLexicon.VdbModel.MODEL_DEFINITION, modelDefinition); //$NON-NLS-1$
+        setObjectProperty( uow, "setModelDefinition", KomodoLexicon.VdbModel.MODEL_DEFINITION, modelDefinition ); //$NON-NLS-1$
     }
 
     /**
@@ -958,8 +1075,8 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public void setModelType( final UnitOfWork uow,
                               final Type newModelType ) throws KException {
-        final Type modelType = ((newModelType == null) ? Type.DEFAULT : newModelType);
-        setObjectProperty(uow, "setModelType", CoreLexicon.JcrId.MODEL_TYPE, modelType.toString()); //$NON-NLS-1$
+        final Type modelType = ( ( newModelType == null ) ? Type.DEFAULT : newModelType );
+        setObjectProperty( uow, "setModelType", CoreLexicon.JcrId.MODEL_TYPE, modelType.toString() ); //$NON-NLS-1$
     }
 
 }
