@@ -299,6 +299,15 @@ public interface Column extends OptionContainer, RelationalObject {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the value of the <code>UUID</code> option (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getUuid( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return <code>true</code> if auto-incremented
      * @throws KException
      *         if an error occurs
@@ -643,5 +652,16 @@ public interface Column extends OptionContainer, RelationalObject {
      */
     void setUpdatable( final UnitOfWork transaction,
                        final boolean newUpdatable ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param newUuid
+     *        the new value of the <code>UUID</code> option (can only be empty when removing)
+     * @throws KException
+     *         if an error occurs
+     */
+    void setUuid( final UnitOfWork transaction,
+                  final String newUuid ) throws KException;
 
 }

@@ -12,6 +12,7 @@ import org.komodo.relational.model.internal.IndexImplTest;
 import org.komodo.relational.model.internal.ModelImplTest;
 import org.komodo.relational.model.internal.ParameterImplTest;
 import org.komodo.relational.model.internal.PrimaryKeyImplTest;
+import org.komodo.relational.model.internal.ResultSetColumnImplTest;
 import org.komodo.relational.model.internal.StatementOptionImplTest;
 import org.komodo.relational.model.internal.TableConstraintTest;
 import org.komodo.relational.model.internal.TableImplTest;
@@ -46,6 +47,7 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
     ModelImplTest.class,
     ParameterImplTest.class,
     PrimaryKeyImplTest.class,
+    ResultSetColumnImplTest.class,
     StatementOptionImplTest.class,
     TableConstraintTest.class,
     TableImplTest.class,

@@ -64,9 +64,10 @@ public final class TableImplTest extends RelationalModelTest {
     @Test
     public void shouldAddColumn() throws Exception {
         final String name = "column";
-        final Column column = this.table.addColumn(null, name);
-        assertThat(column, is(notNullValue()));
-        assertThat(column.getName(null), is(name));
+        final Column column = this.table.addColumn( null, name );
+        assertThat( column, is( notNullValue() ) );
+        assertThat( this.table.getColumns( null ).length, is( 1 ) );
+        assertThat( column.getName( null ), is( name ) );
     }
 
     @Test

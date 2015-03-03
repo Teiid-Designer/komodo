@@ -85,7 +85,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldRemoveResultSet() throws Exception {
         final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-        this.procedure.setResultSet( uow, true );
+        this.procedure.setResultSet( uow, TabularResultSet.class );
         this.procedure.removeResultSet( uow );
         uow.commit();
 
@@ -95,7 +95,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldSetDataTypeResultSet() throws Exception {
         final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-        assertThat( this.procedure.setResultSet( uow, false ), is( notNullValue() ) );
+        assertThat( this.procedure.setResultSet( uow, DataTypeResultSet.class ), is( notNullValue() ) );
         assertThat( this.procedure.getResultSet( uow ), is( instanceOf( DataTypeResultSet.class ) ) );
         uow.commit();
     }
@@ -117,7 +117,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldSetTabularResultSet() throws Exception {
         final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-        assertThat( this.procedure.setResultSet( uow, true ), is( notNullValue() ) );
+        assertThat( this.procedure.setResultSet( uow, TabularResultSet.class ), is( notNullValue() ) );
         assertThat( this.procedure.getResultSet( uow ), is( instanceOf( TabularResultSet.class ) ) );
         uow.commit();
     }
