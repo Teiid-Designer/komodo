@@ -146,6 +146,11 @@ public enum KomodoType {
     DATA_TYPE_RESULT_SET,
 
     /**
+     * Tabular Result Set Column
+     */
+    RESULT_SET_COLUMN,
+
+    /**
      * Tabular Result Set
      */
     TABULAR_RESULT_SET,

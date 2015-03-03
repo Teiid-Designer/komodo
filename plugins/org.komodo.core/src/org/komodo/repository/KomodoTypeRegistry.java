@@ -130,6 +130,8 @@ public class KomodoTypeRegistry {
 
         index(KomodoType.PUSHDOWN_FUNCTION, TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT);
 
+        index(KomodoType.RESULT_SET_COLUMN, TeiidDdlLexicon.CreateProcedure.RESULT_COLUMN);
+
         index(KomodoType.SCHEMA, KomodoLexicon.Schema.NODE_TYPE);
 
         index(KomodoType.STATEMENT_OPTION, StandardDdlLexicon.TYPE_STATEMENT_OPTION);

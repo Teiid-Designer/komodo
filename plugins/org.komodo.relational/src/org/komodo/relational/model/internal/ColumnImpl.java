@@ -507,6 +507,22 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.Column#getUuid(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getUuid( final UnitOfWork transaction ) throws KException {
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.toString() );
+
+        if (option == null) {
+            return null;
+        }
+
+        return option.getOption( transaction );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Column#isAutoIncremented(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
@@ -1032,6 +1048,17 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     public void setUpdatable( final UnitOfWork transaction,
                               final boolean newUpdatable ) throws KException {
         setStatementOption(transaction, StandardOptions.UPDATABLE.toString(), Boolean.toString(newUpdatable));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Column#setUuid(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setUuid( final UnitOfWork transaction,
+                         final String newUuid ) throws KException {
+        setStatementOption( transaction, StandardOptions.UUID.toString(), newUuid );
     }
 
 }

@@ -126,6 +126,16 @@ public final class ColumnImplTest extends RelationalModelTest {
         }
     }
 
+    @Test( expected = KException.class )
+    public void shouldFailSettingEmptyUuidWhenNeverAdded() throws Exception {
+        this.column.setUuid( null, StringConstants.EMPTY_STRING );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNullUuidWhenNeverAdded() throws Exception {
+        this.column.setUuid( null, null );
+    }
+
     @Test
     public void shouldHaveCorrectName() throws Exception {
         assertThat(this.column.getName(null), is(NAME));
@@ -448,6 +458,13 @@ public final class ColumnImplTest extends RelationalModelTest {
         final boolean value = !Column.DEFAULT_UPDATABLE;
         this.column.setUpdatable(null, value);
         assertThat(this.column.isUpdatable(null), is(value));
+    }
+
+    @Test
+    public void shouldSetUuid() throws Exception {
+        final String value = "uuid";
+        this.column.setUuid( null, value );
+        assertThat( this.column.getUuid( null ), is( value ) );
     }
 
 }

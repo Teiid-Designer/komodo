@@ -14,7 +14,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 /**
  * Represents a tabular result set.
  */
-public interface TabularResultSet extends ProcedureResultSet, Table {
+public interface TabularResultSet extends ProcedureResultSet {
 
     /**
      * Identifier of this object.
@@ -27,85 +27,35 @@ public interface TabularResultSet extends ProcedureResultSet, Table {
     int TYPE_ID = TabularResultSet.class.hashCode();
 
     /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#addAccessPattern(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     * @throws UnsupportedOperationException
-     *         if called
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param columnName
+     *        the name of the column being added (cannot be empty)
+     * @return the new column (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
      */
-    @Override
-    public AccessPattern addAccessPattern( final UnitOfWork transaction,
-                                           final String accessPatternName ) throws KException;
+    ResultSetColumn addColumn( final UnitOfWork transaction,
+                               final String columnName ) throws KException;
 
     /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#addForeignKey(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
-     *      org.komodo.relational.model.Table)
-     * @throws UnsupportedOperationException
-     *         if called
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the columns (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
      */
-    @Override
-    public ForeignKey addForeignKey( final UnitOfWork transaction,
-                                     final String foreignKeyName,
-                                     final Table referencedTable ) throws KException;
+    ResultSetColumn[] getColumns( final UnitOfWork transaction ) throws KException;
 
     /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#addUniqueConstraint(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     * @throws UnsupportedOperationException
-     *         if called
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param columnToRemove
+     *        the name of the column being removed (cannot be empty)
+     * @throws KException
+     *         if an error occurs
      */
-    @Override
-    public UniqueConstraint addUniqueConstraint( final UnitOfWork transaction,
-                                                 final String constraintName ) throws KException;
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#removeAccessPattern(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     * @throws UnsupportedOperationException
-     *         if called
-     */
-    @Override
-    public void removeAccessPattern( final UnitOfWork transaction,
-                                     final String accessPatternToRemove ) throws KException;
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#removeForeignKey(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     * @throws UnsupportedOperationException
-     *         if called
-     */
-    @Override
-    public void removeForeignKey( final UnitOfWork transaction,
-                                  final String foreignKeyToRemove ) throws KException;
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#removeUniqueConstraint(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     * @throws UnsupportedOperationException
-     *         if called
-     */
-    @Override
-    public void removeUniqueConstraint( final UnitOfWork transaction,
-                                        final String constraintToRemove ) throws KException;
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#setPrimaryKey(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     * @throws UnsupportedOperationException
-     *         if called
-     */
-    @Override
-    public PrimaryKey setPrimaryKey( final UnitOfWork transaction,
-                                     final String newPrimaryKeyName ) throws KException;
+    void removeColumn( final UnitOfWork transaction,
+                       final String columnToRemove ) throws KException;
 
 }

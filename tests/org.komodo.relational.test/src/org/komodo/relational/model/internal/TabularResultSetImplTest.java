@@ -10,18 +10,18 @@ package org.komodo.relational.model.internal;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StoredProcedure;
-import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TabularResultSet;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.komodo.spi.repository.Repository;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TabularResultSetImplTest extends RelationalModelTest {
@@ -31,60 +31,33 @@ public class TabularResultSetImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.procedure = RelationalModelFactory.createStoredProcedure(null, _repo, mock(Model.class), "procedure");
-        this.resultSet = RelationalModelFactory.createTabularResultSet(null, _repo, this.procedure);
+        final Vdb vdb = RelationalModelFactory.createVdb( null, _repo, null, "vdb", "externalFilePath" );
+        final Model model = RelationalModelFactory.createModel( null, _repo, vdb, "model" );
+        this.procedure = RelationalModelFactory.createStoredProcedure( null, _repo, model, "procedure" );
+        this.resultSet = RelationalModelFactory.createTabularResultSet( null, _repo, this.procedure );
     }
 
     @Test
-    public void shouldFailConstructionIfNotDataTypeResultSet() {
+    public void shouldAddColumn() throws Exception {
+        final String resultSetColumnName = "resultSetColumn";
+        final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
+        final ResultSetColumn resultSetColumn = this.resultSet.addColumn( uow, resultSetColumnName );
+        assertThat( this.resultSet.getColumns( uow ).length, is( 1 ) );
+        assertThat( resultSetColumn.getName( uow ), is( resultSetColumnName ) );
+        uow.commit();
+
+    }
+
+    @Test
+    public void shouldFailConstructionIfNotTabularResultSet() {
         if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
             try {
-                new TabularResultSetImpl(null, _repo, this.procedure.getAbsolutePath());
+                new TabularResultSetImpl( null, _repo, this.procedure.getAbsolutePath() );
                 fail();
             } catch (final KException e) {
                 // expected
             }
         }
-    }
-
-    @Test( expected = UnsupportedOperationException.class )
-    public void shouldFailWhenAddingAccessPattern() throws KException {
-        this.resultSet.addAccessPattern(null, "blah");
-    }
-
-    @Test( expected = UnsupportedOperationException.class )
-    public void shouldFailWhenAddingForeignKey() throws KException {
-        this.resultSet.addForeignKey(null, "blah", mock(Table.class));
-    }
-
-    @Test( expected = UnsupportedOperationException.class )
-    public void shouldFailWhenAddingUniqueConstraint() throws KException {
-        this.resultSet.addUniqueConstraint(null, "blah");
-    }
-
-    @Test( expected = UnsupportedOperationException.class )
-    public void shouldFailWhenRemovingAccessPattern() throws KException {
-        this.resultSet.removeAccessPattern(null, "blah");
-    }
-
-    @Test( expected = UnsupportedOperationException.class )
-    public void shouldFailWhenRemovingForeignKey() throws KException {
-        this.resultSet.removeForeignKey(null, "blah");
-    }
-
-    @Test( expected = UnsupportedOperationException.class )
-    public void shouldFailWhenRemovingUniqueConstraint() throws KException {
-        this.resultSet.removeUniqueConstraint(null, "blah");
-    }
-
-    @Test( expected = UnsupportedOperationException.class )
-    public void shouldFailWhenSettingPrimaryKey() throws KException {
-        this.resultSet.setPrimaryKey(null, "blah");
-    }
-
-    @Test
-    public void shouldHaveCorrectName() throws Exception {
-        assertThat(this.resultSet.getName(null), is(CreateProcedure.RESULT_SET));
     }
 
 }

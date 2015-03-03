@@ -72,7 +72,7 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
          * @see org.komodo.relational.internal.TypeResolver#owningClass()
          */
         @Override
-        public Class< ? extends KomodoObject > owningClass() {
+        public Class< DataTypeResultSetImpl > owningClass() {
             return DataTypeResultSetImpl.class;
         }
 

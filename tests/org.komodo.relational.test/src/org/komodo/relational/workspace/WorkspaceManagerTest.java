@@ -31,6 +31,7 @@ import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.PushdownFunction;
+import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TabularResultSet;
@@ -290,7 +291,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         final Vdb vdb = createVdb(uow, null, "vdb");
         final Model model = createModel(uow, vdb, "model");
         final StoredProcedure procedure = model.addStoredProcedure(uow, "procedure");
-        final ProcedureResultSet resultSet = procedure.setResultSet(uow, false);
+        final ProcedureResultSet resultSet = procedure.setResultSet(uow, DataTypeResultSet.class);
         final KomodoObject kobject = new ObjectImpl(_repo, resultSet.getAbsolutePath(), resultSet.getIndex());
         assertThat(this.wsMgr.resolve(uow, kobject, DataTypeResultSet.class), is(instanceOf(DataTypeResultSet.class)));
         uow.commit();
@@ -401,7 +402,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         final Vdb vdb = createVdb(uow, null, "vdb");
         final Model model = createModel(uow, vdb, "model");
         final StoredProcedure procedure = model.addStoredProcedure(uow, "procedure");
-        final ProcedureResultSet resultSet = procedure.setResultSet(uow, true);
+        final ProcedureResultSet resultSet = procedure.setResultSet(uow, TabularResultSet.class);
         final KomodoObject kobject = new ObjectImpl(_repo, resultSet.getAbsolutePath(), resultSet.getIndex());
         assertThat(this.wsMgr.resolve(uow, kobject, TabularResultSet.class), is(instanceOf(TabularResultSet.class)));
         uow.commit();
@@ -532,6 +533,16 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldCreateResultSetColumn() throws Exception {
+        final Vdb parent = createVdb(null, null, this.name.getMethodName() + "Vdb");
+        final Model model = createModel(null, parent, this.name.getMethodName() + "Model");
+        final AbstractProcedure procedure = RelationalModelFactory.createVirtualProcedure(null, _repo, model, "procedure");
+        final TabularResultSet resultSet = RelationalModelFactory.createTabularResultSet( null, _repo, procedure );
+        final KomodoObject result = wsMgr.create(null, resultSet, "resultSetColumn", KomodoType.RESULT_SET_COLUMN);
+        assertThat(result, is(instanceOf(ResultSetColumn.class)));
+    }
+
+    @Test
     public void shouldCreateAllRelationalObjects() throws Exception {
         KomodoObject workspace = _repo.komodoWorkspace(null);
         Vdb vdb = RelationalModelFactory.createVdb(null, _repo, workspace.getAbsolutePath(), "testControlVdb", "/test1");
@@ -634,6 +645,10 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
                     KomodoObject result = wsMgr.create(null, procedure, "test" + id, type);
                     assertNotNull(result);
                     assertThat(result, is(instanceOf(TabularResultSet.class)));
+                    break;
+                }
+                case RESULT_SET_COLUMN: {
+                    // see separate test
                     break;
                 }
                 case SCHEMA: {

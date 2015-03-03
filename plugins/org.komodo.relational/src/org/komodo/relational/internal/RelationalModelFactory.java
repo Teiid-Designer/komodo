@@ -20,6 +20,7 @@ import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.PushdownFunction;
 import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StatementOption;
@@ -39,6 +40,7 @@ import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.ParameterImpl;
 import org.komodo.relational.model.internal.PrimaryKeyImpl;
 import org.komodo.relational.model.internal.PushdownFunctionImpl;
+import org.komodo.relational.model.internal.ResultSetColumnImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.relational.model.internal.StatementOptionImpl;
 import org.komodo.relational.model.internal.StoredProcedureImpl;
@@ -139,7 +141,7 @@ public final class RelationalModelFactory {
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param table
-     *        the table where container where the column is being created (cannot be <code>null</code>)
+     *        the table where the column is being created (cannot be <code>null</code>)
      * @param columnName
      *        the name of the column to create (cannot be empty)
      * @return the column model object (never <code>null</code>)
@@ -822,6 +824,51 @@ public final class RelationalModelFactory {
             setCreateStatementProperties( transaction, kobject );
 
             final StoredProcedure result = new StoredProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
+    }
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param resultSet
+     *        the tabular result set where the column is being created (cannot be <code>null</code>)
+     * @param columnName
+     *        the name of the column to create (cannot be empty)
+     * @return the result set column model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static ResultSetColumn createResultSetColumn( final UnitOfWork uow,
+                                                         final Repository repository,
+                                                         final TabularResultSet resultSet,
+                                                         final String columnName ) throws KException {
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( resultSet, "resultSet" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( columnName, "columnName" ); //$NON-NLS-1$
+
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction( "relationalmodelfactory-createResultSetColumn", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        try {
+            final KomodoObject kobject = repository.add( transaction, resultSet.getAbsolutePath(), columnName, null );
+            kobject.addDescriptor( transaction, CreateProcedure.RESULT_COLUMN );
+
+            final ResultSetColumn result = new ResultSetColumnImpl( transaction, repository, kobject.getAbsolutePath() );
 
             if (uow == null) {
                 transaction.commit();

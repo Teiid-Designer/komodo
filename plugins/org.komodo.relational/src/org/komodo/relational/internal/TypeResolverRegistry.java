@@ -35,6 +35,7 @@ import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.ParameterImpl;
 import org.komodo.relational.model.internal.PrimaryKeyImpl;
 import org.komodo.relational.model.internal.PushdownFunctionImpl;
+import org.komodo.relational.model.internal.ResultSetColumnImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.relational.model.internal.StatementOptionImpl;
 import org.komodo.relational.model.internal.StoredProcedureImpl;
@@ -118,6 +119,8 @@ public class TypeResolverRegistry {
         index(KomodoType.TABLE, TableImpl.RESOLVER);
 
         index(KomodoType.TABULAR_RESULT_SET, TabularResultSetImpl.RESOLVER);
+
+        index(KomodoType.RESULT_SET_COLUMN, ResultSetColumnImpl.RESOLVER);
 
         index(KomodoType.TEIID, TeiidImpl.RESOLVER);
 

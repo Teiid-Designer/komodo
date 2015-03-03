@@ -15,10 +15,12 @@ import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
+import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.StoredProcedure;
+import org.komodo.relational.model.TabularResultSet;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -326,11 +328,12 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.StoredProcedure#setResultSet(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
+     * @see org.komodo.relational.model.StoredProcedure#setResultSet(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.Class)
      */
     @Override
-    public ProcedureResultSet setResultSet( final UnitOfWork uow,
-                                            final boolean tabularResultSet ) throws KException {
+    public < T extends ProcedureResultSet > T setResultSet( final UnitOfWork uow,
+                                                            final Class< T > resultSetType ) throws KException {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
@@ -340,7 +343,9 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
         assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "setResultSet: transaction = {0}, tabularResultSet = {1}", transaction.getName(), tabularResultSet ); //$NON-NLS-1$
+            LOGGER.debug( "setResultSet: transaction = {0}, resultSetType = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          resultSetType.getName() );
         }
 
         try {
@@ -351,12 +356,12 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
                 removeChild( transaction, resultSet.getName( transaction ) );
             }
 
-            ProcedureResultSet result = null;
+            T result = null;
 
-            if (tabularResultSet) {
-                result = RelationalModelFactory.createTabularResultSet( transaction, getRepository(), this );
-            } else {
-                result = RelationalModelFactory.createDataTypeResultSet( transaction, getRepository(), this );
+            if (resultSetType == TabularResultSet.class) {
+                result = ( T )RelationalModelFactory.createTabularResultSet( transaction, getRepository(), this );
+            } else if (resultSetType == DataTypeResultSet.class) {
+                result = ( T )RelationalModelFactory.createDataTypeResultSet( transaction, getRepository(), this );
             }
 
             if (uow == null) {

@@ -434,7 +434,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             start += tables.length;
             System.arraycopy( views, 0, result, start, views.length );
 
-            start += sources.length;
+            start += views.length;
             System.arraycopy( sources, 0, result, start, sources.length );
 
             if (uow == null) {
