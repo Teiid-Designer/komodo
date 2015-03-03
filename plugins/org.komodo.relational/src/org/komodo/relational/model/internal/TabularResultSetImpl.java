@@ -7,29 +7,31 @@
  */
 package org.komodo.relational.model.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.AbstractProcedure;
-import org.komodo.relational.model.AccessPattern;
-import org.komodo.relational.model.ForeignKey;
-import org.komodo.relational.model.PrimaryKey;
-import org.komodo.relational.model.Table;
+import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.TabularResultSet;
-import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * An implementation of a relational model procedure tabular result set.
  */
-public final class TabularResultSetImpl extends TableImpl implements TabularResultSet {
+public final class TabularResultSetImpl extends RelationalObjectImpl implements TabularResultSet {
 
     /**
      * The resolver of a {@link TabularResultSet}.
@@ -70,7 +72,7 @@ public final class TabularResultSetImpl extends TableImpl implements TabularResu
          * @see org.komodo.relational.internal.TypeResolver#owningClass()
          */
         @Override
-        public Class< ? extends KomodoObject > owningClass() {
+        public Class< TabularResultSetImpl > owningClass() {
             return TabularResultSetImpl.class;
         }
 
@@ -97,12 +99,6 @@ public final class TabularResultSetImpl extends TableImpl implements TabularResu
             return false;
         }
 
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
-         */
         /**
          * {@inheritDoc}
          *
@@ -137,37 +133,89 @@ public final class TabularResultSetImpl extends TableImpl implements TabularResu
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#addAccessPattern(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    public AccessPattern addAccessPattern( final UnitOfWork transaction,
-                                           final String accessPatternName ) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.internal.TableImpl#addForeignKey(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, org.komodo.relational.model.Table)
-     */
-    @Override
-    public ForeignKey addForeignKey( final UnitOfWork uow,
-                                     final String foreignKeyName,
-                                     final Table referencedTable ) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#addUniqueConstraint(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.relational.model.TabularResultSet#addColumn(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */
     @Override
-    public UniqueConstraint addUniqueConstraint( final UnitOfWork transaction,
-                                                 final String constraintName ) {
-        throw new UnsupportedOperationException();
+    public ResultSetColumn addColumn( final UnitOfWork uow,
+                                      final String columnName ) throws KException {
+        ArgCheck.isNotEmpty( columnName, "columnName" ); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "tabularresultsetimpl-addColumn", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug( "addColumn: transaction = {0}, columnName = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          columnName );
+        }
+
+        try {
+            final ResultSetColumn result = RelationalModelFactory.createResultSetColumn( transaction,
+                                                                                         getRepository(),
+                                                                                         this,
+                                                                                         columnName );
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.TabularResultSet#getColumns(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public ResultSetColumn[] getColumns( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "tabularresultsetimpl-getColumns", true, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug( "getColumns: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
+        }
+
+        try {
+            final List< ResultSetColumn > result = new ArrayList<>();
+
+            for (final KomodoObject kobject : getChildrenOfType( transaction, CreateProcedure.RESULT_COLUMN )) {
+                final ResultSetColumn column = new ResultSetColumnImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug( "getColumns: transaction = {0}, found column = {1}", //$NON-NLS-1$
+                                  transaction.getName(),
+                                  kobject.getAbsolutePath() );
+                }
+
+                result.add( column );
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            if (result.isEmpty()) {
+                return ResultSetColumn.NO_COLUMNS;
+            }
+
+            return result.toArray( new ResultSetColumn[result.size()] );
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
     }
 
     /**
@@ -183,47 +231,52 @@ public final class TabularResultSetImpl extends TableImpl implements TabularResu
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#removeAccessPattern(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.relational.model.TabularResultSet#removeColumn(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */
     @Override
-    public void removeAccessPattern( final UnitOfWork transaction,
-                                     final String accessPatternToRemove ) {
-        throw new UnsupportedOperationException();
-    }
+    public void removeColumn( final UnitOfWork uow,
+                              final String columnToRemove ) throws KException {
+        ArgCheck.isNotEmpty( columnToRemove, "columnToRemove" ); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#removeForeignKey(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    public void removeForeignKey( final UnitOfWork transaction,
-                                  final String foreignKeyToRemove ) {
-        throw new UnsupportedOperationException();
-    }
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "tabularresultsetimpl-removeColumn", false, null ); //$NON-NLS-1$
+        }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#removeUniqueConstraint(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    public void removeUniqueConstraint( final UnitOfWork transaction,
-                                        final String constraintToRemove ) {
-        throw new UnsupportedOperationException();
-    }
+        assert ( transaction != null );
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.Table#setPrimaryKey(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    public PrimaryKey setPrimaryKey( final UnitOfWork transaction,
-                                     final String newPrimaryKeyName ) {
-        throw new UnsupportedOperationException();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug( "removeColumn: transaction = {0}, columnToRemove = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          columnToRemove );
+        }
+
+        boolean found = false;
+
+        try {
+            final ResultSetColumn[] columns = getColumns( transaction );
+
+            if (columns.length != 0) {
+                for (final ResultSetColumn column : columns) {
+                    if (columnToRemove.equals( column.getName( transaction ) )) {
+                        removeChild( transaction, columnToRemove );
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                throw new KException( Messages.getString( Relational.COLUMN_NOT_FOUND_TO_REMOVE, columnToRemove ) );
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
     }
 
 }
