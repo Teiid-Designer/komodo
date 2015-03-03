@@ -228,14 +228,12 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
             if (hasChild( transaction, CreateProcedure.RESULT_SET )) {
                 final KomodoObject kobject = getChild( transaction, CreateProcedure.RESULT_SET );
 
-                if (kobject != null) {
-                    if (DataTypeResultSetImpl.RESOLVER.resolvable( transaction, getRepository(), kobject )) {
-                        result = ( ProcedureResultSet )DataTypeResultSetImpl.RESOLVER.resolve( transaction, getRepository(), this );
-                    } else if (TabularResultSetImpl.RESOLVER.resolvable( transaction, getRepository(), kobject )) {
-                        result = ( ProcedureResultSet )TabularResultSetImpl.RESOLVER.resolve( transaction, getRepository(), this );
-                    } else {
-                        LOGGER.error( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, kobject.getAbsolutePath() ) );
-                    }
+                if (DataTypeResultSetImpl.RESOLVER.resolvable( transaction, getRepository(), kobject )) {
+                    result = ( ProcedureResultSet )DataTypeResultSetImpl.RESOLVER.resolve( transaction, getRepository(), kobject );
+                } else if (TabularResultSetImpl.RESOLVER.resolvable( transaction, getRepository(), kobject )) {
+                    result = ( ProcedureResultSet )TabularResultSetImpl.RESOLVER.resolve( transaction, getRepository(), kobject );
+                } else {
+                    LOGGER.error( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, kobject.getAbsolutePath() ) );
                 }
             }
 
