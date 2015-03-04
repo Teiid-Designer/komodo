@@ -13,6 +13,9 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
+import java.util.Properties;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -123,7 +126,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldCreateManifestForEmptyVdb() throws Exception {
-        final VdbManifest manifest = this.vdb.createManifest(null);
+        final VdbManifest manifest = this.vdb.createManifest(null, new Properties());
         assertThat(manifest, is(notNullValue()));
         assertThat(manifest.asDocument(), is(notNullValue()));
     }
@@ -149,14 +152,14 @@ public final class VdbImplTest extends RelationalModelTest {
             transaction.commit();
         }
 
-        final VdbManifest manifest = this.vdb.createManifest(null);
+        final VdbManifest manifest = this.vdb.createManifest(null, new Properties());
         assertThat(manifest, is(notNullValue()));
         assertThat(manifest.asDocument(), is(notNullValue()));
     }
 
     @Test
     public void shouldExportEmptyVdb() throws Exception {
-        final String manifest = this.vdb.export(null);
+        final String manifest = this.vdb.export(null, new Properties());
         assertThat(manifest, is(notNullValue()));
         assertThat(manifest.isEmpty(), is(false));
     }
@@ -183,7 +186,7 @@ public final class VdbImplTest extends RelationalModelTest {
         }
 
         // test
-        final String manifest = this.vdb.export(null);
+        final String manifest = this.vdb.export(null, new Properties());
         assertThat(manifest, is(notNullValue()));
         assertThat(manifest.isEmpty(), is(false));
     }

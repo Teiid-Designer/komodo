@@ -7,6 +7,8 @@
 */
 package org.komodo.spi.repository;
 
+import java.util.Properties;
+
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -18,10 +20,11 @@ public interface Exportable {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param properties (can be <code>null</code> or empty)
      * @return a text representation of the current object state (never empty)
      * @throws KException
      *         if an error occurs
      */
-    String export( final UnitOfWork transaction ) throws KException;
+    String export( final UnitOfWork transaction, Properties properties ) throws KException;
 
 }
