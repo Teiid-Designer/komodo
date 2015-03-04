@@ -66,6 +66,7 @@ public class ObjectEditorPanel extends Composite {
 	private int type;
 	
 	private Text nameText;
+	private Text pathText;
 	private Label nodeTypeLabel;
 	
 
@@ -225,6 +226,15 @@ public class ObjectEditorPanel extends Composite {
 	    		}
 	    	});
 		}
+		
+		// Add label and text field for "Path"
+		NAME : {
+			WidgetFactory.createLabel(this, "Path :");
+			pathText = new Text(this, SWT.BORDER);
+			pathText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
+			pathText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			pathText.setEditable(false);
+		}
 	}
 	
 	private void createTreeViewTab() {
@@ -288,7 +298,7 @@ public class ObjectEditorPanel extends Composite {
 							 }
 						};
 						actionMenu.add(newTable);
-						final NewObjectAction pAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.PROCEDURE, node);
+						final NewObjectAction pAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.STORED_PROCEDURE, node);
 						IAction newPAction = new Action(pAction.getText(), pAction.getImageDescriptor()) {
 							 @Override
 						     public void run() {
@@ -420,6 +430,8 @@ public class ObjectEditorPanel extends Composite {
 			}
 			setTextValue(nameText, newName);
 			
+			setTextValue(pathText, getTargetObject().getAbsolutePath());
+			
 			String desc = ObjectEditorUtils.getDescription(getTargetObject());
 			if( desc == null ) desc = StringUtils.EMPTY_STRING;
 			descriptionTextEditor.setText(desc);
@@ -456,6 +468,7 @@ public class ObjectEditorPanel extends Composite {
 			this.wsTreeViewer.getTree().clearAll(true);
 		}
 		this.nameText.setText(StringUtils.EMPTY_STRING);
+		this.pathText.setText(StringUtils.EMPTY_STRING);
 		this.descriptionTextEditor.setText(StringUtils.EMPTY_STRING);
 		this.targetObject = null;
 	}

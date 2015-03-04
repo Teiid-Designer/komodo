@@ -1,6 +1,11 @@
 package org.komodo.eclipse.workspace.ui.explorer;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -42,11 +47,23 @@ public class WorkspaceContentProvider implements ITreeContentProvider {
 			
 			return children;
 		} else {
-			Repository repo = CorePlugin.getKEngine().getDefaultRepository();
+//			Repository repo = CorePlugin.getKEngine().getDefaultRepository();
 			
 			try {
 //				KomodoObject wsNode = repo.komodoWorkspace(null);
-				return CorePlugin.getWorkspaceManager().findVdbs(null);
+				KomodoObject[] vdbs = CorePlugin.getWorkspaceManager().findVdbs(null);
+				KomodoObject lib = CorePlugin.getLibrary();
+				Set<KomodoObject> allRoots = new HashSet<KomodoObject>();
+				if( lib != null )  allRoots.add(lib);
+				for( KomodoObject vdb : vdbs) {
+					allRoots.add(vdb);
+				}
+				KomodoObject[] models = CorePlugin.getWorkspaceManager().findModels(null);
+				for( KomodoObject model : models) {
+					allRoots.add(model);
+				}
+				
+				return allRoots.toArray(new KomodoObject[allRoots.size()]);
 	//			return wsNode.getChildren(null);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

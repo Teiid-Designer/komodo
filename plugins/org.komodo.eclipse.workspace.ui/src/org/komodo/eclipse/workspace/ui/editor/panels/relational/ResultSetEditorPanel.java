@@ -33,8 +33,9 @@ import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnNameE
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnWidthEditingSupport;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ElementChangedEvent;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ViewerElementChangedListener;
-import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.ResultSetColumn;
+import org.komodo.relational.model.TabularResultSet;
 import org.komodo.spi.KException;
 import org.komodo.utils.StringUtils;
 
@@ -71,7 +72,7 @@ public class ResultSetEditorPanel extends Composite implements ViewerElementChan
 
 		if( getResultSet() != null ) {
 	        try {
-				for( Column row : this.getResultSet().getColumns(null) ) {
+				for( ResultSetColumn row : ((TabularResultSet)this.getResultSet()).getColumns(null) ) {
 					this.columnsViewer.add(row);
 				}
 			} catch (KException e) {
@@ -302,13 +303,13 @@ public class ResultSetEditorPanel extends Composite implements ViewerElementChan
 					boolean enable = true;
 					Object[] objs = sel.toArray();
 					// TODO:
-					Column columnInfo = null;
+					ResultSetColumn columnInfo = null;
 					for( Object obj : objs) {
-						if(  !(obj instanceof Column)) {
+						if(  !(obj instanceof ResultSetColumn)) {
 							enable = false;
 							break;
 						} else {
-							columnInfo = (Column)obj;
+							columnInfo = (ResultSetColumn)obj;
 						}
 					} 
 					if( objs.length == 0 ) {
@@ -348,17 +349,21 @@ public class ResultSetEditorPanel extends Composite implements ViewerElementChan
 		 */
 		@Override
 		public String getText(Object element) {
-			if( element instanceof Column ) {
-				switch (this.columnNumber) {
-					case 0: {
-						return "<name>"; //((Column)element).getName(null);
+			if( element instanceof ResultSetColumn ) {
+				try {
+					switch (this.columnNumber) {
+						case 0: {
+							return ((ResultSetColumn)element).getName(null);
+						}
+						case 1: {
+							return ((ResultSetColumn)element).getDatatypeName(null);
+						}
+						case 2: {
+							return Long.toString(((ResultSetColumn)element).getLength(null));
+						}
 					}
-					case 1: {
-						return "<type>"; //((Column)element).getDatatype();
-					}
-					case 2: {
-						return "<length>"; //Integer.toString(((Column)element).getLength());
-					}
+				} catch (KException e) {
+					e.printStackTrace();
 				}
 			}
 			return CoreStringUtil.Constants.EMPTY_STRING;

@@ -40,6 +40,9 @@ public class PushdownFunctionEditorPanel extends ObjectEditorPanel implements Vi
 	private TabItem generalPropertiesTab;
 	private TabItem parametersTab;
 	
+	private Button nonPreparedCB, deterministicCB, returnsNullCB, variableArgsCB, aggregateCB,
+		allowsDistinctCB, allowsOrderByCB, analyticCB, decomposableCB, useDistinctRowsCB, includeResultSetCB;
+
 	private Button addParameterButton, deleteParameterButton, upParameterButton, downParameterButton;
 	private TableViewerBuilder parametersViewer;
 	

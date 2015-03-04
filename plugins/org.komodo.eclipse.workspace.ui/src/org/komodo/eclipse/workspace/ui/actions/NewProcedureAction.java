@@ -18,7 +18,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 public class NewProcedureAction extends NewObjectAction {
 
 	public NewProcedureAction() {
-		super(CoreConstants.RelationalType.PROCEDURE);
+		super(CoreConstants.RelationalType.STORED_PROCEDURE);
 		setText("New Procedure");
 		setImageDescriptor(CorePlugin.getDefault().getImageDescriptor(CoreConstants.Images.NEW_PROCEDURE_ICON));
 	}
@@ -34,7 +34,7 @@ public class NewProcedureAction extends NewObjectAction {
 			String name = dialog.getName();
 			try {
 				UnitOfWork transaction = CorePlugin.getKEngine().getDefaultRepository().createTransaction("Add Procedure", false, null);
-				((Model)parent).addProcedure(transaction, name);
+				((Model)parent).addStoredProcedure(transaction, name);
 				transaction.commit();
 				completed = true;
 			} catch (KException ex) {

@@ -26,7 +26,7 @@ public class RelationalObjectEditorUtil implements CoreConstants.RelationalType 
 				case MODEL: ((Model)ko).setDescription(txn, description); return true;
 				case TABLE:((Table)ko).setDescription(txn, description); return true;
 				case VIEW: ((View)ko).setDescription(txn, description); return true;
-				case PROCEDURE: ((Procedure)ko).setDescription(txn, description); return true;
+				case STORED_PROCEDURE: ((Procedure)ko).setDescription(txn, description); return true;
 				case VIRTUAL_PROCEDURE: ((Procedure)ko).setDescription(txn, description); return true;
 				case COLUMN: ((Column)ko).setDescription(txn, description); return true;
 // TODO: MISSING DESCRIPTION ON PARAMETER
@@ -54,7 +54,7 @@ public class RelationalObjectEditorUtil implements CoreConstants.RelationalType 
 				case MODEL: ((Model)ko).getDescription(txn); break;
 				case TABLE:((Table)ko).getDescription(txn); break;
 				case VIEW: ((View)ko).getDescription(txn); break;
-				case PROCEDURE: ((Procedure)ko).getDescription(txn); break;
+				case STORED_PROCEDURE: ((Procedure)ko).getDescription(txn); break;
 				case VIRTUAL_PROCEDURE: ((Procedure)ko).getDescription(txn); break;
 				case COLUMN: ((Column)ko).getDescription(txn); break;
 // TODO: MISSING DESCRIPTION ON PARAMETER

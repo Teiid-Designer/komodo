@@ -1,5 +1,6 @@
 package org.komodo.eclipse.workspace.ui.editor.panels.relational;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -12,6 +13,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -19,6 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -40,34 +43,36 @@ import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ElementChan
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ViewerElementChangedListener;
 import org.komodo.eclipse.workspace.util.RelationalIdentifier;
 import org.komodo.relational.model.Column;
+import org.komodo.relational.model.Procedure;
+import org.komodo.relational.model.StoredProcedure;
+import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.StringUtils;
 
 public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerElementChangedListener {
 
+    private Spinner updateCountSpinner;
+    private static int MIN = 0;
+    private static int MAX = 99999;
+    
 	private TabItem generalPropertiesTab;
 	private TabItem parametersTab;
 	private TabItem nativeQueryTab;
 	private TabItem resultSetTab;
 
-	
-	private Button nonPreparedCB, deterministicCB, returnsNullCB, variableArgsCB, aggregateCB,
-					allowsDistinctCB, allowsOrderByCB, analyticCB, decomposableCB, useDistinctRowsCB, includeResultSetCB;
-	private Text resultSetNameText, nativeQueryHelpText;
+	private Button nonPreparedCB;
+	private Text nativeQueryHelpText, nameInSourceText;
 	private StyledTextEditor nativeQueryTextEditor;
 	private Button addParameterButton, deleteParameterButton, upParameterButton, downParameterButton;
 
 	private TableViewerBuilder parametersViewer;
-	private TableViewerBuilder columnsViewer;
-	private Button addColumnButton, deleteColumnButton, upColumnButton, downColumnButton;
-	
-	private ColumnWidthEditingSupport columnWidthEditSupport;
-	private ColumnNameEditingSupport columnNameEditSupport;
-	private ColumnDatatypeEditingSupport columnTypeEditSupport;
 	
 	private ColumnWidthEditingSupport parameterWidthEditSupport;
 	private ColumnNameEditingSupport parameterNameEditSupport;
 	private ColumnDatatypeEditingSupport parameterTypeEditSupport;
+	
+	private ResultSetEditorPanel resultSetPanel;
 	
 	public ProcedureEditorPanel(Composite parent, int style, int nodeType, IKObjectChangeListener objectChangeListener) {
 		super(parent, style, nodeType, objectChangeListener, true);
@@ -75,9 +80,14 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
 	
 	public void addCustomPanel() {
 		createParametersTab(getTabFolder());
-		createGeneralPropertiesTab(getTabFolder());
 		createResultSetTab(getTabFolder());
+		createGeneralPropertiesTab(getTabFolder());
 		createNativeQueryTab(getTabFolder());
+	}
+	
+
+	private StoredProcedure getProcedure() {
+		return ((StoredProcedure)getTargetObject());
 	}
 	
 	@Override
@@ -85,6 +95,27 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
 		super.syncWithTarget();
 		setSynching(true);
 
+		try {
+			updateCountSpinner.setSelection(getProcedure().getUpdateCount(null));
+		} catch (KException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			String nis = getProcedure().getNameInSource(null);
+			if( nis == null ) nis = StringUtils.EMPTY_STRING;
+			this.nameInSourceText.setText(nis);
+		} catch (KException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			this.resultSetPanel.setResultSet(getProcedure().getResultSet(null));
+			this.resultSetPanel.syncWithTarget();
+		} catch (KException e) {
+			e.printStackTrace();
+		}
+		
 		setSynching(false);
 	}
 	
@@ -97,12 +128,71 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
         this.generalPropertiesTab.setText(Messages.propertiesLabel);
 //        this.generalPropertiesTab.setImage(RelationalUiUtil.getRelationalImage(TYPES.TABLE, ModelType.PHYSICAL, Status.OK_STATUS));
 	}
-	
+
 	private Composite createPropertiesPanel(Composite parent) {
 		Composite thePanel = WidgetFactory.createPanel(parent, SWT.NONE, 1, 3);
-		GridLayoutFactory.fillDefaults().margins(5, 5).applyTo(thePanel);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(5, 5).applyTo(thePanel);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(thePanel);
 
+        // ========  NAME IN SOURCE ====
+		{
+            Label label = new Label(thePanel, SWT.NONE);
+            label.setText("Name In Source");
+            
+            this.nameInSourceText =  new Text(thePanel, SWT.BORDER | SWT.SINGLE);
+            this.nameInSourceText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
+            GridDataFactory.fillDefaults().grab(true, false).applyTo(this.nameInSourceText);
+            this.nameInSourceText.addModifyListener(new ModifyListener() {
+        		@Override
+    			public void modifyText( final ModifyEvent event ) {
+//        			if( isSynchronizing() )
+//        			    return;
+
+        			if( !nameInSourceText.getText().isEmpty()) {
+        			    try {	
+        			        String nis = nameInSourceText.getText();
+        			        if( nis != null && nis.isEmpty() ) {
+        			        	nis = null;
+        			        }
+        			        getProcedure().setNameInSource(null, nis);
+        			    } catch (KException ex) {
+        			        MessageDialog.openError(
+        			                                getShell(), 
+        			                                "Problem setting name in source for procedure",  
+        			                                ex.getMessage()); 
+    	        				    return;
+        			    }
+        			}
+        		}
+            });
+        }
+		
+        // == UPDATE COUNT SPINNER
+		{
+            Label label = new Label(thePanel, SWT.NONE);
+            label.setText("Update Count");
+            
+			updateCountSpinner = new Spinner(thePanel, SWT.BORDER);
+			updateCountSpinner.setValues(0,  MIN, MAX, 0, 1, 100);
+			updateCountSpinner.setToolTipText("Set update count value"); //, //$NON-NLS-1$
+			updateCountSpinner.addModifyListener(new ModifyListener() {
+	            @Override
+				public void modifyText( ModifyEvent theEvent ) {
+	            	int value = Integer.parseInt(updateCountSpinner.getText());
+	            	try {
+						getProcedure().setUpdateCount(null, value);
+					} catch (KException e) {
+						e.printStackTrace();
+					}
+	            }
+	        });
+
+	        GridData gridData2 = new GridData();
+	        gridData2.widthHint = 100;
+	        updateCountSpinner.setLayoutData(gridData2);
+	        updateCountSpinner.setSelection(0);
+	        updateCountSpinner.setEnabled(true);
+		}
 
         return thePanel;
 	}
@@ -114,7 +204,28 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
 		Composite thePanel = WidgetFactory.createPanel(parent, SWT.NONE, 1, 3);
 		GridLayoutFactory.fillDefaults().margins(5, 5).applyTo(thePanel);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(thePanel);
-
+		
+		// non-prepared == TRUE should enable the native query text field.
+		// else it's disabled;
+		
+		nonPreparedCB = new Button(thePanel, SWT.CHECK);
+		nonPreparedCB.setText("Treat as non-prepared statement");
+		nonPreparedCB.setToolTipText("PreparedStatement will not be used to execute the native query defined below.");
+		nonPreparedCB.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				try {
+					getProcedure().setNonPrepared(null, nonPreparedCB.getSelection());
+				} catch (KException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
 		nativeQueryHelpText = new Text(thePanel, SWT.WRAP | SWT.READ_ONLY);
 		nativeQueryHelpText.setBackground(parent.getBackground());
 		nativeQueryHelpText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
@@ -160,13 +271,12 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
 	}
 	
 	private void createResultSetTab(TabFolder folderParent) {
-        Composite thePanel = createResultSetPanel(folderParent);
+        resultSetPanel = new ResultSetEditorPanel(folderParent, SWT.NONE, false);
 
         this.resultSetTab = new TabItem(folderParent, SWT.NONE);
-        this.resultSetTab.setControl(thePanel);
+        this.resultSetTab.setControl(resultSetPanel);
         this.resultSetTab.setText(Messages.resultSetLabel);
 	}
-
 	
 	private Composite createParametersTableGroup(Composite parent) {
 	  	
@@ -348,245 +458,7 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
         return thePanel;
     }
 	
-	private Composite createResultSetPanel(Composite parent) {
-	    Composite thePanel = WidgetFactory.createPanel(parent, SWT.NONE, 1, 2);
-        GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(thePanel);
-        GridDataFactory.fillDefaults().grab(true, true).applyTo(thePanel);
-    	
-        this.includeResultSetCB = new Button(thePanel, SWT.CHECK | SWT.RIGHT);
-        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(this.includeResultSetCB);
-        this.includeResultSetCB.setText(UILabelUtil.getLabel(UiLabelConstants.LABEL_IDS.INCLUDE));
-        // TODO: this.includeResultSetCB.setToolTipText(Messages.includeResultSetTooltip);
-        // TODO: this.includeResultSetCB.setSelection(getRelationalReference().getResultSet() != null);
-        this.includeResultSetCB.addSelectionListener(new SelectionAdapter() {
-            /**            		
-             * {@inheritDoc}
-             * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            @Override
-            public void widgetSelected( SelectionEvent e ) {
-            	// TODO:
-//            	if( includeResultSetCB.getSelection() ) {
-//            		if( getRelationalReference().getResultSet() == null ) {
-//            			RelationalProcedureResultSet resultSet = new RelationalProcedureResultSet();
-//            			
-//            			if( resultSetNameText.getText() != null ) {
-//            				resultSet.setName(resultSetNameText.getText());
-//            			}
-//            			getRelationalReference().setResultSet(resultSet);
-//            		}
-//            	} else {
-//            		getRelationalReference().setResultSet(null);
-//            	}
-                handleInfoChanged();
-            }
-        });
-        
-        Composite namePanel = WidgetFactory.createPanel(thePanel, SWT.NONE, 2, 2);
-        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(namePanel);
-        GridDataFactory.fillDefaults().grab(true, false).applyTo(namePanel);
 
-        Label label = new Label(namePanel, SWT.NONE | SWT.RIGHT);
-        label.setText(UILabelUtil.getLabel(UiLabelConstants.LABEL_IDS.NAME));
-        GridDataFactory.fillDefaults().applyTo(label);
-        
-        this.resultSetNameText =  new Text(namePanel, SWT.BORDER | SWT.SINGLE);
-        this.resultSetNameText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
-        GridDataFactory.fillDefaults().grab(true, false).minSize(50, SWT.DEFAULT).applyTo(this.resultSetNameText);
-        this.resultSetNameText.addModifyListener(new ModifyListener() {
-    		@Override
-			public void modifyText( final ModifyEvent event ) {
-    			String value = resultSetNameText.getText();
-    			if( value == null ) {
-    				value = CoreStringUtil.Constants.EMPTY_STRING;
-    			}
-    			// TODO:
-//        		if( getRelationalReference().getResultSet() != null ) {
-//        			RelationalProcedureResultSet resultSet = getRelationalReference().getResultSet();
-//        			resultSet.setName(value);
-//        		}
-        		handleInfoChanged();
-    		}
-        });
-
-        Composite buttonPanel = WidgetFactory.createPanel(thePanel, SWT.NONE, 1, 4);
-        GridLayoutFactory.fillDefaults().numColumns(4).applyTo(buttonPanel);
-        GridDataFactory.fillDefaults().span(2, 1).applyTo(buttonPanel);
-	  	
-    	addColumnButton = new Button(buttonPanel, SWT.PUSH);
-    	addColumnButton.setText(UILabelUtil.getLabel(UiLabelConstants.LABEL_IDS.ADD));
-    	GridDataFactory.fillDefaults().applyTo(addColumnButton);
-    	addColumnButton.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-	    		// TODO: getRelationalReference().getResultSet().createColumn();
-				handleInfoChanged();
-			}
-    		
-		});
-    	this.addColumnButton.setEnabled(false);
-    	
-    	deleteColumnButton = new Button(buttonPanel, SWT.PUSH);
-    	deleteColumnButton.setText(UILabelUtil.getLabel(UiLabelConstants.LABEL_IDS.DELETE));
-    	GridDataFactory.fillDefaults().applyTo(deleteColumnButton);
-    	deleteColumnButton.setEnabled(false);
-    	deleteColumnButton.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// TODO:
-//				RelationalColumn column = null;
-//				
-//				IStructuredSelection selection = (IStructuredSelection)columnsViewer.getSelection();
-//				for( Object obj : selection.toArray()) {
-//					if( obj instanceof RelationalColumn ) {
-//						column =  (RelationalColumn) obj;
-//						break;
-//					}
-//				}
-//				if( column != null ) {
-//					getRelationalReference().getResultSet().removeColumn(column);
-//					deleteColumnButton.setEnabled(false);
-//					handleInfoChanged();
-//				}
-			}
-    		
-		});
-    	
-    	upColumnButton = new Button(buttonPanel, SWT.PUSH);
-    	upColumnButton.setText(UILabelUtil.getLabel(UiLabelConstants.LABEL_IDS.MOVE_UP));
-    	GridDataFactory.fillDefaults().applyTo(upColumnButton);
-    	upColumnButton.setEnabled(false);
-    	upColumnButton.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// TODO:
-//				RelationalColumn info = null;
-//				
-//				IStructuredSelection selection = (IStructuredSelection)columnsViewer.getSelection();
-//				for( Object obj : selection.toArray()) {
-//					if( obj instanceof RelationalColumn ) {
-//						info =  (RelationalColumn) obj;
-//						break;
-//					}
-//				}
-//				if( info != null ) {
-//					int selectedIndex = columnsViewer.getTable().getSelectionIndex();
-//					getRelationalReference().getResultSet().moveColumnUp(info);
-//					handleInfoChanged();
-//					columnsViewer.getTable().select(selectedIndex-1);
-//					downColumnButton.setEnabled(getRelationalReference().getResultSet().canMoveColumnDown(info));
-//					upColumnButton.setEnabled(getRelationalReference().getResultSet().canMoveColumnUp(info));
-//					
-//				}
-			}
-    		
-		});
-    	
-    	downColumnButton = new Button(buttonPanel, SWT.PUSH);
-    	downColumnButton.setText(UILabelUtil.getLabel(UiLabelConstants.LABEL_IDS.MOVE_DOWN));
-    	GridDataFactory.fillDefaults().applyTo(downColumnButton);
-    	downColumnButton.setEnabled(false);
-    	downColumnButton.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// TODO:
-//				RelationalColumn info = null;
-//				
-//				IStructuredSelection selection = (IStructuredSelection)columnsViewer.getSelection();
-//				for( Object obj : selection.toArray()) {
-//					if( obj instanceof RelationalColumn ) {
-//						info =  (RelationalColumn) obj;
-//						break;
-//					}
-//				}
-//				if( info != null ) {
-//					int selectedIndex = columnsViewer.getTable().getSelectionIndex();
-//					getRelationalReference().getResultSet().moveColumnDown(info);
-//					handleInfoChanged();
-//					columnsViewer.getTable().select(selectedIndex+1);
-//					downColumnButton.setEnabled(getRelationalReference().getResultSet().canMoveColumnDown(info));
-//					upColumnButton.setEnabled(getRelationalReference().getResultSet().canMoveColumnUp(info));
-//					
-//				}
-			}
-    		
-		});
-    	
-    	this.columnsViewer = new TableViewerBuilder(thePanel, (SWT.SINGLE | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER));  	
-
-        TableViewerColumn column = this.columnsViewer.createColumn(SWT.LEFT, 30, 40, true);
-        column.getColumn().setText("Result Set Columns"); //Messages.columnNameLabel);
-        
-        columnNameEditSupport = new ColumnNameEditingSupport(this.columnsViewer.getTableViewer());
-        columnNameEditSupport.setViewerElementChangedListener(this);
-        column.setEditingSupport(columnNameEditSupport);
-        column.setLabelProvider(new ColumnDataLabelProvider(0));
-
-        column = this.parametersViewer.createColumn(SWT.LEFT, 30, 40, true);
-        column.getColumn().setText(Messages.dataTypeLabel);
-        column.setLabelProvider(new ColumnDataLabelProvider(1));
-        columnTypeEditSupport = new ColumnDatatypeEditingSupport(this.columnsViewer.getTableViewer());
-        columnTypeEditSupport.setViewerElementChangedListener(this);
-        column.setEditingSupport(columnTypeEditSupport);
-        
-        column = this.parametersViewer.createColumn(SWT.LEFT, 30, 40, true);
-        column.getColumn().setText(Messages.lengthLabel);
-        column.setLabelProvider(new ColumnDataLabelProvider(2));
-        columnWidthEditSupport = new ColumnWidthEditingSupport(this.columnsViewer.getTableViewer());
-        columnWidthEditSupport.setViewerElementChangedListener(this);
-        column.setEditingSupport(columnWidthEditSupport);
-
-        
-    	// TODO:
-//        if( this.getRelationalReference().getResultSet() != null ) {
-//	        for( RelationalColumn row : this.getRelationalReference().getResultSet().getColumns() ) {
-//	        	this.columnsViewer.add(row);
-//	        }
-//        }
-        
-        this.columnsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection sel = (IStructuredSelection)event.getSelection();
-				
-				if( sel.isEmpty()) {
-					deleteColumnButton.setEnabled(false);
-					upColumnButton.setEnabled(false);
-					downColumnButton.setEnabled(false);
-				} else {
-					boolean enable = true;
-					Object[] objs = sel.toArray();
-					// TODO:
-//					RelationalColumn columnInfo = null;
-//					for( Object obj : objs) {
-//						if(  !(obj instanceof RelationalColumn)) {
-//							enable = false;
-//							break;
-//						} else {
-//							columnInfo = (RelationalColumn)obj;
-//						}
-//					} 
-//					if( objs.length == 0 ) {
-//						enable = false;
-//					}
-//					deleteColumnButton.setEnabled(enable && !getRelationalReference().isNativeQueryProcedure());
-//					if( enable ) {
-//						upColumnButton.setEnabled(getRelationalReference().getResultSet().canMoveColumnUp(columnInfo));
-//						downColumnButton.setEnabled(getRelationalReference().getResultSet().canMoveColumnDown(columnInfo));
-//					}
-					
-				}
-				
-			}
-		});
-    	
-    	return thePanel;
-	}
 	
 	/**
 	 * 

@@ -1,8 +1,10 @@
 package org.komodo.eclipse.workspace.ui.editor;
 
 import java.beans.PropertyChangeEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Properties;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -33,6 +35,9 @@ import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.UiConstants;
 import org.komodo.eclipse.workspace.ui.actions.NewObjectAction;
 import org.komodo.eclipse.workspace.ui.actions.NewObjectActionFactory;
+import org.komodo.eclipse.workspace.ui.editor.dialogs.ExportToDynamicVdbDialog;
+import org.komodo.eclipse.workspace.ui.editor.dialogs.ImportDynamicVdbDialog;
+import org.komodo.eclipse.workspace.ui.editor.dialogs.ImportSchemaDialog;
 import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectChangedEvent;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
@@ -54,11 +59,18 @@ import org.komodo.eclipse.workspace.ui.editor.panels.vdb.VdbEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.vdb.VdbImportEditorPanel;
 import org.komodo.eclipse.workspace.ui.explorer.WorkspaceTreeViewer;
 import org.komodo.eclipse.workspace.util.RelationalIdentifier;
+import org.komodo.importer.ImportMessages;
+import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.ImportType;
+import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.importer.ddl.DdlImporter;
+import org.komodo.importer.vdb.VdbImporter;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -147,6 +159,86 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 				public void widgetDefaultSelected(SelectionEvent e) {
 				}
 			});
+            
+            Button importSchemaButton =  new Button(buttonPanel, SWT.PUSH);
+            importSchemaButton.setImage(CorePlugin.getDefault().getImage(CoreConstants.Images.IMPORT_MODEL_ICON));
+            GridDataFactory.fillDefaults().grab(false, true).applyTo(importSchemaButton);
+            importSchemaButton.addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ImportSchemaDialog dialog = new ImportSchemaDialog(getShell(), "Import Schema DDL File");
+					dialog.open();
+					
+					if( dialog.getReturnCode() == IDialogConstants.OK_ID ) {
+						File selectedFile = dialog.getFile();
+						try {
+							UnitOfWork transaction = CorePlugin.getKEngine().getDefaultRepository().createTransaction("Add Model", false, null);
+							DdlImporter importer = new DdlImporter(CorePlugin.getKEngine().getDefaultRepository(), transaction);
+					    	ImportOptions importOptions = new ImportOptions();
+					    	importOptions.setImportType(ImportType.MODEL);
+					    	importOptions.setOption(OptionKeys.NAME, dialog.getModelName());
+
+					    	ImportMessages importMessages = new ImportMessages();
+					    	
+					    	importer.importDdl(selectedFile, importOptions, importMessages);
+					    	
+							transaction.commit();
+							
+							if( importMessages.hasError() ) {
+								MessageDialog.openError(getShell(), "Schema Import Errors", importMessages.errorMessagesToString());
+							}
+						} catch (KException ex) {
+							MessageDialog.openError(getShell(), "Error Importing Schema", ex.getMessage());
+						}
+					}
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+				}
+			});
+            
+            Button importVdbButton =  new Button(buttonPanel, SWT.PUSH);
+            importVdbButton.setImage(CorePlugin.getDefault().getImage(CoreConstants.Images.IMPORT_VDB_ICON));
+            GridDataFactory.fillDefaults().grab(false, true).applyTo(importVdbButton);
+            importVdbButton.addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ImportDynamicVdbDialog dialog = new ImportDynamicVdbDialog(getShell(), "Import VDB XML File");
+					dialog.open();
+					
+					if( dialog.getReturnCode() == IDialogConstants.OK_ID ) {
+						File selectedFile = dialog.getFile();
+						try {
+							UnitOfWork transaction = CorePlugin.getKEngine().getDefaultRepository().createTransaction("Add VDB", false, null);
+							VdbImporter importer = new VdbImporter(CorePlugin.getKEngine().getDefaultRepository(), transaction);
+					    	ImportOptions importOptions = new ImportOptions();
+					    	importOptions.setImportType(ImportType.VDB);
+					    	importOptions.setOption(OptionKeys.NAME,  dialog.getVdbName()); // selectedFile.getName()); //
+					    	importOptions.setOption(OptionKeys.VDB_FILE_PATH, selectedFile.getAbsolutePath());
+
+					    	ImportMessages importMessages = new ImportMessages();
+					    	
+					    	importer.importVdb(selectedFile, importOptions, importMessages);
+					    	
+							transaction.commit();
+							
+							if( importMessages.hasError() ) {
+								MessageDialog.openError(getShell(), "Schema Import Errors", importMessages.errorMessagesToString());
+							}
+						} catch (KException ex) {
+							MessageDialog.openError(getShell(), "Error Importing Schema", ex.getMessage());
+						}
+					}
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+				}
+			});
+            
         }
 
 	    TREE: {
@@ -183,7 +275,7 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
     							 }
     						};
     						actionMenu.add(newColumn);
-    					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.PROCEDURE) ||
+    					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.STORED_PROCEDURE) ||
     							RelationalIdentifier.isType(node, CoreConstants.RelationalType.VIRTUAL_PROCEDURE) ) {
     							final NewObjectAction action = NewObjectActionFactory.getAction(CoreConstants.RelationalType.PARAMETER, node);
     							IAction newParmeter = new Action(action.getText(), action.getImageDescriptor()) {
@@ -210,7 +302,7 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 	    						};
 	    						actionMenu.add(newTable);
     						}
-    						final NewObjectAction pAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.PROCEDURE, node);
+    						final NewObjectAction pAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.STORED_PROCEDURE, node);
     						IAction newPAction = new Action(pAction.getText(), pAction.getImageDescriptor()) {
     							 @Override
     						     public void run() {
@@ -233,23 +325,70 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
     							 }
     						};
     						actionMenu.add(newMAction);
-    						IAction showVdbContents = new Action("Show VDB Contents") {
-   							 @Override
-   						     public void run() {
-   								 try {
-   									String ddlXmlString = ((Vdb)node).export(null);
-   									if( ddlXmlString == null || ddlXmlString.isEmpty() ) {
-   										ddlXmlString = "< No VDB contents >";
-   									}
-   									ShowStringDialog dialog = new ShowStringDialog(getShell(), "Dynamic VDB Contents", ddlXmlString);
-   									dialog.open();
-   								} catch (KException e) {
-   									// TODO Auto-generated catch block
-   									e.printStackTrace();
-   								}
-   							 }
-   						};
-   						actionMenu.add(showVdbContents);
+							IAction showVdbContents = new Action("Show VDB Contents") {
+								@Override
+								public void run() {
+									try {
+										Properties props = new Properties();
+										props.put( ExportConstants.USE_TABS_PROP_KEY, true);
+
+										String ddlXmlString = ((Vdb) node) .export(null, props);
+										if (ddlXmlString == null || ddlXmlString .isEmpty()) {
+											ddlXmlString = "< No VDB contents >";
+										}
+										ShowStringDialog dialog = new ShowStringDialog( getShell(), "Dynamic VDB Contents", ddlXmlString);
+										dialog.open();
+									} catch (KException e) {
+										// TODO Auto-generated catch
+										// block
+										e.printStackTrace();
+									}
+								}
+							};
+   	   						actionMenu.add(showVdbContents);
+   							IAction exportDynamicVdbAction = new Action("Export VDB") {
+      							 @Override
+      						     public void run() {
+      								 try {
+    									Properties props = new Properties();
+    									props.put(ExportConstants.USE_TABS_PROP_KEY, true);
+    									
+    									String ddlXmlString = ((Vdb)node).export(null, props);
+      									if( ddlXmlString == null || ddlXmlString.isEmpty() ) {
+      										ddlXmlString = "< No VDB contents >";
+      									}
+      									ExportToDynamicVdbDialog dialog = new ExportToDynamicVdbDialog(getShell(), "Export Dynamic VDB", ddlXmlString);
+      									dialog.open();
+      								} catch (KException e) {
+      									// TODO Auto-generated catch block
+      									e.printStackTrace();
+      								}
+      							 }
+       						};
+       						actionMenu.add(exportDynamicVdbAction);
+    					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.LIBRARY )) {
+    						final NewObjectAction mAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.MODEL, node);
+    						IAction newMAction = new Action(mAction.getText(), mAction.getImageDescriptor()) {
+    							 @Override
+    						     public void run() {
+    								 boolean completed = mAction.execute();
+    								 if( completed ) {
+    									 wsTreeViewer.refresh();
+    								 }
+    							 }
+    						};
+    						actionMenu.add(newMAction);
+    						final NewObjectAction vdbAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.VDB, node);
+    						IAction newVdbAction = new Action(vdbAction.getText(), mAction.getImageDescriptor()) {
+    							 @Override
+    						     public void run() {
+    								 boolean completed = vdbAction.execute();
+    								 if( completed ) {
+    									 wsTreeViewer.refresh();
+    								 }
+    							 }
+    						};
+    						actionMenu.add(newVdbAction);
     					}
     					
     					actionMenu.add(new Separator());
@@ -359,7 +498,7 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 	    	editorPanels.add(new ModelEditorPanel(parent, SWT.NONE, RelationalIdentifier.MODEL, this));
 	    	editorPanels.add(new TableEditorPanel(parent, SWT.NONE, RelationalIdentifier.TABLE, this));
 	    	editorPanels.add(new ColumnEditorPanel(parent, SWT.NONE, RelationalIdentifier.COLUMN, this));
-	    	editorPanels.add(new ProcedureEditorPanel(parent, SWT.NONE, RelationalIdentifier.PROCEDURE, this));
+	    	editorPanels.add(new ProcedureEditorPanel(parent, SWT.NONE, RelationalIdentifier.STORED_PROCEDURE, this));
 	    	editorPanels.add(new ViewEditorPanel(parent, SWT.NONE, RelationalIdentifier.VIEW, this));
 	    	editorPanels.add(new VirtualProcedureEditorPanel(parent, SWT.NONE, RelationalIdentifier.VIRTUAL_PROCEDURE, this));
 	    	editorPanels.add(new ParameterEditorPanel(parent, SWT.NONE, RelationalIdentifier.PARAMETER, this));
@@ -392,6 +531,14 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 	public void documentChanged(ObjectChangedEvent event) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void dispose() {
+		if( wsTreeViewer != null ) {
+			wsTreeViewer.close();
+		}
+		super.dispose();
 	}
 
 }

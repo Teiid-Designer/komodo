@@ -79,9 +79,9 @@ public class KWorkspaceEditor extends SharedHeaderFormEditor{
 			addPage(0, this.kWorkspaceViewerEditorPage);
 			this.pages.add(this.kWorkspaceViewerEditorPage);
 			
-			this.kNavigableEditorpage = new KNavigableEditorPage(this);
-			addPage(0, this.kNavigableEditorpage);
-			this.pages.add(this.kNavigableEditorpage);
+//			this.kNavigableEditorpage = new KNavigableEditorPage(this);
+//			addPage(0, this.kNavigableEditorpage);
+//			this.pages.add(this.kNavigableEditorpage);
 
 			this.scrolledForm.setText(getPageText(0));
 

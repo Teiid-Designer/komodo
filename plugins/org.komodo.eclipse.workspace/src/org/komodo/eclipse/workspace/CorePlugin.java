@@ -2,6 +2,7 @@ package org.komodo.eclipse.workspace;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,16 +15,21 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.komodo.core.KEngine;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.ResultSetColumn;
+import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.Parameter.Direction;
+import org.komodo.relational.model.TabularResultSet;
 import org.komodo.relational.model.View;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -264,42 +270,91 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 			UnitOfWork transaction = repo.createTransaction("GET WORKSPACE", false, null);
 			Vdb vdb = wsManager.createVdb(transaction, null, "ProductsVDB", "extPath");
 			vdb.setDescription(transaction, "Description for ProductsVDB");
+			vdb.setPreview(transaction, true);
+			vdb.setVersion(transaction, 19);
+			vdb.setConnectionType(transaction, "BY_VERSION");
+			
 			DataRole role = vdb.addDataRole(transaction, "Full Access Data Role");
 			role.setProperty(transaction, VdbLexicon.DataRole.MAPPED_ROLE_NAMES, (Object[])new String[]{"ROLE1", "ROLE2"});
+			role.setDescription(transaction, "Full access to all products data and information.");
+			
 			Permission perm = role.addPermission(transaction, "ProductModel.productData");
-			Translator trans = vdb.addTranslator(transaction, "my oracle override", "oracle");
+			perm.addMask(transaction, "xxxx-mask-name-xxxxx");
+			perm.addCondition(transaction, "xxxx-condition-name-xxxxx");
+			perm.setAllowCreate(transaction, true);
+			perm.setAllowLanguage(transaction, true);
+			
+			Translator trans = vdb.addTranslator(transaction, "myOracleOverride", "oracle");
+			trans.setDescription(transaction, "Oracle override translator. Customized for performance");
+			
 			Model model = wsManager.createModel(transaction, vdb, "ProductModel");
+			model.setDescription(transaction, "Products Oracle source model");
 			model.setProperty(transaction, "vdb:description", "Description for ProductModel....");
 			Table table = model.addTable(transaction, "productData");
-			table.addColumn(transaction, "ID");
-			table.addColumn(transaction, "Value");
-			table.addColumn(transaction, "Reference");
+			table.setDescription(transaction, "General product data");
+			Column col = table.addColumn(transaction, "ID");
+			col.setDatatypeName(transaction, "string");
+			col.setLength(transaction, 58);
+			col = table.addColumn(transaction, "Value");
+			col.setDatatypeName(transaction, "string");
+			col.setLength(transaction, 4000);
+			col = table.addColumn(transaction, "Reference");
+			col.setDatatypeName(transaction, "string");
+			col.setLength(transaction, 4000);
 			table = model.addTable(transaction, "productInfo");
-			table.addColumn(transaction, "ID");
-			table.addColumn(transaction, "vendor");
-			table.addColumn(transaction, "quantity");
-			Column col = table.addColumn(transaction, "weight");
+			col = table.addColumn(transaction, "ID");
+			col.setDatatypeName(transaction, "string");
+			col.setLength(transaction, 58);
+			col = table.addColumn(transaction, "vendor");
+			col.setDatatypeName(transaction, "string");
+			col.setLength(transaction, 4000);
+			col = table.addColumn(transaction, "quantity");
 			col.setDatatypeName(transaction, "integer");
+			col.setDefaultValue(transaction, "0");
+			col = table.addColumn(transaction, "weight");
+			col.setDatatypeName(transaction, "integer");
+			col.setDefaultValue(transaction, "1100");
+			col.setDescription(transaction, "product weight in lbs");
 			
-//			Procedure proc = model.addProcedure(transaction, "getProductData");
-//			Parameter param = proc.addParameter(transaction, "PRODUCT_ID");
-//			param.setDirection(transaction, Direction.IN);
-//			
-//			param = proc.addParameter(transaction, "CATEGORY");
-//			param.setDirection(transaction, Direction.IN);
-//			ProcedureResultSet rs = proc.getResultSet(transaction);
-//			rs.addColumn(transaction, "c1");
+			ModelSource mSource = model.addSource(transaction, "ProductsOracle11");
+			mSource.setJndiName(transaction, "products-ds04");
+			mSource.setTranslatorName(transaction,  "myOracleOverride");
+			
+			StoredProcedure proc = model.addStoredProcedure(transaction, "getProductData");
+			Parameter param = proc.addParameter(transaction, "PRODUCT_ID");
+			param.setDirection(transaction, Direction.IN);
+			TabularResultSet rs = (TabularResultSet)proc.setResultSet(transaction, TabularResultSet.class);
+			
+			param = proc.addParameter(transaction, "CATEGORY");
+			param.setDirection(transaction, Direction.IN);
+			ResultSetColumn rsc = rs.addColumn(transaction, "c1");
+			rsc.setDatatypeName(transaction, "integer");
+			rsc = rs.addColumn(transaction, "c2");
+			rsc.setDatatypeName(transaction, "integer");
+			rsc = rs.addColumn(transaction, "c3");
+			rsc.setDatatypeName(transaction, "string");
+			rsc.setLength(transaction, 255);
 			
 			vdb = wsManager.createVdb(transaction, null, "BooksVdb", "extPath");
 			model = wsManager.createModel(transaction, vdb, "BooksSource");
 			table = model.addTable(transaction, "books");
-			table.addColumn(transaction, "title");
-			table.addColumn(transaction, "author");
-			table.addColumn(transaction, "publisherID");
+			col = table.addColumn(transaction, "title");
+			col.setDatatypeName(transaction, "string");
+			col.setLength(transaction, 300);
+			col = table.addColumn(transaction, "author");
+			col.setDatatypeName(transaction, "string");
+			col.setLength(transaction, 300);
+			col = table.addColumn(transaction, "publisherID");
+			col.setDatatypeName(transaction, "integer");
 			table = model.addTable(transaction, "publishers");
-			table.addColumn(transaction, "publisherID");
-			table.addColumn(transaction, "name");
-			table.addColumn(transaction, "address");
+			col = table.addColumn(transaction, "publisherID");
+			col.setDatatypeName(transaction, "integer");
+			col = table.addColumn(transaction, "name");
+			col.setDatatypeName(transaction, "string");
+			col.setLength(transaction, 300);
+			col = table.addColumn(transaction, "address");
+			col.setDatatypeName(transaction, "string");
+			col.setLength(transaction, 300);
 
 			
 //			param = proc.addParameter(transaction, "PRODUCT_DATA");
@@ -319,12 +374,17 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 //			proc.addParameter(transaction, "isbn");
 //			proc.addParameter(transaction, "authorID");
 //			proc.addParameter(transaction, "publisherID");
-			
+
 			transaction.commit();
+			
+			
+			System.out.println("  CorePlugin.loadTestWorkspace() ENDED");
+			System.out.println("     Result Set # Columns = " + rs.getColumns(null).length);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
     }
     
     public static KomodoObject getWorkspaceRoot() {
@@ -338,6 +398,22 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 			e.printStackTrace();
 		}
 		
+		return null;
+    }
+    
+    public static KomodoObject getLibrary() {
+		KomodoObject ko = getWorkspaceRoot();
+		
+		try {
+			for( KomodoObject obj : ko.getChildren(null) ) {
+				if( obj.getPrimaryType(null).getName().equalsIgnoreCase(KomodoLexicon.Komodo.LIBRARY) ) {
+					return obj;
+				}
+			}
+		} catch (KException e) {
+			e.printStackTrace();
+		}
+			
 		return null;
     }
     

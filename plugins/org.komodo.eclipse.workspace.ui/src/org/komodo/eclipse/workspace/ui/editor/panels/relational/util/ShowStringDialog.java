@@ -70,7 +70,7 @@ public class ShowStringDialog extends Dialog {
         pgd.grabExcessHorizontalSpace = true;
         innerPanel.setLayoutData(pgd);
         
-        this.textEditor = new StyledTextEditor(innerPanel, SWT.MULTI | SWT.V_SCROLL | SWT.BORDER);
+        this.textEditor = new StyledTextEditor(innerPanel, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
         this.textEditor.getTextWidget().setFont(textFont);
         this.textEditor.getTextWidget().setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 //        this.textEditor.getTextWidget().setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_MAGENTA));

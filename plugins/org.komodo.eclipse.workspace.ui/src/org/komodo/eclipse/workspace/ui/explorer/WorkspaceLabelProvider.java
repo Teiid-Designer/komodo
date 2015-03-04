@@ -1,5 +1,6 @@
 package org.komodo.eclipse.workspace.ui.explorer;
 
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.komodo.eclipse.workspace.CoreConstants;
@@ -9,10 +10,11 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
+import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon.ModelType;
 
-public class WorkspaceLabelProvider extends LabelProvider implements CoreConstants.RelationalType, CoreConstants.Images {
+public class WorkspaceLabelProvider extends ColumnLabelProvider implements CoreConstants.RelationalType, CoreConstants.Images {
 
 //	public static final int TABLE = 1;
 //	public static final int COLUMN = 2;
@@ -42,7 +44,7 @@ public class WorkspaceLabelProvider extends LabelProvider implements CoreConstan
 					return getImageInternal(TABLE_ICON);
 				}
 				case VIEW: return getImageInternal(VIRTUAL_TABLE_ICON);
-				case PROCEDURE:  {
+				case STORED_PROCEDURE:  {
 					return getImageInternal(PROCEDURE_ICON);
 				}
 				case VIRTUAL_PROCEDURE: return getImageInternal(VIRTUAL_PROCEDURE_ICON);
@@ -53,6 +55,10 @@ public class WorkspaceLabelProvider extends LabelProvider implements CoreConstan
 				case VDB_IMPORT: return getImageInternal(VDB_ICON);
 				case DATA_ROLE: return getImageInternal(CONNECTION_ICON);
 				case PERMISSION: return getImageInternal(CONNECTION_ICON);
+				case LIBRARY:
+				case MODEL_SOURCE:
+				case MASK:
+				case CONDITION:
 				case UNKNOWN: return getImageInternal(KOMODO_ICON);
 			}
 		}
@@ -86,7 +92,7 @@ public class WorkspaceLabelProvider extends LabelProvider implements CoreConstan
 				return false;
 			}
 			case TABLE:
-			case PROCEDURE:
+			case STORED_PROCEDURE:
 				try {
 					return isVirtual(ko.getParent(null));
 				} catch (KException e) {
@@ -120,30 +126,57 @@ public class WorkspaceLabelProvider extends LabelProvider implements CoreConstan
 		return sb.toString();
 	}
 	
-	private String getType(KomodoObject ko) throws KException {
-		switch(RelationalIdentifier.getType(ko)) {
+	private String getName(KomodoObject ko) {
+
+		try {
+			return ko.getName(null);
+		} catch (KException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return StringUtils.EMPTY_STRING;
+	}
+	
+	private String getType(KomodoObject ko) {
+		switch( RelationalIdentifier.getType(ko)) {
 			case VDB: return "vdb";
 			case MODEL: return "model";
 			case TABLE: return "table";
 			case VIEW: return "view";
-			case PROCEDURE: return "procedure";
-			case VIRTUAL_PROCEDURE: return "procedure";
+			case STORED_PROCEDURE: return "stored-procedure";
+			case VIRTUAL_PROCEDURE: return "virtual-procedure";
+			case USER_DEFINED_FUNCTION: return "user-defined-function";
+			case PUSHDOWN_FUNCTION: return "pushdown-funciton";
 			case COLUMN: return "column";
 			case PARAMETER: return "parameter";
 			case RESULT_SET: return "result-set";
 			case TRANSLATOR: return "translator";
 			case DATA_ROLE: return "data role";
 			case PERMISSION: return "permission";
+			case LIBRARY: return "library";
+			case MODEL_SOURCE: return "source";
+			case MASK: return "mask";
+			case CONDITION: return "condition";
 			case UNKNOWN: return "unknown";
 		}
-//		if( RelationalIdentifier.getType(ko) == TABLE) retyrb
-//		Descriptor[] descriptors = ko.getDescriptors(null);
-//		for( Descriptor des : descriptors ) {
-//			if( des.getName().equalsIgnoreCase(CreateTable.TABLE_STATEMENT)) return TeiidDdlLexicon.TABLE;
-//			if( des.getName().equalsIgnoreCase(CreateTable.TABLE_ELEMENT)) return "column";
-//		}
-//		
-		return "<unknown>";
+		
+		return "unknown";
 	}
+
+	@Override
+	public String getToolTipText(Object element) {
+		if( element instanceof KomodoObject ) {
+			KomodoObject ko = (KomodoObject)element;
+			StringBuilder tooltip = new StringBuilder("Name: ").append(getName(ko));
+			tooltip.append(StringUtils.NEW_LINE).append("Type: " ).append(getType(ko));
+			tooltip.append(StringUtils.NEW_LINE).append("Path : ").append(ko.getAbsolutePath());
+			return tooltip.toString();
+		}
+		
+		return super.getToolTipText(element);
+	}
+	
+	
 
 }

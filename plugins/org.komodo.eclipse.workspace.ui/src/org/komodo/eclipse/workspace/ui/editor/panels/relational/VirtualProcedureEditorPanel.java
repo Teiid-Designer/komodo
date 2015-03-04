@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.komodo.eclipse.sql.ui.editor.panel.SqlEditorPanel;
 import org.komodo.eclipse.workspace.CoreConstants;
+import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.Messages;
 import org.komodo.eclipse.workspace.ui.common.table.TableViewerBuilder;
 import org.komodo.eclipse.workspace.ui.common.util.CoreStringUtil;
@@ -551,14 +552,14 @@ public class VirtualProcedureEditorPanel   extends ObjectEditorPanel implements 
         column.setEditingSupport(columnNameEditSupport);
         column.setLabelProvider(new ColumnDataLabelProvider(0));
 
-        column = this.parametersViewer.createColumn(SWT.LEFT, 30, 40, true);
+        column = this.columnsViewer.createColumn(SWT.LEFT, 30, 40, true);
         column.getColumn().setText(Messages.dataTypeLabel);
         column.setLabelProvider(new ColumnDataLabelProvider(1));
         columnTypeEditSupport = new ColumnDatatypeEditingSupport(this.columnsViewer.getTableViewer());
         columnTypeEditSupport.setViewerElementChangedListener(this);
         column.setEditingSupport(columnTypeEditSupport);
         
-        column = this.parametersViewer.createColumn(SWT.LEFT, 30, 40, true);
+        column = this.columnsViewer.createColumn(SWT.LEFT, 30, 40, true);
         column.getColumn().setText(Messages.lengthLabel);
         column.setLabelProvider(new ColumnDataLabelProvider(2));
         columnWidthEditSupport = new ColumnWidthEditingSupport(this.columnsViewer.getTableViewer());
@@ -717,7 +718,7 @@ public class VirtualProcedureEditorPanel   extends ObjectEditorPanel implements 
 		@Override
 		public Image getImage(Object element) {
 			if( this.columnNumber == 0 ) {
-				return null; // UiPlugin.getDefault().getImage(UiConstants.Images.COLUMN_ICON);
+				return CorePlugin.getDefault().getImage(CoreConstants.Images.COLUMN_ICON);
 			}
 			return null;
 		}

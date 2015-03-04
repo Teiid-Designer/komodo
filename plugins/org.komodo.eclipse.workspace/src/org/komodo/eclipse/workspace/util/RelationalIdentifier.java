@@ -11,8 +11,12 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.PushdownFunction;
+import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.View;
+import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
@@ -67,6 +71,16 @@ public class RelationalIdentifier implements CoreConstants.RelationalType, CoreC
 				if( pType.getName().equalsIgnoreCase(VdbLexicon.DataRole.Permission.PERMISSION)) {
 					return PERMISSION;
 				}
+				if( pType.getName().equalsIgnoreCase(VdbLexicon.DataRole.Permission.Mask.MASK)) {
+					return MASK;
+				}
+				if( pType.getName().equalsIgnoreCase(VdbLexicon.DataRole.Permission.Condition.CONDITION)) {
+					return CONDITION;
+				}
+				
+				if( pType.getName().equalsIgnoreCase(KomodoLexicon.Komodo.LIBRARY)) {
+					return LIBRARY;
+				}
 			}
 			
 			Descriptor[] descriptors = ko.getDescriptors(null);
@@ -85,7 +99,7 @@ public class RelationalIdentifier implements CoreConstants.RelationalType, CoreC
 						} catch (KException e) {
 							e.printStackTrace();
 						}
-						return PROCEDURE;
+						return STORED_PROCEDURE;
 					}
 					else if( des.getName().equalsIgnoreCase(CreateProcedure.RESULT_SET)) return RESULT_SET;
 					else if( des.getName().equalsIgnoreCase(CreateTable.TABLE_ELEMENT)) return COLUMN;
@@ -94,6 +108,8 @@ public class RelationalIdentifier implements CoreConstants.RelationalType, CoreC
 					else if( des.getName().equalsIgnoreCase(VdbLexicon.Source.SOURCE)) return MODEL_SOURCE;
 					else if( des.getName().equalsIgnoreCase(VdbLexicon.ImportVdb.IMPORT_VDB)) return ENTRY;
 					else if( des.getName().equalsIgnoreCase(VdbLexicon.ImportVdb.IMPORT_VDB)) return VDB_IMPORT;
+					else if( des.getName().equalsIgnoreCase(VdbLexicon.DataRole.Permission.Mask.MASK)) return MASK;
+					else if( des.getName().equalsIgnoreCase(VdbLexicon.DataRole.Permission.Condition.CONDITION)) return CONDITION;
 				}
 			}
 		} catch (KException e) {
@@ -111,8 +127,10 @@ public class RelationalIdentifier implements CoreConstants.RelationalType, CoreC
 			case MODEL: return "Model";
 			case TABLE: return "Table";
 			case VIEW: return "View";
-			case PROCEDURE: return "Procedure";
+			case STORED_PROCEDURE: return "Procedure";
 			case VIRTUAL_PROCEDURE: return "Virtual Procedure";
+			case USER_DEFINED_FUNCTION: return "User Defined Function";
+			case PUSHDOWN_FUNCTION: return "Pushdown Function";
 			case COLUMN: return "Column";
 			case PARAMETER: return "Parameter";
 			case RESULT_SET: return "Result Set";
@@ -120,6 +138,9 @@ public class RelationalIdentifier implements CoreConstants.RelationalType, CoreC
 			case MODEL_SOURCE: return "Model Source";
 			case ENTRY: return "File Entry";
 			case VDB_IMPORT: return "Vdb Import";
+			case LIBRARY: return "Library";
+			case MASK: return "Mask";
+			case CONDITION: return "Condition";
 			case UNKNOWN: return "Unknown";
 		}
 		return "Unknown";
@@ -130,18 +151,10 @@ public class RelationalIdentifier implements CoreConstants.RelationalType, CoreC
 		else if( ko instanceof Model) return MODEL;
 		else if( ko instanceof View) return VIEW;
 		else if( ko instanceof Table) return TABLE;
-		else if( ko instanceof Procedure) {
-			try {
-				Property type = (ko.getParent(null)).getProperty(null, CoreLexicon.JcrId.MODEL_TYPE);
-				if( type != null && type.getStringValue(null).equalsIgnoreCase(ModelType.VIRTUAL)) {
-					return VIRTUAL_PROCEDURE;
-				}
-			} catch (KException e) {
-				e.printStackTrace();
-			}
-			
-			return PROCEDURE;
-		}
+		else if( ko instanceof StoredProcedure) return STORED_PROCEDURE;
+		else if( ko instanceof VirtualProcedure) return VIRTUAL_PROCEDURE;
+		else if( ko instanceof UserDefinedFunction) return USER_DEFINED_FUNCTION;
+		else if( ko instanceof PushdownFunction) return PUSHDOWN_FUNCTION;
 		else if( ko instanceof ProcedureResultSet) return RESULT_SET;
 		else if( ko instanceof Column) return COLUMN;
 		else if( ko instanceof Parameter) return PARAMETER;
@@ -160,8 +173,10 @@ public class RelationalIdentifier implements CoreConstants.RelationalType, CoreC
 			case MODEL: return CorePlugin.getDefault().getImage(MODEL_ICON);
 			case TABLE: return CorePlugin.getDefault().getImage(TABLE_ICON);
 			case VIEW: return CorePlugin.getDefault().getImage(VIRTUAL_TABLE_ICON);
-			case PROCEDURE: return CorePlugin.getDefault().getImage(PROCEDURE_ICON);
+			case STORED_PROCEDURE: return CorePlugin.getDefault().getImage(PROCEDURE_ICON);
 			case VIRTUAL_PROCEDURE: return CorePlugin.getDefault().getImage(VIRTUAL_PROCEDURE_ICON);
+			case USER_DEFINED_FUNCTION: return CorePlugin.getDefault().getImage(VIRTUAL_PROCEDURE_ICON);
+			case PUSHDOWN_FUNCTION: return CorePlugin.getDefault().getImage(PROCEDURE_ICON);
 			case COLUMN: return CorePlugin.getDefault().getImage(COLUMN_ICON);
 			case PARAMETER: return CorePlugin.getDefault().getImage(PARAMETER_ICON);
 			case RESULT_SET: return CorePlugin.getDefault().getImage(TABLE_ICON);
@@ -187,7 +202,7 @@ public class RelationalIdentifier implements CoreConstants.RelationalType, CoreC
 				return false;
 			}
 			case TABLE:
-			case PROCEDURE:
+			case STORED_PROCEDURE:
 				try {
 					return isVirtual(ko.getParent(null));
 				} catch (KException e) {

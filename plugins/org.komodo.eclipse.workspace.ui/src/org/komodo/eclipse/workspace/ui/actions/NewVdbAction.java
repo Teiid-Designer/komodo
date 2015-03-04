@@ -28,7 +28,7 @@ public class NewVdbAction extends NewObjectAction {
 			String name = dialog.getName();
 			try {
 				UnitOfWork transaction = CorePlugin.getKEngine().getDefaultRepository().createTransaction("Add VDB", false, null);
-				Vdb vdb = CorePlugin.getWorkspaceManager().createVdb(transaction, null, name, "extPath");
+				Vdb vdb = CorePlugin.getWorkspaceManager().createVdb(transaction, parent, name, "extPath");
 				transaction.commit();
 				completed = true;
 			} catch (KException ex) {

@@ -1,5 +1,7 @@
 package org.komodo.eclipse.workspace.ui.editor.panels;
 
+import java.util.Properties;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -32,6 +34,7 @@ import org.komodo.eclipse.workspace.util.RelationalIdentifier;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -89,7 +92,7 @@ public class WorkspaceTreeViewerPanel extends Composite {
 							 }
 						};
 						actionMenu.add(newColumn);
-					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.PROCEDURE) ||
+					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.STORED_PROCEDURE) ||
 							RelationalIdentifier.isType(node, CoreConstants.RelationalType.VIRTUAL_PROCEDURE) ) {
 							final NewObjectAction action = NewObjectActionFactory.getAction(CoreConstants.RelationalType.PARAMETER, node);
 							IAction newParmeter = new Action(action.getText(), action.getImageDescriptor()) {
@@ -116,7 +119,7 @@ public class WorkspaceTreeViewerPanel extends Composite {
 							};
 							actionMenu.add(newTable);
 						}
-						final NewObjectAction pAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.PROCEDURE, node);
+						final NewObjectAction pAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.STORED_PROCEDURE, node);
 						IAction newPAction = new Action(pAction.getText(), pAction.getImageDescriptor()) {
 							 @Override
 						     public void run() {
@@ -150,11 +153,14 @@ public class WorkspaceTreeViewerPanel extends Composite {
 							 }
 						};
 						actionMenu.add(newMAction);
-						IAction showVdbContents = new Action("Show VDB Contents") {
+						IAction showVdbContents = new Action("Show VDB Contents (formatted)") {
 							 @Override
 						     public void run() {
 								 try {
-									String ddlXmlString = ((Vdb)node).export(null);
+									Properties props = new Properties();
+									props.put(ExportConstants.USE_TABS_PROP_KEY, true);
+									
+									String ddlXmlString = ((Vdb)node).export(null, props);
 									if( ddlXmlString == null || ddlXmlString.isEmpty() ) {
 										ddlXmlString = "< No VDB contents >";
 									}
@@ -167,6 +173,48 @@ public class WorkspaceTreeViewerPanel extends Composite {
 							 }
 						};
 						actionMenu.add(showVdbContents);
+						IAction showVdbContentsRaw = new Action("Show VDB Contents (unformatted)") {
+							 @Override
+						     public void run() {
+								 try {
+									Properties props = new Properties();
+									
+									String ddlXmlString = ((Vdb)node).export(null, props);
+									if( ddlXmlString == null || ddlXmlString.isEmpty() ) {
+										ddlXmlString = "< No VDB contents >";
+									}
+									ShowStringDialog dialog = new ShowStringDialog(getShell(), "Dynamic VDB Contents (Unformatted)", ddlXmlString);
+									dialog.open();
+								} catch (KException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							 }
+						};
+						actionMenu.add(showVdbContentsRaw);
+					} else if( RelationalIdentifier.isType(node, CoreConstants.RelationalType.LIBRARY )) {
+						final NewObjectAction mAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.MODEL, node);
+						IAction newMAction = new Action(mAction.getText(), mAction.getImageDescriptor()) {
+							 @Override
+						     public void run() {
+								 boolean completed = mAction.execute();
+								 if( completed ) {
+									 wsTreeViewer.refresh();
+								 }
+							 }
+						};
+						actionMenu.add(newMAction);
+						final NewObjectAction vdbAction = NewObjectActionFactory.getAction(CoreConstants.RelationalType.VDB, node);
+						IAction newVdbAction = new Action(vdbAction.getText(), mAction.getImageDescriptor()) {
+							 @Override
+						     public void run() {
+								 boolean completed = vdbAction.execute();
+								 if( completed ) {
+									 wsTreeViewer.refresh();
+								 }
+							 }
+						};
+						actionMenu.add(newVdbAction);
 					}
 					
 					actionMenu.add(new Separator());
@@ -269,5 +317,11 @@ public class WorkspaceTreeViewerPanel extends Composite {
 		wsTreeViewer.addDoubleClickListener(listener);
 	}
 	
-
+	@Override
+	public void dispose() {
+		if( wsTreeViewer != null ) {
+			wsTreeViewer.close();
+		}
+		super.dispose();
+	}
 }

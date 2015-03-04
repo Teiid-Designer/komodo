@@ -27,6 +27,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.internal.forms.widgets.FormHeading;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.eclipse.workspace.CoreConstants;
 import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.UiConstants;
@@ -183,6 +184,33 @@ public class KNavigableEditorPage  extends KWorkspaceEditorPage implements IKObj
 				}
 			});
             
+            Button newLibraryButton = new Button(buttonPanel, SWT.PUSH);
+            newLibraryButton.setText("Create Library");
+            GridDataFactory.fillDefaults().grab(false, true).applyTo(newLibraryButton);
+            newLibraryButton.addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+
+						try {
+							UnitOfWork transaction = CorePlugin.getKEngine().getDefaultRepository().createTransaction("Add VDB", false, null);
+							KomodoObject root = CorePlugin.getWorkspaceRoot();
+							root.addChild(transaction, "myLibrary", KomodoLexicon.Komodo.LIBRARY);
+							transaction.commit();
+						} catch (KException ex) {
+							MessageDialog.openError(getShell(), "Error Adding Library", ex.getMessage());
+						} finally {
+							if( stackedEditorsLayout.topControl == workspaceTreeViewerPanel ) {
+								workspaceTreeViewerPanel.refresh();
+							}
+						}
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+				}
+			});
+            
             
         	locationLabel = new Label(finalContainer, SWT.NONE);
         	locationLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
@@ -261,7 +289,7 @@ public class KNavigableEditorPage  extends KWorkspaceEditorPage implements IKObj
 	    	panel = new TableEditorPanel(parent, SWT.NONE, RelationalIdentifier.TABLE, this);
 	    	panel.addDoubleClickListener(this);
 	    	editorPanels.add(panel);
-	    	panel = new ProcedureEditorPanel(parent, SWT.NONE, RelationalIdentifier.PROCEDURE, this);
+	    	panel = new ProcedureEditorPanel(parent, SWT.NONE, RelationalIdentifier.STORED_PROCEDURE, this);
 	    	panel.addDoubleClickListener(this);
 	    	editorPanels.add(panel);
 	    	panel = new ViewEditorPanel(parent, SWT.NONE, RelationalIdentifier.VIEW, this);
