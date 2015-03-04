@@ -219,7 +219,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
         this.procedure.setSchemaElementType( null, value );
         assertThat( this.procedure.getSchemaElementType( null ), is( value ) );
         assertThat( this.procedure.getProperty( null, TeiidDdlLexicon.SchemaElement.TYPE ).getStringValue( null ),
-                    is( value.toString() ) );
+                    is( value.name() ) );
     }
 
     @Test

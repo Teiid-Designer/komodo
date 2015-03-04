@@ -31,13 +31,41 @@ public final class PrimaryKeyImpl extends TableConstraintImpl implements Primary
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public PrimaryKey create( final UnitOfWork transaction,
+                                  final Repository repository,
+                                  final KomodoObject parent,
+                                  final String id,
+                                  final RelationalProperties properties ) throws KException {
+            final AdapterFactory adapter = new AdapterFactory( repository );
+            final Table parentTable = adapter.adapt( transaction, parent, Table.class );
+            return RelationalModelFactory.createPrimaryKey( transaction, repository, parentTable, id );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< PrimaryKeyImpl > owningClass() {
             return PrimaryKeyImpl.class;
         }
 
@@ -45,19 +73,18 @@ public final class PrimaryKeyImpl extends TableConstraintImpl implements Primary
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, Constraint.TABLE_ELEMENT);
-                ObjectImpl.validatePropertyValue(transaction,
-                                                 repository,
-                                                 kobject,
-                                                 Constraint.TYPE,
-                                                 PrimaryKey.CONSTRAINT_TYPE.toString());
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, Constraint.TABLE_ELEMENT );
+                ObjectImpl.validatePropertyValue( transaction,
+                                                  kobject.getRepository(),
+                                                  kobject,
+                                                  Constraint.TYPE,
+                                                  PrimaryKey.CONSTRAINT_TYPE.toValue() );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -70,23 +97,12 @@ public final class PrimaryKeyImpl extends TableConstraintImpl implements Primary
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public PrimaryKey resolve( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) throws KException {
-            return new PrimaryKeyImpl(transaction, repository, kobject.getAbsolutePath());
-        }
-
-        @Override
-        public PrimaryKey create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
-            Table parentTable = adapter.adapt(transaction, parent, Table.class);
-            return RelationalModelFactory.createPrimaryKey(transaction, parent.getRepository(), parentTable, id);
+            return new PrimaryKeyImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };

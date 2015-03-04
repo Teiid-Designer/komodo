@@ -138,6 +138,15 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldCreateModelAtWorkspaceRoot() throws Exception {
+        final String modelName = "model";
+        final Model model = this.wsMgr.createModel( null, null, modelName );
+        assertThat(model, is(notNullValue()));
+        assertThat(this.wsMgr.findModels( null ).length, is(1));
+        assertThat(this.wsMgr.findModels( null )[0].getName( null ), is(modelName));
+    }
+
+    @Test
     public void shouldCreateVdb() throws Exception {
         final KomodoObject parent = _repo.add(null, _repo.komodoWorkspace(null).getAbsolutePath(), "parent", null);
         final Vdb vdb = createVdb(null, parent, this.name.getMethodName());

@@ -83,7 +83,7 @@ public class ForeignKeyImplTest extends RelationalModelTest {
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat(this.foreignKey.getConstraintType(), is(TableConstraint.ConstraintType.FOREIGN_KEY));
         assertThat(this.foreignKey.getProperty(null, TeiidDdlLexicon.Constraint.TYPE).getStringValue(null),
-                   is(TableConstraint.ConstraintType.FOREIGN_KEY.toString()));
+                   is(TableConstraint.ConstraintType.FOREIGN_KEY.toValue()));
     }
 
     @Test

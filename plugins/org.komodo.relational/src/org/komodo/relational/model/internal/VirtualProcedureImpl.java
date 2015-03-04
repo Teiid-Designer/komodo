@@ -37,16 +37,18 @@ public final class VirtualProcedureImpl extends AbstractProcedureImpl implements
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject, java.lang.String, org.komodo.relational.RelationalProperties)
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
          */
         @Override
         public VirtualProcedure create( final UnitOfWork transaction,
+                                        final Repository repository,
                                         final KomodoObject parent,
                                         final String id,
                                         final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( parent.getRepository() );
+            final AdapterFactory adapter = new AdapterFactory( repository );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-            return RelationalModelFactory.createVirtualProcedure( transaction, parent.getRepository(), parentModel, id );
+            return RelationalModelFactory.createVirtualProcedure( transaction, repository, parentModel, id );
         }
 
         /**
@@ -73,19 +75,18 @@ public final class VirtualProcedureImpl extends AbstractProcedureImpl implements
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType( transaction, repository, kobject, CreateProcedure.PROCEDURE_STATEMENT );
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.PROCEDURE_STATEMENT );
                 ObjectImpl.validatePropertyValue( transaction,
-                                                  repository,
+                                                  kobject.getRepository(),
                                                   kobject,
                                                   SchemaElement.TYPE,
-                                                  SchemaElementType.VIRTUAL.toString() );
+                                                  SchemaElementType.VIRTUAL.name() );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -98,13 +99,12 @@ public final class VirtualProcedureImpl extends AbstractProcedureImpl implements
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public VirtualProcedure resolve( final UnitOfWork transaction,
-                                         final Repository repository,
                                          final KomodoObject kobject ) throws KException {
-            return new VirtualProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
+            return new VirtualProcedureImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };

@@ -65,12 +65,9 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
         }
 
         /**
-         * {@inheritDoc}
-         *
-         * @see java.lang.Enum#toString()
+         * @return the Teiid value (cannot be empty)
          */
-        @Override
-        public String toString() {
+        public String toValue() {
             return this.value;
         }
 
@@ -314,6 +311,15 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the value of the <code>UUID</code> option (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getUuid( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return <code>true</code> if this is a materialized table
      * @throws KException
      *         if an error occurs
@@ -507,5 +513,16 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
      */
     void setUpdatable( final UnitOfWork transaction,
                        final boolean newUpdatable ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param newUuid
+     *        the new value of the <code>UUID</code> option (can only be empty when removing)
+     * @throws KException
+     *         if an error occurs
+     */
+    void setUuid( final UnitOfWork transaction,
+                  final String newUuid ) throws KException;
 
 }

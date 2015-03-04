@@ -54,7 +54,7 @@ public class PrimaryKeyImplTest extends RelationalModelTest {
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat(this.primaryKey.getConstraintType(), is(TableConstraint.ConstraintType.PRIMARY_KEY));
         assertThat(this.primaryKey.getProperty(null, TeiidDdlLexicon.Constraint.TYPE).getStringValue(null),
-                   is(TableConstraint.ConstraintType.PRIMARY_KEY.toString()));
+                   is(TableConstraint.ConstraintType.PRIMARY_KEY.toValue()));
     }
 
     @Test

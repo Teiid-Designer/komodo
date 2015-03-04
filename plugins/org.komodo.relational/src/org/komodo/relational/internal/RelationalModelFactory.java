@@ -121,7 +121,7 @@ public final class RelationalModelFactory {
         try {
             final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), accessPatternName, null);
             kobject.addDescriptor(transaction, Constraint.TABLE_ELEMENT);
-            kobject.setProperty(transaction, Constraint.TYPE, AccessPattern.CONSTRAINT_TYPE.toString());
+            kobject.setProperty(transaction, Constraint.TYPE, AccessPattern.CONSTRAINT_TYPE.toValue());
 
             final AccessPattern result = new AccessPatternImpl(transaction, repository, kobject.getAbsolutePath());
 
@@ -405,6 +405,7 @@ public final class RelationalModelFactory {
         try {
             final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), foreignKeyName, null);
             kobject.addDescriptor(transaction, Constraint.FOREIGN_KEY_CONSTRAINT);
+            kobject.setProperty(transaction, Constraint.TYPE, ForeignKey.CONSTRAINT_TYPE.toValue());
 
             final ForeignKey fk = new ForeignKeyImpl(transaction, repository, kobject.getAbsolutePath());
             fk.setReferencesTable(transaction, tableReference);
@@ -453,7 +454,7 @@ public final class RelationalModelFactory {
         try {
             final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), functionName, null );
             kobject.addDescriptor( transaction, CreateProcedure.FUNCTION_STATEMENT );
-            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.toString() );
+            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.name() );
             setCreateStatementProperties( transaction, kobject );
 
             final PushdownFunction result = new PushdownFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
@@ -497,7 +498,8 @@ public final class RelationalModelFactory {
 
         try {
             final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), indexName, null);
-            kobject.addDescriptor(transaction, Constraint.INDEX_CONSTRAINT.toString());
+            kobject.addDescriptor(transaction, Constraint.INDEX_CONSTRAINT);
+            kobject.setProperty(transaction, Constraint.TYPE, Index.CONSTRAINT_TYPE.toValue());
 
             final Index index = new IndexImpl(transaction, repository, kobject.getAbsolutePath());
 
@@ -576,7 +578,6 @@ public final class RelationalModelFactory {
                                      final Vdb vdb,
                                      final String modelName ) throws KException {
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(vdb, "vdb"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(modelName, "modelName"); //$NON-NLS-1$
 
         UnitOfWork transaction = uow;
@@ -587,8 +588,16 @@ public final class RelationalModelFactory {
 
         assert (transaction != null);
 
+        KomodoObject kobject = null;
+
         try {
-            final KomodoObject kobject = vdb.addChild(transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
+            if (vdb == null) {
+                final KomodoObject workspace = repository.komodoWorkspace( transaction );
+                kobject = workspace.addChild(transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
+            } else {
+                kobject = vdb.addChild(transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
+            }
+
             final Model result = new ModelImpl(transaction, repository, kobject.getAbsolutePath());
 
             if (uow == null) {
@@ -772,7 +781,7 @@ public final class RelationalModelFactory {
         try {
             final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), primaryKeyName, null);
             kobject.addDescriptor(transaction, Constraint.TABLE_ELEMENT);
-            kobject.setProperty(transaction, Constraint.TYPE, PrimaryKey.CONSTRAINT_TYPE.toString());
+            kobject.setProperty(transaction, Constraint.TYPE, PrimaryKey.CONSTRAINT_TYPE.toValue());
 
             final PrimaryKey result = new PrimaryKeyImpl(transaction, repository, kobject.getAbsolutePath());
 
@@ -820,7 +829,7 @@ public final class RelationalModelFactory {
         try {
             final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), procedureName, null );
             kobject.addDescriptor( transaction, CreateProcedure.PROCEDURE_STATEMENT );
-            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.toString() );
+            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.name() );
             setCreateStatementProperties( transaction, kobject );
 
             final StoredProcedure result = new StoredProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
@@ -1205,7 +1214,7 @@ public final class RelationalModelFactory {
         try {
             final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), uniqueConstraintName, null);
             kobject.addDescriptor(transaction, Constraint.TABLE_ELEMENT);
-            kobject.setProperty(transaction, Constraint.TYPE, UniqueConstraint.CONSTRAINT_TYPE);
+            kobject.setProperty(transaction, Constraint.TYPE, UniqueConstraint.CONSTRAINT_TYPE.toValue());
 
             final UniqueConstraint result = new UniqueConstraintImpl(transaction, repository, kobject.getAbsolutePath());
 
@@ -1253,7 +1262,7 @@ public final class RelationalModelFactory {
         try {
             final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), functionName, null );
             kobject.addDescriptor( transaction, CreateProcedure.FUNCTION_STATEMENT );
-            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.toString() );
+            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.name() );
             setCreateStatementProperties( transaction, kobject );
 
             final UserDefinedFunction result = new UserDefinedFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
@@ -1451,7 +1460,7 @@ public final class RelationalModelFactory {
         try {
             final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), procedureName, null );
             kobject.addDescriptor( transaction, CreateProcedure.PROCEDURE_STATEMENT );
-            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.toString() );
+            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.name() );
             setCreateStatementProperties( transaction, kobject );
 
             final VirtualProcedure result = new VirtualProcedureImpl( transaction, repository, kobject.getAbsolutePath() );

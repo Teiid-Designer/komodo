@@ -33,13 +33,41 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Condition create( final UnitOfWork transaction,
+                                 final Repository repository,
+                                 final KomodoObject parent,
+                                 final String id,
+                                 final RelationalProperties properties ) throws KException {
+            final AdapterFactory adapter = new AdapterFactory( repository );
+            final Permission parentPerm = adapter.adapt( transaction, parent, Permission.class );
+            return RelationalModelFactory.createCondition( transaction, repository, parentPerm, id );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< ConditionImpl > owningClass() {
             return ConditionImpl.class;
         }
 
@@ -47,14 +75,16 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, VdbLexicon.DataRole.Permission.Condition.CONDITION);
+                ObjectImpl.validateType( transaction,
+                                         kobject.getRepository(),
+                                         kobject,
+                                         VdbLexicon.DataRole.Permission.Condition.CONDITION );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -67,23 +97,12 @@ public final class ConditionImpl extends RelationalObjectImpl implements Conditi
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public Condition resolve( final UnitOfWork transaction,
-                                  final Repository repository,
                                   final KomodoObject kobject ) throws KException {
-            return new ConditionImpl(transaction, repository, kobject.getAbsolutePath());
-        }
-
-        @Override
-        public Condition create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
-            Permission parentPerm = adapter.adapt(transaction, parent, Permission.class);
-            return RelationalModelFactory.createCondition(transaction, parent.getRepository(), parentPerm, id);
+            return new ConditionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };

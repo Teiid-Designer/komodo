@@ -12,13 +12,17 @@ import org.komodo.relational.model.internal.IndexImplTest;
 import org.komodo.relational.model.internal.ModelImplTest;
 import org.komodo.relational.model.internal.ParameterImplTest;
 import org.komodo.relational.model.internal.PrimaryKeyImplTest;
+import org.komodo.relational.model.internal.PushdownFunctionImplTest;
 import org.komodo.relational.model.internal.ResultSetColumnImplTest;
 import org.komodo.relational.model.internal.StatementOptionImplTest;
+import org.komodo.relational.model.internal.StoredProcedureImplTest;
 import org.komodo.relational.model.internal.TableConstraintTest;
 import org.komodo.relational.model.internal.TableImplTest;
 import org.komodo.relational.model.internal.TabularResultSetImplTest;
 import org.komodo.relational.model.internal.UniqueConstraintImplTest;
+import org.komodo.relational.model.internal.UserDefinedFunctionImplTest;
 import org.komodo.relational.model.internal.ViewImplTest;
+import org.komodo.relational.model.internal.VirtualProcedureImplTest;
 import org.komodo.relational.vdb.internal.ConditionImplTest;
 import org.komodo.relational.vdb.internal.DataRoleImplTest;
 import org.komodo.relational.vdb.internal.EntryImplTest;
@@ -47,13 +51,17 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
     ModelImplTest.class,
     ParameterImplTest.class,
     PrimaryKeyImplTest.class,
+    PushdownFunctionImplTest.class,
     ResultSetColumnImplTest.class,
     StatementOptionImplTest.class,
+    StoredProcedureImplTest.class,
     TableConstraintTest.class,
     TableImplTest.class,
     TabularResultSetImplTest.class,
     UniqueConstraintImplTest.class,
+    UserDefinedFunctionImplTest.class,
     ViewImplTest.class,
+    VirtualProcedureImplTest.class,
 
     // VDB
     ConditionImplTest.class,

@@ -183,7 +183,7 @@ public final class ParameterImplTest extends RelationalModelTest {
         assertThat(this.parameter.getDirection(null), is(Direction.DEFAULT_VALUE));
         assertThat(this.parameter.hasProperty(null, TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE), is(true));
         assertThat(this.parameter.getProperty(null, TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE).getStringValue(null),
-                   is(Direction.DEFAULT_VALUE.toString()));
+                   is(Direction.DEFAULT_VALUE.toValue()));
     }
 
     @Test
@@ -191,7 +191,7 @@ public final class ParameterImplTest extends RelationalModelTest {
         assertThat(this.parameter.getNullable(null), is(Nullable.DEFAULT_VALUE));
         assertThat(this.parameter.hasProperty(null, StandardDdlLexicon.NULLABLE), is(true));
         assertThat(this.parameter.getProperty(null, StandardDdlLexicon.NULLABLE).getStringValue(null),
-                   is(RelationalConstants.Nullable.DEFAULT_VALUE.toString()));
+                   is(RelationalConstants.Nullable.DEFAULT_VALUE.toValue()));
     }
 
     @Test
@@ -273,7 +273,7 @@ public final class ParameterImplTest extends RelationalModelTest {
         this.parameter.setDirection(null, value);
         assertThat(this.parameter.getDirection(null), is(value));
         assertThat(this.parameter.getProperty(null, TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE).getStringValue(null),
-                   is(value.toString()));
+                   is(value.toValue()));
     }
 
     @Test
@@ -281,7 +281,7 @@ public final class ParameterImplTest extends RelationalModelTest {
         final Nullable value = Nullable.NO_NULLS;
         this.parameter.setNullable(null, value);
         assertThat(this.parameter.getNullable(null), is(value));
-        assertThat(this.parameter.getProperty(null, StandardDdlLexicon.NULLABLE).getStringValue(null), is(value.toString()));
+        assertThat(this.parameter.getProperty(null, StandardDdlLexicon.NULLABLE).getStringValue(null), is(value.toValue()));
     }
 
     @Test

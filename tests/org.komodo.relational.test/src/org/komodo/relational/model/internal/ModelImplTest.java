@@ -132,7 +132,7 @@ public final class ModelImplTest extends RelationalModelTest {
     public void shouldAllowNullModelTypeWhenSettingToDefaultValue() throws Exception {
         this.model.setModelType( null, Type.VIRTUAL );
         this.model.setModelType( null, null );
-        assertThat( this.model.getModelType( null ), is( Type.DEFAULT ) );
+        assertThat( this.model.getModelType( null ), is( Type.DEFAULT_VALUE ) );
     }
 
     @Test( expected = IllegalArgumentException.class )

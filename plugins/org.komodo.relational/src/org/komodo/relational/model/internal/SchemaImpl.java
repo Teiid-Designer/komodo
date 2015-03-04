@@ -48,13 +48,40 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Schema create( final UnitOfWork transaction,
+                              final Repository repository,
+                              final KomodoObject parent,
+                              final String id,
+                              final RelationalProperties properties ) throws KException {
+            final String parentPath = ( ( parent == null ) ? null : parent.getAbsolutePath() );
+            return RelationalModelFactory.createSchema( transaction, repository, parentPath, id );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< SchemaImpl > owningClass() {
             return SchemaImpl.class;
         }
 
@@ -62,14 +89,13 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, KomodoLexicon.Schema.NODE_TYPE);
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.Schema.NODE_TYPE );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -82,21 +108,12 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public Schema resolve( final UnitOfWork transaction,
-                               final Repository repository,
                                final KomodoObject kobject ) throws KException {
-            return new SchemaImpl(transaction, repository, kobject.getAbsolutePath());
-        }
-
-        @Override
-        public Schema create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            return RelationalModelFactory.createSchema(transaction, parent.getRepository(), parent.getAbsolutePath(), id);
+            return new SchemaImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };

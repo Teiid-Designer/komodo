@@ -55,16 +55,18 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject, java.lang.String, org.komodo.relational.RelationalProperties)
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
          */
         @Override
         public ResultSetColumn create( final UnitOfWork transaction,
+                                       final Repository repository,
                                        final KomodoObject parent,
                                        final String id,
                                        final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( parent.getRepository() );
+            final AdapterFactory adapter = new AdapterFactory( repository );
             final TabularResultSet parentResultSet = adapter.adapt( transaction, parent, TabularResultSet.class );
-            return RelationalModelFactory.createResultSetColumn( transaction, parent.getRepository(), parentResultSet, id );
+            return RelationalModelFactory.createResultSetColumn( transaction, repository, parentResultSet, id );
         }
 
         /**
@@ -77,6 +79,11 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
         public Class< ResultSetColumnImpl > owningClass() {
             return ResultSetColumnImpl.class;
@@ -86,14 +93,13 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType( transaction, repository, kobject, CreateProcedure.RESULT_COLUMN );
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_COLUMN );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -106,13 +112,12 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public ResultSetColumn resolve( final UnitOfWork transaction,
-                                        final Repository repository,
                                         final KomodoObject kobject ) throws KException {
-            return new ResultSetColumnImpl( transaction, repository, kobject.getAbsolutePath() );
+            return new ResultSetColumnImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };
@@ -207,7 +212,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
      */
     @Override
     public String getDescription( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ANNOTATION.toString() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ANNOTATION.name() );
 
         if (option == null) {
             return null;
@@ -239,7 +244,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
      */
     @Override
     public String getNameInSource( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NAMEINSOURCE.toString() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NAMEINSOURCE.name() );
 
         if (option == null) {
             return null;
@@ -364,7 +369,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
      */
     @Override
     public String getUuid( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.toString() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.name() );
 
         if (option == null) {
             return null;
@@ -457,7 +462,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
     @Override
     public void setDescription( final UnitOfWork transaction,
                                 final String newDescription ) throws KException {
-        setStatementOption( transaction, StandardOptions.ANNOTATION.toString(), newDescription );
+        setStatementOption( transaction, StandardOptions.ANNOTATION.name(), newDescription );
     }
 
     /**
@@ -480,7 +485,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
     @Override
     public void setNameInSource( final UnitOfWork transaction,
                                  final String newNameInSource ) throws KException {
-        setStatementOption( transaction, StandardOptions.NAMEINSOURCE.toString(), newNameInSource );
+        setStatementOption( transaction, StandardOptions.NAMEINSOURCE.name(), newNameInSource );
     }
 
     /**
@@ -494,7 +499,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
                              final Nullable newNullable ) throws KException {
         setObjectProperty( uow, "setNullable", //$NON-NLS-1$
                            StandardDdlLexicon.NULLABLE,
-                           ( newNullable == null ) ? Nullable.DEFAULT_VALUE.toString() : newNullable.toString() );
+                           ( newNullable == null ) ? Nullable.DEFAULT_VALUE.toValue() : newNullable.toValue() );
     }
 
     /**
@@ -581,7 +586,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
     @Override
     public void setUuid( final UnitOfWork transaction,
                          final String newUuid ) throws KException {
-        setStatementOption( transaction, StandardOptions.UUID.toString(), newUuid );
+        setStatementOption( transaction, StandardOptions.UUID.name(), newUuid );
     }
 
 }

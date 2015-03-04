@@ -35,13 +35,41 @@ public final class ViewImpl extends TableImpl implements View {
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public View create( final UnitOfWork transaction,
+                            final Repository repository,
+                            final KomodoObject parent,
+                            final String id,
+                            final RelationalProperties properties ) throws KException {
+            AdapterFactory adapter = new AdapterFactory( repository );
+            Model parentModel = adapter.adapt( transaction, parent, Model.class );
+            return RelationalModelFactory.createView( transaction, repository, parentModel, id );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return View.IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< ViewImpl > owningClass() {
             return ViewImpl.class;
         }
 
@@ -49,14 +77,13 @@ public final class ViewImpl extends TableImpl implements View {
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, CreateTable.VIEW_STATEMENT);
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.VIEW_STATEMENT );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -69,23 +96,12 @@ public final class ViewImpl extends TableImpl implements View {
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public View resolve( final UnitOfWork transaction,
-                             final Repository repository,
                              final KomodoObject kobject ) throws KException {
-            return new ViewImpl(transaction, repository, kobject.getAbsolutePath());
-        }
-
-        @Override
-        public View create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
-            Model parentModel = adapter.adapt(transaction, parent, Model.class);
-            return RelationalModelFactory.createView(transaction, parent.getRepository(), parentModel, id);
+            return new ViewImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };

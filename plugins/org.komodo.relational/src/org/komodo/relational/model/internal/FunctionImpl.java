@@ -312,7 +312,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     @Override
     public void setDeterminism( final UnitOfWork transaction,
                                 final Determinism newDeterminism ) throws KException {
-        final String value = ( ( newDeterminism == null ) ? Determinism.DEFAULT_VALUE.toString() : newDeterminism.toString() );
+        final String value = ( ( newDeterminism == null ) ? Determinism.DEFAULT_VALUE.toString() : newDeterminism.name() );
         setStatementOption( transaction, StandardOptions.DETERMINISM.getName(), value );
     }
 

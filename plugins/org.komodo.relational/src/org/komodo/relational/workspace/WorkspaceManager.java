@@ -287,7 +287,6 @@ public class WorkspaceManager implements StringConstants {
                                                   KomodoType type,
                                                   RelationalProperty... properties) throws KException {
 
-        ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
         ArgCheck.isNotNull(type);
 
@@ -310,10 +309,15 @@ public class WorkspaceManager implements StringConstants {
         try {
             TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
             TypeResolver resolver = registry.getResolver(type);
-            if (resolver == null)
-                return parent.addChild(transaction, id, JcrConstants.NT_UNSTRUCTURED);
+            if (resolver == null) {
+                if (parent == null) {
+                    return getRepository().komodoWorkspace( transaction ).addChild(transaction, id, JcrConstants.NT_UNSTRUCTURED);
+                }
 
-            result = resolver.create(transaction, parent, id, relProperties);
+                return parent.addChild(transaction, id, JcrConstants.NT_UNSTRUCTURED);
+            }
+
+            result = resolver.create(transaction, getRepository(), parent, id, relProperties);
 
             if (uow == null) {
                 transaction.commit();
