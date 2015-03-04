@@ -39,16 +39,15 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
     static Class< ? extends AbstractProcedure > getProcedureType( final UnitOfWork transaction,
                                                                   final KomodoObject kobject ) throws KException {
-        final Repository repo = kobject.getRepository();
         Class< ? extends AbstractProcedure > clazz = null;
 
-        if (PushdownFunctionImpl.RESOLVER.resolvable( transaction, repo, kobject )) {
+        if (PushdownFunctionImpl.RESOLVER.resolvable( transaction, kobject )) {
             clazz = PushdownFunction.class;
-        } else if (UserDefinedFunctionImpl.RESOLVER.resolvable( transaction, repo, kobject )) {
+        } else if (UserDefinedFunctionImpl.RESOLVER.resolvable( transaction, kobject )) {
             clazz = UserDefinedFunction.class;
-        } else if (StoredProcedureImpl.RESOLVER.resolvable( transaction, repo, kobject )) {
+        } else if (StoredProcedureImpl.RESOLVER.resolvable( transaction, kobject )) {
             clazz = StoredProcedure.class;
-        } else if (VirtualProcedureImpl.RESOLVER.resolvable( transaction, repo, kobject )) {
+        } else if (VirtualProcedureImpl.RESOLVER.resolvable( transaction, kobject )) {
             clazz = VirtualProcedure.class;
         } else {
             throw new KException( Messages.getString( Relational.UNEXPECTED_PROCEDURE_TYPE, kobject.getAbsolutePath() ) );
@@ -59,20 +58,10 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
     protected enum StandardOptions {
 
-        ANNOTATION( "ANNOTATION" ), //$NON-NLS-1$
-        NAMEINSOURCE( "NAMEINSOURCE" ), //$NON-NLS-1$
-        UPDATECOUNT( "UPDATECOUNT" ), //$NON-NLS-1$
-        UUID( "UUID" ); //$NON-NLS-1$
-
-        private final String name;
-
-        private StandardOptions( final String optionName ) {
-            this.name = optionName;
-        }
-
-        protected String getName() {
-            return this.name;
-        }
+        ANNOTATION,
+        NAMEINSOURCE,
+        UPDATECOUNT,
+        UUID;
 
     }
 
@@ -204,7 +193,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public String getDescription( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ANNOTATION.getName() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ANNOTATION.name() );
 
         if (option == null) {
             return null;
@@ -220,7 +209,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public String getNameInSource( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NAMEINSOURCE.getName() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NAMEINSOURCE.name() );
 
         if (option == null) {
             return null;
@@ -372,7 +361,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public int getUpdateCount( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UPDATECOUNT.getName() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UPDATECOUNT.name() );
 
         if (option == null) {
             return AbstractProcedure.DEFAULT_UPDATE_COUNT;
@@ -388,7 +377,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public String getUuid( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.getName() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.name() );
 
         if (option == null) {
             return null;
@@ -508,7 +497,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setDescription( final UnitOfWork transaction,
                                 final String newDescription ) throws KException {
-        setStatementOption( transaction, StandardOptions.ANNOTATION.getName(), newDescription );
+        setStatementOption( transaction, StandardOptions.ANNOTATION.name(), newDescription );
     }
 
     /**
@@ -520,7 +509,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setNameInSource( final UnitOfWork transaction,
                                  final String newNameInSource ) throws KException {
-        setStatementOption( transaction, StandardOptions.NAMEINSOURCE.getName(), newNameInSource );
+        setStatementOption( transaction, StandardOptions.NAMEINSOURCE.name(), newNameInSource );
     }
 
     /**
@@ -532,7 +521,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setSchemaElementType( final UnitOfWork uow,
                                       final SchemaElementType newSchemaElementType ) throws KException {
-        final String newValue = ( ( newSchemaElementType == null ) ? SchemaElementType.DEFAULT_VALUE.toString() : newSchemaElementType.toString() );
+        final String newValue = ( ( newSchemaElementType == null ) ? SchemaElementType.DEFAULT_VALUE.name() : newSchemaElementType.toString() );
         setObjectProperty( uow, "setSchemaElementType", SchemaElement.TYPE, newValue ); //$NON-NLS-1$
     }
 
@@ -598,7 +587,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setUpdateCount( final UnitOfWork transaction,
                                 final int newUpdateCount ) throws KException {
-        setStatementOption( transaction, StandardOptions.UPDATECOUNT.getName(), Integer.toString( newUpdateCount ) );
+        setStatementOption( transaction, StandardOptions.UPDATECOUNT.name(), Integer.toString( newUpdateCount ) );
     }
 
     /**
@@ -610,7 +599,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setUuid( final UnitOfWork transaction,
                          final String newUuid ) throws KException {
-        setStatementOption( transaction, StandardOptions.UUID.getName(), newUuid );
+        setStatementOption( transaction, StandardOptions.UUID.name(), newUuid );
     }
 
 }

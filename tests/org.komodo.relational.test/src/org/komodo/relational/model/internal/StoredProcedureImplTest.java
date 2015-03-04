@@ -26,6 +26,7 @@ import org.komodo.relational.model.TabularResultSet;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -65,6 +66,20 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailSettingNullNativeQueryWhenNeverAdded() throws Exception {
         this.procedure.setNativeQuery( null, null );
+    }
+
+    @Test
+    public void shouldGetOnlyResultSetWhenGettingChildren() throws Exception {
+        final TabularResultSet resultSet = this.procedure.setResultSet( null, TabularResultSet.class );
+        assertThat(this.procedure.getChildren( null ).length, is(1));
+        assertThat(this.procedure.getChildren( null )[0], is((KomodoObject)resultSet));
+    }
+
+    @Test
+    public void shouldGetChildren() throws Exception {
+        this.procedure.addParameter( null, "param" );
+        this.procedure.setResultSet( null, DataTypeResultSet.class );
+        assertThat(this.procedure.getChildren( null ).length, is(2));
     }
 
     @Test

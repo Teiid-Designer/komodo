@@ -32,19 +32,9 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
 
     private enum StandardOptions {
 
-        CATEGORY( "CATEGORY" ), //$NON-NLS-1$
-        JAVA_CLASS( "JAVA_CLASS" ), //$NON-NLS-1$
-        JAVA_METHOD( "JAVA_METHOD" ); //$NON-NLS-1$
-
-        private final String name;
-
-        private StandardOptions( final String optionName ) {
-            this.name = optionName;
-        }
-
-        public String getName() {
-            return this.name;
-        }
+        CATEGORY,
+        JAVA_CLASS,
+        JAVA_METHOD;
 
     }
 
@@ -57,16 +47,18 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject, java.lang.String, org.komodo.relational.RelationalProperties)
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
          */
         @Override
         public UserDefinedFunction create( final UnitOfWork transaction,
+                                           final Repository repository,
                                            final KomodoObject parent,
                                            final String id,
                                            final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( parent.getRepository() );
+            final AdapterFactory adapter = new AdapterFactory( repository );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-            return RelationalModelFactory.createUserDefinedFunction( transaction, parent.getRepository(), parentModel, id );
+            return RelationalModelFactory.createUserDefinedFunction( transaction, repository, parentModel, id );
         }
 
         /**
@@ -93,19 +85,18 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType( transaction, repository, kobject, CreateProcedure.FUNCTION_STATEMENT );
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.FUNCTION_STATEMENT );
                 ObjectImpl.validatePropertyValue( transaction,
-                                                  repository,
+                                                  kobject.getRepository(),
                                                   kobject,
                                                   SchemaElement.TYPE,
-                                                  SchemaElementType.VIRTUAL.toString() );
+                                                  SchemaElementType.VIRTUAL.name() );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -118,13 +109,12 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public UserDefinedFunction resolve( final UnitOfWork transaction,
-                                            final Repository repository,
                                             final KomodoObject kobject ) throws KException {
-            return new UserDefinedFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
+            return new UserDefinedFunctionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };
@@ -152,7 +142,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
      */
     @Override
     public String getCategory( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.CATEGORY.getName() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.CATEGORY.name() );
 
         if (option == null) {
             return null;
@@ -212,7 +202,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
      */
     @Override
     public String getJavaClass( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.JAVA_CLASS.getName() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.JAVA_CLASS.name() );
 
         if (option == null) {
             return null;
@@ -228,7 +218,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
      */
     @Override
     public String getJavaMethod( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.JAVA_METHOD.getName() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.JAVA_METHOD.name() );
 
         if (option == null) {
             return null;
@@ -266,7 +256,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     @Override
     public void setCategory( final UnitOfWork transaction,
                              final String newCategory ) throws KException {
-        setStatementOption( transaction, StandardOptions.CATEGORY.getName(), newCategory );
+        setStatementOption( transaction, StandardOptions.CATEGORY.name(), newCategory );
     }
 
     /**
@@ -278,7 +268,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     @Override
     public void setJavaClass( final UnitOfWork transaction,
                               final String newJavaClass ) throws KException {
-        setStatementOption( transaction, StandardOptions.JAVA_CLASS.getName(), newJavaClass );
+        setStatementOption( transaction, StandardOptions.JAVA_CLASS.name(), newJavaClass );
     }
 
     /**
@@ -290,7 +280,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     @Override
     public void setJavaMethod( final UnitOfWork transaction,
                                final String newJavaMethod ) throws KException {
-        setStatementOption( transaction, StandardOptions.JAVA_METHOD.getName(), newJavaMethod );
+        setStatementOption( transaction, StandardOptions.JAVA_METHOD.name(), newJavaMethod );
     }
 
 }

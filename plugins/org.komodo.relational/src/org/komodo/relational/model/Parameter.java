@@ -30,7 +30,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
     KomodoType IDENTIFIER = KomodoType.PARAMETER;
 
     /**
-     * Represents a
+     * Represents a parameter direction.
      */
     public enum Direction {
 
@@ -82,12 +82,9 @@ public interface Parameter extends OptionContainer, RelationalObject {
         }
 
         /**
-         * {@inheritDoc}
-         *
-         * @see java.lang.Enum#toString()
+         * @return the Teiid direction value (never empty)
          */
-        @Override
-        public String toString() {
+        public String toValue() {
             return this.value;
         }
 

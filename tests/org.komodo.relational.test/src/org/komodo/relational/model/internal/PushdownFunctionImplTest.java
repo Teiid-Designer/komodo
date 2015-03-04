@@ -25,6 +25,7 @@ import org.komodo.relational.model.PushdownFunction;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -55,6 +56,20 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldGetOnlyResultSetWhenGettingChildren() throws Exception {
+        final TabularResultSet resultSet = this.function.setResultSet( null, TabularResultSet.class );
+        assertThat(this.function.getChildren( null ).length, is(1));
+        assertThat(this.function.getChildren( null )[0], is((KomodoObject)resultSet));
+    }
+
+    @Test
+    public void shouldGetChildren() throws Exception {
+        this.function.addParameter( null, "param" );
+        this.function.setResultSet( null, DataTypeResultSet.class );
+        assertThat(this.function.getChildren( null ).length, is(2));
+    }
+
+    @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
         assertThat( this.function.getSchemaElementType( null ), is( SchemaElementType.FOREIGN ) );
     }
@@ -67,7 +82,7 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldRemoveResultSet() throws Exception {
         final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-        this.function.setResultSet( uow, true );
+        this.function.setResultSet( uow, TabularResultSet.class );
         this.function.removeResultSet( uow );
         uow.commit();
 
@@ -77,7 +92,7 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldSetDataTypeResultSet() throws Exception {
         final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-        assertThat( this.function.setResultSet( uow, false ), is( notNullValue() ) );
+        assertThat( this.function.setResultSet( uow, DataTypeResultSet.class ), is( notNullValue() ) );
         assertThat( this.function.getResultSet( uow ), is( instanceOf( DataTypeResultSet.class ) ) );
         uow.commit();
     }
@@ -85,7 +100,7 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldSetTabularResultSet() throws Exception {
         final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-        assertThat( this.function.setResultSet( uow, true ), is( notNullValue() ) );
+        assertThat( this.function.setResultSet( uow, TabularResultSet.class ), is( notNullValue() ) );
         assertThat( this.function.getResultSet( uow ), is( instanceOf( TabularResultSet.class ) ) );
         uow.commit();
     }

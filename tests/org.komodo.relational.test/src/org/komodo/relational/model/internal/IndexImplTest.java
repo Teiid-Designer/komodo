@@ -83,7 +83,7 @@ public class IndexImplTest extends RelationalModelTest {
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat(this.index.getConstraintType(), is(TableConstraint.ConstraintType.INDEX));
         assertThat(this.index.getProperty(null, TeiidDdlLexicon.Constraint.TYPE).getStringValue(null),
-                   is(TableConstraint.ConstraintType.INDEX.toString()));
+                   is(TableConstraint.ConstraintType.INDEX.toValue()));
     }
 
     @Test

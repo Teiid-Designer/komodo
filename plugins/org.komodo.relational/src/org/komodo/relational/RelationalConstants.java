@@ -56,12 +56,9 @@ public interface RelationalConstants {
         }
 
         /**
-         * {@inheritDoc}
-         *
-         * @see java.lang.Enum#toString()
+         * @return the Teiid nullable value (never empty)
          */
-        @Override
-        public String toString() {
+        public String toValue() {
             return this.value;
         }
 

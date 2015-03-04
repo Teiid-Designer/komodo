@@ -42,18 +42,19 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject, java.lang.String, org.komodo.relational.RelationalProperties)
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
          */
         @Override
         public DataTypeResultSet create( final UnitOfWork transaction,
+                                         final Repository repository,
                                          final KomodoObject parent,
                                          final String id,
                                          final RelationalProperties properties ) throws KException {
-            final Repository repo = parent.getRepository();
             final Class< ? extends AbstractProcedure > clazz = AbstractProcedureImpl.getProcedureType( transaction, parent );
-            final AdapterFactory adapter = new AdapterFactory( repo );
+            final AdapterFactory adapter = new AdapterFactory( repository );
             final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
-            return RelationalModelFactory.createDataTypeResultSet( transaction, repo, parentProc );
+            return RelationalModelFactory.createDataTypeResultSet( transaction, repository, parentProc );
         }
 
         /**
@@ -80,16 +81,15 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
                 // must have the right name
                 if (CreateProcedure.RESULT_SET.equals( kobject.getName( transaction ) )) {
-                    ObjectImpl.validateType( transaction, repository, kobject, CreateProcedure.RESULT_DATA_TYPE );
+                    ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_DATA_TYPE );
                     return true;
                 }
             } catch (final KException e) {
@@ -103,13 +103,12 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public DataTypeResultSet resolve( final UnitOfWork transaction,
-                                          final Repository repository,
                                           final KomodoObject kobject ) throws KException {
-            return new DataTypeResultSetImpl( transaction, repository, kobject.getAbsolutePath() );
+            return new DataTypeResultSetImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };
@@ -253,7 +252,7 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
         final String value = getObjectProperty( uow, Property.ValueType.STRING, "getDataType", StandardDdlLexicon.DATATYPE_NAME ); //$NON-NLS-1$
 
         if (StringUtils.isBlank( value )) {
-            setObjectProperty( uow, "setArray", StandardDdlLexicon.DATATYPE_NAME, ( Type.DEFAULT_VALUE.toString() + ARRAY_SUFFIX ) ); //$NON-NLS-1$
+            setObjectProperty( uow, "setArray", StandardDdlLexicon.DATATYPE_NAME, ( Type.DEFAULT_VALUE.name() + ARRAY_SUFFIX ) ); //$NON-NLS-1$
         } else if (!value.endsWith( ARRAY_SUFFIX )) {
             setObjectProperty( uow, "setArray", StandardDdlLexicon.DATATYPE_NAME, ( value + ARRAY_SUFFIX ) ); //$NON-NLS-1$
         }
@@ -282,9 +281,9 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
         String newValue = null;
 
         if (newType == null) {
-            newValue = Type.DEFAULT_VALUE.toString();
+            newValue = Type.DEFAULT_VALUE.name();
         } else {
-            newValue = newType.toString();
+            newValue = newType.name();
         }
 
         if (isArray( uow )) {

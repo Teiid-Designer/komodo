@@ -54,7 +54,7 @@ public class AccessPatternImplTest extends RelationalModelTest {
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat(this.accessPattern.getConstraintType(), is(TableConstraint.ConstraintType.ACCESS_PATTERN));
         assertThat(this.accessPattern.getProperty(null, TeiidDdlLexicon.Constraint.TYPE).getStringValue(null),
-                   is(TableConstraint.ConstraintType.ACCESS_PATTERN.toString()));
+                   is(TableConstraint.ConstraintType.ACCESS_PATTERN.toValue()));
     }
 
     @Test
