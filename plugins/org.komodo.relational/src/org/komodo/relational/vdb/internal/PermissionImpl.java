@@ -40,13 +40,41 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Permission create( final UnitOfWork transaction,
+                                  final Repository repository,
+                                  final KomodoObject parent,
+                                  final String id,
+                                  final RelationalProperties properties ) throws KException {
+            final AdapterFactory adapter = new AdapterFactory( repository );
+            final DataRole parentDataRole = adapter.adapt( transaction, parent, DataRole.class );
+            return RelationalModelFactory.createPermission( transaction, repository, parentDataRole, id );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< PermissionImpl > owningClass() {
             return PermissionImpl.class;
         }
 
@@ -54,14 +82,13 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, VdbLexicon.DataRole.Permission.PERMISSION);
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.DataRole.Permission.PERMISSION );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -74,23 +101,12 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public Permission resolve( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) throws KException {
-            return new PermissionImpl(transaction, repository, kobject.getAbsolutePath());
-        }
-
-        @Override
-        public Permission create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
-            DataRole parentDataRole = adapter.adapt(transaction, parent, DataRole.class);
-            return RelationalModelFactory.createPermission(transaction, parent.getRepository(), parentDataRole, id);
+            return new PermissionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };

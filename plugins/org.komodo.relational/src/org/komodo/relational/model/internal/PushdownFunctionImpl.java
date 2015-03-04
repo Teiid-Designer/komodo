@@ -13,9 +13,11 @@ import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
+import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.PushdownFunction;
+import org.komodo.relational.model.TabularResultSet;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -39,16 +41,18 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject, java.lang.String, org.komodo.relational.RelationalProperties)
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
          */
         @Override
         public PushdownFunction create( final UnitOfWork transaction,
+                                        final Repository repository,
                                         final KomodoObject parent,
                                         final String id,
                                         final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( parent.getRepository() );
+            final AdapterFactory adapter = new AdapterFactory( repository );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-            return RelationalModelFactory.createPushdownFunction( transaction, parent.getRepository(), parentModel, id );
+            return RelationalModelFactory.createPushdownFunction( transaction, repository, parentModel, id );
         }
 
         /**
@@ -75,19 +79,18 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType( transaction, repository, kobject, CreateProcedure.FUNCTION_STATEMENT );
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.FUNCTION_STATEMENT );
                 ObjectImpl.validatePropertyValue( transaction,
-                                                  repository,
+                                                  kobject.getRepository(),
                                                   kobject,
                                                   SchemaElement.TYPE,
-                                                  SchemaElementType.FOREIGN.toString() );
+                                                  SchemaElementType.FOREIGN.name() );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -100,13 +103,12 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public PushdownFunction resolve( final UnitOfWork transaction,
-                                         final Repository repository,
                                          final KomodoObject kobject ) throws KException {
-            return new PushdownFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
+            return new PushdownFunctionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };
@@ -130,6 +132,44 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "pushdownfunctionimpl-getChildren", true, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        try {
+            final KomodoObject[] superKids = super.getChildren( transaction );
+            final ProcedureResultSet resultSet = getResultSet( transaction );
+            KomodoObject[] result = null;
+
+            if (resultSet == null) {
+                result = superKids;
+            } else {
+                result = new KomodoObject[superKids.length + 1];
+                System.arraycopy( superKids, 0, result, 0, superKids.length );
+                result[superKids.length] = resultSet;
+            }
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.PushdownFunction#getResultSet(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
@@ -148,10 +188,10 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
             if (hasChild( transaction, CreateProcedure.RESULT_SET )) {
                 final KomodoObject kobject = getChild( transaction, CreateProcedure.RESULT_SET );
 
-                if (DataTypeResultSetImpl.RESOLVER.resolvable( transaction, getRepository(), kobject )) {
-                    result = ( ProcedureResultSet )DataTypeResultSetImpl.RESOLVER.resolve( transaction, getRepository(), kobject );
-                } else if (TabularResultSetImpl.RESOLVER.resolvable( transaction, getRepository(), kobject )) {
-                    result = ( ProcedureResultSet )TabularResultSetImpl.RESOLVER.resolve( transaction, getRepository(), kobject );
+                if (DataTypeResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
+                    result = ( ProcedureResultSet )DataTypeResultSetImpl.RESOLVER.resolve( transaction, kobject );
+                } else if (TabularResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
+                    result = ( ProcedureResultSet )TabularResultSetImpl.RESOLVER.resolve( transaction, kobject );
                 } else {
                     LOGGER.error( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, kobject.getAbsolutePath() ) );
                 }
@@ -227,11 +267,11 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.PushdownFunction#setResultSet(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
+     * @see org.komodo.relational.model.PushdownFunction#setResultSet(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.Class)
      */
     @Override
-    public ProcedureResultSet setResultSet( final UnitOfWork uow,
-                                            final boolean tabularResultSet ) throws KException {
+    public < T extends ProcedureResultSet > T setResultSet( final UnitOfWork uow,
+                                                            final Class< T > resultSetType ) throws KException {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
@@ -241,7 +281,9 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
         assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "setResultSet: transaction = {0}, tabularResultSet = {1}", transaction.getName(), tabularResultSet ); //$NON-NLS-1$
+            LOGGER.debug( "setResultSet: transaction = {0}, resultSetType = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          resultSetType.getName() );
         }
 
         try {
@@ -252,12 +294,12 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
                 removeChild( transaction, resultSet.getName( transaction ) );
             }
 
-            ProcedureResultSet result = null;
+            T result = null;
 
-            if (tabularResultSet) {
-                result = RelationalModelFactory.createTabularResultSet( transaction, getRepository(), this );
-            } else {
-                result = RelationalModelFactory.createDataTypeResultSet( transaction, getRepository(), this );
+            if (resultSetType == TabularResultSet.class) {
+                result = ( T )RelationalModelFactory.createTabularResultSet( transaction, getRepository(), this );
+            } else if (resultSetType == DataTypeResultSet.class) {
+                result = ( T )RelationalModelFactory.createDataTypeResultSet( transaction, getRepository(), this );
             }
 
             if (uow == null) {

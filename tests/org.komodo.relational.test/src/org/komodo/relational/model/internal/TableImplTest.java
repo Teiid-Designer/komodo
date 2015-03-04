@@ -231,6 +231,11 @@ public final class TableImplTest extends RelationalModelTest {
     }
 
     @Test( expected = KException.class )
+    public void shouldFailSettingEmptyUuidWhenNeverAdded() throws Exception {
+        this.table.setUuid( null, StringConstants.EMPTY_STRING );
+    }
+
+    @Test( expected = KException.class )
     public void shouldFailSettingNullDescriptionWhenNeverAdded() throws Exception {
         this.table.setDescription(null, null);
     }
@@ -248,6 +253,11 @@ public final class TableImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailSettingNullStatementOptionValueWhenNeverAdded() throws Exception {
         this.table.setStatementOption(null, "blah", null);
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailSettingNullUuidWhenNeverAdded() throws Exception {
+        this.table.setUuid( null, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -574,7 +584,7 @@ public final class TableImplTest extends RelationalModelTest {
         final OnCommit value = OnCommit.DELETE_ROWS;
         this.table.setOnCommitValue(null, value);
         assertThat(this.table.getOnCommitValue(null), is(value));
-        assertThat(this.table.getProperty(null, StandardDdlLexicon.ON_COMMIT_VALUE).getStringValue(null), is(value.toString()));
+        assertThat(this.table.getProperty(null, StandardDdlLexicon.ON_COMMIT_VALUE).getStringValue(null), is(value.toValue()));
     }
 
     @Test
@@ -598,7 +608,7 @@ public final class TableImplTest extends RelationalModelTest {
         final SchemaElementType value = SchemaElementType.VIRTUAL;
         this.table.setSchemaElementType(null, value);
         assertThat(this.table.getSchemaElementType(null), is(value));
-        assertThat(this.table.getProperty(null, TeiidDdlLexicon.SchemaElement.TYPE).getStringValue(null), is(value.toString()));
+        assertThat(this.table.getProperty(null, TeiidDdlLexicon.SchemaElement.TYPE).getStringValue(null), is(value.name()));
     }
 
     @Test
@@ -606,7 +616,7 @@ public final class TableImplTest extends RelationalModelTest {
         final TemporaryType value = TemporaryType.GLOBAL;
         this.table.setTemporaryTableType(null, value);
         assertThat(this.table.getTemporaryTableType(null), is(value));
-        assertThat(this.table.getProperty(null, StandardDdlLexicon.TEMPORARY).getStringValue(null), is(value.toString()));
+        assertThat(this.table.getProperty(null, StandardDdlLexicon.TEMPORARY).getStringValue(null), is(value.name()));
     }
 
     @Test
@@ -614,6 +624,13 @@ public final class TableImplTest extends RelationalModelTest {
         final boolean value = !Table.DEFAULT_UPDATABLE;
         this.table.setUpdatable(null, value);
         assertThat(this.table.isUpdatable(null), is(value));
+    }
+
+    @Test
+    public void shouldSetUuid() throws Exception {
+        final String value = "uuid";
+        this.table.setUuid( null, value );
+        assertThat( this.table.getUuid( null ), is( value ) );
     }
 
 }

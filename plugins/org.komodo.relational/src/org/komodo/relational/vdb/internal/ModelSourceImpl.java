@@ -33,13 +33,41 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public ModelSource create( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject parent,
+                                   final String id,
+                                   final RelationalProperties properties ) throws KException {
+            final AdapterFactory adapter = new AdapterFactory( repository );
+            final Model parentModel = adapter.adapt( transaction, parent, Model.class );
+            return RelationalModelFactory.createModelSource( transaction, repository, parentModel, id );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< ModelSourceImpl > owningClass() {
             return ModelSourceImpl.class;
         }
 
@@ -47,14 +75,13 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, VdbLexicon.Source.SOURCE);
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Source.SOURCE );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -67,23 +94,12 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public ModelSource resolve( final UnitOfWork transaction,
-                                    final Repository repository,
                                     final KomodoObject kobject ) throws KException {
-            return new ModelSourceImpl(transaction, repository, kobject.getAbsolutePath());
-        }
-
-        @Override
-        public ModelSource create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
-            Model parentModel = adapter.adapt(transaction, parent, Model.class);
-            return RelationalModelFactory.createModelSource(transaction, parent.getRepository(), parentModel, id);
+            return new ModelSourceImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };
@@ -101,11 +117,11 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
     public ModelSourceImpl( final UnitOfWork uow,
                             final Repository repository,
                             final String workspacePath ) throws KException {
-        super(uow, repository, workspacePath);
+        super( uow, repository, workspacePath );
     }
 
     @Override
-    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+    public KomodoType getTypeIdentifier( UnitOfWork uow ) {
         return KomodoType.VDB_MODEL_SOURCE;
     }
 
@@ -116,7 +132,7 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
      */
     @Override
     public String getJndiName( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getJndiName", VdbLexicon.Source.JNDI_NAME); //$NON-NLS-1$
+        return getObjectProperty( uow, Property.ValueType.STRING, "getJndiName", VdbLexicon.Source.JNDI_NAME ); //$NON-NLS-1$
     }
 
     /**
@@ -129,14 +145,14 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = getRepository().createTransaction("modelsourceimpl-getParent", true, null); //$NON-NLS-1$
+            transaction = getRepository().createTransaction( "modelsourceimpl-getParent", true, null ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        assert ( transaction != null );
 
         try {
-            final KomodoObject grouping = super.getParent(transaction);
-            final KomodoObject result = resolveType(transaction, grouping.getParent(transaction));
+            final KomodoObject grouping = super.getParent( transaction );
+            final KomodoObject result = resolveType( transaction, grouping.getParent( transaction ) );
 
             if (uow == null) {
                 transaction.commit();
@@ -144,7 +160,7 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
 
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( uow, transaction, e );
         }
     }
 
@@ -155,7 +171,7 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
      */
     @Override
     public String getTranslatorName( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getTranslatorName", VdbLexicon.Source.TRANSLATOR); //$NON-NLS-1$
+        return getObjectProperty( uow, Property.ValueType.STRING, "getTranslatorName", VdbLexicon.Source.TRANSLATOR ); //$NON-NLS-1$
     }
 
     /**
@@ -176,7 +192,7 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
     @Override
     public void setJndiName( final UnitOfWork uow,
                              final String newJndiName ) throws KException {
-        setObjectProperty(uow, "setJndiName", VdbLexicon.Source.JNDI_NAME, newJndiName); //$NON-NLS-1$
+        setObjectProperty( uow, "setJndiName", VdbLexicon.Source.JNDI_NAME, newJndiName ); //$NON-NLS-1$
     }
 
     /**
@@ -188,7 +204,7 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
     @Override
     public void setTranslatorName( final UnitOfWork uow,
                                    final String newTranslatorName ) throws KException {
-        setObjectProperty(uow, "setTranslatorName", VdbLexicon.Source.TRANSLATOR, newTranslatorName); //$NON-NLS-1$
+        setObjectProperty( uow, "setTranslatorName", VdbLexicon.Source.TRANSLATOR, newTranslatorName ); //$NON-NLS-1$
     }
 
 }

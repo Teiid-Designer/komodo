@@ -34,13 +34,43 @@ public final class TranslatorImpl extends RelationalObjectImpl implements Transl
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Translator create( final UnitOfWork transaction,
+                                  final Repository repository,
+                                  final KomodoObject parent,
+                                  final String id,
+                                  final RelationalProperties properties ) throws KException {
+            final Object transTypeValue = properties.getValue( VdbLexicon.Translator.TYPE );
+            final String transType = transTypeValue == null ? null : transTypeValue.toString();
+            final AdapterFactory adapter = new AdapterFactory( parent.getRepository() );
+            final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
+            return RelationalModelFactory.createTranslator( transaction, parent.getRepository(), parentVdb, id, transType );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< TranslatorImpl > owningClass() {
             return TranslatorImpl.class;
         }
 
@@ -48,14 +78,13 @@ public final class TranslatorImpl extends RelationalObjectImpl implements Transl
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, VdbLexicon.Translator.TRANSLATOR);
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Translator.TRANSLATOR );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -68,25 +97,12 @@ public final class TranslatorImpl extends RelationalObjectImpl implements Transl
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public Translator resolve( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) throws KException {
-            return new TranslatorImpl(transaction, repository, kobject.getAbsolutePath());
-        }
-
-        @Override
-        public Translator create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
-            Object transTypeValue = properties.getValue(VdbLexicon.Translator.TYPE);
-            String transType = transTypeValue == null ? null : transTypeValue.toString();
-            Vdb parentVdb = adapter.adapt(transaction, parent, Vdb.class);
-            return RelationalModelFactory.createTranslator(transaction, parent.getRepository(), parentVdb, id, transType);
+            return new TranslatorImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };

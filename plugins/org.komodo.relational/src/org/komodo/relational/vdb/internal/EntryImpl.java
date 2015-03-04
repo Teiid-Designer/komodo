@@ -34,13 +34,43 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Entry create( final UnitOfWork transaction,
+                             final Repository repository,
+                             final KomodoObject parent,
+                             final String id,
+                             final RelationalProperties properties ) throws KException {
+            final Object entryPathValue = properties.getValue( VdbLexicon.Entry.PATH );
+            final String entryPath = entryPathValue == null ? null : entryPathValue.toString();
+            final AdapterFactory adapter = new AdapterFactory( repository );
+            final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
+            return RelationalModelFactory.createEntry( transaction, repository, parentVdb, id, entryPath );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< EntryImpl > owningClass() {
             return EntryImpl.class;
         }
 
@@ -48,14 +78,13 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, VdbLexicon.Entry.ENTRY);
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Entry.ENTRY );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -68,25 +97,12 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public Entry resolve( final UnitOfWork transaction,
-                              final Repository repository,
                               final KomodoObject kobject ) throws KException {
-            return new EntryImpl(transaction, repository, kobject.getAbsolutePath());
-        }
-
-        @Override
-        public Entry create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
-            Object entryPathValue = properties.getValue(VdbLexicon.Entry.PATH);
-            String entryPath = entryPathValue == null ? null : entryPathValue.toString();
-            Vdb parentVdb = adapter.adapt(transaction, parent, Vdb.class);
-            return RelationalModelFactory.createEntry(transaction, parent.getRepository(), parentVdb, id, entryPath);
+            return new EntryImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };

@@ -130,7 +130,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
         assertThat( this.column.hasProperty( null, StandardDdlLexicon.NULLABLE ), is( true ) );
         assertThat( this.column.getNullable( null ), is( RelationalConstants.Nullable.DEFAULT_VALUE ) );
         assertThat( this.column.getProperty( null, StandardDdlLexicon.NULLABLE ).getStringValue( null ),
-                    is( RelationalConstants.Nullable.DEFAULT_VALUE.toString() ) );
+                    is( RelationalConstants.Nullable.DEFAULT_VALUE.toValue() ) );
     }
 
     @Test
@@ -221,7 +221,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
         final Nullable value = Nullable.NO_NULLS;
         this.column.setNullable( null, value );
         assertThat( this.column.getNullable( null ), is( value ) );
-        assertThat( this.column.getProperty( null, StandardDdlLexicon.NULLABLE ).getStringValue( null ), is( value.toString() ) );
+        assertThat( this.column.getProperty( null, StandardDdlLexicon.NULLABLE ).getStringValue( null ), is( value.toValue() ) );
     }
 
     @Test

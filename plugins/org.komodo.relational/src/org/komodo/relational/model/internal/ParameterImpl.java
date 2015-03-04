@@ -59,13 +59,42 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Parameter create( final UnitOfWork transaction,
+                                 final Repository repository,
+                                 final KomodoObject parent,
+                                 final String id,
+                                 final RelationalProperties properties ) throws KException {
+            final Class< ? extends AbstractProcedure > clazz = AbstractProcedureImpl.getProcedureType( transaction, parent );
+            final AdapterFactory adapter = new AdapterFactory( repository );
+            final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
+            return RelationalModelFactory.createParameter( transaction, repository, parentProc, id );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class< ? extends KomodoObject > owningClass() {
+        public Class< ParameterImpl > owningClass() {
             return ParameterImpl.class;
         }
 
@@ -73,14 +102,13 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType( transaction, repository, kobject, CreateProcedure.PARAMETER );
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.PARAMETER );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -93,25 +121,12 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public Parameter resolve( final UnitOfWork transaction,
-                                  final Repository repository,
                                   final KomodoObject kobject ) throws KException {
-            return new ParameterImpl( transaction, repository, kobject.getAbsolutePath() );
-        }
-
-        @Override
-        public Parameter create( UnitOfWork transaction,
-                                 KomodoObject parent,
-                                 String id,
-                                 RelationalProperties properties ) throws KException {
-            final Repository repo = parent.getRepository();
-            final Class< ? extends AbstractProcedure > clazz = AbstractProcedureImpl.getProcedureType( transaction, parent );
-            final AdapterFactory adapter = new AdapterFactory( repo );
-            final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
-            return RelationalModelFactory.createParameter( transaction, repo, parentProc, id );
+            return new ParameterImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };
@@ -421,7 +436,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
                               final Direction newDirection ) throws KException {
         setObjectProperty( uow, "setDirection", //$NON-NLS-1$
                            CreateProcedure.PARAMETER_TYPE,
-                           ( newDirection == null ) ? Direction.DEFAULT_VALUE.toString() : newDirection.toString() );
+                           ( newDirection == null ) ? Direction.DEFAULT_VALUE.toValue() : newDirection.toValue() );
     }
 
     /**
@@ -446,7 +461,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
                              final Nullable newNullable ) throws KException {
         setObjectProperty( uow, "setNullable", //$NON-NLS-1$
                            StandardDdlLexicon.NULLABLE,
-                           ( newNullable == null ) ? Nullable.DEFAULT_VALUE.toString() : newNullable.toString() );
+                           ( newNullable == null ) ? Nullable.DEFAULT_VALUE.toValue() : newNullable.toValue() );
     }
 
     /**

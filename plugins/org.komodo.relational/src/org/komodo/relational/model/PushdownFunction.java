@@ -51,17 +51,19 @@ public interface PushdownFunction extends Function {
     /**
      * Deletes the current result set and returns a new one of the requested type.
      *
+     * @param <T>
+     *        the type of result set
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @param tabularResultSet
-     *        <code>true</code> if the result set should be tabular; <code>false</code> if the result set is a data type
+     * @param resultSetType
+     *        the type of result set being requested
      * @return the new result set (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      * @see TabularResultSet
      * @see DataTypeResultSet
      */
-    ProcedureResultSet setResultSet( final UnitOfWork transaction,
-                                     final boolean tabularResultSet ) throws KException;
+    < T extends ProcedureResultSet > T setResultSet( final UnitOfWork transaction,
+                                                     final Class< T > resultSetType ) throws KException;
 
 }

@@ -39,6 +39,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
 public final class ColumnImpl extends RelationalObjectImpl implements Column {
 
     private enum StandardOptions {
+
         ANNOTATION,
         CASE_SENSITIVE,
         CHAR_OCTET_LENGTH,
@@ -56,6 +57,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
         SIGNED,
         UPDATABLE,
         UUID
+
     }
 
     /**
@@ -63,13 +65,41 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     public static final TypeResolver RESOLVER = new TypeResolver() {
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Column create( UnitOfWork transaction,
+                              Repository repository,
+                              KomodoObject parent,
+                              String id,
+                              RelationalProperties properties ) throws KException {
+            AdapterFactory adapter = new AdapterFactory( parent.getRepository() );
+            Table parentTable = adapter.adapt( transaction, parent, Table.class );
+            return RelationalModelFactory.createColumn( transaction, parent.getRepository(), parentTable, id );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#identifier()
+         */
         @Override
         public KomodoType identifier() {
             return IDENTIFIER;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.internal.TypeResolver#owningClass()
+         */
         @Override
-        public Class<? extends KomodoObject> owningClass() {
+        public Class< ColumnImpl > owningClass() {
             return ColumnImpl.class;
         }
 
@@ -77,14 +107,13 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final Repository repository,
                                    final KomodoObject kobject ) {
             try {
-                ObjectImpl.validateType(transaction, repository, kobject, CreateTable.TABLE_ELEMENT);
+                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.TABLE_ELEMENT );
                 return true;
             } catch (final Exception e) {
                 // not resolvable
@@ -97,23 +126,12 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+         *      org.komodo.spi.repository.KomodoObject)
          */
         @Override
         public Column resolve( final UnitOfWork transaction,
-                               final Repository repository,
                                final KomodoObject kobject ) throws KException {
-            return new ColumnImpl(transaction, repository, kobject.getAbsolutePath());
-        }
-
-        @Override
-        public Column create(UnitOfWork transaction,
-                                                      KomodoObject parent,
-                                                      String id,
-                                                      RelationalProperties properties) throws KException {
-            AdapterFactory adapter = new AdapterFactory(parent.getRepository());
-            Table parentTable = adapter.adapt(transaction, parent, Table.class);
-            return RelationalModelFactory.createColumn(transaction, parent.getRepository(), parentTable, id);
+            return new ColumnImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
     };
@@ -146,7 +164,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public int getCharOctetLength( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.CHAR_OCTET_LENGTH.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.CHAR_OCTET_LENGTH.name());
 
         if (option == null) {
             return Column.DEFAULT_CHAR_OCTET_LENGTH;
@@ -241,7 +259,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public String getDescription( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.ANNOTATION.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.ANNOTATION.name());
 
         if (option == null) {
             return null;
@@ -257,7 +275,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public long getDistinctValues( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.DISTINCT_VALUES.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.DISTINCT_VALUES.name());
 
         if (option == null) {
             return Column.DEFAULT_DISTINCT_VALUES;
@@ -290,7 +308,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public String getMaxValue( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.MAX_VALUE.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.MAX_VALUE.name());
 
         if (option == null) {
             return null;
@@ -306,7 +324,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public String getMinValue( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.MIN_VALUE.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.MIN_VALUE.name());
 
         if (option == null) {
             return null;
@@ -322,7 +340,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public String getNameInSource( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NAMEINSOURCE.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NAMEINSOURCE.name());
 
         if (option == null) {
             return null;
@@ -338,7 +356,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public String getNativeType( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NATIVE_TYPE.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NATIVE_TYPE.name());
 
         if (option == null) {
             return null;
@@ -371,7 +389,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public long getNullValueCount( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NULL_VALUE_COUNT.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NULL_VALUE_COUNT.name());
 
         if (option == null) {
             return Column.DEFAULT_NULL_VALUE_COUNT;
@@ -404,7 +422,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public int getRadix( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.RADIX.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.RADIX.name());
 
         if (option == null) {
             return Column.DEFAULT_RADIX;
@@ -437,7 +455,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public Searchable getSearchable( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.SEARCHABLE.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.SEARCHABLE.name());
 
         if (option == null) {
             return Searchable.DEFAULT_VALUE;
@@ -511,7 +529,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
      */
     @Override
     public String getUuid( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.toString() );
+        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.name() );
 
         if (option == null) {
             return null;
@@ -552,7 +570,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
 
         assert (transaction != null);
 
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.CASE_SENSITIVE.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.CASE_SENSITIVE.name());
 
         if (option == null) {
             return Column.DEFAULT_CASE_SENSITIVE;
@@ -576,7 +594,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
 
         assert (transaction != null);
 
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.CURRENCY.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.CURRENCY.name());
 
         if (option == null) {
             return Column.DEFAULT_CURRENCY;
@@ -600,7 +618,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
 
         assert (transaction != null);
 
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.FIXED_LENGTH.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.FIXED_LENGTH.name());
 
         if (option == null) {
             return Column.DEFAULT_FIXED_LENGTH;
@@ -624,7 +642,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
 
         assert (transaction != null);
 
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.SELECTABLE.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.SELECTABLE.name());
 
         if (option == null) {
             return Column.DEFAULT_SELECTABLE;
@@ -648,7 +666,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
 
         assert (transaction != null);
 
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.SIGNED.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.SIGNED.name());
 
         if (option == null) {
             return Column.DEFAULT_SIGNED;
@@ -672,7 +690,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
 
         assert (transaction != null);
 
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.UPDATABLE.toString());
+        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.UPDATABLE.name());
 
         if (option == null) {
             return Column.DEFAULT_UPDATABLE;
@@ -751,7 +769,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setCaseSensitive( final UnitOfWork transaction,
                                   final boolean newCaseSensitive ) throws KException {
-        setStatementOption(transaction, StandardOptions.CASE_SENSITIVE.toString(), Boolean.toString(newCaseSensitive));
+        setStatementOption(transaction, StandardOptions.CASE_SENSITIVE.name(), Boolean.toString(newCaseSensitive));
     }
 
     /**
@@ -762,7 +780,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setCharOctetLength( final UnitOfWork transaction,
                                     final int newCharOctetLength ) throws KException {
-        setStatementOption(transaction, StandardOptions.CHAR_OCTET_LENGTH.toString(), Integer.toString(newCharOctetLength));
+        setStatementOption(transaction, StandardOptions.CHAR_OCTET_LENGTH.name(), Integer.toString(newCharOctetLength));
     }
 
     /**
@@ -784,7 +802,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setCurrency( final UnitOfWork transaction,
                              final boolean newCurrency ) throws KException {
-        setStatementOption(transaction, StandardOptions.CURRENCY.toString(), Boolean.toString(newCurrency));
+        setStatementOption(transaction, StandardOptions.CURRENCY.name(), Boolean.toString(newCurrency));
     }
 
     /**
@@ -817,13 +835,13 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setDescription( final UnitOfWork transaction,
                                 final String newDescription ) throws KException {
-        setStatementOption(transaction, StandardOptions.ANNOTATION.toString(), newDescription);
+        setStatementOption(transaction, StandardOptions.ANNOTATION.name(), newDescription);
     }
 
     @Override
     public void setDistinctValues( final UnitOfWork transaction,
                                    final long newDistinctValues ) throws KException {
-        setStatementOption(transaction, StandardOptions.DISTINCT_VALUES.toString(), Long.toString(newDistinctValues));
+        setStatementOption(transaction, StandardOptions.DISTINCT_VALUES.name(), Long.toString(newDistinctValues));
     }
 
     /**
@@ -834,7 +852,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setFixedLength( final UnitOfWork transaction,
                                 final boolean newFixedLength ) throws KException {
-        setStatementOption(transaction, StandardOptions.FIXED_LENGTH.toString(), Boolean.toString(newFixedLength));
+        setStatementOption(transaction, StandardOptions.FIXED_LENGTH.name(), Boolean.toString(newFixedLength));
     }
 
     /**
@@ -856,7 +874,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setMaxValue( final UnitOfWork transaction,
                              final String newMaxValue ) throws KException {
-        setStatementOption(transaction, StandardOptions.MAX_VALUE.toString(), newMaxValue);
+        setStatementOption(transaction, StandardOptions.MAX_VALUE.name(), newMaxValue);
     }
 
     /**
@@ -867,7 +885,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setMinValue( final UnitOfWork transaction,
                              final String newMinValue ) throws KException {
-        setStatementOption(transaction, StandardOptions.MIN_VALUE.toString(), newMinValue);
+        setStatementOption(transaction, StandardOptions.MIN_VALUE.name(), newMinValue);
     }
 
     /**
@@ -878,7 +896,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setNameInSource( final UnitOfWork transaction,
                                  final String newNameInSource ) throws KException {
-        setStatementOption(transaction, StandardOptions.NAMEINSOURCE.toString(), newNameInSource);
+        setStatementOption(transaction, StandardOptions.NAMEINSOURCE.name(), newNameInSource);
     }
 
     /**
@@ -889,7 +907,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setNativeType( final UnitOfWork transaction,
                                final String newNativeType ) throws KException {
-        setStatementOption(transaction, StandardOptions.NATIVE_TYPE.toString(), newNativeType);
+        setStatementOption(transaction, StandardOptions.NATIVE_TYPE.name(), newNativeType);
     }
 
     /**
@@ -903,7 +921,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
                              final Nullable newNullable ) throws KException {
         setObjectProperty(uow, "setNullable", //$NON-NLS-1$
                           StandardDdlLexicon.NULLABLE,
-                          (newNullable == null) ? Nullable.DEFAULT_VALUE.toString() : newNullable.toString());
+                          (newNullable == null) ? Nullable.DEFAULT_VALUE.toValue() : newNullable.toValue());
     }
 
     /**
@@ -914,7 +932,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setNullValueCount( final UnitOfWork transaction,
                                    final long newNullValueCount ) throws KException {
-        setStatementOption(transaction, StandardOptions.NULL_VALUE_COUNT.toString(), Long.toString(newNullValueCount));
+        setStatementOption(transaction, StandardOptions.NULL_VALUE_COUNT.name(), Long.toString(newNullValueCount));
     }
 
     /**
@@ -936,7 +954,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setRadix( final UnitOfWork transaction,
                           final int newRadix ) throws KException {
-        setStatementOption(transaction, StandardOptions.RADIX.toString(), Integer.toString(newRadix));
+        setStatementOption(transaction, StandardOptions.RADIX.name(), Integer.toString(newRadix));
     }
 
     /**
@@ -960,7 +978,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     public void setSearchable( final UnitOfWork transaction,
                                final Searchable newSearchable ) throws KException {
         final String value = ((newSearchable == null) ? Searchable.DEFAULT_VALUE.toString() : newSearchable.toString());
-        setStatementOption(transaction, StandardOptions.SEARCHABLE.toString(), value);
+        setStatementOption(transaction, StandardOptions.SEARCHABLE.name(), value);
     }
 
     /**
@@ -971,7 +989,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setSelectable( final UnitOfWork transaction,
                                final boolean newSelectable ) throws KException {
-        setStatementOption(transaction, StandardOptions.SELECTABLE.toString(), Boolean.toString(newSelectable));
+        setStatementOption(transaction, StandardOptions.SELECTABLE.name(), Boolean.toString(newSelectable));
     }
 
     /**
@@ -982,7 +1000,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setSigned( final UnitOfWork transaction,
                            final boolean newSigned ) throws KException {
-        setStatementOption(transaction, StandardOptions.SIGNED.toString(), Boolean.toString(newSigned));
+        setStatementOption(transaction, StandardOptions.SIGNED.name(), Boolean.toString(newSigned));
     }
 
     /**
@@ -1047,7 +1065,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setUpdatable( final UnitOfWork transaction,
                               final boolean newUpdatable ) throws KException {
-        setStatementOption(transaction, StandardOptions.UPDATABLE.toString(), Boolean.toString(newUpdatable));
+        setStatementOption(transaction, StandardOptions.UPDATABLE.name(), Boolean.toString(newUpdatable));
     }
 
     /**
@@ -1058,7 +1076,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setUuid( final UnitOfWork transaction,
                          final String newUuid ) throws KException {
-        setStatementOption( transaction, StandardOptions.UUID.toString(), newUuid );
+        setStatementOption( transaction, StandardOptions.UUID.name(), newUuid );
     }
 
 }

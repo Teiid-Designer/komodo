@@ -38,7 +38,7 @@ public interface Model extends RelationalObject {
         /**
          * The default model type. Value is {@value} .
          */
-        public static final Type DEFAULT = PHYSICAL;
+        public static final Type DEFAULT_VALUE = PHYSICAL;
 
     }
 

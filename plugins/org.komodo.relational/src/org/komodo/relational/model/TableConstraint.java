@@ -35,12 +35,9 @@ public interface TableConstraint extends RelationalObject {
         }
 
         /**
-         * {@inheritDoc}
-         *
-         * @see java.lang.Enum#toString()
+         * @return the Teiid value (never empty)
          */
-        @Override
-        public String toString() {
+        public String toValue() {
             return this.type;
         }
 
