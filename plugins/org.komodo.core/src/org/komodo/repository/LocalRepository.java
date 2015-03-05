@@ -308,18 +308,27 @@ public class LocalRepository extends RepositoryImpl {
                                                                                                   callback, getSession(),
                                                                                                   getName()));
 
+                Exception error = null;
                 boolean noTimeout = false;
 
                 try {
                     noTimeout = latch.await(3, TimeUnit.MINUTES);
                 } catch (final Exception e) {
-                    callback.equals(e);
+                    error = e;
                 }
 
                 if (noTimeout) {
-                    callback.respond(null);
+                    if (getCallback() != null) {
+                        getCallback().respond( null );
+                    }
                 } else {
-                    callback.errorOccurred(new KException(Messages.getString(Messages.LocalRepository.Commit_Timeout, getName())));
+                    if (error == null) {
+                        callback.errorOccurred( new KException( Messages.getString( Messages.LocalRepository.Commit_Timeout,
+                                                                                    getName() ) ) );
+                    } else {
+                        callback.errorOccurred( new KException( Messages.getString( Messages.LocalRepository.Commit_Timeout,
+                                                                                    getName() ), error ) );
+                    }
                 }
             }
         }
@@ -358,18 +367,27 @@ public class LocalRepository extends RepositoryImpl {
                                                                                               getSession(),
                                                                                               getName()));
 
+            Exception error = null;
             boolean noTimeout = false;
 
             try {
                 noTimeout = latch.await(3, TimeUnit.MINUTES);
             } catch (final Exception e) {
-                callback.equals(e);
+                error = e;
             }
 
             if (noTimeout) {
-                callback.respond(null);
+                if (getCallback() != null) {
+                    getCallback().respond( null );
+                }
             } else {
-                callback.errorOccurred(new KException(Messages.getString(Messages.LocalRepository.Rollback_Timeout, getName())));
+                if (error == null) {
+                    callback.errorOccurred( new KException( Messages.getString( Messages.LocalRepository.Rollback_Timeout,
+                                                                                getName() ) ) );
+                } else {
+                    callback.errorOccurred( new KException( Messages.getString( Messages.LocalRepository.Rollback_Timeout,
+                                                                                getName() ), error ) );
+                }
             }
         }
 
