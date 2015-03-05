@@ -179,7 +179,9 @@ public class WorkspaceManager implements StringConstants {
      *         if an error occurs
      */
     public Model createModel( UnitOfWork uow, KomodoObject parent, String modelName ) throws KException {
-
+        if (parent == null)
+            parent = getRepository().komodoWorkspace(uow);
+        
         KomodoObject kobject = create(uow, parent, modelName, KomodoType.MODEL);
         if (! (kobject instanceof Model))
            return null;

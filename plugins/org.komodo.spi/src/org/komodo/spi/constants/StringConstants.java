@@ -244,6 +244,11 @@ public interface StringConstants {
      */
     String PIPE = "|"; //$NON-NLS-1$
 
+    /**
+     * The String "\n"
+     */
+    String CLOSE_ELEMENT = "/>"; //$NON-NLS-1$
+    
 	/**
    * komodo
    */

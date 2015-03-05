@@ -1076,7 +1076,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     @Override
     public void setUuid( final UnitOfWork transaction,
                          final String newUuid ) throws KException {
-        setStatementOption( transaction, StandardOptions.UUID.name(), newUuid );
+        setStatementOption( transaction, StandardOptions.UUID.toString(), newUuid );
     }
 
 }

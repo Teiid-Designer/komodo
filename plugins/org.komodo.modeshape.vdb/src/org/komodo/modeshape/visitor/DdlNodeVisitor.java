@@ -236,7 +236,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
      * @param version teiid version
      * @param exclusions any items that should be excluded from visiting
      */
-    public DdlNodeVisitor(TeiidVersion version, VisitorExclusions... exclusions) {
+    public DdlNodeVisitor(TeiidVersion version, boolean startOnNewLine, VisitorExclusions... exclusions) {
         super(version);
 
         if (exclusions != null) {
@@ -253,6 +253,9 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
                         break;
                 }
             }
+        }
+        if( startOnNewLine ) {
+        	ddlBuffer.append(NEW_LINE);
         }
     }
 

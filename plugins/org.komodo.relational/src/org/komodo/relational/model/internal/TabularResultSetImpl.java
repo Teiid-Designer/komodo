@@ -103,7 +103,11 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
          * {@inheritDoc}
          *
          * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+<<<<<<< HEAD
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject)
+=======
          *      org.komodo.spi.repository.KomodoObject)
+>>>>>>> a81ed826df392746fcde28b3245e39b42fd7a369
          */
         @Override
         public TabularResultSet resolve( final UnitOfWork transaction,
