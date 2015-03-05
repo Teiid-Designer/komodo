@@ -10,6 +10,7 @@ import java.util.Set;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.komodo.eclipse.workspace.CorePlugin;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.spi.KException;
@@ -60,7 +61,9 @@ public class WorkspaceContentProvider implements ITreeContentProvider {
 				}
 				KomodoObject[] models = CorePlugin.getWorkspaceManager().findModels(null);
 				for( KomodoObject model : models) {
-					allRoots.add(model);
+					if( ! (((Model)model).getParent(null) instanceof Vdb ) ) {
+						allRoots.add(model);
+					}
 				}
 				
 				return allRoots.toArray(new KomodoObject[allRoots.size()]);

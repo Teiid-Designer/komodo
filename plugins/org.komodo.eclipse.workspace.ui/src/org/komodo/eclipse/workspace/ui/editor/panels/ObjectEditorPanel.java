@@ -11,8 +11,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -34,34 +32,27 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.komodo.eclipse.sql.ui.editor.panel.StyledTextEditor;
 import org.komodo.eclipse.workspace.CoreConstants;
 import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.Messages;
 import org.komodo.eclipse.workspace.ui.actions.NewObjectAction;
 import org.komodo.eclipse.workspace.ui.actions.NewObjectActionFactory;
-import org.komodo.eclipse.workspace.ui.common.util.CoreStringUtil;
 import org.komodo.eclipse.workspace.ui.common.util.ObjectEditorUtils;
-import org.komodo.eclipse.workspace.ui.common.util.StyledTextEditor;
 import org.komodo.eclipse.workspace.ui.common.util.UILabelUtil;
 import org.komodo.eclipse.workspace.ui.common.util.UiLabelConstants;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
-import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.AddNameObjectDialog;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.RelationalObjectEditorUtil;
 import org.komodo.eclipse.workspace.ui.explorer.WorkspaceTreeViewer;
 import org.komodo.eclipse.workspace.util.RelationalIdentifier;
-import org.komodo.relational.model.Model;
-import org.komodo.relational.model.RelationalObject;
-import org.komodo.relational.model.Table;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 public class ObjectEditorPanel extends Composite {
-	private static final String EMPTY_STRING = CoreStringUtil.Constants.EMPTY_STRING;
+	private static final String EMPTY_STRING = StringConstants.EMPTY_STRING;
 	private KomodoObject targetObject;
 	private int type;
 	
@@ -79,16 +70,16 @@ public class ObjectEditorPanel extends Composite {
 	IAction deleteObjectAction;
 	Button applyDescriptionButton;
 	
-	private IKObjectChangeListener listener;
+	private KObjectChangeListener listener;
 	
 	private boolean showTree = false;
 	private boolean synching = false;
 	
-	public ObjectEditorPanel(Composite parent, int style, int nodeType, IKObjectChangeListener docChangedListener) {
+	public ObjectEditorPanel(Composite parent, int style, int nodeType, KObjectChangeListener docChangedListener) {
 		this(parent, style, nodeType, docChangedListener, false);
 	}
 	
-	public ObjectEditorPanel(Composite parent, int style, int nodeType, IKObjectChangeListener docChangedListener, boolean showTree) {
+	public ObjectEditorPanel(Composite parent, int style, int nodeType, KObjectChangeListener docChangedListener, boolean showTree) {
 		super(parent, style);
 		this.type = nodeType;
 		this.listener = docChangedListener;

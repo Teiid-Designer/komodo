@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
@@ -16,7 +16,7 @@ import org.komodo.spi.KException;
 public class VdbImportEditorPanel extends ObjectEditorPanel {
 	Text nameText;
 	
-	public VdbImportEditorPanel(Composite parent, int style, int nodeType, IKObjectChangeListener objectChangeListener) {
+	public VdbImportEditorPanel(Composite parent, int style, int nodeType, KObjectChangeListener objectChangeListener) {
 		super(parent, style, nodeType, objectChangeListener);
 	}
 	

@@ -30,7 +30,7 @@ import org.komodo.spi.KException;
  *
  * @since 8.0
  */
-public final class CoreStringUtil {
+public final class UiStringUtil {
 
     public interface Constants {
         char CARRIAGE_RETURN_CHAR = '\r';
@@ -357,7 +357,7 @@ public final class CoreStringUtil {
         if (strLength > maxCharPerLine) {
             StringBuffer sb = new StringBuffer(str.length() + (strLength / maxCharPerLine) + 1);
             strLength = 0;
-            List tokens = CoreStringUtil.split(str, Constants.SPACE);
+            List tokens = UiStringUtil.split(str, Constants.SPACE);
             Iterator itr = tokens.iterator();
             while (itr.hasNext()) {
                 String token = (String)itr.next();
@@ -801,7 +801,7 @@ public final class CoreStringUtil {
      */
     public static boolean isDigits( String str ) {
         for (int i = 0; i < str.length(); i++) {
-            if (!CoreStringUtil.isDigit(str.charAt(i))) {
+            if (!UiStringUtil.isDigit(str.charAt(i))) {
                 return false;
             }
         }
@@ -818,7 +818,7 @@ public final class CoreStringUtil {
      * 
      * @since 4.0
      */
-    private CoreStringUtil() {
+    private UiStringUtil() {
     }
 
     /*

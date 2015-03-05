@@ -38,7 +38,7 @@ import org.komodo.eclipse.workspace.ui.actions.NewObjectActionFactory;
 import org.komodo.eclipse.workspace.ui.editor.dialogs.ExportToDynamicVdbDialog;
 import org.komodo.eclipse.workspace.ui.editor.dialogs.ImportDynamicVdbDialog;
 import org.komodo.eclipse.workspace.ui.editor.dialogs.ImportSchemaDialog;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectChangedEvent;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.ColumnEditorPanel;
@@ -78,7 +78,7 @@ import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
 
-public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements IKObjectChangeListener  {
+public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements KObjectChangeListener  {
 	
 	// ====================================================
 	// GENERAL WIDGETS
@@ -145,13 +145,17 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 					
 					if( dialog.getReturnCode() == IDialogConstants.OK_ID ) {
 						String name = dialog.getName();
+						boolean completed = false;
 						try {
 							UnitOfWork transaction = CorePlugin.getKEngine().getDefaultRepository().createTransaction("Add VDB", false, null);
 							Vdb vdb = CorePlugin.getWorkspaceManager().createVdb(transaction, null, name, "extPath");
 							transaction.commit();
+							completed = true;
 						} catch (KException ex) {
 							MessageDialog.openError(getShell(), "Error Adding VDB", ex.getMessage());
 						}
+
+						if( completed ) wsTreeViewer.refresh();
 					}
 				}
 				
@@ -172,6 +176,7 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 					
 					if( dialog.getReturnCode() == IDialogConstants.OK_ID ) {
 						File selectedFile = dialog.getFile();
+						boolean completed = false;
 						try {
 							UnitOfWork transaction = CorePlugin.getKEngine().getDefaultRepository().createTransaction("Add Model", false, null);
 							DdlImporter importer = new DdlImporter(CorePlugin.getKEngine().getDefaultRepository(), transaction);
@@ -188,9 +193,11 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 							if( importMessages.hasError() ) {
 								MessageDialog.openError(getShell(), "Schema Import Errors", importMessages.errorMessagesToString());
 							}
+							completed = true;
 						} catch (KException ex) {
 							MessageDialog.openError(getShell(), "Error Importing Schema", ex.getMessage());
 						}
+						if( completed ) wsTreeViewer.refresh();
 					}
 				}
 				
@@ -211,6 +218,7 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 					
 					if( dialog.getReturnCode() == IDialogConstants.OK_ID ) {
 						File selectedFile = dialog.getFile();
+						boolean completed = false;
 						try {
 							UnitOfWork transaction = CorePlugin.getKEngine().getDefaultRepository().createTransaction("Add VDB", false, null);
 							VdbImporter importer = new VdbImporter(CorePlugin.getKEngine().getDefaultRepository(), transaction);
@@ -228,9 +236,12 @@ public class KWorkspaceViewerEditorPage extends KWorkspaceEditorPage implements 
 							if( importMessages.hasError() ) {
 								MessageDialog.openError(getShell(), "Schema Import Errors", importMessages.errorMessagesToString());
 							}
+							completed = true;
 						} catch (KException ex) {
 							MessageDialog.openError(getShell(), "Error Importing Schema", ex.getMessage());
 						}
+						
+						if( completed ) wsTreeViewer.refresh();
 					}
 				}
 				

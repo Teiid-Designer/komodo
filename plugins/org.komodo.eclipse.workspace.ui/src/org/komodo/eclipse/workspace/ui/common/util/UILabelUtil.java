@@ -8,6 +8,7 @@
 package org.komodo.eclipse.workspace.ui.common.util;
 
 import org.komodo.eclipse.workspace.ui.Messages;
+import org.komodo.spi.constants.StringConstants;
 
 /**
  *
@@ -65,6 +66,6 @@ public class UILabelUtil implements UiLabelConstants {
 			
 		}
 		
-		return CoreStringUtil.Constants.EMPTY_STRING;
+		return StringConstants.EMPTY_STRING;
 	}
 }

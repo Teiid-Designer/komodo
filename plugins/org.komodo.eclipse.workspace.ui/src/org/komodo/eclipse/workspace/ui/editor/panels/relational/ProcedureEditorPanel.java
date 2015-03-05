@@ -25,16 +25,15 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.komodo.eclipse.sql.ui.editor.panel.StyledTextEditor;
 import org.komodo.eclipse.workspace.CoreConstants;
 import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.Messages;
 import org.komodo.eclipse.workspace.ui.common.table.TableViewerBuilder;
-import org.komodo.eclipse.workspace.ui.common.util.CoreStringUtil;
-import org.komodo.eclipse.workspace.ui.common.util.StyledTextEditor;
 import org.komodo.eclipse.workspace.ui.common.util.UILabelUtil;
 import org.komodo.eclipse.workspace.ui.common.util.UiLabelConstants;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnDatatypeEditingSupport;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnNameEditingSupport;
@@ -43,10 +42,9 @@ import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ElementChan
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ViewerElementChangedListener;
 import org.komodo.eclipse.workspace.util.RelationalIdentifier;
 import org.komodo.relational.model.Column;
-import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.StoredProcedure;
-import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
@@ -74,7 +72,7 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
 	
 	private ResultSetEditorPanel resultSetPanel;
 	
-	public ProcedureEditorPanel(Composite parent, int style, int nodeType, IKObjectChangeListener objectChangeListener) {
+	public ProcedureEditorPanel(Composite parent, int style, int nodeType, KObjectChangeListener objectChangeListener) {
 		super(parent, style, nodeType, objectChangeListener, true);
 	}
 	
@@ -539,7 +537,7 @@ public class ProcedureEditorPanel  extends ObjectEditorPanel implements ViewerEl
 					}
 				}
 			}
-			return CoreStringUtil.Constants.EMPTY_STRING;
+			return StringConstants.EMPTY_STRING;
 		}
 
 		/**

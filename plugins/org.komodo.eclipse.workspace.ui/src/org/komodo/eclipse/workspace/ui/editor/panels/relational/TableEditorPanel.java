@@ -1,34 +1,23 @@
 package org.komodo.eclipse.workspace.ui.editor.panels.relational;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewer;
-import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -36,15 +25,11 @@ import org.eclipse.swt.widgets.Text;
 import org.komodo.eclipse.workspace.CoreConstants;
 import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.Messages;
-import org.komodo.eclipse.workspace.ui.common.table.ComboBoxEditingSupport;
 import org.komodo.eclipse.workspace.ui.common.table.TableViewerBuilder;
-import org.komodo.eclipse.workspace.ui.common.util.CoreStringUtil;
-import org.komodo.eclipse.workspace.ui.common.util.ObjectEditorUtils;
-import org.komodo.eclipse.workspace.ui.common.util.StyledTextEditor;
 import org.komodo.eclipse.workspace.ui.common.util.UILabelUtil;
 import org.komodo.eclipse.workspace.ui.common.util.UiLabelConstants;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.AddNameObjectDialog;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnDatatypeEditingSupport;
@@ -56,7 +41,7 @@ import org.komodo.eclipse.workspace.util.RelationalIdentifier;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
-import org.komodo.spi.ddl.RelationalTypeMapping;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
@@ -81,7 +66,7 @@ public class TableEditorPanel extends ObjectEditorPanel implements ViewerElement
 	private ColumnDatatypeEditingSupport columnTypeEditSupport;
 	
 	public TableEditorPanel(Composite parent, int style, int nodeType,
-			IKObjectChangeListener objectChangeListener) {
+			KObjectChangeListener objectChangeListener) {
 		super(parent, style, nodeType, objectChangeListener, true);
 	}
 	
@@ -577,7 +562,7 @@ public class TableEditorPanel extends ObjectEditorPanel implements ViewerElement
 					}
 				}
 			}
-			return CoreStringUtil.Constants.EMPTY_STRING;
+			return StringConstants.EMPTY_STRING;
 		}
 
 		/**

@@ -60,6 +60,7 @@ import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.komodo.eclipse.workspace.ui.UiConstants;
 import org.komodo.eclipse.workspace.ui.common.widget.ITreeViewerController;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 
@@ -798,7 +799,7 @@ public final class WidgetUtil implements UiConstants {
                                     final boolean add) {
         ArgCheck.isNotNull(combo);
         // Get string value of selection, using provider if provided
-        final String text = (selection == null ? CoreStringUtil.Constants.EMPTY_STRING : (provider == null ? selection.toString()
+        final String text = (selection == null ? StringConstants.EMPTY_STRING : (provider == null ? selection.toString()
                         : provider.getText(selection)));
         // Add selection to list if requested and not already present
         if (add) {

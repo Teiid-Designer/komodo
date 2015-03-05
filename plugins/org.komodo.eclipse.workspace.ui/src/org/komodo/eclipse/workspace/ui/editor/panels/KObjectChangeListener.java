@@ -1,6 +1,6 @@
 package org.komodo.eclipse.workspace.ui.editor.panels;
 
-public interface IKObjectChangeListener {
+public interface KObjectChangeListener {
 	
 	void documentChanged(ObjectChangedEvent event);
 }

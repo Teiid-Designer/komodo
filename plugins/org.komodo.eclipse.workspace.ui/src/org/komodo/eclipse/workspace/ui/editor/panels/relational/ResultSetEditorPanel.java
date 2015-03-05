@@ -23,8 +23,6 @@ import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.Messages;
 import org.komodo.eclipse.workspace.ui.actions.NewColumnAction;
 import org.komodo.eclipse.workspace.ui.common.table.TableViewerBuilder;
-import org.komodo.eclipse.workspace.ui.common.util.CoreStringUtil;
-import org.komodo.eclipse.workspace.ui.common.util.ObjectEditorUtils;
 import org.komodo.eclipse.workspace.ui.common.util.UILabelUtil;
 import org.komodo.eclipse.workspace.ui.common.util.UiLabelConstants;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
@@ -37,10 +35,10 @@ import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.spi.KException;
-import org.komodo.utils.StringUtils;
+import org.komodo.spi.constants.StringConstants;
 
 public class ResultSetEditorPanel extends Composite implements ViewerElementChangedListener{
-	private static final String EMPTY_STRING = CoreStringUtil.Constants.EMPTY_STRING;
+	private static final String EMPTY_STRING = StringConstants.EMPTY_STRING;
 	
 	private ProcedureResultSet resultSet;
 	private boolean nameEditable;
@@ -136,7 +134,7 @@ public class ResultSetEditorPanel extends Composite implements ViewerElementChan
 			public void modifyText( final ModifyEvent event ) {
     			String value = resultSetNameText.getText();
     			if( value == null ) {
-    				value = CoreStringUtil.Constants.EMPTY_STRING;
+    				value = StringConstants.EMPTY_STRING;
     			}
     			// TODO:
 //        		if( getRelationalReference().getResultSet() != null ) {
@@ -366,7 +364,7 @@ public class ResultSetEditorPanel extends Composite implements ViewerElementChan
 					e.printStackTrace();
 				}
 			}
-			return CoreStringUtil.Constants.EMPTY_STRING;
+			return StringConstants.EMPTY_STRING;
 		}
 
 		/**

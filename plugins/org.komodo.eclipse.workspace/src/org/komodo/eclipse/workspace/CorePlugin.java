@@ -2,8 +2,6 @@ package org.komodo.eclipse.workspace;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -16,26 +14,26 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.model.Column;
+import org.komodo.relational.model.DataTypeResultSet;
+import org.komodo.relational.model.DataTypeResultSet.Type;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Parameter;
-import org.komodo.relational.model.Procedure;
-import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.Parameter.Direction;
+import org.komodo.relational.model.PushdownFunction;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
-import org.komodo.relational.model.Parameter.Direction;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.relational.model.View;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.LocalRepository;
-import org.komodo.repository.LocalRepository.LocalRepositoryId;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.spi.KException;
@@ -44,8 +42,8 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryObserver;
+import org.komodo.utils.KLog;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
-import org.modeshape.sequencer.teiid.lexicon.CoreLexicon.ModelType;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -55,8 +53,6 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.komodo.eclipse.workspace"; //$NON-NLS-1$
-	
-	private static final String CORE_REPOSITORY_CONFIG = "workspace-core-plugin-repository-in-memory-config.json";
 
 	// The shared instance
 	private static CorePlugin plugin;
@@ -84,7 +80,7 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 		try {
 			startKEngine();
 			
-			//loadTestWorkspace();
+			// loadTestWorkspace();  // UNCOMMENT to LOAD an initial Workspace with VDBs and Models
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -141,16 +137,16 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
         };
 		defaultRepo.addObserver(stateObserver);
 
-        System.out.println(Messages.getString(SHELL.ENGINE_STARTING));
+		KLog.getLogger().info(Messages.getString(SHELL.ENGINE_STARTING));
         kEngine.start();
-        System.out.println(SPACE + Messages.getString(SHELL.COMPONENT_STARTED)+ NEW_LINE);
+        KLog.getLogger().info(SPACE + Messages.getString(SHELL.COMPONENT_STARTED)+ NEW_LINE);
 
-        System.out.println(Messages.getString(SHELL.LOCAL_REPOSITORY_STARTING));
+        KLog.getLogger().info(Messages.getString(SHELL.LOCAL_REPOSITORY_STARTING));
 
         TimerTask progressTask = new TimerTask() {
             @Override
             public void run() {
-            	System.out.println(DOT);
+            	KLog.getLogger().info(DOT);
             }
          };
 
@@ -164,16 +160,16 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
         timer.cancel();
 
         if (localRepoWaiting)
-        	System.out.println(SPACE + Messages.getString(SHELL.COMPONENT_STARTED));
+        	KLog.getLogger().info(SPACE + Messages.getString(SHELL.COMPONENT_STARTED));
         else
-        	System.out.println(SPACE + Messages.getString(SHELL.LOCAL_REPOSITORY_TIMEOUT_ERROR));
+        	KLog.getLogger().info(SPACE + Messages.getString(SHELL.LOCAL_REPOSITORY_TIMEOUT_ERROR));
 
-        System.out.println(NEW_LINE);
-        System.out.println(NEW_LINE);
+        KLog.getLogger().info(NEW_LINE);
+        KLog.getLogger().info(NEW_LINE);
         
 		 wsManager = WorkspaceManager.getInstance(defaultRepo);
 		 
-		 System.out.println("Workspace Manager Intialized");
+		 KLog.getLogger().info("Workspace Manager Intialized");
 	 }
 	 
     private void addToRegistry(ImageRegistry registry, final String imagePath) {
@@ -279,7 +275,8 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 			role.setDescription(transaction, "Full access to all products data and information.");
 			
 			Permission perm = role.addPermission(transaction, "ProductModel.productData");
-			perm.addMask(transaction, "xxxx-mask-name-xxxxx");
+			Mask mask = perm.addMask(transaction, "xxxx-mask-name-xxxxx");
+			mask.setOrder(transaction, "1");
 			perm.addCondition(transaction, "xxxx-condition-name-xxxxx");
 			perm.setAllowCreate(transaction, true);
 			perm.setAllowLanguage(transaction, true);
@@ -293,26 +290,26 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 			Table table = model.addTable(transaction, "productData");
 			table.setDescription(transaction, "General product data");
 			Column col = table.addColumn(transaction, "ID");
-			col.setDatatypeName(transaction, "string");
+			col.setDatatypeName(transaction, Type.STRING.toString());
 			col.setLength(transaction, 58);
 			col = table.addColumn(transaction, "Value");
-			col.setDatatypeName(transaction, "string");
+			col.setDatatypeName(transaction, Type.STRING.toString());
 			col.setLength(transaction, 4000);
 			col = table.addColumn(transaction, "Reference");
-			col.setDatatypeName(transaction, "string");
+			col.setDatatypeName(transaction, Type.STRING.toString());
 			col.setLength(transaction, 4000);
 			table = model.addTable(transaction, "productInfo");
 			col = table.addColumn(transaction, "ID");
-			col.setDatatypeName(transaction, "string");
+			col.setDatatypeName(transaction, Type.STRING.toString());
 			col.setLength(transaction, 58);
 			col = table.addColumn(transaction, "vendor");
-			col.setDatatypeName(transaction, "string");
+			col.setDatatypeName(transaction, Type.STRING.toString());
 			col.setLength(transaction, 4000);
 			col = table.addColumn(transaction, "quantity");
-			col.setDatatypeName(transaction, "integer");
+			col.setDatatypeName(transaction, Type.INTEGER.toString());
 			col.setDefaultValue(transaction, "0");
 			col = table.addColumn(transaction, "weight");
-			col.setDatatypeName(transaction, "integer");
+			col.setDatatypeName(transaction, Type.INTEGER.toString());
 			col.setDefaultValue(transaction, "1100");
 			col.setDescription(transaction, "product weight in lbs");
 			
@@ -323,37 +320,46 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 			StoredProcedure proc = model.addStoredProcedure(transaction, "getProductData");
 			Parameter param = proc.addParameter(transaction, "PRODUCT_ID");
 			param.setDirection(transaction, Direction.IN);
-			TabularResultSet rs = (TabularResultSet)proc.setResultSet(transaction, TabularResultSet.class);
-			
+			param.setDatatypeName(transaction, Type.STRING.toString());
 			param = proc.addParameter(transaction, "CATEGORY");
 			param.setDirection(transaction, Direction.IN);
+			param.setDatatypeName(transaction, Type.STRING.toString());
+			
+			TabularResultSet rs = (TabularResultSet)proc.setResultSet(transaction, TabularResultSet.class);
 			ResultSetColumn rsc = rs.addColumn(transaction, "c1");
-			rsc.setDatatypeName(transaction, "integer");
+			rsc.setDatatypeName(transaction, Type.INTEGER.toString());
 			rsc = rs.addColumn(transaction, "c2");
-			rsc.setDatatypeName(transaction, "integer");
+			rsc.setDatatypeName(transaction, Type.INTEGER.toString());
 			rsc = rs.addColumn(transaction, "c3");
-			rsc.setDatatypeName(transaction, "string");
+			rsc.setDatatypeName(transaction, Type.STRING.toString());
 			rsc.setLength(transaction, 255);
+			
+			PushdownFunction pdFunction = model.addPushdownFunction(transaction, "sumCosts");
+			param = pdFunction.addParameter(transaction, "PRODUCT_ID");
+			param.setDirection(transaction, Direction.IN);
+			param.setDatatypeName(transaction, Type.STRING.toString());
+			DataTypeResultSet dtRS = (DataTypeResultSet)pdFunction.setResultSet(transaction, DataTypeResultSet.class);
+			dtRS.setType(transaction, Type.DOUBLE);
 			
 			vdb = wsManager.createVdb(transaction, null, "BooksVdb", "extPath");
 			model = wsManager.createModel(transaction, vdb, "BooksSource");
 			table = model.addTable(transaction, "books");
 			col = table.addColumn(transaction, "title");
-			col.setDatatypeName(transaction, "string");
+			col.setDatatypeName(transaction, Type.STRING.toString());
 			col.setLength(transaction, 300);
 			col = table.addColumn(transaction, "author");
-			col.setDatatypeName(transaction, "string");
+			col.setDatatypeName(transaction, Type.STRING.toString());
 			col.setLength(transaction, 300);
 			col = table.addColumn(transaction, "publisherID");
-			col.setDatatypeName(transaction, "integer");
+			col.setDatatypeName(transaction, Type.INTEGER.toString());
 			table = model.addTable(transaction, "publishers");
 			col = table.addColumn(transaction, "publisherID");
-			col.setDatatypeName(transaction, "integer");
+			col.setDatatypeName(transaction, Type.INTEGER.toString());
 			col = table.addColumn(transaction, "name");
-			col.setDatatypeName(transaction, "string");
+			col.setDatatypeName(transaction, Type.STRING.toString());
 			col.setLength(transaction, 300);
 			col = table.addColumn(transaction, "address");
-			col.setDatatypeName(transaction, "string");
+			col.setDatatypeName(transaction, Type.STRING.toString());
 			col.setLength(transaction, 300);
 
 			
@@ -376,10 +382,7 @@ public class CorePlugin extends AbstractUIPlugin implements StringConstants {
 //			proc.addParameter(transaction, "publisherID");
 
 			transaction.commit();
-			
-			
-			System.out.println("  CorePlugin.loadTestWorkspace() ENDED");
-			System.out.println("     Result Set # Columns = " + rs.getColumns(null).length);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

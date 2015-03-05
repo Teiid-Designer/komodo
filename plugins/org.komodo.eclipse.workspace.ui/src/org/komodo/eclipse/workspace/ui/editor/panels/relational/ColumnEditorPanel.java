@@ -16,7 +16,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.komodo.eclipse.workspace.ui.Messages;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.StoredProcedure;
@@ -27,7 +27,7 @@ public class ColumnEditorPanel extends ObjectEditorPanel {
 	private Text datatypeText, nameInSourceText;
 	private TabItem generalPropertiesTab;
 	
-	public ColumnEditorPanel(Composite parent, int style, int nodeType,	IKObjectChangeListener objectChangeListener) {
+	public ColumnEditorPanel(Composite parent, int style, int nodeType,	KObjectChangeListener objectChangeListener) {
 		super(parent, style, nodeType, objectChangeListener);
 	}
 	

@@ -1,13 +1,13 @@
 package org.komodo.eclipse.workspace.ui.editor.panels.relational;
 
 import org.eclipse.swt.widgets.Composite;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
 
 public class ParameterEditorPanel extends ObjectEditorPanel {
 //	Text nameText;
 	
-	public ParameterEditorPanel(Composite parent, int style, int nodeType,	IKObjectChangeListener objectChangeListener) {
+	public ParameterEditorPanel(Composite parent, int style, int nodeType,	KObjectChangeListener objectChangeListener) {
 		super(parent, style, nodeType, objectChangeListener);
 	}
 	

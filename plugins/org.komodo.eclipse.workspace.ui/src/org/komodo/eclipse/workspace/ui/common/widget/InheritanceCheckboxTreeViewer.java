@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.widgets.Tree;
 import org.komodo.eclipse.workspace.ui.common.util.TreeViewerUtil;
-import org.komodo.eclipse.workspace.ui.common.viewsupport.UiBusyIndicator;
+import org.komodo.eclipse.workspace.ui.common.util.UiBusyIndicator;
 
 /**
  * Extension to CheckboxTreeViewer in which: A checkmark at a node automatically places a checkmark at all descendant nodes.

@@ -5,7 +5,7 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.eclipse.workspace.ui.common.util;
+package org.komodo.utils;
 
 
 /**

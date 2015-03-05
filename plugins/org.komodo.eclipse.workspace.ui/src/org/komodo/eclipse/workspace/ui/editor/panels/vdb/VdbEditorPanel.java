@@ -1,32 +1,22 @@
 package org.komodo.eclipse.workspace.ui.editor.panels.vdb;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.komodo.eclipse.workspace.ui.Messages;
-import org.komodo.eclipse.workspace.ui.common.util.StyledTextEditor;
-import org.komodo.eclipse.workspace.ui.common.util.UILabelUtil;
-import org.komodo.eclipse.workspace.ui.common.util.UiLabelConstants;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
 import org.komodo.eclipse.workspace.ui.common.widget.Label;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
-import org.komodo.relational.vdb.Vdb;
-import org.komodo.spi.KException;
 
 public class VdbEditorPanel extends ObjectEditorPanel {
 //	Text nameText;
@@ -36,7 +26,7 @@ public class VdbEditorPanel extends ObjectEditorPanel {
     private Label validationDateTimeLabel;
     private Label validationVersionLabel;
 	
-	public VdbEditorPanel(Composite parent, int style, int nodeType, IKObjectChangeListener objectChangeListener) {
+	public VdbEditorPanel(Composite parent, int style, int nodeType, KObjectChangeListener objectChangeListener) {
 		super(parent, style, nodeType, objectChangeListener, true);
 	}
 	

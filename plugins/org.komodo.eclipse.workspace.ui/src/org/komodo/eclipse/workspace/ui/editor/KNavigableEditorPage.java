@@ -31,7 +31,7 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.eclipse.workspace.CoreConstants;
 import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.UiConstants;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectChangedEvent;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.WorkspaceTreeViewerPanel;
@@ -55,7 +55,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
-public class KNavigableEditorPage  extends KWorkspaceEditorPage implements IKObjectChangeListener, IDoubleClickListener  {
+public class KNavigableEditorPage  extends KWorkspaceEditorPage implements KObjectChangeListener, IDoubleClickListener  {
 	
 	// ====================================================
 	// GENERAL WIDGETS

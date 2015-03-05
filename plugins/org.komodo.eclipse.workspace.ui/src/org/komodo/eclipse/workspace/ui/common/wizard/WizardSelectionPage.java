@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Label;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
 import org.komodo.eclipse.workspace.ui.common.widget.AbstractTableLabelProvider;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.KLog;
 
 
 /**
@@ -100,7 +101,7 @@ final class WizardSelectionPage extends WizardPage  {
                         return ImageDescriptor.createFromURL(url).createImage();
                     }
                 } catch (final MalformedURLException err) {
-                    System.out.println(err); // TODO: LOG
+                	KLog.getLogger().error(err.getMessage(), err);
                 }
                 return ImageDescriptor.getMissingImageDescriptor().createImage();
             }

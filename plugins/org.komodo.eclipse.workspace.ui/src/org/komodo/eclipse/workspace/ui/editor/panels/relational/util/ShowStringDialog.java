@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
-import org.komodo.eclipse.workspace.ui.common.util.StyledTextEditor;
+import org.komodo.eclipse.sql.ui.editor.panel.StyledTextEditor;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
 import org.komodo.eclipse.workspace.ui.common.widget.Dialog;
 

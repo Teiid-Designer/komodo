@@ -3,17 +3,11 @@ package org.komodo.eclipse.workspace.ui.editor.dialogs;
 import java.io.File;
 import java.io.IOException;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ExpandAdapter;
-import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -22,20 +16,17 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.komodo.eclipse.workspace.ui.common.util.FileUtils;
-import org.komodo.eclipse.workspace.ui.common.util.StyledTextEditor;
+import org.komodo.eclipse.sql.ui.editor.panel.StyledTextEditor;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
 import org.komodo.eclipse.workspace.ui.common.widget.Dialog;
+import org.komodo.utils.FileUtils;
 
 public class ImportSchemaDialog  extends Dialog {
     

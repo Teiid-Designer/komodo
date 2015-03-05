@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.komodo.eclipse.workspace.ui.UiConstants;
 import org.komodo.eclipse.workspace.ui.common.wizard.IPersistentWizardPage;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
 
 /**<p>
@@ -115,7 +116,7 @@ public final class WizardUtil implements UiConstants.Widgets {
         // Set page's message according to whether its complete and its position within the wizard
         if (status == IMessageProvider.NONE) {
             if (message == null) {
-                message = CoreStringUtil.Constants.EMPTY_STRING;
+                message = StringConstants.EMPTY_STRING;
             } else {
                 message += SENTENCE_SEPARATOR;
             }

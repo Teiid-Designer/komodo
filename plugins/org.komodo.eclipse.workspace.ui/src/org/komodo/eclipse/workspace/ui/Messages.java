@@ -40,6 +40,7 @@ public class Messages extends NLS {
     public static String referencedColumnsLabel;
     public static String indexesLabel;
     public static String indexLabel;
+    public static String modelFileLabel;
     public static String tableSelectionTitle;
     public static String selectExistingTableForIndexInitialMessage;
     public static String noTableSelectedMessage;

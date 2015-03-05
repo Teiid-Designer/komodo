@@ -19,13 +19,11 @@ import org.komodo.eclipse.workspace.CoreConstants;
 import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.Messages;
 import org.komodo.eclipse.workspace.ui.common.table.TableViewerBuilder;
-import org.komodo.eclipse.workspace.ui.common.util.CoreStringUtil;
 import org.komodo.eclipse.workspace.ui.common.util.UILabelUtil;
 import org.komodo.eclipse.workspace.ui.common.util.UiLabelConstants;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
-import org.komodo.eclipse.workspace.ui.editor.panels.relational.UserDefinedFunctionEditorPanel.ParameterDataLabelProvider;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnDatatypeEditingSupport;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnNameEditingSupport;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnWidthEditingSupport;
@@ -34,6 +32,7 @@ import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ViewerEleme
 import org.komodo.eclipse.workspace.util.RelationalIdentifier;
 import org.komodo.relational.model.Column;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 
 public class PushdownFunctionEditorPanel extends ObjectEditorPanel implements ViewerElementChangedListener {
@@ -51,13 +50,13 @@ public class PushdownFunctionEditorPanel extends ObjectEditorPanel implements Vi
 	private ColumnDatatypeEditingSupport parameterTypeEditSupport;
 	
 	public PushdownFunctionEditorPanel(Composite parent, int style,
-			int nodeType, IKObjectChangeListener docChangedListener) {
+			int nodeType, KObjectChangeListener docChangedListener) {
 		super(parent, style, nodeType, docChangedListener);
 		// TODO Auto-generated constructor stub
 	}
 
 	public PushdownFunctionEditorPanel(Composite parent, int style,
-			int nodeType, IKObjectChangeListener docChangedListener,
+			int nodeType, KObjectChangeListener docChangedListener,
 			boolean showTree) {
 		super(parent, style, nodeType, docChangedListener, showTree);
 		// TODO Auto-generated constructor stub
@@ -365,7 +364,7 @@ public class PushdownFunctionEditorPanel extends ObjectEditorPanel implements Vi
 					}
 				}
 			}
-			return CoreStringUtil.Constants.EMPTY_STRING;
+			return StringConstants.EMPTY_STRING;
 		}
 
 		/**

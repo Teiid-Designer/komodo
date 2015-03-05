@@ -15,28 +15,21 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.komodo.eclipse.sql.ui.editor.panel.SqlEditorPanel;
 import org.komodo.eclipse.workspace.CoreConstants;
-import org.komodo.eclipse.workspace.CorePlugin;
 import org.komodo.eclipse.workspace.ui.Messages;
-import org.komodo.eclipse.workspace.ui.UiConstants;
 import org.komodo.eclipse.workspace.ui.common.table.TableViewerBuilder;
-import org.komodo.eclipse.workspace.ui.common.util.CoreStringUtil;
-import org.komodo.eclipse.workspace.ui.common.util.ObjectEditorUtils;
-import org.komodo.eclipse.workspace.ui.common.util.StyledTextEditor;
 import org.komodo.eclipse.workspace.ui.common.util.UILabelUtil;
 import org.komodo.eclipse.workspace.ui.common.util.UiLabelConstants;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
-import org.komodo.eclipse.workspace.ui.editor.panels.IKObjectChangeListener;
+import org.komodo.eclipse.workspace.ui.editor.panels.KObjectChangeListener;
 import org.komodo.eclipse.workspace.ui.editor.panels.ObjectEditorPanel;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnDatatypeEditingSupport;
 import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ColumnNameEditingSupport;
@@ -46,9 +39,9 @@ import org.komodo.eclipse.workspace.ui.editor.panels.relational.util.ViewerEleme
 import org.komodo.eclipse.workspace.ui.explorer.WorkspaceTreeViewer;
 import org.komodo.eclipse.workspace.util.RelationalIdentifier;
 import org.komodo.relational.model.Column;
-import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
@@ -75,7 +68,7 @@ public class ViewEditorPanel extends ObjectEditorPanel implements ViewerElementC
 	private WorkspaceTreeViewer sourceTreeViewer;
 	
 	public ViewEditorPanel(Composite parent, int style, int nodeType,
-			IKObjectChangeListener objectChangeListener) {
+			KObjectChangeListener objectChangeListener) {
 		super(parent, style, nodeType, objectChangeListener, true);
 	}
 	
@@ -529,7 +522,7 @@ public class ViewEditorPanel extends ObjectEditorPanel implements ViewerElementC
 					}
 				}
 			}
-			return CoreStringUtil.Constants.EMPTY_STRING;
+			return StringConstants.EMPTY_STRING;
 		}
 
 		/**

@@ -23,10 +23,10 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.komodo.eclipse.workspace.ui.common.util.FileUtils;
-import org.komodo.eclipse.workspace.ui.common.util.StyledTextEditor;
+import org.komodo.eclipse.sql.ui.editor.panel.StyledTextEditor;
 import org.komodo.eclipse.workspace.ui.common.util.WidgetFactory;
 import org.komodo.eclipse.workspace.ui.common.widget.Dialog;
+import org.komodo.utils.FileUtils;
 
 public class ImportDynamicVdbDialog extends Dialog {
     

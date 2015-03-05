@@ -20,22 +20,16 @@ public class ObjectEditorUtils {
 			} else if( ko instanceof AbstractProcedure ) {
 				((AbstractProcedure)ko).setDescription(null, desc);
 				return true;
-			} 
-//			else if( ko instanceof Parameter ) {
-//				((Parameter)ko).setDescription(null, desc);
-//				return true;
-//			} 
-			else if( ko instanceof Column ) {
+			} else if( ko instanceof Column ) {
 				((Column)ko).setDescription(null, desc);
 				return true;
 			} else if( ko instanceof Vdb ) {
 				((Vdb)ko).setDescription(null, desc);
 				return true;
+			} else if( ko instanceof Model ) {
+				((Model)ko).setDescription(null, desc);
+				return true;
 			} 
-//			else if( ko instanceof Model ) {
-//				((Model)ko).setDescription(null, desc);
-//				return true;
-//			} 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -50,19 +44,13 @@ public class ObjectEditorUtils {
 				return ((Table)ko).getDescription(null);
 			} else if( ko instanceof AbstractProcedure ) {
 				return ((AbstractProcedure)ko).getDescription(null);
-			} 
-//			else if( ko instanceof Parameter ) {
-//				((Parameter)ko).setDescription(null, desc);
-//				return true;
-//			} 
-			else if( ko instanceof Column ) {
+			} else if( ko instanceof Column ) {
 				return ((Column)ko).getDescription(null);
 			} else if( ko instanceof Vdb ) {
 				return ((Vdb)ko).getDescription(null);
+			}  else if( ko instanceof Model ) {
+				return ((Model)ko).getDescription(null);
 			} 
-//			else if( ko instanceof Model ) {
-//				return ((Model)ko).getDescription(null);
-//			} 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
