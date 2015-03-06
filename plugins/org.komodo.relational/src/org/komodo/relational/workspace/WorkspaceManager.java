@@ -353,7 +353,7 @@ public class WorkspaceManager implements StringConstants {
             for (final KomodoObject kobject : kobjects) {
                 ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
                 validateWorkspaceMember(uow, kobject);
-                kobject.getParent(transaction).removeChild(transaction, kobject.getName(transaction));
+                kobject.remove(transaction);
             }
 
             if (uow == null) {

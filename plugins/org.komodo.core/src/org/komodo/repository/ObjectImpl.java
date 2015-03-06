@@ -1094,6 +1094,37 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#remove(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public void remove( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "objectimpl-remove", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug( "objectimpl-remove: transaction = {0}, path = {1}", transaction.getName(), getAbsolutePath() ); //$NON-NLS-1$
+        }
+
+        try {
+            final Node node = node( transaction );
+            node.remove();
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.spi.repository.KomodoObject#removeChild(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String[])
      */

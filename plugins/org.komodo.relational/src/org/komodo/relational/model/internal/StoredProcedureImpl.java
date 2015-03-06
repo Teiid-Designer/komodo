@@ -330,7 +330,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
                 throw new KException( Messages.getString( Relational.RESULT_SET_NOT_FOUND_TO_REMOVE, getAbsolutePath() ) );
             }
 
-            removeChild( transaction, resultSet.getName( transaction ) );
+            resultSet.remove( transaction );
 
             if (uow == null) {
                 transaction.commit();
@@ -387,11 +387,11 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
         }
 
         try {
-            // delete existing result set
+            // delete existing result set (don't call removeResultSet)
             final ProcedureResultSet resultSet = getResultSet( transaction );
 
             if (resultSet != null) {
-                removeChild( transaction, resultSet.getName( transaction ) );
+                resultSet.remove( transaction );
             }
 
             T result = null;

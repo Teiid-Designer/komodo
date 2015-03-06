@@ -418,7 +418,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
             if (parameters.length != 0) {
                 for (final Parameter parameter : parameters) {
                     if (parameterName.equals( parameter.getName( transaction ) )) {
-                        removeChild( transaction, parameterName );
+                        parameter.remove( transaction );
                         found = true;
                         break;
                     }
@@ -469,7 +469,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
             if (options.length != 0) {
                 for (final StatementOption option : options) {
                     if (optionToRemove.equals( option.getName( transaction ) )) {
-                        removeChild( transaction, optionToRemove );
+                        option.remove( transaction );
                         found = true;
                         break;
                     }

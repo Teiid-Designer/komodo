@@ -382,7 +382,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
             if (options.length != 0) {
                 for (final StatementOption option : options) {
                     if (optionToRemove.equals( option.getName( transaction ) )) {
-                        removeChild( transaction, optionToRemove );
+                        option.remove( transaction );
                         found = true;
                         break;
                     }

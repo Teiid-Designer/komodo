@@ -910,8 +910,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
             if (dataRoles.length != 0) {
                 for (final DataRole dataRole : dataRoles) {
                     if (dataRoleToRemove.equals(dataRole.getName(transaction))) {
-                        final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.DATA_ROLES);
-                        grouping.removeChild(transaction, dataRoleToRemove);
+                        dataRole.remove(transaction);
                         found = true;
                         break;
                     }
@@ -961,8 +960,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
             if (entries.length != 0) {
                 for (final Entry entry : entries) {
                     if (entryToRemove.equals(entry.getName(transaction))) {
-                        final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.ENTRIES);
-                        grouping.removeChild(transaction, entryToRemove);
+                        entry.remove(transaction);
                         found = true;
                         break;
                     }
@@ -1012,8 +1010,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
             if (vdbImports.length != 0) {
                 for (final VdbImport vdbImport : vdbImports) {
                     if (importToRemove.equals(vdbImport.getName(transaction))) {
-                        final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.IMPORT_VDBS);
-                        grouping.removeChild(transaction, importToRemove);
+                        vdbImport.remove(transaction);
                         found = true;
                         break;
                     }
@@ -1063,7 +1060,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
             if (models.length != 0) {
                 for (final Model model : models) {
                     if (modelToRemove.equals(model.getName(transaction))) {
-                        removeChild(transaction, modelToRemove);
+                        model.remove(transaction);
                         found = true;
                         break;
                     }
@@ -1113,8 +1110,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
             if (translators.length != 0) {
                 for (final Translator translator : translators) {
                     if (translatorToRemove.equals(translator.getName(transaction))) {
-                        final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.TRANSLATORS);
-                        grouping.removeChild(transaction, translatorToRemove);
+                        translator.remove(transaction);
                         found = true;
                         break;
                     }

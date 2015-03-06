@@ -541,17 +541,20 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
         boolean found = false;
 
         try {
-            if (hasChild(transaction, VdbLexicon.DataRole.PERMISSIONS)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.DataRole.PERMISSIONS);
+            final Permission[] permissions = getPermissions( transaction );
 
-                if (grouping.hasChild(transaction, permissionToRemove)) {
-                    grouping.removeChild(transaction, permissionToRemove);
-                    found = true;
+            if (permissions.length != 0) {
+                for (final Permission permission : permissions) {
+                    if (permissionToRemove.equals( permission.getName( transaction ) )) {
+                        permission.remove( transaction );
+                        found = true;
+                        break;
+                    }
                 }
             }
 
             if (!found) {
-                throw new KException(Messages.getString(Relational.PERMISSION_NOT_FOUND_TO_REMOVE, permissionToRemove));
+                throw new KException( Messages.getString( Relational.PERMISSION_NOT_FOUND_TO_REMOVE, permissionToRemove ) );
             }
 
             if (uow == null) {

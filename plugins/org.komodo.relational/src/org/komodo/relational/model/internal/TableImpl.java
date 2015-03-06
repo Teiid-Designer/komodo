@@ -1060,7 +1060,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
             if (accessPatterns.length != 0) {
                 for (final AccessPattern accessPattern : accessPatterns) {
                     if (accessPatternToRemove.equals(accessPattern.getName(transaction))) {
-                        removeChild(transaction, accessPatternToRemove);
+                        accessPattern.remove( transaction );
                         found = true;
                         break;
                     }
@@ -1112,7 +1112,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
             if (columns.length != 0) {
                 for (final Column column : columns) {
                     if (columnToRemove.equals(column.getName(transaction))) {
-                        removeChild(transaction, columnToRemove);
+                        column.remove( transaction );
                         found = true;
                         break;
                     }
@@ -1162,7 +1162,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
             if (foreignKeys.length != 0) {
                 for (final ForeignKey foreignKey : foreignKeys) {
                     if (foreignKeyToRemove.equals(foreignKey.getName(transaction))) {
-                        removeChild(transaction, foreignKeyToRemove);
+                        foreignKey.remove( transaction );
                         found = true;
                         break;
                     }
@@ -1214,7 +1214,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
             if (indexes.length != 0) {
                 for (final Index index : indexes) {
                     if (indexToRemove.equals(index.getName(transaction))) {
-                        removeChild(transaction, indexToRemove);
+                        index.remove( transaction );
                         found = true;
                         break;
                     }
@@ -1263,7 +1263,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
                                                         PrimaryKey.CONSTRAINT_TYPE.toString()));
             }
 
-            removeChild(transaction, primaryKey.getName(transaction));
+            primaryKey.remove( transaction );
 
             if (uow == null) {
                 transaction.commit();
@@ -1305,7 +1305,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
             if (options.length != 0) {
                 for (final StatementOption option : options) {
                     if (optionToRemove.equals(option.getName(transaction))) {
-                        removeChild(transaction, optionToRemove);
+                        option.remove( transaction );
                         found = true;
                         break;
                     }
@@ -1356,7 +1356,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
             if (uniqueConstraints.length != 0) {
                 for (final UniqueConstraint uniqueConstraint : uniqueConstraints) {
                     if (constraintToRemove.equals(uniqueConstraint.getName(transaction))) {
-                        removeChild(transaction, constraintToRemove);
+                        uniqueConstraint.remove( transaction );
                         found = true;
                         break;
                     }
@@ -1470,11 +1470,11 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         }
 
         try {
-            // delete existing primary key
+            // delete existing primary key (dont' call removePrimaryKey)
             final PrimaryKey primaryKey = getPrimaryKey(transaction);
 
             if (primaryKey != null) {
-                removeChild(transaction, primaryKey.getName(transaction));
+                primaryKey.remove( transaction );
             }
 
             final PrimaryKey result = RelationalModelFactory.createPrimaryKey(transaction,
