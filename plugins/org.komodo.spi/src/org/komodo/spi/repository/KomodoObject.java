@@ -219,7 +219,18 @@ public interface KomodoObject extends KNode {
     void print( final UnitOfWork transaction ) throws KException;
 
     /**
-     * To remove children with same name, the same name must be passed in more than once.
+     * Removes this node.
+     *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @throws KException
+     *         if an error occurs
+     */
+    void remove( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * To remove children with same name, the same name must be passed in more than once. It is recommended to use
+     * {@link #remove(UnitOfWork)} whenever the node being removed is available.
      *
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
@@ -227,6 +238,7 @@ public interface KomodoObject extends KNode {
      *        the name(s) of the child(ren) being removed from this object (cannot be empty)
      * @throws KException
      *         if an error occurs
+     * @see #remove(UnitOfWork)
      */
     void removeChild( final UnitOfWork transaction,
                       final String... names ) throws KException;

@@ -259,7 +259,7 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
             if (columns.length != 0) {
                 for (final ResultSetColumn column : columns) {
                     if (columnToRemove.equals( column.getName( transaction ) )) {
-                        removeChild( transaction, columnToRemove );
+                        column.remove( transaction );
                         found = true;
                         break;
                     }

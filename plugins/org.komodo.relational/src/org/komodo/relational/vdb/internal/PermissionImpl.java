@@ -536,12 +536,15 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         boolean found = false;
 
         try {
-            if (hasChild(transaction, VdbLexicon.DataRole.Permission.CONDITIONS)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.DataRole.Permission.CONDITIONS);
+            final Condition[] conditions = getConditions(transaction);
 
-                if (grouping.hasChild(transaction, conditionToRemove)) {
-                    grouping.removeChild(transaction, conditionToRemove);
-                    found = true;
+            if (conditions.length != 0) {
+                for (final Condition condition : conditions) {
+                    if (conditionToRemove.equals( condition.getName( transaction ) )) {
+                        condition.remove( transaction );
+                        found = true;
+                        break;
+                    }
                 }
             }
 
@@ -583,17 +586,20 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         boolean found = false;
 
         try {
-            if (hasChild(transaction, VdbLexicon.DataRole.Permission.MASKS)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.DataRole.Permission.MASKS);
+            final Mask[] masks = getMasks( transaction );
 
-                if (grouping.hasChild(transaction, maskToRemove)) {
-                    grouping.removeChild(transaction, maskToRemove);
-                    found = true;
+            if (masks.length != 0) {
+                for (final Mask mask : masks) {
+                    if (maskToRemove.equals( mask.getName( transaction ) )) {
+                        mask.remove( transaction );
+                        found = true;
+                        break;
+                    }
                 }
             }
 
             if (!found) {
-                throw new KException(Messages.getString(Relational.MASK_NOT_FOUND_TO_REMOVE, maskToRemove));
+                throw new KException( Messages.getString( Relational.MASK_NOT_FOUND_TO_REMOVE, maskToRemove ) );
             }
 
             if (uow == null) {

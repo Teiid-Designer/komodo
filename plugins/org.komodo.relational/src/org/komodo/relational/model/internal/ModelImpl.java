@@ -845,7 +845,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             if (functions.length != 0) {
                 for (final Function function : functions) {
                     if (functionName.equals( function.getName( transaction ) )) {
-                        removeChild( transaction, functionName );
+                        function.remove( transaction );
                         found = true;
                         break;
                     }
@@ -895,7 +895,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             if (procedures.length != 0) {
                 for (final Procedure procedure : procedures) {
                     if (procedureName.equals( procedure.getName( transaction ) )) {
-                        removeChild( transaction, procedureName );
+                        procedure.remove( transaction );
                         found = true;
                         break;
                     }
@@ -945,8 +945,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             if (sources.length != 0) {
                 for (final ModelSource source : sources) {
                     if (sourceToRemove.equals( source.getName( transaction ) )) {
-                        final KomodoObject grouping = getChild( transaction, VdbLexicon.Vdb.SOURCES );
-                        grouping.removeChild( transaction, sourceToRemove );
+                        source.remove( transaction );
                         found = true;
                         break;
                     }
@@ -996,7 +995,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             if (tables.length != 0) {
                 for (final Table table : tables) {
                     if (tableName.equals( table.getName( transaction ) )) {
-                        removeChild( transaction, tableName );
+                        table.remove( transaction );
                         found = true;
                         break;
                     }
@@ -1046,7 +1045,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             if (views.length != 0) {
                 for (final View view : views) {
                     if (viewName.equals( view.getName( transaction ) )) {
-                        removeChild( transaction, viewName );
+                        view.remove( transaction );
                         found = true;
                         break;
                     }

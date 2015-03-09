@@ -410,7 +410,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
             if (options.length != 0) {
                 for (final StatementOption option : options) {
                     if (optionToRemove.equals( option.getName( transaction ) )) {
-                        removeChild( transaction, optionToRemove );
+                        option.remove( transaction );
                         found = true;
                         break;
                     }
