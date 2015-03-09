@@ -542,7 +542,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
     @Override
     public List<KomodoObject> searchByKeyword( UnitOfWork uow, String type, String property,
-                                                                             KeywordCriteria keywordCriteria, 
+                                                                             KeywordCriteria keywordCriteria,
                                                                              String... keywords) throws KException {
 
         UnitOfWork transaction = verifyTransaction(uow, "seachByKeyword", true); //$NON-NLS-1$
@@ -562,7 +562,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         searcher.addFromType(type, typeAlias);
         searcher.addWhereContainsClause(null, typeAlias, property, keywordCriteria, keywords);
         List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
-        
+
         return searchObjects;
     }
 
@@ -685,11 +685,13 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         String nodePath = path.trim();
 
-        if (!nodePath.startsWith(WORKSPACE_ROOT)) {
-            if (REPO_ROOT.equals(path)) {
-                return WORKSPACE_ROOT;
-            }
+        // return workspace root if path is forward slash
+        if (REPO_ROOT.equals(nodePath)) {
+            return WORKSPACE_ROOT;
+        }
 
+        // if path does not start with workspace root assume a relative path so insert workspace root
+        if (!nodePath.startsWith(WORKSPACE_ROOT)) {
             if (nodePath.charAt(0) == File.separatorChar) {
                 nodePath = WORKSPACE_ROOT + FORWARD_SLASH + nodePath.substring(1); // remove leading slash
             } else {

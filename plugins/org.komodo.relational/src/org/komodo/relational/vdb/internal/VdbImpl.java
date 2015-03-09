@@ -1132,6 +1132,43 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.repository.ObjectImpl#rename(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void rename( final UnitOfWork uow,
+                        final String newName ) throws KException {
+        ArgCheck.isNotEmpty( newName, "newName" ); //$NON-NLS-1$
+        ArgCheck.doesNotContain( newName, "/", "newName" ); //$NON-NLS-1$ //$NON-NLS-2$
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "vdbimpl-rename", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug( "vdbimpl-rename: transaction = {0}, old path = {1}, new name = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          getAbsolutePath(),
+                          newName );
+        }
+
+        try {
+            super.rename( transaction, newName );
+            setVdbName( transaction, newName );
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.vdb.Vdb#setConnectionType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override

@@ -151,7 +151,7 @@ public interface Repository {
     /**
      * A listener notified when a unit of work completes.
      */
-    interface UnitOfWorkListener {
+    public interface UnitOfWorkListener {
 
         /**
          * @param error
