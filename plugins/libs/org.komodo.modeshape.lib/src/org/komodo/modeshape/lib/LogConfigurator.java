@@ -29,6 +29,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -86,17 +87,29 @@ public class LogConfigurator {
     }
 
     private void initContext() throws Exception {
-        LoggerContext context = (LoggerContext)LoggerFactory.getILoggerFactory();
-        JoranConfigurator configurator = new JoranConfigurator();
-        configurator.setContext(context);
+        ILoggerFactory factory = LoggerFactory.getILoggerFactory();
+        if (factory instanceof LoggerContext) {
+            LoggerContext context = (LoggerContext)LoggerFactory.getILoggerFactory();
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(context);
 
-        /*
-         * Call context.reset() to clear any previous configuration, e.g. default configuration.
-         */
-        context.reset();
+            /*
+             * Call context.reset() to clear any previous configuration, e.g. default configuration.
+             */
+            context.reset();
 
-        File configFile = deriveConfigFile();
-        configurator.doConfigure(configFile.getAbsolutePath());
+            File configFile = deriveConfigFile();
+            configurator.doConfigure(configFile.getAbsolutePath());
+        } else {
+            try {
+                String msg = "While trying to init KLog context, the instance of ILoggerFactory is NOT an instance of LoggerContext." + //$NON-NLS-1$
+                                    " The class instance of ILoggerFactory is " + factory.getClass().getName(); //$NON-NLS-1$
+
+                throw new UnsupportedOperationException(msg);
+            } catch (RuntimeException ex) {
+                System.err.println(ex);
+            }
+        }
     }
 
     /**
