@@ -13,7 +13,7 @@
     <packaging>eclipse-plugin</packaging>
 
     <properties>
-        <modeshape.version>4.1.0.Final</modeshape.version>
+        <modeshape.version>4.2.0.Final</modeshape.version>
         <!-- Should be the same as specified in the modeshape bom. Cannot pick it up directly -->
         <logback.version>1.0.9</logback.version>
         <infinispan.version>6.0.2.Final</infinispan.version>
@@ -80,65 +80,7 @@
                             	org.jboss.tools.komodo.plugins,
                             	org.jboss.tools.komodo.plugins.libs
                             </excludeGroupIds>
-                            <excludeArtifactIds>
-                                modeshape-sequencer-teiid
-                                modeshape-sequencer-ddl
-                                <!-- Added until release of modeshape 4.2 and fix for MODE-2386 -->
-                                modeshape-jcr
-                            </excludeArtifactIds>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-scm-plugin</artifactId>
-                <version>1.9.2</version>
-                <configuration>
-                    <connectionUrl>scm:git:https://github.com/Teiid-Designer/modeshape.git</connectionUrl>
-                    <connectionType>connection</connectionType>
-                    <checkoutDirectory>${project.build.directory}/modeshape</checkoutDirectory>
-                    <scmVersion>master</scmVersion>
-                    <scmVersionType>branch</scmVersionType>
-                    <skipCheckoutIfExists>true</skipCheckoutIfExists>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>checkout</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.basedir}/forked/</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}/modeshape/sequencers</directory>
-                                    <includes>
-                                        <include>**/modeshape-sequencer-ddl/src/main/**</include>
-                                        <include>**/modeshape-sequencer-teiid/src/main/**</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>${project.build.directory}/modeshape/</directory>
-                                    <includes>
-                                        <include>modeshape-jcr/src/main/**</include>
-                                    </includes>
-                                </resource>
-                            </resources>
                         </configuration>
                     </execution>
                 </executions>
@@ -260,10 +202,6 @@
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-common</artifactId>
         </dependency>
-<!--
-
-    Commented out since we build from source
-
         <dependency>
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-jcr</artifactId>
@@ -276,8 +214,6 @@
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-sequencer-teiid</artifactId>
         </dependency>
-
--->
         <dependency>
             <groupId>org.modeshape</groupId>
             <artifactId>modeshape-schematic</artifactId>
@@ -300,40 +236,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
-        </dependency>
-        <!-- Allow modeshape-jcr to compile -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.security.jacc</groupId>
-            <artifactId>jboss-jacc-api_1.5_spec</artifactId>
-            <version>${javax.jacc.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.datastax.cassandra</groupId>
-            <artifactId>cassandra-driver-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-core</artifactId>
-            <version>${tika.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${joda.time.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapdb</groupId>
-            <artifactId>mapdb</artifactId>
-            <version>${mapdb.version}</version>
         </dependency>
     </dependencies>
 </project>

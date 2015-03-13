@@ -21,9 +21,9 @@
 		 						 modeshape-jcr-api.jar,
 								 modeshape-common.jar,
 								 modeshape-schematic.jar,
-								 ../forked/modeshape-sequencer-ddl/src,
-								 ../forked/modeshape-sequencer-teiid/src,
-								 ../forked/modeshape-jcr/src,
+								 modeshape-sequencer-ddl.jar,
+								 modeshape-sequencer-teiid.jar,
+								 modeshape-jcr.jar,
 								 infinispan-cachestore-leveldb.jar,
 								 logback-core.jar,
 								 logback-classic.jar"/>
@@ -77,7 +77,7 @@
 
 	<target name="clean-internal" if="should-generate">
 		<echo message="Removing generated files ..." />
-		<delete includeEmptyDirs="true">
+		<delete includeEmptyDirs="true" quiet="true">
 		  <fileset dir="forked" includes="**/*" defaultexcludes="no"/>
 		</delete>
 	</target>
