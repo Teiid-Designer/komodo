@@ -20,10 +20,10 @@
 
 	<!-- Comma-separated list of required libraries -->
 	<property name="libs" value="connector-api.jar,
-                                 jboss-as-cli.jar,
-                                 jboss-as-controller-client.jar,
-                                 jboss-as-controller.jar,
-                                 jboss-as-protocol.jar,
+                                 wildfly-cli.jar,
+                                 wildfly-controller-client.jar,
+                                 wildfly-controller.jar,
+                                 wildfly-protocol.jar,
                                  jboss-dmr.jar,
                                  jboss-logging.jar,
                                  jboss-marshalling-river.jar,
@@ -36,7 +36,7 @@
                                  jgroups.jar,
                                  json-simple.jar,
                                  jta.jar,
-                                 netty.jar,
+                                 netty-all.jar,
                                  nux.jar,
                                  saxonhe.jar,
                                  xnio-api.jar,

@@ -8,12 +8,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
 Require-Bundle: org.komodo.spi;bundle-version="[1.0.0,2.0.0)",
  org.komodo.utils;bundle-version="[1.0.0,2.0.0)"
-Bundle-ClassPath: lib/connector-api.jar,
+Bundle-ClassPath: .,
+ lib/connector-api.jar,
  lib/jgroups.jar,
- lib/jboss-as-cli.jar,
- lib/jboss-as-controller.jar,
- lib/jboss-as-controller-client.jar,
- lib/jboss-as-protocol.jar,
  lib/jboss-dmr.jar,
  lib/jboss-logging.jar,
  lib/jboss-marshalling.jar,
@@ -25,13 +22,16 @@ Bundle-ClassPath: lib/connector-api.jar,
  lib/jboss-vfs.jar,
  lib/json-simple.jar,
  lib/jta.jar,
- lib/netty.jar,
+ lib/netty-all.jar,
  lib/nux.jar,
  lib/saxonhe.jar,
+ lib/wildfly-cli.jar,
+ lib/wildfly-controller-client.jar,
+ lib/wildfly-controller.jar,
+ lib/wildfly-protocol.jar,
  lib/xnio-api.jar,
  lib/xnio-nio.jar,
- lib/xom.jar,
- .
+ lib/xom.jar
 Export-Package: org.teiid.runtime.client.admin.factory,
  org.teiid.runtime.client.instance
 

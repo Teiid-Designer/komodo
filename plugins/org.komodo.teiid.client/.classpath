@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/netty-all.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wildfly-cli.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wildfly-controller-client.jar" sourcepath="/home/phantomjinx/.m2/repository/org/wildfly/wildfly-controller-client/8.0.0.Final/wildfly-controller-client-8.0.0.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wildfly-controller.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wildfly-protocol.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/saxonhe.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/netty.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/connector-api.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jboss-as-protocol.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-logging.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-marshalling-river.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-marshalling.jar"/>
@@ -14,10 +17,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/json-simple.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jta.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-threads.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jboss-as-controller.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jboss-as-cli.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-dmr.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jboss-as-controller-client.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/nux.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xom.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-vfs.jar"/>
