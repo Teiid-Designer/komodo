@@ -171,12 +171,14 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     /**
      * A unit of work analogous to a transaction.
      */
-    public static class UnitOfWorkImpl implements Repository.UnitOfWork {
+    public static class UnitOfWorkImpl implements UnitOfWork {
 
-        private final UnitOfWorkListener callback;
-        private final String name;
-        private final boolean rollbackOnly;
-        private Session session;
+        protected final UnitOfWorkListener callback;
+        protected KException error;
+        protected final String name;
+        protected final boolean rollbackOnly;
+        protected Session session;
+        protected State state = State.NOT_STARTED;
 
         /**
          * @param uowName
@@ -208,32 +210,47 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
          */
         @Override
         public void commit() {
-            LOGGER.debug("commit transaction {0}", getName()); //$NON-NLS-1$
-
-            if (this.rollbackOnly) {
-                rollback();
+            if (this.state != State.NOT_STARTED) {
+                this.error = new KException( Messages.getString( Messages.Komodo.ERROR_TRANSACTION_FINISHED,
+                                                                 this.name,
+                                                                 this.state ) );
+                this.state = State.ERROR;
             } else {
-                try {
-                    if (this.session == null) {
-                        throw new KException(Messages.getString(Messages.Komodo.ERROR_SESSION_IS_CLOSED, this.name));
-                    }
+                LOGGER.debug( "commit transaction {0}", getName() ); //$NON-NLS-1$
 
-                    this.session.save();
-                    LOGGER.debug("transaction {0} saved", getName()); //$NON-NLS-1$
+                if (this.rollbackOnly) {
+                    rollback();
+                } else {
+                    this.state = State.RUNNING;
 
-                    if (this.callback != null) {
-                        this.callback.respond(this);
+                    try {
+                        if (this.session == null) {
+                            this.state = State.ERROR;
+                            this.error = new KException( Messages.getString( Messages.Komodo.ERROR_SESSION_IS_CLOSED, this.name ) );
+                        } else {
+                            this.session.save();
+                            this.state = State.COMMITTED;
+                            LOGGER.debug( "transaction {0} saved", getName() ); //$NON-NLS-1$
+
+                            if (this.callback != null) {
+                                this.callback.respond( this );
+                            }
+                        }
+                    } catch (final Exception e) {
+                        this.state = State.ERROR;
+                        this.error = new KException( e );
+
+                        if (this.callback == null) {
+                            LOGGER.error( Messages.getString( Messages.Komodo.ERROR_TRYING_TO_COMMIT, e, getName() ) );
+                            rollback();
+                            this.state = State.ERROR;
+                        } else {
+                            this.callback.errorOccurred( e );
+                        }
+                    } finally {
+                        if (session.isLive()) this.session.logout();
+                        this.session = null;
                     }
-                } catch (final Exception e) {
-                    if (this.callback == null) {
-                        LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_COMMIT, e, getName()));
-                        rollback();
-                    } else {
-                        this.callback.errorOccurred(e);
-                    }
-                } finally {
-                    this.session.logout();
-                    this.session = null;
                 }
             }
         }
@@ -246,6 +263,16 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         @Override
         public UnitOfWorkListener getCallback() {
             return this.callback;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getError()
+         */
+        @Override
+        public KException getError() {
+            return this.error;
         }
 
         /**
@@ -268,6 +295,16 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         /**
          * {@inheritDoc}
          *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getState()
+         */
+        @Override
+        public State getState() {
+            return this.state;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
          * @see org.komodo.spi.repository.Repository.UnitOfWork#isRollbackOnly()
          */
         @Override
@@ -282,29 +319,44 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
          */
         @Override
         public void rollback() {
-            LOGGER.debug("rollback transaction {0}", getName()); //$NON-NLS-1$
-            try {
-                if (this.session == null) {
-                    throw new KException(Messages.getString(Messages.Komodo.ERROR_SESSION_IS_CLOSED, this.name));
-                }
+            if (this.state != State.NOT_STARTED) {
+                this.error = new KException( Messages.getString( Messages.Komodo.ERROR_TRANSACTION_FINISHED,
+                                                                 this.name,
+                                                                 this.state ) );
+                this.state = State.ERROR;
+            } else {
+                this.state = State.RUNNING;
+                LOGGER.debug( "rollback transaction {0}", getName() ); //$NON-NLS-1$
 
-                this.session.refresh(false);
-                LOGGER.debug("transaction {0} rolled back", getName()); //$NON-NLS-1$
+                try {
+                    if (this.session == null) {
+                        this.state = State.ERROR;
+                        this.error = new KException( Messages.getString( Messages.Komodo.ERROR_SESSION_IS_CLOSED, this.name ) );
+                    } else {
+                        this.session.refresh( false );
+                        this.state = State.ROLLED_BACK;
+                        LOGGER.debug( "transaction {0} rolled back", getName() ); //$NON-NLS-1$
 
-                if (this.callback != null) {
-                    this.callback.respond(null);
+                        if (this.callback != null) {
+                            this.callback.respond( null );
+                        }
+                    }
+                } catch (final Exception e) {
+                    this.state = State.ERROR;
+                    this.error = new KException( e );
+
+                    if (this.callback == null) {
+                        LOGGER.error( Messages.getString( Messages.Komodo.ERROR_TRYING_TO_ROLLBACK, e, getName() ) );
+                    } else {
+                        this.callback.errorOccurred( e );
+                    }
+                } finally {
+                    if (session.isLive()) this.session.logout();
+                    this.session = null;
                 }
-            } catch (final Exception e) {
-                if (this.callback == null) {
-                    LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_ROLLBACK, e, getName()));
-                } else {
-                    this.callback.errorOccurred(e);
-                }
-            } finally {
-                this.session.logout();
-                this.session = null;
             }
         }
+
     }
 
     /**

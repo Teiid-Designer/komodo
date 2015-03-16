@@ -279,56 +279,58 @@ public class LocalRepository extends RepositoryImpl {
          */
         @Override
         public void commit() {
-            if (isRollbackOnly()) {
-                rollback();
+            if (this.state != State.NOT_STARTED) {
+                this.error = new KException( Messages.getString( Messages.Komodo.ERROR_TRANSACTION_FINISHED,
+                                                                 this.name,
+                                                                 this.state ) );
+                this.state = State.ERROR;
             } else {
-                final CountDownLatch latch = new CountDownLatch(1);
+                if (isRollbackOnly()) {
+                    rollback();
+                } else {
+                    this.state = State.RUNNING;
 
-                class CommitCallback implements RequestCallback {
+                    // engine thread callback that communicates with transaction callback
+                    class CommitCallback implements RequestCallback {
 
-                    @Override
-                    public void errorOccurred( final Throwable error ) {
-                        if (getCallback() == null) {
-                            KEngine.getInstance().getErrorHandler().error(error);
-                            return; // No callback so error can only be logged
+                        /**
+                         * {@inheritDoc}
+                         *
+                         * @see org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback#errorOccurred(java.lang.Throwable)
+                         */
+                        @Override
+                        public void errorOccurred( final Throwable error ) {
+                            setState( State.ERROR );
+
+                            if (getCallback() == null) {
+                                KEngine.getInstance().getErrorHandler().error( error );
+                            } else {
+                                getCallback().errorOccurred( error );
+                            }
                         }
 
-                        getCallback().errorOccurred(error);
+                        /**
+                         * {@inheritDoc}
+                         *
+                         * @see org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback#respond(java.lang.Object)
+                         */
+                        @Override
+                        public void respond( final Object results ) {
+                            setState( State.COMMITTED );
+
+                            if (getCallback() != null) {
+                                getCallback().respond( null );
+                            }
+                        }
+
                     }
 
-                    @Override
-                    public void respond( final Object results ) {
-                        latch.countDown();
-                    }
-
-                }
-
-                final CommitCallback callback = new CommitCallback();
-                LocalRepository.this.engineThread.accept(new ModeshapeEngineThread.SessionRequest(RequestType.COMMIT_SESSION,
-                                                                                                  callback, getSession(),
-                                                                                                  getName()));
-
-                Exception error = null;
-                boolean noTimeout = false;
-
-                try {
-                    noTimeout = latch.await(3, TimeUnit.MINUTES);
-                } catch (final Exception e) {
-                    error = e;
-                }
-
-                if (noTimeout) {
-                    if (getCallback() != null) {
-                        getCallback().respond( null );
-                    }
-                } else {
-                    if (error == null) {
-                        callback.errorOccurred( new KException( Messages.getString( Messages.LocalRepository.Commit_Timeout,
-                                                                                    getName() ) ) );
-                    } else {
-                        callback.errorOccurred( new KException( Messages.getString( Messages.LocalRepository.Commit_Timeout,
-                                                                                    getName() ), error ) );
-                    }
+                    // send commit request
+                    final CommitCallback callback = new CommitCallback();
+                    LocalRepository.this.engineThread.accept( new ModeshapeEngineThread.SessionRequest( RequestType.COMMIT_SESSION,
+                                                                                                        callback,
+                                                                                                        getSession(),
+                                                                                                        getName() ) );
                 }
             }
         }
@@ -340,55 +342,70 @@ public class LocalRepository extends RepositoryImpl {
          */
         @Override
         public void rollback() {
-            final CountDownLatch latch = new CountDownLatch(1);
+            if (this.state != State.NOT_STARTED) {
+                this.error = new KException( Messages.getString( Messages.Komodo.ERROR_TRANSACTION_FINISHED,
+                                                                 this.name,
+                                                                 this.state ) );
+                this.state = State.ERROR;
+            } else {
+                this.state = State.RUNNING;
+            }
 
+            // engine thread callback that communicates with transaction callback
             class RollbackCallback implements RequestCallback {
 
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @see org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback#errorOccurred(java.lang.Throwable)
+                 */
                 @Override
                 public void errorOccurred( final Throwable error ) {
-                    if (getCallback() == null) {
-                        KEngine.getInstance().getErrorHandler().error(error);
-                        return; // No callback so error can only be logged
-                    }
+                    setState( State.ERROR );
 
-                    getCallback().errorOccurred(error);
+                    if (getCallback() == null) {
+                        KEngine.getInstance().getErrorHandler().error( error );
+                    } else {
+                        getCallback().errorOccurred( error );
+                    }
                 }
 
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @see org.komodo.repository.internal.ModeshapeEngineThread.RequestCallback#respond(java.lang.Object)
+                 */
                 @Override
                 public void respond( final Object results ) {
-                    latch.countDown();
+                    setState( State.ROLLED_BACK );
+
+                    if (getCallback() != null) {
+                        getCallback().respond( null );
+                    }
                 }
 
             }
 
+            // send rollback request
             final RollbackCallback callback = new RollbackCallback();
             LocalRepository.this.engineThread.accept(new ModeshapeEngineThread.SessionRequest(RequestType.ROLLBACK_SESSION,
                                                                                               callback,
                                                                                               getSession(),
                                                                                               getName()));
+        }
 
-            Exception error = null;
-            boolean noTimeout = false;
+        protected void setError( final Throwable e ) {
+            this.state = State.ERROR;
 
-            try {
-                noTimeout = latch.await(3, TimeUnit.MINUTES);
-            } catch (final Exception e) {
-                error = e;
-            }
-
-            if (noTimeout) {
-                if (getCallback() != null) {
-                    getCallback().respond( null );
-                }
+            if (e instanceof KException) {
+                this.error = ( KException )e;
             } else {
-                if (error == null) {
-                    callback.errorOccurred( new KException( Messages.getString( Messages.LocalRepository.Rollback_Timeout,
-                                                                                getName() ) ) );
-                } else {
-                    callback.errorOccurred( new KException( Messages.getString( Messages.LocalRepository.Rollback_Timeout,
-                                                                                getName() ), error ) );
-                }
+                this.error = new KException( e );
             }
+        }
+
+        protected void setState ( final State newState ) {
+            this.state = newState;
         }
 
     }

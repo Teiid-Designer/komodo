@@ -111,7 +111,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
      * value is used instead.
      *
      * @see getTestConfiguration
-     * 
+     *
      * @return the location of modeshape's test configuration file
      */
     protected String getTestConfigurationPath() {
@@ -146,7 +146,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
         repository = engine.deploy(config);
         problems = repository.getStartupProblems();
         if (problems.hasErrors() || problems.hasWarnings()) {
-            
+
             Iterator<Problem> iterator = problems.iterator();
             while(iterator.hasNext()) {
                 Problem problem = iterator.next();
@@ -176,7 +176,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
      // log out of the session after each test ...
         try {
             clearRepository();
-            if (session != null)
+            if ((session != null) && session.isLive())
                 session.logout();
         } finally {
             session = null;
@@ -205,7 +205,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
 
     /**
      * Utility method to get the resource on the classpath given by the supplied name
-     * 
+     *
      * @param name the name (or path) of the classpath resource
      * @return the input stream to the content; may be null if the resource does not exist
      */
@@ -215,7 +215,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
 
     /**
      * Register the node types in the CND file at the given location on the classpath.
-     * 
+     *
      * @param resourceName the name of the CND file on the classpath
      * @throws RepositoryException if there is a problem registering the node types
      * @throws IOException if the CND file could not be read
@@ -230,7 +230,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
 
     /**
      * Import under the supplied parent node the repository content in the XML file at the given location on the classpath.
-     * 
+     *
      * @param parent the node under which the content should be imported; may not be null
      * @param resourceName the name of the XML file on the classpath
      * @param uuidBehavior the UUID behavior; see {@link ImportUUIDBehavior} for values
@@ -245,7 +245,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
 
     /**
      * Import under the supplied parent node the repository content in the XML file at the given location on the classpath.
-     * 
+     *
      * @param parentPath the path to the node under which the content should be imported; may not be null
      * @param resourceName the name of the XML file on the classpath
      * @param uuidBehavior the UUID behavior; see {@link ImportUUIDBehavior} for values

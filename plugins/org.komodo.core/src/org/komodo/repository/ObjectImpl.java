@@ -390,12 +390,13 @@ public class ObjectImpl implements KomodoObject, StringConstants {
 
         try {
             final Node node = node(transaction).addNode(name, type);
+            final KomodoObject result = new ObjectImpl(getRepository(), node.getPath(), node.getIndex());
 
             if (uow == null) {
                 transaction.commit();
             }
 
-            return new ObjectImpl(getRepository(), node.getPath(), node.getIndex());
+            return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }

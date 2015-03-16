@@ -122,6 +122,38 @@ public interface Repository {
     interface UnitOfWork {
 
         /**
+         * The transaction states.
+         */
+        public enum State {
+
+            /**
+             * The transaction has been committed.
+             */
+            COMMITTED,
+
+            /**
+             * There was an error running the transaction.
+             */
+            ERROR,
+
+            /**
+             * The transaction has not been run (neither commit or rollback has been called).
+             */
+            NOT_STARTED,
+
+            /**
+             * The transaction has been rolled back.
+             */
+            ROLLED_BACK,
+
+            /**
+             * The transaction is currently being committed or rolled back.
+             */
+            RUNNING;
+
+        }
+
+        /**
          * Saves all changes made during the transaction. If this is a roll back transaction then {@link #rollback()} is called.
          */
         void commit();
@@ -132,9 +164,20 @@ public interface Repository {
         UnitOfWorkListener getCallback();
 
         /**
+         * @return an error caught during the transaction (can be <code>null</code>)
+         * @see State#ERROR
+         */
+        KException getError();
+
+        /**
          * @return the name of the transaction (never <code>null</code>)
          */
         String getName();
+
+        /**
+         * @return the transaction state (never <code>null</code>)
+         */
+        State getState();
 
         /**
          * @return <code>true</code> if only rollback is allowed

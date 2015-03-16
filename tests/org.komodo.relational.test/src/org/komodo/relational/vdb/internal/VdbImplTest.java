@@ -13,12 +13,9 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
-import org.komodo.relational.UnitOfWorkTestListener;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
@@ -30,9 +27,7 @@ import org.komodo.relational.vdb.Vdb.VdbManifest;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -406,14 +401,7 @@ public final class VdbImplTest extends RelationalModelTest {
     @Test
     public void shouldRename() throws Exception {
         final String newName = "newVdbName";
-        final CountDownLatch latch = new CountDownLatch( 1 );
-        final UnitOfWorkListener callback = new UnitOfWorkTestListener( latch );
-        final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, callback );
-
-        this.vdb.rename( uow, newName );
-        uow.commit();
-
-        assertThat( latch.await( 3, TimeUnit.SECONDS ), is( true ) ); // wait for the commit to finish
+        this.vdb.rename( null, newName );
         assertThat( this.vdb.getName( null ), is( newName ) );
         assertThat( this.vdb.getVdbName( null ), is( newName ) );
     }

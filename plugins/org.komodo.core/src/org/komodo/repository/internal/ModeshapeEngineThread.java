@@ -247,7 +247,7 @@ public class ModeshapeEngineThread extends Thread {
                 request.getCallback().errorOccurred(e);
             }
         } finally {
-            session.logout();
+            if (session.isLive()) session.logout();
         }
     }
 
@@ -293,7 +293,7 @@ public class ModeshapeEngineThread extends Thread {
         LOGGER.debug("rollback session for request {0}", rollbackRequest.getName()); //$NON-NLS-1$
 
         try {
-            session.refresh(false);
+            if (session.isLive()) session.refresh(false);
             LOGGER.debug("rollback session request {0} has been rolled back", rollbackRequest.getName()); //$NON-NLS-1$
 
             if (request.getCallback() != null) {
