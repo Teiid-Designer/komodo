@@ -1335,7 +1335,19 @@ public final class StringUtils implements StringConstants {
 
         return sb.toString();
     }
-//
+
+    /**
+     * @param value the string whose leading spaces are being removed (can be empty)
+     * @return the input with leading spaces removed (can be <code>null</code> if input is <code>null</code>)
+     */
+    public static String trimLeft( final String value ) {
+        if (isEmpty(value)) {
+            return value;
+        }
+
+        return value.replaceAll("^\\s+", ""); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
     /**
      * Don't allow construction outside of this class.
      */

@@ -182,9 +182,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
     }
 
-    final int index;
-    final String path;
-    final Repository repository;
+    protected int index;
+    protected String path;
+    final private Repository repository;
 
     /**
      * @param komodoRepository
@@ -390,12 +390,13 @@ public class ObjectImpl implements KomodoObject, StringConstants {
 
         try {
             final Node node = node(transaction).addNode(name, type);
+            final KomodoObject result = new ObjectImpl(getRepository(), node.getPath(), node.getIndex());
 
             if (uow == null) {
                 transaction.commit();
             }
 
-            return new ObjectImpl(getRepository(), node.getPath(), node.getIndex());
+            return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
         }
@@ -1202,6 +1203,50 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             }
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#rename(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void rename( final UnitOfWork uow,
+                        final String newName ) throws KException {
+        ArgCheck.isNotEmpty( newName, "newName" ); //$NON-NLS-1$
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = getRepository().createTransaction( "objectimpl-rename", false, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug( "kobject-rename: transaction = {0}, old path = {1}, new name = {1}", //$NON-NLS-1$
+                          transaction.getName(),
+                          getAbsolutePath(),
+                          newName );
+        }
+
+        try {
+            String newPath = getParent( transaction ).getAbsolutePath();
+
+            if (!newPath.endsWith( FORWARD_SLASH )) {
+                newPath += FORWARD_SLASH;
+            }
+
+            newPath += newName;
+            getSession( transaction ).move( getAbsolutePath(), newPath );
+            this.path = newPath;
+            // TODO seems like index could change also
+
+            if (uow == null) {
+                transaction.commit();
+            }
+        } catch (final Exception e) {
+            throw handleError( uow, transaction, e );
         }
     }
 

@@ -35,7 +35,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
     private static final String PATH = "/Users/sledge/hammer/MyVdb.vdb";
 
-    private Vdb vdb;
+    protected Vdb vdb;
     private String vdbName;
 
     @Before
@@ -198,6 +198,21 @@ public final class VdbImplTest extends RelationalModelTest {
                 // expected
             }
         }
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailRenameWhenNewNameHasSlash() throws Exception {
+        this.vdb.rename( null, "illegal/name" );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailRenameWhenNewNameIsEmpty() throws Exception {
+        this.vdb.rename( null, EMPTY_STRING );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailRenameWhenNewNameIsNull() throws Exception {
+        this.vdb.rename( null, null );
     }
 
     @Test
@@ -381,6 +396,14 @@ public final class VdbImplTest extends RelationalModelTest {
 
         this.vdb.removeImport(null, name);
         assertThat(this.vdb.getImports(null).length, is(0));
+    }
+
+    @Test
+    public void shouldRename() throws Exception {
+        final String newName = "newVdbName";
+        this.vdb.rename( null, newName );
+        assertThat( this.vdb.getName( null ), is( newName ) );
+        assertThat( this.vdb.getVdbName( null ), is( newName ) );
     }
 
     @Test

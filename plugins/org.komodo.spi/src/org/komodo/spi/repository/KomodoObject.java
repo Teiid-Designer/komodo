@@ -257,6 +257,17 @@ public interface KomodoObject extends KNode {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param newName
+     *        the new name (cannot be empty or contain any slashes)
+     * @throws KException
+     *         if an error occurs
+     */
+    void rename( final UnitOfWork transaction,
+                 final String newName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param typeName
      *        the new primary type name or <code>null</code> or empty if setting to <code>nt:unstructured</code>
      * @throws KException

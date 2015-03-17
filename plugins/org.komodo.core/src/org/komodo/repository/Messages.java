@@ -68,6 +68,11 @@ public class Messages implements StringConstants {
         DUPLICATE_OBJECT_ERROR,
         ERROR_ADDING_ARTIFACT,
         ERROR_SESSION_IS_CLOSED,
+
+        /**
+         * Indicates a transaction that had already been run is being run again.
+         */
+        ERROR_TRANSACTION_FINISHED,
         ERROR_TRYING_TO_COMMIT,
         ERROR_TRYING_TO_ROLLBACK,
 

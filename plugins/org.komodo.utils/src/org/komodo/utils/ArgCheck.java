@@ -440,6 +440,34 @@ public class ArgCheck {
 //
 
     /**
+     * @param arg
+     *        the argument being checked (cannot be empty)
+     * @param illegalCharacters
+     *        the characters the arg cannot contain (can be empty)
+     * @param message
+     *        the error message used when an illegal character is found (can be empty if a generic message should be used)
+     */
+    public static void doesNotContain( final String arg,
+                                       final String illegalCharacters,
+                                       final String message ) {
+        isNotEmpty( arg, message );
+
+        if (!StringUtils.isBlank( illegalCharacters )) {
+            for (final char c : illegalCharacters.toCharArray()) {
+                if (arg.indexOf( c ) != -1) {
+                    String msg = message;
+
+                    if (StringUtils.isBlank( message )) {
+                        msg = "Argument \"" + arg + "\" contains the illegal character \"c\""; //$NON-NLS-1$ //$NON-NLS-2$
+                    }
+
+                    throw new IllegalArgumentException( msg );
+                }
+            }
+        }
+    }
+
+    /**
      * Can't construct - utility class
      */
     private ArgCheck() {
