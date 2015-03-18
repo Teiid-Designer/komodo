@@ -13,7 +13,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/jcr.jar" sourcepath="libsrc/jcr-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jgroups.jar" sourcepath="libsrc/jgroups-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/joda-time.jar" sourcepath="libsrc/time-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jsr305.jar" sourcepath="libsrc/jsr305-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/leveldb-api.jar" sourcepath="libsrc/api-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/leveldb.jar" sourcepath="libsrc/leveldb-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/leveldbjni-all.jar" sourcepath="libsrc/all-sources.jar"/>
