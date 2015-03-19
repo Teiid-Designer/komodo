@@ -29,8 +29,8 @@
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-jcr-api.jar" sourcepath="libsrc/api-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-jcr.jar" sourcepath="libsrc/jcr-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-schematic.jar" sourcepath="libsrc/schematic-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/modeshape-sequencer-ddl.jar" sourcepath="libsrc/ddl-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/modeshape-sequencer-teiid.jar" sourcepath="libsrc/teiid-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/modeshape-sequencer-ddl.jar" sourcepath="libsrc/modeshape-sequencer-ddl-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/modeshape-sequencer-teiid.jar" sourcepath="libsrc/modeshape-sequencer-teiid-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api.jar" sourcepath="libsrc/api-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tika-core.jar" sourcepath="libsrc/core-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
