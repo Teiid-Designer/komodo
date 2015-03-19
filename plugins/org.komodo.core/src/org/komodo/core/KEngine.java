@@ -170,7 +170,14 @@ public final class KEngine implements RepositoryClient, StringConstants {
      * @return the registered repositories (never <code>null</code> but can be empty)
      */
     public Set<Repository> getRepositories() {
-        return Collections.unmodifiableSet(this.repositories);
+        Set<Repository> allRepositories = new HashSet<Repository>();
+
+        if (defaultRepository != null)
+            allRepositories.add(defaultRepository);
+
+        allRepositories.addAll(this.repositories);
+
+        return Collections.unmodifiableSet(allRepositories);
     }
 
     private void notifyListeners(final KEvent event) {
