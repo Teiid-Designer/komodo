@@ -32,6 +32,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
@@ -771,7 +772,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @throws KException
      */
     protected < T > T getObjectProperty( UnitOfWork uow,
-                                         Property.ValueType returnValueType,
+                                         PropertyValueType returnValueType,
                                          String getterName,
                                          String propertyPath ) throws KException {
         UnitOfWork transaction = uow;

@@ -17,9 +17,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 
@@ -132,7 +132,7 @@ public final class VirtualProcedureImpl extends AbstractProcedureImpl implements
      */
     @Override
     public String getAsClauseStatement( final UnitOfWork uow ) throws KException {
-        return getObjectProperty( uow, Property.ValueType.STRING, "getAsClauseStatement", CreateProcedure.STATEMENT ); //$NON-NLS-1$
+        return getObjectProperty( uow, PropertyValueType.STRING, "getAsClauseStatement", CreateProcedure.STATEMENT ); //$NON-NLS-1$
     }
 
     /**

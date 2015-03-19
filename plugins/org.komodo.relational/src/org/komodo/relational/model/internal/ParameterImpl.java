@@ -25,9 +25,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -169,7 +169,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public String getDatatypeName( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getDatatypeName", //$NON-NLS-1$
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getDatatypeName", //$NON-NLS-1$
                                                 StandardDdlLexicon.DATATYPE_NAME );
 
         if (StringUtils.isBlank( value )) {
@@ -186,7 +186,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public String getDefaultValue( final UnitOfWork uow ) throws KException {
-        return getObjectProperty( uow, Property.ValueType.STRING, "getDefaultValue", //$NON-NLS-1$
+        return getObjectProperty( uow, PropertyValueType.STRING, "getDefaultValue", //$NON-NLS-1$
                                   StandardDdlLexicon.DEFAULT_VALUE );
     }
 
@@ -197,7 +197,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public Direction getDirection( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getDirection", //$NON-NLS-1$
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getDirection", //$NON-NLS-1$
                                                 CreateProcedure.PARAMETER_TYPE );
 
         if (StringUtils.isBlank( value )) {
@@ -214,7 +214,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public long getLength( final UnitOfWork uow ) throws KException {
-        final Long value = getObjectProperty( uow, Property.ValueType.LONG, "getLength", //$NON-NLS-1$
+        final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getLength", //$NON-NLS-1$
                                               StandardDdlLexicon.DATATYPE_LENGTH );
 
         if (value == null) {
@@ -231,7 +231,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public Nullable getNullable( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getNullable", //$NON-NLS-1$
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getNullable", //$NON-NLS-1$
                                                 StandardDdlLexicon.NULLABLE );
 
         if (StringUtils.isBlank( value )) {
@@ -248,7 +248,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public int getPrecision( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty( uow, Property.ValueType.INTEGER, "getPrecision", //$NON-NLS-1$
+        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getPrecision", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_PRECISION );
 
         if (value == null) {
@@ -265,7 +265,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public int getScale( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty( uow, Property.ValueType.INTEGER, "getScale", //$NON-NLS-1$
+        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getScale", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_SCALE );
 
         if (value == null) {
@@ -340,7 +340,7 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
      */
     @Override
     public boolean isResult( final UnitOfWork transaction ) throws KException {
-        final Boolean value = getObjectProperty( transaction, Property.ValueType.BOOLEAN, "isResult", //$NON-NLS-1$
+        final Boolean value = getObjectProperty( transaction, PropertyValueType.BOOLEAN, "isResult", //$NON-NLS-1$
                                                  CreateProcedure.PARAMETER_RESULT_FLAG );
 
         if (value == null) {

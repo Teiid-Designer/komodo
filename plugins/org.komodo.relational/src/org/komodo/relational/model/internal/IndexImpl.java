@@ -17,9 +17,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 
 /**
@@ -146,7 +146,7 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
      */
     @Override
     public String getExpression( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getExpression", Constraint.EXPRESSION); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getExpression", Constraint.EXPRESSION); //$NON-NLS-1$
     }
 
     /**

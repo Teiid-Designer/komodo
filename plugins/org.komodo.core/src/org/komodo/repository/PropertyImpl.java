@@ -28,6 +28,7 @@ import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -231,6 +232,66 @@ public class PropertyImpl implements Property {
 
         this.repository = propertyRepository;
         this.path = propertyPath;
+    }
+
+    @Override
+    public PropertyValueType getValueType(UnitOfWork uow) throws KException {
+        UnitOfWork transaction = uow;
+
+        if (uow == null) {
+            transaction = repository.createTransaction("propertyImpl-getValueType", true, null); //$NON-NLS-1$
+        }
+
+        assert (transaction != null);
+
+        PropertyValueType propertyValueType = PropertyValueType.UNDEFINED;
+
+        try {
+            final javax.jcr.Property result = getSession(transaction).getProperty(this.path);
+
+            if (uow == null) {
+                transaction.commit();
+            }
+
+            int requiredType = result.getDefinition().getRequiredType();
+            switch (requiredType) {
+                case PropertyType.NAME:
+                case PropertyType.STRING:
+                case PropertyType.PATH:
+                case PropertyType.REFERENCE:
+                case PropertyType.URI:
+                case PropertyType.WEAKREFERENCE:
+                    propertyValueType = PropertyValueType.STRING;
+                    break;
+                case PropertyType.LONG:
+                    propertyValueType = PropertyValueType.LONG;
+                    break;
+                case PropertyType.DOUBLE:
+                case PropertyType.DECIMAL:
+                    propertyValueType = PropertyValueType.DOUBLE;
+                    break;
+                case PropertyType.DATE:
+                    propertyValueType = PropertyValueType.CALENDAR;
+                    break;
+                case PropertyType.BOOLEAN:
+                    propertyValueType = PropertyValueType.BOOLEAN;
+                    break;
+                case PropertyType.BINARY:
+                case PropertyType.UNDEFINED:
+                default:
+                    propertyValueType = PropertyValueType.UNDEFINED;
+            }
+
+            return propertyValueType;
+        } catch (final Exception e) {
+            transaction.rollback();
+
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
     }
 
     /**

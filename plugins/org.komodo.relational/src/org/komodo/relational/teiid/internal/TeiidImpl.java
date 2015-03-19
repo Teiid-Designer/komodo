@@ -32,9 +32,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
@@ -479,7 +479,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      */
     @Override
     public String getId( UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getId", JcrLexicon.UUID.getString()); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getId", JcrLexicon.UUID.getString()); //$NON-NLS-1$
     }
 
     /**
@@ -491,7 +491,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      */
     @Override
     public String getHost( UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getHost", KomodoLexicon.Teiid.HOST); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getHost", KomodoLexicon.Teiid.HOST); //$NON-NLS-1$
     }
 
     /**
@@ -503,7 +503,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      */
     @Override
     public int getAdminPort( UnitOfWork uow ) throws KException {
-        Long port = getObjectProperty(uow, Property.ValueType.LONG, "getAdminPort", KomodoLexicon.Teiid.ADMIN_PORT); //$NON-NLS-1$
+        Long port = getObjectProperty(uow, PropertyValueType.LONG, "getAdminPort", KomodoLexicon.Teiid.ADMIN_PORT); //$NON-NLS-1$
         return port != null ? port.intValue() : TeiidAdminInfo.DEFAULT_PORT;
     }
 
@@ -530,7 +530,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      */
     @Override
     public String getAdminUser( UnitOfWork uow ) throws KException {
-        String user = getObjectProperty(uow, Property.ValueType.STRING, "getAdminUser", KomodoLexicon.Teiid.ADMIN_USER); //$NON-NLS-1$
+        String user = getObjectProperty(uow, PropertyValueType.STRING, "getAdminUser", KomodoLexicon.Teiid.ADMIN_USER); //$NON-NLS-1$
         return user != null ? user : TeiidAdminInfo.DEFAULT_ADMIN_USERNAME;
     }
 
@@ -557,7 +557,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      */
     @Override
     public String getAdminPassword( UnitOfWork uow ) throws KException {
-        String password = getObjectProperty(uow, Property.ValueType.STRING, "getAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD); //$NON-NLS-1$
+        String password = getObjectProperty(uow, PropertyValueType.STRING, "getAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD); //$NON-NLS-1$
         return password != null ? password : TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD;
     }
 
@@ -594,7 +594,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      */
     @Override
     public boolean isAdminSecure( UnitOfWork uow ) throws KException {
-        Boolean secure = getObjectProperty(uow, Property.ValueType.BOOLEAN, "isSecure", KomodoLexicon.Teiid.ADMIN_SECURE); //$NON-NLS-1$
+        Boolean secure = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isSecure", KomodoLexicon.Teiid.ADMIN_SECURE); //$NON-NLS-1$
         return secure != null ? secure : TeiidAdminInfo.DEFAULT_SECURE;
     }
 
@@ -620,7 +620,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      *         if error occurs
      */
     private int getJdbcPort( UnitOfWork uow ) throws KException {
-        Long port = getObjectProperty(uow, Property.ValueType.LONG, "getPort", KomodoLexicon.Teiid.JDBC_PORT); //$NON-NLS-1$
+        Long port = getObjectProperty(uow, PropertyValueType.LONG, "getPort", KomodoLexicon.Teiid.JDBC_PORT); //$NON-NLS-1$
         return port != null ? port.intValue() : TeiidJdbcInfo.DEFAULT_PORT;
     }
 
@@ -646,7 +646,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      *         if error occurs
      */
     private String getJdbcUsername( UnitOfWork uow ) throws KException {
-        String user = getObjectProperty(uow, Property.ValueType.STRING, "getUsername", KomodoLexicon.Teiid.JDBC_USER); //$NON-NLS-1$
+        String user = getObjectProperty(uow, PropertyValueType.STRING, "getUsername", KomodoLexicon.Teiid.JDBC_USER); //$NON-NLS-1$
         return user != null ? user : TeiidJdbcInfo.DEFAULT_JDBC_USERNAME;
     }
 
@@ -673,7 +673,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      */
     @Override
     public String getJdbcPassword( UnitOfWork uow ) throws KException {
-        String password = getObjectProperty(uow, Property.ValueType.STRING, "getPassword", KomodoLexicon.Teiid.JDBC_PSWD); //$NON-NLS-1$
+        String password = getObjectProperty(uow, PropertyValueType.STRING, "getPassword", KomodoLexicon.Teiid.JDBC_PSWD); //$NON-NLS-1$
         return password != null ? password : TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD;
     }
 
@@ -700,7 +700,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
      */
     @Override
     public boolean isJdbcSecure( UnitOfWork uow ) throws KException {
-        Boolean secure = getObjectProperty(uow, Property.ValueType.BOOLEAN, "isSecure", KomodoLexicon.Teiid.JDBC_SECURE); //$NON-NLS-1$
+        Boolean secure = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isSecure", KomodoLexicon.Teiid.JDBC_SECURE); //$NON-NLS-1$
         return secure != null ? secure : TeiidJdbcInfo.DEFAULT_SECURE;
     }
 

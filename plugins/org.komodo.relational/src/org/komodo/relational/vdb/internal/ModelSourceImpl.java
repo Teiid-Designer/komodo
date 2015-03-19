@@ -18,9 +18,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -132,7 +132,7 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
      */
     @Override
     public String getJndiName( final UnitOfWork uow ) throws KException {
-        return getObjectProperty( uow, Property.ValueType.STRING, "getJndiName", VdbLexicon.Source.JNDI_NAME ); //$NON-NLS-1$
+        return getObjectProperty( uow, PropertyValueType.STRING, "getJndiName", VdbLexicon.Source.JNDI_NAME ); //$NON-NLS-1$
     }
 
     /**
@@ -171,7 +171,7 @@ public final class ModelSourceImpl extends RelationalObjectImpl implements Model
      */
     @Override
     public String getTranslatorName( final UnitOfWork uow ) throws KException {
-        return getObjectProperty( uow, Property.ValueType.STRING, "getTranslatorName", VdbLexicon.Source.TRANSLATOR ); //$NON-NLS-1$
+        return getObjectProperty( uow, PropertyValueType.STRING, "getTranslatorName", VdbLexicon.Source.TRANSLATOR ); //$NON-NLS-1$
     }
 
     /**

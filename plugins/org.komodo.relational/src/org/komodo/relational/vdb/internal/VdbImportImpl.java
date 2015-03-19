@@ -18,9 +18,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -171,7 +171,7 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
      */
     @Override
     public int getVersion( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.INTEGER, "getVersion", VdbLexicon.ImportVdb.VERSION); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.INTEGER, "getVersion", VdbLexicon.ImportVdb.VERSION); //$NON-NLS-1$
     }
 
     /**
@@ -181,7 +181,7 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
      */
     @Override
     public boolean isImportDataPolicies( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isImportDataPolicies", //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isImportDataPolicies", //$NON-NLS-1$
                                  VdbLexicon.ImportVdb.IMPORT_DATA_POLICIES);
     }
 

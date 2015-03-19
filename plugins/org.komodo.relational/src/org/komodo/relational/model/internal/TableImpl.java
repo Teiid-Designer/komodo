@@ -32,6 +32,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
@@ -766,7 +767,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public OnCommit getOnCommitValue( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty(uow, Property.ValueType.STRING, "getOnCommitValue", //$NON-NLS-1$
+        final String value = getObjectProperty(uow, PropertyValueType.STRING, "getOnCommitValue", //$NON-NLS-1$
                                                StandardDdlLexicon.ON_COMMIT_VALUE);
 
         if (StringUtils.isBlank(value)) {
@@ -831,7 +832,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public String getQueryExpression( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getQueryExpression", CreateTable.QUERY_EXPRESSION); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getQueryExpression", CreateTable.QUERY_EXPRESSION); //$NON-NLS-1$
     }
 
     /**
@@ -841,7 +842,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public SchemaElementType getSchemaElementType( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty(uow, Property.ValueType.STRING, "getSchemaElementType", //$NON-NLS-1$
+        final String value = getObjectProperty(uow, PropertyValueType.STRING, "getSchemaElementType", //$NON-NLS-1$
                                                SchemaElement.TYPE);
 
         if (StringUtils.isBlank(value)) {
@@ -906,7 +907,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public TemporaryType getTemporaryTableType( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty(uow, Property.ValueType.STRING, "getTemporaryTableType", //$NON-NLS-1$
+        final String value = getObjectProperty(uow, PropertyValueType.STRING, "getTemporaryTableType", //$NON-NLS-1$
                                                StandardDdlLexicon.TEMPORARY);
 
         if (StringUtils.isBlank(value)) {

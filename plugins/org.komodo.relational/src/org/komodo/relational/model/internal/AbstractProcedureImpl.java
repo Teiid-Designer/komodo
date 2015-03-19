@@ -23,9 +23,9 @@ import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -296,7 +296,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public SchemaElementType getSchemaElementType( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getSchemaElementType", //$NON-NLS-1$
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getSchemaElementType", //$NON-NLS-1$
                                                 SchemaElement.TYPE );
 
         if (StringUtils.isBlank( value )) {

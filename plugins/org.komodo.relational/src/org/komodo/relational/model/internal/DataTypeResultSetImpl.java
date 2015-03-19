@@ -19,9 +19,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
@@ -177,7 +177,7 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
      */
     @Override
     public long getLength( final UnitOfWork uow ) throws KException {
-        final Long value = getObjectProperty( uow, Property.ValueType.LONG, "getLength", //$NON-NLS-1$
+        final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getLength", //$NON-NLS-1$
                                               StandardDdlLexicon.DATATYPE_LENGTH );
 
         if (value == null) {
@@ -194,7 +194,7 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
      */
     @Override
     public Type getType( final UnitOfWork uow ) throws KException {
-        String value = getObjectProperty( uow, Property.ValueType.STRING, "getDataType", StandardDdlLexicon.DATATYPE_NAME ); //$NON-NLS-1$
+        String value = getObjectProperty( uow, PropertyValueType.STRING, "getDataType", StandardDdlLexicon.DATATYPE_NAME ); //$NON-NLS-1$
 
         if (StringUtils.isBlank( value )) {
             return Type.DEFAULT_VALUE;
@@ -232,7 +232,7 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
      */
     @Override
     public boolean isArray( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getDataType", StandardDdlLexicon.DATATYPE_NAME ); //$NON-NLS-1$
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getDataType", StandardDdlLexicon.DATATYPE_NAME ); //$NON-NLS-1$
 
         if (StringUtils.isBlank( value )) {
             return false;
@@ -249,7 +249,7 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
     @Override
     public void setArray( final UnitOfWork uow,
                           final boolean newArray ) throws KException {
-        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getDataType", StandardDdlLexicon.DATATYPE_NAME ); //$NON-NLS-1$
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getDataType", StandardDdlLexicon.DATATYPE_NAME ); //$NON-NLS-1$
 
         if (StringUtils.isBlank( value )) {
             setObjectProperty( uow, "setArray", StandardDdlLexicon.DATATYPE_NAME, ( Type.DEFAULT_VALUE.name() + ARRAY_SUFFIX ) ); //$NON-NLS-1$

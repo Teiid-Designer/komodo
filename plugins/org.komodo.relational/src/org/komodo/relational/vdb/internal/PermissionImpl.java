@@ -24,9 +24,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -439,7 +439,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowAlter( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAllowAlter", //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAllowAlter", //$NON-NLS-1$
                                  VdbLexicon.DataRole.Permission.ALLOW_ALTER);
     }
 
@@ -450,7 +450,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowCreate( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAllowCreate", //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAllowCreate", //$NON-NLS-1$
                                  VdbLexicon.DataRole.Permission.ALLOW_CREATE);
     }
 
@@ -461,7 +461,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowDelete( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAllowDelete", //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAllowDelete", //$NON-NLS-1$
                                  VdbLexicon.DataRole.Permission.ALLOW_DELETE);
     }
 
@@ -472,7 +472,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowExecute( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAllowExecute", //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAllowExecute", //$NON-NLS-1$
                                  VdbLexicon.DataRole.Permission.ALLOW_EXECUTE);
     }
 
@@ -483,7 +483,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowLanguage( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAllowLanguage", //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAllowLanguage", //$NON-NLS-1$
                                  VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE);
     }
 
@@ -494,7 +494,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowRead( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAllowRead", //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAllowRead", //$NON-NLS-1$
                                  VdbLexicon.DataRole.Permission.ALLOW_READ);
     }
 
@@ -505,7 +505,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      */
     @Override
     public boolean isAllowUpdate( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAllowUpdate", //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAllowUpdate", //$NON-NLS-1$
                                  VdbLexicon.DataRole.Permission.ALLOW_UPDATE);
     }
 

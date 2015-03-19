@@ -18,48 +18,18 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface Property extends KNode {
 
     /**
-     * The types of property value
-     */
-    enum ValueType {
-        /**
-         * {@link String} type
-         */
-        STRING,
-
-        /**
-         * {@link Long} type
-         */
-        LONG,
-
-        /**
-         * {@link Integer} type
-         */
-        INTEGER,
-
-        /**
-         * {@link BigDecimal} type
-         */
-        BIG_DECIMAL,
-
-        /**
-         * {@link Double} type
-         */
-        DOUBLE,
-
-        /**
-         * {@link Boolean} type
-         */
-        BOOLEAN,
-
-        /**
-         * {@link Calendar} type
-         */
-        CALENDAR
-    }
-    /**
      * An empty array of model properties.
      */
     Property[] NO_PROPS = {};
+
+    /**
+     * @param uow
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @return the value type of the value contained in this property
+     * @throws KException
+     *         if the property does not exist or an error occurs
+     */
+    PropertyValueType getValueType( final UnitOfWork uow ) throws KException;
 
     /**
      * @param uow

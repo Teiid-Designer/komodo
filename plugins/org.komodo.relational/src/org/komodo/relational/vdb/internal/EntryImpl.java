@@ -18,9 +18,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -135,7 +135,7 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
      */
     @Override
     public String getDescription( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getDescription", VdbLexicon.Entry.DESCRIPTION); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getDescription", VdbLexicon.Entry.DESCRIPTION); //$NON-NLS-1$
     }
 
     /**
@@ -174,7 +174,7 @@ public final class EntryImpl extends RelationalObjectImpl implements Entry {
      */
     @Override
     public String getPath( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getPath", VdbLexicon.Entry.PATH); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getPath", VdbLexicon.Entry.PATH); //$NON-NLS-1$
     }
 
     /**

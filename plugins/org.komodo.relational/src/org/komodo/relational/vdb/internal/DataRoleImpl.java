@@ -27,6 +27,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -297,7 +298,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      */
     @Override
     public String getDescription( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getDescription", VdbLexicon.DataRole.DESCRIPTION); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getDescription", VdbLexicon.DataRole.DESCRIPTION); //$NON-NLS-1$
     }
 
     /**
@@ -437,7 +438,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      */
     @Override
     public boolean isAllowCreateTempTables( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAllowCreateTempTables", //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAllowCreateTempTables", //$NON-NLS-1$
                                  VdbLexicon.DataRole.ALLOW_CREATE_TEMP_TABLES);
     }
 
@@ -448,7 +449,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      */
     @Override
     public boolean isAnyAuthenticated( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAnyAuthenticated", VdbLexicon.DataRole.ANY_AUTHENTICATED); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAnyAuthenticated", VdbLexicon.DataRole.ANY_AUTHENTICATED); //$NON-NLS-1$
     }
 
     /**
@@ -458,7 +459,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      */
     @Override
     public boolean isGrantAll( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isAnyAuthenticated", VdbLexicon.DataRole.GRANT_ALL); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAnyAuthenticated", VdbLexicon.DataRole.GRANT_ALL); //$NON-NLS-1$
     }
 
     @Override
