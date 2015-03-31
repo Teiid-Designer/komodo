@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
@@ -36,7 +38,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 /**
  *
  */
-public class KomodoTypeRegistry {
+public class KomodoTypeRegistry implements StringConstants {
 
     /**
      * Identifier representation of a komodo relational type
@@ -169,6 +171,12 @@ public class KomodoTypeRegistry {
         index(KomodoType.VDB_TRANSLATOR, VdbLexicon.Translator.TRANSLATOR);
 
         index(KomodoType.VIEW, TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
+
+        index(KomodoType.DDL_SCHEMA, TeiidDdlLexicon.Namespace.PREFIX);
+
+        index(KomodoType.TSQL_SCHEMA, TeiidSqlLexicon.Namespace.PREFIX);
+
+        index(KomodoType.VDB_SCHEMA, VdbLexicon.Namespace.PREFIX);
     }
 
     private void index(KomodoType kType, String lexiconType) {
@@ -196,6 +204,34 @@ public class KomodoTypeRegistry {
         for (TypeIdentifier identifier : kTypeIndex.values()) {
             if (identifier.getLexiconType().equals(lexiconType))
                 identifiers.add(identifier);
+        }
+
+        if (! identifiers.isEmpty())
+            return identifiers;
+
+        //
+        // We want to return TSQL for Teiid SQL nodes
+        // but do not want to index all of them.
+        //
+        if (lexiconType.startsWith(TeiidSqlLexicon.Namespace.PREFIX)) {
+            identifiers.add(kTypeIndex.get(KomodoType.TSQL_SCHEMA));
+            return identifiers;
+        }
+
+        //
+        // We want to return DDL for ddl nodes that do not have explicit types
+        //
+        if (lexiconType.startsWith(TeiidDdlLexicon.Namespace.PREFIX)) {
+            identifiers.add(kTypeIndex.get(KomodoType.DDL_SCHEMA));
+            return identifiers;
+        }
+
+        //
+        // We want to return VDB for vdb nodes that do not have explicit types
+        //
+        if (lexiconType.startsWith(VdbLexicon.Namespace.PREFIX)) {
+            identifiers.add(kTypeIndex.get(KomodoType.VDB_SCHEMA));
+            return identifiers;
         }
 
         return identifiers;
