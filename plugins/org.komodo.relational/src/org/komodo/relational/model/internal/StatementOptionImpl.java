@@ -18,9 +18,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
@@ -135,7 +135,7 @@ public final class StatementOptionImpl extends RelationalObjectImpl implements S
      */
     @Override
     public String getOption( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getOption", StandardDdlLexicon.VALUE); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getOption", StandardDdlLexicon.VALUE); //$NON-NLS-1$
     }
 
     /**

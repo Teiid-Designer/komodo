@@ -25,9 +25,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -185,7 +185,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
      */
     @Override
     public String getDatatypeName( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getDatatypeName", //$NON-NLS-1$
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getDatatypeName", //$NON-NLS-1$
                                                 StandardDdlLexicon.DATATYPE_NAME );
 
         if (StringUtils.isBlank( value )) {
@@ -202,7 +202,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
      */
     @Override
     public String getDefaultValue( final UnitOfWork uow ) throws KException {
-        return getObjectProperty( uow, Property.ValueType.STRING, "getDefaultValue", StandardDdlLexicon.DEFAULT_VALUE ); //$NON-NLS-1$
+        return getObjectProperty( uow, PropertyValueType.STRING, "getDefaultValue", StandardDdlLexicon.DEFAULT_VALUE ); //$NON-NLS-1$
     }
 
     /**
@@ -228,7 +228,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
      */
     @Override
     public long getLength( final UnitOfWork uow ) throws KException {
-        final Long value = getObjectProperty( uow, Property.ValueType.LONG, "getLength", StandardDdlLexicon.DATATYPE_LENGTH ); //$NON-NLS-1$
+        final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getLength", StandardDdlLexicon.DATATYPE_LENGTH ); //$NON-NLS-1$
 
         if (value == null) {
             return RelationalConstants.DEFAULT_LENGTH;
@@ -260,7 +260,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
      */
     @Override
     public Nullable getNullable( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getNullable", //$NON-NLS-1$
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getNullable", //$NON-NLS-1$
                                                 StandardDdlLexicon.NULLABLE );
 
         if (StringUtils.isBlank( value )) {
@@ -277,7 +277,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
      */
     @Override
     public int getPrecision( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty( uow, Property.ValueType.INTEGER, "getPrecision", //$NON-NLS-1$
+        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getPrecision", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_PRECISION );
 
         if (value == null) {
@@ -294,7 +294,7 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
      */
     @Override
     public int getScale( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty( uow, Property.ValueType.INTEGER, "getScale", //$NON-NLS-1$
+        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getScale", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_SCALE );
 
         if (value == null) {

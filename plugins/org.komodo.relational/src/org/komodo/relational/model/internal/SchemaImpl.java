@@ -33,9 +33,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 
 /**
@@ -141,7 +141,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
 
     @Override
     public String getRendition( UnitOfWork uow ) throws KException {
-        String rendition = getObjectProperty(uow, Property.ValueType.STRING, "getRendition", //$NON-NLS-1$
+        String rendition = getObjectProperty(uow, PropertyValueType.STRING, "getRendition", //$NON-NLS-1$
                                              KomodoLexicon.Schema.RENDITION);
 
         return rendition == null ? EMPTY_STRING : rendition;

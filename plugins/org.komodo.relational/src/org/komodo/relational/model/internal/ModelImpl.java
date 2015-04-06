@@ -37,6 +37,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
@@ -512,7 +513,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      */
     @Override
     public String getDescription( final UnitOfWork transaction ) throws KException {
-        return getObjectProperty( transaction, Property.ValueType.STRING, "getDescription", VdbLexicon.Vdb.DESCRIPTION ); //$NON-NLS-1$
+        return getObjectProperty( transaction, PropertyValueType.STRING, "getDescription", VdbLexicon.Vdb.DESCRIPTION ); //$NON-NLS-1$
     }
 
     /**
@@ -577,7 +578,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
     @Override
     public String getModelDefinition( final UnitOfWork uow ) throws KException {
-        final String modelDefn = getObjectProperty( uow, Property.ValueType.STRING, "getModelDefinition", //$NON-NLS-1$
+        final String modelDefn = getObjectProperty( uow, PropertyValueType.STRING, "getModelDefinition", //$NON-NLS-1$
                                                     KomodoLexicon.VdbModel.MODEL_DEFINITION );
 
         return modelDefn == null ? EMPTY_STRING : modelDefn;
@@ -590,7 +591,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      */
     @Override
     public Type getModelType( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty( uow, Property.ValueType.STRING, "getModelType", //$NON-NLS-1$
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getModelType", //$NON-NLS-1$
                                                 CoreLexicon.JcrId.MODEL_TYPE );
         final Type modelType = ( ( value == null ) ? null : Type.valueOf( value ) );
         return ( ( modelType == null ) ? Type.DEFAULT_VALUE : modelType );

@@ -176,6 +176,21 @@ public enum KomodoType {
     VIEW,
 
     /**
+     * Type from the DDL schema
+     */
+    DDL_SCHEMA,
+
+    /**
+     * Type from the Teiid SQL schema
+     */
+    TSQL_SCHEMA,
+
+    /**
+     * Type from the VDB schema
+     */
+    VDB_SCHEMA,
+
+    /**
      * Unknown Type
      */
     UNKNOWN;

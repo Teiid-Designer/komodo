@@ -30,6 +30,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoObjectVisitor;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
@@ -39,6 +40,7 @@ import org.modeshape.jcr.JcrNtLexicon;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrTools;
 import org.modeshape.sequencer.ddl.DdlConstants;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
@@ -231,9 +233,14 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
 
         KomodoType result;
-        if (identifiers == null)
+        if (identifiers == null) {
+            // No identifiers but could be DDL Statements container
+            String nodeName = getName(uow);
+            if (StandardDdlLexicon.STATEMENTS_CONTAINER.equals(nodeName))
+                return KomodoType.DDL_SCHEMA;
+
             result = KomodoType.UNKNOWN;
-        else if (identifiers.size() == 1)
+        } else if (identifiers.size() == 1)
             result = identifiers.iterator().next().getKomodoType();
         else {
             //
@@ -771,7 +778,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @throws KException
      */
     protected < T > T getObjectProperty( UnitOfWork uow,
-                                         Property.ValueType returnValueType,
+                                         PropertyValueType returnValueType,
                                          String getterName,
                                          String propertyPath ) throws KException {
         UnitOfWork transaction = uow;

@@ -33,9 +33,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -556,7 +556,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public String getConnectionType( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getConnectionType", VdbLexicon.Vdb.CONNECTION_TYPE); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getConnectionType", VdbLexicon.Vdb.CONNECTION_TYPE); //$NON-NLS-1$
     }
 
     /**
@@ -619,7 +619,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public String getDescription( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getDescription", VdbLexicon.Vdb.DESCRIPTION); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getDescription", VdbLexicon.Vdb.DESCRIPTION); //$NON-NLS-1$
     }
 
     /**
@@ -783,7 +783,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public String getOriginalFilePath( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getOriginalFilePath", VdbLexicon.Vdb.ORIGINAL_FILE); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getOriginalFilePath", VdbLexicon.Vdb.ORIGINAL_FILE); //$NON-NLS-1$
     }
 
     /**
@@ -856,7 +856,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public String getVdbName( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.STRING, "getVdbName", VdbLexicon.Vdb.NAME); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.STRING, "getVdbName", VdbLexicon.Vdb.NAME); //$NON-NLS-1$
     }
 
     /**
@@ -866,7 +866,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public int getVersion( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.INTEGER, "getVersion", VdbLexicon.Vdb.VERSION); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.INTEGER, "getVersion", VdbLexicon.Vdb.VERSION); //$NON-NLS-1$
     }
 
     /**
@@ -876,7 +876,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     @Override
     public boolean isPreview( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, Property.ValueType.BOOLEAN, "isPreview", VdbLexicon.Vdb.PREVIEW); //$NON-NLS-1$
+        return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isPreview", VdbLexicon.Vdb.PREVIEW); //$NON-NLS-1$
     }
 
     /**
