@@ -1,13 +1,14 @@
 #!/bin/bash
 
 CLASSPATH="lib/*:komodo/*"
+MAINCLASS="org.komodo.shell.DefaultKomodoShell"
 
 # ----------------------------------------
 # No script args - Interactive Mode
 # ----------------------------------------
 if [ $# -eq 0 ]
   then
-java -cp "$CLASSPATH" org.komodo.shell.KomodoShell
+java -cp "$CLASSPATH" "$MAINCLASS"
 fi
 
 # ----------------------------------------
@@ -24,5 +25,5 @@ args=("$@")
 params="${args[0]} ${args[1]}"
 #echo PARAMS: $params
 
-java -cp "$CLASSPATH" org.komodo.shell.KomodoShell $params
+java -cp "$CLASSPATH" "$MAINCLASS" $params
 fi
