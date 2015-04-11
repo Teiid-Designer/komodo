@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.komodo.relational;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.0.1.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
@@ -11,11 +11,11 @@ Export-Package: org.komodo.relational,
  org.komodo.relational.teiid,
  org.komodo.relational.vdb,
  org.komodo.relational.workspace
-Require-Bundle: org.komodo.spi;bundle-version="1.0.0",
+Require-Bundle: org.komodo.spi;bundle-version="0.0.1",
  org.komodo.utils,
- org.komodo.core;bundle-version="1.0.0",
- org.komodo.modeshape.lib;bundle-version="1.0.0",
+ org.komodo.core;bundle-version="0.0.1",
+ org.komodo.modeshape.lib;bundle-version="0.0.1",
  org.komodo.teiid.client,
- org.komodo.modeshape.vdb;bundle-version="1.0.0",
- org.komodo.modeshape.teiid.sql.sequencer;bundle-version="1.0.0"
+ org.komodo.modeshape.vdb;bundle-version="0.0.1",
+ org.komodo.modeshape.teiid.sql.sequencer;bundle-version="0.0.1"
 Bundle-ActivationPolicy: lazy
