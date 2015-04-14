@@ -107,7 +107,9 @@ public interface SQLConstants extends StringConstants {
     String HEADER = "HEADER"; //$NON-NLS-1$
     String SKIP = "SKIP"; //$NON-NLS-1$
     String WIDTH = "width"; //$NON-NLS-1$
-    
+
+    String LIKE = "LIKE"; //$NON-NLS-1$
+
     interface INSERT_OPTIONS {
     	int REPLACE_ALL = 0;
     	int INSERT_AT_BEGINNING = 1;

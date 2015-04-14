@@ -49,6 +49,11 @@ public interface StringConstants {
     String STAR = "*"; //$NON-NLS-1$
 
     /**
+     * A percent.
+     */
+    String PERCENT = "%"; //$NON-NLS-1$
+
+    /**
      * An underscore.
      */
     String UNDERSCORE = "_"; //$NON-NLS-1$
