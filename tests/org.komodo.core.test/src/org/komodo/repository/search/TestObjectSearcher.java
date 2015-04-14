@@ -28,6 +28,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
@@ -57,6 +58,32 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
                                           any(UnitOfWorkListener.class))).thenReturn(transaction);
 
         return repository;
+    }
+
+    /**
+     * @param workspace
+     * @param nodeType
+     * @return children of given object with given type
+     * @throws KException
+     */
+    private KomodoObject[] getChildrenOfType(KomodoObject kObject, String nodeType) throws KException {
+        assertNotNull(kObject);
+        assertNotNull(nodeType);
+
+        KomodoObject[] kids = kObject.getChildren(null);
+        if (kids.length == 0)
+            return kids;
+
+        final List< KomodoObject > matches = new ArrayList< KomodoObject >( kids.length );
+
+        for (final KomodoObject kid : kids) {
+            if (nodeType.equals( kid.getPrimaryType(null).getName() ) || kid.hasDescriptor(null, nodeType)) {
+                matches.add( kid );
+            }
+        }
+
+        kids = matches.toArray( new KomodoObject[matches.size()] );
+        return kids;
     }
 
     @Test
@@ -266,7 +293,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         workspace.addChild(null, "test4", KomodoLexicon.VdbModel.NODE_TYPE);
         workspace.addChild(null, "test5", KomodoLexicon.VdbModel.NODE_TYPE);
 
-        KomodoObject[] testNodes = workspace.getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(5, testNodes.length);
 
         ObjectSearcher os = new ObjectSearcher(_repo);
@@ -288,7 +315,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
             child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
         }
 
-        KomodoObject[] testNodes = workspace.getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = getChildrenOfType(workspace, KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(5, testNodes.length);
         for (KomodoObject testKO : testNodes) {
             Property property = testKO.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
@@ -315,6 +342,71 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
     }
 
     @Test
+    public void executeFromQueryWithParentWhere() throws Exception {
+        int sourceTotal = 5;
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(null);
+        assertNotNull(workspace);
+
+        KomodoObject testModel1 = workspace.addChild(null, "TestModel1", KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject testModel2 = workspace.addChild(null, "TestModel2", KomodoLexicon.VdbModel.NODE_TYPE);
+
+        for (int i = 1; i <= sourceTotal; ++i) {
+            testModel1.addChild(null, "TestModelSource1-" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
+        }
+
+        KomodoObject[] testNodes = getChildrenOfType(testModel1, KomodoLexicon.VdbModelSource.NODE_TYPE);
+        assertEquals(sourceTotal, testNodes.length);
+
+        for (int i = 1; i <= sourceTotal; ++i) {
+            testModel2.addChild(null, "TestModelSource2-" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
+        }
+
+        testNodes = getChildrenOfType(testModel2, KomodoLexicon.VdbModelSource.NODE_TYPE);
+        assertEquals(sourceTotal, testNodes.length);
+
+        //
+        // Test object searcher for immediate children beneath testModel1
+        //
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(KomodoLexicon.VdbModelSource.NODE_TYPE);
+        os.addWhereParentClause(null, null, testModel1.getAbsolutePath());
+
+        String expected = "SELECT [jcr:path], [mode:localName] FROM " +
+                                     OPEN_SQUARE_BRACKET +
+                                     KomodoLexicon.VdbModelSource.NODE_TYPE +
+                                     CLOSE_SQUARE_BRACKET +
+                                     " WHERE [" + JcrConstants.JCR_PATH + "] LIKE '" +
+                                     testModel1.getAbsolutePath() + "/%'";
+        assertEquals(expected, os.toString());
+
+        List<KomodoObject> searchObjects = os.searchObjects(null);
+        assertEquals(sourceTotal, searchObjects.size());
+
+        for (KomodoObject searchObject : searchObjects) {
+            String name = searchObject.getName(null);
+            assertTrue(name.startsWith("TestModelSource1-"));
+        }
+
+        //
+        // Find all the model source nodes beneath the workspace
+        //
+        os = new ObjectSearcher(_repo);
+        os.addFromType(KomodoLexicon.VdbModelSource.NODE_TYPE);
+        os.addWhereParentClause(null, null, workspace.getAbsolutePath());
+        searchObjects = os.searchObjects(null);
+        assertEquals(sourceTotal * 2, searchObjects.size());
+
+        //
+        // Test to confirm that the above does produce the same answer as getChildrenOfType
+        //
+        KomodoObject[] children = workspace.getChildrenOfType(null, KomodoLexicon.VdbModelSource.NODE_TYPE);
+        assertEquals(searchObjects.size(), children.length);
+    }
+
+    @Test
     public void executeFromQueryWithWhereContainsORExpression() throws Exception {
         assertNotNull(_repo);
 
@@ -332,7 +424,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
             child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
         }
 
-        KomodoObject[] testNodes = workspace.getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(10, testNodes.length);
         for (KomodoObject testKO : testNodes) {
             Property property = testKO.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);
