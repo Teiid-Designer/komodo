@@ -16,8 +16,10 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.shell.commands.core.ListCommand;
+import org.komodo.spi.repository.KomodoType;
 
 /**
  * Test Class to test ListCommand
@@ -28,6 +30,7 @@ public class ListCommandTest extends AbstractCommandTest {
 
 	private static final String LIST_COMMAND1 = "listCommand1.txt"; //$NON-NLS-1$
 	private static final String LIST_COMMAND2 = "listCommand2.txt"; //$NON-NLS-1$
+	private static final String LIST_COMMAND3 = "listCommand3.txt"; //$NON-NLS-1$
 	private static final String INDENT = getIndentStr();
 
 	/**
@@ -43,7 +46,7 @@ public class ListCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"tko:workspace [tko:workspace]\n"; //$NON-NLS-1$
+    	String expectedOutput = INDENT+"tko:workspace [UNKNOWN]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("tko:komodo", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
@@ -55,12 +58,26 @@ public class ListCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"Model1 [vdb:declarativeModel]\n"+ //$NON-NLS-1$
-    			                INDENT+"Model2 [vdb:declarativeModel]\n"+ //$NON-NLS-1$
-    			                INDENT+"Model3 [vdb:declarativeModel]\n"; //$NON-NLS-1$
+    	String expectedOutput = INDENT+"Model1 ["+KomodoType.MODEL.name()+"]\n"+ //$NON-NLS-1$
+    			                INDENT+"Model2 ["+KomodoType.MODEL.name()+"]\n"+ //$NON-NLS-1$
+    			                INDENT+"Model3 ["+KomodoType.MODEL.name()+"]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("tko:komodo/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+    
+    @Test
+    public void testList3() throws Exception {
+    	setup(LIST_COMMAND3, ListCommand.class);
+
+    	execute();
+    	
+    	assertEquals("tko:komodo/tko:workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	
+    	String expectedOutput = INDENT+"Table1 ["+KomodoType.TABLE.name()+"]\n"; //$NON-NLS-1$
+    	String writerOutput = getCommandOutput();
+    	assertEquals(expectedOutput,writerOutput);
+
     }
 
 }

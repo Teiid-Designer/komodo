@@ -114,8 +114,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public String getType() throws Exception {
-        Descriptor descriptor = this.repoObject.getPrimaryType(null);
-        return descriptor.getName();
+        return this.repoObject.getTypeIdentifier(null).name();
     }
 
     /* (non-Javadoc)

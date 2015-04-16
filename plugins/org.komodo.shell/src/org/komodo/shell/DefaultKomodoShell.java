@@ -25,13 +25,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.komodo.core.KEngine;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.InvalidCommandArgumentException;
@@ -114,6 +117,7 @@ public class DefaultKomodoShell implements KomodoShell {
     private final KEngine kEngine;
     private final InputStream inStream;
     private final PrintStream outStream;
+    private final Writer commandOutput;
 
     /**
      * Constructor.
@@ -127,6 +131,7 @@ public class DefaultKomodoShell implements KomodoShell {
         this.kEngine = kEngine;
         this.inStream = inStream;
         this.outStream = outStream;
+        this.commandOutput = new OutputStreamWriter(outStream);
 
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < CompletionConstants.MESSAGE_INDENT; i++) {
@@ -148,6 +153,10 @@ public class DefaultKomodoShell implements KomodoShell {
     @Override
     public PrintStream getOutputStream() {
         return outStream;
+    }
+    
+    public Writer getCommandOutput() {
+    	return commandOutput;
     }
 
     @Override

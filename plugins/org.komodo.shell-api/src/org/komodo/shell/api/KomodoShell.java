@@ -23,6 +23,8 @@ package org.komodo.shell.api;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.Writer;
+
 import org.komodo.core.KEngine;
 import org.komodo.spi.constants.StringConstants;
 
@@ -45,6 +47,12 @@ public interface KomodoShell extends StringConstants {
      * @return the shell's output stream
      */
     PrintStream getOutputStream();
+    
+    /**
+     * 
+     * @return
+     */
+    Writer getCommandOutput();
 
     /**
      * Exit the shell

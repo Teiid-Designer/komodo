@@ -1,0 +1,11 @@
+# create three models within workspace.
+# cd into the workspace, then list
+cd tko:workspace
+create vdb vdb_test_1
+cd vdb_test_1
+create model model_1
+cd model_1
+create table table_1
+cd table_1
+cd ..
+delete table_1

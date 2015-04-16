@@ -143,6 +143,7 @@ public class HelpCommand extends BuiltInShellCommand {
 		if (command == null) {
 			print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_INVALID_COMMAND)); 
 		} else {
+			command.setOutput(getWorkspaceStatus().getShell().getCommandOutput());
 			command.printUsage(0);
 			command.printHelp(0);
 			print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
