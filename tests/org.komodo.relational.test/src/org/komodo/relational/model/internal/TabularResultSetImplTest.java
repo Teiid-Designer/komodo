@@ -42,9 +42,9 @@ public class TabularResultSetImplTest extends RelationalModelTest {
         final String resultSetColumnName = "resultSetColumn";
         final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
         final ResultSetColumn resultSetColumn = this.resultSet.addColumn( uow, resultSetColumnName );
-        assertThat( this.resultSet.getColumns( uow ).length, is( 1 ) );
-        assertThat( resultSetColumn.getName( uow ), is( resultSetColumnName ) );
         uow.commit();
+        assertThat( this.resultSet.getColumns( null ).length, is( 1 ) );
+        assertThat( resultSetColumn.getName( null ), is( resultSetColumnName ) );
 
     }
 
