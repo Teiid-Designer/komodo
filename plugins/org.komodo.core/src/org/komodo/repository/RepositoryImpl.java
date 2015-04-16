@@ -367,7 +367,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     /**
      * The root path of the Komodo repository.
      */
-    private static String KOMODO_ROOT = (REPO_ROOT + Komodo.NODE_TYPE);
+    public static String KOMODO_ROOT = (REPO_ROOT + Komodo.NODE_TYPE);
 
     /**
      * The root path of the Komodo repository library.

@@ -46,9 +46,31 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
+     * The JCR names associated with the Komodo environment node type.
+     */
+    public interface Environment {
+
+        /**
+         * The name and node type name of the Komodo environment node. Value is {@value} .
+         */
+        String NODE_TYPE = Komodo.ENVIRONMENT;
+
+        /**
+         * The name of the Komodo environment validation child node. Value is {@value} .
+         */
+        String VALIDATION = Namespace.PREFIX + COLON + "validation"; //$NON-NLS-1$
+
+    }
+
+    /**
      * The JCR names associated with the Komodo node type.
      */
     public interface Komodo {
+
+        /**
+         * The name of the Komodo environment child node. Value is {@value} .
+         */
+        String ENVIRONMENT = Namespace.PREFIX + COLON + "environment"; //$NON-NLS-1$
 
         /**
          * The name and node type name of the Komodo library node. Value is {@value} .
@@ -181,6 +203,154 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
+     * The JCR names associated with validation rules.
+     */
+    public interface Rule {
+
+        /**
+         * The name of the property used to indicate if the rule is built-in. Value is {@value} .
+         */
+        String BUILT_IN = Namespace.PREFIX + COLON + "builtIn"; //$NON-NLS-1$
+
+        /**
+         * The name of the multi-valued property for node type names that children must not have. Value is {@value} .
+         */
+        String CHILD_ABSENT = Namespace.PREFIX + COLON + "childAbsent"; //$NON-NLS-1$
+
+        /**
+         * The name of the multi-valued property for node type names that at least one child must have. Value is {@value} .
+         */
+        String CHILD_EXISTS = Namespace.PREFIX + COLON + "childExists"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used to indicate if the rule is enabled. Value is {@value} .
+         */
+        String ENABLED = Namespace.PREFIX + COLON + "enabled"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used to store either the property name or the child node type name. Value is {@value} .
+         */
+        String JCR_NAME = Namespace.PREFIX + COLON + "jcrName"; //$NON-NLS-1$
+
+        /**
+         * The name of the property for the localized text. Value is {@value} .
+         */
+        String LOCALIZED_TEXT = Namespace.PREFIX + COLON + "text"; //$NON-NLS-1$
+
+        /**
+         * The name of the node type for a localized message. Value is {@value} .
+         */
+        String LOCALIZED_MESSAGE = Namespace.PREFIX + COLON + "localizedMessage"; //$NON-NLS-1$
+
+        /**
+         * The name of the node type for a localized message grouping node. Value is {@value} .
+         */
+        String LOCALIZED_MESSAGE_GROUPING = Namespace.PREFIX + COLON + "localizedMessageGroup"; //$NON-NLS-1$
+
+        /**
+         * The name of the node type for a localized text. Value is {@value} .
+         */
+        String LOCALIZED_TEXT_TYPE = Namespace.PREFIX + COLON + "localizedText"; //$NON-NLS-1$
+
+        /**
+         * The name of the property whose value indicates if SNS should only apply if the node types are the same. Value is *
+         * {@value} .
+         */
+        String MATCH_TYPE = Namespace.PREFIX + COLON + "pattern"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used to hold a maximum value of a number range. Value is {@value} .
+         */
+        String MAX_VALUE = Namespace.PREFIX + COLON + "maxValue"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used to indicate if the max value is inclusive. Value is {@value} .
+         */
+        String MAX_VALUE_INCLUSIVE = Namespace.PREFIX + COLON + "maxInclusive"; //$NON-NLS-1$
+
+        /**
+         * The name of the child grouping node where the localized messages are kept. Value is {@value} .
+         */
+        String MESSAGES = Namespace.PREFIX + COLON + "messages"; //$NON-NLS-1$
+
+        /**
+         * The name of the property to hold the minimum value of a number range. Value is {@value} .
+         */
+        String MIN_VALUE = Namespace.PREFIX + COLON + "minValue"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used to indicate if the min value is inclusive. Value is {@value} .
+         */
+        String MIN_VALUE_INCLUSIVE = Namespace.PREFIX + COLON + "minInclusive"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used for the node type the rule pertains to. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "nodeType"; //$NON-NLS-1$
+
+        /**
+         * The name of the node type for a number rule.
+         */
+        String NUMBER_RULE = Namespace.PREFIX + COLON + "numberRule"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used for a regular expression pattern. Value is {@value} .
+         */
+        String PATTERN = Namespace.PREFIX + COLON + "pattern"; //$NON-NLS-1$
+
+        /**
+         * The name of the node type for a pattern matching rule.
+         */
+        String PATTERN_RULE = Namespace.PREFIX + COLON + "patternRule"; //$NON-NLS-1$
+
+        /**
+         * The name of the multi-valued property used for properties that must not exist. Value is {@value} .
+         */
+        String PROP_ABSENT = Namespace.PREFIX + COLON + "propAbsent"; //$NON-NLS-1$
+
+        /**
+         * The name of the multi-valued property used for properties that must exist. Value is {@value} .
+         */
+        String PROP_EXISTS = Namespace.PREFIX + COLON + "propExists"; //$NON-NLS-1$
+
+        /**
+         * The name of the node type for a relationship rule.
+         */
+        String RELATIONSHIP_RULE = Namespace.PREFIX + COLON + "relationshipRule"; //$NON-NLS-1$
+
+        /**
+         * The name of the node type for a required rule.
+         */
+        String REQUIRED_RULE = Namespace.PREFIX + COLON + "requiredRule"; //$NON-NLS-1$
+
+        /**
+         * The name of the abstract node type for a rule.
+         */
+        String RULE_NODE_TYPE = Namespace.PREFIX + COLON + "rule"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used for the rule type (REQUIRED, PATTERN, RELATIONSHIP, NUMBER). Value is {@value} .
+         */
+        String RULE_TYPE = Namespace.PREFIX + COLON + "ruleType"; //$NON-NLS-1$
+
+        /**
+         * The name of the node type for a same name sibling rule.
+         */
+        String SNS_RULE = Namespace.PREFIX + COLON + "snsRule"; //$NON-NLS-1$
+
+        /**
+         * The name of the property for the rule evaluation severity (ERROR, WARNING, INFO, OK). Value is {@value} .
+         */
+        String SEVERITY = Namespace.PREFIX + COLON + "severity"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used for the validation type (PROPERTY, CHILD). Value is {@value} .
+         */
+        String VALIDATION_TYPE = Namespace.PREFIX + COLON + "validationType"; //$NON-NLS-1$
+
+    }
+
+    /**
      * The JCR names associated with schemas.
      */
     public interface Schema extends LibraryComponent, WorkspaceItem {
@@ -235,7 +405,7 @@ public interface KomodoLexicon extends StringConstants {
         /**
          * The admin connection is encrypted. Value is {@value} .
          */
-        String ADMIN_SECURE  = Namespace.PREFIX + COLON + "adminSecure"; //$NON-NLS-1$
+        String ADMIN_SECURE = Namespace.PREFIX + COLON + "adminSecure"; //$NON-NLS-1$
 
         /**
          * The name of the connected property. Value is {@value} .
@@ -275,7 +445,7 @@ public interface KomodoLexicon extends StringConstants {
         /**
          * The jdbc connection is encrypted. Value is {@value} .
          */
-        String JDBC_SECURE  = Namespace.PREFIX + COLON + "jdbcSecure"; //$NON-NLS-1$
+        String JDBC_SECURE = Namespace.PREFIX + COLON + "jdbcSecure"; //$NON-NLS-1$
 
         /**
          * The name of the Teiid node type. Value is {@value} .

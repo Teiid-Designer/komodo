@@ -1,23 +1,23 @@
 /*************************************************************************************
  * JBoss, Home of Professional Open Source.
-* See the COPYRIGHT.txt file distributed with this work for information
-* regarding copyright ownership. Some portions may be licensed
-* to Red Hat, Inc. under one or more contributor license agreements.
-*
-* This library is free software; you can redistribute it and/or
-* modify it under the terms of the GNU Lesser General Public
-* License as published by the Free Software Foundation; either
-* version 2.1 of the License, or (at your option) any later version.
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with this library; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-* 02110-1301 USA.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership. Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  ************************************************************************************/
 package org.komodo.repository;
 
@@ -32,10 +32,10 @@ import org.komodo.spi.constants.StringConstants;
 public class Messages implements StringConstants {
 
     private static final String BUNDLE_NAME = Messages.class.getPackage().getName()
-    																					+ DOT
-    																					+ Messages.class.getSimpleName().toLowerCase();
+                                                                                       + DOT
+                                              + Messages.class.getSimpleName().toLowerCase();
 
-    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
+    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
 
     @SuppressWarnings( "javadoc" )
     public enum LocalRepository {
@@ -53,7 +53,7 @@ public class Messages implements StringConstants {
 
         @Override
         public String toString() {
-            return getEnumName(this) + DOT + name();
+            return getEnumName( this ) + DOT + name();
         }
     }
 
@@ -102,13 +102,150 @@ public class Messages implements StringConstants {
 
         @Override
         public String toString() {
-            return getEnumName(this) + DOT + name();
+            return getEnumName( this ) + DOT + name();
         }
     }
 
-    private static String getEnumName(Enum<?> enumValue) {
+    /**
+     * Localized messages relating to validation.
+     */
+    public enum Validation {
+
+        /**
+         * Message when a rule is disabled rule is evaluated. One parameter: rule name.
+         */
+        ATTEMPT_TO_EVALUATE_DISABLED_RULE,
+
+        /**
+         * Message when the number of children of a specific type is above the maximum allowed. Five parameters: (1) node name,
+         * (2) node path, (3) child count, (4) child type, (5) max allowed.
+         */
+        CHILD_COUNT_ABOVE_MAX_VALUE,
+
+        /**
+         * Message when the number of children of a specific type is below the minimum allowed. Five parameters: (1) node name,
+         * (2) node path, (3) child count, (4) child type, (5) min allowed.
+         */
+        CHILD_COUNT_BELOW_MIN_VALUE,
+
+        /**
+         * Message when a child of a required type is not found. Three parameters: (1) child type, (2) node name, (3) node path.
+         */
+        CHILD_OF_REQUIRED_TYPE_NOT_FOUND,
+
+        /**
+         * Message when a number range rule does not declare a min or a max value. One parameter: rule name.
+         */
+        NUMBER_RULE_HAS_NO_VALUES,
+
+        /**
+         * Message when a number range rule declares a non-numeric value for either the min or max value. One parameter: rule
+         * name.
+         */
+        NUMBER_RULE_NON_NUMERIC_VALUES,
+
+        /**
+         * Message when a node name is not value. Two parameters: (1) node name, (2) node path.
+         */
+        PATTERN_RULE_INVALID_NODE_NAME,
+
+        /**
+         * Message when a property value is not value. Three parameters: (1) node name, (2) node path, (3) property name.
+         */
+        PATTERN_RULE_INVALID_PROPERTY_VALUE,
+
+        /**
+         * Message when a property exists but a child of a specific type is found and is not allowed. Four parameters: (1) node
+         * name, (2) node path, (3) property name, (4) child type.
+         */
+        PROPERTY_RULE_ABSENT_CHILD_FOUND,
+
+        /**
+         * Message when a property exists and another property exists that is not allowed. Four parameters: (1) node name, (2)
+         * node path, (3) property name, (4) disallowed property name.
+         */
+        PROPERTY_RULE_ABSENT_PROPERTY_FOUND,
+
+        /**
+         * Message when a property exists and a required child of a specific type is not found. Four parameters: (1) node name,
+         * (2) node path, (3) property name, (4) missing child type.
+         */
+        PROPERTY_RULE_REQUIRED_CHILD_NOT_FOUND,
+
+        /**
+         * Message when a property exists and another required property does not exist. Four parameters: (1) node name, (2) node
+         * path, (3) property name, (4) missing property name.
+         */
+        PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND,
+
+        /**
+         * Message when a property value is above the maximum allowed. Five parameters: (1) node name, (2) node path, (3) property
+         * name, (4) property value, (5) max value allowed.
+         */
+        PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE,
+
+        /**
+         * Message when property value is below the minimum allowed. Five parameters: (1) node name, (2) node path, (3) property
+         * name, (4) property value, (5) max allowed.
+         */
+        PROPERTY_RULE_VALUE_BELOW_MIN_VALUE,
+
+        /**
+         * Message when a child of a specific type exists but another child of another type exists but is not allowed. Four
+         * parameters: (1) node name, (2) node path, (3) child type, (4) disallowed child type.
+         */
+        RELATIONSHIP_RULE_ABSENT_CHILD_FOUND,
+
+        /**
+         * Message when a child of a specific type exists and a specific property exists that is not allowed. Four parameters: (1)
+         * node name, (2) node path, (3) child type, (4) disallowed property name.
+         */
+        RELATIONSHIP_RULE_ABSENT_PROPERTY_FOUND,
+
+        /**
+         * Message when a child of a specific type exists but another child of another type does not exist but should. Four
+         * parameters: (1) node name, (2) node path, (3) child type, (4) missing child type.
+         */
+        RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND,
+
+        /**
+         * Message when a child of a specific type exists and a specific required property is missing. Four parameters: (1) node
+         * name, (2) node path, (3) child type, (4) missing property name.
+         */
+        RELATIONSHIP_RULE_REQUIRED_PROPERTY_NOT_FOUND,
+
+        /**
+         * Message when children of the same type and same nam exist. Four parameters: (1) node name, (2) node path, (3) node
+         * name, (4) node type.
+         */
+        RELATIONSHIP_RULE_SNS_FOUND,
+
+        /**
+         * Message when a node is missing required property. Three parameters: (1) node name, (2) node path, (3) missing property
+         * name.
+         */
+        REQUIRED_PROPERTY_NOT_FOUND,
+
+        /**
+         * Message when a rule message is missing. Two parameters: (1) node name, (2) message key.
+         */
+        RULE_MESSAGE_NOT_FOUND;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    private static String getEnumName( Enum< ? > enumValue ) {
         String className = enumValue.getClass().getName();
-        String[] components = className.split("\\$"); //$NON-NLS-1$
+        String[] components = className.split( "\\$" ); //$NON-NLS-1$
         return components[components.length - 1];
     }
 
@@ -122,9 +259,9 @@ public class Messages implements StringConstants {
      *
      * @return i18n string
      */
-    private static String getString(Enum<?> key) {
+    private static String getString( Enum< ? > key ) {
         try {
-            return RESOURCE_BUNDLE.getString(key.toString());
+            return RESOURCE_BUNDLE.getString( key.toString() );
         } catch (final Exception err) {
             String msg;
 
@@ -148,8 +285,8 @@ public class Messages implements StringConstants {
      *
      * @return i18n string
      */
-    public static String getString(Enum<?> key, Object... parameters) {
-        String text = getString(key);
+    public static String getString(Enum< ? > key, Object... parameters) {
+        String text = getString( key );
 
         // Check the trivial cases ...
         if (text == null) {
@@ -159,6 +296,6 @@ public class Messages implements StringConstants {
             return text;
         }
 
-        return MessageFormat.format(text, parameters);
+        return MessageFormat.format( text, parameters );
     }
 }

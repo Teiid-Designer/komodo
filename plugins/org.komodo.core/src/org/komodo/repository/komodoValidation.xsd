@@ -19,7 +19,7 @@
             <xs:sequence>
                 <xs:element
                     name="description"
-                    type="localizedMessageType"
+                    type="localizedDescriptionType"
                     minOccurs="1"
                     maxOccurs="unbounded">
                     <xs:annotation>
@@ -33,16 +33,10 @@
                     maxOccurs="unbounded">
 
                     <!-- Rules for node types and mixins -->
-                    <xs:element
-                        ref="nodeValidation"
-                        maxOccurs="unbounded">
-                    </xs:element>
+                    <xs:element ref="nodeValidation"></xs:element>
 
                     <!-- Rules for global properties (common but not found in a mixin) -->
-                    <xs:element
-                        ref="propertyValidation"
-                        maxOccurs="unbounded">
-                    </xs:element>
+                    <xs:element ref="propertyValidation"></xs:element>
                 </xs:choice>
             </xs:sequence>
         </xs:complexType>
@@ -54,9 +48,15 @@
         </xs:unique>
 
         <!-- Make sure the JCR name attribute is unique across all validations -->
-        <xs:unique name="idKey">
+        <xs:unique name="jcrNameKey">
             <xs:selector xpath=".//*" />
             <xs:field xpath="@jcrName" />
+        </xs:unique>
+
+        <!-- Make sure the id attribute is unique across all validations -->
+        <xs:unique name="idKey">
+            <xs:selector xpath=".//*" />
+            <xs:field xpath="@id" />
         </xs:unique>
     </xs:element>
 
@@ -87,9 +87,61 @@
             <xs:documentation>Validation rules for a property.</xs:documentation>
         </xs:annotation>
 
-        <!-- Make sure the locale is unique for the property validation message elements -->
+        <!-- Make sure the locale is unique for the value range rule message -->
         <xs:unique name="propertyValidationMessageLocaleKey">
             <xs:selector xpath="tko:message" />
+            <xs:field xpath="@locale" />
+        </xs:unique>
+
+        <!-- Make sure the locale is unique for the required rule description -->
+        <xs:unique name="propertyRequiredRuleDescriptionLocaleKey">
+            <xs:selector xpath=".//tko:requiredValidation/tko:description" />
+            <xs:field xpath="@locale" />
+        </xs:unique>
+
+        <!-- Make sure the locale is unique for the value rule description -->
+        <xs:unique name="propertyValueRuleDescriptionLocaleKey">
+            <xs:selector xpath=".//tko:valueValidation/tko:description" />
+            <xs:field xpath="@locale" />
+        </xs:unique>
+
+        <!-- Make sure the locale is unique for the relationship rule description -->
+        <xs:unique name="propertyRelationshipRuleDescriptionLocaleKey">
+            <xs:selector xpath=".//tko:relationshipValidation/tko:description" />
+            <xs:field xpath="@locale" />
+        </xs:unique>
+
+        <!-- Make sure the locale is unique for the value range rule description -->
+        <xs:unique name="propertyValueRangeRuleDescriptionLocaleKey">
+            <xs:selector xpath=".//tko:valueRangeValidation/tko:description" />
+            <xs:field xpath="@locale" />
+        </xs:unique>
+
+        <!-- Make sure the locale is unique for the required rule message -->
+        <xs:unique name="propertyRequiredRuleMessageLocaleKey">
+            <xs:selector xpath=".//tko:requiredValidation/tko:message" />
+            <xs:field xpath="@key" />
+            <xs:field xpath="@locale" />
+        </xs:unique>
+
+        <!-- Make sure the locale is unique for the value rule message -->
+        <xs:unique name="propertyValueRuleMessageLocaleKey">
+            <xs:selector xpath=".//tko:valueValidation/tko:message" />
+            <xs:field xpath="@key" />
+            <xs:field xpath="@locale" />
+        </xs:unique>
+
+        <!-- Make sure the locale is unique for the relationship rule message -->
+        <xs:unique name="propertyRelationshipRuleMessageLocaleKey">
+            <xs:selector xpath=".//tko:relationshipValidation/tko:message" />
+            <xs:field xpath="@key" />
+            <xs:field xpath="@locale" />
+        </xs:unique>
+
+        <!-- Make sure the locale is unique for the value range rule message -->
+        <xs:unique name="propertyValueRangeRuleMessageLocaleKey">
+            <xs:selector xpath=".//tko:valueRangeValidation/tko:message" />
+            <xs:field xpath="@key" />
             <xs:field xpath="@locale" />
         </xs:unique>
     </xs:element>
@@ -106,7 +158,7 @@
                     <xs:element
                         name="nameValidation"
                         maxOccurs="1"
-                        type="stringRuleType">
+                        type="patternRuleType">
                         <xs:annotation>
                             <xs:documentation>Validates the names of the nodes of this type.</xs:documentation>
                         </xs:annotation>
@@ -136,40 +188,99 @@
     <xs:complexType name="childValidationType">
         <xs:complexContent>
             <xs:extension base="jcrValidationType">
-                <xs:choice
-                    minOccurs="1"
-                    maxOccurs="4">
-                    <xs:element
-                        name="requiredValidation"
-                        maxOccurs="1"
-                        type="requiredRuleType">
-                        <xs:annotation>
-                            <xs:documentation>Indicates that a child of this node type must exist.</xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
+                <xs:choice>
+                    <xs:sequence>
+                        <xs:element
+                            name="requiredValidation"
+                            type="requiredRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Indicates that a child of this node type must exist.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
-                    <xs:element
-                        name="nameValidation"
-                        maxOccurs="1"
-                        type="stringRuleType">
-                        <xs:annotation>
-                            <xs:documentation>Validates the names of the child nodes of this type.</xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
+                        <xs:element
+                            name="sameNameSiblingValidation"
+                            minOccurs="0"
+                            maxOccurs="1"
+                            type="sameNameSiblingRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates the names of sibling nodes are not the same.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
-                    <xs:element
-                        name="relationshipValidation"
-                        maxOccurs="1"
-                        type="relationshipRuleType">
-                        <xs:annotation>
-                            <xs:documentation>Validates relationships with property values or other child nodes.
-                            </xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
+                        <xs:element
+                            name="relationshipValidation"
+                            minOccurs="0"
+                            maxOccurs="1"
+                            type="relationshipRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates relationships with property values or other child nodes.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
+                        <xs:element
+                            name="childCountValidation"
+                            minOccurs="0"
+                            maxOccurs="1"
+                            type="numberRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates the number of child nodes of this type.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                    <xs:sequence>
+                        <xs:element
+                            name="sameNameSiblingValidation"
+                            type="sameNameSiblingRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates the names of sibling nodes are not the same.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                        <xs:element
+                            name="relationshipValidation"
+                            minOccurs="0"
+                            maxOccurs="1"
+                            type="relationshipRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates relationships with property values or other child nodes.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                        <xs:element
+                            name="childCountValidation"
+                            minOccurs="0"
+                            maxOccurs="1"
+                            type="numberRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates the number of child nodes of this type.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                    <xs:sequence>
+                        <xs:element
+                            name="relationshipValidation"
+                            type="relationshipRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates relationships with property values or other child nodes.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                        <xs:element
+                            name="childCountValidation"
+                            minOccurs="0"
+                            maxOccurs="1"
+                            type="numberRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates the number of child nodes of this type.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
                     <xs:element
                         name="childCountValidation"
-                        maxOccurs="1"
                         type="numberRuleType">
                         <xs:annotation>
                             <xs:documentation>Validates the number of child nodes of this type.</xs:documentation>
@@ -186,43 +297,105 @@
     <xs:complexType name="propertyValidationType">
         <xs:complexContent>
             <xs:extension base="jcrValidationType">
-                <xs:choice
-                    minOccurs="1"
-                    maxOccurs="4">
-                    <xs:element
-                        name="requiredValidation"
-                        maxOccurs="1"
-                        type="requiredRuleType">
-                        <xs:annotation>
-                            <xs:documentation>Indicates that this property must have a value.</xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
+                <xs:choice>
+                    <xs:sequence>
+                        <xs:element
+                            name="requiredValidation"
+                            type="requiredRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Indicates that this property must have a value.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
-                    <xs:element
-                        name="valueValidation"
-                        maxOccurs="1"
-                        type="stringRuleType">
-                        <xs:annotation>
-                            <xs:documentation>Validates the value.</xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
+                        <xs:element
+                            name="valueValidation"
+                            type="patternRuleType"
+                            minOccurs="0"
+                            maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Validates the value.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
-                    <xs:element
-                        name="relationshipValidation"
-                        maxOccurs="1"
-                        type="relationshipRuleType">
-                        <xs:annotation>
-                            <xs:documentation>Validates relationships with other property values or child nodes.
-                            </xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
+                        <xs:element
+                            name="relationshipValidation"
+                            type="relationshipRuleType"
+                            minOccurs="0"
+                            maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Validates relationships with other property values or child nodes.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
+                        <xs:element
+                            name="valueRangeValidation"
+                            type="numberRuleType"
+                            minOccurs="0"
+                            maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Validates a number value is within a minimum and maximum range.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                    <xs:sequence>
+                        <xs:element
+                            name="valueValidation"
+                            type="patternRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates the value.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                            name="relationshipValidation"
+                            type="relationshipRuleType"
+                            minOccurs="0"
+                            maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Validates relationships with other property values or child nodes.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                        <xs:element
+                            name="valueRangeValidation"
+                            type="numberRuleType"
+                            minOccurs="0"
+                            maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Validates a number value is within a minimum and maximum range.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                    <xs:sequence>
+                        <xs:element
+                            name="relationshipValidation"
+                            type="relationshipRuleType">
+                            <xs:annotation>
+                                <xs:documentation>Validates relationships with other property values or child nodes.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                        <xs:element
+                            name="valueRangeValidation"
+                            type="numberRuleType"
+                            minOccurs="0"
+                            maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Validates a number value is within a minimum and maximum range.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
                     <xs:element
                         name="valueRangeValidation"
-                        maxOccurs="1"
                         type="numberRuleType">
                         <xs:annotation>
-                            <xs:documentation>Validates a number value is within a minimum and maximum range.</xs:documentation>
+                            <xs:documentation>Validates a number value is within a minimum and maximum range.
+                            </xs:documentation>
                         </xs:annotation>
                     </xs:element>
                 </xs:choice>
@@ -237,7 +410,7 @@
         <xs:sequence>
             <xs:element
                 name="message"
-                type="localizedMessageType"
+                type="localizedDescriptionType"
                 minOccurs="1"
                 maxOccurs="unbounded">
                 <xs:annotation>
@@ -267,9 +440,27 @@
     </xs:complexType>
 
     <!-- -->
+    <!-- A rule that indicates children may not have the same name. -->
+    <!-- -->
+    <xs:complexType name="sameNameSiblingRuleType">
+        <xs:complexContent>
+            <xs:extension base="ruleType">
+                <xs:attribute
+                    name="matchType"
+                    type="xs:boolean"
+                    default="false">
+                    <xs:annotation>
+                        <xs:documentation>Indicates if child node types must also match.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- -->
     <!-- A rule that validates a value based on if it matches a pattern. -->
     <!-- -->
-    <xs:complexType name="stringRuleType">
+    <xs:complexType name="patternRuleType">
         <xs:complexContent>
             <xs:extension base="ruleType">
                 <xs:sequence>
@@ -294,22 +485,28 @@
     <xs:complexType name="numberRuleType">
         <xs:complexContent>
             <xs:extension base="ruleType">
-                <xs:choice
-                    minOccurs="1"
-                    maxOccurs="2">
-                    <xs:element
-                        name="minValue"
-                        type="boundaryType"
-                        maxOccurs="1">
-                        <xs:annotation>
-                            <xs:documentation>The smallest, or minimum, value allowed.</xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
-
+                <xs:choice>
+                    <xs:sequence>
+                        <xs:element
+                            name="minValue"
+                            type="boundaryType">
+                            <xs:annotation>
+                                <xs:documentation>The smallest, or minimum, value allowed.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                            name="maxValue"
+                            type="boundaryType"
+                            minOccurs="0"
+                            maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>The largest, or maximum, value allowed.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
                     <xs:element
                         name="maxValue"
-                        type="boundaryType"
-                        maxOccurs="1">
+                        type="boundaryType">
                         <xs:annotation>
                             <xs:documentation>The largest, or maximum, value allowed.</xs:documentation>
                         </xs:annotation>
@@ -325,48 +522,117 @@
     <xs:complexType name="relationshipRuleType">
         <xs:complexContent>
             <xs:extension base="ruleType">
-                <xs:choice
-                    minOccurs="1"
-                    maxOccurs="unbounded">
-                    <xs:element
-                        name="propDoesExist"
-                        type="xs:QName"
-                        minOccurs="0"
-                        maxOccurs="unbounded">
-                        <xs:annotation>
-                            <xs:documentation>A fully-qualified JCR name of a property that must exist when this property or child
-                                node type exists.
-                            </xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
+                <xs:choice>
+                    <xs:sequence>
+                        <xs:element
+                            name="propExists"
+                            type="xs:QName"
+                            minOccurs="1"
+                            maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>A fully-qualified JCR name of a property that must exist when this property or
+                                    child node type exists.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
-                    <xs:element
-                        name="propIsAbsent"
-                        type="xs:QName"
-                        minOccurs="0"
-                        maxOccurs="unbounded">
-                        <xs:annotation>
-                            <xs:documentation>A fully-qualified JCR name of a property that must NOT exist when this property or
-                                child node type exists.
-                            </xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
+                        <xs:element
+                            name="propAbsent"
+                            type="xs:QName"
+                            minOccurs="0"
+                            maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>A fully-qualified JCR name of a property that must NOT exist when this property
+                                    or
+                                    child node type exists.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
-                    <xs:element
-                        name="childDoesExist"
-                        type="xs:QName"
-                        minOccurs="0"
-                        maxOccurs="unbounded">
-                        <xs:annotation>
-                            <xs:documentation>A child must exist with this fully-qualified JCR node type or mixin name.
-                            </xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
+                        <xs:element
+                            name="childExists"
+                            type="xs:QName"
+                            minOccurs="0"
+                            maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>A child must exist with this fully-qualified JCR node type or mixin name.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
 
+                        <xs:element
+                            name="childAbsent"
+                            type="xs:QName"
+                            minOccurs="0"
+                            maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>A child must NOT exist with this fully-qualified JCR node type or mixin name.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                    <xs:sequence>
+                        <xs:element
+                            name="propAbsent"
+                            type="xs:QName"
+                            minOccurs="1"
+                            maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>A fully-qualified JCR name of a property that must NOT exist when this property
+                                    or child node type exists.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                        <xs:element
+                            name="childExists"
+                            type="xs:QName"
+                            minOccurs="0"
+                            maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>A child must exist with this fully-qualified JCR node type or mixin name.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                        <xs:element
+                            name="childAbsent"
+                            type="xs:QName"
+                            minOccurs="0"
+                            maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>A child must NOT exist with this fully-qualified JCR node type or mixin name.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                    <xs:sequence>
+                        <xs:element
+                            name="childExists"
+                            type="xs:QName"
+                            minOccurs="1"
+                            maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>A child must exist with this fully-qualified JCR node type or mixin name.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+
+                        <xs:element
+                            name="childAbsent"
+                            type="xs:QName"
+                            minOccurs="0"
+                            maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>A child must NOT exist with this fully-qualified JCR node type or mixin name.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
                     <xs:element
-                        name="childIsAbsent"
+                        name="childAbsent"
                         type="xs:QName"
-                        minOccurs="0"
+                        minOccurs="1"
                         maxOccurs="unbounded">
                         <xs:annotation>
                             <xs:documentation>A child must NOT exist with this fully-qualified JCR node type or mixin name.
@@ -384,9 +650,19 @@
     <xs:complexType name="ruleType">
         <xs:sequence>
             <xs:element
-                name="message"
-                type="localizedMessageType"
+                name="description"
+                type="localizedDescriptionType"
                 minOccurs="1"
+                maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>One or more locale-specific descriptions of the rule.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            <xs:element
+                name="message"
+                type="localizedErrorMessageType"
+                minOccurs="0"
                 maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>One or more locale-specific messages for when rule evaluation fails.</xs:documentation>
@@ -409,6 +685,15 @@
             default="true">
             <xs:annotation>
                 <xs:documentation>Indicates if this rule is enabled and should be evaluated.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+
+        <xs:attribute
+            name="severity"
+            type="tko:severityType"
+            default="ERROR">
+            <xs:annotation>
+                <xs:documentation>The severity of the rule evaluation.</xs:documentation>
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
@@ -436,9 +721,45 @@
     </xs:complexType>
 
     <!-- -->
-    <!-- A non-empty message and a locale that indicates the language of the message. -->
+    <!-- A non-empty message, with an ID, and a locale that indicates the language of the message. -->
     <!-- -->
-    <xs:complexType name="localizedMessageType">
+    <xs:complexType name="localizedDescriptionType">
+        <xs:complexContent>
+            <xs:extension base="localizedMessageType">
+                <xs:attribute
+                    name="key"
+                    type="xs:string"
+                    fixed="DESCRIPTION">
+                    <xs:annotation>
+                        <xs:documentation>A unique identifier for the message.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- -->
+    <!-- A non-empty message, with an ID, and a locale that indicates the language of the message. -->
+    <!-- -->
+    <xs:complexType name="localizedErrorMessageType">
+        <xs:complexContent>
+            <xs:extension base="localizedMessageType">
+                <xs:attribute
+                    name="key"
+                    type="tko:messageKeyType"
+                    use="required">
+                    <xs:annotation>
+                        <xs:documentation>A unique identifier for the message.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- -->
+    <!-- A non-empty message with a locale that indicates the language of the message. -->
+    <!-- -->
+    <xs:complexType name="localizedMessageType" abstract="true">
         <xs:annotation>
             <xs:documentation>A message that has been translated to the language of the specified locale.</xs:documentation>
         </xs:annotation>
@@ -464,7 +785,7 @@
     </xs:simpleType>
 
     <!-- -->
-    <!-- A min or max value string. -->
+    <!-- A min or max number value string. -->
     <!-- -->
     <xs:simpleType name="boundaryValueType">
         <xs:restriction base="xs:string">
@@ -472,4 +793,43 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <!-- -->
+    <!-- A severity level for when a rule does not evaluate successfully. -->
+    <!-- -->
+    <xs:simpleType name="severityType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="OK" />
+            <xs:enumeration value="INFO" />
+            <xs:enumeration value="WARNING" />
+            <xs:enumeration value="ERROR" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- -->
+    <!-- The localized message keys. -->
+    <!-- -->
+    <xs:simpleType name="messageKeyType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CHILD_COUNT_ABOVE_MAX_VALUE" />
+            <xs:enumeration value="CHILD_COUNT_BELOW_MIN_VALUE" />
+            <xs:enumeration value="CHILD_OF_REQUIRED_TYPE_NOT_FOUND" />
+            <xs:enumeration value="DESCRIPTION" />
+            <xs:enumeration value="NUMBER_RULE_HAS_NO_VALUES" />
+            <xs:enumeration value="NUMBER_RULE_NON_NUMERIC_VALUES" />
+            <xs:enumeration value="PATTERN_RULE_INVALID_NODE_NAME" />
+            <xs:enumeration value="PATTERN_RULE_INVALID_PROPERTY_VALUE" />
+            <xs:enumeration value="PROPERTY_RULE_ABSENT_CHILD_FOUND" />
+            <xs:enumeration value="PROPERTY_RULE_ABSENT_PROPERTY_FOUND" />
+            <xs:enumeration value="PROPERTY_RULE_REQUIRED_CHILD_NOT_FOUND" />
+            <xs:enumeration value="PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND" />
+            <xs:enumeration value="PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE" />
+            <xs:enumeration value="PROPERTY_RULE_VALUE_BELOW_MIN_VALUE" />
+            <xs:enumeration value="RELATIONSHIP_RULE_ABSENT_CHILD_FOUND" />
+            <xs:enumeration value="RELATIONSHIP_RULE_ABSENT_PROPERTY_FOUND" />
+            <xs:enumeration value="RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND" />
+            <xs:enumeration value="RELATIONSHIP_RULE_REQUIRED_PROPERTY_NOT_FOUND" />
+            <xs:enumeration value="RELATIONSHIP_RULE_SNS_FOUND" />
+            <xs:enumeration value="REQUIRED_PROPERTY_NOT_FOUND" />
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>

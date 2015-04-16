@@ -21,6 +21,8 @@
  */
 package org.komodo.utils;
 
+import java.util.Collection;
+
 
 /**
  * This class contains a set of static utility methods for checking method arguments. It contains many of the common checks that
@@ -179,22 +181,28 @@ public class ArgCheck {
 //    public static final void isNotEmpty(Collection collection) {
 //        isNotEmpty(collection, null);
 //    }
-//
-//    /**
-//     * Check that the collection is not empty
-//     *
-//     * @param collection Collection
-//     * @param message Exception message if check fails
-//     * @throws IllegalArgumentException If collection is null or empty
-//     */
-//    public static final void isNotEmpty(Collection collection, String message) {
-//        isNotNull(collection);
-//        if (collection.isEmpty()) {
-//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isCollectionNotEmpty);
-//            throw new IllegalArgumentException(msg);
-//        }
-//    }
-//
+
+    /**
+     * Check that the collection is not empty.
+     *
+     * @param collection
+     *        the collection being checked (can be <code>null</code>)
+     * @param message
+     *        the error message if check fails
+     * @throws IllegalArgumentException
+     *         if the collection is null or empty
+     */
+    public static final void isNotEmpty( final Collection< ? > collection,
+                                         final String message ) {
+        isNotNull( collection );
+
+        if (collection.isEmpty()) {
+            final String msg = message != null ? message : Messages.getString( Messages.ArgCheck.isCollectionNotEmpty );
+            throw new IllegalArgumentException( msg );
+        }
+    }
+
+    //
 //    /**
 //     * Check that the properties is not empty
 //     *

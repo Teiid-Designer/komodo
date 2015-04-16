@@ -25,16 +25,20 @@ package org.komodo.core.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.repository.search.TestObjectSearcher;
+import org.komodo.repository.test.KomodoValidationTest;
+import org.komodo.repository.test.ObjectImplTest;
 import org.komodo.repository.test.TestLocalRepository;
 import org.komodo.repository.test.TestLocalRepositoryPersistence;
 
 @SuppressWarnings( "javadoc" )
 @RunWith( Suite.class )
 @Suite.SuiteClasses( {
-                                        TestLocalRepository.class,
-                                        TestObjectSearcher.class,
-                                        TestLocalRepositoryPersistence.class
-                                    } )
+    KomodoValidationTest.class,
+    ObjectImplTest.class,
+    TestLocalRepository.class,
+    TestObjectSearcher.class,
+    TestLocalRepositoryPersistence.class
+    } )
 public class AllTests {
     // nothing to do
 }

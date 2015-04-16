@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<validationRuleSet
+    xmlns:val="http://www.jboss.org/tools/komodo/validation/2015"
+    xmlns:ddl="http://www.modeshape.org/ddl/1.0"
+    xmlns:vdb="http://www.metamatrix.com/metamodels/VirtualDatabase"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.jboss.org/tools/komodo/validation/2015 http://www.jboss.org/tools/komodo/validation/2015/komodoValidation.xsd"
+    xmlns="http://www.jboss.org/tools/komodo/validation/2015">
+
+    <description locale="en">This is a test validation file.</description>
+    <description locale="es">Este es un archivo de validación de pruebas.</description>
+
+    <nodeValidation jcrName="vdb:virtualDatabase">
+        <message locale="en">Validation rules for the 'vdb:virtualDatabase' node type.</message>
+        <message locale="es">Las reglas de validación para el tipo de nodo 'vdb:virtualDatabase.'</message>
+
+        <!-- Errors 1 and 2: severity value is not valid -->
+        <nameValidation
+            id="vdb.name"
+            severity="BAD">
+            <description locale="en">Validates the name of VDBs.</description>
+            <pattern>[a-z]*</pattern>
+        </nameValidation>
+    </nodeValidation>
+
+    <nodeValidation jcrName="vdb:dataRole">
+        <message locale="en">Validation rules for the 'vdb:dataRole' node type.</message>
+        <childValidation jcrName="vdb:permissions">
+            <message locale="en">Validation rules for child node type 'vdb:permissions' of the 'vdb:dataRole' node type.
+            </message>
+            <childCountValidation
+                id="vdb.dataRole.permissions.childCount"
+                severity="WARNING">
+                <description locale="en">Makes sure a VDB has at least one permission.</description>
+                <!-- Errors 3 and 4: minValue does not have a valid value -->
+                <minValue inclusive="true">a</minValue>
+                <maxValue inclusive="false">10.5</maxValue>
+            </childCountValidation>
+        </childValidation>
+    </nodeValidation>
+
+    <nodeValidation jcrName="vdb:a">
+        <message locale="en">Validation rules for the 'vdb:a' node type.</message>
+        <childValidation jcrName="vdb:b">
+            <message locale="en">Validation rules for child node type 'vdb:b' of the 'vdb:a' node type.
+            </message>
+            <childCountValidation id="vdb.a.b.childCount">
+                <description locale="en">A VDB must have between 10 and 20.</description>
+                <minValue inclusive="true">10</minValue>
+                <!-- Error 5: cannot have 2 minValues -->
+                <minValue inclusive="false">20</minValue>
+            </childCountValidation>
+        </childValidation>
+    </nodeValidation>
+
+    <propertyValidation jcrName="ddl:statementOption">
+        <message locale="en">Validates the property 'ddl:statementOption' of any node type.</message>
+        <!-- Error 6: must have at least one rule -->
+    </propertyValidation>
+
+    <propertyValidation jcrName="vdb:entry">
+        <message locale="en">Validates the property 'vdb:entry' of any node type.</message>
+        <valueValidation id="vdb:entry.value">
+            <description locale="en">A VDB entry value must contain only letters.</description>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </valueValidation>
+        <!-- Error 7: cannot have 2 of the same rule -->
+        <valueValidation id="vdb:entry.valueDuplicate">
+            <description locale="ab">A VDB entry value must contain only letters.</description>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </valueValidation>
+    </propertyValidation>
+
+    <nodeValidation jcrName="vdb:elvis">
+        <message locale="en">Validation rules for the 'vdb:elvis' node type.</message>
+        <!-- Error 8: must have at least one rule -->
+    </nodeValidation>
+
+    <nodeValidation jcrName="vdb:presley">
+        <message locale="en">Validation rules for the 'vdb:presley' node type.</message>
+        <childValidation jcrName="vdb:graceland">
+            <message locale="en">Validation rules for child node type 'vdb:b' of the 'vdb:a' node type.
+            </message>
+            <requiredValidation id="vdb.presley.graceland.required">
+                <description locale="en">A VDB must have a graceland.</description>
+            </requiredValidation>
+            <!-- Error 9: cannot have 2 of the same rule -->
+            <requiredValidation id="vdb.presley.graceland.requiredDuplicate">
+                <description locale="ab">A VDB must have a graceland.</description>
+            </requiredValidation>
+        </childValidation>
+    </nodeValidation>
+
+    <propertyValidation jcrName="ddl:maxValueOnly">
+        <message locale="en">Validates the property 'ddl:maxValueOnly' of any node type.</message>
+        <valueRangeValidation id="ddl:maxValueOnly.valueRange">
+            <description locale="en">A VDB maxValueOnly property must fit inside this range.</description>
+            <!-- Error 8: must have minValue or maxValue -->
+        </valueRangeValidation>
+    </propertyValidation>
+
+    <!-- Verify error message key is invalid -->
+    <nodeValidation jcrName="vdb:invalidErrorMsgKey">
+        <message locale="en">Validation rules for the 'vdb:verifyRelationshipRule4' node type.</message>
+        <childValidation jcrName="vdb:relationshipChildIsAbsent">
+            <message locale="en">Validation rules for child node type 'vdb:relationshipChildIsAbsent' of the
+                'vdb:verifyRelationshipRule4' node type.
+            </message>
+            <relationshipValidation id="vdb.relationshipRule.childIsAbsent">
+                <description locale="en">The VDB must not have a foo.</description>
+                <message key="BAD_KEY" locale="en">The is an overridden error message</message>
+                <childAbsent>vdb:foo</childAbsent>
+            </relationshipValidation>
+        </childValidation>
+    </nodeValidation>
+</validationRuleSet>

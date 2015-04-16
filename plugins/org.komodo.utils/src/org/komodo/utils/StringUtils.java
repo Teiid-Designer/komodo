@@ -885,7 +885,16 @@ public final class StringUtils implements StringConstants {
     public static boolean isLetterOrDigit( char c ) {
         return isBasicLatinLetter(c) || isBasicLatinDigit(c) || Character.isLetterOrDigit(c);
     }
-//
+
+    /**
+     * @param text the text being checked (can be empty)
+     * @return <code>true</code> if the text can be converted to a number
+     */
+    public static boolean isNumber( final String text ) {
+        return ( !isBlank( text ) && text.matches( "-?\\d+(\\.\\d+)?" ) ); //$NON-NLS-1$
+    }
+
+    //
 //    public static boolean isValid( String str ) {
 //        return (!(str == null || str.trim().length() == 0));
 //    }

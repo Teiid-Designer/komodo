@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<validationRuleSet
+    xmlns:val="http://www.jboss.org/tools/komodo/validation/2015"
+    xmlns:ddl="http://www.modeshape.org/ddl/1.0"
+    xmlns:vdb="http://www.metamatrix.com/metamodels/VirtualDatabase"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.jboss.org/tools/komodo/validation/2015 http://www.jboss.org/tools/komodo/validation/2015/komodoValidation.xsd"
+    xmlns="http://www.jboss.org/tools/komodo/validation/2015">
+
+    <!-- Error 1: duplicate locale -->
+    <description locale="en">This is a test validation file.</description>
+    <description locale="en">Este es un archivo de validación de pruebas.</description>
+
+    <nodeValidation jcrName="vdb:virtualDatabase">
+        <!-- Error 2: duplicate locale -->
+        <message locale="es">Validation rules for the 'vdb:virtualDatabase' node type.</message>
+        <message locale="es">Las reglas de validación para el tipo de nodo 'vdb:virtualDatabase.'</message>
+
+        <nameValidation id="vdb.name">
+            <description locale="en">Validates the VDB name.</description>
+            <pattern>[a-z]*</pattern>
+        </nameValidation>
+
+        <propertyValidation jcrName="vdb:connectionType">
+            <!-- Error 3: duplicate locale -->
+            <message locale="nz">Validates the property 'vdb:connectionType' of the 'vdb:virtualDatabase' node type.</message>
+            <message locale="nz">Validates the property 'vdb:connectionType' of the 'vdb:virtualDatabase' node type.</message>
+            <requiredValidation id="vdb.connectionType.required">
+                <description locale="en">The VDB connection type is required.</description>
+            </requiredValidation>
+        </propertyValidation>
+
+        <!-- Error 4: duplicate property -->
+        <propertyValidation jcrName="vdb:connectionType">
+            <message locale="en">Validates the property 'vdb:connectionType' of the 'vdb:virtualDatabase' node type.</message>
+            <valueValidation id="vdb:connectionType.value">
+                <description locale="en">The VDB connection type must be between 1 and 64 characters..</description>
+                <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+            </valueValidation>
+        </propertyValidation>
+    </nodeValidation>
+
+    <propertyValidation jcrName="ddl:statementOption">
+        <!-- Error 5: duplicate locale -->
+        <message locale="ca">Validates the property 'ddl:statementOption' of any node type.</message>
+        <message locale="ca">Validates the property 'ddl:statementOption' of any node type.</message>
+        <valueValidation id="ddl:statementOption.value">
+            <description locale="en">The DDL statement option must be between 1 and 64 characters..</description>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </valueValidation>
+    </propertyValidation>
+
+    <!-- Error 6: duplicate property validation JCR name -->
+    <propertyValidation jcrName="ddl:statementOption">
+        <message locale="ab">Validates the property 'ddl:statementOption' of any node type.</message>
+        <requiredValidation id="vdb.connectionType.mandatory">
+            <description locale="en">The DDL statement option is required.</description>
+        </requiredValidation>
+    </propertyValidation>
+
+    <!-- Error 7: duplicate node validation JCR name -->
+    <nodeValidation jcrName="vdb:virtualDatabase">
+        <message locale="ab">Validation rules for the 'vdb:dataRole' node type.</message>
+        <nameValidation id="vdb:dataRole.name">
+            <description locale="en">Validates the VDB data role name.</description>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </nameValidation>
+    </nodeValidation>
+
+    <nodeValidation jcrName="vdb:translator">
+        <message locale="ab">Validation rules for the 'vdb:translator' node type.</message>
+        <!-- Error 8: duplicate rule id -->
+        <nameValidation id="ddl:statementOption.value">
+            <description locale="en">Validates the VDB translator value.</description>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </nameValidation>
+    </nodeValidation>
+
+    <!-- Duplicate required rule description -->
+    <propertyValidation jcrName="vdb:presley">
+        <message locale="ab">Validates the property 'vdb:presley' of any node type.</message>
+        <requiredValidation id="vdb.presley.required">
+            <description locale="ab">The DDL statement option is required.</description>
+            <!-- Error 9: duplicate rule description locale -->
+            <description locale="ab">This is a duplicate description.</description>
+        </requiredValidation>
+    </propertyValidation>
+
+    <!-- Duplicate value rule description -->
+    <propertyValidation jcrName="vdb:elvis">
+        <message locale="ab">Validates the property 'vdb:elvis' of any node type.</message>
+        <valueValidation id="vdb:elvis.value">
+            <description locale="cd">The VDB elvis value must be between 1 and 64 characters..</description>
+            <!-- Error 10: duplicate rule description locale -->
+            <description locale="cd">This is a duplicate description</description>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </valueValidation>
+    </propertyValidation>
+
+    <!-- Duplicate relationship rule description -->
+    <propertyValidation jcrName="vdb:starr">
+        <message locale="ab">Validates the property 'vdb:starr' of any node type.</message>
+        <relationshipValidation id="vdb.starr.relationship">
+            <description locale="ef">The DDL statement option requires foo and blah properties.</description>
+            <!-- Error 11: duplicate rule description locale -->
+            <description locale="ef">This is a duplicate description.</description>
+            <propExists>vdb:foo</propExists>
+            <propAbsent>vdb:blah</propAbsent>
+        </relationshipValidation>
+    </propertyValidation>
+
+    <!-- Duplicate value range rule description -->
+    <propertyValidation jcrName="vdb:harrison">
+        <message locale="ab">Validates the property 'vdb:harrison' of any node type.</message>
+        <valueRangeValidation id="vdb.harrison.valueRange">
+            <description locale="gh">The DDL statement option requires a value within a range of 1 and 10.</description>
+            <!-- Error 12: duplicate rule description locale -->
+            <description locale="gh">This is a duplicate description.</description>
+            <minValue inclusive="true">1</minValue>
+            <maxValue inclusive="false">10</maxValue>
+        </valueRangeValidation>
+    </propertyValidation>
+
+    <!-- Duplicate required rule message -->
+    <propertyValidation jcrName="vdb:lennon">
+        <message locale="ab">Validates the property 'vdb:lennon' of any node type.</message>
+        <requiredValidation id="vdb.lennon.required">
+            <description locale="en">The DDL statement option is required.</description>
+            <message
+                key="REQUIRED_PROPERTY_NOT_FOUND"
+                locale="ij">The DDL statement option is missing.</message>
+            <!-- Error 13: duplicate rule message locale -->
+            <message
+                key="REQUIRED_PROPERTY_NOT_FOUND"
+                locale="ij">This is a duplicate message.</message>
+        </requiredValidation>
+    </propertyValidation>
+
+    <!-- Duplicate value rule message -->
+    <propertyValidation jcrName="vdb:mcartney">
+        <message locale="ab">Validates the property 'vdb:mcartney' of any node type.</message>
+        <valueValidation id="vdb:mcartney.value">
+            <description locale="cd">The VDB mcartney value must be between 1 and 64 characters..</description>
+            <message
+                key="PATTERN_RULE_INVALID_PROPERTY_VALUE"
+                locale="kl">The value of statement option property is invalid.</message>
+            <!-- Error 14: duplicate rule message locale -->
+            <message
+                key="PATTERN_RULE_INVALID_PROPERTY_VALUE"
+                locale="kl">This is a duplicate message.</message>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </valueValidation>
+    </propertyValidation>
+
+    <!-- Duplicate relationship rule message -->
+    <propertyValidation jcrName="vdb:larry">
+        <message locale="ab">Validates the property 'vdb:larry' of any node type.</message>
+        <relationshipValidation id="vdb.larry.relationship">
+            <description locale="ef">The DDL statement option requires foo and blah properties.</description>
+            <message
+                key="PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND"
+                locale="mn">The foo property and/or blah property is missing.</message>
+            <!-- Error 15: duplicate rule description locale -->
+            <message
+                key="PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND"
+                locale="mn">The foo property and/or blah property is missing.</message>
+            <propExists>vdb:foo</propExists>
+            <propAbsent>vdb:blah</propAbsent>
+        </relationshipValidation>
+    </propertyValidation>
+
+    <!-- Duplicate value range rule message -->
+    <propertyValidation jcrName="vdb:bird">
+        <message locale="ab">Validates the property 'vdb:bird' of any node type.</message>
+        <valueRangeValidation id="vdb.bird.valueRange">
+            <description locale="gh">The DDL statement option requires a value within a range of 1 and 10.</description>
+            <message
+                key="PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE"
+                locale="op">The property 'vdb:bird' does not fit within a valid range.</message>
+            <!-- Error 16: duplicate rule description locale -->
+            <message
+                key="PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE"
+                locale="op">The property 'vdb:bird' does not fit within a valid range.</message>
+            <minValue inclusive="true">1</minValue>
+            <maxValue inclusive="false">10</maxValue>
+        </valueRangeValidation>
+    </propertyValidation>
+</validationRuleSet>
