@@ -130,7 +130,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
 
         traverse(fileNode);
 
-        DdlNodeVisitor visitor = new DdlNodeVisitor(getTeiidVersion());
+        DdlNodeVisitor visitor = new DdlNodeVisitor(getTeiidVersion(), false);
         visitor.visit(fileNode);
 
         compare(expected, visitor);
