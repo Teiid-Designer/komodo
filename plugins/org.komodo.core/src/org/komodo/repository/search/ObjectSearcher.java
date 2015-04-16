@@ -204,6 +204,8 @@ public class ObjectSearcher implements SQLConstants {
     /**
      * Add a PATH clause to the Where clause, eg. WHERE PATH(alias) = 'path1'
      *
+     * Note. this would be the path of the node trying to be found and NOT the path of its parent
+     *
      * @param operator the AND/OR operator preceding the clause. Can be <null> if the first clause
      * @param alias the alias of the selector
      * @param path the path to be added
@@ -214,6 +216,25 @@ public class ObjectSearcher implements SQLConstants {
             whereClauses = new ArrayList<Clause>();
 
         PathClause pathClause = new PathClause(this, operator, alias, path);
+        whereClauses.add(pathClause);
+
+        return this;
+    }
+
+
+    /**
+     * Add a parent clause to the Where clause, eg. WHERE alias.[jcr:path] LIKE 'path1/%'
+     *
+     * @param operator the AND/OR operator preceding the clause. Can be <null> if the first clause
+     * @param alias the alias of the selector
+     * @param parentPath the path to be added
+     * @return this search object
+     */
+    public ObjectSearcher addWhereParentClause(LogicalOperator operator, String alias, String parentPath) {
+        if (whereClauses == null)
+            whereClauses = new ArrayList<Clause>();
+
+        ParentPathClause pathClause = new ParentPathClause(this, operator, alias, parentPath);
         whereClauses.add(pathClause);
 
         return this;

@@ -266,6 +266,9 @@ public class DefaultKomodoShell implements KomodoShell {
      * Shuts down the shell.
      */
     public void shutdown() {
+        if (shutdown)
+            return; // avoid shutting down twice
+
         outStream.print(msgIndentStr + Messages.getString(SHELL.SHUTTING_DOWN));
         try {
             shutdown = true;
