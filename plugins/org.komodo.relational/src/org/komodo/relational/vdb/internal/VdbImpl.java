@@ -11,10 +11,13 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
+
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
@@ -31,6 +34,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -52,14 +56,18 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         private final String xml;
 
         VdbManifestImpl( final UnitOfWork transaction,
-                         final VdbImpl vdb ) throws KException {
+                         final VdbImpl vdb, final Properties exportProperties ) throws KException {
             final StringWriter writer = new StringWriter();
-
+            
             try {
                 final XMLOutputFactory xof = XMLOutputFactory.newInstance();
                 final XMLStreamWriter xsw = xof.createXMLStreamWriter(writer);
 
                 final VdbNodeVisitor visitor = new VdbNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion(), xsw);
+                if( exportProperties != null && !exportProperties.isEmpty() ) {
+                	boolean useTabs = exportProperties.containsKey(ExportConstants.USE_TABS_PROP_KEY);
+                	visitor.setShowTabs(useTabs);
+                }
                 visitor.visit(vdb.node(transaction));
             } catch (final Exception e) {
                 throw new KException(e);
@@ -110,7 +118,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
          * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork)
          */
         @Override
-        public String export( final UnitOfWork transaction ) {
+        public String export( final UnitOfWork transaction, Properties properties) {
             return this.xml;
         }
 
@@ -207,6 +215,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
                     final Repository repository,
                     final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
+        setVdbName(uow, getName(uow));
     }
 
     @Override
@@ -403,7 +412,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      * @see org.komodo.relational.vdb.Vdb#createManifest(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public VdbManifest createManifest( final UnitOfWork uow ) throws KException {
+    public VdbManifest createManifest( final UnitOfWork uow, Properties properties) throws KException {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
@@ -417,7 +426,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         }
 
         try {
-            final VdbManifest result = new VdbManifestImpl(transaction, this);
+            final VdbManifest result = new VdbManifestImpl(transaction, this, properties);
 
             if (uow == null) {
                 transaction.commit();
@@ -435,7 +444,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public String export( final UnitOfWork uow ) throws KException {
+    public String export( final UnitOfWork uow , Properties properties) throws KException {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
@@ -449,7 +458,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         }
 
         try {
-            final String result = createManifest(transaction).export(transaction);
+            final String result = createManifest(transaction, properties).export(transaction, properties);
 
             if (uow == null) {
                 transaction.commit();

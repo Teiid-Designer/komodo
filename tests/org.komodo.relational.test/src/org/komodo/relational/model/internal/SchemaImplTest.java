@@ -14,9 +14,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import javax.jcr.Session;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -123,7 +127,7 @@ public class SchemaImplTest extends RelationalModelTest {
 
     @Test
     public void shouldExportEmptyDdl() throws Exception {
-        final String fragment = this.schema.export(null);
+        final String fragment = this.schema.export(null, new Properties());
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(true));
     }
@@ -132,7 +136,7 @@ public class SchemaImplTest extends RelationalModelTest {
     public void shouldExportInvalidDdl() throws Exception {
         setRenditionValueAwaitSequencing("This is not ddl syntax", SEQUENCE_DDL_PROBLEM);
 
-        final String fragment = this.schema.export(null);
+        final String fragment = this.schema.export(null, new Properties());
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(true));
     }
@@ -142,7 +146,7 @@ public class SchemaImplTest extends RelationalModelTest {
         setRenditionValueAwaitSequencing(DDL_VIEW, SEQUENCE_TEIID_SQL_PATH);
 
         // test
-        final String fragment = this.schema.export(null);
+        final String fragment = this.schema.export(null, new Properties());
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(false));
         assertEquals(DDL_VIEW, fragment);

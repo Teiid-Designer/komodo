@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.vdb;
 
+import java.util.Properties;
+
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
@@ -128,11 +130,12 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param properties (can be <code>null</code> or empty)
      * @return the VDB XML manifest representing the current state of the VDB (never null)
      * @throws KException
      *         if an error occurs
      */
-    VdbManifest createManifest( final UnitOfWork transaction ) throws KException;
+    VdbManifest createManifest( final UnitOfWork transaction, Properties properties ) throws KException;
 
     /**
      * @param transaction

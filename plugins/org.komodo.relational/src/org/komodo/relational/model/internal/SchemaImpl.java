@@ -21,7 +21,10 @@
  */
 package org.komodo.relational.model.internal;
 
+import java.util.Properties;
+
 import javax.jcr.Node;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.RelationalProperties;
@@ -164,7 +167,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
     }
 
     @Override
-    public String export(UnitOfWork uow) throws KException {
+    public String export(UnitOfWork uow, Properties properties) throws KException {
         // Is there a situation where this schema fragment is just Teiid SQL?
         UnitOfWork transaction = uow;
 
@@ -182,7 +185,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
             StringBuffer result = new StringBuffer();
             Node schemaNode = node(transaction);
 
-            DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion());
+            DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion(), false);
             visitor.visit(schemaNode);
             result.append(visitor.getDdl());
 

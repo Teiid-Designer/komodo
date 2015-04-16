@@ -22,8 +22,15 @@
 
 package org.komodo.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.util.ArrayList;
+
 import org.komodo.spi.constants.StringConstants;
 
 /**
@@ -206,7 +213,7 @@ public class FileUtils implements StringConstants {
 	    File folderToScan = new File(pathToScan); 
 	
 		File[] listOfFiles = folderToScan.listFiles();
-		ArrayList<File> list = new ArrayList();
+		ArrayList<File> list = new ArrayList<File>();
 		
 		for (File file:listOfFiles) {
 	        if (file.isFile()) {
@@ -220,6 +227,65 @@ public class FileUtils implements StringConstants {
 		
 		return list;    
     }
+    
+    /**
+     * Read a file, extract its contents, ensuring the file reader is closed.
+     *
+     * @param file 
+     * 
+     * @return contents of file as a {@link String}
+     * 
+     * @throws FileNotFoundException
+     */
+    public static String readSafe(File file) throws FileNotFoundException {
+        String result;
+        FileReader reader = null;
+        try {
+            reader = new FileReader(file);
+            result = read(reader);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {                
+                }
+            }
+        }
+                
+        return result;
+    }
+    
+    /**
+     * Read the given {@link Reader} and return its contents
+     * as a {@link String}
+     * 
+     * @param reader
+     * 
+     * @return contents as a {@link String}
+     */
+    public static String read(Reader reader) {
+        StringWriter writer = new StringWriter();
+        BufferedReader bufferedReader = null;
+        try {
+            bufferedReader = new BufferedReader(reader);
+            while (bufferedReader.ready()) {
+                String line = bufferedReader.readLine();
+                writer.write(line);
+                writer.write(StringConstants.LINE_SEPARATOR);
+            }
+        } catch (IOException e) {
+            // TODO:
+        } finally {
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+        return writer.toString();
+    }
+
 //
 //    /**
 //     * Copy a file. Overwrites the destination file if it exists.
