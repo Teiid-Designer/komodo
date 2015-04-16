@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.TreeMap;
+
 import javax.xml.namespace.QName;
+
 import org.komodo.core.KEngine;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -39,11 +41,14 @@ import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
 import org.komodo.shell.commands.core.CdCommand;
 import org.komodo.shell.commands.core.CreateCommand;
+import org.komodo.shell.commands.core.DeleteCommand;
+import org.komodo.shell.commands.core.ExportCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.NavigateCommand;
 import org.komodo.shell.commands.core.PropertyCommand;
 import org.komodo.shell.commands.core.RecordCommand;
+import org.komodo.shell.commands.core.RenameCommand;
 import org.komodo.shell.commands.core.StatusCommand;
 import org.komodo.shell.commands.core.UseTeiidCommand;
 import org.komodo.utils.FileUtils;
@@ -102,15 +107,24 @@ public class ShellCommandFactory {
 
 		CreateCommand createCommand = new CreateCommand("create",this.wsStatus); //$NON-NLS-1$
 		commandMap.put(createCommand.getName(), createCommand);
+		
+		DeleteCommand deleteCommand = new DeleteCommand("delete",this.wsStatus); //$NON-NLS-1$
+		commandMap.put(deleteCommand.getName(), deleteCommand);
 
 		ImportCommand importCommand = new ImportCommand("import",this.wsStatus); //$NON-NLS-1$
 		commandMap.put(importCommand.getName(), importCommand);
+
+		ExportCommand exportCommand = new ExportCommand("export",this.wsStatus); //$NON-NLS-1$
+		commandMap.put(exportCommand.getName(), exportCommand);
 
 		UseTeiidCommand connCommand = new UseTeiidCommand(this.wsStatus);
         commandMap.put(connCommand.getName(), connCommand);
 
         NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
         commandMap.put(traverseCommand.getName(), traverseCommand);
+        
+        RenameCommand renameCommand = new RenameCommand("rename", this.wsStatus);
+        commandMap.put(renameCommand.getName(), renameCommand);
 
 		discoverContributedCommands();
 	}
@@ -233,7 +247,7 @@ public class ShellCommandFactory {
     public final static ArrayList<File> getFilesForPattern(File folderToScan, String startWith, String endsWith) {
 	    String target_file ;  // fileThatYouWantToFilter
 		File[] listOfFiles = folderToScan.listFiles();
-		ArrayList<File> list = new ArrayList();
+		ArrayList<File> list = new ArrayList<File>();
 		
 		for (File file:listOfFiles) {
 	        if (file.isFile()) {

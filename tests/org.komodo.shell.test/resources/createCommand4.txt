@@ -1,0 +1,21 @@
+# create three models within workspace.
+# cd into the workspace, then list
+cd tko:workspace
+create vdb vdb_test_1
+cd vdb_test_1
+create model model_1
+cd model_1
+create table table_1
+create table table_2
+cd table_2
+create column column_1_2
+cd ..
+cd table_1
+create column column_1
+create column column_2
+create column column_3
+create primarykey pk_1
+create accessPattern ap_1
+create accessPattern ap_2
+create foreignkey fk_1 tko:komodo/tko:workspace/vdb_test_1/model_1/table_2
+list

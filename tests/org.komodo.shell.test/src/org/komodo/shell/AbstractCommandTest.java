@@ -2,20 +2,25 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.komodo.core.KEngine;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.commands.ExitCommand;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
@@ -35,6 +40,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	private Writer commandWriter;
 	private Class testedCommandClass;
     protected WorkspaceStatusImpl wsStatus;
+	
 
     /**
      * @param kEngine 
@@ -173,6 +179,17 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 			sb.append(StringConstants.SPACE);
 		}
 		return sb.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static KomodoObject resolveType(final KomodoObject ko, final Class resolvedClass) {
+		try {
+			return WorkspaceManager.getInstance(_repo).resolve(null, ko, resolvedClass);
+		} catch ( KException ke) {
+			Assert.fail("Failed : "+ ke.getMessage()); //$NON-NLS-1$
+		}
+		
+		return null;
 	}
 
 		 

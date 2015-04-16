@@ -8,10 +8,12 @@
 package org.komodo.shell.commands.core;
 
 import java.util.List;
+
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.FindWorkspaceNodeVisitor;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -24,7 +26,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
- *
+ * Creates various Vdb and relational objects based on command line inputs.
  */
 public class CreateCommand extends BuiltInShellCommand implements StringConstants {
 
@@ -68,32 +70,62 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
 
         KomodoType kType = KomodoType.getKomodoType(objType);
         switch (kType) {
-            case FOREIGN_KEY:
-                String TableRefPath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_FKTableRefPath")); //$NON-NLS-1$
-
-                WorkspaceContext otherTableContext = wsStatus.getWorkspaceContext(TableRefPath);
-                if (otherTableContext == null)
-                    throw new Exception(Messages.getString("CreateCommand.invalidForeignKeyRefPath", TableRefPath)); //$NON-NLS-1$
-
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, otherTableContext.getKomodoObj()));
-                break;
-            case STATEMENT_OPTION:
+            case STATEMENT_OPTION: {
                 String optionValue = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_StatementOptionValue")); //$NON-NLS-1$
                 wkspManager.create(null, parent, objName, kType, new RelationalProperty(StandardDdlLexicon.VALUE, optionValue));
-                break;
-            case VDB_ENTRY:
+            } break;
+            case VDB_ENTRY: {
                 String entryPath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_EntryPath")); //$NON-NLS-1$
                 wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Entry.PATH, entryPath));
-                break;
-            case VDB_TRANSLATOR:
+        	} break;
+            case VDB_TRANSLATOR: {
                 String transType = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_TranslatorType")); //$NON-NLS-1$
                 wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Translator.TYPE, transType));
-                break;
+            } break;
             case VDB: {
                 String filePath = optionalArgument(2, Messages.getString("CreateCommand.DefaultVdb_VdbFilePath")); //$NON-NLS-1$
                 wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, filePath));
-                break;
-            }
+            } break;
+            case MODEL: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.modelNameRequired")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Model.MODEL, name));
+            } break;
+            case TABLE: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.tableNameRequired")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT, name));
+            } break;
+            case VIEW: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.viewNameRequired")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateTable.VIEW_STATEMENT, name));
+            } break;
+            case COLUMN: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.columnNameRequired")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT, name));
+            } break;
+            case FOREIGN_KEY: {
+                String tableRefPath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_FKTableRefPath")); //$NON-NLS-1$
+                
+                FindWorkspaceNodeVisitor visitor = new FindWorkspaceNodeVisitor(tableRefPath);
+                visitor.visit(wsStatus.getRootContext());
+                WorkspaceContext otherTableContext = visitor.getNodeContext();
+
+                if (otherTableContext == null)
+                    throw new Exception(Messages.getString("CreateCommand.invalidForeignKeyRefPath", tableRefPath)); //$NON-NLS-1$
+            	
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, otherTableContext.getKomodoObj()));
+            } break;
+            case PRIMARY_KEY: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.primaryKeyNameRequired")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.Constraint.TABLE_ELEMENT, name));
+            } break;
+            case STORED_PROCEDURE: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.procedureNameRequired")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT, name));
+            } break;
+            case PARAMETER: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.parameterNameRequired")); //$NON-NLS-1$
+                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateProcedure.PARAMETER, name));
+            } break;
             case UNKNOWN:
                 throw new Exception(Messages.getString("CreateCommand.notValidType", objType)); //$NON-NLS-1$
             default:

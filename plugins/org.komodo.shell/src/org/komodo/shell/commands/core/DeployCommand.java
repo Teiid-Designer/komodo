@@ -23,6 +23,7 @@ package org.komodo.shell.commands.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -106,7 +107,7 @@ public class DeployCommand extends BuiltInShellCommand implements StringConstant
             return false;
         }
 
-        String vdbXml = vdb.export(null);
+        String vdbXml = vdb.export(null, null);
         if (vdbXml == null || vdbXml.isEmpty()) {
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("DeployCommand.exportFailure")); //$NON-NLS-1$
             return false;
