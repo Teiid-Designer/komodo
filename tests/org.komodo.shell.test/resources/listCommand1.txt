@@ -1,4 +1,5 @@
 #List at the root
+cd ..
 list
 
 

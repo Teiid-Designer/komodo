@@ -1,5 +1,4 @@
 #status at MyModel
-cd tko:workspace
 create vdb MyVdb
 cd MyVdb
 create model MyModel

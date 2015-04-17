@@ -26,7 +26,6 @@ import org.komodo.shell.commands.core.CdCommand;
 @SuppressWarnings("javadoc")
 public class CdCommandTest extends AbstractCommandTest {
 
-	private static final String CD_COMMAND1 = "cdCommand1.txt"; //$NON-NLS-1$
 	private static final String CD_COMMAND2 = "cdCommand2.txt"; //$NON-NLS-1$
 	
 	/**
@@ -36,15 +35,6 @@ public class CdCommandTest extends AbstractCommandTest {
 		super();
 	}
 
-    @Test
-    public void testCd1() throws Exception {
-    	setup(CD_COMMAND1, CdCommand.class);
-
-    	execute();
-    	
-    	// Check WorkspaceContext
-    	assertEquals("tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    }
     
     @Test
     public void testCd2() throws Exception {
