@@ -9,8 +9,10 @@ package org.komodo.repository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
@@ -20,6 +22,7 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import javax.jcr.nodetype.NodeType;
+
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
 import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
@@ -51,6 +54,8 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 public class ObjectImpl implements KomodoObject, StringConstants {
 
     private static final KLog LOGGER = KLog.getLogger();
+    
+    private static final List<String> ignorableNamespaces = Arrays.asList(new String[]{"nt:", "mix:", "mode:", "jcr:"});  
 
     /**
      * Only one of the {@link UnitOfWork transactions} passed in should be non-<code>null</code>. Ensures that a transaction
@@ -228,6 +233,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         Set<TypeIdentifier> identifiers = null;
         for (Descriptor descriptor : descriptors) {
             String name = descriptor.getName();
+            if( startsWithIgnorablePrefix(name) ) {
+            	continue;
+            }
             identifiers = registry.getIdentifiers(name);
             if (! identifiers.isEmpty())
                 break;
@@ -241,9 +249,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 return KomodoType.DDL_SCHEMA;
 
             result = KomodoType.UNKNOWN;
-        } else if (identifiers.size() == 1)
-            result = identifiers.iterator().next().getKomodoType();
-        else {
+        } else if( identifiers.size() == 1 ) {
+        	result = identifiers.iterator().next().getKomodoType();
+        } else {
             //
             // Only lexicon id with multiple identifiers is TABLE_ELEMENT
             //
@@ -285,6 +293,14 @@ public class ObjectImpl implements KomodoObject, StringConstants {
 
     ObjectImpl accessOuter() {
         return this;
+    }
+    
+    boolean startsWithIgnorablePrefix(String name) {
+    	for(String prefix : ignorableNamespaces ) {
+    		if( name.startsWith(prefix)) return true;
+    	}
+    	
+    	return false;
     }
 
     /**

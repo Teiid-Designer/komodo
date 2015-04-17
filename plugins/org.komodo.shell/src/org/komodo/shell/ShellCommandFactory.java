@@ -46,6 +46,7 @@ import org.komodo.shell.commands.core.ExportCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.NavigateCommand;
+import org.komodo.shell.commands.core.PlayCommand;
 import org.komodo.shell.commands.core.PropertyCommand;
 import org.komodo.shell.commands.core.RecordCommand;
 import org.komodo.shell.commands.core.RenameCommand;
@@ -67,6 +68,19 @@ public class ShellCommandFactory {
 	private static String HELP_CMD_NAME = "help"; //$NON-NLS-1$ 
 	private static String EXIT_CMD_NAME = "exit"; //$NON-NLS-1$ 
 	private static String QUIT_CMD_NAME = "quit"; //$NON-NLS-1$ 
+	
+	private static String CD_CMD_NAME = "cd"; //$NON-NLS-1$ 
+	private static String CREATE_CMD_NAME = "create"; //$NON-NLS-1$ 
+	private static String LIST_CMD_NAME = "list"; //$NON-NLS-1$
+	private static String STATUS_CMD_NAME = "status"; //$NON-NLS-1$ 
+	private static String DELETE_CMD_NAME = "delete"; //$NON-NLS-1$ 
+	private static String RENAME_CMD_NAME = "rename"; //$NON-NLS-1$ 
+	private static String PROPERTY_CMD_NAME = "property"; //$NON-NLS-1$ 
+	private static String IMPORT_CMD_NAME = "import"; //$NON-NLS-1$
+	private static String EXPORT_CMD_NAME = "export"; //$NON-NLS-1$
+	private static String NAVIGATE_CMD_NAME = "navigate"; //$NON-NLS-1$
+	private static String PLAY_CMD_NAME = "play"; //$NON-NLS-1$
+	private static String RECORD_CMD_NAME = "record"; //$NON-NLS-1$
 
 	private WorkspaceStatus wsStatus;
 	private Map<String, ShellCommand> commandMap;
@@ -90,31 +104,31 @@ public class ShellCommandFactory {
 		List<String> allList = new ArrayList<String>(1);
 		allList.add(WorkspaceContext.ALL_TYPES);
 		
-		StatusCommand statusCommand = new StatusCommand("status",this.wsStatus); //$NON-NLS-1$
+		StatusCommand statusCommand = new StatusCommand(STATUS_CMD_NAME,this.wsStatus);
 		commandMap.put(statusCommand.getName(), statusCommand);  
 		
-		ListCommand listCommand = new ListCommand("list",this.wsStatus); //$NON-NLS-1$
+		ListCommand listCommand = new ListCommand(LIST_CMD_NAME,this.wsStatus);
 		commandMap.put(listCommand.getName(), listCommand);  
 
-		CdCommand cdCommand = new CdCommand("cd",this.wsStatus); //$NON-NLS-1$
+		CdCommand cdCommand = new CdCommand(CD_CMD_NAME,this.wsStatus);
 		commandMap.put(cdCommand.getName(), cdCommand); 
 
-		RecordCommand recordCommand = new RecordCommand("record",this.wsStatus); //$NON-NLS-1$
+		RecordCommand recordCommand = new RecordCommand(RECORD_CMD_NAME,this.wsStatus);
 		commandMap.put(recordCommand.getName(), recordCommand);
 		
-		PropertyCommand propertyCommand = new PropertyCommand("property",this.wsStatus); //$NON-NLS-1$
+		PropertyCommand propertyCommand = new PropertyCommand(PROPERTY_CMD_NAME,this.wsStatus);
 		commandMap.put(propertyCommand.getName(), propertyCommand);
 
-		CreateCommand createCommand = new CreateCommand("create",this.wsStatus); //$NON-NLS-1$
+		CreateCommand createCommand = new CreateCommand(CREATE_CMD_NAME,this.wsStatus);
 		commandMap.put(createCommand.getName(), createCommand);
 		
-		DeleteCommand deleteCommand = new DeleteCommand("delete",this.wsStatus); //$NON-NLS-1$
+		DeleteCommand deleteCommand = new DeleteCommand(DELETE_CMD_NAME,this.wsStatus);
 		commandMap.put(deleteCommand.getName(), deleteCommand);
 
-		ImportCommand importCommand = new ImportCommand("import",this.wsStatus); //$NON-NLS-1$
+		ImportCommand importCommand = new ImportCommand(IMPORT_CMD_NAME,this.wsStatus);
 		commandMap.put(importCommand.getName(), importCommand);
 
-		ExportCommand exportCommand = new ExportCommand("export",this.wsStatus); //$NON-NLS-1$
+		ExportCommand exportCommand = new ExportCommand(EXPORT_CMD_NAME,this.wsStatus);
 		commandMap.put(exportCommand.getName(), exportCommand);
 
 		UseTeiidCommand connCommand = new UseTeiidCommand(this.wsStatus);
@@ -123,8 +137,11 @@ public class ShellCommandFactory {
         NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
         commandMap.put(traverseCommand.getName(), traverseCommand);
         
-        RenameCommand renameCommand = new RenameCommand("rename", this.wsStatus);
+        RenameCommand renameCommand = new RenameCommand(RENAME_CMD_NAME, this.wsStatus);
         commandMap.put(renameCommand.getName(), renameCommand);
+
+        PlayCommand playCommand = new PlayCommand(PLAY_CMD_NAME, this.wsStatus);
+        commandMap.put(playCommand.getName(), playCommand);
 
 		discoverContributedCommands();
 	}
@@ -192,14 +209,14 @@ public class ShellCommandFactory {
 	 */
 	public ShellCommand getCommand(String commandName) throws Exception {
 		ShellCommand command = null;
-		if (commandName.equals(HELP_CMD_NAME)) {
+		if (commandName.toLowerCase().equals(HELP_CMD_NAME.toLowerCase())) {
             command = new HelpCommand(HELP_CMD_NAME, this.wsStatus, getCommands());
-		} else if (commandName.equals(QUIT_CMD_NAME)) {
+		} else if (commandName.toLowerCase().equals(QUIT_CMD_NAME.toLowerCase())) {
 			command = new ExitCommand(EXIT_CMD_NAME,this.wsStatus);
-		} else if (commandName.equals(EXIT_CMD_NAME)) {
+		} else if (commandName.toLowerCase().equals(EXIT_CMD_NAME.toLowerCase())) {
 			command = new ExitCommand(EXIT_CMD_NAME,this.wsStatus);
 		} else {
-			command = commandMap.get(commandName);
+			command = commandMap.get(commandName.toLowerCase());
 			if (command == null)
 				return new CommandNotFoundCommand("NotFound"); //$NON-NLS-1$
 		}
