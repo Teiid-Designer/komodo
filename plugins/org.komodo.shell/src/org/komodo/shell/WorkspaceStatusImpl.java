@@ -75,9 +75,10 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         KomodoObject komodoRoot = komodoWksp.getParent(null);
 
         rootContext = new WorkspaceContextImpl(this, null, komodoRoot);
-        contextCache.put(komodoWksp.getAbsolutePath(), rootContext);
+        contextCache.put(komodoRoot.getAbsolutePath(), rootContext);
         
-        WorkspaceContext wsContext = new WorkspaceContextImpl(this, null, komodoWksp);
+        
+        WorkspaceContext wsContext = rootContext.getChild(komodoWksp.getName(null));
         contextCache.put(komodoWksp.getAbsolutePath(), wsContext);
 
 

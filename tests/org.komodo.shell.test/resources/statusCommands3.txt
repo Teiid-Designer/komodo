@@ -1,5 +1,4 @@
 #status at myModel
-cd tko:workspace
 create teiid TestTeiid
 cd TestTeiid
 property set tko:host localhost

@@ -1,4 +1,0 @@
-#cd into workspace
-cd tko:workspace
-
-

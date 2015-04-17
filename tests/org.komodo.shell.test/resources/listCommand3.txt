@@ -1,6 +1,4 @@
 # create three models within workspace.
-# cd into the workspace
-cd tko:workspace
 create vdb MyVdb
 # cd into the vdb
 cd MyVdb
