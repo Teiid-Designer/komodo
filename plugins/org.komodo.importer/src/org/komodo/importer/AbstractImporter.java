@@ -26,11 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
-import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.Messages.IMPORTER;
-import org.komodo.relational.model.Model;
-import org.komodo.relational.model.Schema;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -39,11 +35,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
-import org.komodo.utils.ModelType;
 import org.komodo.utils.StringUtils;
-import org.modeshape.jcr.JcrLexicon;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParser;
 
 /**
  *
@@ -56,6 +48,8 @@ public abstract class AbstractImporter implements StringConstants {
 
     private UnitOfWork transaction;
 
+    protected ImportType importType;
+
     //
     // Defines whether we own the transaction and can commit
     // at the end of the import
@@ -64,14 +58,26 @@ public abstract class AbstractImporter implements StringConstants {
 
     /**
      * @param repository the repository
+     * @param importType the import type
      * @param transaction the transaction
      */
-    public AbstractImporter(Repository repository, UnitOfWork transaction) {
+    public AbstractImporter(Repository repository, ImportType importType, UnitOfWork transaction) {
         this.repository = repository;
+        this.importType = importType;
         if (transaction != null) {
             this.transaction = transaction;
             ownTransaction = false;
         }
+    }
+
+    protected KomodoObject getWorkspace(UnitOfWork transaction) throws KException {
+        ArgCheck.isNotNull(transaction);
+
+        return getRepository().komodoWorkspace(transaction);
+    }
+
+    protected WorkspaceManager getWorkspaceManager() {
+        return WorkspaceManager.getInstance(getRepository());
     }
 
     /**
@@ -85,7 +91,7 @@ public abstract class AbstractImporter implements StringConstants {
      * @return the transaction
      * @throws KException if error occurs
      */
-    private UnitOfWork getTransaction() throws KException {
+    protected UnitOfWork getTransaction() throws KException {
         if (transaction == null) {
             transaction = repository.createTransaction(TRANSACTION_NAME, false, null);
         }
@@ -96,7 +102,7 @@ public abstract class AbstractImporter implements StringConstants {
     /*
      * Only commit the transaction if it was my transaction to being with
      */
-    private void commitTransaction() throws Exception {
+    protected void commitTransaction() throws Exception {
         if (ownTransaction && transaction != null)
             transaction.commit();
     }
@@ -146,6 +152,8 @@ public abstract class AbstractImporter implements StringConstants {
         return buf.toString();
     }
 
+    protected abstract KomodoObject executeImport(String content, ImportOptions importOptions, UnitOfWork transaction) throws KException;
+
     protected KomodoObject prepareImport(String content, ImportOptions importOptions, ImportMessages importMessages) throws Exception {
 
         if(StringUtils.isEmpty(content)) {
@@ -153,49 +161,15 @@ public abstract class AbstractImporter implements StringConstants {
             return null;
         }
 
-        ArgCheck.isNotNull(importOptions.getImportType());
+        ArgCheck.isNotNull(importType);
 
         /*
          * Create object in workspace
          */
         UnitOfWork transaction = getTransaction();
-        WorkspaceManager wkspManager = WorkspaceManager.getInstance(getRepository());
-        KomodoObject workspace = getRepository().komodoWorkspace(transaction);
         KomodoObject resultNode = null;
-        String name = importOptions.getOption(OptionKeys.NAME).toString();
 
-        switch(importOptions.getImportType()) {
-            case MODEL:
-            {
-                ModelType.Type modelType = (ModelType.Type) importOptions.getOption(OptionKeys.MODEL_TYPE);
-                Vdb vdb = wkspManager.createVdb(transaction, workspace, "vdb-for-" + name, name); //$NON-NLS-1$
-                Model model = wkspManager.createModel(transaction, vdb, name);
-                model.setModelType(transaction, Model.Type.valueOf(modelType.toString()));
-                model.setModelDefinition(transaction, content);
-                model.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
-                resultNode = model;
-                break;
-            }
-            case SCHEMA:
-            {
-                Schema schema = wkspManager.createSchema(transaction, workspace, name);
-                schema.setRendition(transaction, content);
-                schema.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
-                resultNode = schema;
-                break;
-            }
-            case VDB:
-            {
-                String vdbFilePath = importOptions.getOption(OptionKeys.VDB_FILE_PATH).toString();
-                Vdb vdb = wkspManager.createVdb(transaction, workspace, name, vdbFilePath);
-                KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
-                fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
-                resultNode = vdb;
-                break;
-            }
-            default:
-                break;
-        }
+        resultNode = executeImport(content, importOptions, transaction);
 
         commitTransaction();
 

@@ -34,8 +34,8 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.importer.AbstractImporterTest;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
-import org.komodo.importer.ImportOptions.ImportType;
 import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.importer.ImportType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -57,17 +57,20 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 
 	@Override
 	protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
-	                                                             File file, ImportOptions importOptions,
+	                                                             File file, ImportType importType, ImportOptions importOptions,
 	                                                             ImportMessages importMessages) {
         DdlImporter importer = new DdlImporter(_repo, uow);
+        importer.setImportType(importType);
         return importer.importDdl(file, importOptions, importMessages);
 	}
 
 	@Override
 	protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
-	                                                             InputStream inputStream, ImportOptions importOptions,
+	                                                             InputStream inputStream, ImportType importType, 
+	                                                             ImportOptions importOptions,
 	                                                             ImportMessages importMessages) {
 	    DdlImporter importer = new DdlImporter(_repo, uow);
+	    importer.setImportType(importType);
         return importer.importDdl(inputStream, importOptions, importMessages);
 	}
 
@@ -78,11 +81,10 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     @Test
     public void testBadDdlFile() throws Exception {
     	ImportOptions importOptions = new ImportOptions();
-    	importOptions.setImportType(ImportType.MODEL);
 
     	ImportMessages importMessages = new ImportMessages();
 
-    	KomodoObject modelNode = executeImporter(new File("unknown.ddl"), importOptions, importMessages);
+    	KomodoObject modelNode = executeImporter(new File("unknown.ddl"), ImportType.MODEL, importOptions, importMessages);
 
     	// No model created
     	assertNull("Failed - expected null model ", modelNode);
@@ -114,12 +116,11 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.MODEL);
 
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
-    	KomodoObject modelNode = executeImporter(tmpFile, importOptions, importMessages);
+    	KomodoObject modelNode = executeImporter(tmpFile, ImportType.MODEL, importOptions, importMessages);
 
     	// Set back to readable
     	tmpFile.setReadable(true);
@@ -148,12 +149,11 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.MODEL);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject modelNode = executeImporter(tmpFile, importOptions, importMessages);
+        KomodoObject modelNode = executeImporter(tmpFile, ImportType.MODEL, importOptions, importMessages);
 
         // No model created
         assertNull("Failed - expected null model ", modelNode);
@@ -259,13 +259,13 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.MODEL);
     	importOptions.setOption(OptionKeys.NAME, TEIID_MYSQL_ACCTS);
 
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
         KomodoObject modelNode = executeImporter(ddlStream,
+                                                                               ImportType.MODEL,
                                                                                importOptions,
                                                                                importMessages,
                                                                                ".*\\/accounts.ACCOUNT",
@@ -289,13 +289,13 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         InputStream ddlStream = setup(TEIID_MYSQL_ACCTS);
 
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.SCHEMA);
         importOptions.setOption(OptionKeys.NAME, TEIID_MYSQL_ACCTS);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
         KomodoObject schemaNode = executeImporter(ddlStream,
+                                                                                 ImportType.SCHEMA,
                                                                                  importOptions,
                                                                                  importMessages,
                                                                                  ".*\\/accounts.ACCOUNT",
@@ -357,13 +357,14 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.MODEL);
 
     	importOptions.setOption(OptionKeys.NAME, TEIID_FLATFILE);
 
     	ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject modelNode = executeImporter(ddlStream, importOptions,
+        KomodoObject modelNode = executeImporter(ddlStream,
+                                                                               ImportType.MODEL,
+                                                                               importOptions,
                                                                                importMessages,
                                                                                ".*\\/getFiles",
                                                                                ".*\\/getTextFiles",
@@ -386,12 +387,13 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 
         // Options for the import
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.SCHEMA);
         importOptions.setOption(OptionKeys.NAME, TEIID_FLATFILE);
 
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject schemaNode = executeImporter(ddlStream, importOptions,
+        KomodoObject schemaNode = executeImporter(ddlStream,
+                                                                                  ImportType.SCHEMA,
+                                                                                  importOptions,
                                                                                   importMessages,
                                                                                   ".*\\/getFiles",
                                                                                   ".*\\/getTextFiles",

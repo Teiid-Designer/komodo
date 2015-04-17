@@ -11,8 +11,8 @@ import java.io.File;
 import java.util.List;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
-import org.komodo.importer.ImportOptions.ImportType;
 import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.importer.ImportType;
 import org.komodo.importer.ddl.DdlImporter;
 import org.komodo.importer.vdb.VdbImporter;
 import org.komodo.shell.BuiltInShellCommand;
@@ -106,12 +106,12 @@ public class ImportCommand extends BuiltInShellCommand {
         }
 
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.MODEL);
         importOptions.setOption(OptionKeys.NAME, modelName);
 
         File ddlFile = new File(modelFile);
 
         DdlImporter importer = new DdlImporter(repository);
+        importer.setImportType(ImportType.MODEL);
         importer.importDdl(ddlFile, importOptions, importMessages);
 
         return importMessages;
@@ -139,7 +139,6 @@ public class ImportCommand extends BuiltInShellCommand {
         File xmlFile = new File(vdbFile);
 
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.VDB);
         importOptions.setOption(OptionKeys.NAME, xmlFile.getName());
 
         VdbImporter importer = new VdbImporter(repository);

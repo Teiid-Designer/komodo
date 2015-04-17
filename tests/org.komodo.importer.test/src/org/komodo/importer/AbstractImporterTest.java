@@ -62,31 +62,36 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
     protected abstract KomodoObject runImporter(Repository repository,
                                                 UnitOfWork uow,
                                                 InputStream inputStream,
+                                                ImportType importType,
                                                 ImportOptions importOptions,
                                                 ImportMessages importMessages);
 
     protected abstract KomodoObject runImporter(Repository repository, 
                                                 UnitOfWork uow,
                                                 File file,
+                                                ImportType importType,
                                                 ImportOptions importOptions,
                                                 ImportMessages importMessages);
 
     protected KomodoObject runImporter(Repository repository, UnitOfWork uow, Object content,
-                                                                 ImportOptions importOptions, ImportMessages importMessages) {
+                                                                 ImportType importType, ImportOptions importOptions,
+                                                                 ImportMessages importMessages) {
         if (content instanceof File)
-            return runImporter(repository, uow, (File) content, importOptions, importMessages);
+            return runImporter(repository, uow, (File) content, importType, importOptions, importMessages);
         else if (content instanceof InputStream)
-            return runImporter(repository, uow, (InputStream) content, importOptions, importMessages);
+            return runImporter(repository, uow, (InputStream) content, importType, importOptions, importMessages);
 
         fail("Content should be a file or input stream");
         return null;
     }
     
-    protected KomodoObject executeImporter(Object content, ImportOptions importOptions,
+    protected KomodoObject executeImporter(Object content, ImportType importType,
+                                                                        ImportOptions importOptions,
                                                                         ImportMessages importMessages, String... sequencePaths)
                                                                         throws Exception {
         assertNotNull(_repo);
         assertNotNull(content);
+        assertNotNull(importType);
         assertNotNull(importOptions);
         assertNotNull(importMessages);
 
@@ -95,7 +100,7 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
 
         CountDownLatch updateLatch = addSequencePathListener(uow, sequencePaths);
 
-        KomodoObject kObject = runImporter(_repo, uow, content, importOptions, importMessages);
+        KomodoObject kObject = runImporter(_repo, uow, content, importType, importOptions, importMessages);
         if (importMessages.hasError()) {
             return null;
         }

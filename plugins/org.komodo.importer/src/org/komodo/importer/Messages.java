@@ -40,7 +40,9 @@ public class Messages implements StringConstants {
     public enum IMPORTER {
         errorFileNotFoundMsg,
         errorFileNotReadableMsg,
-        errorEmptyMsg;
+        errorEmptyMsg,
+        ddlDoesNotSupportVDB,
+        vdbOnlySupportsVDB;
 
         @Override
         public String toString() {
