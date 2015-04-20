@@ -100,7 +100,7 @@ public abstract class AbstractImporter implements StringConstants {
     }
 
     /*
-     * Only commit the transaction if it was my transaction to being with
+     * Only commit the transaction if it was my transaction to begin with
      */
     protected void commitTransaction() throws Exception {
         if (ownTransaction && transaction != null)

@@ -26,8 +26,8 @@
 	<classpathentry exported="true" kind="lib" path="lib/logback-core.jar" sourcepath="libsrc/core-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mapdb.jar" sourcepath="libsrc/mapdb-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-common.jar" sourcepath="libsrc/common-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/modeshape-jcr-api.jar" sourcepath="libsrc/api-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/modeshape-jcr.jar" sourcepath="libsrc/jcr-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/modeshape-jcr-api.jar" sourcepath="libsrc/modeshape-jcr-api-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/modeshape-jcr.jar" sourcepath="libsrc/modeshape-jcr-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-schematic.jar" sourcepath="libsrc/schematic-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-sequencer-ddl.jar" sourcepath="libsrc/modeshape-sequencer-ddl-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-sequencer-teiid.jar" sourcepath="libsrc/modeshape-sequencer-teiid-sources.jar"/>
