@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.commands.core.DeleteCommand;
 
+@SuppressWarnings("javadoc")
 public class DeleteCommandTest  extends AbstractCommandTest {
 
 	private static final String DELETE_COMMAND_1 = "deleteCommand1.txt"; //$NON-NLS-1$
@@ -24,7 +25,7 @@ public class DeleteCommandTest  extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName());
+    	assertEquals("tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	assertEquals(0, wsStatus.getCurrentContext().getKomodoObj().getChildren(null).length);
     }
     
@@ -34,7 +35,7 @@ public class DeleteCommandTest  extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("tko:komodo/tko:workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName());
+    	assertEquals("tko:komodo/tko:workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	assertEquals(0, wsStatus.getCurrentContext().getKomodoObj().getChildren(null).length);
     }
     
@@ -45,7 +46,7 @@ public class DeleteCommandTest  extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("tko:komodo/tko:workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName());
+    	assertEquals("tko:komodo/tko:workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	assertEquals(0, wsStatus.getCurrentContext().getKomodoObj().getChildren(null).length);
     }
 

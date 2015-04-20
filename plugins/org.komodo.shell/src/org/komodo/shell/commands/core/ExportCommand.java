@@ -25,7 +25,7 @@ import org.komodo.spi.repository.Repository;
  *
  */
 public class ExportCommand extends BuiltInShellCommand implements StringConstants {
-	private static final String XML_EXT = "xml";
+	private static final String XML_EXT = "xml"; //$NON-NLS-1$
 	
     /**
      * Constructor.
@@ -67,13 +67,13 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         
         KomodoObject child = parent.getChild(null, objName);
         if( child == null ) {
-        	throw new Exception("Cannot export. The object [" + objName + "] does not exist" );
+        	throw new Exception(Messages.getString("ExportCommand.cannotExport_objectDoesNotExist", objName)); //$NON-NLS-1$
         }
         
         // Check for file location and name
         File theFile = new File(fileNameAndLocation);
         if( theFile.exists()) {
-        	throw new Exception("Cannot export. The file [" + fileNameAndLocation + "] already exists" );
+        	throw new Exception(Messages.getString("ExportCommand.cannotExport_fileAlreadyExists", fileNameAndLocation)); //$NON-NLS-1$
         }
         // Check object type
        
@@ -88,7 +88,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
 
 			String ddlXmlString = vdb.export(null, props);
 			if (ddlXmlString == null || ddlXmlString .isEmpty()) {
-				throw new Exception(" Problem with VDB. Could not export");
+				throw new Exception(Messages.getString("ExportCommand.cannotExport_problemWithVdb")); //$NON-NLS-1$
 			}
 			
 			handleExport(ddlXmlString, fileNameAndLocation);
@@ -105,7 +105,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
     /**
      * Export the current string content of the sql display to a user-selected file
      */
-    public File handleExport(String contents, String fileName) {
+    private File handleExport(String contents, String fileName) {
 
     	String fileExtension = XML_EXT;
     	String fileNameString = fileName;
@@ -138,6 +138,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
                     outputBufferWriter.close();
                 }
             } catch (java.io.IOException e) {
+            	// do nothing
             }
 
             try {
@@ -145,6 +146,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
                     fileWriter.close();
                 }
             } catch (java.io.IOException e) {
+            	// do nothing
             }
         }
         return new File(fileNameString);

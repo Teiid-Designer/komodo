@@ -5,6 +5,11 @@ import org.komodo.shell.api.WorkspaceContextVisitor;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 
+/**
+ * Utility class for finding a node within a node structure with the given node path
+ * @author blafond
+ *
+ */
 public class FindWorkspaceNodeVisitor implements WorkspaceContextVisitor, StringConstants {
 
     private final String nodePath;
@@ -12,6 +17,9 @@ public class FindWorkspaceNodeVisitor implements WorkspaceContextVisitor, String
     private KomodoObject node;
     private WorkspaceContext context;
 
+    /**
+     * @param nodePath the target node path
+     */
     public FindWorkspaceNodeVisitor(String nodePath) {
 		super();
 		this.nodePath = nodePath;
@@ -46,10 +54,16 @@ public class FindWorkspaceNodeVisitor implements WorkspaceContextVisitor, String
         return null;
     }
 	
+	/**
+	 * @return node the target node (if found)
+	 */
 	public KomodoObject getNode() {
 		return node;
 	}
 	
+	/**
+	 * @return the corresponding context of the node (if found)
+	 */
 	public WorkspaceContext getNodeContext() {
 		return context;
 	}

@@ -11,10 +11,17 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.spi.constants.StringConstants;
 
+/**
+ * This command is intended to allow executing (playing) a saved komodo CLI script on your local file system
+ * 
+ * @author blafond
+ *
+ */
 public class PlayCommand  extends BuiltInShellCommand implements StringConstants {
 
 	/**
 	 * Constructor.
+	 * @param name the name of the command
 	 * @param wsStatus the workspace status
 	 */
 	public PlayCommand(String name, WorkspaceStatus wsStatus) {
@@ -66,7 +73,7 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
 			boolean success = command.execute();
 
 			if (!success && reader.isBatch()) {
-				throw new Exception(Messages.getString("PlayCommand.CommandFailure", command.getName()));
+				throw new Exception(Messages.getString("PlayCommand.CommandFailure", command.getName())); //$NON-NLS-1$
 			}
 
 		}

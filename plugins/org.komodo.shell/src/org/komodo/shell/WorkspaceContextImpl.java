@@ -26,12 +26,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceContextVisitor;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;

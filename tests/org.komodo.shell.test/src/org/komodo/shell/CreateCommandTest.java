@@ -9,6 +9,12 @@ import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 
+/**
+ *
+ * @author blafond
+ *
+ */
+@SuppressWarnings("javadoc")
 public class CreateCommandTest extends AbstractCommandTest {
 
 	private static final String CREATE_COMMAND_1 = "createCommand1.txt"; //$NON-NLS-1$
@@ -29,7 +35,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("tko:komodo/tko:workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName());
+    	assertEquals("tko:komodo/tko:workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
     
     @Test
@@ -38,7 +44,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("tko:komodo/tko:workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName());
+    	assertEquals("tko:komodo/tko:workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
     
     @Test
@@ -47,7 +53,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("tko:komodo/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName());
+    	assertEquals("tko:komodo/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
     
     @Test
@@ -56,7 +62,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	assertEquals("tko:komodo/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName());
+    	assertEquals("tko:komodo/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	KomodoObject ko = wsStatus.getCurrentContext().getKomodoObj();
     	// Verify the komodo class is a Table and is TABLE type
@@ -69,7 +75,7 @@ public class CreateCommandTest extends AbstractCommandTest {
     	
     	// verify PK
     	assertNotNull(table.getPrimaryKey(null));
-    	assertEquals("pk_1", table.getPrimaryKey(null).getName(null));
+    	assertEquals("pk_1", table.getPrimaryKey(null).getName(null)); //$NON-NLS-1$
     	
     	// verify 2 access patterns
     	assertEquals(2, table.getAccessPatterns(null).length);
