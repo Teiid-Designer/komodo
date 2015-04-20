@@ -19,9 +19,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
@@ -36,7 +36,7 @@ public final class DataTypeResultSetImpl extends RelationalObjectImpl implements
     /**
      * The resolver of a {@link DataTypeResultSet}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< DataTypeResultSet > RESOLVER = new TypeResolver< DataTypeResultSet >() {
 
         /**
          * {@inheritDoc}

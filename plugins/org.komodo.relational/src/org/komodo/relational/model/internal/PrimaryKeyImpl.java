@@ -29,7 +29,7 @@ public final class PrimaryKeyImpl extends TableConstraintImpl implements Primary
     /**
      * The resolver of a {@link PrimaryKey}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< PrimaryKey > RESOLVER = new TypeResolver< PrimaryKey >() {
 
         /**
          * {@inheritDoc}

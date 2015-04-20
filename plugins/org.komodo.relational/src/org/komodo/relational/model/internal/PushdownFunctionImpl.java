@@ -35,7 +35,7 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
     /**
      * The resolver of a {@link PushdownFunction}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< PushdownFunction > RESOLVER = new TypeResolver< PushdownFunction >() {
 
         /**
          * {@inheritDoc}
@@ -189,9 +189,9 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
                 final KomodoObject kobject = getChild( transaction, CreateProcedure.RESULT_SET );
 
                 if (DataTypeResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
-                    result = ( ProcedureResultSet )DataTypeResultSetImpl.RESOLVER.resolve( transaction, kobject );
+                    result = DataTypeResultSetImpl.RESOLVER.resolve( transaction, kobject );
                 } else if (TabularResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
-                    result = ( ProcedureResultSet )TabularResultSetImpl.RESOLVER.resolve( transaction, kobject );
+                    result = TabularResultSetImpl.RESOLVER.resolve( transaction, kobject );
                 } else {
                     LOGGER.error( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, kobject.getAbsolutePath() ) );
                 }
@@ -269,6 +269,7 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
      *
      * @see org.komodo.relational.model.PushdownFunction#setResultSet(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.Class)
      */
+    @SuppressWarnings( "unchecked" )
     @Override
     public < T extends ProcedureResultSet > T setResultSet( final UnitOfWork uow,
                                                             final Class< T > resultSetType ) throws KException {

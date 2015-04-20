@@ -25,9 +25,9 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -39,7 +39,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     /**
      * The resolver of a {@link DataRole}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< DataRole > RESOLVER = new TypeResolver< DataRole >() {
 
         /**
          * {@inheritDoc}

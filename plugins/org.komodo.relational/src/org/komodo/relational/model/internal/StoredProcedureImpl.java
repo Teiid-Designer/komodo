@@ -55,7 +55,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     /**
      * The resolver of a {@link StoredProcedure}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< StoredProcedure > RESOLVER = new TypeResolver< StoredProcedure >() {
 
         /**
          * {@inheritDoc}
@@ -269,9 +269,9 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
                 final KomodoObject kobject = getChild( transaction, CreateProcedure.RESULT_SET );
 
                 if (DataTypeResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
-                    result = ( ProcedureResultSet )DataTypeResultSetImpl.RESOLVER.resolve( transaction, kobject );
+                    result = DataTypeResultSetImpl.RESOLVER.resolve( transaction, kobject );
                 } else if (TabularResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
-                    result = ( ProcedureResultSet )TabularResultSetImpl.RESOLVER.resolve( transaction, kobject );
+                    result = TabularResultSetImpl.RESOLVER.resolve( transaction, kobject );
                 } else {
                     LOGGER.error( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, kobject.getAbsolutePath() ) );
                 }
@@ -369,6 +369,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
      * @see org.komodo.relational.model.StoredProcedure#setResultSet(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.Class)
      */
+    @SuppressWarnings( "unchecked" )
     @Override
     public < T extends ProcedureResultSet > T setResultSet( final UnitOfWork uow,
                                                             final Class< T > resultSetType ) throws KException {

@@ -197,14 +197,14 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
 
     protected KomodoObject resolveType( final UnitOfWork transaction,
                                         final KomodoObject kobject ) throws KException {
-        TypeResolver resolver = getResolverRegistry().getResolver(kobject.getTypeIdentifier(transaction));
+        TypeResolver< ? > resolver = getResolverRegistry().getResolver(kobject.getTypeIdentifier(transaction));
         if (resolver != null && resolver.resolvable(transaction, kobject))
             return resolver.resolve(transaction, kobject);
 
         // Failed with the type identifier so try to be safe than sorry
         // and iterate through all resolvers to check this object is really
         // not resolvable.
-        for (final TypeResolver aResolver : getResolverRegistry().getResolvers()) {
+        for (final TypeResolver< ? > aResolver : getResolverRegistry().getResolvers()) {
             if (aResolver.resolvable(transaction, kobject)) {
                 return aResolver.resolve(transaction, kobject);
             }
@@ -246,7 +246,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
      */
     protected void validateInitialState( final UnitOfWork transaction,
                                          final KomodoObject kobject ) throws KException {
-        final TypeResolver resolver = getResolverRegistry().getResolver(kobject.getClass());
+        final TypeResolver< ? > resolver = getResolverRegistry().getResolver(kobject.getClass());
 
         if ((resolver != null) && !resolver.resolvable(transaction, kobject)) {
             throw new KException(Messages.getString(Komodo.INCORRECT_TYPE,

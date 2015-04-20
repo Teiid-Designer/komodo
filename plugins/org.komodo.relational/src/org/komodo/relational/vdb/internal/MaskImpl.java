@@ -18,9 +18,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.PropertyValueType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -31,7 +31,7 @@ public final class MaskImpl extends RelationalObjectImpl implements Mask {
     /**
      * The resolver of a {@link Mask}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< Mask > RESOLVER = new TypeResolver< Mask >() {
 
         /**
          * {@inheritDoc}

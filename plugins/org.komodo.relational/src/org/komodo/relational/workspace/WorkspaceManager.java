@@ -308,7 +308,7 @@ public class WorkspaceManager implements StringConstants {
         KomodoObject result = null;
         try {
             TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
-            TypeResolver resolver = registry.getResolver(type);
+            TypeResolver< ? > resolver = registry.getResolver(type);
             if (resolver == null) {
                 if (parent == null) {
                     return getRepository().komodoWorkspace( transaction ).addChild(transaction, id, JcrConstants.NT_UNSTRUCTURED);

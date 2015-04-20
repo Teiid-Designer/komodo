@@ -35,7 +35,7 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
     /**
      * The resolver of a {@link ForeignKey}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< ForeignKey > RESOLVER = new TypeResolver< ForeignKey >() {
 
         /**
          * {@inheritDoc}
