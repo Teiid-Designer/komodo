@@ -231,11 +231,11 @@ public class FileUtils implements StringConstants {
     /**
      * Read a file, extract its contents, ensuring the file reader is closed.
      *
-     * @param file 
+     * @param file the file to read
      * 
      * @return contents of file as a {@link String}
      * 
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException if file cannot be found
      */
     public static String readSafe(File file) throws FileNotFoundException {
         String result;
@@ -247,7 +247,8 @@ public class FileUtils implements StringConstants {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (Exception e) {                
+                } catch (Exception e) {
+                	 KLog.getLogger().error(e.getMessage());
                 }
             }
         }
@@ -259,7 +260,7 @@ public class FileUtils implements StringConstants {
      * Read the given {@link Reader} and return its contents
      * as a {@link String}
      * 
-     * @param reader
+     * @param reader the reader
      * 
      * @return contents as a {@link String}
      */
@@ -280,6 +281,7 @@ public class FileUtils implements StringConstants {
                 try {
                     bufferedReader.close();
                 } catch (Exception e) {
+                	KLog.getLogger().error(e.getMessage());
                 }
             }
         }

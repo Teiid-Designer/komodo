@@ -155,7 +155,8 @@ public class DefaultKomodoShell implements KomodoShell {
         return outStream;
     }
     
-    public Writer getCommandOutput() {
+    @Override
+	public Writer getCommandOutput() {
     	return commandOutput;
     }
 

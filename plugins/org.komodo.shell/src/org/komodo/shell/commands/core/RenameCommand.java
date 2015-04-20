@@ -54,7 +54,7 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         if( child != null ) {
         	child.rename(null, newName);
         } else {
-        	throw new Exception("Cannot rename. The child [" + objName + "] does not exist" );
+        	throw new Exception(Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", objName)); //$NON-NLS-1$
         }
     }
 }

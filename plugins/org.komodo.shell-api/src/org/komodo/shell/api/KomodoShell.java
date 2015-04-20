@@ -50,7 +50,7 @@ public interface KomodoShell extends StringConstants {
     
     /**
      * 
-     * @return
+     * @return the command output writer
      */
     Writer getCommandOutput();
 

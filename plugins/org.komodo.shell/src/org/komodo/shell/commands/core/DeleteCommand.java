@@ -58,7 +58,7 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
         if( child != null ) {
         	wkspManager.delete(null, child);
         } else {
-        	throw new Exception("Cannot delete. The child [" + objName + "] does not exist" );
+        	throw new Exception(Messages.getString("DeleteCommand.cannotDelete_objectDoesNotExist", objName)); //$NON-NLS-1$
         }
     }
 }
