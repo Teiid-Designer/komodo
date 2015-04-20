@@ -32,9 +32,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
@@ -55,7 +55,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     /**
      * The resolver of a {@link Teiid}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< Teiid > RESOLVER = new TypeResolver< Teiid >() {
 
         /**
          * {@inheritDoc}

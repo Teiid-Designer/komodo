@@ -65,9 +65,9 @@ import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
  */
 public class TypeResolverRegistry {
 
-    private class KTypeAdapter implements KeyFromValueAdapter<KomodoType, TypeResolver> {
+    private class KTypeAdapter implements KeyFromValueAdapter<KomodoType, TypeResolver<?>> {
         @Override
-        public KomodoType getKey(TypeResolver value) {
+        public KomodoType getKey(TypeResolver<?> value) {
             return value.identifier();
         }
     }
@@ -84,11 +84,11 @@ public class TypeResolverRegistry {
         return instance;
     }
 
-    private KeyInValueHashMap<KomodoType, TypeResolver> kTypeIndex =
-                    new KeyInValueHashMap<KomodoType, TypeResolver>(new KTypeAdapter());
+    private KeyInValueHashMap<KomodoType, TypeResolver<?>> kTypeIndex =
+                    new KeyInValueHashMap<KomodoType, TypeResolver<?>>(new KTypeAdapter());
 
-    private Map<Class<? extends KomodoObject>, TypeResolver> kClassIndex =
-                    new HashMap<Class<? extends KomodoObject>, TypeResolver>();
+    private Map<Class<? extends KomodoObject>, TypeResolver<?>> kClassIndex =
+                    new HashMap<Class<? extends KomodoObject>, TypeResolver<?>>();
 
     private TypeResolverRegistry() {
 
@@ -151,7 +151,8 @@ public class TypeResolverRegistry {
         index(KomodoType.VIEW, ViewImpl.RESOLVER);
     }
 
-    private void index(KomodoType kType, TypeResolver resolver) {
+    @SuppressWarnings( "unchecked" )
+    private void index(KomodoType kType, TypeResolver<?> resolver) {
         kTypeIndex.add(resolver);
 
         // Indexes the impl class
@@ -171,7 +172,7 @@ public class TypeResolverRegistry {
     /**
      * @return all registered resolvers
      */
-    public Collection<TypeResolver> getResolvers() {
+    public Collection<TypeResolver<?>> getResolvers() {
       return Collections.unmodifiableCollection(kClassIndex.values());
     }
 
@@ -179,7 +180,7 @@ public class TypeResolverRegistry {
      * @param kType the komodo type
      * @return the {@link TypeResolver} for the given komodo type
      */
-    public TypeResolver getResolver(KomodoType kType) {
+    public TypeResolver<?> getResolver(KomodoType kType) {
         if (kType == null || KomodoType.UNKNOWN.equals(kType))
             return null;
 
@@ -190,8 +191,8 @@ public class TypeResolverRegistry {
      * @param kClass the resolver owning class or its interface, eg. {@link AccessPatternImpl} or {@link AccessPattern}
      * @return the {@link TypeResolver} for the given komodo class
      */
-    public TypeResolver getResolver(Class<? extends KomodoObject> kClass) {
-        TypeResolver resolver = kClassIndex.get(kClass);
+    public TypeResolver<?> getResolver(Class<? extends KomodoObject> kClass) {
+        TypeResolver<?> resolver = kClassIndex.get(kClass);
          return resolver;
     }
 }

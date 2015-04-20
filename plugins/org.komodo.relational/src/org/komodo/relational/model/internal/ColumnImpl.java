@@ -25,9 +25,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -63,7 +63,7 @@ public final class ColumnImpl extends RelationalObjectImpl implements Column {
     /**
      * The resolver of a {@link Column}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< Column > RESOLVER = new TypeResolver< Column >() {
 
         /**
          * {@inheritDoc}

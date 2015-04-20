@@ -36,7 +36,7 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
     /**
      * The resolver of a {@link TabularResultSet}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< TabularResultSet > RESOLVER = new TypeResolver< TabularResultSet >() {
 
         /**
          * {@inheritDoc}

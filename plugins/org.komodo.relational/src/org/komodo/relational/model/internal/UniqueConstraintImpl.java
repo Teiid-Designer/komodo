@@ -29,7 +29,7 @@ public final class UniqueConstraintImpl extends TableConstraintImpl implements U
     /**
      * The resolver of a {@link UniqueConstraint}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< UniqueConstraint > RESOLVER = new TypeResolver< UniqueConstraint >() {
 
         /**
          * {@inheritDoc}

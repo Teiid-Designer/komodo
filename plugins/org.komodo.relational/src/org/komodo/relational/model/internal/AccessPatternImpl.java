@@ -29,7 +29,7 @@ public final class AccessPatternImpl extends TableConstraintImpl implements Acce
     /**
      * The resolver of a {@link AccessPattern}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< AccessPattern > RESOLVER = new TypeResolver< AccessPattern >() {
 
         /**
          * {@inheritDoc}

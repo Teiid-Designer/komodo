@@ -60,6 +60,7 @@ public class AdapterFactory {
      * @param adaptedClass the expected class that the object should be adapted to
      * @return the adapted instance or null
      */
+    @SuppressWarnings( "unchecked" )
     public <T extends KomodoObject> T adapt(UnitOfWork uow, Object object, Class<T> adaptedClass) {
         if (! (object instanceof KomodoObject))
             return null;
@@ -81,7 +82,7 @@ public class AdapterFactory {
             KomodoObject kObject = (KomodoObject) object;
             KomodoType type = kObject.getTypeIdentifier(transaction);
             TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
-            TypeResolver resolver = registry.getResolver(type);
+            TypeResolver< ? > resolver = registry.getResolver(type);
 
             if (resolver != null && resolver.resolvable(transaction, kObject))
                 result = resolver.resolve(transaction, kObject);
@@ -90,7 +91,7 @@ public class AdapterFactory {
                 // Failed with the type identifier so try to be safe than sorry
                 // and iterate through all resolvers to check this object is really
                 // not resolvable.
-                for (final TypeResolver aResolver : registry.getResolvers()) {
+                for (final TypeResolver< ? > aResolver : registry.getResolvers()) {
                     if (aResolver.resolvable(transaction, kObject)) {
                         result = aResolver.resolve(transaction, kObject);
                         break;

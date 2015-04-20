@@ -41,7 +41,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     /**
      * The resolver of a {@link UserDefinedFunction}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< UserDefinedFunction > RESOLVER = new TypeResolver< UserDefinedFunction >() {
 
         /**
          * {@inheritDoc}

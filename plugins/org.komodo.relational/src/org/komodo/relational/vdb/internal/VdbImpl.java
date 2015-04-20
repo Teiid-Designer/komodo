@@ -12,12 +12,10 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
-
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
@@ -37,9 +35,9 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -58,7 +56,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         VdbManifestImpl( final UnitOfWork transaction,
                          final VdbImpl vdb, final Properties exportProperties ) throws KException {
             final StringWriter writer = new StringWriter();
-            
+
             try {
                 final XMLOutputFactory xof = XMLOutputFactory.newInstance();
                 final XMLStreamWriter xsw = xof.createXMLStreamWriter(writer);
@@ -115,7 +113,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         /**
          * {@inheritDoc}
          *
-         * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork)
+         * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
          */
         @Override
         public String export( final UnitOfWork transaction, Properties properties) {
@@ -127,7 +125,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     /**
      * The resolver of a {@link Vdb}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< Vdb > RESOLVER = new TypeResolver< Vdb >() {
 
         /**
          * {@inheritDoc}
@@ -409,7 +407,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.vdb.Vdb#createManifest(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.vdb.Vdb#createManifest(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
     public VdbManifest createManifest( final UnitOfWork uow, Properties properties) throws KException {
@@ -441,7 +439,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
     public String export( final UnitOfWork uow , Properties properties) throws KException {

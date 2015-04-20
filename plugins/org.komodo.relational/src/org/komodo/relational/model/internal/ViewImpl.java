@@ -33,7 +33,7 @@ public final class ViewImpl extends TableImpl implements View {
     /**
      * The resolver of a {@link View}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< View > RESOLVER = new TypeResolver< View >() {
 
         /**
          * {@inheritDoc}

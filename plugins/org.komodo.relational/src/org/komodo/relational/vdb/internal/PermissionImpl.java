@@ -24,9 +24,9 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -38,7 +38,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     /**
      * The resolver of a {@link Permission}.
      */
-    public static final TypeResolver RESOLVER = new TypeResolver() {
+    public static final TypeResolver< Permission > RESOLVER = new TypeResolver< Permission >() {
 
         /**
          * {@inheritDoc}
