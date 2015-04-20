@@ -7,6 +7,7 @@
 */
 package org.komodo.spi.repository;
 
+import java.io.File;
 import java.util.List;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -16,7 +17,7 @@ import org.komodo.spi.utils.LocalizedMessage;
 /**
  * Stores Komodo environment settings and preferences.
  */
-public interface EnvironmentStore {
+public interface ValidationManager {
 
     /**
      * The error message and description list elements must be 2 element arrays with the first element being the locale and the
@@ -314,5 +315,14 @@ public interface EnvironmentStore {
                                              final List< String > childTypesThatMustNotExist,
                                              final List< LocalizedMessage > descriptions,
                                              final List< LocalizedMessage > messages ) throws KException;
+
+    /**
+     * @param rulesXmlFile
+     *        the file whose rule definitions are being added (cannot be <code>null</code>)
+     * @return a list of errors (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    List< String > importRules( final File rulesXmlFile ) throws KException;
 
 }

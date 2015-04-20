@@ -5,32 +5,85 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.repository;
+package org.komodo.repository.validation;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import javax.jcr.Node;
 import javax.jcr.Session;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.Komodo;
+import org.komodo.repository.ObjectImpl;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
-import org.komodo.repository.internal.RuleImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.EnvironmentStore;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.ValidationManager;
 import org.komodo.spi.repository.validation.Rule;
 import org.komodo.spi.repository.validation.Rule.MessageKey;
 import org.komodo.spi.utils.LocalizedMessage;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrTools;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * An implementation of an {@link EnvironmentStore} that can be used by repositories.
+ * An implementation of an {@link ValidationManager} that can be used by repositories.
  */
-public class EnvironmentStoreDelegate implements EnvironmentStore {
+public class ValidationManagerImpl implements ValidationManager {
+
+    /**
+     * A handler that can be used with validation parsing.
+     */
+    public static class ValidationHandler extends DefaultHandler {
+
+        private final List< String > errors = new ArrayList<>();
+        private final List< String > fatals = new ArrayList<>();
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
+         */
+        @Override
+        public void error( final SAXParseException e ) {
+            this.errors.add( e.getLocalizedMessage() );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
+         */
+        @Override
+        public void fatalError( final SAXParseException e ) {
+            this.fatals.add( e.getLocalizedMessage() );
+        }
+
+        /**
+         * @return the error messages output from the last parse operation (never <code>null</code> but can be empty)
+         */
+        public List< String > getErrors() {
+            return this.errors;
+        }
+
+        /**
+         * @return the fatal error messages output from the last parse operation (never <code>null</code> but can be empty)
+         */
+        public List< String > getFatalErrors() {
+            return this.fatals;
+        }
+
+    }
+
+    private static SAXParser _parser;
 
     /**
      * The root path of the Komodo repository library.
@@ -44,6 +97,24 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
      */
     public static String VALIDATION_ROOT = ( ENV_ROOT + StringConstants.FORWARD_SLASH + KomodoLexicon.Environment.VALIDATION );
 
+    private static void setupValidationParser() throws Exception {
+        // load validation XSD for validation using parser
+        final File schemaFile = new File( "../../plugins/org.komodo.core/resources/komodoValidation.xsd" ); //$NON-NLS-1$
+
+        if (!schemaFile.exists()) {
+            throw new IllegalStateException( "Validation schema file does not exist" ); //$NON-NLS-1$
+        }
+
+        // create parser
+        final SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setNamespaceAware( true );
+        factory.setValidating( true );
+
+        _parser = factory.newSAXParser();
+        _parser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema" ); //$NON-NLS-1$ //$NON-NLS-2$
+        _parser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource", schemaFile ); //$NON-NLS-1$
+    }
+
     private final Repository repo;
 
     /**
@@ -52,14 +123,14 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
      * @param repo
      *        the repository this is a delegate for (cannot be <code>null</code>)
      */
-    public EnvironmentStoreDelegate( final Repository repo ) {
+    public ValidationManagerImpl( final Repository repo ) {
         this.repo = repo;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.EnvironmentStore#addChildCountValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.spi.repository.ValidationManager#addChildCountValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String, java.lang.String, java.lang.Number, boolean, java.lang.Number, boolean,
      *      java.util.List, java.util.List)
      */
@@ -117,7 +188,7 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.EnvironmentStore#addChildRelationshipValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.spi.repository.ValidationManager#addChildRelationshipValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List, java.util.List, java.util.List,
      *      java.util.List, java.util.List)
      */
@@ -173,7 +244,7 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.EnvironmentStore#addChildTypeRequiredRule(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.spi.repository.ValidationManager#addChildTypeRequiredRule(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List)
      */
     @Override
@@ -216,7 +287,7 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.EnvironmentStore#addNodeNameRule(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.spi.repository.ValidationManager#addNodeNameRule(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List)
      */
     @Override
@@ -259,7 +330,7 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.EnvironmentStore#addPropertyPatternRule(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.spi.repository.ValidationManager#addPropertyPatternRule(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List)
      */
     @Override
@@ -305,7 +376,7 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.EnvironmentStore#addPropertyRelationshipValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.spi.repository.ValidationManager#addPropertyRelationshipValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List, java.util.List, java.util.List,
      *      java.util.List, java.util.List)
      */
@@ -361,7 +432,7 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.EnvironmentStore#addPropertyRequiredRule(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.spi.repository.ValidationManager#addPropertyRequiredRule(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List)
      */
     @Override
@@ -404,7 +475,7 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.EnvironmentStore#addPropertyValueNumberValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.spi.repository.ValidationManager#addPropertyValueNumberValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String, java.lang.String, java.lang.Number, boolean, java.lang.Number, boolean,
      *      java.util.List, java.util.List)
      */
@@ -462,7 +533,7 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.EnvironmentStore#addSameNameSiblingValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
+     * @see org.komodo.spi.repository.ValidationManager#addSameNameSiblingValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String, boolean, java.util.List, java.util.List)
      */
     @Override
@@ -602,13 +673,39 @@ public class EnvironmentStoreDelegate implements EnvironmentStore {
         UnitOfWork transaction = uow;
 
         if (transaction == null) {
-            transaction = this.repo.createTransaction( EnvironmentStoreDelegate.class.getSimpleName() + '.' + name,
-                                                       rollback,
-                                                       null );
+            transaction = this.repo.createTransaction( ValidationManagerImpl.class.getSimpleName() + '.' + name, rollback, null );
         }
 
         assert ( transaction != null );
         return transaction;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.ValidationManager#importRules(java.io.File)
+     */
+    @Override
+    public List< String > importRules( File rulesXmlFile ) throws KException {
+        ArgCheck.isNotNull( rulesXmlFile, "rulesXmlFile" ); //$NON-NLS-1$
+
+        try {
+            if (_parser == null) {
+                setupValidationParser();
+            }
+
+            ValidationHandler handler = new ValidationHandler();
+            _parser.parse( rulesXmlFile, handler );
+
+            // return any errors
+            List<String> result = new ArrayList<>();
+            result.addAll(handler.getFatalErrors());
+            result.addAll(handler.getErrors());
+            return result;
+        } catch (final Exception e) {
+            throw new KException( e );
+        }
+
     }
 
 }

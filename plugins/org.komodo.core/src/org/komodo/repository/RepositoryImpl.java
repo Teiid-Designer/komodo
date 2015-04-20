@@ -30,6 +30,7 @@ import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.core.KomodoLexicon.LibraryComponent;
 import org.komodo.core.KomodoLexicon.WorkspaceItem;
 import org.komodo.repository.search.ObjectSearcher;
+import org.komodo.repository.validation.ValidationManagerImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Artifact;
@@ -40,6 +41,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;
+import org.komodo.spi.repository.ValidationManager;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
@@ -385,6 +387,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     private final Id id;
     private final Set< RepositoryObserver > observers = new HashSet< RepositoryObserver >();
     private final Type type;
+    private ValidationManager validationMgr;
 
     /**
      * @param type
@@ -830,6 +833,20 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
             throw new KException(e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Repository#getValidationManager()
+     */
+    @Override
+    public ValidationManager getValidationManager() {
+        if (this.validationMgr == null) {
+            this.validationMgr = new ValidationManagerImpl( this );
+        }
+
+        return this.validationMgr;
     }
 
     /**

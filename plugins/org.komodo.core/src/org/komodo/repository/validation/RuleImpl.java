@@ -5,7 +5,7 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.repository.internal;
+package org.komodo.repository.validation;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -21,6 +21,7 @@ import org.komodo.spi.outcome.Outcome.Level;
 import org.komodo.spi.outcome.OutcomeFactory.OutcomeImpl;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.validation.Result;
@@ -761,7 +762,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
      */
     @Override
     public String getJcrName() throws KException {
-        return getObjectProperty( null, Property.ValueType.STRING, "getJcrName", KomodoLexicon.Rule.JCR_NAME ); //$NON-NLS-1$
+        return getObjectProperty( null, PropertyValueType.STRING, "getJcrName", KomodoLexicon.Rule.JCR_NAME ); //$NON-NLS-1$
     }
 
     /**
@@ -826,7 +827,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
      */
     @Override
     public String getNodeType() throws KException {
-        return getObjectProperty( null, Property.ValueType.STRING, "getNodeType", KomodoLexicon.Rule.NODE_TYPE ); //$NON-NLS-1$
+        return getObjectProperty( null, PropertyValueType.STRING, "getNodeType", KomodoLexicon.Rule.NODE_TYPE ); //$NON-NLS-1$
     }
 
     /**
@@ -836,7 +837,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
      */
     @Override
     public RuleType getRuleType() throws KException {
-        final String value = getObjectProperty( null, Property.ValueType.STRING, "getRuleType", KomodoLexicon.Rule.RULE_TYPE ); //$NON-NLS-1$
+        final String value = getObjectProperty( null, PropertyValueType.STRING, "getRuleType", KomodoLexicon.Rule.RULE_TYPE ); //$NON-NLS-1$
 
         try {
             final RuleType result = RuleType.valueOf( value );
@@ -853,7 +854,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
      */
     @Override
     public Level getSeverity() throws KException {
-        final String value = getObjectProperty( null, Property.ValueType.STRING, "getSeverity", KomodoLexicon.Rule.SEVERITY ); //$NON-NLS-1$
+        final String value = getObjectProperty( null, PropertyValueType.STRING, "getSeverity", KomodoLexicon.Rule.SEVERITY ); //$NON-NLS-1$
 
         try {
             final Level result = Level.valueOf( value );
@@ -870,7 +871,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
      */
     @Override
     public ValidationType getValidationType() throws KException {
-        final String value = getObjectProperty( null, Property.ValueType.STRING, "getValidationType", //$NON-NLS-1$
+        final String value = getObjectProperty( null, PropertyValueType.STRING, "getValidationType", //$NON-NLS-1$
                                                 KomodoLexicon.Rule.VALIDATION_TYPE );
 
         try {
@@ -888,7 +889,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
      */
     @Override
     public boolean isEnabled() throws KException {
-        final Boolean enabled = getObjectProperty( null, Property.ValueType.BOOLEAN, "isEnabled", KomodoLexicon.Rule.ENABLED ); //$NON-NLS-1$
+        final Boolean enabled = getObjectProperty( null, PropertyValueType.BOOLEAN, "isEnabled", KomodoLexicon.Rule.ENABLED ); //$NON-NLS-1$
         return ( enabled == null ) ? true : enabled;
     }
 
