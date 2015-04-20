@@ -359,6 +359,11 @@ public interface Repository {
     Type getType();
 
     /**
+     * @return the validation manager (never <code>null</code>)
+     */
+    ValidationManager getValidationManager();
+
+    /**
      * @param transaction
      *        the transaction (can be <code>null</code> if operation should be automatically committed)
      * @param file

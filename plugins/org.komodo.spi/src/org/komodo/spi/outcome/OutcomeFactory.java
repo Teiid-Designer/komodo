@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -24,7 +24,6 @@ package org.komodo.spi.outcome;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.komodo.spi.Messages;
 import org.komodo.spi.outcome.Outcome.Level;
 
@@ -33,10 +32,13 @@ import org.komodo.spi.outcome.Outcome.Level;
  */
 public class OutcomeFactory {
 
-    private static class OutcomeImpl implements Outcome {
+    /**
+     * An implementation of an {@link Outcome outcome}.
+     */
+    public static class OutcomeImpl implements Outcome {
 
     	private List<Outcome> children;
-    	
+
         private String message;
 
         private Exception exception;
@@ -142,7 +144,7 @@ public class OutcomeFactory {
 		public boolean isMultiOutcome() {
 			return (this.children!=null && !this.children.isEmpty()) ? true : false;
 		}
-        
+
     	private boolean isGreaterThanCurrent(Level level) {
     		Level currentLevel = getLevel();
     		boolean isGreater = false;
@@ -163,7 +165,7 @@ public class OutcomeFactory {
     		}
     		return isGreater;
     	}
-    	
+
     	/* (non-Javadoc)
     	 * @see java.lang.Object#toString()
     	 */
@@ -184,7 +186,7 @@ public class OutcomeFactory {
     		return sb.toString();
     	}
     }
-    
+
     private static OutcomeFactory instance;
 
     public static OutcomeFactory getInstance() {
@@ -201,7 +203,7 @@ public class OutcomeFactory {
     	multiOutcome.addOutcomes(outcomes);
     	return multiOutcome;
     }
-    
+
     /**
      * @return default ok outcome
      */
@@ -211,7 +213,7 @@ public class OutcomeFactory {
         outcome.setLevel(Level.OK);
         return outcome;
     }
-    
+
     /**
      * @return default ok outcome
      */

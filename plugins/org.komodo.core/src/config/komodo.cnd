@@ -38,6 +38,7 @@
 [tko:komodo] > nt:unstructured
   + tko:workspace (tko:workspace) copy
   + tko:library (tko:library) copy
+  + tko:environment (tko:environment) copy
 
 /*
  * A workspace item.
@@ -199,4 +200,82 @@
  * A VDB entry definition found in the library. The node name is the last segment of the path.
  */
 [tko:vdbEntry] > vdb:entry, tko:libraryComponent
+
+/*
+ * The Komodo environment keeps any environmental settings used by the user.
+ */
+[tko:environment] > nt:unstructured
+  + tko:validation (nt:unstructured)
+
+/*
+ * A grouping node for localized messages.
+ */
+[tko:localizedMessageGroup] > nt:unstructured
+  + * (tko:localizedMessage) = tko:localizedMessage copy
+
+/*
+ * A localized message. The node name is the message key.
+ */
+[tko:localizedMessage] > nt:unstructured
+  + * (tko:localizedText) = tko:localizedText copy
+
+/*
+ * A localized text. The node name is the locale code.
+ */
+[tko:localizedText] > nt:unstructured
+  - tko:text (string) mandatory
+
+/*
+ * A validation rule.
+ */
+[tko:rule] > nt:unstructured abstract
+  - tko:nodeType (string) mandatory // fully-qualified JCR node type name
+  - tko:builtIn (boolean) = 'false' mandatory autocreated
+  - tko:validationType (string) mandatory < 'CHILD', 'NODE', 'PROPERTY'
+  - tko:jcrName (string) // could be a property name or a child node type name
+  - tko:ruleType (string) mandatory < 'NUMBER', 'PATTERN', 'RELATIONSHIP', 'REQUIRED', 'SNS'
+  - tko:enabled (boolean) = 'true' mandatory autocreated
+  - tko:severity (string) = 'ERROR' mandatory autocreated < 'ERROR', 'WARNING', 'INFO', 'OK'
+  + tko:messages (tko:localizedMessageGroup) = tko:localizedMessageGroup copy
+  
+/*
+ * A validation rule that requires a numeric property value to fall within a range.
+ * At least one of the minValue or maxValue properties must be present.
+ */
+[tko:numberRule] > tko:rule
+  - tko:ruleType (string) = 'NUMBER' mandatory autocreated < 'NUMBER'
+  - tko:minValue (string)
+  - tko:minInclusive (boolean) = 'true'
+  - tko:maxValue (string)
+  - tko:maxInclusive (boolean) = 'true'
+  
+/*
+ * A validation rule that requires a node name or property value to match a pattern.
+ */
+[tko:patternRule] > tko:rule
+  - tko:ruleType (string) = 'PATTERN' mandatory autocreated < 'PATTERN'
+  - tko:pattern (string) mandatory
+  
+/*
+ * A validation rule that requires child nodes or properties to either exist or not exist.
+ */
+[tko:relationshipRule] > tko:rule
+  - tko:ruleType (string) = 'RELATIONSHIP' mandatory autocreated < 'RELATIONSHIP'
+  - tko:propExists (string) multiple // properties that must exist
+  - tko:propAbsent (string) multiple // properties that must not exist
+  - tko:childExists (string) multiple // child node types that a child must have
+  - tko:childAbsent (string) multiple // child node types that children cannot be
+  
+/*
+ * A validation rule that requires a child node or a property to exist.
+ */
+[tko:requiredRule] > tko:rule
+  - tko:ruleType (string) = 'REQUIRED' mandatory autocreated < 'REQUIRED'
+  
+/*
+ * A validation rule that requires sibling nodes to not have the same name.
+ */
+[tko:snsRule] > tko:rule
+  - tko:ruleType (string) = 'SNS' mandatory autocreated < 'SNS'
+  - tko:matchType (boolean) = 'true' mandatory
 

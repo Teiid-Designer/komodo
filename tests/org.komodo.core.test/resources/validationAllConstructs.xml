@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<validationRuleSet
+    xmlns:val="http://www.jboss.org/tools/komodo/validation/2015"
+    xmlns:ddl="http://www.modeshape.org/ddl/1.0"
+    xmlns:vdb="http://www.metamatrix.com/metamodels/VirtualDatabase"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.jboss.org/tools/komodo/validation/2015 http://www.jboss.org/tools/komodo/validation/2015/komodoValidation.xsd"
+    xmlns="http://www.jboss.org/tools/komodo/validation/2015">
+
+    <description locale="en">This is a test validation file.</description>
+    <description locale="es">Este es un archivo de validación de pruebas.</description>
+
+    <nodeValidation jcrName="vdb:virtualDatabase">
+        <message locale="en">Validation rules for a VDB.</message>
+        <message locale="es">Las reglas de validación para el tipo de nodo 'vdb:virtualDatabase.'</message>
+
+        <nameValidation id="vdb.name">
+            <description locale="en">Validates the VDB name.</description>
+            <pattern>[a-z]*</pattern>
+        </nameValidation>
+
+        <propertyValidation jcrName="vdb:connectionType">
+            <message locale="en">Validates a VDB's connection type.</message>
+            <requiredValidation id="vdb.connectionType.required">
+                <description locale="en">The VDB connection type is required.</description>
+            </requiredValidation>
+        </propertyValidation>
+    </nodeValidation>
+
+    <propertyValidation jcrName="ddl:statementOption">
+        <message locale="en">Validates the property 'ddl:statementOption' of any node type.</message>
+        <requiredValidation id="ddl:statementOption.required">
+            <description locale="en">The DDL statement option is required.</description>
+        </requiredValidation>
+        <valueValidation id="ddl:statementOption.value">
+            <description locale="en">The DDL statement option value must be between 1 and 64 characters..</description>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </valueValidation>
+        <relationshipValidation id="ddl:statementOption.relationship">
+            <description locale="en">The DDL statement option requires foo and blah properties.</description>
+            <propExists>vdb:foo</propExists>
+            <propAbsent>vdb:blah</propAbsent>
+        </relationshipValidation>
+        <valueRangeValidation id="ddl:statementOption.valueRange">
+            <description locale="en">The DDL statement option requires a value within a range of 1 and 10.</description>
+            <minValue inclusive="true">1</minValue>
+            <maxValue inclusive="false">10</maxValue>
+        </valueRangeValidation>
+    </propertyValidation>
+
+    <!-- Verify you can have only a minValue -->
+    <propertyValidation jcrName="ddl:minValueOnly">
+        <message locale="en">Validates the property 'ddl:minValueOnly' of any node type.</message>
+        <valueRangeValidation id="ddl:minValueOnly.valueRange">
+            <description locale="en">The DDL minValueOnly property requires a minimum value of 1.</description>
+            <minValue>1</minValue>
+        </valueRangeValidation>
+    </propertyValidation>
+
+    <!-- Verify you can have only a maxValue -->
+    <propertyValidation jcrName="ddl:maxValueOnly">
+        <message locale="en">Validates the property 'ddl:maxValueOnly' of any node type.</message>
+        <valueRangeValidation id="ddl:maxValueOnly.valueRange">
+            <description locale="en">The DDL maxValueOnly property requires a maximum value of 10.</description>
+            <maxValue>10</maxValue>
+        </valueRangeValidation>
+    </propertyValidation>
+
+    <nodeValidation jcrName="vdb:dataRole">
+        <message locale="en">Validation rules for the 'vdb:dataRole' node type.</message>
+        <childValidation jcrName="vdb:permission">
+            <message locale="en">Validation rules for child node type 'vdb:permissions' of the 'vdb:dataRole' node type.
+            </message>
+            <requiredValidation id="vdb.permission.required">
+                <description locale="en">A VDB permission is required.</description>
+            </requiredValidation>
+            <sameNameSiblingValidation id="vdb.permission.sns">
+                <description locale="en">A VDB permission must have a unique name.</description>
+            </sameNameSiblingValidation>
+            <relationshipValidation id="vdb.permission.relationship">
+                <description locale="en">A VDB permission must have these properties:.</description>
+                <propExists>vdb:foo</propExists>
+                <propAbsent>vdb:foobar</propAbsent>
+                <propAbsent>vdb:bar</propAbsent>
+                <childExists>vdb:sledge</childExists>
+                <childExists>vdb:sledgeHammer</childExists>
+                <childAbsent>vdb:hammer</childAbsent>
+            </relationshipValidation>
+            <childCountValidation
+                id="vdb.dataRole.permission.childCount"
+                severity="WARNING">
+                <description locale="en">A VDB must have between 0 and 10.5 permissions.</description>
+                <minValue inclusive="true">0</minValue>
+                <maxValue inclusive="false">10.5</maxValue>
+            </childCountValidation>
+        </childValidation>
+    </nodeValidation>
+
+    <!-- Verify you can have only a propExists -->
+    <nodeValidation jcrName="vdb:verifyRelationshipRule1">
+        <message locale="en">Validation rules for the 'vdb:verifyRelationshipRule1' node type.</message>
+        <childValidation jcrName="vdb:relationshippropExists">
+            <message locale="en">Validation rules for child node type 'vdb:relationshippropExists' of the
+                'vdb:verifyRelationshipRule1' node type.
+            </message>
+            <relationshipValidation id="vdb.relationshipRule.propExists">
+                <description locale="en">The VDB must have a foo.</description>
+                <propExists>vdb:foo</propExists>
+            </relationshipValidation>
+        </childValidation>
+    </nodeValidation>
+
+    <!-- Verify you can have only a propAbsent -->
+    <nodeValidation jcrName="vdb:verifyRelationshipRule2">
+        <message locale="en">Validation rules for the 'vdb:verifyRelationshipRule2' node type.</message>
+        <childValidation jcrName="vdb:relationshipPropIsAbsent">
+            <message locale="en">Validation rules for child node type 'vdb:relationshipPropIsAbsent' of the
+                'vdb:verifyRelationshipRule2' node type.
+            </message>
+            <relationshipValidation id="vdb.relationshipRule.propIsAbsent">
+                <description locale="en">The VDB must not have a foo.</description>
+                <propAbsent>vdb:foo</propAbsent>
+            </relationshipValidation>
+        </childValidation>
+    </nodeValidation>
+
+    <!-- Verify you can have only a childExists -->
+    <nodeValidation jcrName="vdb:verifyRelationshipRule3">
+        <message locale="en">Validation rules for the 'vdb:verifyRelationshipRule3' node type.</message>
+        <childValidation jcrName="vdb:relationshipchildExists">
+            <message locale="en">Validation rules for child node type 'vdb:relationshipchildExists' of the
+                'vdb:verifyRelationshipRule3' node type.
+            </message>
+            <relationshipValidation id="vdb.relationshipRule.childExists">
+                <description locale="en">The VDB must have a foo.</description>
+                <childExists>vdb:foo</childExists>
+            </relationshipValidation>
+        </childValidation>
+    </nodeValidation>
+
+    <!-- Verify you can have only a childIsAbsent -->
+    <nodeValidation jcrName="vdb:verifyRelationshipRule4">
+        <message locale="en">Validation rules for the 'vdb:verifyRelationshipRule4' node type.</message>
+        <childValidation jcrName="vdb:relationshipChildIsAbsent">
+            <message locale="en">Validation rules for child node type 'vdb:relationshipChildIsAbsent' of the
+                'vdb:verifyRelationshipRule4' node type.
+            </message>
+            <relationshipValidation id="vdb.relationshipRule.childIsAbsent">
+                <description locale="en">The VDB must not have a foo.</description>
+                <message key="RELATIONSHIP_RULE_ABSENT_CHILD_FOUND" locale="en">The is an overridden error message</message>
+                <childAbsent>vdb:foo</childAbsent>
+            </relationshipValidation>
+        </childValidation>
+    </nodeValidation>
+</validationRuleSet>
