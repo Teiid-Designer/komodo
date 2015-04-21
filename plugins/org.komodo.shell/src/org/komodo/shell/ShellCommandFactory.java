@@ -78,7 +78,6 @@ public class ShellCommandFactory {
 	private static String PROPERTY_CMD_NAME = "property"; //$NON-NLS-1$ 
 	private static String IMPORT_CMD_NAME = "import"; //$NON-NLS-1$
 	private static String EXPORT_CMD_NAME = "export"; //$NON-NLS-1$
-	private static String NAVIGATE_CMD_NAME = "navigate"; //$NON-NLS-1$
 	private static String PLAY_CMD_NAME = "play"; //$NON-NLS-1$
 	private static String RECORD_CMD_NAME = "record"; //$NON-NLS-1$
 
@@ -105,43 +104,43 @@ public class ShellCommandFactory {
 		allList.add(WorkspaceContext.ALL_TYPES);
 		
 		StatusCommand statusCommand = new StatusCommand(STATUS_CMD_NAME,this.wsStatus);
-		commandMap.put(statusCommand.getName(), statusCommand);  
+		commandMap.put(statusCommand.getName().toLowerCase(), statusCommand);  
 		
 		ListCommand listCommand = new ListCommand(LIST_CMD_NAME,this.wsStatus);
-		commandMap.put(listCommand.getName(), listCommand);  
+		commandMap.put(listCommand.getName().toLowerCase(), listCommand);  
 
 		CdCommand cdCommand = new CdCommand(CD_CMD_NAME,this.wsStatus);
-		commandMap.put(cdCommand.getName(), cdCommand); 
+		commandMap.put(cdCommand.getName().toLowerCase(), cdCommand); 
 
 		RecordCommand recordCommand = new RecordCommand(RECORD_CMD_NAME,this.wsStatus);
-		commandMap.put(recordCommand.getName(), recordCommand);
+		commandMap.put(recordCommand.getName().toLowerCase(), recordCommand);
 		
 		PropertyCommand propertyCommand = new PropertyCommand(PROPERTY_CMD_NAME,this.wsStatus);
-		commandMap.put(propertyCommand.getName(), propertyCommand);
+		commandMap.put(propertyCommand.getName().toLowerCase(), propertyCommand);
 
 		CreateCommand createCommand = new CreateCommand(CREATE_CMD_NAME,this.wsStatus);
-		commandMap.put(createCommand.getName(), createCommand);
+		commandMap.put(createCommand.getName().toLowerCase(), createCommand);
 		
 		DeleteCommand deleteCommand = new DeleteCommand(DELETE_CMD_NAME,this.wsStatus);
-		commandMap.put(deleteCommand.getName(), deleteCommand);
+		commandMap.put(deleteCommand.getName().toLowerCase(), deleteCommand);
 
 		ImportCommand importCommand = new ImportCommand(IMPORT_CMD_NAME,this.wsStatus);
-		commandMap.put(importCommand.getName(), importCommand);
+		commandMap.put(importCommand.getName().toLowerCase(), importCommand);
 
 		ExportCommand exportCommand = new ExportCommand(EXPORT_CMD_NAME,this.wsStatus);
-		commandMap.put(exportCommand.getName(), exportCommand);
+		commandMap.put(exportCommand.getName().toLowerCase(), exportCommand);
 
 		UseTeiidCommand connCommand = new UseTeiidCommand(this.wsStatus);
-        commandMap.put(connCommand.getName(), connCommand);
+        commandMap.put(connCommand.getName().toLowerCase(), connCommand);
 
         NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
-        commandMap.put(traverseCommand.getName(), traverseCommand);
+        commandMap.put(traverseCommand.getName().toLowerCase(), traverseCommand);
         
         RenameCommand renameCommand = new RenameCommand(RENAME_CMD_NAME, this.wsStatus);
-        commandMap.put(renameCommand.getName(), renameCommand);
+        commandMap.put(renameCommand.getName().toLowerCase(), renameCommand);
 
         PlayCommand playCommand = new PlayCommand(PLAY_CMD_NAME, this.wsStatus);
-        commandMap.put(playCommand.getName(), playCommand);
+        commandMap.put(playCommand.getName().toLowerCase(), playCommand);
 
 		discoverContributedCommands();
 	}

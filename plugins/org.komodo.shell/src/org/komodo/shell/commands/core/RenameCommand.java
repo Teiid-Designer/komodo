@@ -1,8 +1,11 @@
 package org.komodo.shell.commands.core;
 
+import java.util.List;
+
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
+import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -57,4 +60,24 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         	throw new Exception(Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", objName)); //$NON-NLS-1$
         }
     }
+    
+    /**
+     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+
+        if (getArguments().isEmpty()) {
+        	List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
+            for (WorkspaceContext child : children) {
+            	String childName = child.getName();
+                if (lastArgument == null || childName.startsWith(lastArgument.toUpperCase())) {
+                    candidates.add(childName + " "); //$NON-NLS-1$
+                }
+            }
+            return 0;
+        }
+        return -1;
+    }
+
 }
