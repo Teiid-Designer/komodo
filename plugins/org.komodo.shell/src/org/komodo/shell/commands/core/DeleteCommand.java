@@ -1,5 +1,6 @@
 package org.komodo.shell.commands.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -69,15 +70,28 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
-
         if (getArguments().isEmpty()) {
-        	List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
-            for (WorkspaceContext child : children) {
-            	String childName = child.getName();
-                if (lastArgument == null || childName.startsWith(lastArgument.toUpperCase())) {
-                    candidates.add(childName + " "); //$NON-NLS-1$
-                }
-            }
+			// List of potential completions
+			List<String> potentialsList = new ArrayList<String>();
+			List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
+			for(WorkspaceContext wsContext : children) {
+				potentialsList.add(wsContext.getName());
+			}
+    		// --------------------------------------------------------------
+    		// No arg - offer children relative to current context.
+    		// --------------------------------------------------------------
+    		if(lastArgument==null) {
+    			candidates.addAll(potentialsList);
+    		// --------------------------------------------------------------
+    		// One arg - determine the completion options for it.
+    		// --------------------------------------------------------------
+    		} else {
+    			for (String item : potentialsList) {
+    				if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
+    					candidates.add(item);
+    				}
+    			}
+    		}
             return 0;
         }
         return -1;
