@@ -1,0 +1,10 @@
+#create a vdb, model, table.  cd into one of the tables with absolute path
+cd /tko:komodo/tko:workspace
+create vdb MyVdb
+cd MyVdb
+create model MyModel
+cd MyModel
+create table MyTable1
+create table MyTable2
+cd MyTable1
+cd /tko:komodo/tko:workspace/MyVdb/MyModel/MyTable2
