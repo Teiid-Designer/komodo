@@ -32,10 +32,6 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,6 +40,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
+import org.komodo.repository.KSequencers;
 import org.komodo.test.utils.AbstractSequencerTest;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
@@ -218,6 +215,11 @@ public class TestVdbExport extends AbstractSequencerTest {
                                 .append("CREATE VIEW Tweet AS select * FROM twitterview.getTweets;");
         twitterView.setProperty(VdbLexicon.Model.MODEL_DEFINITION, modelDefinition.toString());
         session().save();
+
+        //
+        // Sequence the session
+        //
+        KSequencers.getInstance().sequence(session());
 
         return tweetExample;
     }
@@ -460,6 +462,11 @@ public class TestVdbExport extends AbstractSequencerTest {
         permission4.setProperty(VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, true);
 
         session().save();
+        //
+        // Sequence the session
+        //
+        KSequencers.getInstance().sequence(session());
+
         return myVdbExample;
     }
 
@@ -637,15 +644,6 @@ public class TestVdbExport extends AbstractSequencerTest {
     public void testBasicVdbExport() throws Exception {
         Node twitterExampleNode = createTweetExampleNode();
 
-        List<String> pathsToBeSequenced = new ArrayList<String>();
-        pathsToBeSequenced.add(".*\\/getTweets\\/" + TeiidSqlLexicon.Query.ID);
-        pathsToBeSequenced.add(".*\\/Tweet\\/" + TeiidSqlLexicon.Query.ID);
-
-        CountDownLatch updateLatch = addPathLatchListener(1, pathsToBeSequenced);
-
-        // Wait for the starting of the repository or timeout of 3 minutes
-        updateLatch.await(3, TimeUnit.MINUTES);
-
         traverse(twitterExampleNode);
 
         //
@@ -683,11 +681,6 @@ public class TestVdbExport extends AbstractSequencerTest {
     @Test(timeout=3000000)
     public void testAllElementsVdbExport() throws Exception {
         Node allElementsNode = createAllElementsExampleNode();
-
-        CountDownLatch updateLatch = addPathLatchListener(1, ".*\\/Test\\/" + TeiidSqlLexicon.Query.ID);
-
-        // Wait for the starting of the repository or timeout of 3 minutes
-        updateLatch.await(3, TimeUnit.MINUTES);
 
         traverse(allElementsNode);
 

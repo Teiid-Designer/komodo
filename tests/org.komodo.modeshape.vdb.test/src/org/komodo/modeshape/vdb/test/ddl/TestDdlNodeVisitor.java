@@ -26,15 +26,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
+import org.komodo.repository.KSequencers;
 import org.komodo.test.utils.AbstractSequencerTest;
 
 /**
@@ -121,17 +119,13 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
     }
 
     protected void helpTest(String ddl, String expected, String... pathsToBeSequenced) throws Exception {
-        CountDownLatch updateLatch = addPathLatchListener(1, Arrays.asList(pathsToBeSequenced));
-        Node fileNode = prepareSequence(ddl, SequenceType.DDL);
-        assertNotNull(fileNode);
+        Node ddlNode = prepareSequence(ddl, KSequencers.Sequencers.DDL);
+        assertNotNull(ddlNode);
 
-        // Wait for the sequencing of the file node or timeout of 3 minutes
-        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
-
-        traverse(fileNode);
+        traverse(ddlNode);
 
         DdlNodeVisitor visitor = new DdlNodeVisitor(getTeiidVersion(), false);
-        visitor.visit(fileNode);
+        visitor.visit(ddlNode);
 
         compare(expected, visitor);
     }

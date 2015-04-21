@@ -34,11 +34,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.jcr.Session;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
@@ -95,10 +95,19 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         assertNotNull(importOptions);
         assertNotNull(importMessages);
 
-        UnitOfWork uow = _repo.createTransaction("test-importer", false, null);
-        Session session = session(uow);
+        final CountDownLatch updateLatch = new CountDownLatch(1);
+        UnitOfWork uow = _repo.createTransaction("test-importer", false, new UnitOfWorkListener() {
 
-        CountDownLatch updateLatch = addSequencePathListener(uow, sequencePaths);
+            @Override
+            public void respond(Object results) {
+                updateLatch.countDown();
+            }
+
+            @Override
+            public void errorOccurred(Throwable error) {
+                updateLatch.countDown();
+            }
+        });
 
         KomodoObject kObject = runImporter(_repo, uow, content, importType, importOptions, importMessages);
         if (importMessages.hasError()) {
@@ -106,24 +115,11 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         }
 
         //
-        // Save the session to ensure that the sequencers are executed.
-        //
-        // However, we cannot logout:
-        // * Sequence listeners added through the observation manager are only applicable for the lifetime
-        //    of the session.
-        // * Once session.logout() is called, then all listeners are removed from the RepositoryChangeBus so
-        //    sequencing will fire a completion event but the sequence listener will never receive it.
-        //
-        session.save();
-
-        // Wait for the sequencing of the repository or timeout of 3 minutes
-        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
-
-        //
-        // Commit and logout of the session after waiting for the sequence listener
-        // to observe the completion of the sequencing
+        // Commit the transaction and await the response of the callback
         //
         uow.commit();
+
+        updateLatch.await(3, TimeUnit.MINUTES);
 
         traverse(kObject);
 

@@ -22,12 +22,7 @@
 package org.komodo.modeshape.teiid.sequencer;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
-import javax.jcr.Property;
 import org.junit.Test;
 import org.komodo.modeshape.AbstractTSqlSequencerTest;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractCompareCriteria;
@@ -81,11 +76,11 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLAttributes;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLElement;
 import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
+import org.komodo.repository.KSequencers;
 import org.komodo.spi.query.sql.lang.JoinType;
 import org.komodo.spi.query.sql.lang.SetQuery.Operation;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
-import org.modeshape.jcr.api.JcrConstants;
 
 /**
  *
@@ -107,19 +102,8 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     }
 
     protected Node sequenceSql(String text, String seqRegEx) throws Exception {
-        CountDownLatch updateLatch = addPathLatchListener(1, seqRegEx);
-
-        Node fileNode = prepareSequence(text, SequenceType.TSQL);
-
-        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
-
-        Node contentNode = fileNode.getNode(JcrConstants.JCR_CONTENT);
-        assertNotNull(contentNode);
-
-        Property content = contentNode.getProperty(JcrConstants.JCR_DATA);
-        assertNotNull(content);
-
-        return fileNode;
+        Node node = prepareSequence(text, KSequencers.Sequencers.TSQL);
+        return node;
     }
 
     @Test

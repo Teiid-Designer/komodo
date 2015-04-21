@@ -31,6 +31,7 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import org.komodo.core.KEngine;
+import org.komodo.repository.KSequencers;
 import org.komodo.repository.Messages;
 import org.komodo.spi.KException;
 import org.komodo.utils.ArgCheck;
@@ -231,8 +232,13 @@ public class ModeshapeEngineThread extends Thread {
             //
             // Only bother to save if we actually have changes to save
             //
-            if (session.hasPendingChanges())
+            if (session.hasPendingChanges()) {
                 session.save();
+                //
+                // Sequence the session to generate relevent nodes
+                //
+                KSequencers.getInstance().sequence(session);
+            }
 
             LOGGER.debug("commit session request {0} has been saved", commitRequest.getName()); //$NON-NLS-1$
 
@@ -240,9 +246,11 @@ public class ModeshapeEngineThread extends Thread {
                 request.getCallback().respond(null);
             }
         } catch (final Exception e) {
+            request.requestType = RequestType.ROLLBACK_SESSION;
+            rollbackSession(request);
+
             if (request.getCallback() == null) {
                 LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_COMMIT, e, commitRequest.getName()));
-                rollbackSession(request);
             } else {
                 request.getCallback().errorOccurred(e);
             }

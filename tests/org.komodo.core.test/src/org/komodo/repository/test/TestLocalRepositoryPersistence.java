@@ -31,13 +31,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import java.io.File;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.jcr.Session;
-import javax.jcr.observation.Event;
-import javax.jcr.observation.ObservationManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,18 +41,17 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.LocalRepository.LocalRepositoryId;
 import org.komodo.repository.RepositoryImpl;
-import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.test.utils.AbstractLoggingTest;
 import org.komodo.test.utils.LocalRepositoryObserver;
-import org.komodo.test.utils.NodePathListener;
 import org.komodo.utils.FileUtils;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
 
@@ -129,32 +124,6 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
         initLocalRepository(TestLocalRepositoryPersistence.class, configFile);
     }
 
-    private Session session(UnitOfWork uow) throws Exception {
-        if (!(uow instanceof UnitOfWorkImpl))
-            throw new Exception("Attempt to extract session from unit of work which is not a UnitOfWorkImpl");
-
-        Session session = ((UnitOfWorkImpl)uow).getSession();
-        return session;
-    }
-
-    /**
-     * @param countdown equivalent to number of sql query expressions to be sequenced
-     * @param pathsToBeSequenced wilcarded patterns against which to compare the sequenced nodes
-     * @return the latch for awaiting the sequencing
-     * @throws Exception
-     */
-    private CountDownLatch addNodeCreatedListener(UnitOfWork uow, final String... pathsCreated) throws Exception {
-        Session session = session(uow);
-        ObservationManager manager = session.getWorkspace().getObservationManager();
-        assertNotNull(manager);
-
-        final CountDownLatch updateLatch = new CountDownLatch(pathsCreated.length);
-        List<String> paths = Arrays.asList(pathsCreated);
-        NodePathListener nodePathListener = new NodePathListener(paths, updateLatch);
-        manager.addEventListener(nodePathListener, Event.NODE_ADDED, null, true, null, null, false);
-        return updateLatch;
-    }
-
     /**
      * Shutdown and destroy repo
      *
@@ -207,30 +176,33 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
         initLocalRepository(config);
         assertNotNull(_repo);
 
-        UnitOfWork uow = _repo.createTransaction("test-persistence-workspace", false, null);
+        final CountDownLatch latch = new CountDownLatch(1);
+        UnitOfWork uow = _repo.createTransaction("test-persistence-workspace", false, new UnitOfWorkListener() {
 
-        Session session = session(uow);
-        CountDownLatch latch = addNodeCreatedListener(uow, "/tko:komodo/tko:workspace");
+            @Override
+            public void respond(Object results) {
+                latch.countDown();
+            }
+
+            @Override
+            public void errorOccurred(Throwable error) {
+                latch.countDown();
+            }
+        });
 
         // Create the komodo workspace
         KomodoObject workspace = _repo.komodoWorkspace(uow);
         assertNotNull(workspace);
 
         //
-        // Save the session to ensure the node created listener fires
-        // to let us know that the workspace has been created.
+        // Commit the transaction and await the response of the callback
         //
-        session.save();
+        uow.commit();
 
         //
         // Wait for the latch to countdown
         //
         assertTrue(latch.await(3, TimeUnit.MINUTES));
-
-        //
-        // Commit transaction to logout out of the session
-        //
-        uow.commit();
 
         // Find the workspace to confirm what we expect to happen
         List<KomodoObject> results = _repo.searchByType(null, KomodoLexicon.Workspace.NODE_TYPE);
@@ -274,16 +246,19 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
         initLocalRepository(config);
         assertNotNull(_repo);
 
-        UnitOfWork uow = _repo.createTransaction("test-persistence-objects", false, null);
+        final CountDownLatch latch = new CountDownLatch(1);
+        UnitOfWork uow = _repo.createTransaction("test-persistence-objects", false, new UnitOfWorkListener() {
 
-        Session session = session(uow);
+            @Override
+            public void respond(Object results) {
+                latch.countDown();
+            }
 
-        String[] nodePaths = new String[testObjectCount + 1];
-        nodePaths[0] = "/tko:komodo/tko:workspace";
-        for (int i = 1; i <= testObjectCount; ++i)
-            nodePaths[i] = "/tko:komodo/tko:workspace/test" + i;
-
-        CountDownLatch latch = addNodeCreatedListener(uow, nodePaths);
+            @Override
+            public void errorOccurred(Throwable error) {
+                latch.countDown();
+            }
+        });
 
         // Create the komodo workspace
         KomodoObject workspace = _repo.komodoWorkspace(uow);
@@ -295,20 +270,14 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
         }
 
         //
-        // Save the session to ensure the node created listener fires
-        // to let us know that the workspace has been created.
+        // Commit the transaction and await the response of the callback
         //
-        session.save();
+        uow.commit();
 
         //
         // Wait for the latch to countdown
         //
         assertTrue(latch.await(3, TimeUnit.MINUTES));
-
-        //
-        // Commit transaction to logout out of the session
-        //
-        uow.commit();
 
         // Find the objects to confirm what we expect to happen
         List<KomodoObject> results = _repo.searchByType(null, KomodoLexicon.VdbModel.NODE_TYPE);
