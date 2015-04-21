@@ -26,7 +26,17 @@ import org.komodo.shell.commands.core.CdCommand;
 @SuppressWarnings("javadoc")
 public class CdCommandTest extends AbstractCommandTest {
 
-	private static final String CD_COMMAND2 = "cdCommand2.txt"; //$NON-NLS-1$
+	private static final String CD_COMMAND_REL1 = "cdCommand_Relative1.txt"; //$NON-NLS-1$
+	private static final String CD_COMMAND_REL2 = "cdCommand_Relative2.txt"; //$NON-NLS-1$
+	private static final String CD_COMMAND_REL3 = "cdCommand_Relative3.txt"; //$NON-NLS-1$
+	private static final String CD_COMMAND_REL4 = "cdCommand_Relative4.txt"; //$NON-NLS-1$
+	private static final String CD_COMMAND_REL5 = "cdCommand_Relative5.txt"; //$NON-NLS-1$
+	private static final String CD_COMMAND_REL6 = "cdCommand_Relative6.txt"; //$NON-NLS-1$
+
+	private static final String CD_COMMAND_ABS1 = "cdCommand_Absolute1.txt"; //$NON-NLS-1$
+	private static final String CD_COMMAND_ABS2 = "cdCommand_Absolute2.txt"; //$NON-NLS-1$
+	private static final String CD_COMMAND_ABS3 = "cdCommand_Absolute3.txt"; //$NON-NLS-1$
+	private static final String CD_COMMAND_ABS4 = "cdCommand_Absolute4.txt"; //$NON-NLS-1$
 	
 	/**
 	 * Test for CdCommand
@@ -35,15 +45,104 @@ public class CdCommandTest extends AbstractCommandTest {
 		super();
 	}
 
+    @Test
+    public void testCdRelative1() throws Exception {
+    	setup(CD_COMMAND_REL1, CdCommand.class);
+
+    	execute();
+    	
+    	// Check WorkspaceContext
+    	assertEquals("tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
     
     @Test
-    public void testCd2() throws Exception {
-    	setup(CD_COMMAND2, CdCommand.class);
+    public void testCdRelative2() throws Exception {
+    	setup(CD_COMMAND_REL2, CdCommand.class);
     	
     	execute();
     	
     	// Check WorkspaceContext
     	assertEquals("tko:komodo/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testCdRelative3() throws Exception {
+    	setup(CD_COMMAND_REL3, CdCommand.class);
+    	
+    	execute();
+    	
+    	// Check WorkspaceContext
+    	assertEquals("tko:komodo/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testCdRelative4() throws Exception {
+    	setup(CD_COMMAND_REL4, CdCommand.class);
+    	
+    	execute();
+    	
+    	// Check WorkspaceContext
+    	assertEquals("tko:komodo/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+    
+    @Test
+    public void testCdRelative5() throws Exception {
+    	setup(CD_COMMAND_REL5, CdCommand.class);
+    	
+    	execute();
+    	
+    	// Check WorkspaceContext
+    	assertEquals("tko:komodo/tko:workspace/MyVdb/MyModel/MyTable1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+    
+    @Test
+    public void testCdRelative6() throws Exception {
+    	setup(CD_COMMAND_REL6, CdCommand.class);
+    	
+    	execute();
+    	
+    	// Check WorkspaceContext
+    	assertEquals("tko:komodo/tko:workspace/MyVdb/MyModel/MyTable1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+    
+    @Test
+    public void testCdAbsolute1() throws Exception {
+    	setup(CD_COMMAND_ABS1, CdCommand.class);
+
+    	execute();
+    	
+    	// Check WorkspaceContext
+    	assertEquals("tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+    
+    @Test
+    public void testCdAbsolute2() throws Exception {
+    	setup(CD_COMMAND_ABS2, CdCommand.class);
+    	
+    	execute();
+    	
+    	// Check WorkspaceContext
+    	assertEquals("tko:komodo/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testCdAbsolute3() throws Exception {
+    	setup(CD_COMMAND_ABS3, CdCommand.class);
+    	
+    	execute();
+    	
+    	// Check WorkspaceContext
+    	assertEquals("tko:komodo/tko:workspace/MyVdb/MyModel/MyTable2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testCdAbsolute4() throws Exception {
+    	setup(CD_COMMAND_ABS4, CdCommand.class);
+    	
+    	execute();
+    	
+    	// Check WorkspaceContext
+    	assertEquals("tko:komodo/tko:workspace/MyVdb/MyModel/Table1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
     
 }

@@ -23,12 +23,14 @@ package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
 
 /**
@@ -37,6 +39,10 @@ import org.komodo.spi.constants.StringConstants;
  */
 public class CdCommand extends BuiltInShellCommand implements StringConstants {
 
+	private static final String ROOT_OPT1 = WorkspaceStatus.ROOT_TYPE;
+	private static final String ROOT_OPT2 = ROOT_OPT1 + ContextUtils.ROOT_CONTEXT_NAME;
+	private static final String ROOT_OPT3 = ROOT_OPT2 + WorkspaceStatus.ROOT_TYPE;
+	
     /**
 	 * Constructor
 	 * @param name the command name
@@ -61,29 +67,24 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
 		
 		String locArg = locationArg.trim();
-		if("..".equals(locArg)) { //$NON-NLS-1$
-			wsStatus.setCurrentContext(currentContext.getParent());
-			if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
-			return true;
-		} 
 		
-		if(WorkspaceStatus.ROOT_TYPE.equals(locArg)) { 
+		// check for cd into root
+		if( locArg.equalsIgnoreCase(ROOT_OPT1) || locArg.equalsIgnoreCase(ROOT_OPT2) || locArg.equalsIgnoreCase(ROOT_OPT3)) { 
 			wsStatus.setCurrentContext(wsStatus.getRootContext());
 			if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
-			    return true;
-		} 
-		
-		// See if matching child
-		boolean foundMatch = false;
-		WorkspaceContext newContext = null;
-		for(WorkspaceContext childContext : currentContext.getChildren()) {
-			if(childContext.getName().equals(locArg)) {
-				newContext = childContext;
-				foundMatch = true;
-				break;
-			}
+			return true;
 		}
-		if(foundMatch) {
+		
+		WorkspaceContext newContext = null;
+		// Location supplied as absolute path
+		if(ContextUtils.isAbsolutePath(locArg)) {
+			newContext = ContextUtils.getContextForAbsolutePath(getWorkspaceStatus().getRootContext(), locArg);
+		// Location supplied as relative path
+		} else {
+			newContext = ContextUtils.getRelativeContext(currentContext, locArg);
+		}
+		
+		if(newContext!=null) {
 			getWorkspaceStatus().setCurrentContext(newContext);
 			if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
 			return true;
@@ -112,30 +113,24 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CdCommand.locationArg_empty")); //$NON-NLS-1$
 			return false;
 		}
-		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		// See if command to go up
-		if("..".equals(locArg)) {  //$NON-NLS-1$
-			if(currentContext.getParent()==null) {
-	            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CdCommand.locationArg_cantCdUp")); //$NON-NLS-1$
-				return false;
-			} 
+		WorkspaceContext currentContext = getWorkspaceStatus().getCurrentContext();
+
+		// check for cd into root
+		if( locArg.equalsIgnoreCase(ROOT_OPT1) || locArg.equalsIgnoreCase(ROOT_OPT2) || locArg.equalsIgnoreCase(ROOT_OPT3)) { 
 			return true;
 		}
-		// cd /
-		if(WorkspaceStatus.ROOT_TYPE.equalsIgnoreCase(locArg)) { 
-			return true;
+		
+		WorkspaceContext newContext = null;
+		// Location supplied as absolute path
+		if(ContextUtils.isAbsolutePath(locArg)) {
+			newContext = ContextUtils.getContextForAbsolutePath(getWorkspaceStatus().getRootContext(), locArg);
+		// Location supplied as relative path
+		} else {
+			newContext = ContextUtils.getRelativeContext(currentContext, locArg);
 		}
-		// See if matching child
-		boolean foundMatch = false;
-		for(WorkspaceContext childContext : currentContext.getChildren()) {
-			if(childContext.getName().equals(locArg)) {
-				foundMatch = true;
-				break;
-			}
-		}
-		if(!foundMatch) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CdCommand.locationArg_noChildWithThisName")); //$NON-NLS-1$
+		
+		if(newContext==null) {
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CdCommand.locationArg_noContextWithThisName")); //$NON-NLS-1$
 			return false;
 		}
 		return true;
@@ -146,29 +141,102 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 	 */
 	@Override
 	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
-
 		if (getArguments().isEmpty()) {
-			List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
-			List<String> childNames = new ArrayList<String>(children.size());
-			if(getWorkspaceStatus().getCurrentContext().getType() != WorkspaceStatus.ROOT_TYPE) {
-				childNames.add(StringConstants.DOT_DOT);
-				childNames.add(WorkspaceStatus.ROOT_TYPE);
+			WorkspaceContext currentContext = getWorkspaceStatus().getCurrentContext();
+			
+			// List of potentials completions
+			List<String> potentialsList = new ArrayList<String>();
+			// Only offer '..' if below the root
+			if(currentContext.getType() != WorkspaceStatus.ROOT_TYPE) {
+				potentialsList.add(StringConstants.DOT_DOT);
 			}
-			for(WorkspaceContext wsContext : children) {
-				childNames.add(wsContext.getName());
-			}
+			
+			// --------------------------------------------------------------
+			// No arg - offer children relative current context.
+			// --------------------------------------------------------------
 			if(lastArgument==null) {
-				candidates.addAll(childNames);
+				List<WorkspaceContext> children = currentContext.getChildren();
+				for(WorkspaceContext wsContext : children) {
+					potentialsList.add(wsContext.getName()+ContextUtils.PATH_SEPARATOR);
+				}
+				candidates.addAll(potentialsList);
+			// --------------------------------------------------------------
+			// One arg - determine the completion options for it.
+			// --------------------------------------------------------------
 			} else {
-				for (String name : childNames) {
-					if (name.toUpperCase().startsWith(lastArgument.toUpperCase())) {
-						candidates.add(name);
+				// --------------------------------------------
+				// Absolute Path Arg handling
+				// --------------------------------------------
+				if( lastArgument.startsWith(ContextUtils.PATH_SEPARATOR) ) {
+					// If not the full absolute root, then provide it
+					if(!ContextUtils.isAbsolutePath(lastArgument)) {
+						potentialsList.add(ROOT_OPT3);
+						updateCandidates(candidates,potentialsList,lastArgument);
+				    // Starts with correct root - provide next option
+					} else {
+						String relativePath = ContextUtils.convertAbsolutePathToRootRelative(lastArgument);
+						WorkspaceContext deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus().getRootContext(), relativePath);
+						
+						// Get children of deepest context match to form potentialsList
+						List<WorkspaceContext> children = deepestMatchingContext.getChildren();
+						if(!children.isEmpty()) {
+							// Get all children as potentials
+							for(WorkspaceContext childContext : children) {
+								String absolutePath = ContextUtils.PATH_SEPARATOR + childContext.getFullName();
+								potentialsList.add(absolutePath+ContextUtils.PATH_SEPARATOR);
+							}
+						} else {
+							String absolutePath = ContextUtils.PATH_SEPARATOR + deepestMatchingContext.getFullName();
+							potentialsList.add(absolutePath+ContextUtils.PATH_SEPARATOR);
+						}
+						updateCandidates(candidates, potentialsList, lastArgument);
 					}
+				// -------------------------------------------
+			    // Relative Path Arg handling
+			    // -------------------------------------------
+				} else {
+					// Deepest matching context for relative path
+					WorkspaceContext deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(currentContext, lastArgument);
+					
+					// Get children of deepest context match to form potentialsList
+					List<WorkspaceContext> children = deepestMatchingContext.getChildren();
+					if(!children.isEmpty()) {
+						// Get all children as potentials
+						for(WorkspaceContext childContext : children) {
+							String absolutePath = ContextUtils.PATH_SEPARATOR + childContext.getFullName();
+							String relativePath = ContextUtils.convertAbsolutePathToRelative(currentContext, absolutePath);
+							potentialsList.add(relativePath+ContextUtils.PATH_SEPARATOR);
+						}
+					} else {
+						String absolutePath = ContextUtils.PATH_SEPARATOR + deepestMatchingContext.getFullName();
+						String relativePath = ContextUtils.convertAbsolutePathToRelative(currentContext, absolutePath);
+						potentialsList.add(relativePath+ContextUtils.PATH_SEPARATOR);
+					}
+					updateCandidates(candidates, potentialsList, lastArgument);
 				}
 			}
-			return 0;
+			// Do not put space after it - may want to append more to the path
+			if(candidates.size()==1) {
+				return CompletionConstants.NO_APPEND_SEPARATOR;
+			}
+			return CompletionConstants.NO_APPEND_SEPARATOR;
 		}
 		return -1;
+	}
+	
+	/**
+	 * Adds the valid items from the completionList to the candidates.  They are added to the candidates if they start
+	 * with 'lastArg'
+	 * @param candidates the candidates
+	 * @param completionList possibilities before filtering based on last arg
+	 * @param lastArg the commandline arg
+	 */
+	private void updateCandidates(List<CharSequence> candidates, List<String> completionList, String lastArg) {
+		for (String item : completionList) {
+			if (item.toUpperCase().startsWith(lastArg.toUpperCase())) {
+				candidates.add(item);
+			}
+		}
 	}
 	
 }

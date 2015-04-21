@@ -1,0 +1,10 @@
+#Uses multiple double dot notation then back down tree
+cd /tko:komodo/tko:workspace
+create vdb MyVdb
+cd MyVdb
+create model MyModel
+cd MyModel
+create table MyTable1
+create table MyTable2
+cd MyTable2
+cd ../../MyModel/MyTable1

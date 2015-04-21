@@ -1,0 +1,10 @@
+#Uses the single dot notation in the path
+cd /tko:komodo/tko:workspace
+create vdb MyVdb
+cd MyVdb
+create model MyModel
+cd MyModel
+create table MyTable1
+create table MyTable2
+cd MyTable2
+cd ../../MyModel/./MyTable1
