@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Properties;
 
 import org.komodo.relational.vdb.Vdb;
@@ -81,7 +82,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         if( child.getTypeIdentifier(null).equals(KomodoType.VDB)) {
         	Vdb vdb = wkspManager.resolve(null, child, Vdb.class);
         	if( vdb == null ) {
-        		throw new Exception(" EXPORT VDB not yet implemented");
+        		throw new Exception(" EXPORT VDB not yet implemented"); //$NON-NLS-1$
         	}
 			Properties props = new Properties();
 			props.put( ExportConstants.USE_TABS_PROP_KEY, true);
@@ -96,7 +97,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         	
         } else if( child.getTypeIdentifier(null).equals(KomodoType.MODEL)) {
         	 // IF Model, then export as xyz.ddl file
-        	throw new Exception(" EXPORT MODEL not yet implemented");
+        	throw new Exception(" EXPORT MODEL not yet implemented"); //$NON-NLS-1$
         }
        
 
@@ -150,5 +151,24 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
             }
         }
         return new File(fileNameString);
+    }
+    
+    /**
+     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+
+        if (getArguments().isEmpty()) {
+        	List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
+            for (WorkspaceContext child : children) {
+            	String childName = child.getName();
+                if (lastArgument == null || childName.startsWith(lastArgument.toUpperCase())) {
+                    candidates.add(childName + " "); //$NON-NLS-1$
+                }
+            }
+            return 0;
+        }
+        return -1;
     }
 }
