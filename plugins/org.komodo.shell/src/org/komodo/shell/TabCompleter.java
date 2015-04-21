@@ -65,11 +65,11 @@ public class TabCompleter implements Completion {
     		for(String commandName : allCommandsForContext) {
     			completeOperation.addCompletionCandidate(commandName);
     		}
-    		// Case 2 - partial command has been typed - show entire command
+    	// Case 2 - partial command has been typed - show entire command
     	} else if(!buffer.contains(" ")) { //$NON-NLS-1$
     		String name = buffer.toString().trim();
     		for (String cmdName : allCommandsForContext) {
-    			if (cmdName.startsWith(name)) {
+    			if (cmdName.startsWith(name.toLowerCase())) {
     				completeOperation.addCompletionCandidate(cmdName);
     			}
     		}
