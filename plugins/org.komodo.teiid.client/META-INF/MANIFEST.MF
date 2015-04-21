@@ -29,6 +29,7 @@ Bundle-ClassPath: .,
  lib/wildfly-controller-client.jar,
  lib/wildfly-controller.jar,
  lib/wildfly-protocol.jar,
+ lib/wildfly-security-manager.jar,
  lib/xnio-api.jar,
  lib/xnio-nio.jar,
  lib/xom.jar

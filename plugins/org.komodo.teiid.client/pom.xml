@@ -24,6 +24,7 @@
         <version.org.jboss.marshalling.jboss-marshalling-river>1.4.3.Final</version.org.jboss.marshalling.jboss-marshalling-river>
         <version.org.jboss.jboss-remoting>4.0.0.Final</version.org.jboss.jboss-remoting>
         <version.org.jboss.jboss-sasl>1.0.4.Final</version.org.jboss.jboss-sasl>
+        <version.wildfly.security>1.0.0.Final</version.wildfly.security>
         <version.io.netty>4.0.15.Final</version.io.netty>
         <version.org.jboss.xnio>3.2.0.Final</version.org.jboss.xnio>
         <version.json-simple>1.1</version.json-simple>
@@ -120,6 +121,11 @@
                                     <groupId>org.wildfly</groupId>
                                     <artifactId>wildfly-protocol</artifactId>
                                     <version>${version.jboss}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.wildfly.security</groupId>
+                                    <artifactId>wildfly-security-manager</artifactId>
+                                    <version>${version.wildfly.security}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.jboss</groupId>
@@ -505,6 +511,11 @@
                 <groupId>org.wildfly</groupId>
                 <artifactId>wildfly-protocol</artifactId>
                 <version>${version.jboss}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wildfly.security</groupId>
+                <artifactId>wildfly-security-manager</artifactId>
+                <version>${version.wildfly.security}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss</groupId>

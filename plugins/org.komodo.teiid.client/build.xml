@@ -24,6 +24,7 @@
                                  wildfly-controller-client.jar,
                                  wildfly-controller.jar,
                                  wildfly-protocol.jar,
+                                 wildfly-security-manager.jar,
                                  jboss-dmr.jar,
                                  jboss-logging.jar,
                                  jboss-marshalling-river.jar,
