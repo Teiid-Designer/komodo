@@ -293,7 +293,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         workspace.addChild(null, "test4", KomodoLexicon.VdbModel.NODE_TYPE);
         workspace.addChild(null, "test5", KomodoLexicon.VdbModel.NODE_TYPE);
 
-        KomodoObject[] testNodes = workspace.getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = getChildrenOfType(workspace, KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(5, testNodes.length);
 
         ObjectSearcher os = new ObjectSearcher(_repo);
@@ -424,7 +424,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
             child.setProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
         }
 
-        KomodoObject[] testNodes = workspace.getChildrenOfType(null, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = getChildrenOfType(workspace, KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(10, testNodes.length);
         for (KomodoObject testKO : testNodes) {
             Property property = testKO.getProperty(null, KomodoLexicon.VdbModel.MODEL_DEFINITION);

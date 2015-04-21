@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/wildfly-security-manager.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/netty-all.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wildfly-cli.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wildfly-controller-client.jar" sourcepath="/home/phantomjinx/.m2/repository/org/wildfly/wildfly-controller-client/8.0.0.Final/wildfly-controller-client-8.0.0.Final-sources.jar"/>

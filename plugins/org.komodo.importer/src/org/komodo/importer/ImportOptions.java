@@ -23,6 +23,7 @@ package org.komodo.importer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.komodo.utils.ModelType;
 
 /**
@@ -33,26 +34,6 @@ public class ImportOptions {
     private static final String DEFAULT_ARTEFACT_NAME = "<imported>"; //$NON-NLS-1$
 
     private static final String DEFAULT_VDB_FILE_PATH = "<not available>"; //$NON-NLS-1$
-
-    /**
-     * The type of import to be executed
-     */
-    public static enum ImportType {
-        /**
-         * Import ddl into a default model
-         */
-        MODEL,
-
-        /**
-         * Import ddl as a schema fragment
-         */
-        SCHEMA,
-
-        /**
-         * Import vdb
-         */
-        VDB;
-    }
 
     /**
      * Option keys applicable to import ddl into a model
@@ -90,24 +71,7 @@ public class ImportOptions {
         }
     }
 
-    // Import as model by default
-    private ImportType importType;
-
     private final Map<OptionKeys, Object> options = new HashMap<OptionKeys, Object>();
-
-    /**
-     * @return the importType
-     */
-    public ImportType getImportType() {
-        return this.importType;
-    }
-
-    /**
-     * @param importType type of import that should be executed
-     */
-    public void setImportType(ImportType importType) {
-        this.importType = importType;
-    }
 
     /**
      * @param optionName name of the option
@@ -131,6 +95,17 @@ public class ImportOptions {
      */
     public void setOption(OptionKeys optionName, Object value) {
         options.put(optionName, value);
+    }
+
+    /**
+     * Merge the options in the given option set into this option set
+     *
+     * @param newOptions new set of options
+     */
+    public void mergeOptions(ImportOptions newOptions) {
+        for (Entry<OptionKeys, Object> entry : newOptions.options.entrySet()) {
+            this.setOption(entry.getKey(), entry.getValue());
+        }
     }
 
 }

@@ -14,13 +14,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import javax.jcr.Session;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -30,6 +26,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class SchemaImplTest extends RelationalModelTest {
@@ -59,34 +56,31 @@ public class SchemaImplTest extends RelationalModelTest {
     }
 
     private void setRenditionValueAwaitSequencing(String value, String... sequencerPaths) throws Exception {
-        UnitOfWork transaction = _repo.createTransaction("schematests-setrendition-value", false, null);
+        final CountDownLatch updateLatch = new CountDownLatch(1);
+        UnitOfWork transaction = _repo.createTransaction("schematests-setrendition-value", false, new UnitOfWorkListener() {
+
+            @Override
+            public void respond(Object results) {
+                updateLatch.countDown();
+            }
+
+            @Override
+            public void errorOccurred(Throwable error) {
+                updateLatch.countDown();
+            }
+        });
+
         assertNotNull(transaction);
-
-        Session session = session(transaction);
-
-        CountDownLatch updateLatch = addSequencePathListener(transaction, sequencerPaths);
 
         this.schema.setRendition(transaction, value);
 
         //
-        // Save the session to ensure that the sequencers are executed.
+        // Commit the transaction and await the response of the callback
         //
-        // However, we cannot logout:
-        // * Sequence listeners added through the observation manager are only applicable for the lifetime
-        //    of the session.
-        // * Once session.logout() is called, then all listeners are removed from the RepositoryChangeBus so
-        //    sequencing will fire a completion event but the sequence listener will never receive it.
-        //
-        session.save();
+        transaction.commit();
 
         // Wait for the sequencing of the repository or timeout of 3 minutes
         assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
-
-        //
-        // Commit and logout of the session after waiting for the sequence listener
-        // to observe the completion of the sequencing
-        //
-        transaction.commit();
 
         traverse(schema);
     }

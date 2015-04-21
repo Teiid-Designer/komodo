@@ -22,9 +22,6 @@
 package org.komodo.modeshape.teiid.sequencer;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import org.junit.Test;
 import org.komodo.modeshape.AbstractTSqlSequencerTest;
@@ -37,6 +34,7 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinPredicate;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.MultipleElementSymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
+import org.komodo.repository.KSequencers;
 import org.komodo.spi.query.sql.lang.JoinType;
 import org.komodo.spi.runtime.version.TeiidVersion;
 
@@ -55,13 +53,8 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
 
     @Test(timeout = 5000000)
     public void testBasicDDLStatement() throws Exception {
-        CountDownLatch updateLatch = addPathLatchListener(1, ".*\\/Tweet\\/tsql:query");
-
         String ddl =  "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";        
-        Node fileNode = prepareSequence(ddl, SequenceType.DDL);
-
-        // Wait for the starting of the repository or timeout of 3 minutes
-        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
+        Node fileNode = prepareSequence(ddl, KSequencers.Sequencers.DDL);
 
         //
         // Sequencing completed, now verify
@@ -144,12 +137,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
                      .append("o.amount as amount ")
                      .append("FROM Customer C INNER JOIN o ON c.id = o.customerid; ");
 
-        CountDownLatch updateLatch = addPathLatchListener(4, ".*\\/tsql:query");
-
-        Node fileNode = prepareSequence(ddl.toString(), SequenceType.DDL);
-
-        // Wait for the starting of the repository or timeout of 5 minutes
-        assertTrue(updateLatch.await(5, TimeUnit.MINUTES));
+        Node fileNode = prepareSequence(ddl.toString(), KSequencers.Sequencers.DDL);
 
         //
         // Sequencing completed, now verify

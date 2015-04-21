@@ -33,8 +33,8 @@ import org.junit.Test;
 import org.komodo.importer.AbstractImporterTest;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
-import org.komodo.importer.ImportOptions.ImportType;
 import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.importer.ImportType;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -56,7 +56,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     @Override
     protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
-                                                                 File file, ImportOptions importOptions,
+                                                                 File file, ImportType importType, ImportOptions importOptions,
                                                                  ImportMessages importMessages) {
         VdbImporter importer = new VdbImporter(_repo, uow);
         return importer.importVdb(file, importOptions, importMessages);
@@ -64,7 +64,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     @Override
     protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
-                                                                 InputStream inputStream, ImportOptions importOptions,
+                                                                 InputStream inputStream, ImportType importType,
+                                                                 ImportOptions importOptions,
                                                                  ImportMessages importMessages) {
         VdbImporter importer = new VdbImporter(_repo, uow);
         return importer.importVdb(inputStream, importOptions, importMessages);
@@ -77,11 +78,10 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBadVdbFile() throws Exception {
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.VDB);
 
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject vdbNode = executeImporter(new File("unknown.xml"), importOptions, importMessages);
+        KomodoObject vdbNode = executeImporter(new File("unknown.xml"), ImportType.VDB, importOptions, importMessages);
 
         // No model created
         assertNull("Failed - expected null model ", vdbNode);
@@ -112,12 +112,11 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.VDB);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject vdbNode = executeImporter(tmpFile, importOptions, importMessages);
+        KomodoObject vdbNode = executeImporter(tmpFile, ImportType.VDB, importOptions, importMessages);
 
         // Set back to readable
         tmpFile.setReadable(true);
@@ -146,12 +145,11 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.VDB);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject vdbNode = executeImporter(tmpFile, importOptions, importMessages);
+        KomodoObject vdbNode = executeImporter(tmpFile, ImportType.VDB, importOptions, importMessages);
 
         // No model created
         assertNull("Failed - expected null model ", vdbNode);
@@ -286,14 +284,14 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.VDB);
         importOptions.setOption(OptionKeys.NAME, TWEET_EXAMPLE);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject vdbNode = executeImporter(vdbStream, importOptions, importMessages,
-                                                                            ".*\\/getTweets\\/tsql:query");
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages,
+                                                                           ".*\\/getTweets\\/tsql:query");
 
         // Test that a vdb was created
         assertNotNull("Failed - No Vdb Created ", vdbNode);
@@ -549,13 +547,13 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setImportType(ImportType.VDB);
         importOptions.setOption(OptionKeys.NAME, ALL_ELEMENTS_EXAMPLE_NAME);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject vdbNode = executeImporter(vdbStream, importOptions, importMessages,
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages,
                                                                             ".*\\/Test/tsql:query");
 
         // Test that a vdb was created

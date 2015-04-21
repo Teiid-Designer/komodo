@@ -234,6 +234,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
 
     /**
      * @param version teiid version
+     * @param startOnNewLine prepend new line to start of ddl string
      * @param exclusions any items that should be excluded from visiting
      */
     public DdlNodeVisitor(TeiidVersion version, boolean startOnNewLine, VisitorExclusions... exclusions) {

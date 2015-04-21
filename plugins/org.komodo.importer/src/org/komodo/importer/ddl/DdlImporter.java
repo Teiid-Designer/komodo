@@ -26,10 +26,20 @@ import java.io.InputStream;
 import org.komodo.importer.AbstractImporter;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.importer.ImportType;
+import org.komodo.importer.Messages;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Schema;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.ModelType;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParser;
 
 /**
  * Importer implementation for importing from DDL Schema.
@@ -44,7 +54,8 @@ public class DdlImporter extends AbstractImporter {
      * @param transaction the transaction used for importing the DDL schema
      */
     public DdlImporter(Repository repository, UnitOfWork transaction) {
-        super(repository, transaction);
+        // set default import type to model
+        super(repository, ImportType.MODEL, transaction);
     }
 
     /**
@@ -55,6 +66,33 @@ public class DdlImporter extends AbstractImporter {
      */
     public DdlImporter(Repository repository) {
         this(repository, null);
+    }
+
+    @Override
+    protected KomodoObject executeImport(String content, ImportOptions importOptions, UnitOfWork transaction) throws KException {
+        String name = importOptions.getOption(OptionKeys.NAME).toString();
+
+        switch(importType) {
+            case MODEL:
+            {
+                ModelType.Type modelType = (ModelType.Type) importOptions.getOption(OptionKeys.MODEL_TYPE);
+                Vdb vdb = getWorkspaceManager().createVdb(transaction, getWorkspace(transaction), "vdb-for-" + name, name); //$NON-NLS-1$
+                Model model = getWorkspaceManager().createModel(transaction, vdb, name);
+                model.setModelType(transaction, Model.Type.valueOf(modelType.toString()));
+                model.setModelDefinition(transaction, content);
+                model.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
+                return model;
+            }
+            case SCHEMA:
+            {
+                Schema schema = getWorkspaceManager().createSchema(transaction, getWorkspace(transaction), name);
+                schema.setRendition(transaction, content);
+                schema.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
+                return schema;
+            }
+            default:
+                throw new UnsupportedOperationException();
+        }
     }
 
     /**
@@ -115,5 +153,17 @@ public class DdlImporter extends AbstractImporter {
         }
 
         return ko;
+    }
+
+    /**
+     * Set the import type. DDL importer does NOT support the VDB import type
+     *
+     * @param importType the type of import
+     */
+    public void setImportType(ImportType importType) {
+        if (ImportType.VDB.equals(importType))
+            throw new UnsupportedOperationException(Messages.getString(Messages.IMPORTER.ddlDoesNotSupportVDB));
+
+        this.importType = importType;
     }
 }

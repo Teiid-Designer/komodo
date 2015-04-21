@@ -15,5 +15,4 @@ Require-Bundle: org.komodo.spi;bundle-version="0.0.1",
  org.komodo.modeshape.lib;bundle-version="0.0.1",
  org.komodo.modeshape.teiid.sql.sequencer;bundle-version="0.0.1",
  org.komodo.utils;bundle-version="0.0.1"
-Import-Package: org.komodo.repository
 Eclipse-RegisterBuddy: org.komodo.modeshape.lib

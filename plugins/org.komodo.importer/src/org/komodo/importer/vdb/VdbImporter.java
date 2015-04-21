@@ -26,10 +26,15 @@ import java.io.InputStream;
 import org.komodo.importer.AbstractImporter;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.importer.ImportType;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
+import org.modeshape.jcr.JcrLexicon;
 
 /**
  *
@@ -44,7 +49,7 @@ public class VdbImporter extends AbstractImporter {
      * @param transaction the transaction used for importing the DDL schema 
      */
     public VdbImporter(Repository repository, UnitOfWork transaction) {
-        super(repository, transaction);
+        super(repository, ImportType.VDB, transaction);
     }
 
     /**
@@ -54,7 +59,18 @@ public class VdbImporter extends AbstractImporter {
      * 
      */
     public VdbImporter(Repository repository) {
-        super(repository, null);
+        super(repository, ImportType.VDB, null);
+    }
+
+    @Override
+    protected KomodoObject executeImport(String content, ImportOptions importOptions, UnitOfWork transaction) throws KException {
+
+        String vdbName = importOptions.getOption(OptionKeys.NAME).toString();
+        String vdbFilePath = importOptions.getOption(OptionKeys.VDB_FILE_PATH).toString();
+        Vdb vdb = getWorkspaceManager().createVdb(transaction, getWorkspace(transaction), vdbName, vdbFilePath);
+        KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
+        fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
+        return vdb;
     }
 
     /**

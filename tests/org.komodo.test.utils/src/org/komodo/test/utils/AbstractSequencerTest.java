@@ -28,10 +28,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,6 +54,7 @@ import javax.jcr.observation.ObservationManager;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.komodo.repository.KSequencers;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
@@ -66,6 +63,9 @@ import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.observation.Event;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 /**
  * Class which serves as base for various sequencer unit tests. In addition to this, it uses the sequencing events fired by
  * ModeShape's {@link javax.jcr.observation.ObservationManager} to perform various assertions and therefore, acts as a test for
@@ -75,42 +75,6 @@ import org.modeshape.jcr.api.observation.Event.Sequencing;
 public abstract class AbstractSequencerTest extends MultiUseAbstractTest implements Sequencing, StringConstants {
 
     private static final int DEFAULT_WAIT_TIME_SECONDS = 15;
-
-    public static enum SequenceType {
-        VDB("VDB Sequencer", "xml"),
-
-        DDL("DDL Sequencer"),
-
-        TSQL("Teiid SQL Sequencer");
-
-        private String sequencerName;
-
-        private String extension;
-
-        private SequenceType(String sequencerName) {
-            this.sequencerName = sequencerName;
-            this.extension = this.name().toLowerCase();
-        }
-
-        private SequenceType(String sequencerName, String extension) {
-            this.sequencerName = sequencerName;
-            this.extension = extension;
-        }
-
-        /**
-         * @return file extension for type
-         */
-        public String getExtension() {
-            return extension;
-        }
-
-        /**
-         * @return name of associated sequencer
-         */
-        public String getSequencerName() {
-            return sequencerName;
-        }
-    }
 
     protected Node rootNode;
 
@@ -159,34 +123,6 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         rootNode = session().getRootNode();
     }
 
-    /**
-     * @param countdown equivalent to number of sql query expressions to be sequenced
-     * @param pathsToBeSequenced wilcarded pattern against which to compare the sequenced nodes
-     * @return the latch for awaiting the sequencing
-     * @throws Exception
-     */
-    protected CountDownLatch addPathLatchListener(int countdown, final List<String> pathsToBeSequenced) throws Exception {
-        ObservationManager manager = getObservationManager();
-        assertNotNull(manager);
-
-        final CountDownLatch updateLatch = new CountDownLatch(countdown);
-        manager.addEventListener(new NodePathListener(pathsToBeSequenced, updateLatch), NODE_SEQUENCED, null, true, null, null, false);
-
-        return updateLatch;
-    }
-
-    /**
-     * @param countdown equivalent to number of sql query expressions to be sequenced
-     * @param pathsToBeSequenced wilcarded pattern against which to compare the sequenced nodes
-     * @return the latch for awaiting the sequencing
-     * @throws Exception
-     */
-    protected CountDownLatch addPathLatchListener(int countdown, String pathToBeSequenced) throws Exception {
-        List<String> pathsToBeSequenced = new ArrayList<String>();
-        pathsToBeSequenced.add(pathToBeSequenced);
-        return addPathLatchListener(countdown, pathsToBeSequenced);
-    }
-
     @Override
     @After
     public void afterEach() throws Exception {
@@ -207,46 +143,42 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         sequencingFailureLatches.clear();
     }
 
-    private Node createNodeWithContentFromStream(String nodeRelativePath, InputStream inputStream) throws Exception {
-        Node parent = rootNode;
-        for (String pathSegment : nodeRelativePath.split(FORWARD_SLASH)) {
-            parent = parent.addNode(pathSegment);
+    protected Node prepareSequence(String text, KSequencers.Sequencers sequencer) throws Exception {
+
+        String name = "Test" + text.hashCode();
+        Node node = rootNode.addNode(FORWARD_SLASH + name);
+        switch (sequencer) {
+            case TSQL:
+                node.setPrimaryType(JcrConstants.NT_UNSTRUCTURED);
+                node.addMixin(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+                node.setProperty(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION, text);
+                //
+                // Not applicable to tests but required to conform
+                // to the ddl:statement mandatory requirements
+                //
+                node.setProperty(StandardDdlLexicon.DDL_EXPRESSION, text);
+                node.setProperty(StandardDdlLexicon.DDL_LENGTH, text.length());
+                node.setProperty(StandardDdlLexicon.DDL_START_LINE_NUMBER, 1);
+                node.setProperty(StandardDdlLexicon.DDL_START_COLUMN_NUMBER, 1);
+                node.setProperty(StandardDdlLexicon.DDL_START_CHAR_INDEX, 1);
+                break;
+            case DDL:
+                node.setPrimaryType(VdbLexicon.Vdb.DECLARATIVE_MODEL);
+                node.setProperty(VdbLexicon.Model.MODEL_DEFINITION, text);
+                break;
+            case VDB:
+                throw new UnsupportedOperationException("Not tested by these sequencer tests");
         }
 
-        Node content = parent.addNode(JcrConstants.JCR_CONTENT);
-        content.setProperty(JcrConstants.JCR_DATA,
-                            session().getValueFactory().createBinary(inputStream));
-        session().save();
-        return parent;
-    }
+        node.getSession().save();
 
-    protected Node prepareSequence(String fileName, InputStream inputStream) throws Exception {
-        createNodeWithContentFromStream(fileName, inputStream);
+        assertNotNull(node);
 
-        Node fileNode = session().getNode(FORWARD_SLASH + fileName);
-        assertNotNull(fileNode);
+        traverse(rootNode);
 
-        return fileNode;
-    }
+        KSequencers.getInstance().sequence(node.getSession());
 
-    protected Node prepareSequence(File textFile) throws Exception {
-        return prepareSequence(textFile.getName(), new FileInputStream(textFile));
-    }
-
-    private File wrapText(String text, String extension) throws Exception {
-        File tmpFile = File.createTempFile(extension, DOT + extension);
-        tmpFile.deleteOnExit();
-        FileWriter fw = new FileWriter(tmpFile);
-        fw.write(text);
-        fw.close();
-        return tmpFile;
-    }
-
-    protected Node prepareSequence(String text, SequenceType sequenceType) throws Exception {
-        File textFile = wrapText(text, sequenceType.getExtension());
-        Node fileNode = prepareSequence(textFile);
-        assertNotNull(fileNode);
-        return fileNode;
+        return node;
     }
 
     /**
