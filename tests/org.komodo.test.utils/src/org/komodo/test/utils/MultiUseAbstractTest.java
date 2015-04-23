@@ -33,13 +33,14 @@ import java.util.concurrent.Future;
 import javax.jcr.ImportUUIDBehavior;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
-import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Workspace;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.komodo.repository.KSequencers;
+import org.komodo.repository.WorkspaceIdentifier;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
 import org.modeshape.common.collection.Problems;
@@ -62,20 +63,26 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
      */
     private static final String DEFAULT_TEST_REPOSITORY_CONFIG = DATA_DIRECTORY + File.separator + "test-repository-config.json";
 
-    private static JcrRepository repository;
+    private static WorkspaceIdentifier identifier;
 
     private static JcrSession session;
 
     private static ModeShapeEngine engine;
 
+    private static KSequencers sequencers;
+
     private static void stopRepository() throws Exception {
         try {
             clearRepository();
+
+            if (sequencers != null)
+                sequencers.dispose();
+
             Future<Boolean> shutdown = engine.shutdown();
             shutdown.get();
         } finally {
             session = null;
-            repository = null;
+            identifier = null;
             engine = null;
         }
     }
@@ -129,7 +136,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
     }
 
     private void startEngine() throws Exception {
-        if (repository != null)
+        if (identifier != null && identifier.getRepository() != null)
             return;
 
         engine = new ModeShapeEngine();
@@ -143,7 +150,10 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
             throw new RuntimeException("Problems with the configuration.");
         }
 
-        repository = engine.deploy(config);
+        identifier = new WorkspaceIdentifier(config.getDefaultWorkspaceName());
+        JcrRepository repository = engine.deploy(config);
+        identifier.setRepository(repository);
+
         problems = repository.getStartupProblems();
         if (problems.hasErrors() || problems.hasWarnings()) {
 
@@ -158,6 +168,9 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
                 }
             }
         }
+
+        // Add the sequencing listener
+        sequencers = new KSequencers(identifier);
     }
 
     @Before
@@ -183,6 +196,14 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
         }
     }
 
+    protected KSequencers sequencers() {
+        return sequencers;
+    }
+
+    protected SequencerLatchListener addSequencingListenerLatch() {
+        return new SequencerLatchListener(sequencers());
+    }
+
     protected JcrSession session() {
         return session;
     }
@@ -192,15 +213,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
     }
 
     protected JcrSession newSession() throws RepositoryException {
-        return repository.login();
-    }
-
-    protected Session jcrSession() {
-        return session;
-    }
-
-    protected Repository repository() {
-        return repository;
+        return identifier.getRepository().login();
     }
 
     /**

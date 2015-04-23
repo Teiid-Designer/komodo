@@ -26,14 +26,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import javax.jcr.PropertyIterator;
 import javax.jcr.Session;
-import javax.jcr.observation.ObservationManager;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -48,7 +44,6 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.KLog;
-import org.modeshape.jcr.api.observation.Event.Sequencing;
 
 /**
  * Provides framework for testing an instance of the local repository
@@ -76,8 +71,6 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
 
     protected static LocalRepositoryObserver _repoObserver = null;
 
-    private NodePathListener nodePathListener;
-
     @BeforeClass
     public static void initLocalRepository() throws Exception {
 
@@ -98,7 +91,7 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         _repo.notify(event);
 
         // Wait for the starting of the repository or timeout of 1 minute
-        if (!_repoObserver.getLatch().await(100, TimeUnit.MINUTES)) {
+        if (!_repoObserver.getLatch().await(1, TimeUnit.MINUTES)) {
             throw new RuntimeException("Local repository did not start");
         }
     }
@@ -153,24 +146,6 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
 
         Session session = ((UnitOfWorkImpl)uow).getSession();
         return session;
-    }
-
-    /**
-     * @param countdown equivalent to number of sql query expressions to be sequenced
-     * @param pathsToBeSequenced wilcarded patterns against which to compare the sequenced nodes
-     * @return the latch for awaiting the sequencing
-     * @throws Exception
-     */
-    protected CountDownLatch addSequencePathListener(UnitOfWork uow, final String... pathsToBeSequenced) throws Exception {
-        Session session = session(uow);
-        ObservationManager manager = session.getWorkspace().getObservationManager();
-        assertNotNull(manager);
-
-        final CountDownLatch updateLatch = new CountDownLatch(pathsToBeSequenced.length);
-        List<String> seqPaths = Arrays.asList(pathsToBeSequenced);
-        nodePathListener = new NodePathListener(seqPaths, updateLatch);
-        manager.addEventListener(nodePathListener, Sequencing.NODE_SEQUENCED, null, true, null, null, false);
-        return updateLatch;
     }
 
     private void traverse(String tabs, Node node, StringBuffer buffer) throws Exception {

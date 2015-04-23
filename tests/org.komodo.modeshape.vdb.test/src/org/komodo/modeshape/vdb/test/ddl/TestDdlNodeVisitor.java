@@ -119,7 +119,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
     }
 
     protected void helpTest(String ddl, String expected, String... pathsToBeSequenced) throws Exception {
-        Node ddlNode = prepareSequence(ddl, KSequencers.Sequencers.DDL);
+        Node ddlNode = prepareSequence(ddl, KSequencers.SequencerType.DDL);
         assertNotNull(ddlNode);
 
         traverse(ddlNode);

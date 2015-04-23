@@ -24,6 +24,7 @@
 package org.komodo.test.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
@@ -143,10 +144,12 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         sequencingFailureLatches.clear();
     }
 
-    protected Node prepareSequence(String text, KSequencers.Sequencers sequencer) throws Exception {
+    protected Node prepareSequence(String text, KSequencers.SequencerType sequencer) throws Exception {
 
         String name = "Test" + text.hashCode();
         Node node = rootNode.addNode(FORWARD_SLASH + name);
+        assertNotNull(node);
+
         switch (sequencer) {
             case TSQL:
                 node.setPrimaryType(JcrConstants.NT_UNSTRUCTURED);
@@ -170,13 +173,14 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
                 throw new UnsupportedOperationException("Not tested by these sequencer tests");
         }
 
+        SequencerLatchListener listener = addSequencingListenerLatch();
+
         node.getSession().save();
 
-        assertNotNull(node);
+        assertTrue(listener.getLatch().await(3, TimeUnit.MINUTES));
+        assertFalse(listener.exceptionOccurred());
 
-        traverse(rootNode);
-
-        KSequencers.getInstance().sequence(node.getSession());
+        traverse(node);
 
         return node;
     }

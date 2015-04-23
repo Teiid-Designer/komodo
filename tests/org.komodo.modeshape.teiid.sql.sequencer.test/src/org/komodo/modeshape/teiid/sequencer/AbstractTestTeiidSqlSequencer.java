@@ -102,7 +102,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     }
 
     protected Node sequenceSql(String text, String seqRegEx) throws Exception {
-        Node node = prepareSequence(text, KSequencers.Sequencers.TSQL);
+        Node node = prepareSequence(text, KSequencers.SequencerType.TSQL);
         return node;
     }
 

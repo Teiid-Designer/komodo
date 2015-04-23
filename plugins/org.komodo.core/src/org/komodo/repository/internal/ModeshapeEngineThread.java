@@ -31,15 +31,15 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import org.komodo.core.KEngine;
+import org.komodo.repository.KSequencerListener;
 import org.komodo.repository.KSequencers;
 import org.komodo.repository.Messages;
-import org.komodo.spi.KException;
+import org.komodo.repository.WorkspaceIdentifier;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
 import org.modeshape.common.collection.Problems;
 import org.modeshape.jcr.JcrRepository;
-import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.ModeShapeEngine;
 import org.modeshape.jcr.RepositoryConfiguration;
 
@@ -123,6 +123,8 @@ public class ModeshapeEngineThread extends Thread {
 
         private RequestCallback callback;
 
+        private boolean awaitSequencers = false;
+
         /**
          * @param requestType
          *        type of request (cannot be <code>null</code>)
@@ -134,6 +136,20 @@ public class ModeshapeEngineThread extends Thread {
             ArgCheck.isNotNull(requestType, "requestType"); //$NON-NLS-1$
             this.requestType = requestType;
             this.callback = callback;
+        }
+
+        /**
+         * @return wait for sequencers flag
+         */
+        public boolean awaitSequencers() {
+            return this.awaitSequencers;
+        }
+
+        /**
+         * @param waitForSequencers the waitForSequencers to set
+         */
+        public void setAwaitSequencers(boolean waitForSequencers) {
+            this.awaitSequencers = waitForSequencers;
         }
 
         /**
@@ -196,14 +212,15 @@ public class ModeshapeEngineThread extends Thread {
     private final static ModeShapeEngine msEngine = new ModeShapeEngine();
     private static final KLog LOGGER = KLog.getLogger();
 
-    private JcrRepository repository;
-
     private BlockingQueue< Request > queue = new LinkedBlockingQueue< Request >();
 
     private volatile boolean stop = false;
 
     private final URL configPath;
-    private final String workspaceName;
+
+    private final WorkspaceIdentifier identifier;
+
+    private KSequencers sequencers;
 
     /**
      * Create this thread and give it a name
@@ -217,11 +234,30 @@ public class ModeshapeEngineThread extends Thread {
                                   final String workspaceName ) {
         super("Modeshape Engine Thread"); //$NON-NLS-1$
         this.configPath = configPath;
-        this.workspaceName = workspaceName;
+        identifier = new WorkspaceIdentifier(workspaceName);
         setDaemon(true);
     }
 
-    private void commitSession( final Request request ) {
+    private void respondCallback(final Request request, Object result) {
+        if (request.getCallback() != null) {
+            request.getCallback().respond(result);
+        }
+    }
+
+    private void errorCallback(final Request request, Exception e) {
+        if (request.getCallback() != null) {
+            request.getCallback().errorOccurred(e);
+        }
+    }
+
+    private void logoutSession(final Session session) {
+        if (session == null || ! session.isLive())
+            return;
+
+        session.logout();
+    }
+
+    private synchronized void commitSession( final Request request ) {
         ArgCheck.isTrue(request.getRequestType() == RequestType.COMMIT_SESSION,
                         "commitSession called when request is not a commit session"); //$NON-NLS-1$
         final SessionRequest commitRequest = (SessionRequest)request;
@@ -232,19 +268,67 @@ public class ModeshapeEngineThread extends Thread {
             //
             // Only bother to save if we actually have changes to save
             //
-            if (session.hasPendingChanges()) {
-                session.save();
-                //
-                // Sequence the session to generate relevent nodes
-                //
-                KSequencers.getInstance().sequence(session);
+            if (! session.hasPendingChanges()) {
+                try {
+                    respondCallback(request, null);
+                } finally {
+                    logoutSession(session);
+                }
+                return;
             }
+
+            //
+            // If the request has been flagged to await the completion of the sequencers
+            // then attach a listener to the sequencers controller class, which will be responsible
+            // for responding to the callback and finalising the session.
+            //
+            if (request.awaitSequencers()) {
+                KSequencerListener sequencerListener = new KSequencerListener() {
+
+                    @Override
+                    public void sequencingCompleted() {
+                        LOGGER.debug("Sequencers completed. Calling request callback"); //$NON-NLS-1$
+                        try {
+                            respondCallback(request, null);
+                        } finally {
+                            logoutSession(session);
+                        }
+                    }
+
+                    @Override
+                    public void sequencingError(Exception exception) {
+                        try {
+                            LOGGER.error(Messages.getString(Messages.Komodo.SEQUENCING_ERROR_TRYING_TO_COMMIT, exception, commitRequest.getName()));
+                            errorCallback(request, exception);
+                        } finally {
+                            logoutSession(session);
+                        }
+                    }
+                };
+
+                sequencers.addSequencerListener(sequencerListener);
+            }
+
+            //
+            // Save the session
+            //
+            session.save();
 
             LOGGER.debug("commit session request {0} has been saved", commitRequest.getName()); //$NON-NLS-1$
 
-            if (request.getCallback() != null) {
-                request.getCallback().respond(null);
+            //
+            // Respond with the callback immmediately if not to await the
+            // completion of the sequencers
+            //
+            if (! request.awaitSequencers() && request.getCallback() != null) {
+                try {
+                    LOGGER.debug("Not waiting on sequencers. Calling callback immediately"); //$NON-NLS-1$
+                    respondCallback(request, null);
+                } finally {
+                    logoutSession(session);
+                }
             }
+
         } catch (final Exception e) {
             request.requestType = RequestType.ROLLBACK_SESSION;
             rollbackSession(request);
@@ -254,46 +338,20 @@ public class ModeshapeEngineThread extends Thread {
             } else {
                 request.getCallback().errorOccurred(e);
             }
-        } finally {
-            if (session.isLive()) session.logout();
+
+            logoutSession(session);
         }
-    }
-
-    private JcrSession createSession() throws Exception {
-        if (! isEngineRunning()) {
-            throw new KException(Messages.getString(Messages.LocalRepository.Engine_Not_Running));
-        }
-
-        if (! isRepositoryRunning()) {
-            throw new KException(Messages.getString(Messages.LocalRepository.Repository_Not_Running));
-        }
-
-        // the workspace name must agree with the config file
-        return this.repository.login(null, this.workspaceName);
-    }
-
-    private boolean isEngineRunning() {
-        if (msEngine == null)
-            return false;
-
-        return ModeShapeEngine.State.RUNNING.equals(msEngine.getState());
-    }
-
-    private boolean isRepositoryRunning() {
-        if (repository == null)
-            return true;
-
-        return ModeShapeEngine.State.RUNNING.equals(repository.getState());
     }
 
     /**
      * @return is modeshape engine and repository are running
      */
     public boolean isRunning() {
-        return isEngineRunning() && isRepositoryRunning();
+        return ModeshapeUtils.isEngineRunning(msEngine) && 
+                    ModeshapeUtils.isRepositoryRunning(identifier.getRepository());
     }
 
-    private void rollbackSession( final Request request ) {
+    private synchronized void rollbackSession( final Request request ) {
         ArgCheck.isTrue(request.getRequestType() == RequestType.ROLLBACK_SESSION,
                         "rollbackSession called when request is not a rollback session"); //$NON-NLS-1$
         final SessionRequest rollbackRequest = (SessionRequest)request;
@@ -304,90 +362,107 @@ public class ModeshapeEngineThread extends Thread {
             if (session.isLive()) session.refresh(false);
             LOGGER.debug("rollback session request {0} has been rolled back", rollbackRequest.getName()); //$NON-NLS-1$
 
-            if (request.getCallback() != null) {
-                request.getCallback().respond(null);
-            }
+            respondCallback(request, null);
+
         } catch (final Exception e) {
-            if (request.getCallback() == null) {
-                LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_ROLLBACK, e, rollbackRequest.getName()));
-            } else {
-                request.getCallback().errorOccurred(e);
-            }
+            LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_ROLLBACK, e, rollbackRequest.getName()));
+            errorCallback(request, e);
         } finally {
-            session.logout();
+            logoutSession(session);
         }
     }
 
-    private synchronized void startEngine() throws Exception {
-        if (isEngineRunning())
+    private synchronized void startEngine(Request request) {
+        if (ModeshapeUtils.isEngineRunning(msEngine))
             return;
 
-        // start the ModeShape Engine
-        msEngine.start();
+        try {
+            // start the ModeShape Engine
+            msEngine.start();
 
-        // start the local repository
-        final RepositoryConfiguration config = RepositoryConfiguration.read(configPath);
+            // start the local repository
+            final RepositoryConfiguration config = RepositoryConfiguration.read(configPath);
 
-        //
-        // Validate the configuration for any errors
-        //
-        Problems problems = config.validate();
-        if (problems.hasProblems()) {
-            Iterator< Problem > iterator = problems.iterator();
-            while (iterator.hasNext()) {
-                Problem problem = iterator.next();
-                switch (problem.getStatus()) {
-                    case ERROR:
-                        // Catastrophic error if the configuration is not valid!
-                        throw new Exception(Messages.getString(Messages.LocalRepository.Configuration_Problem,
-                                                                                         problem.getMessageString()),
-                                                                                         problem.getThrowable());
-                    default:
-                        KEngine.getInstance().getErrorHandler().error(problem.getThrowable());
+            //
+            // Validate the configuration for any errors
+            //
+            Problems problems = config.validate();
+            if (problems.hasProblems()) {
+                Iterator<Problem> iterator = problems.iterator();
+                while (iterator.hasNext()) {
+                    Problem problem = iterator.next();
+                    switch (problem.getStatus()) {
+                        case ERROR:
+                            // Catastrophic error if the configuration is not valid!
+                            throw new Exception(Messages.getString(
+                                                                   Messages.LocalRepository.Configuration_Problem,
+                                                                   problem.getMessageString()),
+                                                                   problem.getThrowable());
+                        default:
+                            KEngine.getInstance().getErrorHandler().error(problem.getThrowable());
+                    }
                 }
             }
-        }
 
-        // Deploy configuration to engine
-        repository = msEngine.deploy(config);
+            // Deploy configuration to engine
+            JcrRepository repository = msEngine.deploy(config);
+            identifier.setRepository(repository);
 
-        //
-        // Check for errors in startup
-        //
-        problems = repository.getStartupProblems();
-        if (problems.hasErrors() || problems.hasWarnings()) {
-            Iterator< Problem > iterator = problems.iterator();
-            while (iterator.hasNext()) {
-                Problem problem = iterator.next();
-                switch (problem.getStatus()) {
-                    case ERROR:
-                        throw new Exception(Messages.getString(Messages.LocalRepository.Deployment_Failure,
-                                                               problem.getMessageString()), problem.getThrowable());
-                    default:
-                        KEngine.getInstance().getErrorHandler().error(problem.getThrowable());
+            //
+            // Check for errors in startup
+            //
+            problems = repository.getStartupProblems();
+            if (problems.hasErrors() || problems.hasWarnings()) {
+                Iterator<Problem> iterator = problems.iterator();
+                while (iterator.hasNext()) {
+                    Problem problem = iterator.next();
+                    switch (problem.getStatus()) {
+                        case ERROR:
+                            throw new Exception(Messages.getString(Messages.LocalRepository.Deployment_Failure, problem.getMessageString()), problem.getThrowable());
+                        default:
+                            KEngine.getInstance().getErrorHandler().error(problem.getThrowable());
+                    }
                 }
             }
+
+            // Start the repository
+            Future<JcrRepository> startRepository = msEngine.startRepository(repository.getName());
+
+            // Await the start of the repository
+            startRepository.get(5, TimeUnit.MINUTES);
+
+            // Add the sequencing listener
+            sequencers = new KSequencers(identifier);
+
+            respondCallback(request, null);
+        } catch (Exception ex) {
+            LOGGER.error(Messages.getString(Messages.Komodo.ERROR_STARTING_ENGINE, ex));
+            errorCallback(request, ex);
         }
-
-        // Start the repository
-        Future<JcrRepository> startRepository = msEngine.startRepository(repository.getName());
-
-        // Await the start of the repository
-        startRepository.get(5, TimeUnit.MINUTES);
     }
 
-    private synchronized void stopEngine() throws Exception {
+    private synchronized void stopEngine(Request request) {
         try {
+            if (sequencers != null) {
+                sequencers.dispose();
+                sequencers = null;
+            }
+
             Future<Boolean> shutdown = msEngine.shutdown();
             // Await the shutdown
             shutdown.get();
+
+            respondCallback(request, null);
+        } catch (Exception ex) {
+            LOGGER.error(Messages.getString(Messages.Komodo.ERROR_STOPPING_ENGINE, ex));
+            errorCallback(request, ex);
         } finally {
-            repository = null;
+            identifier.setRepository(null);
         }
     }
 
-    private synchronized void clear()  throws Exception {
-        Session session = createSession();
+    private synchronized void clear(Request request)  throws Exception {
+        Session session = ModeshapeUtils.createSession(identifier);
         if (session == null || !session.isLive())
             return;
 
@@ -406,10 +481,20 @@ public class ModeshapeEngineThread extends Thread {
         }
 
         Request saveRequest = new ModeshapeEngineThread.SessionRequest(RequestType.COMMIT_SESSION,
-                                                                                                                       null,
+                                                                                                                       request.getCallback(),
                                                                                                                        session,
                                                                                                                        "Clearing-Session"); //$NON-NLS-1$
         commitSession(saveRequest);
+    }
+
+    private synchronized void createSession(final Request request) {
+        Object results = null;
+        try {
+            results = ModeshapeUtils.createSession(identifier);
+            respondCallback(request, results);
+        } catch (Exception ex) {
+            errorCallback(request, ex);
+        }
     }
 
     @Override
@@ -420,45 +505,30 @@ public class ModeshapeEngineThread extends Thread {
 
                 if (request == null) continue;
 
-                final RequestCallback callback = request.getCallback();
-                Throwable error = null;
-                Object results = null;
-
-                try {
-                    switch (request.getRequestType()) {
-                        case START:
-                            startEngine();
-                            break;
-                        case STOP:
-                            stopEngine();
-                            stop = true;
-                            break;
-                        case CLEAR:
-                            clear();
-                            break;
-                        case CREATE_SESSION:
-                            results = createSession();
-                            break;
-                        case COMMIT_SESSION:
-                            commitSession(request);
-                            break;
-                        case ROLLBACK_SESSION:
-                            rollbackSession(request);
-                            break;
-                        default:
-                            break;
-                    }
-                } catch (final Exception e) {
-                    error = e;
+                switch (request.getRequestType()) {
+                    case START:
+                        startEngine(request);
+                        break;
+                    case STOP:
+                        stopEngine(request);
+                        stop = true;
+                        break;
+                    case CLEAR:
+                        clear(request);
+                        break;
+                    case CREATE_SESSION:
+                        createSession(request);
+                        break;
+                    case COMMIT_SESSION:
+                        commitSession(request);
+                        break;
+                    case ROLLBACK_SESSION:
+                        rollbackSession(request);
+                        break;
+                    default:
+                        break;
                 }
 
-                if (callback != null) {
-                    if (error == null) {
-                        callback.respond(results);
-                    } else {
-                        callback.errorOccurred(error);
-                    }
-                }
             } catch (final Exception e) {
                 stop = true;
                 KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), e);

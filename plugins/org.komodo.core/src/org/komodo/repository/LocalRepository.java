@@ -327,10 +327,12 @@ public class LocalRepository extends RepositoryImpl {
 
                     // send commit request
                     final CommitCallback callback = new CommitCallback();
-                    LocalRepository.this.engineThread.accept( new ModeshapeEngineThread.SessionRequest( RequestType.COMMIT_SESSION,
+                    ModeshapeEngineThread.SessionRequest request = new ModeshapeEngineThread.SessionRequest( RequestType.COMMIT_SESSION,
                                                                                                         callback,
                                                                                                         getSession(),
-                                                                                                        getName() ) );
+                                                                                                        getName() );
+                    request.setAwaitSequencers(getCallback() != null ? getCallback().awaitSequencerCompletion() : false);
+                    LocalRepository.this.engineThread.accept( request );
                 }
             }
         }

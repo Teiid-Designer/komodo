@@ -54,7 +54,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
     @Test(timeout = 5000000)
     public void testBasicDDLStatement() throws Exception {
         String ddl =  "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";        
-        Node fileNode = prepareSequence(ddl, KSequencers.Sequencers.DDL);
+        Node fileNode = prepareSequence(ddl, KSequencers.SequencerType.DDL);
 
         //
         // Sequencing completed, now verify
@@ -137,7 +137,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
                      .append("o.amount as amount ")
                      .append("FROM Customer C INNER JOIN o ON c.id = o.customerid; ");
 
-        Node fileNode = prepareSequence(ddl.toString(), KSequencers.Sequencers.DDL);
+        Node fileNode = prepareSequence(ddl.toString(), KSequencers.SequencerType.DDL);
 
         //
         // Sequencing completed, now verify

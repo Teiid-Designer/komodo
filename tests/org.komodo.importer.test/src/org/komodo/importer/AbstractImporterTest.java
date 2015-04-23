@@ -99,6 +99,11 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         UnitOfWork uow = _repo.createTransaction("test-importer", false, new UnitOfWorkListener() {
 
             @Override
+            public boolean awaitSequencerCompletion() {
+                return true;
+            }
+
+            @Override
             public void respond(Object results) {
                 updateLatch.countDown();
             }

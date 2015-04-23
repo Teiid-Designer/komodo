@@ -26,12 +26,15 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,14 +51,19 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.jcr.JcrNtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
+    private UnitOfWork createTransaction( final String name, UnitOfWorkListener callback) throws Exception {
+        return _repo.createTransaction("transaction", false, callback);
+    }
+
     private UnitOfWork createTransaction( final String name ) throws Exception {
-        return _repo.createTransaction("transaction", false, null);
+        return createTransaction(name, null);
     }
 
     @Before
@@ -77,6 +85,197 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         }
 
         return false;
+    }
+
+    /**
+     * Tests to confirm that the transaction awaits the completion of the sequencers
+     * prior to calling the given callback when creating an unrelated object.
+     *
+     * Confirms that the sequencers are called and complete (with nothing to do)
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldRespondWithCallback() throws Exception {
+        // Ensure the workspace is created first and in a different transaction
+        _repo.komodoWorkspace(null);
+
+        final Boolean[] callbackCalled = new Boolean[1];
+        callbackCalled[0] = false;
+
+        //
+        // Despite only creating a node the callback should be called
+        // and the value of callbackCalled changed to true
+        //
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Throwable[] errorHolder = new Throwable[1];
+        UnitOfWorkListener callback = new UnitOfWorkListener() {
+
+            @Override
+            public boolean awaitSequencerCompletion() {
+                return true;
+            }
+
+            @Override
+            public void respond(Object results) {
+                callbackCalled[0] = true;
+                latch.countDown();
+            }
+
+            @Override
+            public void errorOccurred(Throwable error) {
+                errorHolder[0] = error;
+                latch.countDown();
+            }
+        };
+
+        String name = "shouldRespondWithCallback";
+        UnitOfWork transaction = createTransaction(name, callback);
+        //
+        // Create a single test node with no relationship to the sequencers or
+        // with any relevant properties
+        //
+        _repo.add(transaction, RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
+        transaction.commit();
+
+        //
+        // Stop the test from completing prior to the callback returning
+        //
+        assertTrue(latch.await(3, TimeUnit.MINUTES));
+        assertNull(errorHolder[0]);
+
+        //
+        // The callback should have updated the value of callbackCalled to true
+        //
+        assertTrue(callbackCalled[0]);
+    }
+
+    /**
+     * Tests to confirm that the transaction awaits the completion of the sequencers
+     * prior to calling the given callback when setting a property on an unrelated object
+     *
+     * Confirms that the sequencers are called and complete (with nothing to do)
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldRespondWithCallback2() throws Exception {
+        // Ensure the workspace is created first and in a different transaction
+        _repo.komodoWorkspace(null);
+
+        // Create the test object without a transaction to test the addition of a property
+        KomodoObject testObject = _repo.add(null, RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
+        assertNotNull(testObject);
+
+        final Boolean[] callbackCalled = new Boolean[1];
+        callbackCalled[0] = false;
+
+        //
+        // Despite setting an unrelated (to the sequencers) property the callback
+        // should be called and the value of callbackCalled changed to true
+        //
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Throwable[] errorHolder = new Throwable[1];
+        UnitOfWorkListener callback = new UnitOfWorkListener() {
+
+            @Override
+            public boolean awaitSequencerCompletion() {
+                return true;
+            }
+
+            @Override
+            public void respond(Object results) {
+                callbackCalled[0] = true;
+                latch.countDown();
+            }
+
+            @Override
+            public void errorOccurred(Throwable error) {
+                errorHolder[0] = error;
+                latch.countDown();
+            }
+        };
+
+        String name = "shouldRespondWithCallback";
+        UnitOfWork transaction = createTransaction(name, callback);
+        //
+        // Create a single test node with no relationship to the sequencers or
+        // with any relevant properties
+        //
+        testObject.setProperty(transaction, "TestProperty1", "My property value");
+        transaction.commit();
+
+        //
+        // Stop the test from completing prior to the callback returning
+        //
+        assertTrue(latch.await(3, TimeUnit.MINUTES));
+        assertNull(errorHolder[0]);
+
+        //
+        // The callback should have updated the value of callbackCalled to true
+        //
+        assertTrue(callbackCalled[0]);
+    }
+
+    /**
+     * Tests to confirm that with the awaitSequencerCompletion flag set to false,
+     * the transaction does NOT wait for the completion of the sequencers.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void shouldRespondWithCallbackWithoutWaitingOnSequencers() throws Exception {
+        // Ensure the workspace is created first and in a different transaction
+        _repo.komodoWorkspace(null);
+
+        final Boolean[] callbackCalled = new Boolean[1];
+        callbackCalled[0] = false;
+
+        //
+        // The callback should be called and the value of callbackCalled changed to true
+        // even though the sequencers will not be waited on
+        //
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Throwable[] errorHolder = new Throwable[1];
+        UnitOfWorkListener callback = new UnitOfWorkListener() {
+
+            @Override
+            public boolean awaitSequencerCompletion() {
+                return false;
+            }
+
+            @Override
+            public void respond(Object results) {
+                callbackCalled[0] = true;
+                latch.countDown();
+            }
+
+            @Override
+            public void errorOccurred(Throwable error) {
+                errorHolder[0] = error;
+                latch.countDown();
+            }
+        };
+
+        String name = "shouldAlwaysRespondWithCallback";
+        UnitOfWork transaction = createTransaction(name, callback);
+        //
+        // Create a single test node with no relationship to the sequencers or
+        // with any relevant properties
+        //
+        _repo.add(transaction, RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
+        transaction.commit();
+
+        //
+        // Stop the test from completing prior to the callback returning
+        //
+        assertTrue(latch.await(3, TimeUnit.MINUTES));
+        assertNull(errorHolder[0]);
+
+        //
+        // The callback should have updated the value of callbackCalled to true
+        //
+        assertTrue(callbackCalled[0]);
     }
 
     @Test

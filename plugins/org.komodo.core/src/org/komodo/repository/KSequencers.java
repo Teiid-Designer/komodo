@@ -21,20 +21,23 @@
  */
 package org.komodo.repository;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
-import javax.jcr.query.Query;
-import javax.jcr.query.QueryManager;
-import javax.jcr.query.QueryResult;
+import javax.jcr.observation.Event;
+import javax.jcr.observation.EventIterator;
+import javax.jcr.observation.EventListener;
+import javax.jcr.observation.ObservationManager;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
+import org.komodo.repository.internal.ModeshapeUtils;
 import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.Session;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -43,12 +46,12 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * Sequencers class responsible for executing all the sequencers in
  * consecutive, synchronous order.
  */
-public class KSequencers implements SQLConstants {
+public class KSequencers implements SQLConstants, EventListener {
 
     /**
      * The Sequencers executed by {@link KSequencers}
      */
-    public static enum Sequencers {
+    public static enum SequencerType {
         /**
          * VDB Sequencer
          */
@@ -66,7 +69,7 @@ public class KSequencers implements SQLConstants {
 
         private String id;
 
-        private Sequencers(String id) {
+        private SequencerType(String id) {
             this.id = id;
         }
 
@@ -76,255 +79,312 @@ public class KSequencers implements SQLConstants {
         }
     }
 
-    private static KSequencers instance;
+    private final WorkspaceIdentifier identifier;
 
-    private static final String SELECT_FROM = "SELECT [jcr:path] FROM "; //$NON-NLS-1$
+    private Session session;
 
-    /**
-     * @return singleton instance
-     */
-    public static KSequencers getInstance() {
-        if (instance == null)
-            instance = new KSequencers();
+    // Flag switched on only when a sequencing execution is started
+    private boolean sequencingActive = false;
 
-        return instance;
-    }
+    // List appended to by running sequencers detailing their unique identifiers
+    private List<String> runningSequencers = new ArrayList<String>();
+
+    private Set<KSequencerListener> listeners = new LinkedHashSet<KSequencerListener>();
 
     /**
-     * @param node node to test
-     * @return true if this is a vdb node
-     * @throws RepositoryException if error occurs
-     */
-    public static boolean isVdbNode(Node node) throws RepositoryException {
-        return node.getPrimaryNodeType().getName().equals(VdbLexicon.Vdb.VIRTUAL_DATABASE);
-    }
-
-    private String queryText(String nodeType, String property, String whereOperand) {
-        StringBuffer buffer = new StringBuffer(SELECT_FROM)
-                    .append(OPEN_SQUARE_BRACKET + nodeType + CLOSE_SQUARE_BRACKET);
-
-        if (property != null && whereOperand != null) {
-            buffer.append(SPACE + WHERE + SPACE)
-                     .append(OPEN_SQUARE_BRACKET + property + CLOSE_SQUARE_BRACKET)
-                     .append(SPACE + whereOperand);
-        }
-
-        return buffer.toString();
-    }
-
-    private NodeIterator query(Session session, String queryText) throws RepositoryException {
-        QueryManager queryMgr = session.getWorkspace().getQueryManager();
-        Query query = queryMgr.createQuery(queryText, Query.JCR_SQL2);
-        QueryResult resultSet = query.execute();
-        return resultSet.getNodes();
-    }
-
-    private boolean isDdlSequenced(Node ddlParentNode) throws Exception {
-        boolean alreadySequenced = false;
-        NodeIterator children = ddlParentNode.getNodes();
-        while(children.hasNext()) {
-            Node child = children.nextNode();
-            if (child.hasProperty(StandardDdlLexicon.DDL_EXPRESSION)) {
-                alreadySequenced = true;
-                break;
-            }
-        }
-        return alreadySequenced;
-    }
-
-    private boolean isTSqlSequenced(Node tsqlParentNode) throws RepositoryException {
-        boolean alreadySequenced = false;
-        NodeIterator children = tsqlParentNode.getNodes();
-        while(children.hasNext()) {
-            Node child = children.nextNode();
-            if (child.hasProperty(TeiidSqlLexicon.LanguageObject.TEIID_VERSION_PROP_NAME)) {
-                alreadySequenced = true;
-                break;
-            }
-        }
-        return alreadySequenced;
-    }
-
-    private Property jcrDataProperty(Node node) throws RepositoryException {
-        if (! node.hasNode(JcrConstants.JCR_CONTENT))
-            return null;
-
-        Node contentNode = node.getNode(JcrConstants.JCR_CONTENT);
-        if (! contentNode.hasProperty(JcrConstants.JCR_DATA))
-            return null;
-
-        return contentNode.getProperty(JcrConstants.JCR_DATA);
-    }
-
-    private boolean execDdlSequencer(Session session, String nodeType, String nodeProperty) throws RepositoryException {
-        boolean executeStatus = false;
-        String queryText = queryText(nodeType, nodeProperty, "IS NOT NULL"); //$NON-NLS-1$
-
-        NodeIterator iterator = query(session, queryText);
-        while (iterator.hasNext()) {
-            Node node = iterator.nextNode();
-
-            try {
-                if (isDdlSequenced(node))
-                    continue;
-
-                if (!node.hasProperty(nodeProperty))
-                    continue;
-
-                Property stmtProperty = node.getProperty(nodeProperty);
-                boolean status = session.sequence(Sequencers.DDL.toString(), stmtProperty, node);
-                if (status) {
-                    session.save();
-                    executeStatus = status;
-                }
-
-            } catch (Exception ex) {
-                // Sequencing has failed for this node
-                KLog.getLogger().error("Ddl Sequencer failed for node " + node.getPath(), ex); //$NON-NLS-1$
-            }
-        }
-
-        return executeStatus;
-    }
-
-    private boolean execTSqlSequencer(Session session, String nodeType, String nodeProperty) throws RepositoryException {
-        boolean executeStatus = false;
-        String queryText = queryText(nodeType, nodeProperty, "IS NOT NULL"); //$NON-NLS-1$
-
-        NodeIterator iterator = query(session, queryText);
-        while (iterator.hasNext()) {
-            Node node = iterator.nextNode();
-
-            try {
-                if (isTSqlSequenced(node))
-                    continue;
-
-                if (!node.hasProperty(nodeProperty))
-                    continue;
-
-                Property stmtProperty = node.getProperty(nodeProperty);
-
-                boolean status = session.sequence(Sequencers.TSQL.toString(), stmtProperty, node);
-                if (status) {
-                    session.save();
-                    executeStatus = status;
-                }
-
-            } catch (Exception ex) {
-                // Sequencing has failed for this node
-                KLog.getLogger().error("TSql Sequencer failed for node " + node.getPath(), ex); //$NON-NLS-1$
-            }
-        }
-
-        return executeStatus;
-    }
-
-    private boolean ddlSequencer(Session session) throws RepositoryException {
-        boolean executeStatus = false;
-
-        //
-        // ":(//*)[@vdb:modelDefinition] => /$1"
-        //
-        boolean status = execDdlSequencer(session,
-                                                    VdbLexicon.Vdb.DECLARATIVE_MODEL,
-                                                    VdbLexicon.Model.MODEL_DEFINITION);
-        executeStatus = status ? status : executeStatus;
-
-        //
-        // ":(//*)[@tko:rendition] => /$1"
-        //
-        status = execDdlSequencer(session,
-                                                          KomodoLexicon.Schema.NODE_TYPE,
-                                                          KomodoLexicon.Schema.RENDITION);
-        executeStatus = status ? status : executeStatus;
-
-        return executeStatus;
-    }
-
-    private boolean tsqlSequencer(Session session) throws RepositoryException {
-        boolean executeStatus = false;
-
-        //
-        // ":(//*)[@teiidddl:queryExpression] => /$1",
-        //
-        boolean status = execTSqlSequencer(session,
-                                                          TeiidDdlLexicon.CreateTable.TABLE_STATEMENT,
-                                                          TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION);
-        executeStatus = status ? status : executeStatus;
-
-        status = execTSqlSequencer(session,
-                                                          TeiidDdlLexicon.CreateTable.VIEW_STATEMENT,
-                                                          TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION);
-        executeStatus = status ? status : executeStatus;
-
-        //
-        // ":(//*)[@teiidddl:statement] => /$1"
-        //
-        status = execTSqlSequencer(session,
-                                              TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT,
-                                              TeiidDdlLexicon.CreateProcedure.STATEMENT);
-        executeStatus = status ? status : executeStatus;
-
-        return executeStatus;
-    }
-
-    private boolean vdbSequencer(Session session) throws RepositoryException {
-        boolean executeStatus = false;
-
-        String queryText = queryText(VdbLexicon.Vdb.VIRTUAL_DATABASE, null, null);
-
-        NodeIterator iterator = query(session, queryText);
-        while (iterator.hasNext()) {
-            Node vdbNode = iterator.nextNode();
-
-            try {
-                if (! isVdbNode(vdbNode))
-                    return false;
-
-                Property dataProperty = jcrDataProperty(vdbNode);
-                if (dataProperty == null)
-                    return false;
-
-                boolean status = session.sequence(Sequencers.VDB.toString(), dataProperty, vdbNode);
-                if (status) {
-                    session.save();
-                    executeStatus = status;
-                }
-
-            } catch (Exception ex) {
-                // Sequencing has failed for this node
-                KLog.getLogger().error("Vdb Sequencer failed for node " + vdbNode.getPath(), ex); //$NON-NLS-1$
-            }
-        }
-
-        return executeStatus;
-    }
-
-    /**
-     * Execute the sequencers synchronously and consecutively
+     * Create new instance
      *
-     * @param session the session to sequence
+     * @param identifier the workspace identifier
+     * @throws Exception if error occurs
      */
-    public void sequence(javax.jcr.Session session) {
-        if (! (session instanceof Session))
+    public KSequencers(WorkspaceIdentifier identifier) throws Exception {
+        this.identifier = identifier;
+        this.session = ModeshapeUtils.createSession(identifier);
+
+        ObservationManager manager = session.getWorkspace().getObservationManager();
+        manager.addEventListener(this,
+                                 Event.NODE_ADDED |
+                                 Event.NODE_MOVED |
+                                 Event.NODE_REMOVED |
+                                 Event.PROPERTY_ADDED |
+                                 Event.PROPERTY_CHANGED |
+                                 Event.PROPERTY_REMOVED,
+                                 null,                                           // ignore non-komodo paths
+                                 true,                                          // deep to look beneath komodo root
+                                 null,                                          // all uuids
+                                 null,                                          // all node types
+                                 true);                                        // ignore events generated by this session
+    }
+
+    /**
+     * Dispose of this instance
+     */
+    public void dispose() {
+        if (session != null) {
+            session.logout();
+            session = null;
+        }
+    }
+
+    /**
+     * @param listener the listener to add
+     */
+    public synchronized void addSequencerListener(KSequencerListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * @param listener the listener to remove
+     */
+    public synchronized void removeSequencerListener(KSequencerListener listener) {
+        listeners.remove(listener);
+    }
+
+    /**
+     * @return the identifier
+     */
+    public WorkspaceIdentifier getIdentifier() {
+        return this.identifier;
+    }
+
+    private boolean isVdbSequenceable(Property property) throws RepositoryException {
+        if (! property.getName().equals(JcrConstants.JCR_DATA))
+            return false;
+
+        Node node = property.getParent();
+        if (node.getName().equals(JcrConstants.JCR_CONTENT))
+            return false;
+
+        Node parentNode = node.getParent();
+        if (parentNode == null ||
+                ! (parentNode.getPrimaryNodeType().equals(VdbLexicon.Vdb.VIRTUAL_DATABASE)))
+            return false;
+
+        return true;
+    }
+
+    private boolean isDdlSequenceable(Property property) throws RepositoryException {
+        String propertyName = property.getName();
+        Node node = property.getParent();
+        List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
+
+        if (propertyName.equals(VdbLexicon.Model.MODEL_DEFINITION) &&
+                nodeTypeNames.contains(VdbLexicon.Vdb.DECLARATIVE_MODEL))
+            return true;
+
+        if (propertyName.equals(KomodoLexicon.Schema.RENDITION) &&
+                nodeTypeNames.contains(KomodoLexicon.Schema.NODE_TYPE))
+            return true;
+
+        return false;
+    }
+
+    private boolean isTsqlSequenceable(Property property) throws RepositoryException {
+        String propertyName = property.getName();
+        Node node = property.getParent();
+        List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
+
+        if (propertyName.equals(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION) &&
+                (   nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT) ||
+                    nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.VIEW_STATEMENT)))
+            return true;
+
+        if (propertyName.equals(TeiidDdlLexicon.CreateProcedure.STATEMENT) &&
+                nodeTypeNames.contains(TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT))
+            return true;
+
+        return false;
+    }
+
+    /**
+     * @param property
+     * @return if the property is sequenceable then return the sequencer type, otherwise null
+     */
+    private SequencerType isSequenceable(Property property) throws Exception {
+        if (isVdbSequenceable(property))
+            return SequencerType.VDB;
+
+        if (isDdlSequenceable(property))
+            return SequencerType.DDL;
+
+        if (isTsqlSequenceable(property))
+            return SequencerType.TSQL;
+
+        return null;
+    }
+
+    private boolean checkSequencerWork(SequencerType sequencerType, Node oldNode, Node newNode) throws Exception {
+        switch (sequencerType) {
+            case VDB:
+                return newNode.hasProperty(VdbLexicon.Vdb.VERSION);
+            case DDL:
+            case TSQL:
+                return ModeshapeUtils.childrenCount(oldNode) < ModeshapeUtils.childrenCount(newNode);
+        }
+
+        return false;
+    }
+
+    private boolean sequence(SequencerType sequencerType, Property property, Node outputNode) throws Exception {
+        Session seqSession = ModeshapeUtils.createSession(getIdentifier());
+
+        KLog.getLogger().debug("Executing " + sequencerType.name() + " Sequencer on property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
+
+        try {
+            Property seqProperty = seqSession.getProperty(property.getPath());
+            Node seqOutputNode = seqSession.getNode(outputNode.getPath());
+
+            boolean status = seqSession.sequence(sequencerType.toString(), seqProperty, seqOutputNode);
+            if (status) {
+                //
+                // Return flag is only a notional indicator that the sequencer executed successfully.
+                // Need to confirm that changes have actually been made to the output node.
+                //
+                status = checkSequencerWork(sequencerType, outputNode, seqOutputNode);
+                if (status) {
+                    // Sequencer executed and changed something
+
+                    // Create an identifier for this sequencer's work
+                    String seqPropId = encode(sequencerType, property);
+
+                    // Adds the identifier to the user data for the 'next' event to be received by this listener
+                    seqSession.getWorkspace().getObservationManager().setUserData(seqPropId);
+
+                    // Adds the identifier to the running sequencers to indicate work has been done and need to
+                    // wait for the event to run through before proclaiming eveything is complete
+                    runningSequencers.add(seqPropId);
+
+                    // Save this session
+                    seqSession.save();
+                }
+            }
+
+            return status;
+
+        } finally {
+            seqSession.logout();
+        }
+    }
+
+    private String encode(SequencerType sequencerType, Property property) throws Exception {
+        return sequencerType.name() + HYPHEN + property.getPath();
+    }
+
+    private boolean sequence(SequencerType sequencerType, Property property) throws Exception {
+        sequencingActive = true;
+
+        Node outputNode = property.getParent();
+        if (SequencerType.VDB.equals(sequencerType))
+            outputNode = outputNode.getParent();
+
+        return sequence(sequencerType, property, outputNode);
+    }
+
+    private synchronized void notifySequencerCompletion() {
+        KLog.getLogger().debug("KSequencers complete. Notifying clients"); //$NON-NLS-1$
+
+        for (KSequencerListener listener : listeners) {
+            listener.sequencingCompleted();
+        }
+    }
+
+    private synchronized void notifySequencerError(Exception exception) {
+        KLog.getLogger().error("Sequencing error", exception); //$NON-NLS-1$
+
+        for (KSequencerListener listener : listeners) {
+            listener.sequencingError(exception);
+        }
+    }
+
+    @Override
+    public void onEvent(EventIterator events) {
+        KLog.getLogger().debug("KSequencers: onEvent() called"); //$NON-NLS-1$
+
+        String seqResponseIdentifier = null;
+        try {
+            while (events.hasNext()) {
+                Event event = events.nextEvent();
+                String eventPath = event.getPath();
+                seqResponseIdentifier = event.getUserData();
+
+                switch (event.getType()) {
+                    case Event.NODE_ADDED:
+                    case Event.NODE_MOVED:
+                    case Event.NODE_REMOVED:
+                    case Event.PROPERTY_REMOVED:
+                        //
+                        // Even though we do nothing with these events the
+                        // sequencer still must fire on them in order to ensure the
+                        // listeners are always notified that the sequencer has finished
+                        //
+                        continue;
+                    case Event.PROPERTY_ADDED:
+                    case Event.PROPERTY_CHANGED:
+                        KLog.getLogger().debug("KSequencers: processing event for path " + eventPath); //$NON-NLS-1$
+
+                        Property property = session.getProperty(eventPath);
+                        SequencerType sequencerType = isSequenceable(property);
+                        if (sequencerType == null)
+                            continue;
+
+                        sequence(sequencerType, property);
+                }
+            }
+
+            //
+            // Event looping has completed.
+            //
+
+            if (! sequencingActive) {
+                notifySequencerCompletion();
+                return; // No sequencers started so nothing further to do
+            }
+
+            //
+            // Sequencers add a user-data object to their events [ see sequence(SequencerType, Property, Node) ].
+            // The object is the same as that added to runningSequencers
+            //
+            // If this set of events has a user-data object, try removing it from runningSequencers
+            // since this confirms that this set of events is the completion of that particular sequencer.
+            //
+            if (seqResponseIdentifier != null) {
+                boolean removed = runningSequencers.remove(seqResponseIdentifier);
+                if (removed)
+                    KLog.getLogger().debug("Sequencer with id " + seqResponseIdentifier + " has completed"); //$NON-NLS-1$ //$NON-NLS-2$
+            }
+
+            //
+            // Determine if runningSequencers is empty. This can happen if
+            // a) no sequencers had been running (in which case sequencingActive would be false)
+            // b) the last sequencer identifier has been removed
+            //
+            if (runningSequencers.isEmpty()) {
+                //
+                // All sequencers have completed so reset sequencingActive
+                //
+                sequencingActive = false;
+
+                //
+                // Notify clients that sequencing has completed
+                //
+                notifySequencerCompletion();
+            } else {
+                //
+                // Still sequencers are currently executing
+                //
+                if (KLog.getLogger().isDebugEnabled()) {
+                    StringBuffer buffer = new StringBuffer("Current Sequencing Train: "); //$NON-NLS-1$
+                    for (String id : runningSequencers)
+                        buffer.append(id).append(TAB);
+
+                    KLog.getLogger().debug(buffer.toString());
+                }
+            }
+        } catch (Exception ex) {
+            sequencingActive = false;
+            runningSequencers.clear();
+            notifySequencerError(ex);
             return;
-
-        try {
-            vdbSequencer((Session) session);
-        } catch (RepositoryException ex) {
-            KLog.getLogger().error("Vdb Sequencer repository exception", ex); //$NON-NLS-1$
-        }
-
-        try {
-            ddlSequencer((Session)session);
-        } catch (RepositoryException ex) {
-            KLog.getLogger().error("Ddl Sequencer repository exception", ex); //$NON-NLS-1$
-        }
-
-        try {
-            tsqlSequencer((Session)session);
-        } catch (RepositoryException ex) {
-            KLog.getLogger().error("TSql Sequencer repository exception", ex); //$NON-NLS-1$
         }
     }
 }

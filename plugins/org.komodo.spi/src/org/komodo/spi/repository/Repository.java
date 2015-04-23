@@ -197,6 +197,11 @@ public interface Repository {
     public interface UnitOfWorkListener {
 
         /**
+         * @return true if the callback should execute once the sequencers have completed their work
+         */
+        boolean awaitSequencerCompletion();
+
+        /**
          * @param error
          *        the error that occurred processing the transaction (never <code>null</code>)
          */
