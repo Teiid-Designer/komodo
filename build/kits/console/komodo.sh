@@ -3,12 +3,15 @@
 CLASSPATH="lib/*:komodo/*"
 MAINCLASS="org.komodo.shell.DefaultKomodoShell"
 
+# Uncomment these JPDA settings for remote socket debugging
+#JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=y"
+
 # ----------------------------------------
 # No script args - Interactive Mode
 # ----------------------------------------
 if [ $# -eq 0 ]
   then
-java -cp "$CLASSPATH" "$MAINCLASS"
+java $JAVA_OPTS -cp "$CLASSPATH" "$MAINCLASS"
 fi
 
 # ----------------------------------------
@@ -25,5 +28,5 @@ args=("$@")
 params="${args[0]} ${args[1]}"
 #echo PARAMS: $params
 
-java -cp "$CLASSPATH" "$MAINCLASS" $params
+java $JAVA_OPTS -cp "$CLASSPATH" "$MAINCLASS" $params
 fi

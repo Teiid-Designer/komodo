@@ -23,6 +23,7 @@
         <filtering>true</filtering>
         <includes>
           <include>**/*.sh</include>
+          <include>**/*.properties</include>
         </includes>
       </resource>
     </resources>
