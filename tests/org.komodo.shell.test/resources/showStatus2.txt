@@ -1,0 +1,8 @@
+#show status at MyModel
+create vdb MyVdb
+cd MyVdb
+create model MyModel
+cd MyModel
+show status
+
+

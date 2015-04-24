@@ -93,6 +93,20 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum ShowCommand {
+        Separator,
+        Connected,
+        NotConnected,
+        PingOk,
+        PingFail;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
 
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();

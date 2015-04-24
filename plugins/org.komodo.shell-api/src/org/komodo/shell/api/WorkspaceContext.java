@@ -112,8 +112,10 @@ public interface WorkspaceContext {
 	List<String> getProperties() throws Exception;
 
 	/**
+	 * Get the value for the supplied propertyName.  If no property with the supplied name is found,
+	 * returns null.
 	 * @param propertyName
-	 * @return the value of the property with this name
+	 * @return the value of the property with this name, null if property with name was not found.
 	 * @throws Exception if an error occurs
 	 */
 	String getPropertyValue(String propertyName) throws Exception;

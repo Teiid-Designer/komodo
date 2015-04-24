@@ -18,9 +18,17 @@ package org.komodo.shell;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.komodo.shell.api.AbstractShellCommand;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.ContextUtils;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.utils.StringUtils;
 
 /**
  * Abstract base class for all built-in shell commands.
@@ -94,7 +102,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 				recordingFileWriter.write(line+"\n"); //$NON-NLS-1$ 
 				recordingFileWriter.flush();
 			} catch (IOException ex) {
-			    // ignore
+	            print(0,"*** Could not create or write to the specifed recording file - "+outputFile); //$NON-NLS-1$
 			}
     	    finally {
     	        try {
@@ -103,6 +111,174 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     	            // ignore
     	        }
     	    }
+        // Print error message if the recording file was not defined
+    	} else {
+            print(0,"*** Recording file not defined in startup properties"); //$NON-NLS-1$
+    	}
+    }
+    
+	/**
+	 * Validates whether the supplied path is valid.  If the path is relative this takes into account the 
+	 * current context.  If invalid an error message is printed out.
+	 * @param pathArg the path to test
+	 * @return 'true' if the path is valid, 'false' if not.
+	 */
+	public boolean validatePath(String pathArg) {
+		String path = pathArg.trim();
+		if(path.length()==0) {
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.locationArg_empty")); //$NON-NLS-1$
+			return false;
+		}
+
+		WorkspaceStatus wsStatus = getWorkspaceStatus();
+		WorkspaceContext newContext = ContextUtils.getContextForPath(wsStatus, pathArg);
+				
+		if(newContext==null) {
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.locationArg_noContextWithThisName", path)); //$NON-NLS-1$
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Validate whether the supplied propName is valid for the supplied context.  If invalid, a message is printed out.
+	 * @param context the context
+	 * @param propName the property name
+	 * @return 'true' if valid, 'false' if not.
+	 * @throws Exception exception if problem getting the value.
+	 */
+	public boolean validatePropertyName(WorkspaceContext context, String propName) throws Exception {
+		// Check for valid propName
+		String propValue = context.getPropertyValue(propName);
+
+		// If a property with the supplied name is not found, propValue is null.
+		if(propValue==null) {
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.propertyArg_noPropertyWithThisName", propName)); //$NON-NLS-1$
+			return false;
+		}
+		return true;
+	}
+	
+    /**
+     * Updates the candidates for tab completion, given the currentContext and path
+     * @param candidates the candidates list
+     * @param currentContext the current context
+     * @param lastArgument the last arg
+     * @throws Exception the exception
+     */
+    public void updateTabCompleteCandidatesForPath(List<CharSequence> candidates, WorkspaceContext currentContext, String lastArgument) throws Exception {
+    	// List of potentials completions
+    	List<String> potentialsList = new ArrayList<String>();
+    	// Only offer '..' if below the root
+    	if(currentContext.getType() != WorkspaceStatus.ROOT_TYPE) {
+    		potentialsList.add(StringConstants.DOT_DOT);
+    	}
+
+    	// --------------------------------------------------------------
+    	// No arg - offer children relative current context.
+    	// --------------------------------------------------------------
+    	if(lastArgument==null) {
+    		List<WorkspaceContext> children = currentContext.getChildren();
+    		for(WorkspaceContext wsContext : children) {
+    			potentialsList.add(wsContext.getName()+ContextUtils.PATH_SEPARATOR);
+    		}
+    		candidates.addAll(potentialsList);
+    		// --------------------------------------------------------------
+    		// One arg - determine the completion options for it.
+    		// --------------------------------------------------------------
+    	} else {
+    		// --------------------------------------------
+    		// Absolute Path Arg handling
+    		// --------------------------------------------
+    		if( lastArgument.startsWith(ContextUtils.PATH_SEPARATOR) ) {
+    			// If not the full absolute root, then provide it
+    			if(!ContextUtils.isAbsolutePath(lastArgument)) {
+    				potentialsList.add(ContextUtils.PATH_SEPARATOR+ContextUtils.ROOT_CONTEXT_NAME+ContextUtils.PATH_SEPARATOR);
+    				updateCandidates(candidates,potentialsList,lastArgument);
+    				// Starts with correct root - provide next option
+    			} else {
+    				String relativePath = ContextUtils.convertAbsolutePathToRootRelative(lastArgument);
+    				WorkspaceContext deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus().getRootContext(), relativePath);
+
+    				// Get children of deepest context match to form potentialsList
+    				List<WorkspaceContext> children = deepestMatchingContext.getChildren();
+    				if(!children.isEmpty()) {
+    					// Get all children as potentials
+    					for(WorkspaceContext childContext : children) {
+    						String absolutePath = ContextUtils.PATH_SEPARATOR + childContext.getFullName();
+    						potentialsList.add(absolutePath+ContextUtils.PATH_SEPARATOR);
+    					}
+    				} else {
+    					String absolutePath = ContextUtils.PATH_SEPARATOR + deepestMatchingContext.getFullName();
+    					potentialsList.add(absolutePath+ContextUtils.PATH_SEPARATOR);
+    				}
+    				updateCandidates(candidates, potentialsList, lastArgument);
+    			}
+    			// -------------------------------------------
+    			// Relative Path Arg handling
+    			// -------------------------------------------
+    		} else {
+    			// Deepest matching context for relative path
+    			WorkspaceContext deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(currentContext, lastArgument);
+
+    			// Get children of deepest context match to form potentialsList
+    			List<WorkspaceContext> children = deepestMatchingContext.getChildren();
+    			if(!children.isEmpty()) {
+    				// Get all children as potentials
+    				for(WorkspaceContext childContext : children) {
+    					String absolutePath = ContextUtils.PATH_SEPARATOR + childContext.getFullName();
+    					String relativePath = ContextUtils.convertAbsolutePathToRelative(currentContext, absolutePath);
+    					potentialsList.add(relativePath+ContextUtils.PATH_SEPARATOR);
+    				}
+    			} else {
+    				String absolutePath = ContextUtils.PATH_SEPARATOR + deepestMatchingContext.getFullName();
+    				String relativePath = ContextUtils.convertAbsolutePathToRelative(currentContext, absolutePath);
+    				potentialsList.add(relativePath+ContextUtils.PATH_SEPARATOR);
+    			}
+    			updateCandidates(candidates, potentialsList, lastArgument);
+    		}
+    
+    	}
+    }
+    
+    /**
+     * Updates the candidates for tab completion, given the context and property Arg
+     * @param candidates the candidates list
+     * @param context the context
+     * @param propArg the propName for completion
+     * @throws Exception the exception
+     */
+    public void updateTabCompleteCandidatesForProperty(List<CharSequence> candidates, WorkspaceContext context, String propArg) throws Exception {
+		// List of potentials completions
+		List<String> potentialsList = new ArrayList<String>();
+
+		// Context properties
+		List<String> currentProps = context.getProperties();  // All properties
+
+		// Sort the properties by name
+		List<String> sortedPropNames = new ArrayList<String>(currentProps);
+		Collections.sort(sortedPropNames);
+
+		potentialsList.addAll(sortedPropNames);
+		if(StringUtils.isEmpty(propArg)) {
+			candidates.addAll(potentialsList);
+		} else {
+			updateCandidates(candidates, potentialsList, propArg);
+		}
+    }
+
+    /**
+     * Adds the valid items from the completionList to the candidates.  They are added to the candidates if they start
+     * with 'lastArg'
+     * @param candidates the candidates
+     * @param completionList possibilities before filtering based on last arg
+     * @param lastArg the commandline arg
+     */
+    private void updateCandidates(List<CharSequence> candidates, List<String> completionList, String lastArg) {
+    	for (String item : completionList) {
+    		if (item.toUpperCase().startsWith(lastArg.toUpperCase())) {
+    			candidates.add(item);
+    		}
     	}
     }
 

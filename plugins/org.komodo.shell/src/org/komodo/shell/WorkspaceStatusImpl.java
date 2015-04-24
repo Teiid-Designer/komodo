@@ -53,6 +53,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     private WorkspaceContext currentContext;
     private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
+    
+    private Properties wsProperties;
     private boolean recordingStatus = false;
     private File recordingOutputFile;
 
@@ -238,11 +240,21 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public void setProperties(Properties props) {
+    	this.wsProperties = props;
         for (final String name : props.stringPropertyNames()) {
-            if (name.equals(RECORDING_FILEPATH_KEY)) {
+            if (name.equals(RECORDING_FILE_KEY)) {
                 setRecordingOutputFile(props.getProperty(name));
             }
         }
     }
+    
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#getProperties()
+     */
+    @Override
+	public Properties getProperties() {
+    	return this.wsProperties;
+    }
+
 
 }

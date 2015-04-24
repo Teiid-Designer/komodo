@@ -125,26 +125,13 @@ public class RepositoryTools implements StringConstants {
     /**
      * @param property
      *        the property whose display value is being requested (cannot be empty)
-     * @return String representation of property and its values
+     * @return String representation including the property name and its values
      */
-    public static String getDisplayValue(Property property) {
+    public static String getDisplayNameAndValue(Property property) {
         StringBuilder sb = new StringBuilder();
         try {
             sb.append(property.getName(null)).append('=');
-            if (property.isMultiple(null)) {
-                sb.append('[');
-                Object[] values = property.getValues(null);
-                for (int i = 0; i < values.length; ++i) {
-                    Object value = values[i];
-                    sb.append(value);
-                    if ((i + 1) < values.length)
-                        sb.append(',');
-                }
-                sb.append(']');
-            } else {
-                Object value = property.getValue(null);
-                sb.append(value);
-            }
+            sb.append(getDisplayValue(property));
         } catch (Exception e) {
             sb.append(" on deleted node ").append(property.getAbsolutePath()); //$NON-NLS-1$
         }
@@ -152,6 +139,33 @@ public class RepositoryTools implements StringConstants {
         return sb.toString();
     }
 
+    /**
+     * @param property
+     *        the property whose display value is being requested (cannot be empty)
+     * @return String representation of property values
+     * @throws Exception the exception
+     */
+    public static String getDisplayValue(Property property) throws Exception {
+    	StringBuilder sb = new StringBuilder();
+
+    	if (property.isMultiple(null)) {
+    		sb.append('[');
+    		Object[] values = property.getValues(null);
+    		for (int i = 0; i < values.length; ++i) {
+    			Object value = values[i];
+    			sb.append(value);
+    			if ((i + 1) < values.length)
+    				sb.append(',');
+    		}
+    		sb.append(']');
+    	} else {
+    		Object value = property.getValue(null);
+    		sb.append(value);
+    	}
+
+    	return sb.toString();
+    }
+    
     /**
      * Traverses the graph of the given {@link KomodoObject} and returns its
      * String representation.
@@ -197,7 +211,7 @@ public class RepositoryTools implements StringConstants {
 
             for (String propertyName : propertyNames) {
                 Property property = object.getProperty(null, propertyName);
-                buffer.append(indent + TAB + AT + getDisplayValue(property) + NEW_LINE);
+                buffer.append(indent + TAB + AT + getDisplayNameAndValue(property) + NEW_LINE);
             }
 
             KomodoObject[] children = object.getChildren(null);

@@ -223,7 +223,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
     @Override
     public List<String> getProperties() throws Exception {
 ////        if (getType().equals(WorkspaceContext.Type.ROOT)) {
-////            propNameValues.put(WorkspaceStatus.RECORDING_FILEPATH_KEY, getWorkspaceStatus().getRecordingOutputFile().toString());
+////            propNameValues.put(WorkspaceStatus.RECORDING_FILE_KEY, getWorkspaceStatus().getRecordingOutputFile().toString());
 
         KomodoObject relObj = getKomodoObj();
         String[] props = relObj.getPropertyNames(null);
@@ -238,7 +238,12 @@ public class WorkspaceContextImpl implements WorkspaceContext {
     public String getPropertyValue(String propertyName) throws Exception {
         KomodoObject relObj = getKomodoObj();
         Property property = relObj.getProperty(null, propertyName);
-        return RepositoryTools.getDisplayValue(property);
+        // Null means the property with that name wasn't found
+        if(property==null) {
+        	return null;
+        } else {
+        	return RepositoryTools.getDisplayValue(property);
+        }
     }
 
     @Override

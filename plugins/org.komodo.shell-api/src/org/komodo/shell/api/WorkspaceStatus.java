@@ -40,14 +40,23 @@ public interface WorkspaceStatus extends StringConstants {
     String ROOT_TYPE = FORWARD_SLASH;
 
     @SuppressWarnings("javadoc")
-	String RECORDING_FILEPATH_KEY = "RECORDING_FILEPATH"; //$NON-NLS-1$
-
+	String RECORDING_FILE_KEY = "RECORDING_FILE"; //$NON-NLS-1$
+    @SuppressWarnings("javadoc")
+	String IMPORT_DEFAULT_DIR_KEY = "IMPORT_DEFAULT_DIR"; //$NON-NLS-1$
+    @SuppressWarnings("javadoc")
+	String EXPORT_DEFAULT_DIR_KEY = "EXPORT_DEFAULT_DIR"; //$NON-NLS-1$
     
 	/**
-	 * Allows set workspace properties on startup
+	 * Sets global workspace properties on startup
 	 * @param props the properties
 	 */
 	void setProperties(Properties props);
+
+	/**
+	 * Gets global workspace properties
+	 * @return the global workspace properties
+	 */
+	Properties getProperties();
 
 	/**
 	 * Get the home context
