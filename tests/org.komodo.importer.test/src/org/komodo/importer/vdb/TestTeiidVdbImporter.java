@@ -25,10 +25,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+
 import org.junit.Test;
 import org.komodo.importer.AbstractImporterTest;
 import org.komodo.importer.ImportMessages;
@@ -36,6 +38,10 @@ import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.ImportType;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
+import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Translator;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -53,6 +59,13 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     private static final String TWEET_EXAMPLE = "tweet-example-vdb.xml";
 
     private static final String ALL_ELEMENTS_EXAMPLE_NAME = "teiid-vdb-all-elements.xml";
+    
+    private static final String BOOKS_EXAMPLE_FULL = "books.xml";
+    private static final String BOOKS_EXAMPLE_PROPS_ONLY = "books_props_only.xml";
+    private static final String BOOKS_EXAMPLE_SOURCE_MODEL_ONLY = "books_source_model_only.xml";
+    private static final String BOOKS_EXAMPLE_SOURCE_WITH_ROLES = "books_source_model_with_roles.xml";
+    private static final String BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY = "books_virtual_model_only.xml";
+    private static final String BOOKS_EXAMPLE_TRANSLATORS_ONLY = "books_translators_only.xml";
 
     @Override
     protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
@@ -562,5 +575,321 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
         verifyAllElementsExampleNode(vdbNode);
+    }
+    
+
+    @Test
+    public void testBooksExample_Full_Vdb() throws Exception {
+        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
+        InputStream vdbStream = setup(BOOKS_EXAMPLE_FULL);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_FULL);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(null);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+        
+        assertNotNull(vdbNode);
+        
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(null, vdbNode, Vdb.class);
+        
+        assertNotNull(vdb);
+        String desc = vdb.getDescription(null);
+        assertEquals("Sample vdb that demonstrates various vdb manifest properties including data role with permissions", desc);
+        
+        assertNotNull(vdb.getProperty(null, "vdb:preview"));
+        assertEquals("false", vdb.getProperty(null, "vdb:preview").getValue(null).toString());
+        assertNotNull(vdb.getProperty(null, "query-timeout"));
+        assertEquals("256000", vdb.getProperty(null, "query-timeout").getValue(null).toString());
+        assertNotNull(vdb.getProperty(null, "allowed-languages"));
+        assertEquals("java, pascal", vdb.getProperty(null, "allowed-languages").getValue(null).toString());
+        assertNotNull(vdb.getProperty(null, "authentication-type"));
+        assertEquals("USERPASSWORD", vdb.getProperty(null, "authentication-type").getValue(null).toString());
+    	
+        assertEquals(2, vdb.getModels(null).length);
+        
+        assertEquals(1, vdb.getDataRoles(null).length);
+        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(null,  vdb.getDataRoles(null)[0], DataRole.class);
+    	assertEquals("publishers-only", dataRole.getName(null));
+    	assertNotNull(dataRole.getProperty(null, "vdb:grantAll"));
+        assertEquals("true", dataRole.getProperty(null, "vdb:grantAll").getValue(null).toString());
+        assertEquals(8, dataRole.getPermissions(null).length);
+        assertEquals(2, dataRole.getMappedRoles(null).length);
+        
+        assertEquals(1, vdb.getTranslators(null).length);
+        Translator translator = WorkspaceManager.getInstance(_repo).resolve(null,  vdb.getTranslators(null)[0], Translator.class);
+    	assertEquals("books_db2", translator.getName(null));
+    	assertEquals("db2", translator.getType(null));
+    	assertNotNull(translator.getProperty(null, "requiresCriteria"));
+        assertEquals("true", translator.getProperty(null, "requiresCriteria").getValue(null).toString());
+        assertNotNull(translator.getProperty(null, "supportsCommonTableExpressions"));
+        assertEquals("false", translator.getProperty(null, "supportsCommonTableExpressions").getValue(null).toString());
+        assertNotNull(translator.getProperty(null, "MaxDependentInPredicates"));
+        assertEquals("25", translator.getProperty(null, "MaxDependentInPredicates").getValue(null).toString());
+    }
+
+    
+    @Test
+    public void testBooksExample_Vdb_Properties_Only() throws Exception {
+        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
+        InputStream vdbStream = setup(BOOKS_EXAMPLE_PROPS_ONLY);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_PROPS_ONLY);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(null);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+        assertNotNull(vdbNode);
+        
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(null, vdbNode, Vdb.class);
+        
+        assertNotNull(vdb);
+        String desc = vdb.getDescription(null);
+        assertEquals("Sample vdb that demonstrates various vdb manifest properties only", desc);
+        
+        // VDB Properties
+        /*
+			    <property name="preview" value="false"/>
+			    <property name="query-timeout" value="256000"/>
+			    <property name="allowed-languages" value="java, pascal"/>
+			    <property name="security-domain" value="custom-security"/>
+			    <property name="gss-pattern" value="%abc&amp;a-b"/>
+			    <property name="password-pattern" value="$xyz1-9"/>
+			    <property name="authentication-type" value="USERPASSWORD"/>
+			    <property name="validationDateTime" value="Wed Apr 22 08:36:34 CDT 2015"/>
+			    <property name="validationVersion" value="8.7.1"/>
+         */
+        assertNotNull(vdb.getProperty(null, "vdb:preview"));
+        assertEquals("false", vdb.getProperty(null, "vdb:preview").getValue(null).toString());
+        assertNotNull(vdb.getProperty(null, "query-timeout"));
+        assertEquals("256000", vdb.getProperty(null, "query-timeout").getValue(null).toString());
+        assertNotNull(vdb.getProperty(null, "allowed-languages"));
+        assertEquals("java, pascal", vdb.getProperty(null, "allowed-languages").getValue(null).toString());
+        assertNotNull(vdb.getProperty(null, "authentication-type"));
+        assertEquals("USERPASSWORD", vdb.getProperty(null, "authentication-type").getValue(null).toString());
+    	
+        assertEquals(0, vdb.getModels(null).length);
+        
+    }
+    
+    @Test
+    public void testBooksExample_Source_Model_Only() throws Exception {
+        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
+        InputStream vdbStream = setup(BOOKS_EXAMPLE_SOURCE_MODEL_ONLY);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_SOURCE_MODEL_ONLY);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(null);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+        assertNotNull(vdbNode);
+        
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(null, vdbNode, Vdb.class);
+        
+        assertNotNull(vdb);
+        String desc = vdb.getDescription(null);
+        assertEquals("Sample vdb that includes this description and a single pass-through source model", desc);
+        
+        assertEquals(1, vdb.getModels(null).length);
+        assertNotNull("BooksSource", vdb.getModels(null)[0].getName(null));
+    	
+    	//System.out.println("testBooksExampleVdb_3 >> COMPLETED");
+        
+    }
+    
+    @Test
+    public void testBooksExample_Source_Model_With_Roles() throws Exception {
+        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
+        InputStream vdbStream = setup(BOOKS_EXAMPLE_SOURCE_WITH_ROLES);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_SOURCE_WITH_ROLES);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(null);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+        assertNotNull(vdbNode);
+        
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(null, vdbNode, Vdb.class);
+        
+        assertNotNull(vdb);
+        String desc = vdb.getDescription(null);
+        assertEquals("Sample vdb that includes this description, a single pass-through source model with data roles", desc);
+        
+        assertEquals(1, vdb.getModels(null).length);
+        assertNotNull("BooksSource", vdb.getModels(null)[0].getName(null));
+        assertEquals(1, vdb.getDataRoles(null).length);
+    	/*
+	        <data-role name="publishers-only" any-authenticated="false" allow-create-temporary-tables="false" grant-all="true">
+		        <description>publishers can both read and update book info</description>
+		        <permission>
+		            <resource-name>sysadmin</resource-name>
+		            <allow-create>false</allow-create>
+		            <allow-read>true</allow-read>
+		            <allow-update>false</allow-update>
+		            <allow-delete>false</allow-delete>
+		            <allow-execute>false</allow-execute>
+		            <allow-alter>false</allow-alter>
+		        </permission>
+		        <permission>
+		            <resource-name>BooksSource</resource-name>
+		            <allow-create>false</allow-create>
+		            <allow-read>true</allow-read>
+		            <allow-update>false</allow-update>
+		            <allow-delete>false</allow-delete>
+		            <allow-execute>false</allow-execute>
+		            <allow-alter>false</allow-alter>
+		        </permission>
+		        <permission>
+		            <resource-name>BooksSource.AUTHORS</resource-name>
+		            <allow-update>false</allow-update>
+		        </permission>
+		        <permission>
+		            <resource-name>BooksSource.BOOK_AUTHORS</resource-name>
+		            <allow-update>false</allow-update>
+		        </permission>
+		    </data-role>
+        */
+        
+        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(null,  vdb.getDataRoles(null)[0], DataRole.class);
+    	assertEquals("publishers-only", dataRole.getName(null));
+    	assertNotNull(dataRole.getProperty(null, "vdb:grantAll"));
+        assertEquals("true", dataRole.getProperty(null, "vdb:grantAll").getValue(null).toString());
+        assertEquals(8, dataRole.getPermissions(null).length);
+        assertEquals(2, dataRole.getMappedRoles(null).length);
+    }
+    
+    @Test
+    public void testBooksExample_Virtual_Model_Only() throws Exception {
+        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
+        InputStream vdbStream = setup(BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(null);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+        assertNotNull(vdbNode);
+        
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(null, vdbNode, Vdb.class);
+        
+        assertNotNull(vdb);
+        assertEquals("BooksVirtualModelOnly", vdb.getVdbName(null));
+        String desc = vdb.getDescription(null);
+        assertEquals("Sample vdb that contains simple VIRTUAL model and single view", desc);
+        
+        assertEquals(1, vdb.getModels(null).length);
+        assertNotNull("BooksView", vdb.getModels(null)[0].getName(null));
+        assertEquals(0, vdb.getDataRoles(null).length);
+    	
+    	//System.out.println("testBooksExampleVdb_5 >> COMPLETED");
+        
+    }
+    
+    @Test
+    public void testBooksExample_Translator_Only() throws Exception {
+        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
+        InputStream vdbStream = setup(BOOKS_EXAMPLE_TRANSLATORS_ONLY);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_TRANSLATORS_ONLY);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(null);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+        assertNotNull(vdbNode);
+        
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(null, vdbNode, Vdb.class);
+        
+        /*
+		    <description>Sample vdb containing only a tranlator override element</description>
+		    <translator name="books_db2" type="db2" description="">
+		        <property name="requiresCriteria" value="true"/>
+		        <property name="supportsCommonTableExpressions" value="false"/>
+		        <property name="MaxDependentInPredicates" value="25"/>
+		    </translator>
+         */
+        assertNotNull(vdb);
+        assertEquals("BooksExampleTranslatorOverride", vdb.getVdbName(null));
+        String desc = vdb.getDescription(null);
+        assertEquals("Sample vdb containing only a tranlator override element", desc);
+        
+        assertEquals(0, vdb.getModels(null).length);
+        assertEquals(1, vdb.getTranslators(null).length);
+        Translator translator = WorkspaceManager.getInstance(_repo).resolve(null,  vdb.getTranslators(null)[0], Translator.class);
+    	assertEquals("books_db2", translator.getName(null));
+    	assertEquals("db2", translator.getType(null));
+    	
+    	assertNotNull(translator.getProperty(null, "requiresCriteria"));
+        assertEquals("true", translator.getProperty(null, "requiresCriteria").getValue(null).toString());
+        assertNotNull(translator.getProperty(null, "supportsCommonTableExpressions"));
+        assertEquals("false", translator.getProperty(null, "supportsCommonTableExpressions").getValue(null).toString());
+        assertNotNull(translator.getProperty(null, "MaxDependentInPredicates"));
+        assertEquals("25", translator.getProperty(null, "MaxDependentInPredicates").getValue(null).toString());
+        
     }
 }
