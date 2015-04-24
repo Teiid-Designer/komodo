@@ -29,7 +29,6 @@ import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.nodetype.NodeType;
 import org.komodo.repository.Messages;
-import org.komodo.repository.WorkspaceIdentifier;
 import org.komodo.spi.KException;
 import org.modeshape.jcr.JcrRepository;
 import org.modeshape.jcr.ModeShapeEngine;

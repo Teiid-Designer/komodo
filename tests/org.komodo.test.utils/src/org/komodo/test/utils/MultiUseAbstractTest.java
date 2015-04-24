@@ -39,8 +39,8 @@ import javax.jcr.Workspace;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.komodo.repository.KSequencers;
-import org.komodo.repository.WorkspaceIdentifier;
+import org.komodo.repository.KSequencerController;
+import org.komodo.repository.KSequencersFactory;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
 import org.modeshape.common.collection.Problems;
@@ -63,13 +63,13 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
      */
     private static final String DEFAULT_TEST_REPOSITORY_CONFIG = DATA_DIRECTORY + File.separator + "test-repository-config.json";
 
-    private static WorkspaceIdentifier identifier;
-
     private static JcrSession session;
 
     private static ModeShapeEngine engine;
 
-    private static KSequencers sequencers;
+    private static KSequencerController sequencers;
+
+    private static JcrRepository repository;
 
     private static void stopRepository() throws Exception {
         try {
@@ -81,8 +81,8 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
             Future<Boolean> shutdown = engine.shutdown();
             shutdown.get();
         } finally {
+            repository = null;
             session = null;
-            identifier = null;
             engine = null;
         }
     }
@@ -136,7 +136,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
     }
 
     private void startEngine() throws Exception {
-        if (identifier != null && identifier.getRepository() != null)
+        if (repository != null)
             return;
 
         engine = new ModeShapeEngine();
@@ -150,9 +150,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
             throw new RuntimeException("Problems with the configuration.");
         }
 
-        identifier = new WorkspaceIdentifier(config.getDefaultWorkspaceName());
-        JcrRepository repository = engine.deploy(config);
-        identifier.setRepository(repository);
+        repository = engine.deploy(config);
 
         problems = repository.getStartupProblems();
         if (problems.hasErrors() || problems.hasWarnings()) {
@@ -170,7 +168,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
         }
 
         // Add the sequencing listener
-        sequencers = new KSequencers(identifier);
+        sequencers = KSequencersFactory.getInstance().createSequencerController(config.getDefaultWorkspaceName(), repository);
     }
 
     @Before
@@ -196,7 +194,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
         }
     }
 
-    protected KSequencers sequencers() {
+    protected KSequencerController sequencers() {
         return sequencers;
     }
 
@@ -213,7 +211,7 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
     }
 
     protected JcrSession newSession() throws RepositoryException {
-        return identifier.getRepository().login();
+        return repository.login();
     }
 
     /**

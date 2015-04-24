@@ -31,10 +31,9 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import org.komodo.core.KEngine;
+import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
-import org.komodo.repository.KSequencers;
 import org.komodo.repository.Messages;
-import org.komodo.repository.WorkspaceIdentifier;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
@@ -220,7 +219,7 @@ public class ModeshapeEngineThread extends Thread {
 
     private final WorkspaceIdentifier identifier;
 
-    private KSequencers sequencers;
+    private KSequencerController sequencers;
 
     /**
      * Create this thread and give it a name

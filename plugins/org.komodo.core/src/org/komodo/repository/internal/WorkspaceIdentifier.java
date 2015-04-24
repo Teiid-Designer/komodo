@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.repository;
+package org.komodo.repository.internal;
 
 import org.modeshape.jcr.JcrRepository;
 
@@ -38,6 +38,16 @@ public class WorkspaceIdentifier {
      */
     public WorkspaceIdentifier(String workspace) {
         this.workspace = workspace;
+    }
+
+    /**
+     * Create a new instance
+     * @param workspace the workspace name
+     * @param repository the repository
+     */
+    public WorkspaceIdentifier(String workspace, JcrRepository repository) {
+        this.workspace = workspace;
+        this.repository = repository;
     }
 
     /**

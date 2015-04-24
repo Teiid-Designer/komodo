@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.repository;
+package org.komodo.repository.internal;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -33,7 +33,8 @@ import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.repository.internal.ModeshapeUtils;
+import org.komodo.repository.KSequencerController;
+import org.komodo.repository.KSequencerListener;
 import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
@@ -46,38 +47,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * Sequencers class responsible for executing all the sequencers in
  * consecutive, synchronous order.
  */
-public class KSequencers implements SQLConstants, EventListener {
-
-    /**
-     * The Sequencers executed by {@link KSequencers}
-     */
-    public static enum SequencerType {
-        /**
-         * VDB Sequencer
-         */
-        VDB("VDB Dynamic Sequencer"), //$NON-NLS-1$
-
-        /**
-         * DDL Sequencer
-         */
-        DDL("DDL Sequencer"), //$NON-NLS-1$
-
-        /**
-         * Teiid SQL Sequencer
-         */
-        TSQL("Teiid SQL Sequencer"); //$NON-NLS-1$
-
-        private String id;
-
-        private SequencerType(String id) {
-            this.id = id;
-        }
-
-        @Override
-        public String toString() {
-            return id;
-        }
-    }
+public class KSequencers implements SQLConstants, EventListener, KSequencerController {
 
     private final WorkspaceIdentifier identifier;
 
@@ -119,6 +89,7 @@ public class KSequencers implements SQLConstants, EventListener {
     /**
      * Dispose of this instance
      */
+    @Override
     public void dispose() {
         if (session != null) {
             session.logout();
@@ -129,6 +100,7 @@ public class KSequencers implements SQLConstants, EventListener {
     /**
      * @param listener the listener to add
      */
+    @Override
     public synchronized void addSequencerListener(KSequencerListener listener) {
         listeners.add(listener);
     }
@@ -136,6 +108,7 @@ public class KSequencers implements SQLConstants, EventListener {
     /**
      * @param listener the listener to remove
      */
+    @Override
     public synchronized void removeSequencerListener(KSequencerListener listener) {
         listeners.remove(listener);
     }

@@ -22,8 +22,8 @@
 package org.komodo.test.utils;
 
 import java.util.concurrent.CountDownLatch;
+import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
-import org.komodo.repository.KSequencers;
 import org.komodo.utils.KLog;
 
 /**
@@ -33,14 +33,14 @@ public class SequencerLatchListener implements KSequencerListener {
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
-    private final KSequencers sequencers;
+    private final KSequencerController sequencers;
 
     private Exception sequencerException = null;
 
     /**
      * @param sequencers the sequencers
      */
-    public SequencerLatchListener(KSequencers sequencers) {
+    public SequencerLatchListener(KSequencerController sequencers) {
         this.sequencers = sequencers;
         this.sequencers.addSequencerListener(this);
     }

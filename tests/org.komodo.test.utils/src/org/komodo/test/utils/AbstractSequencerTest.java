@@ -55,7 +55,7 @@ import javax.jcr.observation.ObservationManager;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.komodo.repository.KSequencers;
+import org.komodo.repository.KSequencerController.SequencerType;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
@@ -144,7 +144,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         sequencingFailureLatches.clear();
     }
 
-    protected Node prepareSequence(String text, KSequencers.SequencerType sequencer) throws Exception {
+    protected Node prepareSequence(String text, SequencerType sequencer) throws Exception {
 
         String name = "Test" + text.hashCode();
         Node node = rootNode.addNode(FORWARD_SLASH + name);

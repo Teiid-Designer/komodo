@@ -25,20 +25,54 @@ import org.komodo.repository.internal.KSequencers;
 
 
 /**
- * Listener for {@link KSequencers} events
+ * Controls the execution of the sequencers
  */
-public interface KSequencerListener {
+public interface KSequencerController {
 
     /**
-     * Will be called when all sequencers have been executed
+     * The Sequencers executed by {@link KSequencers}
      */
-    void sequencingCompleted();
+    public static enum SequencerType {
+        /**
+         * VDB Sequencer
+         */
+        VDB("VDB Dynamic Sequencer"), //$NON-NLS-1$
+
+        /**
+         * DDL Sequencer
+         */
+        DDL("DDL Sequencer"), //$NON-NLS-1$
+
+        /**
+         * Teiid SQL Sequencer
+         */
+        TSQL("Teiid SQL Sequencer"); //$NON-NLS-1$
+
+        private String id;
+
+        private SequencerType(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public String toString() {
+            return id;
+        }
+    }
 
     /**
-     * Will be called if the sequencers encounter an error
-     *
-     * @param exception error encountered
+     * Dispose of this instance
      */
-    void sequencingError(Exception exception);
+    void dispose();
+
+    /**
+     * @param listener the listener to add
+     */
+    void addSequencerListener(KSequencerListener listener);
+
+    /**
+     * @param listener the listener to remove
+     */
+    void removeSequencerListener(KSequencerListener listener);
 
 }

@@ -34,7 +34,7 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinPredicate;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.MultipleElementSymbol;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
-import org.komodo.repository.KSequencers;
+import org.komodo.repository.KSequencerController.SequencerType;
 import org.komodo.spi.query.sql.lang.JoinType;
 import org.komodo.spi.runtime.version.TeiidVersion;
 
@@ -54,7 +54,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
     @Test(timeout = 5000000)
     public void testBasicDDLStatement() throws Exception {
         String ddl =  "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";        
-        Node fileNode = prepareSequence(ddl, KSequencers.SequencerType.DDL);
+        Node fileNode = prepareSequence(ddl, SequencerType.DDL);
 
         //
         // Sequencing completed, now verify
@@ -137,7 +137,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
                      .append("o.amount as amount ")
                      .append("FROM Customer C INNER JOIN o ON c.id = o.customerid; ");
 
-        Node fileNode = prepareSequence(ddl.toString(), KSequencers.SequencerType.DDL);
+        Node fileNode = prepareSequence(ddl.toString(), SequencerType.DDL);
 
         //
         // Sequencing completed, now verify
