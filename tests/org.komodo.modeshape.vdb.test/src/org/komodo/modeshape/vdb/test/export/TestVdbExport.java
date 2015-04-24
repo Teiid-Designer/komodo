@@ -22,7 +22,9 @@
 package org.komodo.modeshape.vdb.test.export;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,6 +34,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,8 +43,8 @@ import javax.xml.stream.XMLStreamWriter;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
-import org.komodo.repository.KSequencers;
 import org.komodo.test.utils.AbstractSequencerTest;
+import org.komodo.test.utils.SequencerLatchListener;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -97,6 +100,15 @@ public class TestVdbExport extends AbstractSequencerTest {
         }
 
         return builder.toString();
+    }
+
+    private void saveSession() throws Exception {
+        SequencerLatchListener listener = addSequencingListenerLatch();
+
+        session().save();
+
+        assertTrue(listener.getLatch().await(3, TimeUnit.MINUTES));
+        assertFalse(listener.exceptionOccurred());
     }
 
     private Node createTweetExampleNode() throws Exception {
@@ -214,12 +226,8 @@ public class TestVdbExport extends AbstractSequencerTest {
                                 .append("source string PATH 'source', text string PATH 'text') AS tweet; ")
                                 .append("CREATE VIEW Tweet AS select * FROM twitterview.getTweets;");
         twitterView.setProperty(VdbLexicon.Model.MODEL_DEFINITION, modelDefinition.toString());
-        session().save();
 
-        //
-        // Sequence the session
-        //
-        KSequencers.getInstance().sequence(session());
+        saveSession();
 
         return tweetExample;
     }
@@ -461,11 +469,7 @@ public class TestVdbExport extends AbstractSequencerTest {
         Node permission4 = permissions.addNode("javascript", VdbLexicon.DataRole.Permission.PERMISSION);
         permission4.setProperty(VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, true);
 
-        session().save();
-        //
-        // Sequence the session
-        //
-        KSequencers.getInstance().sequence(session());
+        saveSession();
 
         return myVdbExample;
     }

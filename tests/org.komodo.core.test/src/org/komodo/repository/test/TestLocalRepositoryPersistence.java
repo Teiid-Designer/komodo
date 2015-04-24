@@ -180,6 +180,11 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
         UnitOfWork uow = _repo.createTransaction("test-persistence-workspace", false, new UnitOfWorkListener() {
 
             @Override
+            public boolean awaitSequencerCompletion() {
+                return false;
+            }
+
+            @Override
             public void respond(Object results) {
                 latch.countDown();
             }
@@ -248,6 +253,11 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
 
         final CountDownLatch latch = new CountDownLatch(1);
         UnitOfWork uow = _repo.createTransaction("test-persistence-objects", false, new UnitOfWorkListener() {
+
+            @Override
+            public boolean awaitSequencerCompletion() {
+                return false;
+            }
 
             @Override
             public void respond(Object results) {

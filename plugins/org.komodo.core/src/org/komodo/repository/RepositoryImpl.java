@@ -232,11 +232,6 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                         } else {
                             this.session.save();
 
-                            //
-                            // Sequence the session
-                            //
-                            KSequencers.getInstance().sequence(session);
-
                             this.state = State.COMMITTED;
                             LOGGER.debug( "transaction {0} saved", getName() ); //$NON-NLS-1$
 

@@ -1,7 +1,7 @@
-/*************************************************************************************
+/*
  * JBoss, Home of Professional Open Source.
  * See the COPYRIGHT.txt file distributed with this work for information
- * regarding copyright ownership. Some portions may be licensed
+ * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
  *
  * This library is free software; you can redistribute it and/or
@@ -11,28 +11,34 @@
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- ************************************************************************************/
-package org.komodo.importer;
+ */
+package org.komodo.repository;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.komodo.importer.ddl.TestTeiidDdlImporter;
-import org.komodo.importer.vdb.TestTeiidVdbImporter;
+import org.komodo.repository.internal.KSequencers;
+
 
 /**
- * Suite for all unit tests
+ * Listener for {@link KSequencers} events
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ 
-	TestTeiidDdlImporter.class,
-	TestTeiidVdbImporter.class})
-public class AllTests {
-    // nothing to do
+public interface KSequencerListener {
+
+    /**
+     * Will be called when all sequencers have been executed
+     */
+    void sequencingCompleted();
+
+    /**
+     * Will be called if the sequencers encounter an error
+     *
+     * @param exception error encountered
+     */
+    void sequencingError(Exception exception);
+
 }

@@ -74,7 +74,10 @@ public class Messages implements StringConstants {
          */
         ERROR_TRANSACTION_FINISHED,
         ERROR_TRYING_TO_COMMIT,
+        SEQUENCING_ERROR_TRYING_TO_COMMIT,
         ERROR_TRYING_TO_ROLLBACK,
+        ERROR_STOPPING_ENGINE,
+        ERROR_STARTING_ENGINE,
 
         /**
          * An error message indicating the type of the object is not incorrect.

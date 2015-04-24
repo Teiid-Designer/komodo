@@ -76,7 +76,7 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLAttributes;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLElement;
 import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
-import org.komodo.repository.KSequencers;
+import org.komodo.repository.KSequencerController.SequencerType;
 import org.komodo.spi.query.sql.lang.JoinType;
 import org.komodo.spi.query.sql.lang.SetQuery.Operation;
 import org.komodo.spi.runtime.version.TeiidVersion;
@@ -102,7 +102,7 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
     }
 
     protected Node sequenceSql(String text, String seqRegEx) throws Exception {
-        Node node = prepareSequence(text, KSequencers.Sequencers.TSQL);
+        Node node = prepareSequence(text, SequencerType.TSQL);
         return node;
     }
 

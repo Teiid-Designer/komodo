@@ -11,6 +11,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -57,7 +58,14 @@ public class SchemaImplTest extends RelationalModelTest {
 
     private void setRenditionValueAwaitSequencing(String value, String... sequencerPaths) throws Exception {
         final CountDownLatch updateLatch = new CountDownLatch(1);
+        final Throwable[] errorHolder = new Throwable[1];
+
         UnitOfWork transaction = _repo.createTransaction("schematests-setrendition-value", false, new UnitOfWorkListener() {
+
+            @Override
+            public boolean awaitSequencerCompletion() {
+                return true;
+            }
 
             @Override
             public void respond(Object results) {
@@ -67,6 +75,7 @@ public class SchemaImplTest extends RelationalModelTest {
             @Override
             public void errorOccurred(Throwable error) {
                 updateLatch.countDown();
+                errorHolder[0] = error;
             }
         });
 
@@ -81,6 +90,7 @@ public class SchemaImplTest extends RelationalModelTest {
 
         // Wait for the sequencing of the repository or timeout of 3 minutes
         assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
+        assertNull(errorHolder[0]);
 
         traverse(schema);
     }

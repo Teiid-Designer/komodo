@@ -32,7 +32,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
-import org.komodo.repository.KSequencers;
+import org.komodo.repository.KSequencerController.SequencerType;
 import org.komodo.test.utils.AbstractSequencerTest;
 
 /**
@@ -119,7 +119,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
     }
 
     protected void helpTest(String ddl, String expected, String... pathsToBeSequenced) throws Exception {
-        Node ddlNode = prepareSequence(ddl, KSequencers.Sequencers.DDL);
+        Node ddlNode = prepareSequence(ddl, SequencerType.DDL);
         assertNotNull(ddlNode);
 
         traverse(ddlNode);
