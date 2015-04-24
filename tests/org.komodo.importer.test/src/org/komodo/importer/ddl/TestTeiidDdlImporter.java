@@ -267,12 +267,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         KomodoObject modelNode = executeImporter(ddlStream,
                                                                                ImportType.MODEL,
                                                                                importOptions,
-                                                                               importMessages,
-                                                                               ".*\\/accounts.ACCOUNT",
-                                                                               ".*\\/accounts.CUSTOMER",
-                                                                               ".*\\/accounts.HOLDINGS",
-                                                                               ".*\\/accounts.PRODUCT",
-                                                                               ".*\\/accounts.SUBSCRIPTIONS");
+                                                                               importMessages);
 
     	// Test that a Model was created
     	assertNotNull("Failed - No Model Created ", modelNode);
@@ -297,12 +292,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         KomodoObject schemaNode = executeImporter(ddlStream,
                                                                                  ImportType.SCHEMA,
                                                                                  importOptions,
-                                                                                 importMessages,
-                                                                                 ".*\\/accounts.ACCOUNT",
-                                                                                 ".*\\/accounts.CUSTOMER",
-                                                                                 ".*\\/accounts.HOLDINGS",
-                                                                                 ".*\\/accounts.PRODUCT",
-                                                                                 ".*\\/accounts.SUBSCRIPTIONS");
+                                                                                 importMessages);
 
         // Test that a schema fragment was created
         assertNotNull("Failed - No Schema Created ", schemaNode);
@@ -365,10 +355,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         KomodoObject modelNode = executeImporter(ddlStream,
                                                                                ImportType.MODEL,
                                                                                importOptions,
-                                                                               importMessages,
-                                                                               ".*\\/getFiles",
-                                                                               ".*\\/getTextFiles",
-                                                                               ".*\\/saveFile");
+                                                                               importMessages);
 
     	// Test that a Model was created
     	assertNotNull("Failed - No Model Created ", modelNode);
@@ -394,10 +381,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         KomodoObject schemaNode = executeImporter(ddlStream,
                                                                                   ImportType.SCHEMA,
                                                                                   importOptions,
-                                                                                  importMessages,
-                                                                                  ".*\\/getFiles",
-                                                                                  ".*\\/getTextFiles",
-                                                                                  ".*\\/saveFile");
+                                                                                  importMessages);
 
         // Test that a Model was created
         assertNotNull("Failed - No Schema fragment Created ", schemaNode);

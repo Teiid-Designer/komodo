@@ -290,8 +290,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         ImportMessages importMessages = new ImportMessages();
 
         KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
-                                                                           importMessages,
-                                                                           ".*\\/getTweets\\/tsql:query");
+                                                                           importMessages);
 
         // Test that a vdb was created
         assertNotNull("Failed - No Vdb Created ", vdbNode);
@@ -553,8 +552,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         ImportMessages importMessages = new ImportMessages();
 
         KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
-                                                                           importMessages,
-                                                                            ".*\\/Test/tsql:query");
+                                                                           importMessages);
 
         // Test that a vdb was created
         assertNotNull("Failed - No Vdb Created ", vdbNode);

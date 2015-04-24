@@ -163,11 +163,21 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
     }
 
+    protected void traverse(Node node) throws Exception {
+        StringBuffer buffer = new StringBuffer(NEW_LINE);
+        traverse(TAB, node, buffer);
+        KLog.getLogger().info(buffer.toString());
+    }
+
+    protected void traverse(UnitOfWork uow, String nodePath) throws Exception {
+        Session session = session(uow);
+        Node node = session.getNode(nodePath);
+        traverse(node);
+    }
+
     protected void traverse(UnitOfWork uow) throws Exception {
         Session session = session(uow);
-        StringBuffer buffer = new StringBuffer(NEW_LINE);
-        traverse(TAB, session.getRootNode(), buffer);
-        KLog.getLogger().info(buffer.toString());
+        traverse(session.getRootNode());
     }
 
     /**

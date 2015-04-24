@@ -152,12 +152,12 @@ public class KSequencers implements SQLConstants, EventListener {
             return false;
 
         Node node = property.getParent();
-        if (node.getName().equals(JcrConstants.JCR_CONTENT))
+        if (! node.getName().equals(JcrConstants.JCR_CONTENT))
             return false;
 
         Node parentNode = node.getParent();
         if (parentNode == null ||
-                ! (parentNode.getPrimaryNodeType().equals(VdbLexicon.Vdb.VIRTUAL_DATABASE)))
+                ! (parentNode.getPrimaryNodeType().getName().equals(VdbLexicon.Vdb.VIRTUAL_DATABASE)))
             return false;
 
         return true;

@@ -87,7 +87,7 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
     
     protected KomodoObject executeImporter(Object content, ImportType importType,
                                                                         ImportOptions importOptions,
-                                                                        ImportMessages importMessages, String... sequencePaths)
+                                                                        ImportMessages importMessages)
                                                                         throws Exception {
         assertNotNull(_repo);
         assertNotNull(content);
@@ -126,7 +126,7 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
 
         updateLatch.await(3, TimeUnit.MINUTES);
 
-        traverse(kObject);
+        traverse(_repo.createTransaction("traverse-imported-nodes", true, null), kObject.getAbsolutePath());
 
         return kObject;
     }

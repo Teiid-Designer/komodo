@@ -24,13 +24,15 @@ package org.komodo.importer;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.importer.ddl.TestTeiidDdlImporter;
+import org.komodo.importer.vdb.TestTeiidVdbImporter;
 
 /**
  * Suite for all unit tests
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ 
-	TestTeiidDdlImporter.class,})
+	TestTeiidDdlImporter.class,
+	TestTeiidVdbImporter.class})
 public class AllTests {
     // nothing to do
 }
