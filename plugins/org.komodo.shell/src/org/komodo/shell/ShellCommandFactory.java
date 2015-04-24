@@ -50,6 +50,7 @@ import org.komodo.shell.commands.core.PlayCommand;
 import org.komodo.shell.commands.core.PropertyCommand;
 import org.komodo.shell.commands.core.RecordCommand;
 import org.komodo.shell.commands.core.RenameCommand;
+import org.komodo.shell.commands.core.ShowCommand;
 import org.komodo.shell.commands.core.StatusCommand;
 import org.komodo.shell.commands.core.UseTeiidCommand;
 import org.komodo.utils.FileUtils;
@@ -136,6 +137,9 @@ public class ShellCommandFactory {
         NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
         commandMap.put(traverseCommand.getName().toLowerCase(), traverseCommand);
         
+        ShowCommand showCommand = new ShowCommand(this.wsStatus);
+        commandMap.put(showCommand.getName().toLowerCase(), showCommand);
+
         RenameCommand renameCommand = new RenameCommand(RENAME_CMD_NAME, this.wsStatus);
         commandMap.put(renameCommand.getName().toLowerCase(), renameCommand);
 

@@ -8,6 +8,7 @@
 package org.komodo.shell.util;
 
 import org.komodo.shell.api.WorkspaceContext;
+import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
 
 
@@ -16,10 +17,39 @@ import org.komodo.utils.StringUtils;
  */
 public class ContextUtils {
 	
+	@SuppressWarnings("javadoc")
 	public static final String ROOT_CONTEXT_NAME = "tko:komodo"; //$NON-NLS-1$
-	public static final String WORKSPACE_CONTEXT_NAME = "tko:workspace"; //$NON-NLS-1$
-	
+	@SuppressWarnings("javadoc")
 	public static final String PATH_SEPARATOR = "/"; //$NON-NLS-1$
+
+	private static final String ROOT_OPT1 = PATH_SEPARATOR;
+	private static final String ROOT_OPT2 = ROOT_OPT1 + ContextUtils.ROOT_CONTEXT_NAME;
+	private static final String ROOT_OPT3 = ROOT_OPT2 + PATH_SEPARATOR;
+
+	/**
+	 * Get the workspace context for the specified path.  The path can be either an absolute path, or relative
+	 * to the current context.
+	 * separated by the PATH_SEPARATOR, for example 'table1/col1'.  or it could be single path.
+	 * @param workspaceStatus the workspace status
+	 * @param path the supplied path
+	 * @return the context at the specified path, null if not found.
+	 */
+	public static WorkspaceContext getContextForPath(WorkspaceStatus workspaceStatus, String path) {
+		if(StringUtils.isBlank(path)) return workspaceStatus.getCurrentContext();
+		
+		// check path for cd into root options
+		if( path.equalsIgnoreCase(ROOT_OPT1) || path.equalsIgnoreCase(ROOT_OPT2) || path.equalsIgnoreCase(ROOT_OPT3)) { 
+			return workspaceStatus.getRootContext();
+		}
+		
+		// Location supplied as absolute path
+		if(ContextUtils.isAbsolutePath(path)) {
+			return ContextUtils.getContextForAbsolutePath(workspaceStatus.getRootContext(), path);
+		// Location supplied as relative path
+		} else {
+			return ContextUtils.getRelativeContext(workspaceStatus.getCurrentContext(), path);
+		}
+	}
 	
 	/**
 	 * Get the context relative to the current context at the specified path.  The path could be multi-level,
@@ -28,7 +58,7 @@ public class ContextUtils {
 	 * @param relativePath the supplied child path relative to the context
 	 * @return the context at the specified path, null if not found.
 	 */
-	public static WorkspaceContext getRelativeContext(WorkspaceContext currentContext, String relativePath) {
+	private static WorkspaceContext getRelativeContext(WorkspaceContext currentContext, String relativePath) {
 		WorkspaceContext resultContext = null;
 		
 		// Get the path segments
@@ -53,24 +83,13 @@ public class ContextUtils {
 	}
 	
 	/**
-	 * Determines whether supplied context has a child at the specified path.  The path could be multi-level,
-	 * separated by the PATH_SEPARATOR, for example 'table1/col1'.  or it could be single path.
-	 * @param currentContext the current context
-	 * @param relativePath the supplied child path relative to the context
-	 * @return true if a child exists at the supplied path, false if not.
-	 */
-	public static boolean hasContextAtPath(WorkspaceContext currentContext, String relativePath) {
-		return getRelativeContext(currentContext,relativePath)!=null ? true : false;
-	}
-	
-	/**
 	 * Get a context child (or parent) of the current context, based on provided segment name.  Returns null if a child of supplied name
 	 * does not exist.  The supplied segment can only represent a change of one level above or below the currentContext.
 	 * @param currentContext the current context
 	 * @param segmentName the name of the context to find
 	 * @return the child context
 	 */
-	public static WorkspaceContext getContext(WorkspaceContext currentContext, String segmentName) {
+	private static WorkspaceContext getContext(WorkspaceContext currentContext, String segmentName) {
 		// Special navigation cases
 		if(segmentName.equals("..")) { //$NON-NLS-1$
 			return currentContext.getParent();
@@ -97,7 +116,7 @@ public class ContextUtils {
 	 * @param absolutePath the absolute path
 	 * @return the context at the specified absolute path, null if not found.
 	 */
-	public static WorkspaceContext getContextForAbsolutePath(WorkspaceContext rootContext, String absolutePath) {
+	private static WorkspaceContext getContextForAbsolutePath(WorkspaceContext rootContext, String absolutePath) {
 		WorkspaceContext resultContext = null;
 		
 		if(isAbsolutePath(absolutePath)) {
@@ -188,7 +207,7 @@ public class ContextUtils {
 	 * @param path the supplied path
 	 * @return the array of path segments
 	 */
-	public static String[] getPathSegments(String path) {
+	private static String[] getPathSegments(String path) {
 		return path.split(PATH_SEPARATOR);
 	}
 	

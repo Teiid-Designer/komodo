@@ -1,0 +1,9 @@
+# create three models within workspace.
+create vdb MyVdb
+cd MyVdb
+create model Model1
+create model Model2
+create model Model3
+#show children of MyVdb
+show children
+
