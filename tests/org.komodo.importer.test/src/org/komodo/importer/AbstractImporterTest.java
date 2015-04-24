@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
@@ -53,10 +55,17 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
     protected static final String DATA_DIRECTORY = File.separator + "data"; //$NON-NLS-1$
 
     protected InputStream setup(String fileName) {
-
-        InputStream stream = getClass().getResourceAsStream(DATA_DIRECTORY + File.separator + fileName);
+    	String fullFilePath = DATA_DIRECTORY + File.separator + fileName;
+        InputStream stream = getClass().getResourceAsStream(fullFilePath);
         assertNotNull(stream);
         return stream;
+    }
+    
+    protected File setupWithFile(String fileName) {
+    	String fullFilePath = DATA_DIRECTORY + File.separator + fileName;
+        File file = new File(fullFilePath);
+        assertTrue(file.exists());
+        return file;
     }
 
     protected abstract KomodoObject runImporter(Repository repository,
