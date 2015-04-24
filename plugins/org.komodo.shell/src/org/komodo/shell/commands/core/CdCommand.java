@@ -94,7 +94,7 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 			WorkspaceContext currentContext = getWorkspaceStatus().getCurrentContext();
 			
 			// The arg is expected to be a path
-			updateTabCompleteCandidatesForPath(candidates, currentContext, lastArgument);
+			updateTabCompleteCandidatesForPath(candidates, currentContext, true, lastArgument);
 
 			// Do not put space after it - may want to append more to the path
 			return CompletionConstants.NO_APPEND_SEPARATOR;

@@ -367,7 +367,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     		// Tab completion for "properties", "children", "summary" - expects a path arg
     		if(SUBCMD_PROPERTIES.equals(cmdArgLower) || SUBCMD_CHILDREN.equals(cmdArgLower) || SUBCMD_SUMMARY.equals(cmdArgLower)) {
     			// The arg is expected to be a path
-    			updateTabCompleteCandidatesForPath(candidates, getWorkspaceStatus().getCurrentContext(), lastArgument);
+    			updateTabCompleteCandidatesForPath(candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument);
 
     			// Do not put space after it - may want to append more to the path
     			return CompletionConstants.NO_APPEND_SEPARATOR;

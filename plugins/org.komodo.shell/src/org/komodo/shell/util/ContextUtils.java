@@ -83,6 +83,56 @@ public class ContextUtils {
 	}
 	
 	/**
+	 * Determine if the second context is above the first.
+	 * 
+	 * @param context1 the first context
+	 * @param context2 the second context
+	 * @return 'true' if context2 is above(closer to root) than context1
+	 */
+	public static boolean isContextAbove(WorkspaceContext context1, WorkspaceContext context2) {
+		int context1Level = getContextLevel(context1);
+		int context2Level = getContextLevel(context2);
+		
+		return (context2Level < context1Level) ? true : false;
+	}
+	
+	/**
+	 * Determine if the second context is below the first.
+	 * 
+	 * @param context1 the first context
+	 * @param context2 the second context
+	 * @return 'true' if context2 is below(further from root) than context1
+	 */
+	public static boolean isContextBelow(WorkspaceContext context1, WorkspaceContext context2) {
+		int context1Level = getContextLevel(context1);
+		int context2Level = getContextLevel(context2);
+		
+		return (context2Level > context1Level) ? true : false;
+	}
+	
+	/**
+	 * Get the context level, relative to the root context.
+	 * Examples:
+	 * tko.komodo = 0
+	 * tko.komodo-tko.workspace = 1
+	 * tko.komodo-tko.workspace-MyVdb = 2
+	 * 
+	 * @param context the supplied context
+	 * @return the context level relative to the root.
+	 */
+	public static int getContextLevel(WorkspaceContext context) {
+		int contextLevel = 0;
+		
+		WorkspaceContext parent = context.getParent();
+		while(parent!=null) {
+			contextLevel++;
+			parent = parent.getParent();
+		}
+		
+		return contextLevel;
+	}
+	
+	/**
 	 * Get a context child (or parent) of the current context, based on provided segment name.  Returns null if a child of supplied name
 	 * does not exist.  The supplied segment can only represent a change of one level above or below the currentContext.
 	 * @param currentContext the current context

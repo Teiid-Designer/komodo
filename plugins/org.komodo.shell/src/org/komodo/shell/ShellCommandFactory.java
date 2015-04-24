@@ -74,7 +74,6 @@ public class ShellCommandFactory {
 	private static String CREATE_CMD_NAME = "create"; //$NON-NLS-1$ 
 	private static String LIST_CMD_NAME = "list"; //$NON-NLS-1$
 	private static String STATUS_CMD_NAME = "status"; //$NON-NLS-1$ 
-	private static String DELETE_CMD_NAME = "delete"; //$NON-NLS-1$ 
 	private static String RENAME_CMD_NAME = "rename"; //$NON-NLS-1$ 
 	private static String PROPERTY_CMD_NAME = "property"; //$NON-NLS-1$ 
 	private static String IMPORT_CMD_NAME = "import"; //$NON-NLS-1$
@@ -122,7 +121,7 @@ public class ShellCommandFactory {
 		CreateCommand createCommand = new CreateCommand(CREATE_CMD_NAME,this.wsStatus);
 		commandMap.put(createCommand.getName().toLowerCase(), createCommand);
 		
-		DeleteCommand deleteCommand = new DeleteCommand(DELETE_CMD_NAME,this.wsStatus);
+		DeleteCommand deleteCommand = new DeleteCommand(this.wsStatus);
 		commandMap.put(deleteCommand.getName().toLowerCase(), deleteCommand);
 
 		ImportCommand importCommand = new ImportCommand(IMPORT_CMD_NAME,this.wsStatus);
