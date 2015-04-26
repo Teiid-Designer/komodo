@@ -8,6 +8,7 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
@@ -61,6 +62,7 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( function, is( notNullValue() ) );
         assertThat( function.getName( null ), is( name ) );
         assertThat( this.model.getFunctions( null ).length, is( 1 ) );
+        assertThat( this.model.getChildren( null )[0], is( instanceOf( PushdownFunction.class ) ) );
     }
 
     @Test
@@ -69,6 +71,8 @@ public final class ModelImplTest extends RelationalModelTest {
         final ModelSource source = this.model.addSource( null, name );
         assertThat( source, is( notNullValue() ) );
         assertThat( source.getName( null ), is( name ) );
+        assertThat( this.model.getSources( null ).length, is( 1 ) );
+        assertThat( this.model.getChildren( null )[0], is( instanceOf( ModelSource.class ) ) );
     }
 
     @Test
@@ -78,6 +82,7 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( procedure, is( notNullValue() ) );
         assertThat( procedure.getName( null ), is( name ) );
         assertThat( this.model.getProcedures( null ).length, is( 1 ) );
+        assertThat( this.model.getChildren( null )[0], is( instanceOf( StoredProcedure.class ) ) );
     }
 
     @Test
@@ -86,6 +91,8 @@ public final class ModelImplTest extends RelationalModelTest {
         final Table table = this.model.addTable( null, name );
         assertThat( table, is( notNullValue() ) );
         assertThat( table.getName( null ), is( name ) );
+        assertThat( this.model.getTables( null ).length, is( 1 ) );
+        assertThat( this.model.getChildren( null )[0], is( instanceOf( Table.class ) ) );
     }
 
     @Test
@@ -95,6 +102,7 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( function, is( notNullValue() ) );
         assertThat( function.getName( null ), is( name ) );
         assertThat( this.model.getFunctions( null ).length, is( 1 ) );
+        assertThat( this.model.getChildren( null )[0], is( instanceOf( UserDefinedFunction.class ) ) );
     }
 
     @Test
@@ -103,6 +111,8 @@ public final class ModelImplTest extends RelationalModelTest {
         final View view = this.model.addView( null, name );
         assertThat( view, is( notNullValue() ) );
         assertThat( view.getName( null ), is( name ) );
+        assertThat( this.model.getViews( null ).length, is( 1 ) );
+        assertThat( this.model.getChildren( null )[0], is( instanceOf( View.class ) ) );
     }
 
     @Test
@@ -112,6 +122,7 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( procedure, is( notNullValue() ) );
         assertThat( procedure.getName( null ), is( name ) );
         assertThat( this.model.getProcedures( null ).length, is( 1 ) );
+        assertThat( this.model.getChildren( null )[0], is( instanceOf( VirtualProcedure.class ) ) );
     }
 
     @Test

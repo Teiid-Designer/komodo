@@ -9,8 +9,8 @@ package org.komodo.relational.model.internal;
 
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
@@ -27,7 +27,7 @@ import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 /**
  * An implementation of a relational model DDL statement option.
  */
-public final class StatementOptionImpl extends RelationalObjectImpl implements StatementOption {
+public final class StatementOptionImpl extends RelationalChildRestrictedObject implements StatementOption {
 
     /**
      * The resolver of a {@link StatementOption}.

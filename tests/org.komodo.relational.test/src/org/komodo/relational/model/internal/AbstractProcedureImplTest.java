@@ -8,6 +8,7 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import org.junit.Before;
@@ -43,6 +44,8 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
         final Parameter param = this.procedure.addParameter( null, name );
         assertThat( param, is( notNullValue() ) );
         assertThat( param.getName( null ), is( name ) );
+        assertThat( this.procedure.getChildren( null ).length, is( 1 ) );
+        assertThat( this.procedure.getChildren( null )[0], is( instanceOf( Parameter.class ) ) );
     }
 
     @Test
@@ -53,6 +56,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
         assertThat( statementOption, is( notNullValue() ) );
         assertThat( statementOption.getName( null ), is( name ) );
         assertThat( statementOption.getOption( null ), is( value ) );
+        assertThat( this.procedure.getChildren( null ).length, is( 0 ) );
     }
 
     @Test
@@ -176,6 +180,13 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveDefaultUpdateCountAfterConstruction() throws Exception {
         assertThat( this.procedure.getUpdateCount( null ), is( AbstractProcedure.DEFAULT_UPDATE_COUNT ) );
+    }
+
+    @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.procedure.setNameInSource( null, "elvis" );
+        this.procedure.setStatementOption( null, "sledge", "hammer" );
+        assertThat( this.procedure.getChildren( null ).length, is( 0 ) );
     }
 
     @Test

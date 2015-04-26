@@ -15,8 +15,8 @@ import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.Parameter;
@@ -36,7 +36,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
 /**
  * An implementation of a relational model procedure parameter.
  */
-public final class ParameterImpl extends RelationalObjectImpl implements Parameter {
+public final class ParameterImpl extends RelationalChildRestrictedObject implements Parameter {
 
     /*
 
@@ -295,9 +295,10 @@ public final class ParameterImpl extends RelationalObjectImpl implements Paramet
         }
 
         try {
+            final KomodoObject same = new ObjectImpl(getRepository(), getAbsolutePath(), getIndex());
             final List< StatementOption > result = new ArrayList< StatementOption >();
 
-            for (final KomodoObject kobject : getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION )) {
+            for (final KomodoObject kobject : same.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION )) {
                 final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
 
                 if (LOGGER.isDebugEnabled()) {

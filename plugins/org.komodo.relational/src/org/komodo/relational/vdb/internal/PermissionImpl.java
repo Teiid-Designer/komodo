@@ -297,8 +297,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         try {
             Condition[] result = null;
 
-            if (hasChild(transaction, VdbLexicon.DataRole.Permission.CONDITIONS)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.DataRole.Permission.CONDITIONS);
+            if (hasChild(transaction, VdbLexicon.DataRole.Permission.CONDITIONS, VdbLexicon.DataRole.Permission.CONDITIONS)) {
+                final KomodoObject grouping = getChild( transaction,
+                                                        VdbLexicon.DataRole.Permission.CONDITIONS,
+                                                        VdbLexicon.DataRole.Permission.CONDITIONS );
                 final List< Condition > temp = new ArrayList<>();
 
                 for (final KomodoObject kobject : grouping.getChildrenOfType(transaction,
@@ -351,8 +353,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         try {
             Mask[] result = null;
 
-            if (hasChild(transaction, VdbLexicon.DataRole.Permission.MASKS)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.DataRole.Permission.MASKS);
+            if (hasChild(transaction, VdbLexicon.DataRole.Permission.MASKS, VdbLexicon.DataRole.Permission.MASKS)) {
+                final KomodoObject grouping = getChild( transaction,
+                                                        VdbLexicon.DataRole.Permission.MASKS,
+                                                        VdbLexicon.DataRole.Permission.MASKS );
                 final List< Mask > temp = new ArrayList<>();
 
                 for (final KomodoObject kobject : grouping.getChildrenOfType(transaction,

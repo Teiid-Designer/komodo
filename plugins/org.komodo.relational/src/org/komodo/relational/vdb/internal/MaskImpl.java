@@ -10,7 +10,7 @@ package org.komodo.relational.vdb.internal;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
@@ -26,7 +26,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 /**
  * An implementation of a VDB permission mask.
  */
-public final class MaskImpl extends RelationalObjectImpl implements Mask {
+public final class MaskImpl extends RelationalChildRestrictedObject implements Mask {
 
     /**
      * The resolver of a {@link Mask}.

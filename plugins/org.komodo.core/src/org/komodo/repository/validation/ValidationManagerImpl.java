@@ -616,8 +616,8 @@ public class ValidationManagerImpl implements ValidationManager {
                     final String id = localizedMessage.getId();
                     KomodoObject message = null;
 
-                    if (messagesNode.hasChild( uow, id )) {
-                        message = messagesNode.getChild( uow, id );
+                    if (messagesNode.hasChild( uow, id, KomodoLexicon.Rule.LOCALIZED_MESSAGE )) {
+                        message = messagesNode.getChild( uow, id, KomodoLexicon.Rule.LOCALIZED_MESSAGE );
                     } else {
                         message = messagesNode.addChild( uow, id, KomodoLexicon.Rule.LOCALIZED_MESSAGE );
                     }

@@ -24,7 +24,7 @@ import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public class UniqueConstraintImplTest extends RelationalModelTest {
 
     private static final String NAME = "uniqueconstraint";
@@ -34,15 +34,20 @@ public class UniqueConstraintImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "table");
-        this.uniqueConstraint = RelationalModelFactory.createUniqueConstraint(null, _repo, this.table, NAME);
+        this.table = RelationalModelFactory.createTable( null, _repo, mock( Model.class ), "table" );
+        this.uniqueConstraint = RelationalModelFactory.createUniqueConstraint( null, _repo, this.table, NAME );
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.uniqueConstraint.isChildRestricted(), is( true ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotUniqueConstraint() {
         if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
             try {
-                new UniqueConstraintImpl(null, _repo, this.table.getAbsolutePath());
+                new UniqueConstraintImpl( null, _repo, this.table.getAbsolutePath() );
                 fail();
             } catch (final KException e) {
                 // expected
@@ -52,20 +57,25 @@ public class UniqueConstraintImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
-        assertThat(this.uniqueConstraint.getConstraintType(), is(TableConstraint.ConstraintType.UNIQUE));
-        assertThat(this.uniqueConstraint.getProperty(null, TeiidDdlLexicon.Constraint.TYPE).getStringValue(null),
-                   is(TableConstraint.ConstraintType.UNIQUE.toValue()));
+        assertThat( this.uniqueConstraint.getConstraintType(), is( TableConstraint.ConstraintType.UNIQUE ) );
+        assertThat( this.uniqueConstraint.getProperty( null, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( null ),
+                    is( TableConstraint.ConstraintType.UNIQUE.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat(this.uniqueConstraint.hasDescriptor(null, TeiidDdlLexicon.Constraint.TABLE_ELEMENT), is(true));
+        assertThat( this.uniqueConstraint.hasDescriptor( null, TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat(this.uniqueConstraint.getParent(null), is(instanceOf(Table.class)));
-        assertThat(this.uniqueConstraint.getTable(null), is(this.table));
+        assertThat( this.uniqueConstraint.getParent( null ), is( instanceOf( Table.class ) ) );
+        assertThat( this.uniqueConstraint.getTable( null ), is( this.table ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.uniqueConstraint.addChild( null, "blah", null );
     }
 
 }

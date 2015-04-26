@@ -779,23 +779,31 @@ public class RuleImpl extends ObjectImpl implements Rule {
             uow = getRepository().createTransaction( "getMessage", true, null ); //$NON-NLS-1$
             KomodoObject localizedText = null;
 
-            if (hasChild( uow, KomodoLexicon.Rule.MESSAGES )) {
-                final KomodoObject messages = getChild( uow, KomodoLexicon.Rule.MESSAGES );
+            if ( hasChild( uow, KomodoLexicon.Rule.MESSAGES ) ) {
+                final KomodoObject messages = getChild( uow,
+                                                        KomodoLexicon.Rule.MESSAGES,
+                                                        KomodoLexicon.Rule.LOCALIZED_MESSAGE_GROUPING );
 
-                if (messages.hasChild( uow, key )) {
-                    final KomodoObject message = messages.getChild( uow, key );
+                if ( messages.hasChild( uow, key, KomodoLexicon.Rule.LOCALIZED_MESSAGE ) ) {
+                    final KomodoObject message = messages.getChild( uow, key, KomodoLexicon.Rule.LOCALIZED_MESSAGE );
 
-                    if (message.hasChild( uow, getLocaleCode( true, true ) )) {
-                        localizedText = message.getChild( uow, getLocaleCode( true, true ) );
-                    } else if (message.hasChild( uow, getLocaleCode( true, false ) )) {
-                        localizedText = message.getChild( uow, getLocaleCode( true, false ) );
-                    } else if (message.hasChild( uow, getLocaleCode( false, false ) )) {
-                        localizedText = message.getChild( uow, getLocaleCode( false, false ) );
+                    if ( message.hasChild( uow, getLocaleCode( true, true ), KomodoLexicon.Rule.LOCALIZED_TEXT_TYPE ) ) {
+                        localizedText = message.getChild( uow,
+                                                          getLocaleCode( true, true ),
+                                                          KomodoLexicon.Rule.LOCALIZED_TEXT_TYPE );
+                    } else if ( message.hasChild( uow, getLocaleCode( true, false ), KomodoLexicon.Rule.LOCALIZED_TEXT_TYPE ) ) {
+                        localizedText = message.getChild( uow,
+                                                          getLocaleCode( true, false ),
+                                                          KomodoLexicon.Rule.LOCALIZED_TEXT_TYPE );
+                    } else if ( message.hasChild( uow, getLocaleCode( false, false ), KomodoLexicon.Rule.LOCALIZED_TEXT_TYPE ) ) {
+                        localizedText = message.getChild( uow,
+                                                          getLocaleCode( false, false ),
+                                                          KomodoLexicon.Rule.LOCALIZED_TEXT_TYPE );
                     }
                 }
             }
 
-            if (localizedText == null) {
+            if ( localizedText == null ) {
                 return Messages.getString( Messages.Validation.RULE_MESSAGE_NOT_FOUND, key, getAbsolutePath() );
             }
 

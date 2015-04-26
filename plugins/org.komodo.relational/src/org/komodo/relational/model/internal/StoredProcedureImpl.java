@@ -152,44 +152,6 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "storedprocedureimpl-getChildren", true, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            final KomodoObject[] superKids = super.getChildren( transaction );
-            final ProcedureResultSet resultSet = getResultSet( transaction );
-            KomodoObject[] result = null;
-
-            if (resultSet == null) {
-                result = superKids;
-            } else {
-                result = new KomodoObject[superKids.length + 1];
-                System.arraycopy( superKids, 0, result, 0, superKids.length );
-                result[superKids.length] = resultSet;
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.relational.model.OptionContainer#getCustomOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

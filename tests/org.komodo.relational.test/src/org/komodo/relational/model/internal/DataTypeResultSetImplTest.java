@@ -25,7 +25,7 @@ import org.komodo.spi.KException;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public class DataTypeResultSetImplTest extends RelationalModelTest {
 
     private StoredProcedure procedure;
@@ -35,6 +35,11 @@ public class DataTypeResultSetImplTest extends RelationalModelTest {
     public void init() throws Exception {
         this.procedure = RelationalModelFactory.createStoredProcedure( null, _repo, mock( Model.class ), "procedure" );
         this.resultSet = RelationalModelFactory.createDataTypeResultSet( null, _repo, this.procedure );
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.resultSet.isChildRestricted(), is( true ) );
     }
 
     @Test
@@ -52,15 +57,15 @@ public class DataTypeResultSetImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectDisplayString() throws Exception {
         // STRING
-        assertThat(this.resultSet.getDisplayString( null ), is("STRING"));
+        assertThat( this.resultSet.getDisplayString( null ), is( "STRING" ) );
 
         // STRING(50)
         this.resultSet.setLength( null, 50 );
-        assertThat(this.resultSet.getDisplayString( null ), is("STRING(50)"));
+        assertThat( this.resultSet.getDisplayString( null ), is( "STRING(50)" ) );
 
         // STRING(50)[]
         this.resultSet.setArray( null, true );
-        assertThat(this.resultSet.getDisplayString( null ), is("STRING(50)[]"));
+        assertThat( this.resultSet.getDisplayString( null ), is( "STRING(50)[]" ) );
     }
 
     @Test
@@ -77,6 +82,11 @@ public class DataTypeResultSetImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveDefaultTypeAfterConstruction() throws Exception {
         assertThat( this.resultSet.getType( null ), is( Type.DEFAULT_VALUE ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.resultSet.addChild( null, "blah", null );
     }
 
     @Test

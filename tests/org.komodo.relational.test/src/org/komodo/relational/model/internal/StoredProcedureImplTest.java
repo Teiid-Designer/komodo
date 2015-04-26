@@ -93,6 +93,13 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.procedure.setNativeQuery( null, "blah" );
+        this.procedure.setStatementOption( null, "sledge", "hammer" );
+        assertThat( this.procedure.getChildren( null ).length, is( 0 ) );
+    }
+
+    @Test
     public void shouldNotHaveResultSetAfterConstruction() throws Exception {
         assertThat( this.procedure.getResultSet( null ), is( nullValue() ) );
     }

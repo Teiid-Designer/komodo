@@ -10,7 +10,7 @@ package org.komodo.relational.vdb.internal;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.Permission;
@@ -26,7 +26,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 /**
  * An implementation of a VDB permission condition.
  */
-public final class ConditionImpl extends RelationalObjectImpl implements Condition {
+public final class ConditionImpl extends RelationalChildRestrictedObject implements Condition {
 
     /**
      * The resolver of a {@link Condition}.

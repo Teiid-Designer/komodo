@@ -24,7 +24,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class ConditionImplTest extends RelationalModelTest {
 
     private Condition condition;
@@ -34,21 +34,26 @@ public final class ConditionImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(ConditionImplTest.class.getSimpleName(), false, null);
+        final UnitOfWork transaction = _repo.createTransaction( ConditionImplTest.class.getSimpleName(), false, null );
 
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb");
-        this.dataRole = RelationalModelFactory.createDataRole(transaction, _repo, this.vdb, "dataRole");
-        this.permission = RelationalModelFactory.createPermission(transaction, _repo, this.dataRole, "permission");
-        this.condition = RelationalModelFactory.createCondition(transaction, _repo, this.permission, "condition");
+        this.vdb = RelationalModelFactory.createVdb( transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
+        this.dataRole = RelationalModelFactory.createDataRole( transaction, _repo, this.vdb, "dataRole" );
+        this.permission = RelationalModelFactory.createPermission( transaction, _repo, this.dataRole, "permission" );
+        this.condition = RelationalModelFactory.createCondition( transaction, _repo, this.permission, "condition" );
 
         transaction.commit();
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.condition.isChildRestricted(), is( true ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotCondition() {
         if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
             try {
-                new ConditionImpl(null, _repo, this.vdb.getAbsolutePath());
+                new ConditionImpl( null, _repo, this.vdb.getAbsolutePath() );
                 fail();
             } catch (final KException e) {
                 // expected
@@ -58,24 +63,29 @@ public final class ConditionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveConstraintDefaultValueAfterConstruction() throws Exception {
-        assertThat(this.condition.isConstraint(null), is(Condition.DEFAULT_CONSTRAINT));
+        assertThat( this.condition.isConstraint( null ), is( Condition.DEFAULT_CONSTRAINT ) );
     }
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat(this.condition.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Condition.CONDITION));
+        assertThat( this.condition.getPrimaryType( null ).getName(), is( VdbLexicon.DataRole.Permission.Condition.CONDITION ) );
     }
 
     @Test
     public void shouldHaveParentPermission() throws Exception {
-        assertThat(this.condition.getParent(null), is(instanceOf(Permission.class)));
+        assertThat( this.condition.getParent( null ), is( instanceOf( Permission.class ) ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.condition.addChild( null, "blah", null );
     }
 
     @Test
     public void shouldSetConstraintValue() throws Exception {
         final boolean newValue = !Condition.DEFAULT_CONSTRAINT;
-        this.condition.setConstraint(null, newValue);
-        assertThat(this.condition.isConstraint(null), is(newValue));
+        this.condition.setConstraint( null, newValue );
+        assertThat( this.condition.isConstraint( null ), is( newValue ) );
     }
 
 }

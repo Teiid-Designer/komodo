@@ -8,6 +8,7 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -23,7 +24,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public class TabularResultSetImplTest extends RelationalModelTest {
 
     private StoredProcedure procedure;
@@ -45,7 +46,7 @@ public class TabularResultSetImplTest extends RelationalModelTest {
         uow.commit();
         assertThat( this.resultSet.getColumns( null ).length, is( 1 ) );
         assertThat( resultSetColumn.getName( null ), is( resultSetColumnName ) );
-
+        assertThat( this.resultSet.getChildren( null )[0], is( instanceOf( ResultSetColumn.class ) ) );
     }
 
     @Test
@@ -58,6 +59,13 @@ public class TabularResultSetImplTest extends RelationalModelTest {
                 // expected
             }
         }
+    }
+
+    @Test
+    public void shouldObtainStrongTypedChildren() throws Exception {
+        this.resultSet.addColumn( null, "resultSetColumn" );
+        assertThat( this.resultSet.getChildren( null ).length, is( 1 ) );
+        assertThat( this.resultSet.getChildren( null )[0], is( instanceOf( ResultSetColumn.class ) ) );
     }
 
 }

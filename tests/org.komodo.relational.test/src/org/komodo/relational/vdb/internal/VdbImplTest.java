@@ -13,9 +13,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
 import java.util.Properties;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -122,6 +120,7 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat(added.getName(null), is(name));
         assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.Translator.TRANSLATOR));
         assertThat(added.getType(null), is(type));
+        assertThat(added, is(instanceOf(Translator.class)));
     }
 
     @Test

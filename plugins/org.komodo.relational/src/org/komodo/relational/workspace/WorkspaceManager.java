@@ -284,7 +284,7 @@ public class WorkspaceManager implements StringConstants {
         ArgCheck.isNotNull(type);
 
         RelationalProperties relProperties = new RelationalProperties();
-        if (properties != null) {
+        if ( ( properties != null ) && ( properties.length != 0 ) ) {
             for (RelationalProperty property : properties) {
                 relProperties.add(property);
             }

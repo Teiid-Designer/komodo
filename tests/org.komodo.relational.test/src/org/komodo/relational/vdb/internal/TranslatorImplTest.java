@@ -25,7 +25,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class TranslatorImplTest extends RelationalModelTest {
 
     private Translator translator;
@@ -33,19 +33,24 @@ public final class TranslatorImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(TranslatorImplTest.class.getSimpleName(), false, null);
+        final UnitOfWork transaction = _repo.createTransaction( TranslatorImplTest.class.getSimpleName(), false, null );
 
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb");
-        this.translator = RelationalModelFactory.createTranslator(transaction, _repo, this.vdb, "translator", "type");
+        this.vdb = RelationalModelFactory.createVdb( transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
+        this.translator = RelationalModelFactory.createTranslator( transaction, _repo, this.vdb, "translator", "type" );
 
         transaction.commit();
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.translator.isChildRestricted(), is( true ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotTranslator() {
         if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
             try {
-                new TranslatorImpl(null, _repo, this.vdb.getAbsolutePath());
+                new TranslatorImpl( null, _repo, this.vdb.getAbsolutePath() );
                 fail();
             } catch (final KException e) {
                 // expected
@@ -55,56 +60,61 @@ public final class TranslatorImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat(this.translator.getPrimaryType(null).getName(), is(VdbLexicon.Translator.TRANSLATOR));
+        assertThat( this.translator.getPrimaryType( null ).getName(), is( VdbLexicon.Translator.TRANSLATOR ) );
     }
 
     @Test
     public void shouldHaveParentVdb() throws Exception {
-        assertThat(this.translator.getParent(null), is(instanceOf(Vdb.class)));
+        assertThat( this.translator.getParent( null ), is( instanceOf( Vdb.class ) ) );
     }
 
     @Test
     public void shouldHaveTypeAfterConstruction() throws Exception {
-        assertThat(this.translator.getType(null), is(notNullValue()));
+        assertThat( this.translator.getType( null ), is( notNullValue() ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.translator.addChild( null, "blah", null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyType() throws Exception {
-        this.translator.setType(null, StringConstants.EMPTY_STRING);
+        this.translator.setType( null, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullType() throws Exception {
-        this.translator.setType(null, null);
+        this.translator.setType( null, null );
     }
 
     @Test
     public void shouldNotHaveDescriptionAfterConstruction() throws Exception {
-        assertThat(this.translator.getDescription(null), is(nullValue()));
+        assertThat( this.translator.getDescription( null ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetCustomProperty() throws Exception {
         final String propName = "custom";
         final String propValue = "value";
-        this.translator.setProperty(null, propName, propValue);
+        this.translator.setProperty( null, propName, propValue );
 
-        assertThat(this.translator.getProperty(null, propName), is(notNullValue()));
-        assertThat(this.translator.getProperty(null, propName).getStringValue(null), is(propValue));
+        assertThat( this.translator.getProperty( null, propName ), is( notNullValue() ) );
+        assertThat( this.translator.getProperty( null, propName ).getStringValue( null ), is( propValue ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String newValue = "newDescription";
-        this.translator.setDescription(null, newValue);
-        assertThat(this.translator.getDescription(null), is(newValue));
+        this.translator.setDescription( null, newValue );
+        assertThat( this.translator.getDescription( null ), is( newValue ) );
     }
 
     @Test
     public void shouldSetType() throws Exception {
         final String newValue = "newType";
-        this.translator.setType(null, newValue);
-        assertThat(this.translator.getType(null), is(newValue));
+        this.translator.setType( null, newValue );
+        assertThat( this.translator.getType( null ), is( newValue ) );
     }
 
 }

@@ -19,10 +19,12 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
+import org.modeshape.jcr.JcrNtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class ObjectImplTest extends AbstractLocalRepositoryTest {
@@ -104,11 +106,40 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
         this.kobject.getChild( null, null );
     }
 
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailToGetChildWithEmptyType() throws Exception {
+        final String name = "kid";
+        this.kobject.addChild( null, name, null );
+        this.kobject.getChild( null, name, StringConstants.EMPTY_STRING );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailToGetChildWithNullType() throws Exception {
+        final String name = "kid";
+        this.kobject.addChild( null, name, null );
+        this.kobject.getChild( null, name, null );
+    }
+
     @Test
     public void shouldGetChild() throws Exception {
         final String name = "kid";
         this.kobject.addChild( null, name, null );
         assertThat( this.kobject.getChild( null, name ), is( notNullValue() ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailToGetChildIfIncorrectType() throws Exception {
+        final String name = "kid";
+        this.kobject.addChild( null, name, null );
+        this.kobject.getChild( null, name, JcrNtLexicon.FOLDER.getString() );
+    }
+
+    @Test
+    public void shouldGetChildWithCorrectType() throws Exception {
+        final String name = "kid";
+        KomodoObject expected = this.kobject.addChild( null, name, null );
+        this.kobject.addChild( null, name, JcrNtLexicon.FOLDER.getString() );
+        assertThat( this.kobject.getChild( null, name, JcrNtLexicon.UNSTRUCTURED.getString() ), is( expected ) );
     }
 
     @Test

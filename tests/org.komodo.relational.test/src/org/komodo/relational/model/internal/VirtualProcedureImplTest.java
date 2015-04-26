@@ -27,25 +27,27 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class VirtualProcedureImplTest extends RelationalModelTest {
 
+    private static final String AS_ClAUSE = "BEGIN SELECT a,b FROM x; END";
+
     private VirtualProcedure procedure;
 
     @Before
     public void init() throws Exception {
         final Vdb vdb = RelationalModelFactory.createVdb( null, _repo, null, "vdb", "externalFilePath" );
         final Model model = RelationalModelFactory.createModel( null, _repo, vdb, "model" );
-        this.procedure = RelationalModelFactory.createVirtualProcedure( null, _repo, model, "procedure" );
+        this.procedure = RelationalModelFactory.createVirtualProcedure( null, _repo, model, "myProcedure" );
     }
 
     @Test
     public void shouldClearAsClauseWithEmptyString() throws Exception {
-        this.procedure.setAsClauseStatement( null, "asClause" );
+        this.procedure.setAsClauseStatement( null, AS_ClAUSE );
         this.procedure.setAsClauseStatement( null, StringConstants.EMPTY_STRING );
         assertThat( this.procedure.getAsClauseStatement( null ), is( nullValue() ) );
     }
 
     @Test
     public void shouldClearAsClauseWithNullString() throws Exception {
-        this.procedure.setAsClauseStatement( null, "asClause" );
+        this.procedure.setAsClauseStatement( null, AS_ClAUSE );
         this.procedure.setAsClauseStatement( null, null );
         assertThat( this.procedure.getAsClauseStatement( null ), is( nullValue() ) );
     }
@@ -68,6 +70,12 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.procedure.setStatementOption( null, "sledge", "hammer" );
+        assertThat( this.procedure.getChildren( null ).length, is( 0 ) );
+    }
+
+    @Test
     public void shouldNotHaveAsClauseStatementPropertyAfterConstruction() throws Exception {
         assertThat( this.procedure.getAsClauseStatement( null ), is( nullValue() ) );
         assertThat( this.procedure.hasProperty( null, TeiidDdlLexicon.CreateProcedure.STATEMENT ), is( false ) );
@@ -75,7 +83,7 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetAsClauseProperty() throws Exception {
-        final String value = "asclause";
+        final String value = AS_ClAUSE;
         this.procedure.setAsClauseStatement( null, value );
         assertThat( this.procedure.getAsClauseStatement( null ), is( value ) );
         assertThat( this.procedure.getProperty( null, TeiidDdlLexicon.CreateProcedure.STATEMENT ).getStringValue( null ),

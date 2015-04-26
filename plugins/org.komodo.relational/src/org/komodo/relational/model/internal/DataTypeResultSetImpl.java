@@ -11,7 +11,7 @@ import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.DataTypeResultSet;
@@ -29,7 +29,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
 /**
  * An implementation of a relational model procedure data type result set.
  */
-public final class DataTypeResultSetImpl extends RelationalObjectImpl implements DataTypeResultSet {
+public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject implements DataTypeResultSet {
 
     private static final String ARRAY_SUFFIX = "[]"; //$NON-NLS-1$
 

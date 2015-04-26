@@ -75,6 +75,13 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.function.setAggregate( null, true );
+        this.function.setStatementOption( null, "sledge", "hammer" );
+        assertThat( this.function.getChildren( null ).length, is( 0 ) );
+    }
+
+    @Test
     public void shouldNotHaveResultSetAfterConstruction() throws Exception {
         assertThat( this.function.getResultSet( null ), is( nullValue() ) );
     }

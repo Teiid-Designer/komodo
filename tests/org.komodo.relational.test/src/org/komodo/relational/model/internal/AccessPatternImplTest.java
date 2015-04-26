@@ -24,7 +24,7 @@ import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public class AccessPatternImplTest extends RelationalModelTest {
 
     private static final String NAME = "accesspattern";
@@ -34,15 +34,20 @@ public class AccessPatternImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "table");
-        this.accessPattern = RelationalModelFactory.createAccessPattern(null, _repo, this.table, NAME);
+        this.table = RelationalModelFactory.createTable( null, _repo, mock( Model.class ), "table" );
+        this.accessPattern = RelationalModelFactory.createAccessPattern( null, _repo, this.table, NAME );
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.accessPattern.isChildRestricted(), is( true ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotAccessPattern() {
         if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
             try {
-                new AccessPatternImpl(null, _repo, this.table.getAbsolutePath());
+                new AccessPatternImpl( null, _repo, this.table.getAbsolutePath() );
                 fail();
             } catch (final KException e) {
                 // expected
@@ -52,29 +57,34 @@ public class AccessPatternImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
-        assertThat(this.accessPattern.getConstraintType(), is(TableConstraint.ConstraintType.ACCESS_PATTERN));
-        assertThat(this.accessPattern.getProperty(null, TeiidDdlLexicon.Constraint.TYPE).getStringValue(null),
-                   is(TableConstraint.ConstraintType.ACCESS_PATTERN.toValue()));
+        assertThat( this.accessPattern.getConstraintType(), is( TableConstraint.ConstraintType.ACCESS_PATTERN ) );
+        assertThat( this.accessPattern.getProperty( null, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( null ),
+                    is( TableConstraint.ConstraintType.ACCESS_PATTERN.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat(this.accessPattern.hasDescriptor(null, TeiidDdlLexicon.Constraint.TABLE_ELEMENT), is(true));
+        assertThat( this.accessPattern.hasDescriptor( null, TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat(this.accessPattern.getName(null), is(NAME));
+        assertThat( this.accessPattern.getName( null ), is( NAME ) );
     }
 
     @Test
     public void shouldHaveParentTable() throws Exception {
-        assertThat(this.accessPattern.getParent(null), is(instanceOf(Table.class)));
+        assertThat( this.accessPattern.getParent( null ), is( instanceOf( Table.class ) ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat(this.accessPattern.getTable(null), is(this.table));
+        assertThat( this.accessPattern.getTable( null ), is( this.table ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.accessPattern.addChild( null, "blah", null );
     }
 
 }

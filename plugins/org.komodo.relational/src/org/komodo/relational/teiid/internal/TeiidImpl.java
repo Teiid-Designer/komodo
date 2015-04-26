@@ -24,14 +24,15 @@ package org.komodo.relational.teiid.internal;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -50,7 +51,7 @@ import org.teiid.runtime.client.instance.TCTeiidInstance;
 /**
  * Implementation of teiid instance model
  */
-public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManager {
+public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid, EventManager {
 
     /**
      * The resolver of a {@link Teiid}.
@@ -472,14 +473,33 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
-     * @return value of teiid id property
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return value of teiid id property (never empty)
      * @throws KException
      *         if error occurs
      */
     @Override
-    public String getId( UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, PropertyValueType.STRING, "getId", JcrLexicon.UUID.getString()); //$NON-NLS-1$
+    public String getId( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if ( uow == null ) {
+            transaction = getRepository().createTransaction( "teiidimpl-getId", true, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        try {
+            final Property prop = getRawProperty( transaction, JcrLexicon.UUID.getString() );
+            final String result = prop.getStringValue( transaction );
+
+            if ( uow == null ) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch ( final Exception e ) {
+            throw handleError( uow, transaction, e );
+        }
     }
 
     /**

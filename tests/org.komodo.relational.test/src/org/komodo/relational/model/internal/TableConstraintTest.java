@@ -22,7 +22,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class TableConstraintTest extends RelationalModelTest {
 
     private static final String NAME = "tableConstraint";
@@ -32,50 +32,60 @@ public final class TableConstraintTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "table");
-        this.constraint = RelationalModelFactory.createAccessPattern(null, _repo, this.table, NAME);
+        this.table = RelationalModelFactory.createTable( null, _repo, mock( Model.class ), "table" );
+        this.constraint = RelationalModelFactory.createAccessPattern( null, _repo, this.table, NAME );
     }
 
     @Test
     public void shouldAddColumn() throws Exception {
-        final Column column = RelationalModelFactory.createColumn(null, _repo, mock(Table.class), "column");
-        this.constraint.addColumn(null, column);
+        final Column column = RelationalModelFactory.createColumn( null, _repo, mock( Table.class ), "column" );
+        this.constraint.addColumn( null, column );
 
-        assertThat(this.constraint.hasProperty(null, TeiidDdlLexicon.Constraint.REFERENCES), is(true));
-        assertThat(this.constraint.getProperty(null, TeiidDdlLexicon.Constraint.REFERENCES).getValues(null).length, is(1));
-        assertThat(this.constraint.getColumns(null).length, is(1));
+        assertThat( this.constraint.hasProperty( null, TeiidDdlLexicon.Constraint.REFERENCES ), is( true ) );
+        assertThat( this.constraint.getProperty( null, TeiidDdlLexicon.Constraint.REFERENCES ).getValues( null ).length, is( 1 ) );
+        assertThat( this.constraint.getColumns( null ).length, is( 1 ) );
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.constraint.isChildRestricted(), is( true ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailWhenRemovingColumnThatWasNeverAdded() throws Exception {
+        final UnitOfWork transaction = _repo.createTransaction( "shouldFailWhenRemovingColumnThatWasNeverAdded", false, null );
+        final Column column = RelationalModelFactory.createColumn( transaction, _repo, mock( Table.class ), "column" );
+        this.constraint.removeColumn( transaction, column );
+        transaction.commit();
     }
 
     @Test
     public void shouldHaveTableAfterConstruction() throws Exception {
-        assertThat(this.constraint.getTable(null), is(this.table));
+        assertThat( this.constraint.getTable( null ), is( this.table ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.constraint.addChild( null, "blah", null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullColumn() throws Exception {
-        this.constraint.addColumn(null, null);
+        this.constraint.addColumn( null, null );
     }
 
     @Test
     public void shouldNotHaveColumnsAfterConstruction() throws Exception {
-        assertThat(this.constraint.getColumns(null).length, is(0));
+        assertThat( this.constraint.getColumns( null ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveColumn() throws Exception {
-        final Column column = RelationalModelFactory.createColumn(null, _repo, mock(Table.class), "column");
-        this.constraint.addColumn(null, column);
-        this.constraint.removeColumn(null, column);
+        final Column column = RelationalModelFactory.createColumn( null, _repo, mock( Table.class ), "column" );
+        this.constraint.addColumn( null, column );
+        this.constraint.removeColumn( null, column );
 
-        assertThat(this.constraint.hasProperty(null, TeiidDdlLexicon.Constraint.REFERENCES), is(false));
-    }
-
-    @Test(expected = KException.class)
-    public void shouldFailWhenRemovingColumnThatWasNeverAdded() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction("shouldFailWhenRemovingColumnThatWasNeverAdded", false, null);
-        final Column column = RelationalModelFactory.createColumn(transaction, _repo, mock(Table.class), "column");
-        this.constraint.removeColumn(transaction, column);
-        transaction.commit();
+        assertThat( this.constraint.hasProperty( null, TeiidDdlLexicon.Constraint.REFERENCES ), is( false ) );
     }
 
 }

@@ -230,7 +230,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
@@ -389,8 +389,10 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
         try {
             Permission[] result = null;
 
-            if (hasChild(transaction, VdbLexicon.DataRole.PERMISSIONS)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.DataRole.PERMISSIONS);
+            if (hasChild(transaction, VdbLexicon.DataRole.PERMISSIONS, VdbLexicon.DataRole.PERMISSIONS)) {
+                final KomodoObject grouping = getChild( transaction,
+                                                        VdbLexicon.DataRole.PERMISSIONS,
+                                                        VdbLexicon.DataRole.PERMISSIONS );
                 final List< Permission > temp = new ArrayList<>();
 
                 for (final KomodoObject kobject : grouping.getChildrenOfType(transaction,
@@ -462,6 +464,11 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
         return getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAnyAuthenticated", VdbLexicon.DataRole.GRANT_ALL); //$NON-NLS-1$
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.vdb.DataRole#removeMappedRole(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
     @Override
     public String[] removeMappedRole( final UnitOfWork uow,
                                       final String roleNameToRemove ) throws KException {

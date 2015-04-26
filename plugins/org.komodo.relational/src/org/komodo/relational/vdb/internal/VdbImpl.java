@@ -588,8 +588,8 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         try {
             DataRole[] result = null;
 
-            if (hasChild(transaction, VdbLexicon.Vdb.DATA_ROLES)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.DATA_ROLES);
+            if (hasChild(transaction, VdbLexicon.Vdb.DATA_ROLES, VdbLexicon.Vdb.DATA_ROLES)) {
+                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.DATA_ROLES, VdbLexicon.Vdb.DATA_ROLES);
                 final List< DataRole > temp = new ArrayList<>();
 
                 for (final KomodoObject kobject : grouping.getChildrenOfType(transaction, VdbLexicon.DataRole.DATA_ROLE)) {
@@ -651,8 +651,8 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         try {
             Entry[] result = null;
 
-            if (hasChild(transaction, VdbLexicon.Vdb.ENTRIES)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.ENTRIES);
+            if (hasChild(transaction, VdbLexicon.Vdb.ENTRIES, VdbLexicon.Vdb.ENTRIES)) {
+                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.ENTRIES, VdbLexicon.Vdb.ENTRIES);
                 final List< Entry > temp = new ArrayList<>();
 
                 for (final KomodoObject kobject : grouping.getChildrenOfType(transaction, VdbLexicon.Entry.ENTRY)) {
@@ -704,8 +704,8 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         try {
             VdbImport[] result = null;
 
-            if (hasChild(transaction, VdbLexicon.Vdb.IMPORT_VDBS)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.IMPORT_VDBS);
+            if (hasChild(transaction, VdbLexicon.Vdb.IMPORT_VDBS, VdbLexicon.Vdb.IMPORT_VDBS)) {
+                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.IMPORT_VDBS, VdbLexicon.Vdb.IMPORT_VDBS);
                 final List< VdbImport > temp = new ArrayList<>();
 
                 for (final KomodoObject kobject : grouping.getChildrenOfType(transaction, VdbLexicon.ImportVdb.IMPORT_VDB)) {
@@ -815,8 +815,8 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         try {
             Translator[] result = null;
 
-            if (hasChild(transaction, VdbLexicon.Vdb.TRANSLATORS)) {
-                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.TRANSLATORS);
+            if (hasChild(transaction, VdbLexicon.Vdb.TRANSLATORS, VdbLexicon.Vdb.TRANSLATORS)) {
+                final KomodoObject grouping = getChild(transaction, VdbLexicon.Vdb.TRANSLATORS, VdbLexicon.Vdb.TRANSLATORS);
                 final List< Translator > temp = new ArrayList<>();
 
                 for (final KomodoObject kobject : grouping.getChildrenOfType(transaction, VdbLexicon.Translator.TRANSLATOR)) {

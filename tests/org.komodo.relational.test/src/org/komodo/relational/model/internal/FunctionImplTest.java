@@ -30,6 +30,13 @@ public final class FunctionImplTest extends RelationalModelTest {
         this.function = RelationalModelFactory.createPushdownFunction(null, _repo, mock(Model.class), NAME);
     }
 
+    @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.function.setAnalytic( null, true );
+        this.function.setStatementOption( null, "sledge", "hammer" );
+        assertThat( this.function.getChildren( null ).length, is( 0 ) );
+    }
+
     /////////////////////////////////////////////////
     // AGGREGATE Option tests
     /////////////////////////////////////////////////

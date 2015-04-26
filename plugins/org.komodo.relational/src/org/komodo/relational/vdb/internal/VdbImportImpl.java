@@ -10,7 +10,7 @@ package org.komodo.relational.vdb.internal;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
@@ -26,7 +26,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 /**
  * An implementation of a referenced VDB.
  */
-public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
+public class VdbImportImpl extends RelationalChildRestrictedObject implements VdbImport {
 
     /**
      * The resolver of a {@link VdbImport}.

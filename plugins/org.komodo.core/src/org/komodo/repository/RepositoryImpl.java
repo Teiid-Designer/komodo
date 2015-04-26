@@ -674,7 +674,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         // Transaction has to be committable (hence the 'false') since is it possible that
         // komodoWorkspace() below actually creates the workspace if it doesn't already exist
         //
-        UnitOfWork transaction = verifyTransaction(uow, "get", false); //$NON-NLS-1$
+        UnitOfWork transaction = verifyTransaction(uow, "getFromWorkspace", true); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("get: transaction = {0}, path = {1}", transaction.getName(), path); //$NON-NLS-1$

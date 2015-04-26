@@ -65,6 +65,17 @@ public class Messages implements StringConstants {
 
         ARTIFACT_DOES_NOT_EXIST_ERROR,
         ARTIFACT_EXISTS_ERROR,
+
+        /**
+         * Indicates a child with a given name cannot be found.
+         */
+        CHILD_NOT_FOUND,
+
+        /**
+         * Indicates a node type or mixin with a given name cannot be found.
+         */
+        DESCRIPTOR_NOT_FOUND,
+
         DUPLICATE_OBJECT_ERROR,
         ERROR_ADDING_ARTIFACT,
         ERROR_SESSION_IS_CLOSED,

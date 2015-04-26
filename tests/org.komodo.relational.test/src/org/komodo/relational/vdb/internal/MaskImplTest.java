@@ -25,7 +25,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class MaskImplTest extends RelationalModelTest {
 
     private DataRole dataRole;
@@ -35,21 +35,26 @@ public final class MaskImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(MaskImplTest.class.getSimpleName(), false, null);
+        final UnitOfWork transaction = _repo.createTransaction( MaskImplTest.class.getSimpleName(), false, null );
 
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb");
-        this.dataRole = RelationalModelFactory.createDataRole(transaction, _repo, this.vdb, "dataRole");
-        this.permission = RelationalModelFactory.createPermission(transaction, _repo, this.dataRole, "permission");
-        this.mask = RelationalModelFactory.createMask(transaction, _repo, this.permission, "mask");
+        this.vdb = RelationalModelFactory.createVdb( transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
+        this.dataRole = RelationalModelFactory.createDataRole( transaction, _repo, this.vdb, "dataRole" );
+        this.permission = RelationalModelFactory.createPermission( transaction, _repo, this.dataRole, "permission" );
+        this.mask = RelationalModelFactory.createMask( transaction, _repo, this.permission, "mask" );
 
         transaction.commit();
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.mask.isChildRestricted(), is( true ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotMask() {
         if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
             try {
-                new MaskImpl(null, _repo, this.vdb.getAbsolutePath());
+                new MaskImpl( null, _repo, this.vdb.getAbsolutePath() );
                 fail();
             } catch (final KException e) {
                 // expected
@@ -59,24 +64,29 @@ public final class MaskImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat(this.mask.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Mask.MASK));
+        assertThat( this.mask.getPrimaryType( null ).getName(), is( VdbLexicon.DataRole.Permission.Mask.MASK ) );
     }
 
     @Test
     public void shouldHaveParentPermission() throws Exception {
-        assertThat(this.mask.getParent(null), is(instanceOf(Permission.class)));
+        assertThat( this.mask.getParent( null ), is( instanceOf( Permission.class ) ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.mask.addChild( null, "blah", null );
     }
 
     @Test
     public void shouldNotHaveOrderAfterConstruction() throws Exception {
-        assertThat(this.mask.getOrder(null), is(nullValue()));
+        assertThat( this.mask.getOrder( null ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetOrder() throws Exception {
         final String newValue = "newOrder";
-        this.mask.setOrder(null, newValue);
-        assertThat(this.mask.getOrder(null), is(newValue));
+        this.mask.setOrder( null, newValue );
+        assertThat( this.mask.getOrder( null ), is( newValue ) );
     }
 
 }

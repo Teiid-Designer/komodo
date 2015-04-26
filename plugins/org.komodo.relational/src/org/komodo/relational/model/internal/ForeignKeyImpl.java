@@ -158,7 +158,7 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
 
         try {
             final Property property = getProperty(transaction, Constraint.TABLE_REFERENCE_REFERENCES);
-            final String columnId = newReferencesColumn.getProperty(transaction, JcrLexicon.UUID.getString()).getStringValue(transaction);
+            final String columnId = newReferencesColumn.getRawProperty( transaction, JcrLexicon.UUID.getString() ).getStringValue( transaction );
 
             if (property == null) {
                 newValue = new String[1];
@@ -317,7 +317,7 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
         assert (removeReferencesColumn != null);
 
         try {
-            final String columnId = removeReferencesColumn.getProperty(transaction, JcrLexicon.UUID.getString()).getStringValue(transaction);
+            final String columnId = removeReferencesColumn.getRawProperty( transaction, JcrLexicon.UUID.getString() ).getStringValue( transaction );
             final Column[] current = getReferencesColumns(transaction);
 
             if (current.length == 0) {
@@ -379,7 +379,7 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
             String tableId = null;
 
             if (newReferencesTable != null) {
-                tableId = newReferencesTable.getProperty(transaction, JcrLexicon.UUID.getString()).getStringValue(transaction);
+                tableId = newReferencesTable.getRawProperty( transaction, JcrLexicon.UUID.getString() ).getStringValue( transaction );
             }
 
             setProperty(transaction, Constraint.TABLE_REFERENCE, tableId);

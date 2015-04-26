@@ -9,7 +9,7 @@ package org.komodo.relational.model.internal;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
@@ -26,7 +26,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
 /**
  * A base implementation of a relational model table constraint.
  */
-abstract class TableConstraintImpl extends RelationalObjectImpl implements TableConstraint {
+abstract class TableConstraintImpl extends RelationalChildRestrictedObject implements TableConstraint {
 
     protected TableConstraintImpl( final UnitOfWork uow,
                                    final Repository repository,
@@ -61,7 +61,7 @@ abstract class TableConstraintImpl extends RelationalObjectImpl implements Table
         try {
             String[] newRefs = null;
             final Property property = getProperty(transaction, Constraint.REFERENCES);
-            final String columnId = columnToAdd.getProperty(transaction, JcrLexicon.UUID.getString()).getStringValue(transaction);
+            final String columnId = columnToAdd.getRawProperty( transaction, JcrLexicon.UUID.getString() ).getStringValue( transaction );
 
             if (property == null) {
                 newRefs = new String[] {columnId};
@@ -81,27 +81,6 @@ abstract class TableConstraintImpl extends RelationalObjectImpl implements Table
         } catch (final Exception e) {
             handleError(uow, transaction, e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public KomodoObject[] getChildren( final UnitOfWork uow ) {
-        return KomodoObject.EMPTY_ARRAY; // table constraints do not have children
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.repository.ObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
-                                             final String type ) {
-        return KomodoObject.EMPTY_ARRAY; // table constraints do not have children
     }
 
     /**
@@ -218,7 +197,7 @@ abstract class TableConstraintImpl extends RelationalObjectImpl implements Table
         assert (columnToRemove != null);
 
         try {
-            final String columnId = columnToRemove.getProperty(transaction, JcrLexicon.UUID.getString()).getStringValue(transaction);
+            final String columnId = columnToRemove.getRawProperty( transaction, JcrLexicon.UUID.getString() ).getStringValue( transaction );
             final Column[] current = getColumns(transaction);
 
             if (current.length == 0) {

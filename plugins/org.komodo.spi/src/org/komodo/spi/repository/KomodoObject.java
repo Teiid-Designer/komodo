@@ -61,6 +61,8 @@ public interface KomodoObject extends KNode {
                         final String... descriptorNames ) throws KException;
 
     /**
+     * Obtains the first child with the specified name regardless of the type.
+     *
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @param name
@@ -73,11 +75,33 @@ public interface KomodoObject extends KNode {
                            final String name ) throws KException;
 
     /**
+     * Obtains the first child with the specified name having the specified primary type or mixin. If the type name is empty, the
+     * first child found regardless of type is returned.
+     *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param name
+     *        the name of child being requested (cannot be empty)
+     * @param typeName
+     *        the primary type or mixin (cannot be empty)
+     * @return the child object (never <code>null</code>)
+     * @throws KException
+     *         if the child does not exist or an error occurs
+     * @see #getChild(UnitOfWork, String)
+     */
+    KomodoObject getChild( final UnitOfWork transaction,
+                           final String name,
+                           final String typeName ) throws KException;
+
+    /**
+     * Subclasses may choose to implement this so that it may not represent that actual, physical children.
+     *
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return the child objects (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
+     * @see #getRawChildren(UnitOfWork)
      */
     KomodoObject[] getChildren( final UnitOfWork transaction ) throws KException;
 
@@ -104,6 +128,18 @@ public interface KomodoObject extends KNode {
      */
     KomodoObject[] getChildrenOfType( final UnitOfWork transaction,
                                       final String type ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param typeName
+     *        the name of the primary type or mixin whose descriptor is being requested (cannot be empty)
+     * @return the type descriptor (never <code>null</code>)
+     * @throws KException
+     *         if descriptor is not found or an error occurs
+     */
+    Descriptor getDescriptor( final UnitOfWork transaction,
+                              final String typeName ) throws KException;
 
     /**
      * @param transaction
@@ -141,13 +177,55 @@ public interface KomodoObject extends KNode {
                           final String name ) throws KException;
 
     /**
+     * Subclasses may choose to implement this so that it may not represent that actual, physical property names.
+     *
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @return the property names for this object
      * @throws KException
      *         if an error occurs
+     * @see #getRawPropertyNames(UnitOfWork)
      */
     String[] getPropertyNames( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * Subclasses may implement {@link #getChildren(UnitOfWork)} in such a way that it does not represent the actual set of child
+     * nodes. This method obtains the actual child nodes.
+     *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the child objects (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    KomodoObject[] getRawChildren( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * Obtains a property even if it has been filtered out by the subclasses.
+     *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param name
+     *        the name of property being requested (cannot be empty)
+     * @return the property or <code>null</code> if the property doesn't exist
+     * @throws KException
+     *         if an error occurs
+     */
+    Property getRawProperty( final UnitOfWork transaction,
+                             final String name ) throws KException;
+
+    /**
+     * Subclasses may implement {@link #getPropertyNames(UnitOfWork)} in such a way that it does not represent the actual set of
+     * properties. This method obtains the actual, physical set of property names.
+     *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the property names for this object
+     * @throws KException
+     *         if an error occurs
+     * @see #getPropertyNames(UnitOfWork)
+     */
+    String[] getRawPropertyNames( final UnitOfWork transaction ) throws KException;
 
     /**
      * @return a unique identifier for the object class
@@ -155,6 +233,8 @@ public interface KomodoObject extends KNode {
     int getTypeId();
 
     /**
+     * Indicates if a child exists with the specified name, regardless of the type.
+     *
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @param name
@@ -165,6 +245,23 @@ public interface KomodoObject extends KNode {
      */
     boolean hasChild( final UnitOfWork transaction,
                       final String name ) throws KException;
+
+    /**
+     * Indicates if a child exists with the specified name and the specified primary type or mixin.
+     *
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @param name
+     *        the name of the child whose existence is being checked (cannot be empty)
+     * @param typeName
+     *        the primary type or mixin (cannot be empty)
+     * @return <code>true</code> if a child with the supplied name and type exists
+     * @throws KException
+     *         if an error occurs
+     */
+    boolean hasChild( final UnitOfWork transaction,
+                      final String name,
+                      final String typeName ) throws KException;
 
     /**
      * @param transaction
@@ -207,6 +304,13 @@ public interface KomodoObject extends KNode {
      */
     boolean hasProperty( final UnitOfWork transaction,
                          final String name ) throws KException;
+
+    /**
+     * The implementing class is responsible for enforcing this restriction.
+     *
+     * @return <code>true</code> if children are not permitted
+     */
+    boolean isChildRestricted();
 
     /**
      * Prints this object's subtree to standard out

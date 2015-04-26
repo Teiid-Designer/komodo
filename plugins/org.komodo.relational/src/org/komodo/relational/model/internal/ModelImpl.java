@@ -418,7 +418,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
@@ -430,70 +430,35 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
         assert ( transaction != null );
 
+        // sources are found under a grouping node
         try {
-            final Function[] functions = getFunctions( transaction );
-            final Procedure[] procedures = getProcedures( transaction );
-            final Table[] tables = getTables( transaction );
-            final View[] views = getViews( transaction );
-            final ModelSource[] sources = getSources( transaction );
-            final KomodoObject[] result = new KomodoObject[functions.length + procedures.length + tables.length + views.length
-                                                           + sources.length];
+            KomodoObject[] kids = super.getChildren( transaction );
+            KomodoObject[] result = null;
 
-            int start = 0;
-            System.arraycopy( functions, 0, result, start, functions.length );
+            if (kids.length == 0) {
+                result = kids;
+            } else {
+                final List< KomodoObject > temp = new ArrayList<>();
+                boolean foundGroup = false;
 
-            start = functions.length;
-            System.arraycopy( procedures, 0, result, start, procedures.length );
+                for (final KomodoObject kid : kids) {
+                    // found sources grouping node so remove grouping node and add in sources
+                    if (VdbLexicon.Vdb.SOURCES.equals( kid.getName( transaction ) )) {
+                        foundGroup = true;
 
-            start += procedures.length;
-            System.arraycopy( tables, 0, result, start, tables.length );
+                        for (final KomodoObject source : getSources( transaction )) {
+                            temp.add( source );
+                        }
+                    } else {
+                        temp.add( kid );
+                    }
+                }
 
-            start += tables.length;
-            System.arraycopy( views, 0, result, start, views.length );
-
-            start += views.length;
-            System.arraycopy( sources, 0, result, start, sources.length );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
-                                             final String type ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "modelimpl-getChildrenOfType", true, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            KomodoObject[] result = KomodoObject.EMPTY_ARRAY;
-
-            if (CreateProcedure.FUNCTION_STATEMENT.equals( type )) {
-                result = getFunctions( transaction );
-            } else if (CreateProcedure.PROCEDURE_STATEMENT.equals( type )) {
-                result = getProcedures( transaction );
-            } else if (CreateTable.TABLE_STATEMENT.equals( type )) {
-                result = getTables( transaction );
-            } else if (CreateTable.VIEW_STATEMENT.equals( type )) {
-                result = getViews( transaction );
-            } else if (VdbLexicon.Source.SOURCE.equals( type )) {
-                result = getSources( transaction );
+                if (foundGroup) {
+                    result = temp.toArray( new KomodoObject[ temp.size() ] );
+                } else {
+                    result = kids;
+                }
             }
 
             if (uow == null) {
@@ -678,8 +643,8 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         try {
             ModelSource[] result = null;
 
-            if (hasChild( transaction, VdbLexicon.Vdb.SOURCES )) {
-                final KomodoObject grouping = getChild( transaction, VdbLexicon.Vdb.SOURCES );
+            if (hasChild( transaction, VdbLexicon.Vdb.SOURCES, VdbLexicon.Vdb.SOURCES )) {
+                final KomodoObject grouping = getChild( transaction, VdbLexicon.Vdb.SOURCES, VdbLexicon.Vdb.SOURCES );
                 final List< ModelSource > temp = new ArrayList<>();
 
                 for (final KomodoObject kobject : grouping.getChildrenOfType( transaction, VdbLexicon.Source.SOURCE )) {

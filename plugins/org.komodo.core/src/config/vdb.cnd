@@ -35,6 +35,7 @@
  - vdb:preview (boolean) = 'false' autocreated
  - vdb:connectionType (string)
  - vdb:originalFile (string) mandatory
+ + * (vdb:abstractModel) copy
  + vdb:translators (vdb:translators) copy
  + vdb:dataRoles (vdb:dataRoles) copy
  + vdb:entries (vdb:entries) copy

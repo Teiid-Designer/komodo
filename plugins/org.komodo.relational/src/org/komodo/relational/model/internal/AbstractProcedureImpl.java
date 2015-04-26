@@ -23,9 +23,9 @@ import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -121,7 +121,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
@@ -134,7 +134,25 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         assert ( transaction != null );
 
         try {
-            final KomodoObject[] result = getParameters( transaction );
+            KomodoObject[] result = null;
+            final KomodoObject[] kids = super.getChildren( transaction );
+
+            // do not include statement options
+            if (kids.length == 0) {
+                result = kids;
+            } else {
+                final List< KomodoObject > temp = new ArrayList<>();
+
+                for (final KomodoObject kid : kids) {
+                    if (kid.hasDescriptor( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION )) {
+                        continue;
+                    }
+
+                    temp.add( kid );
+                }
+
+                result = temp.toArray( new KomodoObject[ temp.size() ] );
+            }
 
             if (uow == null) {
                 transaction.commit();

@@ -15,8 +15,8 @@ import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StatementOption;
@@ -36,7 +36,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
 /**
  * An implementation of a relational model tabular result set column.
  */
-public final class ResultSetColumnImpl extends RelationalObjectImpl implements ResultSetColumn {
+public final class ResultSetColumnImpl extends RelationalChildRestrictedObject implements ResultSetColumn {
 
     private enum StandardOptions {
 
@@ -324,9 +324,10 @@ public final class ResultSetColumnImpl extends RelationalObjectImpl implements R
         }
 
         try {
+            final KomodoObject same = new ObjectImpl(getRepository(), getAbsolutePath(), getIndex());
             final List< StatementOption > result = new ArrayList< StatementOption >();
 
-            for (final KomodoObject kobject : getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION )) {
+            for (final KomodoObject kobject : same.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION )) {
                 final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
 
                 if (LOGGER.isDebugEnabled()) {

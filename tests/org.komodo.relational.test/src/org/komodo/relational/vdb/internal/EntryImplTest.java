@@ -25,7 +25,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class EntryImplTest extends RelationalModelTest {
 
     private Entry entry;
@@ -33,19 +33,24 @@ public final class EntryImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(EntryImplTest.class.getSimpleName(), false, null);
+        final UnitOfWork transaction = _repo.createTransaction( EntryImplTest.class.getSimpleName(), false, null );
 
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb");
-        this.entry = RelationalModelFactory.createEntry(transaction, _repo, this.vdb, "entry", "path");
+        this.vdb = RelationalModelFactory.createVdb( transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
+        this.entry = RelationalModelFactory.createEntry( transaction, _repo, this.vdb, "entry", "path" );
 
         transaction.commit();
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.entry.isChildRestricted(), is( true ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotEntry() {
         if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
             try {
-                new EntryImpl(null, _repo, this.vdb.getAbsolutePath());
+                new EntryImpl( null, _repo, this.vdb.getAbsolutePath() );
                 fail();
             } catch (final KException e) {
                 // expected
@@ -55,46 +60,51 @@ public final class EntryImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat(this.entry.getPrimaryType(null).getName(), is(VdbLexicon.Entry.ENTRY));
+        assertThat( this.entry.getPrimaryType( null ).getName(), is( VdbLexicon.Entry.ENTRY ) );
     }
 
     @Test
     public void shouldHaveParentVdb() throws Exception {
-        assertThat(this.entry.getParent(null), is(instanceOf(Vdb.class)));
+        assertThat( this.entry.getParent( null ), is( instanceOf( Vdb.class ) ) );
     }
 
     @Test
     public void shouldHavePathAfterConstruction() throws Exception {
-        assertThat(this.entry.getPath(null), is(notNullValue()));
+        assertThat( this.entry.getPath( null ), is( notNullValue() ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.entry.addChild( null, "blah", null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyPPath() throws Exception {
-        this.entry.setPath(null, StringConstants.EMPTY_STRING);
+        this.entry.setPath( null, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullPath() throws Exception {
-        this.entry.setPath(null, null);
+        this.entry.setPath( null, null );
     }
 
     @Test
     public void shouldNotHaveDescriptionAfterConstruction() throws Exception {
-        assertThat(this.entry.getDescription(null), is(nullValue()));
+        assertThat( this.entry.getDescription( null ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String newValue = "newDescription";
-        this.entry.setDescription(null, newValue);
-        assertThat(this.entry.getDescription(null), is(newValue));
+        this.entry.setDescription( null, newValue );
+        assertThat( this.entry.getDescription( null ), is( newValue ) );
     }
 
     @Test
     public void shouldSetPath() throws Exception {
         final String newValue = "newPath";
-        this.entry.setPath(null, newValue);
-        assertThat(this.entry.getPath(null), is(newValue));
+        this.entry.setPath( null, newValue );
+        assertThat( this.entry.getPath( null ), is( newValue ) );
     }
 
 }

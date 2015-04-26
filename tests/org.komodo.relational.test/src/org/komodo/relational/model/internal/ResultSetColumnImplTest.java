@@ -29,7 +29,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     private static final String NAME = "column";
@@ -72,6 +72,11 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
         this.column.setNameInSource( null, "blah" );
         this.column.setNameInSource( null, null );
         assertThat( this.column.getNameInSource( null ), is( nullValue() ) );
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.column.isChildRestricted(), is( true ) );
     }
 
     @Test
@@ -137,6 +142,18 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     public void shouldHaveParentResultSet() throws Exception {
         assertThat( this.column.getParent( null ), is( instanceOf( TabularResultSet.class ) ) );
         assertThat( this.column.getParent( null ), is( ( KomodoObject )this.resultSet ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.column.addChild( null, "blah", null );
+    }
+
+    @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.column.setUuid( null, "elvis" );
+        this.column.setStatementOption( null, "sledge", "hammer" );
+        assertThat( this.column.getChildren( null ).length, is( 0 ) );
     }
 
     @Test

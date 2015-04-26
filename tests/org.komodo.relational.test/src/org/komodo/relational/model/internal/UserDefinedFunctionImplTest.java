@@ -114,6 +114,13 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.function.setCategory( null, "blah" );
+        this.function.setStatementOption( null, "sledge", "hammer" );
+        assertThat( this.function.getChildren( null ).length, is( 0 ) );
+    }
+
+    @Test
     public void shouldSetJavaClass() throws Exception {
         final String value = "javaClass";
         this.function.setJavaClass(null, value);
