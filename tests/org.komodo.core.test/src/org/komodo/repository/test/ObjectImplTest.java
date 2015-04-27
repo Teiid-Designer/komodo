@@ -10,12 +10,18 @@ package org.komodo.repository.test;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -121,6 +127,66 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
         obj.remove( null );
         assertThat( _repo.getFromWorkspace( null, NAME ), is( nullValue() ) );
         assertThat( _repo.komodoWorkspace( null ).getChildren( null ).length, is( 0 ) );
+    }
+
+    @Test
+    @Ignore("Mapping issue MODE-2463 - a remove then a re-add cannot be conducted in the same transaction")
+    public void testRemoveThenAdd() throws Exception {
+        String name = "testNode";
+
+        UnitOfWork transaction1 = _repo.createTransaction("create-node-to-remove", false, null);
+        KomodoObject wkspNode = _repo.komodoWorkspace(transaction1);
+        assertNotNull(wkspNode);
+        KomodoObject testNode = wkspNode.addChild(transaction1, name, null);
+        assertNotNull(testNode);
+        String testNodePath = testNode.getAbsolutePath();
+        transaction1.commit();
+
+        UnitOfWork transaction2 = _repo.createTransaction("node-removal", false, null);
+        wkspNode = _repo.komodoWorkspace(transaction2);
+        assertNotNull(wkspNode);
+        testNode = _repo.getFromWorkspace(transaction2, testNodePath);
+        assertNotNull(testNode);
+
+        testNode.remove(transaction2);
+        assertFalse(wkspNode.hasChild(transaction2, name));
+
+        testNode = _repo.getFromWorkspace(transaction2, testNodePath);
+        assertNull(testNode); 
+
+        KomodoObject newTestNode = wkspNode.addChild(transaction2, name, null);
+
+        /*
+         * ISSUE #1
+         *
+         * This will fail with:
+         * testNodePath = /{kworkspace}/testNode
+         * testNode.getPath() = /{kworkspace}/testNode[2]
+         */
+        assertEquals(testNodePath, newTestNode.getAbsolutePath());        // Uncomment to view failure
+
+        /*
+         * ISSUE #2
+         *
+         * The path of newTestNode is alledgedly /{kworkspace}/testNode[2] so should
+         * be able to find it from session2, except it fails
+         */
+        assertNotNull(_repo.getFromWorkspace(transaction2, testNodePath + "[2]")); //$NON-NLS-1$
+
+        /*
+         * ISSUE #3
+         *
+         * Despite newTestNode claiming its path is /{kworkspace}/testNode[2], transaction2
+         * cannot find it so where is newTestNode?
+         *
+         * Turns out that its been added to /{kworkspace}/testNode which is the correct
+         * path but not what is being reported by newTestNode.getPath()
+         *
+         * Conclusion: bug in node.getPath(), returning incorrect absolute path
+         */
+        KomodoObject kObject = _repo.getFromWorkspace(transaction2, testNodePath);
+        assertEquals("Node path should equal " + testNodePath, testNodePath, kObject.getAbsolutePath()); //$NON-NLS-1$
+        assertEquals(newTestNode.getAbsolutePath(), kObject.getAbsolutePath());
     }
 
     @Test
