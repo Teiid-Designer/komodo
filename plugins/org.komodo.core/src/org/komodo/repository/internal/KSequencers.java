@@ -120,51 +120,63 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         return this.identifier;
     }
 
-    private boolean isVdbSequenceable(Property property) throws RepositoryException {
-        if (! property.getName().equals(JcrConstants.JCR_DATA))
-            return false;
+    private boolean isVdbSequenceable(Property property) {
+        try {
+            if (! property.getName().equals(JcrConstants.JCR_DATA))
+                return false;
 
-        Node node = property.getParent();
-        if (! node.getName().equals(JcrConstants.JCR_CONTENT))
-            return false;
+            Node node = property.getParent();
+            if (! node.getName().equals(JcrConstants.JCR_CONTENT))
+                return false;
 
-        Node parentNode = node.getParent();
-        if (parentNode == null ||
-                ! (parentNode.getPrimaryNodeType().getName().equals(VdbLexicon.Vdb.VIRTUAL_DATABASE)))
+            Node parentNode = node.getParent();
+            if (parentNode == null ||
+                    ! (parentNode.getPrimaryNodeType().getName().equals(VdbLexicon.Vdb.VIRTUAL_DATABASE)))
+                return false;
+        } catch (RepositoryException ex) {
             return false;
+        }
 
         return true;
     }
 
-    private boolean isDdlSequenceable(Property property) throws RepositoryException {
-        String propertyName = property.getName();
-        Node node = property.getParent();
-        List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
+    private boolean isDdlSequenceable(Property property) {
+        try {
+            String propertyName = property.getName();
+            Node node = property.getParent();
+            List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
 
-        if (propertyName.equals(VdbLexicon.Model.MODEL_DEFINITION) &&
-                nodeTypeNames.contains(VdbLexicon.Vdb.DECLARATIVE_MODEL))
-            return true;
+            if (propertyName.equals(VdbLexicon.Model.MODEL_DEFINITION) &&
+                    nodeTypeNames.contains(VdbLexicon.Vdb.DECLARATIVE_MODEL))
+                return true;
 
-        if (propertyName.equals(KomodoLexicon.Schema.RENDITION) &&
-                nodeTypeNames.contains(KomodoLexicon.Schema.NODE_TYPE))
-            return true;
-
+            if (propertyName.equals(KomodoLexicon.Schema.RENDITION) &&
+                    nodeTypeNames.contains(KomodoLexicon.Schema.NODE_TYPE))
+                return true;
+        } catch (RepositoryException ex) {
+            // Not required to be logged since false is returned anyway
+        }
+        
         return false;
     }
 
-    private boolean isTsqlSequenceable(Property property) throws RepositoryException {
-        String propertyName = property.getName();
-        Node node = property.getParent();
-        List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
+    private boolean isTsqlSequenceable(Property property) {
+        try {
+            String propertyName = property.getName();
+            Node node = property.getParent();
+            List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
 
-        if (propertyName.equals(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION) &&
-                (   nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT) ||
-                    nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.VIEW_STATEMENT)))
-            return true;
+            if (propertyName.equals(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION) &&
+                    (   nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT) ||
+                        nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.VIEW_STATEMENT)))
+                return true;
 
-        if (propertyName.equals(TeiidDdlLexicon.CreateProcedure.STATEMENT) &&
-                nodeTypeNames.contains(TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT))
-            return true;
+            if (propertyName.equals(TeiidDdlLexicon.CreateProcedure.STATEMENT) &&
+                    nodeTypeNames.contains(TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT))
+                return true;
+        } catch (RepositoryException ex) {
+            // Not required to be logged since false is returned anyway
+        }
 
         return false;
     }
@@ -173,7 +185,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
      * @param property
      * @return if the property is sequenceable then return the sequencer type, otherwise null
      */
-    private SequencerType isSequenceable(Property property) throws Exception {
+    private SequencerType isSequenceable(Property property) {
         if (isVdbSequenceable(property))
             return SequencerType.VDB;
 
