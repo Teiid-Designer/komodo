@@ -1155,7 +1155,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "vdbimpl-rename: transaction = {0}, old path = {1}, new name = {1}", //$NON-NLS-1$
+            LOGGER.debug( "vdbimpl-rename: transaction = {0}, old path = {1}, new name = {2}", //$NON-NLS-1$
                           transaction.getName(),
                           getAbsolutePath(),
                           newName );
