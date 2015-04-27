@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vdb name="BooksExampleTranslatorOverride" version="1">
+    <description>Sample vdb containing only a tranlator override element</description>
+    <translator name="books_db2" type="db2" description="">
+        <property name="requiresCriteria" value="true"/>
+        <property name="supportsCommonTableExpressions" value="false"/>
+        <property name="MaxDependentInPredicates" value="25"/>
+    </translator>
+ 
+</vdb>
