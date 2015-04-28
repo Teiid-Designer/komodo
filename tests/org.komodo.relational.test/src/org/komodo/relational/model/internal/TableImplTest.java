@@ -25,6 +25,7 @@ import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.PrimaryKey;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
@@ -458,6 +459,13 @@ public final class TableImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.table.getPropertyNames( null );
+        final String[] rawProps = this.table.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveParentModel() throws Exception {
         assertThat( this.table.getParent( null ), is( instanceOf( Model.class ) ) );
         assertThat( this.table.getParent( null ), is( ( KomodoObject )this.model ) );
@@ -467,6 +475,18 @@ public final class TableImplTest extends RelationalModelTest {
     public void shouldHaveSchemaElementTypePropertyDefaultValueAfterConstruction() throws Exception {
         assertThat( this.table.getSchemaElementType( null ), is( SchemaElementType.DEFAULT_VALUE ) );
         assertThat( this.table.hasProperty( null, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.table.getPropertyNames( null );
+        final Filter[] filters = this.table.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

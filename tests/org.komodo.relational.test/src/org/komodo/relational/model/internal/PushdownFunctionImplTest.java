@@ -22,6 +22,7 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.PushdownFunction;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.spi.KException;
@@ -72,6 +73,25 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
         assertThat( this.function.getSchemaElementType( null ), is( SchemaElementType.FOREIGN ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.function.getPropertyNames( null );
+        final String[] rawProps = this.function.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.function.getPropertyNames( null );
+        final Filter[] filters = this.function.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

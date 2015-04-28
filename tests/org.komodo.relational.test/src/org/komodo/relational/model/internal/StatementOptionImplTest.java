@@ -17,6 +17,7 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.OptionContainer;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -61,6 +62,13 @@ public final class StatementOptionImplTest extends RelationalModelTest {
         assertThat( this.option.getName( null ), is( NAME ) );
     }
 
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.option.getPropertyNames( null );
+        final String[] rawProps = this.option.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
         this.option.addChild( null, "blah", null );
@@ -74,6 +82,18 @@ public final class StatementOptionImplTest extends RelationalModelTest {
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowNullOptionValueProperty() throws Exception {
         this.option.setOption( null, null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.option.getPropertyNames( null );
+        final Filter[] filters = this.option.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

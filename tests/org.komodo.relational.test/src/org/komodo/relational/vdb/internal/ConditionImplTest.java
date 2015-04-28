@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
@@ -72,6 +73,13 @@ public final class ConditionImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.condition.getPropertyNames( null );
+        final String[] rawProps = this.condition.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveParentPermission() throws Exception {
         assertThat( this.condition.getParent( null ), is( instanceOf( Permission.class ) ) );
     }
@@ -79,6 +87,18 @@ public final class ConditionImplTest extends RelationalModelTest {
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
         this.condition.addChild( null, "blah", null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.condition.getPropertyNames( null );
+        final Filter[] filters = this.condition.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

@@ -23,6 +23,7 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
@@ -97,6 +98,13 @@ public class ForeignKeyImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.foreignKey.getPropertyNames( null );
+        final String[] rawProps = this.foreignKey.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
         assertThat( this.foreignKey.getParent( null ), is( instanceOf( Table.class ) ) );
         assertThat( this.foreignKey.getTable( null ), is( this.parentTable ) );
@@ -115,6 +123,18 @@ public class ForeignKeyImplTest extends RelationalModelTest {
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowNullTableReference() throws Exception {
         this.foreignKey.setReferencesTable( null, null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.foreignKey.getPropertyNames( null );
+        final Filter[] filters = this.foreignKey.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

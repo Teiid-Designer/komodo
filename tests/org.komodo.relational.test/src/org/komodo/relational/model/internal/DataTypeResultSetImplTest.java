@@ -20,6 +20,7 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.DataTypeResultSet.Type;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.spi.KException;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -84,6 +85,13 @@ public class DataTypeResultSetImplTest extends RelationalModelTest {
         assertThat( this.resultSet.getType( null ), is( Type.DEFAULT_VALUE ) );
     }
 
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.resultSet.getPropertyNames( null );
+        final String[] rawProps = this.resultSet.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
         this.resultSet.addChild( null, "blah", null );
@@ -92,6 +100,18 @@ public class DataTypeResultSetImplTest extends RelationalModelTest {
     @Test
     public void shouldNotBeAnArrayAfterConstruction() throws Exception {
         assertThat( this.resultSet.isArray( null ), is( false ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.resultSet.getPropertyNames( null );
+        final Filter[] filters = this.resultSet.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

@@ -23,28 +23,39 @@ import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class AbstractProcedureImplTest extends RelationalModelTest {
 
     private AbstractProcedure procedure;
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( null, _repo, null, "vdb", "externalFilePath" );
-        final Model model = RelationalModelFactory.createModel( null, _repo, vdb, "model" );
-        this.procedure = RelationalModelFactory.createVirtualProcedure( null, _repo, model, "procedure" );
+        final UnitOfWork uow = createWriteTransaction();
+
+        final Vdb vdb = RelationalModelFactory.createVdb( uow, _repo, null, "vdb", "externalFilePath" );
+        final Model model = RelationalModelFactory.createModel( uow, _repo, vdb, "model" );
+        this.procedure = RelationalModelFactory.createVirtualProcedure( uow, _repo, model, "procedure" );
+
+        commit( uow );
     }
 
     @Test
     public void shouldAddParameter() throws Exception {
         final String name = "param";
-        final Parameter param = this.procedure.addParameter( null, name );
-        assertThat( param, is( notNullValue() ) );
-        assertThat( param.getName( null ), is( name ) );
+
+        { // setup
+            final UnitOfWork uow = createWriteTransaction();
+            this.procedure.addParameter( uow, name );
+            commit( uow );
+        }
+
+        // tests
         assertThat( this.procedure.getChildren( null ).length, is( 1 ) );
+        assertThat( this.procedure.getChildren( null )[0].getName( null ), is( name ) );
         assertThat( this.procedure.getChildren( null )[0], is( instanceOf( Parameter.class ) ) );
     }
 
@@ -158,7 +169,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
     public void shouldGetParameters() throws Exception {
         final int numParams = 5;
 
-        for (int i = 0; i < numParams; ++i) {
+        for ( int i = 0; i < numParams; ++i ) {
             this.procedure.addParameter( null, "param" + i );
         }
 
@@ -170,7 +181,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
     public void shouldGetStatementOptions() throws Exception {
         final int numStatementOptions = 5;
 
-        for (int i = 0; i < numStatementOptions; ++i) {
+        for ( int i = 0; i < numStatementOptions; ++i ) {
             this.procedure.setStatementOption( null, "statementoption" + i, "statementvalue" + i );
         }
 

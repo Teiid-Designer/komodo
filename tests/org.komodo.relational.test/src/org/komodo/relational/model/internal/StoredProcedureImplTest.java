@@ -20,6 +20,7 @@ import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
@@ -90,6 +91,25 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveDefaultNonPreparedAfterConstruction() throws Exception {
         assertThat( this.procedure.isNonPrepared( null ), is( StoredProcedure.DEFAULT_NON_PREPARED ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.procedure.getPropertyNames( null );
+        final String[] rawProps = this.procedure.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.procedure.getPropertyNames( null );
+        final Filter[] filters = this.procedure.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

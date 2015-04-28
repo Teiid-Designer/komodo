@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
@@ -68,6 +69,13 @@ public final class MaskImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.mask.getPropertyNames( null );
+        final String[] rawProps = this.mask.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveParentPermission() throws Exception {
         assertThat( this.mask.getParent( null ), is( instanceOf( Permission.class ) ) );
     }
@@ -75,6 +83,18 @@ public final class MaskImplTest extends RelationalModelTest {
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
         this.mask.addChild( null, "blah", null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.mask.getPropertyNames( null );
+        final Filter[] filters = this.mask.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

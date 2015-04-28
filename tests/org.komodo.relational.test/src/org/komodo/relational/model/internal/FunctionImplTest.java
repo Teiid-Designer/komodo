@@ -17,6 +17,7 @@ import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Function.Determinism;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class FunctionImplTest extends RelationalModelTest {
@@ -28,6 +29,25 @@ public final class FunctionImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         this.function = RelationalModelFactory.createPushdownFunction(null, _repo, mock(Model.class), NAME);
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.function.getPropertyNames( null );
+        final String[] rawProps = this.function.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.function.getPropertyNames( null );
+        final Filter[] filters = this.function.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

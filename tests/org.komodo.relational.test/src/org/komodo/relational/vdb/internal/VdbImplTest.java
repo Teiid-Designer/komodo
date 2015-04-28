@@ -20,6 +20,7 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Translator;
@@ -243,6 +244,13 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.vdb.getPropertyNames( null );
+        final String[] rawProps = this.vdb.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveStrongTypedChildren() throws Exception {
         this.vdb.addDataRole(null, "dataRole");
         this.vdb.addEntry(null, "entry", "path");
@@ -313,6 +321,18 @@ public final class VdbImplTest extends RelationalModelTest {
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullOriginalFilePath() throws Exception {
         this.vdb.setOriginalFilePath(null, null);
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.vdb.getPropertyNames( null );
+        final Filter[] filters = this.vdb.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

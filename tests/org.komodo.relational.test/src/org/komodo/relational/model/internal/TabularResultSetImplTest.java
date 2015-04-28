@@ -17,6 +17,7 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
@@ -57,6 +58,25 @@ public class TabularResultSetImplTest extends RelationalModelTest {
                 fail();
             } catch (final KException e) {
                 // expected
+            }
+        }
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.resultSet.getPropertyNames( null );
+        final String[] rawProps = this.resultSet.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.resultSet.getPropertyNames( null );
+        final Filter[] filters = this.resultSet.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
             }
         }
     }

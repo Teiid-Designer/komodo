@@ -18,6 +18,7 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
 import org.komodo.relational.vdb.Vdb;
@@ -75,9 +76,28 @@ public class ViewImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.view.getPropertyNames( null );
+        final String[] rawProps = this.view.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveParentModel() throws Exception {
         assertThat(this.view.getParent(null), is(instanceOf(Model.class)));
         assertThat(this.view.getParent(null), is((KomodoObject)this.model));
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.view.getPropertyNames( null );
+        final Filter[] filters = this.view.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
 }

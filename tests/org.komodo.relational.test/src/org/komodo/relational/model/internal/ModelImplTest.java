@@ -22,6 +22,7 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.model.PushdownFunction;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UserDefinedFunction;
@@ -363,6 +364,13 @@ public final class ModelImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.model.getPropertyNames( null );
+        final String[] rawProps = this.model.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveStrongTypeChildren() throws Exception {
         this.model.addUserDefinedFunction( null, "udf" );
         this.model.addPushdownFunction( null, "pushdownFunction" );
@@ -438,6 +446,18 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( foundUdf, is( true ) );
         assertThat( foundView, is( true ) );
         assertThat( foundVirtualProcedure, is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.model.getPropertyNames( null );
+        final Filter[] filters = this.model.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

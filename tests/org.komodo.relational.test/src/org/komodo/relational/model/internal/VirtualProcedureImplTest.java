@@ -17,6 +17,7 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.relational.vdb.Vdb;
@@ -67,6 +68,25 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
         assertThat( this.procedure.getSchemaElementType( null ), is( SchemaElementType.VIRTUAL ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.procedure.getPropertyNames( null );
+        final String[] rawProps = this.procedure.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.procedure.getPropertyNames( null );
+        final Filter[] filters = this.procedure.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

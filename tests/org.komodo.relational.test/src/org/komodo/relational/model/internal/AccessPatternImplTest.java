@@ -19,6 +19,7 @@ import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
@@ -73,6 +74,13 @@ public class AccessPatternImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.accessPattern.getPropertyNames( null );
+        final String[] rawProps = this.accessPattern.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveParentTable() throws Exception {
         assertThat( this.accessPattern.getParent( null ), is( instanceOf( Table.class ) ) );
     }
@@ -85,6 +93,18 @@ public class AccessPatternImplTest extends RelationalModelTest {
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
         this.accessPattern.addChild( null, "blah", null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.accessPattern.getPropertyNames( null );
+        final Filter[] filters = this.accessPattern.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
 }

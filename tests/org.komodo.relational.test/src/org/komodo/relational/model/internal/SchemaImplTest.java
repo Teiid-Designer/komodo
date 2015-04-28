@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
@@ -130,6 +131,25 @@ public class SchemaImplTest extends RelationalModelTest {
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(false));
         assertEquals(DDL_VIEW, fragment);
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.schema.getPropertyNames( null );
+        final String[] rawProps = this.schema.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.schema.getPropertyNames( null );
+        final Filter[] filters = this.schema.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
 }

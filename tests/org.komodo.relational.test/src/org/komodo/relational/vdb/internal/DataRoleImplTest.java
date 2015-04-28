@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
@@ -99,6 +100,13 @@ public final class DataRoleImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.dataRole.getPropertyNames( null );
+        final String[] rawProps = this.dataRole.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveParentVdb() throws Exception {
         assertThat(this.dataRole.getParent(null), is(instanceOf(Vdb.class)));
     }
@@ -128,6 +136,18 @@ public final class DataRoleImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldNotBeAbleToAddNullPermission() throws Exception {
         this.dataRole.addPermission(null, null);
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.dataRole.getPropertyNames( null );
+        final Filter[] filters = this.dataRole.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

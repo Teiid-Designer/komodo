@@ -745,14 +745,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         assert (transaction != null);
 
         try {
-            final Node node = node(transaction);
-            final NodeType[] nodeTypes = node.getMixinNodeTypes();
-            final Descriptor[] result = new Descriptor[nodeTypes.length];
-            int i = 0;
-
-            for (final NodeType nodeType : nodeTypes) {
-                result[i++] = new DescriptorImpl(this.repository, nodeType.getName());
-            }
+            final Descriptor[] result = getRawDescriptors( transaction );
 
             if (uow == null) {
                 transaction.commit();
@@ -1019,6 +1012,41 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             return result;
         } catch (final Exception e) {
             throw handleError(uow, transaction, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getRawDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public final Descriptor[] getRawDescriptors( final UnitOfWork uow ) throws KException {
+        UnitOfWork transaction = uow;
+
+        if ( transaction == null ) {
+            transaction = getRepository().createTransaction( "objectimpl-getRawDescriptors", true, null ); //$NON-NLS-1$
+        }
+
+        assert ( transaction != null );
+
+        try {
+            final Node node = node( transaction );
+            final NodeType[] nodeTypes = node.getMixinNodeTypes();
+            final Descriptor[] result = new Descriptor[ nodeTypes.length ];
+            int i = 0;
+
+            for ( final NodeType nodeType : nodeTypes ) {
+                result[i++] = new DescriptorImpl( this.repository, nodeType.getName() );
+            }
+
+            if ( uow == null ) {
+                transaction.commit();
+            }
+
+            return result;
+        } catch ( final Exception e ) {
+            throw handleError( uow, transaction, e );
         }
     }
 

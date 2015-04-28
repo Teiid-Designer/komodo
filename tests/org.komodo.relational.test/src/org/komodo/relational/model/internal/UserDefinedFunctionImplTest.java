@@ -18,6 +18,7 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.spi.KException;
@@ -48,6 +49,25 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
         assertThat( this.function.getSchemaElementType( null ), is( SchemaElementType.VIRTUAL ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.function.getPropertyNames( null );
+        final String[] rawProps = this.function.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.function.getPropertyNames( null );
+        final Filter[] filters = this.function.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     /////////////////////////////////////////////////

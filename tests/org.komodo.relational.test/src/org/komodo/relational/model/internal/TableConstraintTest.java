@@ -16,6 +16,7 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
@@ -60,6 +61,13 @@ public final class TableConstraintTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.constraint.getPropertyNames( null );
+        final String[] rawProps = this.constraint.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveTableAfterConstruction() throws Exception {
         assertThat( this.constraint.getTable( null ), is( this.table ) );
     }
@@ -72,6 +80,18 @@ public final class TableConstraintTest extends RelationalModelTest {
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullColumn() throws Exception {
         this.constraint.addColumn( null, null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.constraint.getPropertyNames( null );
+        final Filter[] filters = this.constraint.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

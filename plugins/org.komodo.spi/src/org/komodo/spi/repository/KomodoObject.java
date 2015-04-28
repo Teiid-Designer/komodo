@@ -194,11 +194,20 @@ public interface KomodoObject extends KNode {
      *
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the child objects (never <code>null</code> but can be empty)
+     * @return the unfiltered child objects (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
     KomodoObject[] getRawChildren( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     * @return the unfiltered object's mixin type descriptors (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Descriptor[] getRawDescriptors( final UnitOfWork transaction ) throws KException;
 
     /**
      * Obtains a property even if it has been filtered out by the subclasses.
@@ -206,7 +215,7 @@ public interface KomodoObject extends KNode {
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
      * @param name
-     *        the name of property being requested (cannot be empty)
+     *        the name of property, filtered or unfiltered, being requested (cannot be empty)
      * @return the property or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if an error occurs
@@ -220,7 +229,7 @@ public interface KomodoObject extends KNode {
      *
      * @param transaction
      *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the property names for this object
+     * @return the unfiltered property names for this object
      * @throws KException
      *         if an error occurs
      * @see #getPropertyNames(UnitOfWork)

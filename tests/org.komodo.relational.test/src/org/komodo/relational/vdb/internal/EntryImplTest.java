@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
@@ -64,6 +65,13 @@ public final class EntryImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.entry.getPropertyNames( null );
+        final String[] rawProps = this.entry.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveParentVdb() throws Exception {
         assertThat( this.entry.getParent( null ), is( instanceOf( Vdb.class ) ) );
     }
@@ -86,6 +94,18 @@ public final class EntryImplTest extends RelationalModelTest {
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullPath() throws Exception {
         this.entry.setPath( null, null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.entry.getPropertyNames( null );
+        final Filter[] filters = this.entry.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

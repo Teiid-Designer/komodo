@@ -148,6 +148,25 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     }
 
     @Test
+    public void shouldGetNamedDescriptor() throws Exception {
+        final String descriptorName = "mix:referenceable";
+        this.kobject.addDescriptor( null, descriptorName );
+        this.kobject.addDescriptor( null, "mix:lockable" );
+        assertThat( this.kobject.getDescriptors( null ).length, is( 2 ) );
+        assertThat( this.kobject.getDescriptor( null, descriptorName ).getName(), is( descriptorName ) );
+    }
+
+    @Test
+    public void shouldHaveSameNumberRawDescriptorsAsDescriptors() throws Exception {
+        assertThat( this.kobject.getDescriptors( null ).length, is( this.kobject.getRawDescriptors( null ).length ) );
+    }
+
+    @Test
+    public void shouldHaveSameNumberRawPropertiesAsProperties() throws Exception {
+        assertThat( this.kobject.getPropertyNames( null ).length, is( this.kobject.getRawPropertyNames( null ).length ) );
+    }
+
+    @Test
     public void shouldHaveUnknownTypeIdentifier() throws Exception {
         assertThat( this.kobject.getTypeIdentifier( null ), is( KomodoType.UNKNOWN ) );
     }

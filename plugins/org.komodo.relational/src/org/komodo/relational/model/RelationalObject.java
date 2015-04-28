@@ -45,17 +45,17 @@ public interface RelationalObject extends KomodoObject {
     /**
      * A filter to exclude JCR-namespaced properties and type descriptors.
      */
-    Filter JCR_FILTER = new ExcludeNamespaceFilter( JcrLexicon.Namespace.PREFIX, JcrLexicon.Namespace.PREFIX );
+    Filter JCR_FILTER = new ExcludeNamespaceFilter( JcrLexicon.Namespace.PREFIX, JcrLexicon.Namespace.URI );
 
     /**
      * A filter to exclude MIX-namespaced properties and type descriptors.
      */
-    Filter MIX_FILTER = new ExcludeNamespaceFilter( JcrMixLexicon.Namespace.PREFIX, JcrMixLexicon.Namespace.PREFIX );
+    Filter MIX_FILTER = new ExcludeNamespaceFilter( JcrMixLexicon.Namespace.PREFIX, JcrMixLexicon.Namespace.URI );
 
     /**
      * A filter to exclude MODE-namespaced properties and type descriptors.
      */
-    Filter MODE_FILTER = new ExcludeNamespaceFilter( ModeShapeLexicon.Namespace.PREFIX, ModeShapeLexicon.Namespace.PREFIX );
+    Filter MODE_FILTER = new ExcludeNamespaceFilter( ModeShapeLexicon.Namespace.PREFIX, ModeShapeLexicon.Namespace.URI );
 
     /**
      * An empty collection of filters.
@@ -65,7 +65,7 @@ public interface RelationalObject extends KomodoObject {
     /**
      * A filter to exclude NT-namespaced properties and type descriptors.
      */
-    Filter NT_FILTER = new ExcludeNamespaceFilter( JcrNtLexicon.Namespace.PREFIX, JcrNtLexicon.Namespace.PREFIX );
+    Filter NT_FILTER = new ExcludeNamespaceFilter( JcrNtLexicon.Namespace.PREFIX, JcrNtLexicon.Namespace.URI );
 
     /**
      * The default set of filters for restricting which properties and descriptors apply to relational objects.

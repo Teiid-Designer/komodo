@@ -23,6 +23,7 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Column.Searchable;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -232,6 +233,13 @@ public final class ColumnImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.column.getPropertyNames( null );
+        final String[] rawProps = this.column.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveNullablePropertyDefaultValueAfterConstruction() throws Exception {
         assertThat( this.column.hasProperty( null, StandardDdlLexicon.NULLABLE ), is( true ) );
         assertThat( this.column.getNullable( null ), is( RelationalConstants.Nullable.DEFAULT_VALUE ) );
@@ -248,6 +256,18 @@ public final class ColumnImplTest extends RelationalModelTest {
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
         this.column.addChild( null, "blah", null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.column.getPropertyNames( null );
+        final Filter[] filters = this.column.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test

@@ -19,6 +19,7 @@ import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.PrimaryKey;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
@@ -73,6 +74,13 @@ public class PrimaryKeyImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.primaryKey.getPropertyNames( null );
+        final String[] rawProps = this.primaryKey.getRawPropertyNames( null );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
         assertThat( this.primaryKey.getParent( null ), is( instanceOf( Table.class ) ) );
         assertThat( this.primaryKey.getTable( null ), is( this.table ) );
@@ -81,6 +89,18 @@ public class PrimaryKeyImplTest extends RelationalModelTest {
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
         this.primaryKey.addChild( null, "blah", null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.primaryKey.getPropertyNames( null );
+        final Filter[] filters = this.primaryKey.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
 }
