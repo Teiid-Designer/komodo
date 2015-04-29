@@ -24,7 +24,10 @@ package org.komodo.shell.api;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.constants.StringConstants;
@@ -40,12 +43,22 @@ public interface WorkspaceStatus extends StringConstants {
     String ROOT_TYPE = FORWARD_SLASH;
 
     @SuppressWarnings("javadoc")
-	String RECORDING_FILE_KEY = "RECORDING_FILE"; //$NON-NLS-1$
+	public static final String RECORDING_FILE_KEY = "RECORDING_FILE"; //$NON-NLS-1$
     @SuppressWarnings("javadoc")
-	String IMPORT_DEFAULT_DIR_KEY = "IMPORT_DEFAULT_DIR"; //$NON-NLS-1$
+	public static final String IMPORT_DEFAULT_DIR_KEY = "IMPORT_DEFAULT_DIR"; //$NON-NLS-1$
     @SuppressWarnings("javadoc")
-	String EXPORT_DEFAULT_DIR_KEY = "EXPORT_DEFAULT_DIR"; //$NON-NLS-1$
+	public static final String EXPORT_DEFAULT_DIR_KEY = "EXPORT_DEFAULT_DIR"; //$NON-NLS-1$
+    @SuppressWarnings("javadoc")
+    public static final List<String> GLOBAL_PROP_KEYS = 
+    		Arrays.asList(RECORDING_FILE_KEY, IMPORT_DEFAULT_DIR_KEY, EXPORT_DEFAULT_DIR_KEY);    
     
+	/**
+	 * Sets the specified global property value
+	 * @param propKey the property key
+	 * @param propValue the property value
+	 */
+	void setProperty(String propKey, String propValue);
+	
 	/**
 	 * Sets global workspace properties on startup
 	 * @param props the properties
@@ -95,12 +108,6 @@ public interface WorkspaceStatus extends StringConstants {
 	 */
 	File getRecordingOutputFile();
 	
-	/**
-	 * Set the Recording output file
-	 * @param recordingOutputFilePath the recording output file path
-	 */
-	void setRecordingOutputFile(String recordingOutputFilePath);
-
 	/**
      * @return current teiid model
      */

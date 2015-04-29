@@ -1,0 +1,2 @@
+# Tests the Set Record command
+set record ON

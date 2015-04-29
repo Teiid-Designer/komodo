@@ -1,0 +1,6 @@
+# Tests the Set Property command without optional context path
+create Model MyModel
+create Table MyTable ./MyModel
+cd MyModel/MyTable
+#
+set Property ddl:length 99

@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.api.KomodoShell;
@@ -37,6 +38,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.utils.StringUtils;
 
 /**
  * Test implementation of WorkspaceStatus
@@ -54,9 +56,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private WorkspaceContext currentContext;
     private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
     
-    private Properties wsProperties;
+    private Properties wsProperties = new Properties();
     private boolean recordingStatus = false;
-    private File recordingOutputFile;
 
     private Teiid teiid;
 
@@ -224,28 +225,36 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public File getRecordingOutputFile() {
-        return this.recordingOutputFile;
+    	String filePath = this.wsProperties.getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
+    	if(StringUtils.isEmpty(filePath)) {
+    		return null;
+    	}
+        return new File(filePath);
     }
 
     /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#setRecordingOutputFile(java.lang.String)
+     * @see org.komodo.shell.api.WorkspaceStatus#setProperty(java.lang.String, java.lang.String)
      */
     @Override
-    public void setRecordingOutputFile(String recordingOutputFilePath) {
-        this.recordingOutputFile = new File(recordingOutputFilePath);
+    public void setProperty(String propKey, String propValue) {
+    	if(!StringUtils.isEmpty(propKey)) {
+    		if(WorkspaceStatus.GLOBAL_PROP_KEYS.contains(propKey.toUpperCase())) {
+    			this.wsProperties.put(propKey, propValue);
+    		}
+    	}
     }
-
+    
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceStatus#setProperties(java.util.Properties)
      */
     @Override
     public void setProperties(Properties props) {
-    	this.wsProperties = props;
-        for (final String name : props.stringPropertyNames()) {
-            if (name.equals(RECORDING_FILE_KEY)) {
-                setRecordingOutputFile(props.getProperty(name));
-            }
-        }
+    	this.wsProperties.clear();
+    	for (final String name : props.stringPropertyNames()) {
+    		if(WorkspaceStatus.GLOBAL_PROP_KEYS.contains(name.toUpperCase())) {
+    			this.wsProperties.put(name, props.getProperty(name));
+    		}
+    	}
     }
     
     /* (non-Javadoc)
@@ -255,6 +264,5 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 	public Properties getProperties() {
     	return this.wsProperties;
     }
-
 
 }
