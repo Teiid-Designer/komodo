@@ -141,6 +141,18 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	}
 	
 	/**
+	 * Validates whether the supplied object type is a valid child for the supplied context. 
+	 * If invalid an error message is printed out.
+	 * @param objType the object type
+	 * @param context the workspace context
+	 * @return 'true' if the child type is valid for the context, 'false' if not.
+	 */
+	public boolean validateChildType(String objType, WorkspaceContext context) {
+		// TODO: add logic to test
+		return true;
+	}
+	
+	/**
 	 * Validate whether the supplied propName is valid for the supplied context.  If invalid, a message is printed out.
 	 * @param context the context
 	 * @param propName the property name

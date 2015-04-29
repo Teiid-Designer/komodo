@@ -21,6 +21,8 @@
  ************************************************************************************/
 package org.komodo.shell.commands.core;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +30,7 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.StringUtils;
 
 /**
  * Enable or disable recording of commands to a file
@@ -35,16 +38,19 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 public class RecordCommand extends BuiltInShellCommand {
 
-	private static final String ON = "ON"; //$NON-NLS-1$
-	private static final String OFF = "OFF"; //$NON-NLS-1$
+    private static final String RECORD = "record"; //$NON-NLS-1$
+    
+	private static final String ON = "on"; //$NON-NLS-1$
+	private static final String OFF = "off"; //$NON-NLS-1$
+    private static final List<String> SUBCMDS = 
+    		Arrays.asList(ON, OFF);    
 	
 	/**
 	 * Constructor
-	 * @param name the command name
 	 * @param wsStatus the workspace status
 	 */
-	public RecordCommand(String name, WorkspaceStatus wsStatus) {
-		super(name,wsStatus);
+	public RecordCommand(WorkspaceStatus wsStatus) {
+		super(RECORD,wsStatus);
 	}
 
 	/**
@@ -59,15 +65,16 @@ public class RecordCommand extends BuiltInShellCommand {
 		}
 
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		if(onOffArg.equalsIgnoreCase("on")) { //$NON-NLS-1$
+		if(onOffArg.equalsIgnoreCase(ON)) { 
 			wsStatus.setRecordingStatus(true);
-		} else if(onOffArg.equalsIgnoreCase("off")) { //$NON-NLS-1$
+		} else if(onOffArg.equalsIgnoreCase(OFF)) { 
 			wsStatus.setRecordingStatus(false);
 		}
 		
 		Date d = new Date();
 		String rState = wsStatus.getRecordingStatus() ? ON : OFF; 
-		String stateChangedMsg = Messages.getString("RecordCommand.setRecordingStateMsg",rState,d.toString()); //$NON-NLS-1$
+		String rFile = wsStatus.getRecordingOutputFile().getCanonicalPath();
+		String stateChangedMsg = Messages.getString("RecordCommand.setRecordingStateMsg",rState,d.toString(),rFile); //$NON-NLS-1$
 		
         print(CompletionConstants.MESSAGE_INDENT,stateChangedMsg);  
 
@@ -85,15 +92,34 @@ public class RecordCommand extends BuiltInShellCommand {
 	 */
 	protected boolean validate(String... args) {
 		String onOffArg = args[0].trim();
-		if(onOffArg.length()==0) {
+		
+		// Check for empty arg
+		if(StringUtils.isEmpty(onOffArg)) {
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RecordCommand.onOffArg_empty")); //$NON-NLS-1$
 			return false;
 		}
 		
-		if(!onOffArg.equalsIgnoreCase("on") && !onOffArg.equalsIgnoreCase("off")) { //$NON-NLS-1$ //$NON-NLS-2$
+		// Check for invalid arg
+		if(!onOffArg.equalsIgnoreCase(ON) && !onOffArg.equalsIgnoreCase(OFF)) { 
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RecordCommand.onOffArg_invalid")); //$NON-NLS-1$
 			return false;
 		}
+		
+		// If verify that global file var was set.
+		String recordingFileStr = getWorkspaceStatus().getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
+		if(StringUtils.isEmpty(recordingFileStr)) {
+			print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RecordCommand.recordingFileNotSet")); //$NON-NLS-1$
+			return false;
+		} else {
+			File recordingFile = getWorkspaceStatus().getRecordingOutputFile();
+			if(recordingFile!=null && recordingFile.exists()) {
+				if(!recordingFile.canWrite()) {
+					print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RecordCommand.recordingFileNotWriteable",recordingFile)); //$NON-NLS-1$
+					return false;
+				}
+			}
+		}
+		
 		return true;
 	}
 	
@@ -103,17 +129,22 @@ public class RecordCommand extends BuiltInShellCommand {
 	@Override
 	public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
 		if (getArguments().isEmpty()) {
-			if (lastArgument == null) {
-				candidates.add("on "); //$NON-NLS-1$
-				candidates.add("off "); //$NON-NLS-1$
-				return 0;
-			} else if ("on".startsWith(lastArgument)) { //$NON-NLS-1$
-				candidates.add("on "); //$NON-NLS-1$
-				return 0;
-			} else if ("off".startsWith(lastArgument)) { //$NON-NLS-1$
-				candidates.add("off "); //$NON-NLS-1$
-				return 0;
+			// --------------------------------------------------------------
+			// No arg - offer subcommands
+			// --------------------------------------------------------------
+			if(lastArgument==null) {
+				candidates.addAll(SUBCMDS);
+				// --------------------------------------------------------------
+				// One arg - determine the completion options for it.
+				// --------------------------------------------------------------
+			} else {
+				for (String item : SUBCMDS) {
+					if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
+						candidates.add(item);
+					}
+				}
 			}
+			return 0;
 		} 
 		return -1;
 	}

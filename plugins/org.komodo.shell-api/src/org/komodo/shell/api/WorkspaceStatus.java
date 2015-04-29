@@ -96,7 +96,7 @@ public interface WorkspaceStatus extends StringConstants {
 	File getRecordingOutputFile();
 	
 	/**
-	 * Set the Teiid URL
+	 * Set the Recording output file
 	 * @param recordingOutputFilePath the recording output file path
 	 */
 	void setRecordingOutputFile(String recordingOutputFilePath);

@@ -1,0 +1,33 @@
+# -----------------------------------------------
+# Create all Vdb objects 
+# -----------------------------------------------
+#
+create Vdb MyVdb1 /tko:komodo/tko:workspace
+create Vdb MyVdb2 /tko:komodo/tko:workspace
+#
+# VdbTranslator
+create VdbTranslator MyTranslator1 /tko:komodo/tko:workspace/MyVdb1
+#
+# VdbImport
+create VdbImport MyImport1 /tko:komodo/tko:workspace/MyVdb1
+#
+# VdbModel
+create Model MyModel /tko:komodo/tko:workspace/MyVdb1
+#
+# VdbModelSource must be created under VdbModel
+create VdbModelSource MyModelSource1 /tko:komodo/tko:workspace/MyVdb1/MyModel
+#
+# VdbEntry
+create VdbEntry MyEntry1 /tko:komodo/tko:workspace/MyVdb1
+#
+# VdbDataRole
+create VdbDataRole MyDataRole1 /tko:komodo/tko:workspace/MyVdb1
+#
+# VdbPermission needs DataRole parent
+create VdbPermission MyPermission1 /tko:komodo/tko:workspace/MyVdb1/vdb:dataRoles/MyDataRole1
+#
+# VdbCondition - requires VdbPermission parent
+create VdbCondition MyCondition1 /tko:komodo/tko:workspace/MyVdb1/vdb:dataRoles/MyDataRole1/vdb:permissions/MyPermission1
+#
+# VdbMask - requires VdbPermission parent
+create VdbMask MyMask1 /tko:komodo/tko:workspace/MyVdb1/vdb:dataRoles/MyDataRole1/vdb:permissions/MyPermission1

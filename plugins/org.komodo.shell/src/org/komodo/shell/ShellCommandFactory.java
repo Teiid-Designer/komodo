@@ -71,7 +71,6 @@ public class ShellCommandFactory {
 	private static String QUIT_CMD_NAME = "quit"; //$NON-NLS-1$ 
 	
 	private static String CD_CMD_NAME = "cd"; //$NON-NLS-1$ 
-	private static String CREATE_CMD_NAME = "create"; //$NON-NLS-1$ 
 	private static String LIST_CMD_NAME = "list"; //$NON-NLS-1$
 	private static String STATUS_CMD_NAME = "status"; //$NON-NLS-1$ 
 	private static String RENAME_CMD_NAME = "rename"; //$NON-NLS-1$ 
@@ -79,7 +78,6 @@ public class ShellCommandFactory {
 	private static String IMPORT_CMD_NAME = "import"; //$NON-NLS-1$
 	private static String EXPORT_CMD_NAME = "export"; //$NON-NLS-1$
 	private static String PLAY_CMD_NAME = "play"; //$NON-NLS-1$
-	private static String RECORD_CMD_NAME = "record"; //$NON-NLS-1$
 
 	private WorkspaceStatus wsStatus;
 	private Map<String, ShellCommand> commandMap;
@@ -112,13 +110,13 @@ public class ShellCommandFactory {
 		CdCommand cdCommand = new CdCommand(CD_CMD_NAME,this.wsStatus);
 		commandMap.put(cdCommand.getName().toLowerCase(), cdCommand); 
 
-		RecordCommand recordCommand = new RecordCommand(RECORD_CMD_NAME,this.wsStatus);
+		RecordCommand recordCommand = new RecordCommand(this.wsStatus);
 		commandMap.put(recordCommand.getName().toLowerCase(), recordCommand);
 		
 		PropertyCommand propertyCommand = new PropertyCommand(PROPERTY_CMD_NAME,this.wsStatus);
 		commandMap.put(propertyCommand.getName().toLowerCase(), propertyCommand);
 
-		CreateCommand createCommand = new CreateCommand(CREATE_CMD_NAME,this.wsStatus);
+		CreateCommand createCommand = new CreateCommand(this.wsStatus);
 		commandMap.put(createCommand.getName().toLowerCase(), createCommand);
 		
 		DeleteCommand deleteCommand = new DeleteCommand(this.wsStatus);
