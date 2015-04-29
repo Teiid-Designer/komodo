@@ -374,6 +374,12 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
                     case Event.PROPERTY_CHANGED:
                         KLog.getLogger().debug("KSequencers: processing event for path " + eventPath); //$NON-NLS-1$
 
+                        if (! session.propertyExists(eventPath)) {
+                            // property never got as far as being visible to this session
+                            // implies modeshape is shutting down maybe
+                            continue;
+                        }
+
                         Property property = session.getProperty(eventPath);
                         SequencerType sequencerType = isSequenceable(property);
                         if (sequencerType == null)
