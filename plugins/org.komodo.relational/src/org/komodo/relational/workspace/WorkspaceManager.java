@@ -24,12 +24,6 @@ package org.komodo.relational.workspace;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.jcr.Session;
-import javax.jcr.query.Query;
-import javax.jcr.query.QueryManager;
-import javax.jcr.query.QueryResult;
-import javax.jcr.query.Row;
-import javax.jcr.query.RowIterator;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
@@ -48,7 +42,6 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.RepositoryImpl;
-import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -378,13 +371,8 @@ public class WorkspaceManager implements StringConstants {
 
         try {
             final String queryText = String.format(FIND_QUERY_PATTERN, type);
-            final Session session = ((UnitOfWorkImpl)transaction).getSession();
-            final QueryManager queryMgr = session.getWorkspace().getQueryManager();
-            final Query query = queryMgr.createQuery(queryText, Query.JCR_SQL2);
-            final QueryResult resultSet = query.execute();
-            final RowIterator itr = resultSet.getRows();
-            final String columnName = resultSet.getColumnNames()[0];
-            int numPaths = (int)itr.getSize();
+            List<KomodoObject> results = getRepository().query(transaction, queryText);
+            int numPaths = results.size();
 
             if (numPaths == 0) {
                 result = StringConstants.EMPTY_ARRAY;
@@ -392,9 +380,8 @@ public class WorkspaceManager implements StringConstants {
                 result = new String[numPaths];
                 int i = 0;
 
-                while (itr.hasNext()) {
-                    final Row row = itr.nextRow();
-                    result[i++] = row.getValue(columnName).getString();
+                for (KomodoObject kObject : results) {
+                    result[i++] = kObject.getAbsolutePath();
                 }
             }
 

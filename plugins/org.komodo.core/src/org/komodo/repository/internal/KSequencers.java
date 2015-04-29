@@ -22,10 +22,12 @@
 package org.komodo.repository.internal;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.observation.Event;
@@ -33,6 +35,7 @@ import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
 import org.komodo.spi.query.sql.SQLConstants;
@@ -120,51 +123,63 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         return this.identifier;
     }
 
-    private boolean isVdbSequenceable(Property property) throws RepositoryException {
-        if (! property.getName().equals(JcrConstants.JCR_DATA))
-            return false;
+    private boolean isVdbSequenceable(Property property) {
+        try {
+            if (! property.getName().equals(JcrConstants.JCR_DATA))
+                return false;
 
-        Node node = property.getParent();
-        if (! node.getName().equals(JcrConstants.JCR_CONTENT))
-            return false;
+            Node node = property.getParent();
+            if (! node.getName().equals(JcrConstants.JCR_CONTENT))
+                return false;
 
-        Node parentNode = node.getParent();
-        if (parentNode == null ||
-                ! (parentNode.getPrimaryNodeType().getName().equals(VdbLexicon.Vdb.VIRTUAL_DATABASE)))
+            Node parentNode = node.getParent();
+            if (parentNode == null ||
+                    ! (parentNode.getPrimaryNodeType().getName().equals(VdbLexicon.Vdb.VIRTUAL_DATABASE)))
+                return false;
+        } catch (RepositoryException ex) {
             return false;
+        }
 
         return true;
     }
 
-    private boolean isDdlSequenceable(Property property) throws RepositoryException {
-        String propertyName = property.getName();
-        Node node = property.getParent();
-        List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
+    private boolean isDdlSequenceable(Property property) {
+        try {
+            String propertyName = property.getName();
+            Node node = property.getParent();
+            List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
 
-        if (propertyName.equals(VdbLexicon.Model.MODEL_DEFINITION) &&
-                nodeTypeNames.contains(VdbLexicon.Vdb.DECLARATIVE_MODEL))
-            return true;
+            if (propertyName.equals(VdbLexicon.Model.MODEL_DEFINITION) &&
+                    nodeTypeNames.contains(VdbLexicon.Vdb.DECLARATIVE_MODEL))
+                return true;
 
-        if (propertyName.equals(KomodoLexicon.Schema.RENDITION) &&
-                nodeTypeNames.contains(KomodoLexicon.Schema.NODE_TYPE))
-            return true;
-
+            if (propertyName.equals(KomodoLexicon.Schema.RENDITION) &&
+                    nodeTypeNames.contains(KomodoLexicon.Schema.NODE_TYPE))
+                return true;
+        } catch (RepositoryException ex) {
+            // Not required to be logged since false is returned anyway
+        }
+        
         return false;
     }
 
-    private boolean isTsqlSequenceable(Property property) throws RepositoryException {
-        String propertyName = property.getName();
-        Node node = property.getParent();
-        List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
+    private boolean isTsqlSequenceable(Property property) {
+        try {
+            String propertyName = property.getName();
+            Node node = property.getParent();
+            List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
 
-        if (propertyName.equals(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION) &&
-                (   nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT) ||
-                    nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.VIEW_STATEMENT)))
-            return true;
+            if (propertyName.equals(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION) &&
+                    (   nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT) ||
+                        nodeTypeNames.contains(TeiidDdlLexicon.CreateTable.VIEW_STATEMENT)))
+                return true;
 
-        if (propertyName.equals(TeiidDdlLexicon.CreateProcedure.STATEMENT) &&
-                nodeTypeNames.contains(TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT))
-            return true;
+            if (propertyName.equals(TeiidDdlLexicon.CreateProcedure.STATEMENT) &&
+                    nodeTypeNames.contains(TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT))
+                return true;
+        } catch (RepositoryException ex) {
+            // Not required to be logged since false is returned anyway
+        }
 
         return false;
     }
@@ -173,7 +188,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
      * @param property
      * @return if the property is sequenceable then return the sequencer type, otherwise null
      */
-    private SequencerType isSequenceable(Property property) throws Exception {
+    private SequencerType isSequenceable(Property property) {
         if (isVdbSequenceable(property))
             return SequencerType.VDB;
 
@@ -198,12 +213,75 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         return false;
     }
 
+    private void preSequenceClean(SequencerType sequencerType, Node outputNode) throws Exception {
+        Session session = null;
+
+        try {
+            switch (sequencerType) {
+                case VDB:
+                {
+                    if (! outputNode.hasNodes())
+                        return;
+
+                    session = ModeshapeUtils.createSession(getIdentifier());
+                    Iterator<Node> childIter = outputNode.getNodes();
+                    while(childIter.hasNext()) {
+                        Node child = childIter.next();
+                        if (! ModeshapeUtils.hasTypeNamespace(child, VdbLexicon.Namespace.PREFIX))
+                            continue;
+
+                        Node wChild = session.getNode(child.getPath());
+                        wChild.remove();
+                    }
+                    return;
+                }
+                case DDL:
+                {
+                    session = ModeshapeUtils.createSession(getIdentifier());
+                    Node parent = session.getNode(outputNode.getPath());
+                    NodeIterator children = parent.getNodes();
+                    while(children.hasNext()) {
+                        Node child = children.nextNode();
+                        if (! ModeshapeUtils.hasTypeNamespace(child, TeiidDdlLexicon.Namespace.PREFIX))
+                            continue;
+
+                        child.remove();
+                    }
+                    return;
+                }
+                case TSQL:
+                {
+                    session = ModeshapeUtils.createSession(getIdentifier());
+                    Node parent = session.getNode(outputNode.getPath());
+                    NodeIterator children = parent.getNodes();
+                    while(children.hasNext()) {
+                        Node child = children.nextNode();
+                        if (! ModeshapeUtils.hasTypeNamespace(child, TeiidSqlLexicon.Namespace.PREFIX))
+                            continue;
+
+                        child.remove();
+                    }
+                }
+            }
+        } finally {
+            if (session != null && session.isLive()) {
+                if (session.hasPendingChanges())
+                    session.save();
+
+                session.logout();
+            }
+        }
+    }
+
     private boolean sequence(SequencerType sequencerType, Property property, Node outputNode) throws Exception {
         Session seqSession = ModeshapeUtils.createSession(getIdentifier());
 
-        KLog.getLogger().debug("Executing " + sequencerType.name() + " Sequencer on property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
-
         try {
+            KLog.getLogger().debug("Executing pre-sequencing of " + sequencerType.name() + " Sequencer for property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
+            preSequenceClean(sequencerType, outputNode);
+
+            KLog.getLogger().debug("Executing " + sequencerType.name() + " Sequencer on property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
+
             Property seqProperty = seqSession.getProperty(property.getPath());
             Node seqOutputNode = seqSession.getNode(outputNode.getPath());
 
@@ -235,7 +313,8 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
             return status;
 
         } finally {
-            seqSession.logout();
+            if (seqSession != null && seqSession.isLive())
+                seqSession.logout();
         }
     }
 

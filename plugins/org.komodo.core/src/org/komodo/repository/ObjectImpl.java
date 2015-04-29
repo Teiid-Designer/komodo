@@ -9,10 +9,8 @@ package org.komodo.repository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
@@ -22,7 +20,6 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import javax.jcr.nodetype.NodeType;
-
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
 import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
@@ -1234,7 +1231,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "kobject-rename: transaction = {0}, old path = {1}, new name = {1}", //$NON-NLS-1$
+            LOGGER.debug( "kobject-rename: transaction = {0}, old path = {1}, new name = {2}", //$NON-NLS-1$
                           transaction.getName(),
                           getAbsolutePath(),
                           newName );

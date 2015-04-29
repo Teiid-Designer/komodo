@@ -38,7 +38,6 @@ import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.ImportType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
@@ -56,20 +55,20 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 	private static final String TEIID_FLATFILE = "Teiid-FlatFile.ddl";
 
 	@Override
-	protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
+	protected KomodoObject runImporter(Repository repository,
 	                                                             File file, ImportType importType, ImportOptions importOptions,
 	                                                             ImportMessages importMessages) {
-        DdlImporter importer = new DdlImporter(_repo, uow);
+        DdlImporter importer = new DdlImporter(_repo);
         importer.setImportType(importType);
         return importer.importDdl(file, importOptions, importMessages);
 	}
 
 	@Override
-	protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
+	protected KomodoObject runImporter(Repository repository,
 	                                                             InputStream inputStream, ImportType importType, 
 	                                                             ImportOptions importOptions,
 	                                                             ImportMessages importMessages) {
-	    DdlImporter importer = new DdlImporter(_repo, uow);
+	    DdlImporter importer = new DdlImporter(_repo);
 	    importer.setImportType(importType);
         return importer.importDdl(inputStream, importOptions, importMessages);
 	}

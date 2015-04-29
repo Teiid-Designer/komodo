@@ -45,29 +45,23 @@ public class VdbImporter extends AbstractImporter {
      * constructor
      *
      * @param repository repository into which ddl should be imported
-     *
-     * @param transaction the transaction used for importing the DDL schema 
-     */
-    public VdbImporter(Repository repository, UnitOfWork transaction) {
-        super(repository, ImportType.VDB, transaction);
-    }
-
-    /**
-     * constructor
-     *
-     * @param repository repository into which ddl should be imported
      * 
      */
     public VdbImporter(Repository repository) {
-        super(repository, ImportType.VDB, null);
+        super(repository, ImportType.VDB);
     }
 
     @Override
-    protected KomodoObject executeImport(String content, ImportOptions importOptions, UnitOfWork transaction) throws KException {
+    protected KomodoObject executeImport(UnitOfWork transaction,
+                                                                     String content,
+                                                                     ImportOptions importOptions,
+                                                                     ImportMessages importMessages) throws KException {
 
         String vdbName = importOptions.getOption(OptionKeys.NAME).toString();
         String vdbFilePath = importOptions.getOption(OptionKeys.VDB_FILE_PATH).toString();
-        Vdb vdb = getWorkspaceManager().createVdb(transaction, getWorkspace(transaction), vdbName, vdbFilePath);
+        KomodoObject workspace = getWorkspace(transaction);
+
+        Vdb vdb = getWorkspaceManager().createVdb(transaction, workspace, vdbName, vdbFilePath);
         KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
         fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
         return vdb;

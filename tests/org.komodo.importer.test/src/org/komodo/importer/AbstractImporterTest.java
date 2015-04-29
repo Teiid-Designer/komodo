@@ -27,21 +27,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
-
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
+import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
 
@@ -69,26 +65,24 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
     }
 
     protected abstract KomodoObject runImporter(Repository repository,
-                                                UnitOfWork uow,
                                                 InputStream inputStream,
                                                 ImportType importType,
                                                 ImportOptions importOptions,
                                                 ImportMessages importMessages);
 
-    protected abstract KomodoObject runImporter(Repository repository, 
-                                                UnitOfWork uow,
+    protected abstract KomodoObject runImporter(Repository repository,
                                                 File file,
                                                 ImportType importType,
                                                 ImportOptions importOptions,
                                                 ImportMessages importMessages);
 
-    protected KomodoObject runImporter(Repository repository, UnitOfWork uow, Object content,
+    protected KomodoObject runImporter(Repository repository, Object content,
                                                                  ImportType importType, ImportOptions importOptions,
                                                                  ImportMessages importMessages) {
         if (content instanceof File)
-            return runImporter(repository, uow, (File) content, importType, importOptions, importMessages);
+            return runImporter(repository, (File) content, importType, importOptions, importMessages);
         else if (content instanceof InputStream)
-            return runImporter(repository, uow, (InputStream) content, importType, importOptions, importMessages);
+            return runImporter(repository, (InputStream) content, importType, importOptions, importMessages);
 
         fail("Content should be a file or input stream");
         return null;
@@ -104,36 +98,11 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         assertNotNull(importOptions);
         assertNotNull(importMessages);
 
-        final CountDownLatch updateLatch = new CountDownLatch(1);
-        UnitOfWork uow = _repo.createTransaction("test-importer", false, new UnitOfWorkListener() {
-
-            @Override
-            public boolean awaitSequencerCompletion() {
-                return true;
-            }
-
-            @Override
-            public void respond(Object results) {
-                updateLatch.countDown();
-            }
-
-            @Override
-            public void errorOccurred(Throwable error) {
-                updateLatch.countDown();
-            }
-        });
-
-        KomodoObject kObject = runImporter(_repo, uow, content, importType, importOptions, importMessages);
+        KomodoObject kObject = runImporter(_repo, content, importType, importOptions, importMessages);
         if (importMessages.hasError()) {
+            KLog.getLogger().debug(importMessages.errorMessagesToString());
             return null;
         }
-
-        //
-        // Commit the transaction and await the response of the callback
-        //
-        uow.commit();
-
-        updateLatch.await(3, TimeUnit.MINUTES);
 
         traverse(_repo.createTransaction("traverse-imported-nodes", true, null), kObject.getAbsolutePath());
 
