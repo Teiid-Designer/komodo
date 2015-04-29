@@ -1,0 +1,5 @@
+# Tests the Set Property command using absolute context path
+create Model MyModel
+create Table MyTable ./MyModel
+#
+set Property ddl:length 99 /tko:komodo/tko:workspace/MyModel/MyTable

@@ -153,6 +153,36 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	}
 	
 	/**
+	 * Validates whether the supplied property is a valid property for the supplied context. 
+	 * If invalid an error message is printed out.
+	 * @param propName the property name
+	 * @param context the workspace context
+	 * @return 'true' if the property is valid for the context, 'false' if not.
+	 * @exception Exception the exception
+	 */
+	public boolean validateProperty(String propName, WorkspaceContext context) throws Exception {
+		if(!StringUtils.isEmpty(propName)) {
+			// Get properties for this object
+			List<String> propNames = context.getProperties();
+			return propNames.contains(propName) ? true : false;
+		}
+		return false;
+	}
+	
+	/**
+	 * Validates whether the supplied property value is valid for the property 
+	 * If invalid an error message is printed out.
+	 * @param propName the property name
+	 * @param propValue the property value
+	 * @param context the workspace context
+	 * @return 'true' if the property is valid for the context, 'false' if not.
+	 */
+	public boolean validatePropertyValue(String propName, String propValue, WorkspaceContext context) {
+		// TODO: add logic to test
+		return true;
+	}
+	
+	/**
 	 * Validate whether the supplied propName is valid for the supplied context.  If invalid, a message is printed out.
 	 * @param context the context
 	 * @param propName the property name
@@ -169,6 +199,31 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Validates whether the supplied property value is valid for the specified global property 
+	 * If invalid an error message is printed out.
+	 * @param propName the property name
+	 * @param propValue the property value
+	 * @return 'true' if the property is valid for the context, 'false' if not.
+	 */
+	public boolean validateGlobalPropertyValue(String propName, String propValue) {
+		// TODO: add logic to test
+		return true;
+	}
+	
+	/**
+	 * Validate whether the supplied propName is a valid global property.  If invalid, a message is printed out.
+	 * @param propName the property name
+	 * @return 'true' if valid, 'false' if not.
+	 * @throws Exception exception if problem getting the value.
+	 */
+	public boolean validateGlobalProperty(String propName) throws Exception {
+		if(WorkspaceStatus.GLOBAL_PROP_KEYS.contains(propName.toUpperCase())) {
+			return true;
+		}
+		return false;
 	}
 	
     /**

@@ -47,11 +47,9 @@ import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.NavigateCommand;
 import org.komodo.shell.commands.core.PlayCommand;
-import org.komodo.shell.commands.core.PropertyCommand;
-import org.komodo.shell.commands.core.RecordCommand;
 import org.komodo.shell.commands.core.RenameCommand;
+import org.komodo.shell.commands.core.SetCommand;
 import org.komodo.shell.commands.core.ShowCommand;
-import org.komodo.shell.commands.core.StatusCommand;
 import org.komodo.shell.commands.core.UseTeiidCommand;
 import org.komodo.utils.FileUtils;
 
@@ -72,9 +70,7 @@ public class ShellCommandFactory {
 	
 	private static String CD_CMD_NAME = "cd"; //$NON-NLS-1$ 
 	private static String LIST_CMD_NAME = "list"; //$NON-NLS-1$
-	private static String STATUS_CMD_NAME = "status"; //$NON-NLS-1$ 
 	private static String RENAME_CMD_NAME = "rename"; //$NON-NLS-1$ 
-	private static String PROPERTY_CMD_NAME = "property"; //$NON-NLS-1$ 
 	private static String IMPORT_CMD_NAME = "import"; //$NON-NLS-1$
 	private static String EXPORT_CMD_NAME = "export"; //$NON-NLS-1$
 	private static String PLAY_CMD_NAME = "play"; //$NON-NLS-1$
@@ -101,20 +97,14 @@ public class ShellCommandFactory {
 		List<String> allList = new ArrayList<String>(1);
 		allList.add(WorkspaceContext.ALL_TYPES);
 		
-		StatusCommand statusCommand = new StatusCommand(STATUS_CMD_NAME,this.wsStatus);
-		commandMap.put(statusCommand.getName().toLowerCase(), statusCommand);  
-		
 		ListCommand listCommand = new ListCommand(LIST_CMD_NAME,this.wsStatus);
 		commandMap.put(listCommand.getName().toLowerCase(), listCommand);  
 
 		CdCommand cdCommand = new CdCommand(CD_CMD_NAME,this.wsStatus);
 		commandMap.put(cdCommand.getName().toLowerCase(), cdCommand); 
 
-		RecordCommand recordCommand = new RecordCommand(this.wsStatus);
-		commandMap.put(recordCommand.getName().toLowerCase(), recordCommand);
-		
-		PropertyCommand propertyCommand = new PropertyCommand(PROPERTY_CMD_NAME,this.wsStatus);
-		commandMap.put(propertyCommand.getName().toLowerCase(), propertyCommand);
+		SetCommand setCommand = new SetCommand(this.wsStatus);
+		commandMap.put(setCommand.getName().toLowerCase(), setCommand);
 
 		CreateCommand createCommand = new CreateCommand(this.wsStatus);
 		commandMap.put(createCommand.getName().toLowerCase(), createCommand);
