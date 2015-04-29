@@ -141,6 +141,18 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	}
 	
 	/**
+	 * Validates whether the supplied object type is a valid child for the supplied context. 
+	 * If invalid an error message is printed out.
+	 * @param objType the object type
+	 * @param context the workspace context
+	 * @return 'true' if the child type is valid for the context, 'false' if not.
+	 */
+	public boolean validateChildType(String objType, WorkspaceContext context) {
+		// TODO: add logic to test
+		return true;
+	}
+	
+	/**
 	 * Validate whether the supplied propName is valid for the supplied context.  If invalid, a message is printed out.
 	 * @param context the context
 	 * @param propName the property name
@@ -163,14 +175,15 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
      * Updates the candidates for tab completion, given the currentContext and path
      * @param candidates the candidates list
      * @param currentContext the current context
+     * @param includeGoUp if 'true' the '..' option is included
      * @param lastArgument the last arg
      * @throws Exception the exception
      */
-    public void updateTabCompleteCandidatesForPath(List<CharSequence> candidates, WorkspaceContext currentContext, String lastArgument) throws Exception {
+    public void updateTabCompleteCandidatesForPath(List<CharSequence> candidates, WorkspaceContext currentContext, boolean includeGoUp, String lastArgument) throws Exception {
     	// List of potentials completions
     	List<String> potentialsList = new ArrayList<String>();
     	// Only offer '..' if below the root
-    	if(currentContext.getType() != WorkspaceStatus.ROOT_TYPE) {
+    	if( (currentContext.getType()!=WorkspaceStatus.ROOT_TYPE) && includeGoUp ) {
     		potentialsList.add(StringConstants.DOT_DOT);
     	}
 

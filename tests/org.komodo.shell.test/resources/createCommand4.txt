@@ -15,5 +15,4 @@ create column column_3
 create primarykey pk_1
 create accessPattern ap_1
 create accessPattern ap_2
-create foreignkey fk_1 tko:komodo/tko:workspace/vdb_test_1/model_1/table_2
 list

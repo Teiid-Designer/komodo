@@ -1,0 +1,12 @@
+# all items from the workspace context
+create vdb vdb_test_1
+create model model_1 vdb_test_1
+create table table_1 vdb_test_1/model_1
+create table table_2 vdb_test_1/model_1
+create column column_1_2 vdb_test_1/model_1/table_2
+create column column_1 vdb_test_1/model_1/table_1
+create column column_2 vdb_test_1/model_1/table_1
+create column column_3 vdb_test_1/model_1/table_1
+create primarykey pk_1 vdb_test_1/model_1/table_1
+create accessPattern ap_1 vdb_test_1/model_1/table_1
+create accessPattern ap_2 vdb_test_1/model_1/table_1
