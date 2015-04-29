@@ -56,7 +56,7 @@ public class SchemaImplTest extends RelationalModelTest {
         this.schema = manager.createSchema(null, workspace, NAME);
     }
 
-    private void setRenditionValueAwaitSequencing(String value, String... sequencerPaths) throws Exception {
+    private void setRenditionValueAwaitSequencing(String value) throws Exception {
         final CountDownLatch updateLatch = new CountDownLatch(1);
         final Throwable[] errorHolder = new Throwable[1];
 
@@ -138,7 +138,7 @@ public class SchemaImplTest extends RelationalModelTest {
 
     @Test
     public void shouldExportInvalidDdl() throws Exception {
-        setRenditionValueAwaitSequencing("This is not ddl syntax", SEQUENCE_DDL_PROBLEM);
+        setRenditionValueAwaitSequencing("This is not ddl syntax");
 
         final String fragment = this.schema.export(null, new Properties());
         assertThat(fragment, is(notNullValue()));
@@ -147,7 +147,7 @@ public class SchemaImplTest extends RelationalModelTest {
 
     @Test
     public void shouldExportDdl() throws Exception {
-        setRenditionValueAwaitSequencing(DDL_VIEW, SEQUENCE_TEIID_SQL_PATH);
+        setRenditionValueAwaitSequencing(DDL_VIEW);
 
         // test
         final String fragment = this.schema.export(null, new Properties());

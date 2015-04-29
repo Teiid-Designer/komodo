@@ -26,6 +26,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import org.komodo.importer.ImportOptions.ExistingNodeOptions;
+import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.Messages.IMPORTER;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
@@ -33,6 +37,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
@@ -42,32 +47,72 @@ import org.komodo.utils.StringUtils;
  */
 public abstract class AbstractImporter implements StringConstants {
 
-    private static final String TRANSACTION_NAME = "import-object"; //$NON-NLS-1$
+    private static final String EXISTING_TRANSACTION_NAME = "handle-existing-object"; //$NON-NLS-1$
+
+    private static final String IMPORT_TRANSACTION_NAME = "import-object"; //$NON-NLS-1$
+
+    protected static final String OLD = HYPHEN + "OLD"; //$NON-NLS-1$
 
     private Repository repository;
 
-    private UnitOfWork transaction;
-
     protected ImportType importType;
 
-    //
-    // Defines whether we own the transaction and can commit
-    // at the end of the import
-    //
-    private boolean ownTransaction = true;
+    private static class LatchTransactionPair {
+
+        private final UnitOfWork transaction;
+
+        private final CountDownLatch sequencerLatch;
+
+        /**
+         * Create new instance
+         *
+         * @param name name of the transaction
+         * @param repository the repository
+         * @throws KException if error occurs
+         */
+        public LatchTransactionPair(String name, Repository repository) throws KException {
+            sequencerLatch = new CountDownLatch(1);
+            transaction = repository.createTransaction(name, false, new UnitOfWorkListener() {
+
+                @Override
+                public boolean awaitSequencerCompletion() {
+                    return true;
+                }
+
+                @Override
+                public void respond(Object results) {
+                    sequencerLatch.countDown();
+                }
+
+                @Override
+                public void errorOccurred(Throwable error) {
+                    sequencerLatch.countDown();
+                }
+            });
+        }
+
+        /**
+         * @return the sequencerLatch
+         */
+        public CountDownLatch getSequencerLatch() {
+            return this.sequencerLatch;
+        }
+
+        /**
+         * @return the transaction
+         */
+        public UnitOfWork getTransaction() {
+            return this.transaction;
+        }
+    }
 
     /**
      * @param repository the repository
      * @param importType the import type
-     * @param transaction the transaction
      */
-    public AbstractImporter(Repository repository, ImportType importType, UnitOfWork transaction) {
+    public AbstractImporter(Repository repository, ImportType importType) {
         this.repository = repository;
         this.importType = importType;
-        if (transaction != null) {
-            this.transaction = transaction;
-            ownTransaction = false;
-        }
     }
 
     protected KomodoObject getWorkspace(UnitOfWork transaction) throws KException {
@@ -87,24 +132,14 @@ public abstract class AbstractImporter implements StringConstants {
         return this.repository;
     }
 
-    /**
-     * @return the transaction
-     * @throws KException if error occurs
-     */
-    protected UnitOfWork getTransaction() throws KException {
-        if (transaction == null) {
-            transaction = repository.createTransaction(TRANSACTION_NAME, false, null);
-        }
-
-        return this.transaction;
-    }
-
     /*
      * Only commit the transaction if it was my transaction to begin with
      */
-    protected void commitTransaction() throws Exception {
-        if (ownTransaction && transaction != null)
-            transaction.commit();
+    protected void commitTransaction(UnitOfWork transaction) throws Exception {
+        if (transaction == null)
+            return;
+
+        transaction.commit();
     }
 
     protected boolean validFile(File file, ImportMessages importMessages) {
@@ -152,7 +187,41 @@ public abstract class AbstractImporter implements StringConstants {
         return buf.toString();
     }
 
-    protected abstract KomodoObject executeImport(String content, ImportOptions importOptions, UnitOfWork transaction) throws KException;
+    protected boolean handleExistingNode(UnitOfWork transaction,
+                                                                      ImportOptions importOptions,
+                                                                      ImportMessages importMessages) throws KException {
+        String nodeName = importOptions.getOption(OptionKeys.NAME).toString();
+        ExistingNodeOptions exNodeOption = (ExistingNodeOptions)importOptions.getOption(OptionKeys.HANDLE_EXISTING);
+
+        if (! getWorkspace(transaction).hasChild(transaction, nodeName))
+            return true;
+
+        switch (exNodeOption) {
+            case RETURN:
+                importMessages.addErrorMessage(Messages.getString(Messages.IMPORTER.nodeExistsReturn));
+                return false;
+            case CREATE_NEW:
+                String newName = determineNewName(nodeName);
+                importMessages.addProgressMessage(Messages.getString(Messages.IMPORTER.nodeExistCreateNew, nodeName, newName));
+                importOptions.setOption(OptionKeys.NAME, newName);
+                break;
+            case OVERWRITE:
+                KomodoObject oldNode = getWorkspace(transaction).getChild(transaction, nodeName);
+                //
+                // Have to use a different transaction at this point
+                // due to MODE-2463. Does mean that we cannot
+                // rollback the transaction until this is fixed
+                //
+                oldNode.remove(transaction);
+        }
+
+        return true;
+    }
+
+    protected abstract KomodoObject executeImport(UnitOfWork transaction,
+                                                                                    String content,
+                                                                                    ImportOptions importOptions,
+                                                                                    ImportMessages importMessages) throws KException;
 
     protected KomodoObject prepareImport(String content, ImportOptions importOptions, ImportMessages importMessages) throws Exception {
 
@@ -163,20 +232,53 @@ public abstract class AbstractImporter implements StringConstants {
 
         ArgCheck.isNotNull(importType);
 
-        /*
-         * Create object in workspace
-         */
-        UnitOfWork transaction = getTransaction();
-        KomodoObject resultNode = null;
+        LatchTransactionPair latchTransPair = new LatchTransactionPair(EXISTING_TRANSACTION_NAME,
+                                                                                                                   getRepository());
 
-        resultNode = executeImport(content, importOptions, transaction);
-
-        commitTransaction();
+        boolean doImport = handleExistingNode(latchTransPair.getTransaction(), importOptions, importMessages);
 
         //
-        // Once committed the sequencers should take over and sequence the file
+        // Commit the operations performed in handling existing node
         //
+        latchTransPair.getTransaction().commit();
+
+        //
+        // Wait for the sequencers to do something if anything
+        //
+        latchTransPair.getSequencerLatch().await(3, TimeUnit.MINUTES);
+
+        if (! doImport) {
+            // Handling existing node advises not to continue
+            return null;
+        }
+
+        //
+        // Create object in workspace
+        //
+        latchTransPair = new LatchTransactionPair(IMPORT_TRANSACTION_NAME, getRepository());
+        KomodoObject resultNode = executeImport(latchTransPair.getTransaction(), content, importOptions, importMessages);
+
+        //
+        // Commit the operations performed in handling existing node
+        //
+        latchTransPair.getTransaction().commit();
+
+        //
+        // Wait for the sequencers to do something if anything
+        //
+        latchTransPair.getSequencerLatch().await(3, TimeUnit.MINUTES);
 
         return resultNode;
+    }
+
+    protected String determineNewName(String nodeName) throws KException {
+        KomodoObject workspace = getWorkspace(null);
+        for (int i = 0; i < 1000; ++i) {
+            String newName = nodeName + UNDERSCORE + i;
+            if (! workspace.hasChild(null, newName))
+                return newName;
+        }
+
+        throw new KException(Messages.getString(Messages.IMPORTER.newNameFailure, nodeName));
     }
 }

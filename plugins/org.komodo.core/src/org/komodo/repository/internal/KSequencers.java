@@ -22,10 +22,12 @@
 package org.komodo.repository.internal;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.jcr.Node;
+import javax.jcr.NodeIterator;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.observation.Event;
@@ -33,6 +35,7 @@ import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
 import org.komodo.spi.query.sql.SQLConstants;
@@ -210,12 +213,75 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         return false;
     }
 
+    private void preSequenceClean(SequencerType sequencerType, Node outputNode) throws Exception {
+        Session session = null;
+
+        try {
+            switch (sequencerType) {
+                case VDB:
+                {
+                    if (! outputNode.hasNodes())
+                        return;
+
+                    session = ModeshapeUtils.createSession(getIdentifier());
+                    Iterator<Node> childIter = outputNode.getNodes();
+                    while(childIter.hasNext()) {
+                        Node child = childIter.next();
+                        if (! ModeshapeUtils.hasTypeNamespace(child, VdbLexicon.Namespace.PREFIX))
+                            continue;
+
+                        Node wChild = session.getNode(child.getPath());
+                        wChild.remove();
+                    }
+                    return;
+                }
+                case DDL:
+                {
+                    session = ModeshapeUtils.createSession(getIdentifier());
+                    Node parent = session.getNode(outputNode.getPath());
+                    NodeIterator children = parent.getNodes();
+                    while(children.hasNext()) {
+                        Node child = children.nextNode();
+                        if (! ModeshapeUtils.hasTypeNamespace(child, TeiidDdlLexicon.Namespace.PREFIX))
+                            continue;
+
+                        child.remove();
+                    }
+                    return;
+                }
+                case TSQL:
+                {
+                    session = ModeshapeUtils.createSession(getIdentifier());
+                    Node parent = session.getNode(outputNode.getPath());
+                    NodeIterator children = parent.getNodes();
+                    while(children.hasNext()) {
+                        Node child = children.nextNode();
+                        if (! ModeshapeUtils.hasTypeNamespace(child, TeiidSqlLexicon.Namespace.PREFIX))
+                            continue;
+
+                        child.remove();
+                    }
+                }
+            }
+        } finally {
+            if (session != null && session.isLive()) {
+                if (session.hasPendingChanges())
+                    session.save();
+
+                session.logout();
+            }
+        }
+    }
+
     private boolean sequence(SequencerType sequencerType, Property property, Node outputNode) throws Exception {
         Session seqSession = ModeshapeUtils.createSession(getIdentifier());
 
-        KLog.getLogger().debug("Executing " + sequencerType.name() + " Sequencer on property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
-
         try {
+            KLog.getLogger().debug("Executing pre-sequencing of " + sequencerType.name() + " Sequencer for property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
+            preSequenceClean(sequencerType, outputNode);
+
+            KLog.getLogger().debug("Executing " + sequencerType.name() + " Sequencer on property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
+
             Property seqProperty = seqSession.getProperty(property.getPath());
             Node seqOutputNode = seqSession.getNode(outputNode.getPath());
 
@@ -247,7 +313,8 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
             return status;
 
         } finally {
-            seqSession.logout();
+            if (seqSession != null && seqSession.isLive())
+                seqSession.logout();
         }
     }
 

@@ -36,6 +36,26 @@ public class ImportOptions {
     private static final String DEFAULT_VDB_FILE_PATH = "<not available>"; //$NON-NLS-1$
 
     /**
+     * Options for handling the import of a node that already exists
+     */
+    public static enum ExistingNodeOptions {
+        /**
+         * Replace the existing node
+         */
+        OVERWRITE,
+
+        /**
+         * Do not proceed further
+         */
+        RETURN,
+
+        /**
+         * Create a new sister node with slightly edited name
+         */
+        CREATE_NEW
+    }
+
+    /**
      * Option keys applicable to import ddl into a model
      */
     public static enum OptionKeys {
@@ -52,7 +72,12 @@ public class ImportOptions {
         /**
          * Location of vdb file
          */
-        VDB_FILE_PATH(DEFAULT_VDB_FILE_PATH);
+        VDB_FILE_PATH(DEFAULT_VDB_FILE_PATH),
+
+        /**
+         * What to do if there is already a vdb with the same name
+         */
+        HANDLE_EXISTING(ExistingNodeOptions.OVERWRITE);
 
         private Object defaultValue;
 

@@ -25,12 +25,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.komodo.importer.AbstractImporterTest;
 import org.komodo.importer.ImportMessages;
@@ -38,6 +38,8 @@ import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.ImportType;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
+import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -45,7 +47,10 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
+import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -58,6 +63,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     private static final String TWEET_EXAMPLE = "tweet-example-vdb.xml";
 
+    private static final String TWEET_EXAMPLE_REIMPORT = "tweet-example-vdb-reimport.xml";
+
     private static final String ALL_ELEMENTS_EXAMPLE_NAME = "teiid-vdb-all-elements.xml";
     
     private static final String BOOKS_EXAMPLE_FULL = "books.xml";
@@ -67,20 +74,47 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     private static final String BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY = "books_virtual_model_only.xml";
     private static final String BOOKS_EXAMPLE_TRANSLATORS_ONLY = "books_translators_only.xml";
 
+    private static final String TWEET_EXAMPLE_DDL = EMPTY_STRING +
+                                                        "CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) " +
+                                                        "RETURNS TABLE (created_on varchar(25), from_user varchar(25), " +
+                                                        "to_user varchar(25), profile_image_url varchar(25), source " +
+                                                        "varchar(25), text varchar(140)) AS select tweet.* from " +
+                                                        "(EXEC twitter.invokeHTTP(" +
+                                                        "action => 'GET', endpoint => querystring(\'', query as q))) AS w, " +
+                                                        "XMLTABLE('results' passing JSONTOXML('myxml', w.result) columns " +
+                                                        "created_on string PATH 'created_at', from_user string PATH 'from_user', " +
+                                                        "to_user string PATH 'to_user', profile_image_url string PATH 'profile_image_url', " +
+                                                        "source string PATH 'source', text string PATH 'text') AS tweet; " +
+                                                        "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";
+
+    private static final String TWEET_EXAMPLE_REIMPORT_DDL = EMPTY_STRING +
+                                                        "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";
+
+    private static final String TWEET_QUERY_1 = EMPTY_STRING +
+                                                        "select title FROM twitterview.getTweets;";
+
+    private static final String TWITTER_MODEL = "twitter";
+
+    private static final String TWITTER_VIEW_MODEL = "twitterview";
+
+    private static final String WARBLE_MODEL = "warble";
+
+    private static final String WARBLE_VIEW_MODEL = "warbleview";
+
     @Override
-    protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
+    protected KomodoObject runImporter(Repository repository,
                                                                  File file, ImportType importType, ImportOptions importOptions,
                                                                  ImportMessages importMessages) {
-        VdbImporter importer = new VdbImporter(_repo, uow);
+        VdbImporter importer = new VdbImporter(_repo);
         return importer.importVdb(file, importOptions, importMessages);
     }
 
     @Override
-    protected KomodoObject runImporter(Repository repository, UnitOfWork uow,
+    protected KomodoObject runImporter(Repository repository,
                                                                  InputStream inputStream, ImportType importType,
                                                                  ImportOptions importOptions,
                                                                  ImportMessages importMessages) {
-        VdbImporter importer = new VdbImporter(_repo, uow);
+        VdbImporter importer = new VdbImporter(_repo);
         return importer.importVdb(inputStream, importOptions, importMessages);
     }
 
@@ -174,10 +208,11 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals("The supplied content string is empty", msg);
     }
 
-    private void verifyTweetExampleNode(KomodoObject tweetNode) throws Exception {
+    private void verifyTweetExampleNode(KomodoObject tweetNode,
+                                                                   String model1Name,
+                                                                   String model2Name,
+                                                                   String modelDefinition) throws Exception {
         String REST_TRANSLATOR = "rest";
-        String TWITTER_MODEL = "twitter";
-        String TWITTER_VIEW_MODEL = "twitterview";
 
         assertNotNull(tweetNode);
 
@@ -235,7 +270,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *          @vdb:visible=true
          *          @vdb:sourceJndiName=java:/twitterDS
          */
-        KomodoObject twitter = verify(tweetNode, TWITTER_MODEL, VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        KomodoObject twitter = verify(tweetNode, model1Name, VdbLexicon.Vdb.DECLARATIVE_MODEL);
         verifyProperty(twitter, CoreLexicon.JcrId.MODEL_TYPE, CoreLexicon.ModelType.PHYSICAL);
         verifyProperty(twitter, VdbLexicon.Model.VISIBLE, Boolean.TRUE.toString());
         verifyProperty(twitter, VdbLexicon.Model.METADATA_TYPE, "DDL");
@@ -252,7 +287,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *                  @vdb:sourceTranslator=rest
          *                  @vdb:sourceJndiName=java:/twitterDS
          */
-        KomodoObject twitterSource = verify(twitterSources, TWITTER_MODEL, VdbLexicon.Source.SOURCE);
+        KomodoObject twitterSource = verify(twitterSources, model1Name, VdbLexicon.Source.SOURCE);
         verifyProperty(twitterSource, VdbLexicon.Source.TRANSLATOR, REST_TRANSLATOR);
         verifyProperty(twitterSource, VdbLexicon.Source.JNDI_NAME, "java:/twitterDS");
 
@@ -265,30 +300,23 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *          @vdb:metadataType=DDL
          *          @vdb:modelDefinition=CREATE VIRTUAL PROCEDURE getTweets(query varchar) RETURNS (created_on varchar(25), from_user varchar(25), to_user varchar(25), profile_image_url varchar(25), source varchar(25), text varchar(140)) AS select tweet.* from (call twitter.invokeHTTP(action => 'GET', endpoint =>querystring('',query as "q"))) w, XMLTABLE('results' passing JSONTOXML('myxml', w.result) columns created_on string PATH 'created_at', from_user string PATH 'from_user', to_user string PATH 'to_user', profile_image_url string PATH 'profile_image_url', source string PATH 'source', text string PATH 'text') tweet; CREATE VIEW Tweet AS select * FROM twitterview.getTweets;
          */
-        KomodoObject twitterView = verify(tweetNode, TWITTER_VIEW_MODEL, VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        KomodoObject twitterView = verify(tweetNode, model2Name, VdbLexicon.Vdb.DECLARATIVE_MODEL);
         verifyProperty(twitterView, CoreLexicon.JcrId.MODEL_TYPE, CoreLexicon.ModelType.VIRTUAL);
         verifyProperty(twitterView, VdbLexicon.Model.METADATA_TYPE, "DDL");
         verifyProperty(twitterView, VdbLexicon.Model.VISIBLE, Boolean.TRUE.toString());
+        verifyProperty(twitterView, VdbLexicon.Model.MODEL_DEFINITION, modelDefinition);
 
-        StringBuffer modelDefinition = new StringBuffer();
-        modelDefinition.append("CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) ")
-                                .append("RETURNS TABLE (created_on varchar(25), from_user varchar(25), ")
-                                .append("to_user varchar(25), profile_image_url varchar(25), source ")
-                                .append("varchar(25), text varchar(140)) AS select tweet.* from ")
-                                .append("(EXEC twitter.invokeHTTP(")
-                                .append("action => 'GET', endpoint => querystring(\'', query as q))) AS w, ")
-                                .append("XMLTABLE('results' passing JSONTOXML('myxml', w.result) columns ")
-                                .append("created_on string PATH 'created_at', from_user string PATH 'from_user', ")
-                                .append("to_user string PATH 'to_user', profile_image_url string PATH 'profile_image_url', ")
-                                .append("source string PATH 'source', text string PATH 'text') AS tweet; ")
-                                .append("CREATE VIEW Tweet AS select * FROM twitterview.getTweets;");
-                                
-        verifyProperty(twitterView, VdbLexicon.Model.MODEL_DEFINITION, modelDefinition.toString());
+        if (TWITTER_VIEW_MODEL.equals(model2Name)) {
+            // Only the twitterview version of the import data has the VIRTUAL PROCEDURE
+            // which creates the getTweets node
+            KomodoObject getTweets = verify(twitterView, "getTweets");
+            KomodoObject getTweetsQuery = verify(getTweets, TeiidSqlLexicon.Query.ID);
+            verify(getTweetsQuery, TeiidSqlLexicon.From.ID, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.From.ID);
+        }
 
-        KomodoObject getTweets = verify(twitterView, "getTweets");
-
-        KomodoObject getTweetsQuery = verify(getTweets, TeiidSqlLexicon.Query.ID);
-        verify(getTweetsQuery, TeiidSqlLexicon.From.ID, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.From.ID);
+        KomodoObject tweet = verify(twitterView, "Tweet");
+        KomodoObject tweetQuery = verify(tweet, TeiidSqlLexicon.Query.ID);
+        verify(tweetQuery, TeiidSqlLexicon.From.ID, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.From.ID);
     }
 
     @Test
@@ -312,7 +340,182 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         String vdbName = vdbNode.getName(null);
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
-        verifyTweetExampleNode(vdbNode);
+        verifyTweetExampleNode(vdbNode, TWITTER_MODEL, TWITTER_VIEW_MODEL, TWEET_EXAMPLE_DDL);
+    }
+
+    private void setModelDefinitionAwaitSequencing(Model model, String defn) throws Exception {
+        final CountDownLatch updateLatch = new CountDownLatch(1);
+        final Throwable[] errorHolder = new Throwable[1];
+
+        UnitOfWork transaction = _repo.createTransaction("vdbtests-setmodeldefn-value", false, new UnitOfWorkListener() {
+
+            @Override
+            public boolean awaitSequencerCompletion() {
+                return true;
+            }
+
+            @Override
+            public void respond(Object results) {
+                updateLatch.countDown();
+            }
+
+            @Override
+            public void errorOccurred(Throwable error) {
+                updateLatch.countDown();
+                errorHolder[0] = error;
+            }
+        });
+
+        assertNotNull(transaction);
+
+        model.setModelDefinition(transaction, defn);
+
+        //
+        // Commit the transaction and await the response of the callback
+        //
+        transaction.commit();
+
+        // Wait for the sequencing of the repository or timeout of 3 minutes
+        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
+        assertNull(errorHolder[0]);
+
+        traverse(_repo.createTransaction("traverse-modeldef-node", true, null), model.getAbsolutePath());
+    }
+
+    @Test
+    public void testBasicVdbImportThenChangeModelDefnProperty()  throws Exception {
+        // Import the original vdb import first
+        testBasicVdbImport();
+
+        KLog.getLogger().debug("\n\n=== Editing tweet example ===");
+
+        KomodoObject vdbNode = _repo.getFromWorkspace(null, TWEET_EXAMPLE);
+        assertNotNull(vdbNode);
+        WorkspaceManager wkspManager = WorkspaceManager.getInstance(_repo);
+
+        KomodoObject twitterView = vdbNode.getChild(null, TWITTER_VIEW_MODEL);
+        Model model = wkspManager.resolve(null, twitterView, Model.class);
+
+        //
+        // Set the model defintion of tweetview to alternative
+        //
+        setModelDefinitionAwaitSequencing(model, TWEET_EXAMPLE_REIMPORT_DDL);
+
+        KomodoObject[] tweets = twitterView.getChildren(null, "Tweet");
+        assertEquals(1, tweets.length);
+
+        /*      
+         *      twitterview
+         *          @jcr:primaryType=vdb:declarativeModel
+         *          @jcr:uuid={uuid-to-be-created}
+         *          @mmcore:modelType=VIRTUAL
+         *          @vdb:visible=true
+         *          @vdb:metadataType=DDL
+         *          @vdb:modelDefinition=CREATE VIRTUAL PROCEDURE getTweets(query varchar) RETURNS (created_on varchar(25), from_user varchar(25), to_user varchar(25), profile_image_url varchar(25), source varchar(25), text varchar(140)) AS select tweet.* from (call twitter.invokeHTTP(action => 'GET', endpoint =>querystring('',query as "q"))) w, XMLTABLE('results' passing JSONTOXML('myxml', w.result) columns created_on string PATH 'created_at', from_user string PATH 'from_user', to_user string PATH 'to_user', profile_image_url string PATH 'profile_image_url', source string PATH 'source', text string PATH 'text') tweet; CREATE VIEW Tweet AS select * FROM twitterview.getTweets;
+         */
+        verifyPrimaryType(twitterView, VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        verifyProperty(twitterView, CoreLexicon.JcrId.MODEL_TYPE, CoreLexicon.ModelType.VIRTUAL);
+        verifyProperty(twitterView, VdbLexicon.Model.METADATA_TYPE, "DDL");
+        verifyProperty(twitterView, VdbLexicon.Model.VISIBLE, Boolean.TRUE.toString());
+        verifyProperty(twitterView, VdbLexicon.Model.MODEL_DEFINITION, TWEET_EXAMPLE_REIMPORT_DDL);
+
+        KomodoObject tweet = verify(twitterView, "Tweet");
+        KomodoObject tweetQuery = verify(tweet, TeiidSqlLexicon.Query.ID);
+        verify(tweetQuery, TeiidSqlLexicon.From.ID, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.From.ID);
+    }
+
+    @Test
+    public void testBasicVdbImportThenChangeQueryExpressionProperty()  throws Exception {
+        // Import the original vdb import first
+        testBasicVdbImport();
+
+        KLog.getLogger().debug("\n\n=== Editing tweet example ===");
+
+        KomodoObject vdbNode = _repo.getFromWorkspace(null, TWEET_EXAMPLE);
+        assertNotNull(vdbNode);
+
+        KomodoObject twitterView = vdbNode.getChild(null, TWITTER_VIEW_MODEL);
+        KomodoObject[] tweets = twitterView.getChildren(null, "Tweet");
+        assertEquals(1, tweets.length);
+
+        KomodoObject tweet = verify(twitterView, "Tweet");
+
+        final CountDownLatch updateLatch = new CountDownLatch(1);
+        final Throwable[] errorHolder = new Throwable[1];
+        UnitOfWork transaction = _repo.createTransaction("vdbtests-setqueryexp-value", false, new UnitOfWorkListener() {
+
+            @Override
+            public boolean awaitSequencerCompletion() {
+                return true;
+            }
+
+            @Override
+            public void respond(Object results) {
+                updateLatch.countDown();
+            }
+
+            @Override
+            public void errorOccurred(Throwable error) {
+                updateLatch.countDown();
+                errorHolder[0] = error;
+            }
+        });
+
+        //
+        // Change the value of the query expression for the tweet node
+        //
+        tweet.setProperty(transaction, TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION, TWEET_QUERY_1);
+
+        //
+        // Commit the transaction and await the response of the callback
+        //
+        transaction.commit();
+
+        // Wait for the sequencing of the repository or timeout of 3 minutes
+        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
+        assertNull(errorHolder[0]);
+
+        traverse(_repo.createTransaction("traverse-queryexp-node", true, null), tweet.getAbsolutePath());
+
+        KomodoObject tweetQuery = verify(tweet, TeiidSqlLexicon.Query.ID);
+        verify(tweetQuery, TeiidSqlLexicon.From.ID, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.From.ID);
+        KomodoObject selectStmt = verify(tweetQuery, TeiidSqlLexicon.Select.ID, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.Select.ID);
+        KomodoObject symbolsStmt = verify(selectStmt, TeiidSqlLexicon.Select.SYMBOLS_REF_NAME, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.ElementSymbol.ID);
+        verifyProperty(symbolsStmt, Symbol.NAME_PROP_NAME, "title");
+        
+    }
+
+    @Test
+    public void testBasicVdbReImport()  throws Exception {
+        // Import the original vdb import first
+        testBasicVdbImport();
+
+        KLog.getLogger().debug("\n\n=== Reimporting edited tweet example ===");
+
+        // Set up the vdb reimport stream
+        InputStream vdbStream = setup(TWEET_EXAMPLE_REIMPORT);
+
+        // Options for the import (default)
+        //
+        // Handling existing node set to OVERWRITE by default
+        //
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, TWEET_EXAMPLE);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(null);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+
+        verifyTweetExampleNode(vdbNode, WARBLE_MODEL, WARBLE_VIEW_MODEL, TWEET_EXAMPLE_REIMPORT_DDL);
     }
 
     private void verifyAllElementsExampleNode(KomodoObject allElementsNode) throws Exception {

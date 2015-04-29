@@ -42,7 +42,10 @@ public class Messages implements StringConstants {
         errorFileNotReadableMsg,
         errorEmptyMsg,
         ddlDoesNotSupportVDB,
-        vdbOnlySupportsVDB;
+        vdbOnlySupportsVDB,
+        nodeExistsReturn,
+        nodeExistCreateNew,
+        newNameFailure;
 
         @Override
         public String toString() {

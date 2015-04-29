@@ -50,26 +50,16 @@ public class DdlImporter extends AbstractImporter {
      * constructor
      *
      * @param repository repository into which ddl should be imported
-     *
-     * @param transaction the transaction used for importing the DDL schema
-     */
-    public DdlImporter(Repository repository, UnitOfWork transaction) {
-        // set default import type to model
-        super(repository, ImportType.MODEL, transaction);
-    }
-
-    /**
-     * constructor
-     *
-     * @param repository repository into which ddl should be imported
-     *
      */
     public DdlImporter(Repository repository) {
-        this(repository, null);
+        // set default import type to model
+        super(repository, ImportType.MODEL);
     }
 
     @Override
-    protected KomodoObject executeImport(String content, ImportOptions importOptions, UnitOfWork transaction) throws KException {
+    protected KomodoObject executeImport(UnitOfWork transaction, String content,
+                                                                     ImportOptions importOptions,
+                                                                     ImportMessages importMessages) throws KException {
         String name = importOptions.getOption(OptionKeys.NAME).toString();
 
         switch(importType) {

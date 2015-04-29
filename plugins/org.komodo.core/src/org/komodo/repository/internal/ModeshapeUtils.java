@@ -30,6 +30,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.nodetype.NodeType;
 import org.komodo.repository.Messages;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.modeshape.jcr.JcrRepository;
 import org.modeshape.jcr.ModeShapeEngine;
 import org.modeshape.jcr.api.Session;
@@ -37,7 +38,7 @@ import org.modeshape.jcr.api.Session;
 /**
  *
  */
-public class ModeshapeUtils {
+public class ModeshapeUtils implements StringConstants {
 
     private ModeshapeUtils() {}
 
@@ -91,6 +92,21 @@ public class ModeshapeUtils {
         nodeTypes.add(node.getPrimaryNodeType());
         nodeTypes.addAll(Arrays.asList(node.getMixinNodeTypes()));
         return nodeTypes;
+    }
+
+    /**
+     * @param node the node
+     * @param namespace the type namespace
+     * @return true if the node has any types with the given namespace
+     * @throws RepositoryException if error occurs
+     */
+    public static boolean hasTypeNamespace(Node node, String namespace) throws RepositoryException {
+        for (String name : getAllNodeTypeNames(node)) {
+            if (name.startsWith(namespace + COLON))
+                return true;
+        }
+
+        return false;
     }
 
     /**
