@@ -782,8 +782,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     
 
     @Test
+    @Ignore("This will not succeed until MODE-2464 has been fixed")
     public void testBooksExample_Full_Vdb() throws Exception {
-        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
         InputStream vdbStream = setup(BOOKS_EXAMPLE_FULL);
 
         // Options for the import (default)
