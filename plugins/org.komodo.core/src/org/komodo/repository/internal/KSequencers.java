@@ -22,8 +22,8 @@
 package org.komodo.repository.internal;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.jcr.Node;
@@ -62,7 +62,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
     // List appended to by running sequencers detailing their unique identifiers
     private List<String> runningSequencers = new ArrayList<String>();
 
-    private Set<KSequencerListener> listeners = new LinkedHashSet<KSequencerListener>();
+    private Set<KSequencerListener> listeners = new HashSet<KSequencerListener>();
 
     /**
      * Create new instance
@@ -93,7 +93,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
      * Dispose of this instance
      */
     @Override
-    public void dispose() {
+    public synchronized void dispose() {
         if (session != null) {
             session.logout();
             session = null;
@@ -104,16 +104,22 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
      * @param listener the listener to add
      */
     @Override
-    public synchronized void addSequencerListener(KSequencerListener listener) {
-        listeners.add(listener);
-    }
+    public synchronized void addSequencerListener(KSequencerListener listener) throws Exception {
+        //
+        // Events are passed the user data using the observation manager so
+        // to identifier the event with this commit request, set the user data
+        // to the request id.
+        //
+        // This connects the sequencer listener constructed above with the
+        // events being generated from saving the session, ensuring that the
+        // correct listener is notified.
+        //
+        String id = listener.id();
+        javax.jcr.Session session = listener.session();
 
-    /**
-     * @param listener the listener to remove
-     */
-    @Override
-    public synchronized void removeSequencerListener(KSequencerListener listener) {
-        listeners.remove(listener);
+        session.getWorkspace().getObservationManager().setUserData(id);
+
+        listeners.add(listener);
     }
 
     /**
@@ -273,13 +279,13 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         }
     }
 
-    private boolean sequence(SequencerType sequencerType, Property property, Node outputNode) throws Exception {
+    private boolean sequence(SequencerType sequencerType, Property property,
+                                                 Node outputNode, String eventId) throws Exception {
+        KLog.getLogger().debug("Executing pre-sequencing of " + sequencerType.name() + " Sequencer for property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
+        preSequenceClean(sequencerType, outputNode);
+
         Session seqSession = ModeshapeUtils.createSession(getIdentifier());
-
         try {
-            KLog.getLogger().debug("Executing pre-sequencing of " + sequencerType.name() + " Sequencer for property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
-            preSequenceClean(sequencerType, outputNode);
-
             KLog.getLogger().debug("Executing " + sequencerType.name() + " Sequencer on property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
 
             Property seqProperty = seqSession.getProperty(property.getPath());
@@ -296,7 +302,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
                     // Sequencer executed and changed something
 
                     // Create an identifier for this sequencer's work
-                    String seqPropId = encode(sequencerType, property);
+                    String seqPropId = encode(eventId, sequencerType, property);
 
                     // Adds the identifier to the user data for the 'next' event to be received by this listener
                     seqSession.getWorkspace().getObservationManager().setUserData(seqPropId);
@@ -318,32 +324,52 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         }
     }
 
-    private String encode(SequencerType sequencerType, Property property) throws Exception {
-        return sequencerType.name() + HYPHEN + property.getPath();
+    private String encode(String eventId, SequencerType sequencerType, Property property) throws Exception {
+        return eventId + HYPHEN + sequencerType.name() + HYPHEN + property.getPath();
     }
 
-    private boolean sequence(SequencerType sequencerType, Property property) throws Exception {
+    private boolean sequence(SequencerType sequencerType, Property property, String eventId) throws Exception {
         sequencingActive = true;
 
         Node outputNode = property.getParent();
         if (SequencerType.VDB.equals(sequencerType))
             outputNode = outputNode.getParent();
 
-        return sequence(sequencerType, property, outputNode);
+        return sequence(sequencerType, property, outputNode, eventId);
     }
 
-    private synchronized void notifySequencerCompletion() {
-        KLog.getLogger().debug("KSequencers complete. Notifying clients"); //$NON-NLS-1$
+    private void notifySequencerCompletion(String eventUserData) {
+        Iterator<KSequencerListener> iterator = listeners.iterator();
+        while(iterator.hasNext()) {
+            KSequencerListener listener = iterator.next();
 
-        for (KSequencerListener listener : listeners) {
+            if (! listener.session().isLive()) {
+                iterator.remove();
+                continue;
+            }
+
+            if (eventUserData == null || ! eventUserData.startsWith(listener.id()))
+                continue; // Listener is not listening for this event
+
+            KLog.getLogger().debug("KSequencers complete. Notifying " + listener); //$NON-NLS-1$
             listener.sequencingCompleted();
         }
     }
 
-    private synchronized void notifySequencerError(Exception exception) {
-        KLog.getLogger().error("Sequencing error", exception); //$NON-NLS-1$
+    private void notifySequencerError(String eventUserData, Exception exception) {
+        Iterator<KSequencerListener> iterator = listeners.iterator();
+        while (iterator.hasNext()) {
+            KSequencerListener listener = iterator.next();
 
-        for (KSequencerListener listener : listeners) {
+            if (! listener.session().isLive()) {
+                iterator.remove();
+                continue;
+            }
+
+            if (eventUserData == null || ! eventUserData.startsWith(listener.id()))
+                continue; // Listener is not listening for this event
+
+            KLog.getLogger().error("KSequencers error. Notifying ", listener + " of exception " + exception); //$NON-NLS-1$ //$NON-NLS-2$
             listener.sequencingError(exception);
         }
     }
@@ -352,12 +378,12 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
     public void onEvent(EventIterator events) {
         KLog.getLogger().debug("KSequencers: onEvent() called"); //$NON-NLS-1$
 
-        String seqResponseIdentifier = null;
+        String eventUserData = null;
         try {
             while (events.hasNext()) {
                 Event event = events.nextEvent();
                 String eventPath = event.getPath();
-                seqResponseIdentifier = event.getUserData();
+                eventUserData = event.getUserData();
 
                 switch (event.getType()) {
                     case Event.NODE_ADDED:
@@ -372,7 +398,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
                         continue;
                     case Event.PROPERTY_ADDED:
                     case Event.PROPERTY_CHANGED:
-                        KLog.getLogger().debug("KSequencers: processing event for path " + eventPath); //$NON-NLS-1$
+                        KLog.getLogger().debug("KSequencers: processing event " + eventUserData + " for path " + eventPath); //$NON-NLS-1$ //$NON-NLS-2$
 
                         if (! session.propertyExists(eventPath)) {
                             // property never got as far as being visible to this session
@@ -385,7 +411,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
                         if (sequencerType == null)
                             continue;
 
-                        sequence(sequencerType, property);
+                        sequence(sequencerType, property, eventUserData);
                 }
             }
 
@@ -394,7 +420,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
             //
 
             if (! sequencingActive) {
-                notifySequencerCompletion();
+                notifySequencerCompletion(eventUserData);
                 return; // No sequencers started so nothing further to do
             }
 
@@ -405,10 +431,10 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
             // If this set of events has a user-data object, try removing it from runningSequencers
             // since this confirms that this set of events is the completion of that particular sequencer.
             //
-            if (seqResponseIdentifier != null) {
-                boolean removed = runningSequencers.remove(seqResponseIdentifier);
+            if (eventUserData != null) {
+                boolean removed = runningSequencers.remove(eventUserData);
                 if (removed)
-                    KLog.getLogger().debug("Sequencer with id " + seqResponseIdentifier + " has completed"); //$NON-NLS-1$ //$NON-NLS-2$
+                    KLog.getLogger().debug("Sequencer with id " + eventUserData + " has completed"); //$NON-NLS-1$ //$NON-NLS-2$
             }
 
             //
@@ -425,7 +451,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
                 //
                 // Notify clients that sequencing has completed
                 //
-                notifySequencerCompletion();
+                notifySequencerCompletion(eventUserData);
             } else {
                 //
                 // Still sequencers are currently executing
@@ -441,7 +467,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         } catch (Exception ex) {
             sequencingActive = false;
             runningSequencers.clear();
-            notifySequencerError(ex);
+            notifySequencerError(eventUserData, ex);
             return;
         }
     }

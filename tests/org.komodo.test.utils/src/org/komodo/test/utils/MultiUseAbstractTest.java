@@ -198,8 +198,8 @@ public abstract class MultiUseAbstractTest extends AbstractLoggingTest {
         return sequencers;
     }
 
-    protected SequencerLatchListener addSequencingListenerLatch() {
-        return new SequencerLatchListener(sequencers());
+    protected SynchronousSequencerListener addSequencingListenerLatch(String listenerId, Session session) throws Exception {
+        return new SynchronousSequencerListener(listenerId, session, sequencers());
     }
 
     protected JcrSession session() {

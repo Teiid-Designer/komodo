@@ -35,6 +35,7 @@ import org.komodo.repository.internal.ModeshapeEngineThread.RequestType;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.KLog;
 
 /**
  * A repository installed on the local machine, using the modeshape engine and repository.
@@ -319,8 +320,10 @@ public class LocalRepository extends RepositoryImpl {
                             setState( State.COMMITTED );
 
                             if (getCallback() != null) {
+                                KLog.getLogger().debug(LocalRepositoryTransaction.class.getName() + ": Responding to callback: " + getCallback().getClass().getName()); //$NON-NLS-1$
                                 getCallback().respond( null );
-                            }
+                            } else
+                                KLog.getLogger().debug(LocalRepositoryTransaction.class.getName() + ": No callback specified"); //$NON-NLS-1$
                         }
 
                     }
@@ -331,7 +334,6 @@ public class LocalRepository extends RepositoryImpl {
                                                                                                         callback,
                                                                                                         getSession(),
                                                                                                         getName() );
-                    request.setAwaitSequencers(getCallback() != null ? getCallback().awaitSequencerCompletion() : false);
                     LocalRepository.this.engineThread.accept( request );
                 }
             }

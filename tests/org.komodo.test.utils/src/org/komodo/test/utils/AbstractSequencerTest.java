@@ -173,11 +173,12 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
                 throw new UnsupportedOperationException("Not tested by these sequencer tests");
         }
 
-        SequencerLatchListener listener = addSequencingListenerLatch();
+        Session session = node.getSession();
+        String requestId = getClass().getName() + session.hashCode();
+        SynchronousSequencerListener listener = addSequencingListenerLatch(requestId, session);
+        session.save();
 
-        node.getSession().save();
-
-        assertTrue(listener.getLatch().await(3, TimeUnit.MINUTES));
+        assertTrue(listener.await(3, TimeUnit.MINUTES));
         assertFalse(listener.exceptionOccurred());
 
         traverse(node);

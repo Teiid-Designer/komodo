@@ -21,36 +21,33 @@
  */
 package org.komodo.repository;
 
-import javax.jcr.Session;
-import org.komodo.repository.internal.KSequencers;
-
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 
 /**
- * Listener for {@link KSequencers} events
+ * Acts like a {@link SynchronousCallback} but will also call a delegate
+ * callback added by its constructor. Thus, allowing for a callback to 'do'
+ * something as well as being called synchronously.
  */
-public interface KSequencerListener {
+public class SynchronousNestedCallback extends SynchronousCallback {
+
+    private final UnitOfWorkListener delegate;
 
     /**
-     * @return unique id of the events to listen for. This id should match
-     *                the id
+     * @param delegate additional callback to be called synchronously
      */
-    String id();
+    public SynchronousNestedCallback(UnitOfWorkListener delegate) {
+        this.delegate = delegate;
+    }
 
-    /**
-     * @return the session associated with the sequence listener
-     */
-    Session session();
+    @Override
+    public void respond(Object results) {
+        super.respond(results);
+        delegate.respond(results);
+    }
 
-    /**
-     * Will be called when all sequencers have been executed
-     */
-    void sequencingCompleted();
-
-    /**
-     * Will be called if the sequencers encounter an error
-     *
-     * @param exception error encountered
-     */
-    void sequencingError(Exception exception);
-
+    @Override
+    public void errorOccurred(Throwable error) {
+        super.errorOccurred(error);
+        delegate.errorOccurred(error);
+    }
 }

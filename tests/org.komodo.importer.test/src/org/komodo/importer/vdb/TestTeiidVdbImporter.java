@@ -22,6 +22,7 @@
 package org.komodo.importer.vdb;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -29,8 +30,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.importer.AbstractImporterTest;
 import org.komodo.importer.ImportMessages;
@@ -44,10 +45,10 @@ import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
@@ -344,28 +345,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     }
 
     private void setModelDefinitionAwaitSequencing(Model model, String defn) throws Exception {
-        final CountDownLatch updateLatch = new CountDownLatch(1);
-        final Throwable[] errorHolder = new Throwable[1];
-
-        UnitOfWork transaction = _repo.createTransaction("vdbtests-setmodeldefn-value", false, new UnitOfWorkListener() {
-
-            @Override
-            public boolean awaitSequencerCompletion() {
-                return true;
-            }
-
-            @Override
-            public void respond(Object results) {
-                updateLatch.countDown();
-            }
-
-            @Override
-            public void errorOccurred(Throwable error) {
-                updateLatch.countDown();
-                errorHolder[0] = error;
-            }
-        });
-
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork transaction = _repo.createTransaction("vdbtests-setmodeldefn-value", false, callback);
         assertNotNull(transaction);
 
         model.setModelDefinition(transaction, defn);
@@ -376,8 +357,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         transaction.commit();
 
         // Wait for the sequencing of the repository or timeout of 3 minutes
-        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
-        assertNull(errorHolder[0]);
+        assertTrue(callback.await(3, TimeUnit.MINUTES));
+        assertFalse(callback.hasError());
 
         traverse(_repo.createTransaction("traverse-modeldef-node", true, null), model.getAbsolutePath());
     }
@@ -440,26 +421,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KomodoObject tweet = verify(twitterView, "Tweet");
 
-        final CountDownLatch updateLatch = new CountDownLatch(1);
-        final Throwable[] errorHolder = new Throwable[1];
-        UnitOfWork transaction = _repo.createTransaction("vdbtests-setqueryexp-value", false, new UnitOfWorkListener() {
-
-            @Override
-            public boolean awaitSequencerCompletion() {
-                return true;
-            }
-
-            @Override
-            public void respond(Object results) {
-                updateLatch.countDown();
-            }
-
-            @Override
-            public void errorOccurred(Throwable error) {
-                updateLatch.countDown();
-                errorHolder[0] = error;
-            }
-        });
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork transaction = _repo.createTransaction("vdbtests-setqueryexp-value", false, callback);
 
         //
         // Change the value of the query expression for the tweet node
@@ -472,8 +435,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         transaction.commit();
 
         // Wait for the sequencing of the repository or timeout of 3 minutes
-        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
-        assertNull(errorHolder[0]);
+        assertTrue(callback.await(3, TimeUnit.MINUTES));
+        assertFalse(callback.hasError());
 
         traverse(_repo.createTransaction("traverse-queryexp-node", true, null), tweet.getAbsolutePath());
 

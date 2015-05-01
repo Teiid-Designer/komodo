@@ -26,21 +26,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.Messages.IMPORTER;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
+import org.modeshape.jcr.JcrLexicon;
 
 /**
  *
@@ -56,55 +57,6 @@ public abstract class AbstractImporter implements StringConstants {
     private Repository repository;
 
     protected ImportType importType;
-
-    private static class LatchTransactionPair {
-
-        private final UnitOfWork transaction;
-
-        private final CountDownLatch sequencerLatch;
-
-        /**
-         * Create new instance
-         *
-         * @param name name of the transaction
-         * @param repository the repository
-         * @throws KException if error occurs
-         */
-        public LatchTransactionPair(String name, Repository repository) throws KException {
-            sequencerLatch = new CountDownLatch(1);
-            transaction = repository.createTransaction(name, false, new UnitOfWorkListener() {
-
-                @Override
-                public boolean awaitSequencerCompletion() {
-                    return true;
-                }
-
-                @Override
-                public void respond(Object results) {
-                    sequencerLatch.countDown();
-                }
-
-                @Override
-                public void errorOccurred(Throwable error) {
-                    sequencerLatch.countDown();
-                }
-            });
-        }
-
-        /**
-         * @return the sequencerLatch
-         */
-        public CountDownLatch getSequencerLatch() {
-            return this.sequencerLatch;
-        }
-
-        /**
-         * @return the transaction
-         */
-        public UnitOfWork getTransaction() {
-            return this.transaction;
-        }
-    }
 
     /**
      * @param repository the repository
@@ -232,20 +184,20 @@ public abstract class AbstractImporter implements StringConstants {
 
         ArgCheck.isNotNull(importType);
 
-        LatchTransactionPair latchTransPair = new LatchTransactionPair(EXISTING_TRANSACTION_NAME,
-                                                                                                                   getRepository());
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork transaction = getRepository().createTransaction(EXISTING_TRANSACTION_NAME, false, callback);
 
-        boolean doImport = handleExistingNode(latchTransPair.getTransaction(), importOptions, importMessages);
+        boolean doImport = handleExistingNode(transaction, importOptions, importMessages);
 
         //
         // Commit the operations performed in handling existing node
         //
-        latchTransPair.getTransaction().commit();
+        transaction.commit();
 
         //
         // Wait for the sequencers to do something if anything
         //
-        latchTransPair.getSequencerLatch().await(3, TimeUnit.MINUTES);
+        callback.await(3, TimeUnit.MINUTES);
 
         if (! doImport) {
             // Handling existing node advises not to continue
@@ -255,18 +207,20 @@ public abstract class AbstractImporter implements StringConstants {
         //
         // Create object in workspace
         //
-        latchTransPair = new LatchTransactionPair(IMPORT_TRANSACTION_NAME, getRepository());
-        KomodoObject resultNode = executeImport(latchTransPair.getTransaction(), content, importOptions, importMessages);
+        callback = new SynchronousCallback();
+        transaction = getRepository().createTransaction(IMPORT_TRANSACTION_NAME, false, callback);
+
+        KomodoObject resultNode = executeImport(transaction, content, importOptions, importMessages);
 
         //
         // Commit the operations performed in handling existing node
         //
-        latchTransPair.getTransaction().commit();
+        transaction.commit();
 
         //
         // Wait for the sequencers to do something if anything
         //
-        latchTransPair.getSequencerLatch().await(3, TimeUnit.MINUTES);
+        callback.await(3, TimeUnit.MINUTES);
 
         return resultNode;
     }
