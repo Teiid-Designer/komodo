@@ -2,12 +2,10 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -22,6 +20,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.mockito.Mockito;
@@ -33,18 +32,18 @@ import org.mockito.Mockito;
 public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
     private static KEngine kEngine = KEngine.getInstance();
-    
+
 	private ShellCommandFactory factory;
 	private ShellCommandReader reader;
 	private Writer writer;
 	private Writer commandWriter;
-	private Class testedCommandClass;
+	private Class< ? extends ShellCommand > testedCommandClass;
     protected WorkspaceStatusImpl wsStatus;
-	
+
 
     /**
-     * @param kEngine 
-     * @throws Exception 
+     * @param kEngine
+     * @throws Exception
      */
     @BeforeClass
     public static void startKEngine() throws Exception {
@@ -81,9 +80,9 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	 * Setup the test
 	 * @param commandFile the file containing the command
 	 * @param commandClass the command being tested
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public void setup(String commandFile, Class commandClass) throws Exception {
+	public void setup(String commandFile, Class< ? extends ShellCommand > commandClass) throws Exception {
 	    assertEquals(RepositoryClient.State.STARTED, kEngine.getState());
         assertEquals(Repository.State.REACHABLE, kEngine.getDefaultRepository().getState());
 
@@ -92,30 +91,41 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         Mockito.when(komodoShell.getInputStream()).thenReturn(System.in);
         Mockito.when(komodoShell.getOutputStream()).thenReturn(System.out);
 
-        wsStatus = new WorkspaceStatusImpl(komodoShell);
+        wsStatus = new WorkspaceStatusImpl(this.uow, komodoShell);
 		this.factory = new ShellCommandFactory(wsStatus);
 		this.testedCommandClass = commandClass;
-		
+
     	try {
     		String commandFilePath = "./resources/" + commandFile; //$NON-NLS-1$
-    		//String commandFilePath = UnitTestUtil.getTestDataPath() + "../resources" + commandFile;
     		String[] args = new String[]{"-f", commandFilePath}; //$NON-NLS-1$
-    		
+
     		// Create the FileReader
 			reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
 	        reader.open();
-	        
+
 	        // Writer to store the output
 	        writer = new StringWriter();
 	        commandWriter = new StringWriter();
+
 		} catch (Exception e) {
 			Assert.fail("Failed - setup error: "+e.getMessage()); //$NON-NLS-1$
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see org.komodo.test.utils.AbstractLocalRepositoryTest#commit()
+	 */
+	@Override
+	protected void commit() throws Exception {
+	    super.commit();
+	    this.wsStatus.setTransaction( this.uow );
+	}
+
     /**
 	 * Teardown the test
-     * @throws Exception 
+     * @throws Exception
 	 */
 	@After
 	public void teardown( ) throws Exception {
@@ -129,7 +139,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 		this.writer = null;
 		this.commandWriter = null;
 	}
-	
+
 	/**
 	 * Executes the command file, putting the result output into writer
 	 */
@@ -140,7 +150,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 			try {
 				command = this.reader.read();
 				if(command==null || command instanceof ExitCommand) break;
-				
+
 				if(command.getClass().getName().equals(testedCommandClass.getName())) {
 					command.setOutput(this.commandWriter);
 				} else {
@@ -159,7 +169,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 			}
 		}
 	}
-	
+
 	/**
 	 * Get command output.  Contains only the output of the command being tested.
 	 * @return the output
@@ -167,7 +177,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	public String getCommandOutput() {
 		return this.commandWriter.toString();
 	}
-	
+
 	/**
 	 * Get the message indent string
 	 * @return the indent string
@@ -180,17 +190,18 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 		}
 		return sb.toString();
 	}
-	
-	@SuppressWarnings("unchecked")
-	public static KomodoObject resolveType(final KomodoObject ko, final Class resolvedClass) {
+
+	public static < T extends KomodoObject > KomodoObject resolveType( final UnitOfWork transaction,
+	                                                                   final KomodoObject ko,
+	                                                                   final Class< T > resolvedClass) {
 		try {
-			return WorkspaceManager.getInstance(_repo).resolve(null, ko, resolvedClass);
+			return WorkspaceManager.getInstance(_repo).resolve(transaction, ko, resolvedClass);
 		} catch ( KException ke) {
 			Assert.fail("Failed : "+ ke.getMessage()); //$NON-NLS-1$
 		}
-		
+
 		return null;
 	}
 
-		 
+
 }

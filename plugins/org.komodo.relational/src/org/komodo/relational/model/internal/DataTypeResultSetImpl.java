@@ -10,8 +10,8 @@ package org.komodo.relational.model.internal;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.DataTypeResultSet;
@@ -22,6 +22,8 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
@@ -115,7 +117,7 @@ public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -135,39 +137,22 @@ public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject
      * @see org.komodo.relational.model.DataTypeResultSet#getDisplayString(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public String getDisplayString( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public String getDisplayString( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "datatyperesultsetimpl-getDisplayString", true, null ); //$NON-NLS-1$
+        final StringBuilder result = new StringBuilder( getType( transaction ).toString() );
+        final long length = getLength( transaction );
+
+        if ( length != 0 ) {
+            result.append( '(' ).append( length ).append( ')' );
         }
 
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "getDisplayString: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
+        if ( isArray( transaction ) ) {
+            result.append( "[]" ); //$NON-NLS-1$
         }
 
-        try {
-            final StringBuilder result = new StringBuilder( getType( transaction ).toString() );
-            final long length = getLength( transaction );
-
-            if (length != 0) {
-                result.append( '(' ).append( length ).append( ')' );
-            }
-
-            if (isArray( transaction )) {
-                result.append( "[]" ); //$NON-NLS-1$
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result.toString();
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        return result.toString();
     }
 
     /**

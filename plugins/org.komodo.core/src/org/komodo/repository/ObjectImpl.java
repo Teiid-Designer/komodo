@@ -23,7 +23,6 @@ import javax.jcr.nodetype.NodeType;
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
 import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
-import org.komodo.repository.search.ObjectSearcher;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
@@ -31,13 +30,14 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoObjectVisitor;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
-import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrNtLexicon;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrTools;
@@ -53,42 +53,37 @@ public class ObjectImpl implements KomodoObject, StringConstants {
 
     private static final KLog LOGGER = KLog.getLogger();
 
-    private static final List<String> ignorableNamespaces = Arrays.asList(new String[]{"nt:", "mix:", "mode:", "jcr:"});   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    protected static Descriptor[] getAllDescriptors( final UnitOfWork transaction,
+                                                     final KomodoObject kobject ) throws KException {
+        assert ( transaction != null );
 
-    /**
-     * Only one of the {@link UnitOfWork transactions} passed in should be non-<code>null</code>. Ensures that a transaction
-     * rollback occurs if the transaction was constructed within the method.
-     *
-     * @param transactionParameter
-     *        the transaction passed into the method (can be <code>null</code>)
-     * @param transactionVariable
-     *        the transaction constructed within the method (can be <code>null</code>)
-     * @param e
-     *        the error being handled (cannot be <code>null</code>)
-     * @return the error passed in if already a {@link KException} or the error passed in wrapped in a {@link KException}
-     */
-    public static KException handleError( final UnitOfWork transactionParameter,
-                                          final UnitOfWork transactionVariable,
-                                          final Exception e ) {
-        assert (e != null);
-        assert ((transactionParameter == null) && (transactionVariable != null))
-               || ((transactionParameter != null) && (transactionVariable == null))
-               || ((transactionParameter == transactionVariable));
-
-        if (transactionParameter == null) {
-            transactionVariable.rollback();
-        }
-
-        if (e instanceof KException) {
-            return (KException)e;
-        }
-
-        return new KException(e);
+        final Descriptor[] mixins = kobject.getDescriptors( transaction );
+        final Descriptor[] allDescriptors = new Descriptor[ mixins.length + 1 ];
+        System.arraycopy( mixins, 0, allDescriptors, 0, mixins.length );
+        allDescriptors[mixins.length] = kobject.getPrimaryType( transaction );
+        return allDescriptors;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * Wraps error in a {@link KException} if necessary.
+     *
+     * @param e
+     *        the error being handled (cannot be <code>null</code>)
+     * @return the error (never <code>null</code>)
+     */
+    public static KException handleError( final Exception e ) {
+        assert ( e != null );
+
+        if ( e instanceof KException ) {
+            return ( KException )e;
+        }
+
+        return new KException( e );
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the object is located (cannot be <code>null</code>)
      * @param kobject
@@ -100,50 +95,36 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @throws KException
      *         if an error occurs or if the property value is not the expected value
      */
-    public static void validatePropertyValue( final UnitOfWork uow,
+    public static void validatePropertyValue( final UnitOfWork transaction,
                                               final Repository repository,
                                               final KomodoObject kobject,
                                               final String name,
                                               final Object expectedValue ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        boolean valid = true;
+        final Property property = kobject.getProperty( transaction, name );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("objectimpl-validatePropertyValue", true, null); //$NON-NLS-1$
+        if ( property == null ) {
+            if ( expectedValue != null ) {
+                valid = ( ( expectedValue instanceof String ) && StringUtils.isBlank( ( String )expectedValue ) );
+            }
+        } else {
+            valid = property.getValue( transaction ).equals( expectedValue );
         }
 
-        assert (transaction != null);
-
-        try {
-            boolean valid = true;
-            final Property property = kobject.getProperty(transaction, name);
-
-            if (property == null) {
-                if (expectedValue != null) {
-                    valid = ((expectedValue instanceof String) && StringUtils.isBlank((String)expectedValue));
-                }
-            } else {
-                valid = property.getValue(transaction).equals(expectedValue);
-            }
-
-            if (!valid) {
-                throw new KException(Messages.getString(Komodo.INVALID_PROPERTY_VALUE, kobject.getAbsolutePath(), name));
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+        if ( !valid ) {
+            throw new KException( Messages.getString( Komodo.INVALID_PROPERTY_VALUE, kobject.getAbsolutePath(), name ) );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the object is located (cannot be <code>null</code>)
      * @param kobject
@@ -154,37 +135,24 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @throws KException
      *         if an error occurs or if object does not have all the specified types
      */
-    public static void validateType( final UnitOfWork uow,
+    public static void validateType( final UnitOfWork transaction,
                                      final Repository repository,
                                      final KomodoObject kobject,
                                      final String... types ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(types, "types"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
 
-        if (transaction == null) {
-            transaction = repository.createTransaction("objectimpl-validateType", true, null); //$NON-NLS-1$
-        }
+        for ( final String type : types ) {
+            ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
 
-        assert (transaction != null);
-
-        try {
-            for (final String type : types) {
-                ArgCheck.isNotEmpty(type, "type"); //$NON-NLS-1$
-
-                if (!kobject.hasDescriptor(transaction, type) && !type.equals(kobject.getPrimaryType(transaction).getName())) {
-                    throw new KException(Messages.getString(Komodo.INCORRECT_TYPE,
-                                                            kobject.getAbsolutePath(),
-                                                            kobject.getClass().getSimpleName()));
-                }
+            if ( !kobject.hasDescriptor( transaction, type ) && !type.equals( kobject.getPrimaryType( transaction ).getName() ) ) {
+                throw new KException( Messages.getString( Komodo.INCORRECT_TYPE,
+                                                          kobject.getAbsolutePath(),
+                                                          kobject.getClass().getSimpleName() ) );
             }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
         }
     }
 
@@ -213,92 +181,94 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         this.index = index;
     }
 
-    @Override
-    public KomodoType getTypeIdentifier(UnitOfWork uow) throws KException {
-        UnitOfWork transaction = uow;
+    private void internalSetProperty( final UnitOfWork transaction,
+                                      final String name,
+                                      final Object... values ) throws Exception {
+        final Session session = getSession( transaction );
+        final Node node = session.getNode( getAbsolutePath() );
+        final ValueFactory factory = session.getValueFactory();
+        final boolean exists = node.hasProperty( name );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("getTypeIdentifier", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        List<Descriptor> descriptors = new ArrayList<Descriptor>();
-        descriptors.add(getPrimaryType(transaction));
-        descriptors.addAll(Arrays.asList(getDescriptors(transaction)));
-
-        KomodoTypeRegistry registry  = KomodoTypeRegistry.getInstance();
-        Set<TypeIdentifier> identifiers = null;
-        for (Descriptor descriptor : descriptors) {
-            String name = descriptor.getName();
-            if( startsWithIgnorablePrefix(name) ) {
-            	continue;
+        // remove property
+        if ( values == null ) {
+            if ( exists ) {
+                node.getProperty( name ).remove();
+            } else {
+                throw new KException( Messages.getString( Messages.Komodo.UNABLE_TO_REMOVE_PROPERTY_THAT_DOES_NOT_EXIST,
+                                                          name,
+                                                          getAbsolutePath() ) );
             }
-            identifiers = registry.getIdentifiers(name);
-            if (! identifiers.isEmpty())
-                break;
-        }
-
-        KomodoType result;
-        if (identifiers == null) {
-            // No identifiers but could be DDL Statements container
-            String nodeName = getName(uow);
-            if (StandardDdlLexicon.STATEMENTS_CONTAINER.equals(nodeName))
-                return KomodoType.DDL_SCHEMA;
-
-            result = KomodoType.UNKNOWN;
-        } else if( identifiers.size() == 1 ) {
-        	result = identifiers.iterator().next().getKomodoType();
         } else {
-            //
-            // Only lexicon id with multiple identifiers is TABLE_ELEMENT
-            //
+            // must be an array at this point
+            final int count = values.length;
 
-            // ACCESS_PATTERN, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
-            //
-            // COLUMN, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
-            //
-            // PRIMARY_KEY, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
-            //
-            // UNIQUE_CONSTRAINT, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+            if ( exists ) {
+                final javax.jcr.Property property = node.getProperty( name );
+                final int type = property.getType();
+                final boolean multiple = property.isMultiple();
 
-            String accessPatternConstraint = TeiidDdlConstants.TeiidNonReservedWord.ACCESSPATTERN.toDdl();
-            String primaryKeyConstraint = DdlConstants.PRIMARY_KEY;
-            String uniqueConstraint = TeiidDdlConstants.TeiidReservedWord.UNIQUE.toDdl();
+                if ( count == 0 ) {
+                    if ( multiple ) {
+                        property.remove();
+                    } else {
+                        throw new KException( Messages.getString( Messages.Komodo.UNABLE_TO_REMOVE_SINGLE_VALUE_PROPERTY_WITH_EMPTY_ARRAY,
+                                                                  name,
+                                                                  getAbsolutePath() ) );
+                    }
+                } else if ( count > 1 ) {
+                    if ( multiple ) {
+                        setMultiValuedProperty( session, node, factory, name, values, type );
+                    } else {
+                        throw new KException( Messages.getString( Messages.Komodo.UNABLE_TO_SET_SINGLE_VALUE_PROPERTY_WITH_MULTIPLE_VALUES,
+                                                                  name,
+                                                                  getAbsolutePath() ) );
+                    }
+                } else {
+                    // only one value so set property
+                    if ( multiple ) {
+                        setMultiValuedProperty( session, node, factory, name, values, type );
+                    } else {
+                        // remove if value is null or empty string
+                        if ( ( values[0] == null )
+                             || ( ( values[0] instanceof String ) && StringUtils.isBlank( ( String )values[0] ) ) ) {
+                            node.getProperty( name ).remove();
+                        } else {
+                            node.setProperty( name, PropertyImpl.createValue( factory, values[0] ) );
+                        }
+                    }
+                }
+            } else {
+                // property does not exist and no values being set
+                if ( count == 0 ) {
+                    throw new KException( Messages.getString( Messages.Komodo.UNABLE_TO_REMOVE_PROPERTY_THAT_DOES_NOT_EXIST,
+                                                              name,
+                                                              getAbsolutePath() ) );
+                }
 
-            Property constProperty = getProperty(transaction, TeiidDdlLexicon.Constraint.TYPE);
-            if (constProperty == null)
-                result = KomodoType.UNKNOWN;
-            else {
-                String constType = constProperty.getStringValue(transaction);
-                if (accessPatternConstraint.equals(constType))
-                    result = KomodoType.ACCESS_PATTERN;
-                else if (primaryKeyConstraint.equals(constType))
-                    result = KomodoType.PRIMARY_KEY;
-                else if (uniqueConstraint.equals(constType))
-                    result = KomodoType.UNIQUE_CONSTRAINT;
-                else
-                    result = KomodoType.COLUMN;
+                // try and find property descriptor
+                final PropertyDescriptor propDescriptor = getPropertyDescriptor( transaction, name );
+
+                if ( propDescriptor == null ) {
+                    // could not find a property descriptor so assume if more than one value it is multi-valued
+                    if ( count > 1 ) {
+                        setMultiValuedProperty( session, node, factory, name, values, PropertyType.UNDEFINED );
+                    } else {
+                        if ( ( values[0] != null )
+                             && ( ( !( values[0] instanceof String ) ) || !StringUtils.isBlank( ( String )values[0] ) ) ) {
+                            node.setProperty( name, PropertyImpl.createValue( factory, values[0] ) );
+                        }
+                    }
+                } else if ( propDescriptor.isMultiple() ) {
+                    final int propType = PropertyDescriptorImpl.convert( propDescriptor.getType() );
+                    setMultiValuedProperty( session, node, factory, name, values, propType );
+                } else {
+                    if ( ( values[0] != null )
+                         && ( ( !( values[0] instanceof String ) ) || !StringUtils.isBlank( ( String )values[0] ) ) ) {
+                        node.setProperty( name, PropertyImpl.createValue( factory, values[0] ) );
+                    }
+                }
             }
         }
-
-        if (uow == null) {
-            transaction.commit();
-        }
-
-        return result;
-    }
-
-    ObjectImpl accessOuter() {
-        return this;
-    }
-
-    boolean startsWithIgnorablePrefix(String name) {
-    	for(String prefix : ignorableNamespaces ) {
-    		if( name.startsWith(prefix)) return true;
-    	}
-
-    	return false;
     }
 
     /**
@@ -314,23 +284,18 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * Implementation specific and not to be included on the interface!
      *
-     * @param uow
-     *        transaction for this operation. Can be null.
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the underlying object of this {@link ObjectImpl}
      * @throws KException
      *         if an error occurs
      */
-    protected Node node( UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-node", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    protected Node node( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("kobject-node: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+            LOGGER.debug("objectimpl-node: transaction = {0}", transaction.getName()); //$NON-NLS-1$
         }
 
         Node node = null;
@@ -376,10 +341,6 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 }
             }
 
-            if (uow == null) {
-                transaction.commit();
-            }
-
             if (node == null) {
                 // throw the original path not found exception
                 throw throwEx;
@@ -388,7 +349,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             // return the found node
             return node;
         } catch (final Exception e) {
-            throw handleError(transaction, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -399,20 +360,15 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String)
      */
     @Override
-    public KomodoObject addChild( final UnitOfWork uow,
+    public KomodoObject addChild( final UnitOfWork transaction,
                                   final String name,
                                   final String primaryType ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-addChild", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("kobject-addChild: transaction = {0}, name = {1}, primaryType = {2}", //$NON-NLS-1$
+            LOGGER.debug("objectimpl-addChild: transaction = {0}, name = {1}, primaryType = {2}", //$NON-NLS-1$
                          transaction.getName(),
                          name,
                          primaryType);
@@ -424,13 +380,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             final Node node = node(transaction).addNode(name, type);
             final KomodoObject result = new ObjectImpl(getRepository(), node.getPath(), node.getIndex());
 
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -441,19 +393,14 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String[])
      */
     @Override
-    public void addDescriptor( final UnitOfWork uow,
+    public void addDescriptor( final UnitOfWork transaction,
                                final String... descriptorNames ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(descriptorNames, "descriptorNames"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-addDescriptor", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("kobject-addDescriptor: transaction = {0}, descriptorNames = {1}", //$NON-NLS-1$
+            LOGGER.debug("objectimpl-addDescriptor: transaction = {0}, descriptorNames = {1}", //$NON-NLS-1$
                          transaction.getName(),
                          Arrays.asList(descriptorNames));
         }
@@ -465,12 +412,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 ArgCheck.isNotEmpty(mixin, "mixin"); //$NON-NLS-1$
                 node.addMixin(mixin);
             }
-
-            if (uow == null) {
-                transaction.commit();
-            }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -504,28 +447,19 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public KomodoObject getChild( final UnitOfWork uow,
+    public KomodoObject getChild( final UnitOfWork transaction,
                                   final String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("objectimpl-getChild", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final Node node = node(transaction).getNode(name);
             final KomodoObject result = new ObjectImpl(getRepository(), node.getPath(), 0);
 
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -536,42 +470,25 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String)
      */
     @Override
-    public KomodoObject getChild( final UnitOfWork uow,
+    public KomodoObject getChild( final UnitOfWork transaction,
                                   final String name,
                                   final String typeName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
 
-        if ( transaction == null ) {
-            transaction = getRepository().createTransaction( "objectimpl-getChild2", true, null ); //$NON-NLS-1$
+        final KomodoObject[] kids = getChildren( transaction, name );
+
+        if ( kids.length != 0 ) {
+            for ( final KomodoObject kid : kids ) {
+                if ( typeName.equals( kid.getPrimaryType( transaction ).getName() ) || kid.hasDescriptor( transaction, typeName ) ) {
+                    return kid;
+                }
+            }
         }
 
-        assert ( transaction != null );
-
-        try {
-            final ObjectSearcher searcher = new ObjectSearcher( this.repository );
-            searcher.addFromType( typeName );
-            searcher.addWhereParentClause( null, null, getAbsolutePath() );
-            searcher.addWhereSetClause( null, null, StringConstants.OPEN_SQUARE_BRACKET + JcrLexicon.NAME.getString()
-                                                    + StringConstants.CLOSE_SQUARE_BRACKET, name );
-
-            final List< KomodoObject > searchResults = searcher.searchObjects( transaction );
-
-            if ( searchResults.isEmpty() ) {
-                throw new KException( Messages.getString( Messages.Komodo.CHILD_NOT_FOUND, name, getAbsolutePath() ) );
-            }
-
-            final KomodoObject result = searchResults.get( 0 );
-
-            if ( uow == null ) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch ( final Exception e ) {
-            throw handleError( uow, transaction, e );
-        }
+        throw new KException( Messages.getString( Messages.Komodo.CHILD_NOT_FOUND, name, getAbsolutePath() ) );
     }
 
     /**
@@ -580,30 +497,19 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public KomodoObject[] getChildren( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("objectimpl-getChildren", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject[] result = getRawChildren(transaction);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final KomodoObject[] result = getRawChildren( transaction );
+        return result;
     }
 
     private KomodoObject[] getChildren( final UnitOfWork transaction,
                                         final NodeIterator itr ) throws Exception {
+        assert ( transaction != null );
+        assert ( transaction.getState() == State.NOT_STARTED );
+
         if (!itr.hasNext()) {
             return KomodoObject.EMPTY_ARRAY;
         }
@@ -624,29 +530,19 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getChildren(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public KomodoObject[] getChildren( final UnitOfWork uow,
+    public KomodoObject[] getChildren( final UnitOfWork transaction,
                                        final String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-getChildren", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         KomodoObject[] result = null;
 
         try {
             result = getChildren(transaction, node(transaction).getNodes(name));
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -657,30 +553,30 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String)
      */
     @Override
-    public KomodoObject[] getChildrenOfType( final UnitOfWork uow,
+    public KomodoObject[] getChildrenOfType( final UnitOfWork transaction,
                                              final String type ) throws KException {
-        ArgCheck.isNotEmpty(type, "type"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-getChildrenOfType", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
 
         try {
-            final ObjectSearcher searcher = new ObjectSearcher(this.repository);
-            searcher.addFromType(type);
-            searcher.addWhereParentClause(null, null, getAbsolutePath());
-            final List< KomodoObject > result = searcher.searchObjects( transaction );
+            KomodoObject[] kids = getChildren( transaction, node( transaction ).getNodes() );
 
-            if (uow == null) {
-                transaction.commit();
+            if ( kids.length != 0 ) {
+                final List< KomodoObject > matches = new ArrayList< KomodoObject >( kids.length );
+
+                for ( final KomodoObject kid : kids ) {
+                    if ( type.equals( kid.getPrimaryType( transaction ).getName() ) || kid.hasDescriptor( transaction, type ) ) {
+                        matches.add( kid );
+                    }
+                }
+
+                kids = matches.toArray( new KomodoObject[ matches.size() ] );
             }
 
-            return result.toArray( new KomodoObject[result.size()] );
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            return kids;
+        } catch ( final Exception e ) {
+            throw handleError( e );
         }
     }
 
@@ -691,16 +587,11 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String)
      */
     @Override
-    public Descriptor getDescriptor( final UnitOfWork uow,
+    public Descriptor getDescriptor( final UnitOfWork transaction,
                                      final String typeName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if ( transaction == null ) {
-            transaction = getRepository().createTransaction( "objectimpl-getDescriptor", true, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
 
         try {
             final Node node = node( transaction );
@@ -719,13 +610,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 throw new KException( Messages.getString( Messages.Komodo.DESCRIPTOR_NOT_FOUND, typeName, getAbsolutePath() ) );
             }
 
-            if ( uow == null ) {
-                transaction.commit();
-            }
-
             return result;
         } catch ( final Exception e ) {
-            throw handleError( uow, transaction, e );
+            throw handleError( e );
         }
     }
 
@@ -735,26 +622,12 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Descriptor[] getDescriptors( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public Descriptor[] getDescriptors( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-getDescriptors", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final Descriptor[] result = getRawDescriptors( transaction );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final Descriptor[] result = getRawDescriptors( transaction );
+        return result;
     }
 
     /**
@@ -773,25 +646,15 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KNode#getName(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public String getName( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-getName", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public String getName( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
             final String result = node(transaction).getName();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -801,14 +664,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public KomodoObject getParent( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-getParent", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
             final Node parent = node(transaction).getParent();
@@ -818,13 +676,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 parentPath += FORWARD_SLASH;
             }
 
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return new ObjectImpl(this.repository, parent.getPath(), 0);
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -834,25 +688,15 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getPrimaryType(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Descriptor getPrimaryType( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-getPrimaryType", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public Descriptor getPrimaryType( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
             final NodeType nodeType = node(transaction).getPrimaryNodeType();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return new DescriptorImpl(this.repository, nodeType.getName());
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -860,7 +704,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * Convenience method for retrieving a property.
      *
      * @param uow
-     *        the transaction. If null then a new transaction is generated.
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param returnValueType
      *        the type of the return value type
      * @param getterName
@@ -870,62 +714,50 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @return the value of the property cast to the specified return value type
      * @throws KException
      */
-    protected < T > T getObjectProperty( UnitOfWork uow,
-                                         PropertyValueType returnValueType,
-                                         String getterName,
-                                         String propertyPath ) throws KException {
-        UnitOfWork transaction = uow;
+    @SuppressWarnings( "unchecked" )
+    protected < T > T getObjectProperty( final UnitOfWork transaction,
+                                         final PropertyValueType returnValueType,
+                                         final String getterName,
+                                         final String propertyPath ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction(getClass().getSimpleName() + HYPHEN + getterName, true, null);
+        if ( LOGGER.isDebugEnabled() ) {
+            LOGGER.debug( getterName + ": transaction = {0}", transaction.getName() ); //$NON-NLS-1$
         }
 
-        assert (transaction != null);
+        T result = null;
+        Property property = getProperty( transaction, propertyPath );
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(getterName + ": transaction = {0}", transaction.getName()); //$NON-NLS-1$
-        }
-
-        try {
-            T result = null;
-            Property property = getProperty(transaction, propertyPath);
-
-            if (property != null) {
-                switch (returnValueType) {
-                    case STRING:
-                        result = (T)property.getStringValue(transaction);
-                        break;
-                    case LONG:
-                        result = (T)Long.valueOf(property.getLongValue(transaction));
-                        break;
-                    case INTEGER:
-                        result = (T)Integer.valueOf(Long.valueOf(property.getLongValue(transaction)).intValue());
-                        break;
-                    case BIG_DECIMAL:
-                        result = (T)property.getDecimalValue(transaction);
-                        break;
-                    case DOUBLE:
-                        result = (T)Double.valueOf(property.getDoubleValue(transaction));
-                        break;
-                    case BOOLEAN:
-                        result = (T)Boolean.valueOf(property.getBooleanValue(transaction));
-                        break;
-                    case CALENDAR:
-                        result = (T)property.getDateValue(transaction);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Further property types should be added for support in this method"); //$NON-NLS-1$
-                }
+        if ( property != null ) {
+            switch ( returnValueType ) {
+                case STRING:
+                    result = ( T )property.getStringValue( transaction );
+                    break;
+                case LONG:
+                    result = ( T )Long.valueOf( property.getLongValue( transaction ) );
+                    break;
+                case INTEGER:
+                    result = ( T )Integer.valueOf( Long.valueOf( property.getLongValue( transaction ) ).intValue() );
+                    break;
+                case BIG_DECIMAL:
+                    result = ( T )property.getDecimalValue( transaction );
+                    break;
+                case DOUBLE:
+                    result = ( T )Double.valueOf( property.getDoubleValue( transaction ) );
+                    break;
+                case BOOLEAN:
+                    result = ( T )Boolean.valueOf( property.getBooleanValue( transaction ) );
+                    break;
+                case CALENDAR:
+                    result = ( T )property.getDateValue( transaction );
+                    break;
+                default:
+                    throw new UnsupportedOperationException( "Further property types should be added for support in this method" ); //$NON-NLS-1$
             }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
         }
+
+        return result;
     }
 
     /**
@@ -934,28 +766,38 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getProperty(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public Property getProperty( final UnitOfWork uow,
+    public Property getProperty( final UnitOfWork transaction,
                                  final String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("objectimpl-getProperty", true, null); //$NON-NLS-1$
-        }
+        final Property result = getRawProperty( transaction, name );
+        return result;
+    }
 
-        assert (transaction != null);
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getPropertyDescriptor(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public PropertyDescriptor getPropertyDescriptor( final UnitOfWork transaction,
+                                                     final String propName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( propName, "propName" ); //$NON-NLS-1$
 
-        try {
-            final Property result = getRawProperty( transaction, name );
-
-            if (uow == null) {
-                transaction.commit();
+        for ( final Descriptor typeDescriptor : getAllDescriptors( transaction, this ) ) {
+            for ( final PropertyDescriptor propDescriptor : typeDescriptor.getPropertyDescriptors( transaction ) ) {
+                if ( propName.equals( propDescriptor.getName() ) ) {
+                    return propDescriptor;
+                }
             }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
         }
+
+        return null;
     }
 
     /**
@@ -964,26 +806,12 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getPropertyNames(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public String[] getPropertyNames( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public String[] getPropertyNames( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-getPropertyNames", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final String[] result = getRawPropertyNames( transaction );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final String[] result = getRawPropertyNames( transaction );
+        return result;
     }
 
     /**
@@ -992,26 +820,16 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getRawChildren(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public final KomodoObject[] getRawChildren( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("objectimpl-getRawChildren", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public final KomodoObject[] getRawChildren( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
-            final NodeIterator itr = node(transaction).getNodes();
-            final KomodoObject[] result = getChildren(transaction, itr);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
+            final NodeIterator itr = node( transaction ).getNodes();
+            final KomodoObject[] result = getChildren( transaction, itr );
             return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+        } catch ( final Exception e ) {
+            throw handleError( e );
         }
     }
 
@@ -1021,14 +839,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getRawDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public final Descriptor[] getRawDescriptors( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if ( transaction == null ) {
-            transaction = getRepository().createTransaction( "objectimpl-getRawDescriptors", true, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
+    public final Descriptor[] getRawDescriptors( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
             final Node node = node( transaction );
@@ -1040,13 +853,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 result[i++] = new DescriptorImpl( this.repository, nodeType.getName() );
             }
 
-            if ( uow == null ) {
-                transaction.commit();
-            }
-
             return result;
         } catch ( final Exception e ) {
-            throw handleError( uow, transaction, e );
+            throw handleError( e );
         }
     }
 
@@ -1057,16 +866,11 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String)
      */
     @Override
-    public final Property getRawProperty( final UnitOfWork uow,
+    public final Property getRawProperty( final UnitOfWork transaction,
                                           final String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if ( transaction == null ) {
-            transaction = getRepository().createTransaction( "objectimpl-getRawProperty", true, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
 
         try {
             final Node node = node( transaction );
@@ -1077,13 +881,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 result = new PropertyImpl( this.repository, jcrProperty.getPath() );
             }
 
-            if ( uow == null ) {
-                transaction.commit();
-            }
-
             return result;
         } catch ( final Exception e ) {
-            throw handleError( uow, transaction, e );
+            throw handleError( e );
         }
     }
 
@@ -1093,14 +893,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getRawPropertyNames(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public final String[] getRawPropertyNames( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if ( transaction == null ) {
-            transaction = getRepository().createTransaction( "objectimpl-getRawPropertyNames", true, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
+    public final String[] getRawPropertyNames( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
             final List< String > names = new ArrayList< String >();
@@ -1110,13 +905,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 names.add( name );
             }
 
-            if ( uow == null ) {
-                transaction.commit();
-            }
-
             return names.toArray( new String[ names.size() ] );
         } catch ( final Exception e ) {
-            throw handleError( uow, transaction, e );
+            throw handleError( e );
         }
     }
 
@@ -1131,7 +922,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     }
 
     protected Session getSession( final UnitOfWork transaction ) {
-        return ((UnitOfWorkImpl)transaction).getSession();
+        assert ( transaction != null );
+        return ( ( UnitOfWorkImpl )transaction ).getSession();
     }
 
     /**
@@ -1147,30 +939,89 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeIdentifier(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoType getTypeIdentifier( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        List<Descriptor> descriptors = new ArrayList<Descriptor>();
+        descriptors.add(getPrimaryType(transaction));
+        descriptors.addAll(Arrays.asList(getDescriptors(transaction)));
+
+        KomodoTypeRegistry registry  = KomodoTypeRegistry.getInstance();
+        Set<TypeIdentifier> identifiers = null;
+        for (Descriptor descriptor : descriptors) {
+            String name = descriptor.getName();
+            identifiers = registry.getIdentifiers(name);
+            if (! identifiers.isEmpty())
+                break;
+        }
+
+        KomodoType result;
+        if (identifiers == null) {
+            // No identifiers but could be DDL Statements container
+            String nodeName = getName(transaction);
+            if (StandardDdlLexicon.STATEMENTS_CONTAINER.equals(nodeName))
+                return KomodoType.DDL_SCHEMA;
+
+            result = KomodoType.UNKNOWN;
+        } else if( identifiers.size() == 1 ) {
+            result = identifiers.iterator().next().getKomodoType();
+        } else {
+            //
+            // Only lexicon id with multiple identifiers is TABLE_ELEMENT
+            //
+
+            // ACCESS_PATTERN, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+            //
+            // COLUMN, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+            //
+            // PRIMARY_KEY, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+            //
+            // UNIQUE_CONSTRAINT, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+
+            String accessPatternConstraint = TeiidDdlConstants.TeiidNonReservedWord.ACCESSPATTERN.toDdl();
+            String primaryKeyConstraint = DdlConstants.PRIMARY_KEY;
+            String uniqueConstraint = TeiidDdlConstants.TeiidReservedWord.UNIQUE.toDdl();
+
+            Property constProperty = getProperty(transaction, TeiidDdlLexicon.Constraint.TYPE);
+            if (constProperty == null)
+                result = KomodoType.UNKNOWN;
+            else {
+                String constType = constProperty.getStringValue(transaction);
+                if (accessPatternConstraint.equals(constType))
+                    result = KomodoType.ACCESS_PATTERN;
+                else if (primaryKeyConstraint.equals(constType))
+                    result = KomodoType.PRIMARY_KEY;
+                else if (uniqueConstraint.equals(constType))
+                    result = KomodoType.UNIQUE_CONSTRAINT;
+                else
+                    result = KomodoType.COLUMN;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.spi.repository.KomodoObject#hasChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public boolean hasChild( final UnitOfWork uow,
+    public boolean hasChild( final UnitOfWork transaction,
                              final String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if ( transaction == null ) {
-            transaction = getRepository().createTransaction( "objectimpl-hasChild", true, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
 
         try {
             final boolean result = node( transaction ).hasNode( name );
-
-            if ( uow == null ) {
-                transaction.commit();
-            }
-
             return result;
         } catch ( final Exception e ) {
-            throw handleError( uow, transaction, e );
+            throw handleError( e );
         }
     }
 
@@ -1181,37 +1032,22 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String)
      */
     @Override
-    public boolean hasChild( final UnitOfWork uow,
+    public boolean hasChild( final UnitOfWork transaction,
                              final String name,
-                             final String typeName ) throws KException {
+                             final String typeName ) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if ( transaction == null ) {
-            transaction = getRepository().createTransaction( "objectimpl-hasChild2", true, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
 
         try {
-            boolean result = false;
-
-            try {
-                getChild( transaction, name, typeName ); // TODO should just query for node count > 0
-                result = true;
-            } catch ( final KException e ) {
-                // child not found
-            }
-
-            if ( uow == null ) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch ( final Exception e ) {
-            throw handleError( uow, transaction, e );
+            getChild( transaction, name, typeName ); // TODO should just query for node count > 0
+            return true;
+        } catch ( final KException e ) {
+            // child not found
         }
+
+        return false;
     }
 
     /**
@@ -1220,24 +1056,15 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#hasChildren(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public boolean hasChildren( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-hasChildren", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public boolean hasChildren( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
             final boolean result = node(transaction).hasNodes();
-
-            if (uow == null) {
-                transaction.commit();
-            }
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -1248,34 +1075,21 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String)
      */
     @Override
-    public boolean hasDescriptor( final UnitOfWork uow,
+    public boolean hasDescriptor( final UnitOfWork transaction,
                                   final String descriptorName ) throws KException {
-        ArgCheck.isNotEmpty(descriptorName);
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-hasDescriptor", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( descriptorName );
 
         boolean result = false;
 
-        try {
-            for (final Descriptor descriptor : getDescriptors(transaction)) {
-                if (descriptorName.equals(descriptor.getName())) {
-                    result = true;
-                }
+        for ( final Descriptor descriptor : getDescriptors( transaction ) ) {
+            if ( descriptorName.equals( descriptor.getName() ) ) {
+                result = true;
             }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
         }
+
+        return result;
     }
 
     /**
@@ -1304,27 +1118,17 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#hasProperty(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public boolean hasProperty( final UnitOfWork uow,
+    public boolean hasProperty( final UnitOfWork transaction,
                                 final String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-hasProperty", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final boolean result = node(transaction).hasProperty(name);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -1334,24 +1138,15 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#print(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public void print( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-print", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public void print( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
             final JcrTools tools = new JcrTools(true);
             tools.printSubgraph(node(transaction));
-
-            if (uow == null) {
-                transaction.commit();
-            }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -1361,14 +1156,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#remove(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public void remove( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "objectimpl-remove", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
+    public void remove( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug( "objectimpl-remove: transaction = {0}, path = {1}", transaction.getName(), getAbsolutePath() ); //$NON-NLS-1$
@@ -1377,12 +1167,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         try {
             final Node node = node( transaction );
             node.remove();
-
-            if (uow == null) {
-                transaction.commit();
-            }
         } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
+            throw handleError( e );
         }
     }
 
@@ -1393,19 +1179,14 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String[])
      */
     @Override
-    public void removeChild( final UnitOfWork uow,
+    public void removeChild( final UnitOfWork transaction,
                              final String... names ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(names, "names"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-removeChild", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("kobject-removeChild: transaction = {0}, names = {1}", //$NON-NLS-1$
+            LOGGER.debug("objectimpl-removeChild: transaction = {0}, names = {1}", //$NON-NLS-1$
                          transaction.getName(),
                          Arrays.asList(names));
         }
@@ -1420,12 +1201,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                     throw new KException(Messages.getString(Messages.Komodo.UNABLE_TO_REMOVE_CHILD, names, getAbsolutePath()));
                 }
             }
-
-            if (uow == null) {
-                transaction.commit();
-            }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -1436,19 +1213,14 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String[])
      */
     @Override
-    public void removeDescriptor( final UnitOfWork uow,
+    public void removeDescriptor( final UnitOfWork transaction,
                                   final String... descriptorNames ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(descriptorNames, "descriptorNames"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-removeDescriptor", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("kobject-removeDescriptor: transaction = {0}, mixins = {1}", //$NON-NLS-1$
+            LOGGER.debug("objectimpl-removeDescriptor: transaction = {0}, mixins = {1}", //$NON-NLS-1$
                          transaction.getName(),
                          Arrays.asList(descriptorNames));
         }
@@ -1460,12 +1232,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 ArgCheck.isNotEmpty(mixin, "mixin"); //$NON-NLS-1$
                 node.removeMixin(mixin);
             }
-
-            if (uow == null) {
-                transaction.commit();
-            }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -1475,19 +1243,14 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#rename(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public void rename( final UnitOfWork uow,
+    public void rename( final UnitOfWork transaction,
                         final String newName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( newName, "newName" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "objectimpl-rename", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "kobject-rename: transaction = {0}, old path = {1}, new name = {2}", //$NON-NLS-1$
+            LOGGER.debug( "objectimpl-rename: transaction = {0}, old path = {1}, new name = {2}", //$NON-NLS-1$
                           transaction.getName(),
                           getAbsolutePath(),
                           newName );
@@ -1504,12 +1267,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             getSession( transaction ).move( getAbsolutePath(), newPath );
             this.path = newPath;
             // TODO seems like index could change also
-
-            if (uow == null) {
-                transaction.commit();
-            }
         } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
+            throw handleError( e );
         }
     }
 
@@ -1536,15 +1295,10 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.String)
      */
     @Override
-    public void setPrimaryType( final UnitOfWork uow,
+    public void setPrimaryType( final UnitOfWork transaction,
                                 final String typeName ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-setPrimaryType", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("setPrimaryType: transaction = {0}, typeName = {1}", transaction.getName(), typeName); //$NON-NLS-1$
@@ -1553,99 +1307,17 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         try {
             final String type = (StringUtils.isBlank(typeName) ? JcrNtLexicon.UNSTRUCTURED.getString() : typeName);
             getSession(transaction).getNode(this.path).setPrimaryType(type);
-
-            if (uow == null) {
-                transaction.commit();
-            }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
-    private void setProperty( final Session session,
-                              final Node node,
-                              final String name,
-                              final Object... values ) throws Exception {
-        final ValueFactory factory = session.getValueFactory();
-        final boolean exists = node.hasProperty(name);
-
-        // remove property
-        if (values == null) {
-            if (exists) {
-                node.getProperty(name).remove();
-            } else {
-                throw new KException(Messages.getString(Messages.Komodo.UNABLE_TO_REMOVE_PROPERTY_THAT_DOES_NOT_EXIST,
-                                                        name,
-                                                        getAbsolutePath()));
-            }
-        } else {
-            // must be an array at this point
-            final int count = values.length;
-
-            if (exists) {
-                final javax.jcr.Property property = node.getProperty(name);
-                final int type = property.getType();
-                final boolean multiple = property.isMultiple();
-
-                if (count == 0) {
-                    if (multiple) {
-                        property.remove();
-                    } else {
-                        throw new KException(Messages.getString(Messages.Komodo.UNABLE_TO_REMOVE_SINGLE_VALUE_PROPERTY_WITH_EMPTY_ARRAY,
-                                                                name,
-                                                                getAbsolutePath()));
-                    }
-                } else if (count > 1) {
-                    if (multiple) {
-                        setMultiValuedProperty(session, node, factory, name, values, type);
-                    } else {
-                        throw new KException(Messages.getString(Messages.Komodo.UNABLE_TO_SET_SINGLE_VALUE_PROPERTY_WITH_MULTIPLE_VALUES,
-                                                                name,
-                                                                getAbsolutePath()));
-                    }
-                } else {
-                    // only one value so set property
-                    if (multiple) {
-                        setMultiValuedProperty(session, node, factory, name, values, type);
-                    } else {
-                        // remove if value is null or empty string
-                        if ((values[0] == null) || ((values[0] instanceof String) && StringUtils.isBlank((String)values[0]))) {
-                            node.getProperty(name).remove();
-                        } else {
-                            node.setProperty(name, PropertyImpl.createValue(factory, values[0]));
-                        }
-                    }
-                }
-            } else {
-                // property does not exist and no values being set
-                if (count == 0) {
-                    throw new KException(Messages.getString(Messages.Komodo.UNABLE_TO_REMOVE_PROPERTY_THAT_DOES_NOT_EXIST,
-                                                            name,
-                                                            getAbsolutePath()));
-                }
-
-                if (count > 1) {
-                    setMultiValuedProperty(session, node, factory, name, values, PropertyType.UNDEFINED);
-                } else {
-                    if ((values[0] != null) && ((!(values[0] instanceof String)) || !StringUtils.isBlank((String)values[0]))) {
-                        node.setProperty(name, PropertyImpl.createValue(factory, values[0]));
-                    }
-                }
-            }
-        }
-    }
-
-    protected void setObjectProperty( UnitOfWork uow,
-                                      String setterName,
-                                      String propertyName,
-                                      Object value ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction(getClass().getSimpleName() + HYPHEN + setterName, false, null);
-        }
-
-        assert (transaction != null);
+    protected void setObjectProperty( final UnitOfWork transaction,
+                                      final String setterName,
+                                      final String propertyName,
+                                      final Object value ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(setterName + ": transaction = {0}, value = {1}", //$NON-NLS-1$
@@ -1655,12 +1327,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
 
         try {
             setProperty(transaction, propertyName, value);
-
-            if (uow == null) {
-                transaction.commit();
-            }
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -1671,15 +1339,12 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *      java.lang.Object[])
      */
     @Override
-    public void setProperty( final UnitOfWork uow,
+    public void setProperty( final UnitOfWork transaction,
                              final String propertyName,
                              final Object... values ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(propertyName, "propertyName"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("kobject-setProperty", false, null); //$NON-NLS-1$
-        }
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("setProperty: transaction = {0}, propertyName = {1}, value(s) = {2}", //$NON-NLS-1$
@@ -1689,15 +1354,9 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
 
         try {
-            final Session session = getSession(transaction);
-            final Node node = session.getNode(getAbsolutePath());
-            setProperty(session, node, propertyName, values);
-
-            if (uow == null) {
-                transaction.commit();
-            }
+            internalSetProperty(transaction, propertyName, values);
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
@@ -1712,7 +1371,11 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     }
 
     @Override
-    public void visit( KomodoObjectVisitor visitor ) throws Exception {
-        visitor.visit(this);
+    public void visit( final UnitOfWork transaction,
+                       final KomodoObjectVisitor visitor ) throws Exception {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        visitor.visit(transaction, this);
     }
+
 }

@@ -30,7 +30,7 @@ import org.komodo.importer.vdb.TestTeiidVdbImporter;
  * Suite for all unit tests
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ 
+@Suite.SuiteClasses({
 	TestTeiidDdlImporter.class,
 	TestTeiidVdbImporter.class})
 public class AllTests {

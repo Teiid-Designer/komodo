@@ -22,7 +22,6 @@ import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -35,14 +34,11 @@ public final class ConditionImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction( ConditionImplTest.class.getSimpleName(), false, null );
-
-        this.vdb = RelationalModelFactory.createVdb( transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
-        this.dataRole = RelationalModelFactory.createDataRole( transaction, _repo, this.vdb, "dataRole" );
-        this.permission = RelationalModelFactory.createPermission( transaction, _repo, this.dataRole, "permission" );
-        this.condition = RelationalModelFactory.createCondition( transaction, _repo, this.permission, "condition" );
-
-        transaction.commit();
+        this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
+        this.dataRole = RelationalModelFactory.createDataRole( this.uow, _repo, this.vdb, "dataRole" );
+        this.permission = RelationalModelFactory.createPermission( this.uow, _repo, this.dataRole, "permission" );
+        this.condition = RelationalModelFactory.createCondition( this.uow, _repo, this.permission, "condition" );
+        commit();
     }
 
     @Test
@@ -52,11 +48,11 @@ public final class ConditionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldFailConstructionIfNotCondition() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ConditionImpl( null, _repo, this.vdb.getAbsolutePath() );
+                new ConditionImpl( this.uow, _repo, this.vdb.getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -64,34 +60,34 @@ public final class ConditionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveConstraintDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.condition.isConstraint( null ), is( Condition.DEFAULT_CONSTRAINT ) );
+        assertThat( this.condition.isConstraint( this.uow ), is( Condition.DEFAULT_CONSTRAINT ) );
     }
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat( this.condition.getPrimaryType( null ).getName(), is( VdbLexicon.DataRole.Permission.Condition.CONDITION ) );
+        assertThat( this.condition.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.Condition.CONDITION ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.condition.getPropertyNames( null );
-        final String[] rawProps = this.condition.getRawPropertyNames( null );
+        final String[] filteredProps = this.condition.getPropertyNames( this.uow );
+        final String[] rawProps = this.condition.getRawPropertyNames( this.uow );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentPermission() throws Exception {
-        assertThat( this.condition.getParent( null ), is( instanceOf( Permission.class ) ) );
+        assertThat( this.condition.getParent( this.uow ), is( instanceOf( Permission.class ) ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.condition.addChild( null, "blah", null );
+        this.condition.addChild( this.uow, "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.condition.getPropertyNames( null );
+        final String[] filteredProps = this.condition.getPropertyNames( this.uow );
         final Filter[] filters = this.condition.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -104,8 +100,8 @@ public final class ConditionImplTest extends RelationalModelTest {
     @Test
     public void shouldSetConstraintValue() throws Exception {
         final boolean newValue = !Condition.DEFAULT_CONSTRAINT;
-        this.condition.setConstraint( null, newValue );
-        assertThat( this.condition.isConstraint( null ), is( newValue ) );
+        this.condition.setConstraint( this.uow, newValue );
+        assertThat( this.condition.isConstraint( this.uow ), is( newValue ) );
     }
 
 }

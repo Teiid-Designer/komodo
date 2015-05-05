@@ -35,7 +35,6 @@ import java.util.List;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrSession;
@@ -51,12 +50,12 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
     protected static final String DATA_DIRECTORY = File.separator + "data"; //$NON-NLS-1$
 
     protected InputStream setup(String fileName) {
-    	String fullFilePath = DATA_DIRECTORY + File.separator + fileName;
+        String fullFilePath = DATA_DIRECTORY + File.separator + fileName;
         InputStream stream = getClass().getResourceAsStream(fullFilePath);
         assertNotNull(stream);
         return stream;
     }
-    
+
     protected File setupWithFile(String fileName) {
     	String fullFilePath = DATA_DIRECTORY + File.separator + fileName;
         File file = new File(fullFilePath);
@@ -87,7 +86,7 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         fail("Content should be a file or input stream");
         return null;
     }
-    
+
     protected KomodoObject executeImporter(Object content, ImportType importType,
                                                                         ImportOptions importOptions,
                                                                         ImportMessages importMessages)
@@ -110,24 +109,19 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
     }
 
     protected String enc(String input) throws Exception {
-        UnitOfWork uow = _repo.createTransaction("test-encode-transaction", true, null);
-        try {
-            return ((JcrSession)session(uow)).encode(input);
-        } finally {
-            uow.commit();
-        }
+        return ( ( JcrSession )session( this.uow ) ).encode( input );
     }
 
     protected void verifyProperty(KomodoObject node, String propertyName, String... expectedValues) throws Exception {
-        Property property = node.getProperty(null, propertyName);
+        Property property = node.getRawProperty(this.uow, propertyName);
         assertNotNull(property);
 
         List<String> values;
-        if (property.isMultiple(null))
-            values = Arrays.asList(property.getStringValues(null));
+        if (property.isMultiple(this.uow))
+            values = Arrays.asList(property.getStringValues(this.uow));
         else {
             values = new ArrayList<String>();
-            values.add(property.getStringValue(null));
+            values.add(property.getStringValue(this.uow));
         }
 
         assertEquals(expectedValues.length, values.size());
@@ -141,15 +135,15 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
     }
 
     protected void verifyMixinType(KomodoObject node, String... expectedValues) throws Exception {
-        Property property = node.getProperty(null, JCR_MIXIN_TYPES);
+        Property property = node.getRawProperty(this.uow, JCR_MIXIN_TYPES);
         assertNotNull(property);
 
         List<String> values;
-        if (property.isMultiple(null))
-            values = Arrays.asList(property.getStringValues(null));
+        if (property.isMultiple(this.uow))
+            values = Arrays.asList(property.getStringValues(this.uow));
         else {
             values = new ArrayList<String>();
-            values.add(property.getStringValue(null));
+            values.add(property.getStringValue(this.uow));
         }
 
         assertEquals(expectedValues.length, values.size());
@@ -173,9 +167,9 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
             indexExp = OPEN_SQUARE_BRACKET + index + CLOSE_SQUARE_BRACKET;
 
         KomodoObject childNode = null;
-        if (parentNode.hasChild(null, relativePath)) {
-            childNode = parentNode.getChild(null, relativePath + indexExp);
-        } else childNode = parentNode.getChild(null, enc(relativePath) + indexExp);
+        if (parentNode.hasChild(this.uow, relativePath)) {
+            childNode = parentNode.getChild(this.uow, relativePath + indexExp);
+        } else childNode = parentNode.getChild(this.uow, enc(relativePath) + indexExp);
         assertNotNull(childNode);
 
         verifyBaseProperties(childNode, primaryType, mixinType);

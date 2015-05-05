@@ -31,7 +31,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 
 @SuppressWarnings( { "javadoc", "nls" } )
-public class ForeignKeyImplTest extends RelationalModelTest {
+public final class ForeignKeyImplTest extends RelationalModelTest {
 
     private static final String NAME = "foreignKey";
 
@@ -41,21 +41,24 @@ public class ForeignKeyImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.parentTable = RelationalModelFactory.createTable( null, _repo, mock( Model.class ), "parentTable" );
-        this.refTable = RelationalModelFactory.createTable( null, _repo, mock( Model.class ), "refTable" );
-        this.foreignKey = RelationalModelFactory.createForeignKey( null, _repo, this.parentTable, NAME, this.refTable );
+        this.parentTable = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "parentTable" );
+        this.refTable = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "refTable" );
+        this.foreignKey = RelationalModelFactory.createForeignKey( this.uow, _repo, this.parentTable, NAME, this.refTable );
+        commit();
     }
 
     @Test
     public void shouldAddReferencesColumns() throws Exception {
-        final Column columnA = RelationalModelFactory.createColumn( null, _repo, this.refTable, "columnRefA" );
-        this.foreignKey.addReferencesColumn( null, columnA );
+        final Column columnA = RelationalModelFactory.createColumn( this.uow, _repo, this.refTable, "columnRefA" );
+        this.foreignKey.addReferencesColumn( this.uow, columnA );
 
-        final Column columnB = RelationalModelFactory.createColumn( null, _repo, this.refTable, "columnRefB" );
-        this.foreignKey.addReferencesColumn( null, columnB );
+        final Column columnB = RelationalModelFactory.createColumn( this.uow, _repo, this.refTable, "columnRefB" );
+        this.foreignKey.addReferencesColumn( this.uow, columnB );
 
-        assertThat( this.foreignKey.getReferencesColumns( null ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.foreignKey.getReferencesColumns( null ) ), hasItems( columnA, columnB ) );
+        commit(); // must commit so that query used in getReferencesColumns will work
+
+        assertThat( this.foreignKey.getReferencesColumns( this.uow ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.foreignKey.getReferencesColumns( this.uow ) ), hasItems( columnA, columnB ) );
     }
 
     @Test
@@ -65,21 +68,21 @@ public class ForeignKeyImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullColumn() throws Exception {
-        this.foreignKey.addColumn( null, null );
+        this.foreignKey.addColumn( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullReferencesColumn() throws Exception {
-        this.foreignKey.addReferencesColumn( null, null );
+        this.foreignKey.addReferencesColumn( this.uow, null );
     }
 
     @Test
     public void shouldFailConstructionIfNotForeignKey() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ForeignKeyImpl( null, _repo, this.parentTable.getAbsolutePath() );
+                new ForeignKeyImpl( this.uow, _repo, this.parentTable.getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -88,46 +91,46 @@ public class ForeignKeyImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.foreignKey.getConstraintType(), is( TableConstraint.ConstraintType.FOREIGN_KEY ) );
-        assertThat( this.foreignKey.getProperty( null, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( null ),
+        assertThat( this.foreignKey.getProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
                     is( TableConstraint.ConstraintType.FOREIGN_KEY.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat( this.foreignKey.hasDescriptor( null, Constraint.FOREIGN_KEY_CONSTRAINT ), is( true ) );
+        assertThat( this.foreignKey.hasDescriptor( this.uow, Constraint.FOREIGN_KEY_CONSTRAINT ), is( true ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.foreignKey.getPropertyNames( null );
-        final String[] rawProps = this.foreignKey.getRawPropertyNames( null );
+        final String[] filteredProps = this.foreignKey.getPropertyNames( this.uow );
+        final String[] rawProps = this.foreignKey.getRawPropertyNames( this.uow );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat( this.foreignKey.getParent( null ), is( instanceOf( Table.class ) ) );
-        assertThat( this.foreignKey.getTable( null ), is( this.parentTable ) );
+        assertThat( this.foreignKey.getParent( this.uow ), is( instanceOf( Table.class ) ) );
+        assertThat( this.foreignKey.getTable( this.uow ), is( this.parentTable ) );
     }
 
     @Test
     public void shouldHaveReferencesTableAfterConstruction() throws Exception {
-        assertThat( this.foreignKey.getReferencesTable( null ), is( this.refTable ) );
+        assertThat( this.foreignKey.getReferencesTable( this.uow ), is( this.refTable ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.foreignKey.addChild( null, "blah", null );
+        this.foreignKey.addChild( this.uow, "blah", null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowNullTableReference() throws Exception {
-        this.foreignKey.setReferencesTable( null, null );
+        this.foreignKey.setReferencesTable( this.uow, null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.foreignKey.getPropertyNames( null );
+        final String[] filteredProps = this.foreignKey.getPropertyNames( this.uow );
         final Filter[] filters = this.foreignKey.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -139,30 +142,33 @@ public class ForeignKeyImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveColumnReferencesAfterConstruction() throws Exception {
-        assertThat( this.foreignKey.getReferencesColumns( null ), is( notNullValue() ) );
-        assertThat( this.foreignKey.getReferencesColumns( null ).length, is( 0 ) );
+        assertThat( this.foreignKey.getReferencesColumns( this.uow ), is( notNullValue() ) );
+        assertThat( this.foreignKey.getReferencesColumns( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveColumnsAfterConstruction() throws Exception {
-        assertThat( this.foreignKey.getColumns( null ), is( notNullValue() ) );
-        assertThat( this.foreignKey.getColumns( null ).length, is( 0 ) );
+        assertThat( this.foreignKey.getColumns( this.uow ), is( notNullValue() ) );
+        assertThat( this.foreignKey.getColumns( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveReferencesColumn() throws Exception {
-        final Column columnA = RelationalModelFactory.createColumn( null, _repo, this.refTable, "removeRefColumnA" );
-        this.foreignKey.addReferencesColumn( null, columnA );
-        this.foreignKey.removeReferencesColumn( null, columnA );
-        assertThat( this.foreignKey.getReferencesColumns( null ).length, is( 0 ) );
+        final Column columnA = RelationalModelFactory.createColumn( this.uow, _repo, this.refTable, "removeRefColumnA" );
+        this.foreignKey.addReferencesColumn( this.uow, columnA );
+        commit(); // must commit so that query used in next method will work
+
+        this.foreignKey.removeReferencesColumn( this.uow, columnA );
+        assertThat( this.foreignKey.getReferencesColumns( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetTableReference() throws Exception {
-        final Table newTable = RelationalModelFactory.createTable( null, _repo, mock( Model.class ), "newTable" );
-        this.foreignKey.setReferencesTable( null, newTable );
+        final Table newTable = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "newTable" );
+        this.foreignKey.setReferencesTable( this.uow, newTable );
+        commit(); // must commit so that query used in next method will work
 
-        assertThat( this.foreignKey.getReferencesTable( null ), is( newTable ) );
+        assertThat( this.foreignKey.getReferencesTable( this.uow ), is( newTable ) );
     }
 
 }

@@ -1,2 +1,2 @@
 # Tests the Set Global command
-set global RECORDING_FILE /home/me/BogusFile.txt
+set global RECORDING_FILE BogusFile.txt

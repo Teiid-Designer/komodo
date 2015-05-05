@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a {@link KomodoObject Komodo object} property.
@@ -24,7 +25,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value type of the value contained in this property
      * @throws KException
      *         if the property does not exist or an error occurs
@@ -33,7 +34,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value represented as a <code>boolean</code>
      * @throws KException
      *         if the property does not exist or an error occurs
@@ -42,7 +43,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the values represented as <code>boolean</code>s (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
@@ -51,7 +52,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value represented as a date or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
@@ -60,7 +61,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the values represented as dates (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
@@ -69,7 +70,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value represented as a <code>decimal</code> or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
@@ -78,7 +79,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the values represented as <code>decimal</code>s (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
@@ -87,7 +88,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the property descriptor (never <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -96,7 +97,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value represented as a <code>double</code> or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
@@ -105,7 +106,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the values represented as <code>double</code>s (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
@@ -114,7 +115,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the Long value of the supplied property, or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
@@ -123,7 +124,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the long values of the supplied property (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
@@ -132,7 +133,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the String value of the supplied property, or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
@@ -141,7 +142,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the String values of the supplied property (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
@@ -150,7 +151,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the supplied property, or <code>null</code> if the property doesn't exist
      * @throws KException
      *         if the property does not exist or an error occurs
@@ -159,7 +160,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the values of the supplied property (never <code>null</code> or empty)
      * @throws KException
      *         if not a multi-value property, if property does not exist, or if an error occurs
@@ -168,7 +169,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return this property has multiple values
      * @throws KException
      *         if an error occurs
@@ -177,7 +178,7 @@ public interface Property extends KNode {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * Passing in <code>null</code> will remove the existing property from its node.
      *
      * @param values

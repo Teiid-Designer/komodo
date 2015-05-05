@@ -29,10 +29,9 @@ import org.komodo.relational.vdb.Vdb.VdbManifest;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class VdbImplTest extends RelationalModelTest {
 
     private static final String PATH = "/Users/sledge/hammer/MyVdb.vdb";
@@ -42,162 +41,152 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(VdbImplTest.class.getSimpleName(), false, null);
-
         this.vdbName = "vdb";
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, this.vdbName, PATH);
-
-        transaction.commit();
+        this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, this.vdbName, PATH );
     }
 
     @Test
     public void shouldAddDataRole() throws Exception {
         final String name = "dataRole";
-        final DataRole dataRole = this.vdb.addDataRole(null, name);
-        assertThat(dataRole, is(notNullValue()));
-        assertThat(this.vdb.getDataRoles(null).length, is(1));
+        final DataRole dataRole = this.vdb.addDataRole( this.uow, name );
+        assertThat( dataRole, is( notNullValue() ) );
+        assertThat( this.vdb.getDataRoles( this.uow ).length, is( 1 ) );
 
-        final DataRole added = this.vdb.getDataRoles(null)[0];
-        assertThat(added, is(dataRole));
-        assertThat(added.getName(null), is(name));
-        assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.DATA_ROLE));
-        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(DataRole.class)));
+        final DataRole added = this.vdb.getDataRoles( this.uow )[0];
+        assertThat( added, is( dataRole ) );
+        assertThat( added.getName( this.uow ), is( name ) );
+        assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.DATA_ROLE ) );
+        assertThat( this.vdb.getChildren( this.uow )[0], is( instanceOf( DataRole.class ) ) );
     }
 
     @Test
     public void shouldAddEntry() throws Exception {
         final String name = "entry";
         final String path = "/my/path";
-        final Entry entry = this.vdb.addEntry(null, name, path);
-        assertThat(entry, is(notNullValue()));
-        assertThat(this.vdb.getEntries(null).length, is(1));
+        final Entry entry = this.vdb.addEntry( this.uow, name, path );
+        assertThat( entry, is( notNullValue() ) );
+        assertThat( this.vdb.getEntries( this.uow ).length, is( 1 ) );
 
-        final Entry added = this.vdb.getEntries(null)[0];
-        assertThat(added, is(entry));
-        assertThat(added.getName(null), is(name));
-        assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.Entry.ENTRY));
-        assertThat(added.getPath(null), is(path));
-        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(Entry.class)));
+        final Entry added = this.vdb.getEntries( this.uow )[0];
+        assertThat( added, is( entry ) );
+        assertThat( added.getName( this.uow ), is( name ) );
+        assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Entry.ENTRY ) );
+        assertThat( added.getPath( this.uow ), is( path ) );
+        assertThat( this.vdb.getChildren( this.uow )[0], is( instanceOf( Entry.class ) ) );
     }
 
     @Test
     public void shouldAddImport() throws Exception {
         final String name = "vdbImport";
-        final VdbImport vdbImport = this.vdb.addImport(null, name);
-        assertThat(vdbImport, is(notNullValue()));
-        assertThat(this.vdb.getImports(null).length, is(1));
+        final VdbImport vdbImport = this.vdb.addImport( this.uow, name );
+        assertThat( vdbImport, is( notNullValue() ) );
+        assertThat( this.vdb.getImports( this.uow ).length, is( 1 ) );
 
-        final VdbImport added = this.vdb.getImports(null)[0];
-        assertThat(added, is(vdbImport));
-        assertThat(added.getName(null), is(name));
-        assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.ImportVdb.IMPORT_VDB));
-        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(VdbImport.class)));
+        final VdbImport added = this.vdb.getImports( this.uow )[0];
+        assertThat( added, is( vdbImport ) );
+        assertThat( added.getName( this.uow ), is( name ) );
+        assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.ImportVdb.IMPORT_VDB ) );
+        assertThat( this.vdb.getChildren( this.uow )[0], is( instanceOf( VdbImport.class ) ) );
     }
 
     @Test
     public void shouldAddModel() throws Exception {
         final String name = "model";
-        final Model model = this.vdb.addModel(null, name);
-        assertThat(model, is(notNullValue()));
-        assertThat(this.vdb.getModels(null).length, is(1));
+        final Model model = this.vdb.addModel( this.uow, name );
+        assertThat( model, is( notNullValue() ) );
+        assertThat( this.vdb.getModels( this.uow ).length, is( 1 ) );
 
-        final Model added = this.vdb.getModels(null)[0];
-        assertThat(added, is(model));
-        assertThat(added.getName(null), is(name));
-        assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.Vdb.DECLARATIVE_MODEL));
-        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(Model.class)));
+        final Model added = this.vdb.getModels( this.uow )[0];
+        assertThat( added, is( model ) );
+        assertThat( added.getName( this.uow ), is( name ) );
+        assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Vdb.DECLARATIVE_MODEL ) );
+        assertThat( this.vdb.getChildren( this.uow )[0], is( instanceOf( Model.class ) ) );
     }
 
     @Test
     public void shouldAddTranslator() throws Exception {
         final String name = "translator";
         final String type = "oracle";
-        final Translator translator = this.vdb.addTranslator(null, name, type);
-        assertThat(translator, is(notNullValue()));
-        assertThat(this.vdb.getTranslators(null).length, is(1));
+        final Translator translator = this.vdb.addTranslator( this.uow, name, type );
+        assertThat( translator, is( notNullValue() ) );
+        assertThat( this.vdb.getTranslators( this.uow ).length, is( 1 ) );
 
-        final Translator added = this.vdb.getTranslators(null)[0];
-        assertThat(added, is(translator));
-        assertThat(added.getName(null), is(name));
-        assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.Translator.TRANSLATOR));
-        assertThat(added.getType(null), is(type));
-        assertThat(added, is(instanceOf(Translator.class)));
+        final Translator added = this.vdb.getTranslators( this.uow )[0];
+        assertThat( added, is( translator ) );
+        assertThat( added.getName( this.uow ), is( name ) );
+        assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Translator.TRANSLATOR ) );
+        assertThat( added.getType( this.uow ), is( type ) );
+        assertThat( added, is( instanceOf( Translator.class ) ) );
     }
 
     @Test
     public void shouldCreateManifestForEmptyVdb() throws Exception {
-        final VdbManifest manifest = this.vdb.createManifest(null, new Properties());
-        assertThat(manifest, is(notNullValue()));
-        assertThat(manifest.asDocument(), is(notNullValue()));
+        final VdbManifest manifest = this.vdb.createManifest( this.uow, new Properties() );
+        assertThat( manifest, is( notNullValue() ) );
+        assertThat( manifest.asDocument(), is( notNullValue() ) );
     }
 
     @Test
     public void shouldCreateManifestForVdb() throws Exception {
         { // setup
-            final UnitOfWork transaction = _repo.createTransaction(this.name.getMethodName(), false, null);
-            this.vdb.setVdbName(transaction, "twitter");
-            this.vdb.setVersion(transaction, 1);
-            this.vdb.setDescription(transaction, "Shows how to call Web Services");
-            this.vdb.setProperty(transaction, "UseConnectorMetadata", "cached");
+            this.vdb.setVdbName( this.uow, "twitter" );
+            this.vdb.setVersion( this.uow, 1 );
+            this.vdb.setDescription( this.uow, "Shows how to call Web Services" );
+            this.vdb.setProperty( this.uow, "UseConnectorMetadata", "cached" );
 
-            final Model twitter = this.vdb.addModel(transaction, "twitter");
-            twitter.setModelType(transaction, Model.Type.PHYSICAL);
+            final Model twitter = this.vdb.addModel( this.uow, "twitter" );
+            twitter.setModelType( this.uow, Model.Type.PHYSICAL );
 
-            final Model twitterview = this.vdb.addModel(transaction, "twitterview");
-            twitterview.setModelType(transaction, Model.Type.VIRTUAL);
+            final Model twitterview = this.vdb.addModel( this.uow, "twitterview" );
+            twitterview.setModelType( this.uow, Model.Type.VIRTUAL );
 
-            final Translator translator = this.vdb.addTranslator(transaction, "rest", "ws");
-            translator.setProperty(transaction, "DefaultBinding", "HTTP");
-
-            transaction.commit();
+            final Translator translator = this.vdb.addTranslator( this.uow, "rest", "ws" );
+            translator.setProperty( this.uow, "DefaultBinding", "HTTP" );
         }
 
-        final VdbManifest manifest = this.vdb.createManifest(null, new Properties());
-        assertThat(manifest, is(notNullValue()));
-        assertThat(manifest.asDocument(), is(notNullValue()));
+        final VdbManifest manifest = this.vdb.createManifest( this.uow, new Properties() );
+        assertThat( manifest, is( notNullValue() ) );
+        assertThat( manifest.asDocument(), is( notNullValue() ) );
     }
 
     @Test
     public void shouldExportEmptyVdb() throws Exception {
-        final String manifest = this.vdb.export(null, new Properties());
-        assertThat(manifest, is(notNullValue()));
-        assertThat(manifest.isEmpty(), is(false));
+        final String manifest = this.vdb.export( this.uow, new Properties() );
+        assertThat( manifest, is( notNullValue() ) );
+        assertThat( manifest.isEmpty(), is( false ) );
     }
 
     @Test
     public void shouldExportVdb() throws Exception {
         { // setup
-            final UnitOfWork transaction = _repo.createTransaction(this.name.getMethodName(), false, null);
-            this.vdb.setVdbName(transaction, "twitter");
-            this.vdb.setVersion(transaction, 1);
-            this.vdb.setDescription(transaction, "Shows how to call Web Services");
-            this.vdb.setProperty(transaction, "UseConnectorMetadata", "cached");
+            this.vdb.setVdbName( this.uow, "twitter" );
+            this.vdb.setVersion( this.uow, 1 );
+            this.vdb.setDescription( this.uow, "Shows how to call Web Services" );
+            this.vdb.setProperty( this.uow, "UseConnectorMetadata", "cached" );
 
-            final Model twitter = this.vdb.addModel(transaction, "twitter");
-            twitter.setModelType(transaction, Model.Type.PHYSICAL);
+            final Model twitter = this.vdb.addModel( this.uow, "twitter" );
+            twitter.setModelType( this.uow, Model.Type.PHYSICAL );
 
-            final Model twitterview = this.vdb.addModel(transaction, "twitterview");
-            twitterview.setModelType(transaction, Model.Type.VIRTUAL);
+            final Model twitterview = this.vdb.addModel( this.uow, "twitterview" );
+            twitterview.setModelType( this.uow, Model.Type.VIRTUAL );
 
-            final Translator translator = this.vdb.addTranslator(transaction, "rest", "ws");
-            translator.setProperty(transaction, "DefaultBinding", "HTTP");
-
-            transaction.commit();
+            final Translator translator = this.vdb.addTranslator( this.uow, "rest", "ws" );
+            translator.setProperty( this.uow, "DefaultBinding", "HTTP" );
         }
 
         // test
-        final String manifest = this.vdb.export(null, new Properties());
-        assertThat(manifest, is(notNullValue()));
-        assertThat(manifest.isEmpty(), is(false));
+        final String manifest = this.vdb.export( this.uow, new Properties() );
+        assertThat( manifest, is( notNullValue() ) );
+        assertThat( manifest.isEmpty(), is( false ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotVdb() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new VdbImpl(null, _repo, _repo.komodoLibrary(null).getAbsolutePath());
+                new VdbImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -205,127 +194,127 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailRenameWhenNewNameHasSlash() throws Exception {
-        this.vdb.rename( null, "illegal/name" );
+        this.vdb.rename( this.uow, "illegal/name" );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailRenameWhenNewNameIsEmpty() throws Exception {
-        this.vdb.rename( null, EMPTY_STRING );
+        this.vdb.rename( this.uow, EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailRenameWhenNewNameIsNull() throws Exception {
-        this.vdb.rename( null, null );
+        this.vdb.rename( this.uow, null );
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat(this.vdb.getName(null), is(this.vdbName));
+        assertThat( this.vdb.getName( this.uow ), is( this.vdbName ) );
     }
 
     @Test
     public void shouldHaveCorrectOriginalFilePathAfterConstruction() throws Exception {
-        assertThat(this.vdb.getOriginalFilePath(null), is(PATH));
+        assertThat( this.vdb.getOriginalFilePath( this.uow ), is( PATH ) );
     }
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat(this.vdb.getPrimaryType(null).getName(), is(VdbLexicon.Vdb.VIRTUAL_DATABASE));
+        assertThat( this.vdb.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Vdb.VIRTUAL_DATABASE ) );
     }
 
     @Test
     public void shouldHaveDefaultPreviewValueAfterConstruction() throws Exception {
-        assertThat(this.vdb.isPreview(null), is(Vdb.DEFAULT_PREVIEW));
+        assertThat( this.vdb.isPreview( this.uow ), is( Vdb.DEFAULT_PREVIEW ) );
     }
 
     @Test
     public void shouldHaveDefaultVersionAfterConstruction() throws Exception {
-        assertThat(this.vdb.getVersion(null), is(Vdb.DEFAULT_VERSION));
+        assertThat( this.vdb.getVersion( this.uow ), is( Vdb.DEFAULT_VERSION ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.vdb.getPropertyNames( null );
-        final String[] rawProps = this.vdb.getRawPropertyNames( null );
+        final String[] filteredProps = this.vdb.getPropertyNames( this.uow );
+        final String[] rawProps = this.vdb.getRawPropertyNames( this.uow );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveStrongTypedChildren() throws Exception {
-        this.vdb.addDataRole(null, "dataRole");
-        this.vdb.addEntry(null, "entry", "path");
-        this.vdb.addImport(null, "vdbImport");
-        this.vdb.addModel(null, "model");
-        assertThat(this.vdb.getChildren(null).length, is(4));
-        assertThat(this.vdb.getChildren(null)[0], is(instanceOf(DataRole.class)));
-        assertThat(this.vdb.getChildren(null)[1], is(instanceOf(Entry.class)));
-        assertThat(this.vdb.getChildren(null)[2], is(instanceOf(VdbImport.class)));
-        assertThat(this.vdb.getChildren(null)[3], is(instanceOf(Model.class)));
+        this.vdb.addDataRole( this.uow, "dataRole" );
+        this.vdb.addEntry( this.uow, "entry", "path" );
+        this.vdb.addImport( this.uow, "vdbImport" );
+        this.vdb.addModel( this.uow, "model" );
+        assertThat( this.vdb.getChildren( this.uow ).length, is( 4 ) );
+        assertThat( this.vdb.getChildren( this.uow )[0], is( instanceOf( DataRole.class ) ) );
+        assertThat( this.vdb.getChildren( this.uow )[1], is( instanceOf( Entry.class ) ) );
+        assertThat( this.vdb.getChildren( this.uow )[2], is( instanceOf( VdbImport.class ) ) );
+        assertThat( this.vdb.getChildren( this.uow )[3], is( instanceOf( Model.class ) ) );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyDataRole() throws Exception {
-        this.vdb.addDataRole(null, StringConstants.EMPTY_STRING);
+        this.vdb.addDataRole( this.uow, StringConstants.EMPTY_STRING );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyEntry() throws Exception {
-        this.vdb.addEntry(null, StringConstants.EMPTY_STRING, "blah");
+        this.vdb.addEntry( this.uow, StringConstants.EMPTY_STRING, "blah" );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyImport() throws Exception {
-        this.vdb.addImport(null, StringConstants.EMPTY_STRING);
+        this.vdb.addImport( this.uow, StringConstants.EMPTY_STRING );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyModel() throws Exception {
-        this.vdb.addModel(null, StringConstants.EMPTY_STRING);
+        this.vdb.addModel( this.uow, StringConstants.EMPTY_STRING );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyTranslator() throws Exception {
-        this.vdb.addTranslator(null, StringConstants.EMPTY_STRING, "blah");
+        this.vdb.addTranslator( this.uow, StringConstants.EMPTY_STRING, "blah" );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullDataRole() throws Exception {
-        this.vdb.addDataRole(null, null);
+        this.vdb.addDataRole( this.uow, null );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullEntry() throws Exception {
-        this.vdb.addEntry(null, null, "blah");
+        this.vdb.addEntry( this.uow, null, "blah" );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullImport() throws Exception {
-        this.vdb.addImport(null, null);
+        this.vdb.addImport( this.uow, null );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullModel() throws Exception {
-        this.vdb.addModel(null, null);
+        this.vdb.addModel( this.uow, null );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullTranslator() throws Exception {
-        this.vdb.addTranslator(null, null, "blah");
+        this.vdb.addTranslator( this.uow, null, "blah" );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyOriginalFilePath() throws Exception {
-        this.vdb.setOriginalFilePath(null, StringConstants.EMPTY_STRING);
+        this.vdb.setOriginalFilePath( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullOriginalFilePath() throws Exception {
-        this.vdb.setOriginalFilePath(null, null);
+        this.vdb.setOriginalFilePath( this.uow, null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.vdb.getPropertyNames( null );
+        final String[] filteredProps = this.vdb.getPropertyNames( this.uow );
         final Filter[] filters = this.vdb.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -337,137 +326,137 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveConnectionTypeAfterConstruction() throws Exception {
-        assertThat(this.vdb.getConnectionType(null), is(nullValue()));
+        assertThat( this.vdb.getConnectionType( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldNotHaveDataRolesAfterConstruction() throws Exception {
-        assertThat(this.vdb.getDataRoles(null), is(notNullValue()));
-        assertThat(this.vdb.getDataRoles(null).length, is(0));
+        assertThat( this.vdb.getDataRoles( this.uow ), is( notNullValue() ) );
+        assertThat( this.vdb.getDataRoles( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveEntriesAfterConstruction() throws Exception {
-        assertThat(this.vdb.getEntries(null), is(notNullValue()));
-        assertThat(this.vdb.getEntries(null).length, is(0));
+        assertThat( this.vdb.getEntries( this.uow ), is( notNullValue() ) );
+        assertThat( this.vdb.getEntries( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveModelsAfterConstruction() throws Exception {
-        assertThat(this.vdb.getModels(null), is(notNullValue()));
-        assertThat(this.vdb.getModels(null).length, is(0));
+        assertThat( this.vdb.getModels( this.uow ), is( notNullValue() ) );
+        assertThat( this.vdb.getModels( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveTranslatorsAfterConstruction() throws Exception {
-        assertThat(this.vdb.getTranslators(null), is(notNullValue()));
-        assertThat(this.vdb.getTranslators(null).length, is(0));
+        assertThat( this.vdb.getTranslators( this.uow ), is( notNullValue() ) );
+        assertThat( this.vdb.getTranslators( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveVdbImportsAfterConstruction() throws Exception {
-        assertThat(this.vdb.getImports(null), is(notNullValue()));
-        assertThat(this.vdb.getImports(null).length, is(0));
+        assertThat( this.vdb.getImports( this.uow ), is( notNullValue() ) );
+        assertThat( this.vdb.getImports( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveDataRole() throws Exception {
         final String name = "dataRole";
-        this.vdb.addDataRole(null, name);
-        assertThat(this.vdb.getDataRoles(null).length, is(1));
+        this.vdb.addDataRole( this.uow, name );
+        assertThat( this.vdb.getDataRoles( this.uow ).length, is( 1 ) );
 
-        this.vdb.removeDataRole(null, name);
-        assertThat(this.vdb.getDataRoles(null).length, is(0));
+        this.vdb.removeDataRole( this.uow, name );
+        assertThat( this.vdb.getDataRoles( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveEntry() throws Exception {
         final String name = "entry";
-        this.vdb.addEntry(null, name, "path");
-        assertThat(this.vdb.getEntries(null).length, is(1));
+        this.vdb.addEntry( this.uow, name, "path" );
+        assertThat( this.vdb.getEntries( this.uow ).length, is( 1 ) );
 
-        this.vdb.removeEntry(null, name);
-        assertThat(this.vdb.getEntries(null).length, is(0));
+        this.vdb.removeEntry( this.uow, name );
+        assertThat( this.vdb.getEntries( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveModel() throws Exception {
         final String name = "model";
-        this.vdb.addModel(null, name);
-        assertThat(this.vdb.getModels(null).length, is(1));
+        this.vdb.addModel( this.uow, name );
+        assertThat( this.vdb.getModels( this.uow ).length, is( 1 ) );
 
-        this.vdb.removeModel(null, name);
-        assertThat(this.vdb.getModels(null).length, is(0));
+        this.vdb.removeModel( this.uow, name );
+        assertThat( this.vdb.getModels( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveTranslator() throws Exception {
         final String name = "translator";
-        this.vdb.addTranslator(null, name, "oracle");
-        assertThat(this.vdb.getTranslators(null).length, is(1));
+        this.vdb.addTranslator( this.uow, name, "oracle" );
+        assertThat( this.vdb.getTranslators( this.uow ).length, is( 1 ) );
 
-        this.vdb.removeTranslator(null, name);
-        assertThat(this.vdb.getTranslators(null).length, is(0));
+        this.vdb.removeTranslator( this.uow, name );
+        assertThat( this.vdb.getTranslators( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveVdbImport() throws Exception {
         final String name = "vdbImport";
-        this.vdb.addImport(null, name);
-        assertThat(this.vdb.getImports(null).length, is(1));
+        this.vdb.addImport( this.uow, name );
+        assertThat( this.vdb.getImports( this.uow ).length, is( 1 ) );
 
-        this.vdb.removeImport(null, name);
-        assertThat(this.vdb.getImports(null).length, is(0));
+        this.vdb.removeImport( this.uow, name );
+        assertThat( this.vdb.getImports( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRename() throws Exception {
         final String newName = "newVdbName";
-        this.vdb.rename( null, newName );
-        assertThat( this.vdb.getName( null ), is( newName ) );
-        assertThat( this.vdb.getVdbName( null ), is( newName ) );
+        this.vdb.rename( this.uow, newName );
+        assertThat( this.vdb.getName( this.uow ), is( newName ) );
+        assertThat( this.vdb.getVdbName( this.uow ), is( newName ) );
     }
 
     @Test
     public void shouldSetConnectionType() throws Exception {
         final String newValue = "newConnectionType";
-        this.vdb.setConnectionType(null, newValue);
-        assertThat(this.vdb.getConnectionType(null), is(newValue));
+        this.vdb.setConnectionType( this.uow, newValue );
+        assertThat( this.vdb.getConnectionType( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String newValue = "newDescription";
-        this.vdb.setDescription(null, newValue);
-        assertThat(this.vdb.getDescription(null), is(newValue));
+        this.vdb.setDescription( this.uow, newValue );
+        assertThat( this.vdb.getDescription( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetOriginalFilePath() throws Exception {
         final String newValue = "newOriginalFilePath";
-        this.vdb.setOriginalFilePath(null, newValue);
-        assertThat(this.vdb.getOriginalFilePath(null), is(newValue));
+        this.vdb.setOriginalFilePath( this.uow, newValue );
+        assertThat( this.vdb.getOriginalFilePath( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetPreviewValue() throws Exception {
         final boolean newValue = !Vdb.DEFAULT_PREVIEW;
-        this.vdb.setPreview(null, newValue);
-        assertThat(this.vdb.isPreview(null), is(newValue));
+        this.vdb.setPreview( this.uow, newValue );
+        assertThat( this.vdb.isPreview( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetVdbName() throws Exception {
         final String newValue = "newName";
-        this.vdb.setVdbName(null, newValue);
-        assertThat(this.vdb.getVdbName(null), is(newValue));
+        this.vdb.setVdbName( this.uow, newValue );
+        assertThat( this.vdb.getVdbName( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetVersion() throws Exception {
-        final int newValue = (Vdb.DEFAULT_VERSION + 10);
-        this.vdb.setVersion(null, newValue);
-        assertThat(this.vdb.getVersion(null), is(newValue));
+        final int newValue = ( Vdb.DEFAULT_VERSION + 10 );
+        this.vdb.setVersion( this.uow, newValue );
+        assertThat( this.vdb.getVersion( this.uow ), is( newValue ) );
     }
 
 }

@@ -24,9 +24,7 @@ package org.komodo.shell;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.api.WorkspaceContext;
@@ -57,7 +55,9 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      * @param parent the parent context
      * @param repoObject repository object on which this context is based
      */
-    public WorkspaceContextImpl(WorkspaceStatus wsStatus, WorkspaceContext parent, KomodoObject repoObject) {
+    public WorkspaceContextImpl( WorkspaceStatus wsStatus,
+                                 WorkspaceContext parent,
+                                 KomodoObject repoObject ) {
         super();
         this.wsStatus = wsStatus;
         this.parent = parent;
@@ -106,7 +106,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public String getName() throws Exception {
-        return this.repoObject.getName(null);
+        return this.repoObject.getName(this.wsStatus.getTransaction());
     }
 
     /* (non-Javadoc)
@@ -114,7 +114,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public String getType() throws Exception {
-        return this.repoObject.getTypeIdentifier(null).name();
+        return this.repoObject.getTypeIdentifier(this.wsStatus.getTransaction()).name();
     }
 
     /* (non-Javadoc)
@@ -131,7 +131,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
     @Override
     public List<WorkspaceContext> getChildren() throws Exception {
         List<WorkspaceContext> childrenCtx = new ArrayList<WorkspaceContext>();
-        KomodoObject[] children = repoObject.getChildren(null);
+        KomodoObject[] children = repoObject.getChildren(this.wsStatus.getTransaction());
 
         for (KomodoObject child : children) {
             childrenCtx.add(new WorkspaceContextImpl(wsStatus, this, child));
@@ -157,17 +157,16 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public String getFullName() throws Exception {
-        List<WorkspaceContext> parentContexts = new ArrayList<WorkspaceContext>();
         WorkspaceContext parentContext = this.parent;
-        while (parentContext != null) {
-            parentContexts.add(0, parentContext);
-            parentContext = parentContext.getParent();
-        }
         StringBuffer sb = new StringBuffer();
-        for (WorkspaceContext theContext : parentContexts) {
-            sb.append(theContext.getName() + File.separator);
-        }
+
+        // Ensures a slash is placed right at the root of the path
+        if (parentContext != null)
+            sb.append(parentContext.getFullName());
+
+        sb.append(File.separator);
         sb.append(getName());
+
         return sb.toString();
     }
 
@@ -188,10 +187,10 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public WorkspaceContext getChild(String name) throws Exception {
-        KomodoObject[] children = repoObject.getChildren(null);
+        KomodoObject[] children = repoObject.getChildren(this.wsStatus.getTransaction());
 
         for (KomodoObject child : children) {
-            String childName = child.getName(null);
+            String childName = child.getName(this.wsStatus.getTransaction());
             if (childName.equalsIgnoreCase(name)) {
                 return createWorkspaceContext(child);
             }
@@ -205,10 +204,10 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public WorkspaceContext getChild(String name, String type) throws Exception {
-        KomodoObject[] children = repoObject.getChildrenOfType(null, type);
+        KomodoObject[] children = repoObject.getChildrenOfType(this.wsStatus.getTransaction(), type);
 
         for (KomodoObject child : children) {
-            String childName = child.getName(null);
+            String childName = child.getName(this.wsStatus.getTransaction());
             if (childName.equalsIgnoreCase(name)) {
                 return createWorkspaceContext(child);
             }
@@ -226,30 +225,26 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 ////            propNameValues.put(WorkspaceStatus.RECORDING_FILE_KEY, getWorkspaceStatus().getRecordingOutputFile().toString());
 
         KomodoObject relObj = getKomodoObj();
-        String[] props = relObj.getPropertyNames(null);
-
-        if (props != null)
-            return Arrays.asList(props);
-        else
-            return Collections.emptyList();
+        String[] props = relObj.getPropertyNames(this.wsStatus.getTransaction());
+        return Arrays.asList(props);
     }
 
     @Override
     public String getPropertyValue(String propertyName) throws Exception {
         KomodoObject relObj = getKomodoObj();
-        Property property = relObj.getProperty(null, propertyName);
+        Property property = relObj.getProperty(this.wsStatus.getTransaction(), propertyName);
         // Null means the property with that name wasn't found
         if(property==null) {
         	return null;
         } else {
-        	return RepositoryTools.getDisplayValue(property);
+        	return RepositoryTools.getDisplayValue(this.wsStatus.getTransaction(), property);
         }
     }
 
     @Override
     public void setPropertyValue(String propertyName, Object value) throws Exception {
         KomodoObject relObj = getKomodoObj();
-        relObj.setProperty(null, propertyName, value);
+        relObj.setProperty(this.wsStatus.getTransaction(), propertyName, value);
     }
 
     /* (non-Javadoc)
@@ -266,23 +261,6 @@ public class WorkspaceContextImpl implements WorkspaceContext {
     @Override
     public WorkspaceStatus getWorkspaceStatus() {
         return this.wsStatus;
-    }
-
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceContext#addChild(org.komodo.shell.api.WorkspaceContext)
-     */
-    @Override
-    public void addChild(Object child) {
-//        if (child instanceof WorkspaceContext) {
-//            
-//            
-//            
-//            this.children.add((WorkspaceContext)child);
-//        } else if (child instanceof KomodoObject) {
-//            WorkspaceContext wCtx = createWorkspaceContext((KomodoObject)child);
-//            this.children.add(wCtx);
-//            addChildren(wCtx, ((KomodoObject)child).getChildren());
-//        }
     }
 
     /* (non-Javadoc)

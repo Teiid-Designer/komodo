@@ -108,7 +108,7 @@ public class TestVdbExport extends AbstractSequencerTest {
 
         session().save();
 
-        assertTrue(listener.await(3, TimeUnit.MINUTES));
+        assertTrue(listener.await(TIME_TO_WAIT, TimeUnit.MINUTES));
         assertFalse(listener.exceptionOccurred());
     }
 

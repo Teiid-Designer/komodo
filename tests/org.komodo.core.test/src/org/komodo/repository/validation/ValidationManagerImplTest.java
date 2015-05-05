@@ -19,7 +19,6 @@ import org.junit.rules.TestName;
 import org.komodo.spi.KException;
 import org.komodo.spi.outcome.Outcome.Level;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.ValidationManager;
 import org.komodo.spi.repository.validation.Result;
 import org.komodo.spi.repository.validation.Rule;
@@ -39,7 +38,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         _validationMgr = new ValidationManagerImpl( _repo );
         _description = Collections.singletonList( new LocalizedMessage( MessageKey.DESCRIPTION.name(),
                                                                         "en",
-        "This is a rule description" ) );
+                                                                        "This is a rule description" ) );
         _message = Collections.singletonList( new LocalizedMessage( "myrule.msg", "en", "This is a rule error message" ) );
     }
 
@@ -48,14 +47,14 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailWhenNullRulesFile() throws Exception {
-        _validationMgr.importRules( null );
+        _validationMgr.validateRules( null );
     }
 
     @Test
     public void shouldFindErrorsInXmlWithErrors() throws Exception {
         final int numErrors = 12;
         final File testFile = new File( "resources/verifyValidationErrors.xml" );
-        final List< String > errors = _validationMgr.importRules( testFile );
+        final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( numErrors ) );
 
         // verify we got the errors we expect and the order we expect
@@ -80,7 +79,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
     public void shouldFindErrorsInXmlWithUniquenessProblems() throws Exception {
         final int numErrors = 16;
         final File testFile = new File( "resources/verifyUniquenessChecks.xml" );
-        final List< String > errors = _validationMgr.importRules( testFile );
+        final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( numErrors ) );
 
         // verify we got the errors we expect and the order we expect
@@ -113,19 +112,18 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
     @Test
     public void shouldParseXmlWithNoErrors() throws Exception {
         final File testFile = new File( "resources/validationAllConstructs.xml" );
-        final List< String > errors = _validationMgr.importRules( testFile );
+        final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.isEmpty(), is( true ) );
     }
 
     @Test
     public void shouldVerifyChildCountRuleFailsWhenCountEqualsMaxButMaxNotInclusive() throws Exception {
         final String childType = "nt:unstructured";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
         final Number minValue = 1;
         final Number maxValue = 3;
-        final Rule rule = _validationMgr.addChildCountValidationRule( uow,
+        final Rule rule = _validationMgr.addChildCountValidationRule( this.uow,
                                                                       "propRule",
                                                                       "nt:unstructured",
                                                                       childType,
@@ -137,30 +135,29 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                       _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
 
-        for (int i = -1; i < maxValue.intValue(); ++i) {
-            kobject.addChild( uow, ( "child" + i ), null );
+        for ( int i = -1; i < maxValue.intValue(); ++i ) {
+            kobject.addChild( this.uow, ( "child" + i ), null );
         }
 
-        uow.commit();
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyChildCountRuleFailsWhenCountEqualsMinButMinNotInclusive() throws Exception {
         final String childType = "nt:unstructured";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
         final Number minValue = 1;
         final Number maxValue = 3;
-        final Rule rule = _validationMgr.addChildCountValidationRule( uow,
+        final Rule rule = _validationMgr.addChildCountValidationRule( this.uow,
                                                                       "propRule",
                                                                       "nt:unstructured",
                                                                       childType,
@@ -172,30 +169,29 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                       _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
 
-        for (int i = 0; i < minValue.intValue(); ++i) {
-            kobject.addChild( uow, ( "child" + i ), null );
+        for ( int i = 0; i < minValue.intValue(); ++i ) {
+            kobject.addChild( this.uow, ( "child" + i ), null );
         }
 
-        uow.commit();
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyChildCountRuleFailsWhenCountIsNotWithinRange() throws Exception {
         final String childType = "nt:unstructured";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
         final Number minValue = 1;
         final Number maxValue = 3;
-        final Rule rule = _validationMgr.addChildCountValidationRule( uow,
+        final Rule rule = _validationMgr.addChildCountValidationRule( this.uow,
                                                                       "propRule",
                                                                       "nt:unstructured",
                                                                       childType,
@@ -207,30 +203,29 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                       _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
 
-        for (int i = -1; i < ( maxValue.intValue() + 1 ); ++i) {
-            kobject.addChild( uow, ( "child" + i ), null );
+        for ( int i = -1; i < ( maxValue.intValue() + 1 ); ++i ) {
+            kobject.addChild( this.uow, ( "child" + i ), null );
         }
 
-        uow.commit();
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyChildCountRulePassesWhenCountWithinRange() throws Exception {
         final String childType = "nt:unstructured";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
         final Number minValue = 1;
         final Number maxValue = 3;
-        final Rule rule = _validationMgr.addChildCountValidationRule( uow,
+        final Rule rule = _validationMgr.addChildCountValidationRule( this.uow,
                                                                       "propRule",
                                                                       "nt:unstructured",
                                                                       childType,
@@ -242,28 +237,27 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                       _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
 
-        for (int i = 0; i < maxValue.intValue(); ++i) {
-            kobject.addChild( uow, ( "child" + i ), null );
+        for ( int i = 0; i < maxValue.intValue(); ++i ) {
+            kobject.addChild( this.uow, ( "child" + i ), null );
         }
 
-        uow.commit();
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test( expected = KException.class )
     public void shouldVerifyDisabledRulesCannotBeEvaluated() throws Exception {
         final String propName = "sledge";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRequiredRule( uow,
+        final Rule rule = _validationMgr.addPropertyRequiredRule( this.uow,
                                                                   "propRule",
                                                                   "nt:unstructured",
                                                                   propName,
@@ -271,63 +265,68 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                   _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        commit();
 
         // disable rule
-        rule.setEnabled( false );
+        rule.setEnabled( this.uow, false );
 
         // test
-        rule.evaluate( null, kobject );
+        rule.evaluate( this.uow, kobject );
     }
 
     @Test
     public void shouldVerifyNodeNameRuleFailsWhenNameDoesNotMatchesPattern() throws Exception {
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-
         // create rule in repo
         final String pattern = "[A-Z]{3}";
-        final Rule rule = _validationMgr.addNodeNameRule( uow, "propRule", "nt:unstructured", pattern, _description, _message );
+        final Rule rule = _validationMgr.addNodeNameRule( this.uow,
+                                                          "propRule",
+                                                          "nt:unstructured",
+                                                          pattern,
+                                                          _description,
+                                                          _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "ABc", null );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "ABc", null );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyNodeNameRulePassesWhenNameMatchesPattern() throws Exception {
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-
         // create rule in repo
         final String pattern = "[A-Z]{3}";
-        final Rule rule = _validationMgr.addNodeNameRule( uow, "propRule", "nt:unstructured", pattern, _description, _message );
+        final Rule rule = _validationMgr.addNodeNameRule( this.uow,
+                                                          "propRule",
+                                                          "nt:unstructured",
+                                                          pattern,
+                                                          _description,
+                                                          _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "ABC", null );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "ABC", null );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyPropertyRangeRuleFailsWhenValueEqualsMaxButMaxNotInclusive() throws Exception {
         final String propName = "sledge";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
         final Number minValue = 5;
         final Number maxValue = 10;
-        final Rule rule = _validationMgr.addPropertyValueNumberValidationRule( uow,
+        final Rule rule = _validationMgr.addPropertyValueNumberValidationRule( this.uow,
                                                                                "propRule",
                                                                                "nt:unstructured",
                                                                                propName,
@@ -339,26 +338,25 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                                _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, maxValue );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, maxValue );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyPropertyRangeRuleFailsWhenValueEqualsMinButMinNotInclusive() throws Exception {
         final String propName = "sledge";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
         final Number minValue = 5;
         final Number maxValue = 10;
-        final Rule rule = _validationMgr.addPropertyValueNumberValidationRule( uow,
+        final Rule rule = _validationMgr.addPropertyValueNumberValidationRule( this.uow,
                                                                                "propRule",
                                                                                "nt:unstructured",
                                                                                propName,
@@ -370,26 +368,25 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                                _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, minValue );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, minValue );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyPropertyRangeRulePassesWhenValueWithinRange() throws Exception {
         final String propName = "sledge";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
         final Number minValue = 5;
         final Number maxValue = 10;
-        final Rule rule = _validationMgr.addPropertyValueNumberValidationRule( uow,
+        final Rule rule = _validationMgr.addPropertyValueNumberValidationRule( this.uow,
                                                                                "propRule",
                                                                                "nt:unstructured",
                                                                                propName,
@@ -401,15 +398,15 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                                _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, 8 );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, 8 );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
@@ -419,10 +416,9 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType" };
         final String[] childExists = new String[] { "tko:schemas", "tko:dataSources" };
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( uow,
+        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( this.uow,
                                                                                 "propRule",
                                                                                 "nt:unstructured",
                                                                                 propName,
@@ -434,18 +430,18 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                                 _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, "elvis" );
-        kobject.setProperty( uow, propsExists[0], "foo" );
-        kobject.setProperty( uow, propsExists[1], "foo" );
-        kobject.addChild( uow, "larry", childExists[0] );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, "elvis" );
+        kobject.setProperty( this.uow, propsExists[0], "foo" );
+        kobject.setProperty( this.uow, propsExists[1], "foo" );
+        kobject.addChild( this.uow, "larry", childExists[0] );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
@@ -455,10 +451,9 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType" };
         final String[] childExists = new String[] { "tko:schemas" };
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries", "tko:dataSources" };
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( uow,
+        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( this.uow,
                                                                                 "propRule",
                                                                                 "nt:unstructured",
                                                                                 propName,
@@ -470,19 +465,19 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                                 _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, "elvis" );
-        kobject.setProperty( uow, propsExists[0], "foo" );
-        kobject.setProperty( uow, propsExists[1], "bar" );
-        kobject.addChild( uow, "larry", childExists[0] );
-        kobject.addChild( uow, "bird", childAbsent[2] );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, "elvis" );
+        kobject.setProperty( this.uow, propsExists[0], "foo" );
+        kobject.setProperty( this.uow, propsExists[1], "bar" );
+        kobject.addChild( this.uow, "larry", childExists[0] );
+        kobject.addChild( this.uow, "bird", childAbsent[2] );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
@@ -492,10 +487,9 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType" };
         final String[] childExists = new String[] { "tko:schemas", "tko:dataSources" };
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( uow,
+        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( this.uow,
                                                                                 "propRule",
                                                                                 "nt:unstructured",
                                                                                 propName,
@@ -507,18 +501,18 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                                 _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, "elvis" );
-        kobject.setProperty( uow, propsExists[0], "foo" );
-        kobject.addChild( uow, "larry", childExists[0] );
-        kobject.addChild( uow, "bird", childExists[1] );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, "elvis" );
+        kobject.setProperty( this.uow, propsExists[0], "foo" );
+        kobject.addChild( this.uow, "larry", childExists[0] );
+        kobject.addChild( this.uow, "bird", childExists[1] );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
@@ -528,10 +522,9 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType", "tko:type" };
         final String[] childExists = new String[] { "tko:schemas", "tko:dataSources" };
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( uow,
+        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( this.uow,
                                                                                 "propRule",
                                                                                 "nt:unstructured",
                                                                                 propName,
@@ -543,19 +536,19 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                                 _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, "elvis" );
-        kobject.setProperty( uow, propsExists[0], "foo" );
-        kobject.setProperty( uow, propsAbsent[2], "bar" );
-        kobject.addChild( uow, "larry", childExists[0] );
-        kobject.addChild( uow, "bird", childExists[1] );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, "elvis" );
+        kobject.setProperty( this.uow, propsExists[0], "foo" );
+        kobject.setProperty( this.uow, propsAbsent[2], "bar" );
+        kobject.addChild( this.uow, "larry", childExists[0] );
+        kobject.addChild( this.uow, "bird", childExists[1] );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
@@ -565,10 +558,9 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType" };
         final String[] childExists = new String[] { "tko:schemas", "tko:dataSources" };
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( uow,
+        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( this.uow,
                                                                                 "propRule",
                                                                                 "nt:unstructured",
                                                                                 propName,
@@ -580,29 +572,28 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                                 _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, "elvis" );
-        kobject.setProperty( uow, propsExists[0], "foo" );
-        kobject.setProperty( uow, propsExists[1], "bar" );
-        kobject.addChild( uow, "larry", childExists[0] );
-        kobject.addChild( uow, "bird", childExists[1] );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, "elvis" );
+        kobject.setProperty( this.uow, propsExists[0], "foo" );
+        kobject.setProperty( this.uow, propsExists[1], "bar" );
+        kobject.addChild( this.uow, "larry", childExists[0] );
+        kobject.addChild( this.uow, "bird", childExists[1] );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyPropertyValueRuleFailsWhenValueDoesNotMatchPattern() throws Exception {
         final String propName = "sledge";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
         final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
-        final Rule rule = _validationMgr.addPropertyPatternRule( uow,
+        final Rule rule = _validationMgr.addPropertyPatternRule( this.uow,
                                                                  "propRule",
                                                                  "nt:unstructured",
                                                                  propName,
@@ -611,25 +602,24 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                  _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, "elvis" );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, "elvis" );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyPropertyValueRulePassesWhenValueMatchesPattern() throws Exception {
         final String propName = "sledge";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
         final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
-        final Rule rule = _validationMgr.addPropertyPatternRule( uow,
+        final Rule rule = _validationMgr.addPropertyPatternRule( this.uow,
                                                                  "propRule",
                                                                  "nt:unstructured",
                                                                  propName,
@@ -638,48 +628,46 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                  _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, "123-45-6789" );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, "123-45-6789" );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyRequiredRuleFailsWhenChildNodeDoesNotExist() throws Exception {
         final String childType = "nt:file";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addChildTypeRequiredRule( uow,
+        final Rule rule = _validationMgr.addChildTypeRequiredRule( this.uow,
                                                                    "childRule",
                                                                    "nt:unstructured",
                                                                    childType,
                                                                    _description,
                                                                    _message );
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.addChild( uow, "blah", "nt:unstructured" ); // not the required child type
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.addChild( this.uow, "blah", "nt:unstructured" ); // not the required child type
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyRequiredRuleFailsWhenPropertyDoesNotExist() throws Exception {
         final String propName = "sledge";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRequiredRule( uow,
+        final Rule rule = _validationMgr.addPropertyRequiredRule( this.uow,
                                                                   "propRule",
                                                                   "nt:unstructured",
                                                                   propName,
@@ -687,47 +675,45 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                   _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.getLevel(), is( Level.ERROR ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyRequiredRulePassesWhenChildNodeExists() throws Exception {
         final String childType = "nt:unstructured";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addChildTypeRequiredRule( uow,
+        final Rule rule = _validationMgr.addChildTypeRequiredRule( this.uow,
                                                                    "childRule",
                                                                    "nt:unstructured",
                                                                    childType,
                                                                    _description,
                                                                    _message );
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.addChild( uow, "blah", childType );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.addChild( this.uow, "blah", childType );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
     @Test
     public void shouldVerifyRequiredRulePassesWhenPropertyExists() throws Exception {
         final String propName = "sledge";
-        final UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
 
         // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRequiredRule( uow,
+        final Rule rule = _validationMgr.addPropertyRequiredRule( this.uow,
                                                                   "propRule",
                                                                   "nt:unstructured",
                                                                   propName,
@@ -735,15 +721,15 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                   _message );
 
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( uow, null, "kobject", null );
-        kobject.setProperty( uow, propName, "hammer" );
-        uow.commit();
+        final KomodoObject kobject = _repo.add( this.uow, null, "kobject", null );
+        kobject.setProperty( this.uow, propName, "hammer" );
+        commit();
 
         // test
-        final Result result = rule.evaluate( null, kobject );
+        final Result result = rule.evaluate( this.uow, kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName() ) );
+        assertThat( result.getRuleId(), is( rule.getName( this.uow ) ) );
     }
 
 }

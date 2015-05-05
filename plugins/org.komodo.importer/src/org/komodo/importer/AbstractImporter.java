@@ -35,13 +35,11 @@ import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
-import org.modeshape.jcr.JcrLexicon;
 
 /**
  *
@@ -85,7 +83,7 @@ public abstract class AbstractImporter implements StringConstants {
     }
 
     /*
-     * Only commit the transaction if it was my transaction to begin with
+     * Commit the transaction
      */
     protected void commitTransaction(UnitOfWork transaction) throws Exception {
         if (transaction == null)

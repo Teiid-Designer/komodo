@@ -20,6 +20,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 
@@ -111,7 +112,7 @@ public final class VirtualProcedureImpl extends AbstractProcedureImpl implements
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath

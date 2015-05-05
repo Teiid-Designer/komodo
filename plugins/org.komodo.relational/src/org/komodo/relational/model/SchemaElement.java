@@ -9,6 +9,7 @@ package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents an element that has a schema element type.
@@ -57,7 +58,7 @@ public interface SchemaElement {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the schema element type (never <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -67,7 +68,7 @@ public interface SchemaElement {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newSchemaElementType
      *        the new value for the <code>schema element type</code> property (can be <code>null</code>)
      * @throws KException

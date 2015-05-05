@@ -25,6 +25,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * A schema fragment
@@ -48,7 +49,7 @@ public interface Schema extends RelationalObject, Exportable {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return rendered content of this schema, eg. ddl string
      * @throws KException if error occurs
      */
@@ -56,7 +57,7 @@ public interface Schema extends RelationalObject, Exportable {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param rendition rendered content of this schema, eg. ddl string
      * @throws KException if error occurs
      */

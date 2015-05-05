@@ -40,39 +40,40 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( null, _repo, null, "vdb", "path" );
-        final Model model = RelationalModelFactory.createModel( null, _repo, vdb, "model" );
-        final StoredProcedure procedure = RelationalModelFactory.createStoredProcedure( null, _repo, model, "procedure" );
-        this.resultSet = RelationalModelFactory.createTabularResultSet( null, _repo, procedure );
-        this.column = RelationalModelFactory.createResultSetColumn( null, _repo, this.resultSet, NAME );
+        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "path" );
+        final Model model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
+        final StoredProcedure procedure = RelationalModelFactory.createStoredProcedure( this.uow, _repo, model, "procedure" );
+        this.resultSet = RelationalModelFactory.createTabularResultSet( this.uow, _repo, procedure );
+        this.column = RelationalModelFactory.createResultSetColumn( this.uow, _repo, this.resultSet, NAME );
+        commit();
     }
 
     @Test
     public void shouldAllowEmptyDescription() throws Exception {
-        this.column.setDescription( null, "blah" );
-        this.column.setDescription( null, StringConstants.EMPTY_STRING );
-        assertThat( this.column.getDescription( null ), is( nullValue() ) );
+        this.column.setDescription( this.uow, "blah" );
+        this.column.setDescription( this.uow, StringConstants.EMPTY_STRING );
+        assertThat( this.column.getDescription( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowEmptyNameInSource() throws Exception {
-        this.column.setNameInSource( null, "blah" );
-        this.column.setNameInSource( null, StringConstants.EMPTY_STRING );
-        assertThat( this.column.getNameInSource( null ), is( nullValue() ) );
+        this.column.setNameInSource( this.uow, "blah" );
+        this.column.setNameInSource( this.uow, StringConstants.EMPTY_STRING );
+        assertThat( this.column.getNameInSource( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullDescription() throws Exception {
-        this.column.setDescription( null, "blah" );
-        this.column.setDescription( null, null );
-        assertThat( this.column.getDescription( null ), is( nullValue() ) );
+        this.column.setDescription( this.uow, "blah" );
+        this.column.setDescription( this.uow, null );
+        assertThat( this.column.getDescription( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullNameInSource() throws Exception {
-        this.column.setNameInSource( null, "blah" );
-        this.column.setNameInSource( null, null );
-        assertThat( this.column.getNameInSource( null ), is( nullValue() ) );
+        this.column.setNameInSource( this.uow, "blah" );
+        this.column.setNameInSource( this.uow, null );
+        assertThat( this.column.getNameInSource( this.uow ), is( nullValue() ) );
     }
 
     @Test
@@ -82,11 +83,11 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldFailConstructionIfNotResultSetColumn() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ColumnImpl( null, _repo, _repo.komodoLibrary( null ).getAbsolutePath() );
+                new ColumnImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -94,72 +95,72 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyUuidWhenNeverAdded() throws Exception {
-        this.column.setUuid( null, StringConstants.EMPTY_STRING );
+        this.column.setUuid( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullUuidWhenNeverAdded() throws Exception {
-        this.column.setUuid( null, null );
+        this.column.setUuid( this.uow, null );
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat( this.column.getName( null ), is( NAME ) );
+        assertThat( this.column.getName( this.uow ), is( NAME ) );
     }
 
     @Test
     public void shouldHaveDatatypeLengthPropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getLength( null ), is( RelationalConstants.DEFAULT_LENGTH ) );
-        assertThat( this.column.hasProperty( null, StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
+        assertThat( this.column.getLength( this.uow ), is( RelationalConstants.DEFAULT_LENGTH ) );
+        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
     }
 
     @Test
     public void shouldHaveDatatypeNamePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getDatatypeName( null ), is( RelationalConstants.DEFAULT_DATATYPE_NAME ) );
-        assertThat( this.column.hasProperty( null, StandardDdlLexicon.DATATYPE_NAME ), is( false ) );
+        assertThat( this.column.getDatatypeName( this.uow ), is( RelationalConstants.DEFAULT_DATATYPE_NAME ) );
+        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_NAME ), is( false ) );
     }
 
     @Test
     public void shouldHaveDatatypePrecisionPropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getPrecision( null ), is( RelationalConstants.DEFAULT_PRECISION ) );
-        assertThat( this.column.hasProperty( null, StandardDdlLexicon.DATATYPE_PRECISION ), is( false ) );
+        assertThat( this.column.getPrecision( this.uow ), is( RelationalConstants.DEFAULT_PRECISION ) );
+        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_PRECISION ), is( false ) );
     }
 
     @Test
     public void shouldHaveDatatypeScalePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getScale( null ), is( RelationalConstants.DEFAULT_SCALE ) );
-        assertThat( this.column.hasProperty( null, StandardDdlLexicon.DATATYPE_SCALE ), is( false ) );
+        assertThat( this.column.getScale( this.uow ), is( RelationalConstants.DEFAULT_SCALE ) );
+        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_SCALE ), is( false ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.column.getPropertyNames( null );
-        final String[] rawProps = this.column.getRawPropertyNames( null );
+        final String[] filteredProps = this.column.getPropertyNames( this.uow );
+        final String[] rawProps = this.column.getRawPropertyNames( this.uow );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveNullablePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.hasProperty( null, StandardDdlLexicon.NULLABLE ), is( true ) );
-        assertThat( this.column.getNullable( null ), is( RelationalConstants.Nullable.DEFAULT_VALUE ) );
-        assertThat( this.column.getProperty( null, StandardDdlLexicon.NULLABLE ).getStringValue( null ),
+        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.NULLABLE ), is( true ) );
+        assertThat( this.column.getNullable( this.uow ), is( RelationalConstants.Nullable.DEFAULT_VALUE ) );
+        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.NULLABLE ).getStringValue( this.uow ),
                     is( RelationalConstants.Nullable.DEFAULT_VALUE.toValue() ) );
     }
 
     @Test
     public void shouldHaveParentResultSet() throws Exception {
-        assertThat( this.column.getParent( null ), is( instanceOf( TabularResultSet.class ) ) );
-        assertThat( this.column.getParent( null ), is( ( KomodoObject )this.resultSet ) );
+        assertThat( this.column.getParent( this.uow ), is( instanceOf( TabularResultSet.class ) ) );
+        assertThat( this.column.getParent( this.uow ), is( ( KomodoObject )this.resultSet ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.column.addChild( null, "blah", null );
+        this.column.addChild( this.uow, "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.column.getPropertyNames( null );
+        final String[] filteredProps = this.column.getPropertyNames( this.uow );
         final Filter[] filters = this.column.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -171,101 +172,103 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotCountStatementOptionsAsChildren() throws Exception {
-        this.column.setUuid( null, "elvis" );
-        this.column.setStatementOption( null, "sledge", "hammer" );
-        assertThat( this.column.getChildren( null ).length, is( 0 ) );
+        this.column.setUuid( this.uow, "elvis" );
+        this.column.setStatementOption( this.uow, "sledge", "hammer" );
+        assertThat( this.column.getChildren( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getDefaultValue( null ), is( nullValue() ) );
-        assertThat( this.column.hasProperty( null, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
+        assertThat( this.column.getDefaultValue( this.uow ), is( nullValue() ) );
+        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
     }
 
     @Test
     public void shouldRemoveDefaultValueWithEmptyString() throws Exception {
-        this.column.setDefaultValue( null, "defaultValue" );
-        this.column.setDefaultValue( null, StringConstants.EMPTY_STRING );
-        assertThat( this.column.getDefaultValue( null ), is( nullValue() ) );
-        assertThat( this.column.hasProperty( null, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
+        this.column.setDefaultValue( this.uow, "defaultValue" );
+        this.column.setDefaultValue( this.uow, StringConstants.EMPTY_STRING );
+        assertThat( this.column.getDefaultValue( this.uow ), is( nullValue() ) );
+        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
     }
 
     @Test
     public void shouldRemoveDefaultValueWithNull() throws Exception {
-        this.column.setDefaultValue( null, "defaultValue" );
-        this.column.setDefaultValue( null, null );
-        assertThat( this.column.getDefaultValue( null ), is( nullValue() ) );
-        assertThat( this.column.hasProperty( null, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
+        this.column.setDefaultValue( this.uow, "defaultValue" );
+        this.column.setDefaultValue( this.uow, null );
+        assertThat( this.column.getDefaultValue( this.uow ), is( nullValue() ) );
+        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
     }
 
     @Test
     public void shouldSetDatatypeLengthProperty() throws Exception {
         final long value = ( RelationalConstants.DEFAULT_LENGTH + 10 );
-        this.column.setLength( null, value );
-        assertThat( this.column.getLength( null ), is( value ) );
-        assertThat( this.column.getProperty( null, StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( null ), is( value ) );
+        this.column.setLength( this.uow, value );
+        assertThat( this.column.getLength( this.uow ), is( value ) );
+        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetDatatypeNameProperty() throws Exception {
         final String value = "datatypename";
-        this.column.setDatatypeName( null, value );
-        assertThat( this.column.getDatatypeName( null ), is( value ) );
-        assertThat( this.column.getProperty( null, StandardDdlLexicon.DATATYPE_NAME ).getStringValue( null ), is( value ) );
+        this.column.setDatatypeName( this.uow, value );
+        assertThat( this.column.getDatatypeName( this.uow ), is( value ) );
+        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_NAME ).getStringValue( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetDatatypePrecisionProperty() throws Exception {
         final int value = 10;
-        this.column.setPrecision( null, value );
-        assertThat( this.column.getPrecision( null ), is( value ) );
-        assertThat( this.column.getProperty( null, StandardDdlLexicon.DATATYPE_PRECISION ).getLongValue( null ),
+        this.column.setPrecision( this.uow, value );
+        assertThat( this.column.getPrecision( this.uow ), is( value ) );
+        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_PRECISION ).getLongValue( this.uow ),
                     is( ( long )value ) );
     }
 
     @Test
     public void shouldSetDatatypeScaleProperty() throws Exception {
         final int value = 10;
-        this.column.setScale( null, value );
-        assertThat( this.column.getScale( null ), is( value ) );
-        assertThat( this.column.getProperty( null, StandardDdlLexicon.DATATYPE_SCALE ).getLongValue( null ), is( ( long )value ) );
+        this.column.setScale( this.uow, value );
+        assertThat( this.column.getScale( this.uow ), is( value ) );
+        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_SCALE ).getLongValue( this.uow ),
+                    is( ( long )value ) );
     }
 
     @Test
     public void shouldSetDefaultValueProperty() throws Exception {
         final String value = "defaultvalue";
-        this.column.setDefaultValue( null, value );
-        assertThat( this.column.getDefaultValue( null ), is( value ) );
-        assertThat( this.column.getProperty( null, StandardDdlLexicon.DEFAULT_VALUE ).getStringValue( null ), is( value ) );
+        this.column.setDefaultValue( this.uow, value );
+        assertThat( this.column.getDefaultValue( this.uow ), is( value ) );
+        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ).getStringValue( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String value = "description";
-        this.column.setDescription( null, value );
-        assertThat( this.column.getDescription( null ), is( value ) );
+        this.column.setDescription( this.uow, value );
+        assertThat( this.column.getDescription( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetNameInSource() throws Exception {
         final String value = "nameInSource";
-        this.column.setNameInSource( null, value );
-        assertThat( this.column.getNameInSource( null ), is( value ) );
+        this.column.setNameInSource( this.uow, value );
+        assertThat( this.column.getNameInSource( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetNullableProperty() throws Exception {
         final Nullable value = Nullable.NO_NULLS;
-        this.column.setNullable( null, value );
-        assertThat( this.column.getNullable( null ), is( value ) );
-        assertThat( this.column.getProperty( null, StandardDdlLexicon.NULLABLE ).getStringValue( null ), is( value.toValue() ) );
+        this.column.setNullable( this.uow, value );
+        assertThat( this.column.getNullable( this.uow ), is( value ) );
+        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.NULLABLE ).getStringValue( this.uow ),
+                    is( value.toValue() ) );
     }
 
     @Test
     public void shouldSetUuid() throws Exception {
         final String value = "uuid";
-        this.column.setUuid( null, value );
-        assertThat( this.column.getUuid( null ), is( value ) );
+        this.column.setUuid( this.uow, value );
+        assertThat( this.column.getUuid( this.uow ), is( value ) );
     }
 
 }

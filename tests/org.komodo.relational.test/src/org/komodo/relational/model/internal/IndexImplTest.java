@@ -31,7 +31,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
-public class IndexImplTest extends RelationalModelTest {
+public final class IndexImplTest extends RelationalModelTest {
 
     private static final String NAME = "index";
 
@@ -40,32 +40,35 @@ public class IndexImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable( null, _repo, mock( Model.class ), "table" );
-        this.index = RelationalModelFactory.createIndex( null, _repo, this.table, NAME );
+        this.table = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "table" );
+        this.index = RelationalModelFactory.createIndex( this.uow, _repo, this.table, NAME );
+        commit();
     }
 
     @Test
     public void shouldAddColumns() throws Exception {
-        final Column columnA = RelationalModelFactory.createColumn( null, _repo, mock( Table.class ), "columnA" );
-        this.index.addColumn( null, columnA );
+        final Column columnA = RelationalModelFactory.createColumn( this.uow, _repo, mock( Table.class ), "columnA" );
+        this.index.addColumn( this.uow, columnA );
 
-        final Column columnB = RelationalModelFactory.createColumn( null, _repo, mock( Table.class ), "columnB" );
-        this.index.addColumn( null, columnB );
+        final Column columnB = RelationalModelFactory.createColumn( this.uow, _repo, mock( Table.class ), "columnB" );
+        this.index.addColumn( this.uow, columnB );
 
-        assertThat( this.index.getColumns( null ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.index.getColumns( null ) ), hasItems( columnA, columnB ) );
+        commit(); // must commit so that query used in next method will work
+
+        assertThat( this.index.getColumns( this.uow ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.index.getColumns( this.uow ) ), hasItems( columnA, columnB ) );
     }
 
     @Test
     public void shouldAllowEmptyExpression() throws Exception {
-        this.index.setExpression( null, "" );
-        assertThat( this.index.getExpression( null ), is( nullValue() ) );
+        this.index.setExpression( this.uow, EMPTY_STRING );
+        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullExpression() throws Exception {
-        this.index.setExpression( null, null );
-        assertThat( this.index.getExpression( null ), is( nullValue() ) );
+        this.index.setExpression( this.uow, null );
+        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
     }
 
     @Test
@@ -75,11 +78,11 @@ public class IndexImplTest extends RelationalModelTest {
 
     @Test
     public void shouldFailConstructionIfNotIndex() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new IndexImpl( null, _repo, this.table.getAbsolutePath() );
+                new IndexImpl( this.uow, _repo, this.table.getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -88,31 +91,31 @@ public class IndexImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.index.getConstraintType(), is( TableConstraint.ConstraintType.INDEX ) );
-        assertThat( this.index.getProperty( null, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( null ),
+        assertThat( this.index.getProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
                     is( TableConstraint.ConstraintType.INDEX.toValue() ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.index.getPropertyNames( null );
-        final String[] rawProps = this.index.getRawPropertyNames( null );
+        final String[] filteredProps = this.index.getPropertyNames( this.uow );
+        final String[] rawProps = this.index.getRawPropertyNames( this.uow );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat( this.index.getParent( null ), is( instanceOf( Table.class ) ) );
-        assertThat( this.index.getTable( null ), is( this.table ) );
+        assertThat( this.index.getParent( this.uow ), is( instanceOf( Table.class ) ) );
+        assertThat( this.index.getTable( this.uow ), is( this.table ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.index.addChild( null, "blah", null );
+        this.index.addChild( this.uow, "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.index.getPropertyNames( null );
+        final String[] filteredProps = this.index.getPropertyNames( this.uow );
         final Filter[] filters = this.index.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -124,29 +127,29 @@ public class IndexImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveExpressionAfterConstruction() throws Exception {
-        assertThat( this.index.getExpression( null ), is( nullValue() ) );
-        assertThat( this.index.hasProperty( null, TeiidDdlLexicon.Constraint.EXPRESSION ), is( false ) );
+        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
+        assertThat( this.index.hasProperty( this.uow, TeiidDdlLexicon.Constraint.EXPRESSION ), is( false ) );
     }
 
     @Test
     public void shouldRemoveExpressionWithEmptyString() throws Exception {
-        this.index.setExpression( null, "expression" );
-        this.index.setExpression( null, StringConstants.EMPTY_STRING );
-        assertThat( this.index.getExpression( null ), is( nullValue() ) );
+        this.index.setExpression( this.uow, "expression" );
+        this.index.setExpression( this.uow, StringConstants.EMPTY_STRING );
+        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldRemoveExpressionWithNull() throws Exception {
-        this.index.setExpression( null, "expression" );
-        this.index.setExpression( null, null );
-        assertThat( this.index.getExpression( null ), is( nullValue() ) );
+        this.index.setExpression( this.uow, "expression" );
+        this.index.setExpression( this.uow, null );
+        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetExpression() throws Exception {
         final String value = "expression";
-        this.index.setExpression( null, value );
-        assertThat( this.index.getExpression( null ), is( value ) );
+        this.index.setExpression( this.uow, value );
+        assertThat( this.index.getExpression( this.uow ), is( value ) );
     }
 
 }

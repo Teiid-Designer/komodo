@@ -18,6 +18,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -36,8 +37,8 @@ public class DescriptorImpl implements Descriptor {
      */
     public DescriptorImpl( final Repository descriptorRepository,
                            final String descriptorName ) {
-        ArgCheck.isNotNull(descriptorRepository, "descriptorRepository"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(descriptorName, "descriptorName"); //$NON-NLS-1$
+        ArgCheck.isNotNull( descriptorRepository, "descriptorRepository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( descriptorName, "descriptorName" ); //$NON-NLS-1$
 
         this.repository = descriptorRepository;
         this.name = descriptorName;
@@ -46,32 +47,30 @@ public class DescriptorImpl implements Descriptor {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Descriptor#getChildDescriptors()
+     * @see org.komodo.spi.repository.Descriptor#getChildDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Descriptor[] getChildDescriptors() throws KException {
-        final UnitOfWork transaction = this.repository.createTransaction("descriptor-getChildDescriptors", true, null); //$NON-NLS-1$
+    public Descriptor[] getChildDescriptors( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
-            final NodeTypeManager nodeTypeMgr = getSession(transaction).getWorkspace().getNodeTypeManager();
-            final NodeDefinition[] childDefns = nodeTypeMgr.getNodeType(this.name).getChildNodeDefinitions();
-            final Descriptor[] childDescriptors = new Descriptor[childDefns.length];
+            final NodeTypeManager nodeTypeMgr = getSession( transaction ).getWorkspace().getNodeTypeManager();
+            final NodeDefinition[] childDefns = nodeTypeMgr.getNodeType( this.name ).getChildNodeDefinitions();
+            final Descriptor[] childDescriptors = new Descriptor[ childDefns.length ];
             int i = 0;
 
-            for (final NodeDefinition childDefn : childDefns) {
-                childDescriptors[i++] = new DescriptorImpl(this.repository, childDefn.getName());
+            for ( final NodeDefinition childDefn : childDefns ) {
+                childDescriptors[i++] = new DescriptorImpl( this.repository, childDefn.getName() );
             }
 
-            transaction.commit();
             return childDescriptors;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
+        } catch ( final Exception e ) {
+            if ( e instanceof KException ) {
+                throw ( KException )e;
             }
 
-            throw new KException(e);
+            throw new KException( e );
         }
     }
 
@@ -88,37 +87,35 @@ public class DescriptorImpl implements Descriptor {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.Descriptor#getPropertyDescriptors()
+     * @see org.komodo.spi.repository.Descriptor#getPropertyDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public PropertyDescriptor[] getPropertyDescriptors() throws KException {
-        final UnitOfWork transaction = this.repository.createTransaction("descriptor-getPropertyDescriptors", true, null); //$NON-NLS-1$
+    public PropertyDescriptor[] getPropertyDescriptors( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
-            final NodeTypeManager nodeTypeMgr = getSession(transaction).getWorkspace().getNodeTypeManager();
-            final PropertyDefinition[] propDefns = nodeTypeMgr.getNodeType(this.name).getPropertyDefinitions();
-            final PropertyDescriptor[] propDescriptors = new PropertyDescriptorImpl[propDefns.length];
+            final NodeTypeManager nodeTypeMgr = getSession( transaction ).getWorkspace().getNodeTypeManager();
+            final PropertyDefinition[] propDefns = nodeTypeMgr.getNodeType( this.name ).getPropertyDefinitions();
+            final PropertyDescriptor[] propDescriptors = new PropertyDescriptorImpl[ propDefns.length ];
             int i = 0;
 
-            for (final PropertyDefinition propDefn : propDefns) {
-                propDescriptors[i++] = new PropertyDescriptorImpl(propDefn);
+            for ( final PropertyDefinition propDefn : propDefns ) {
+                propDescriptors[i++] = new PropertyDescriptorImpl( propDefn );
             }
 
-            transaction.commit();
             return propDescriptors;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
+        } catch ( final Exception e ) {
+            if ( e instanceof KException ) {
+                throw ( KException )e;
             }
 
-            throw new KException(e);
+            throw new KException( e );
         }
     }
 
     private Session getSession( final UnitOfWork transaction ) {
-        return ((UnitOfWorkImpl)transaction).getSession();
+        return ( ( UnitOfWorkImpl )transaction ).getSession();
     }
 
     /**

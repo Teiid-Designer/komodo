@@ -28,6 +28,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -101,7 +102,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
             try {
                 ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_COLUMN );
                 return true;
-            } catch (final Exception e) {
+            } catch ( final Exception e ) {
                 // not resolvable
             }
 
@@ -124,7 +125,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -144,38 +145,25 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
      * @see org.komodo.relational.model.OptionContainer#getCustomOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public StatementOption[] getCustomOptions( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "resultsetcolumnimpl-getCustomOptions", true, null ); //$NON-NLS-1$
-        }
+        StatementOption[] result = getStatementOptions( transaction );
 
-        assert ( transaction != null );
+        if ( result.length != 0 ) {
+            final List< StatementOption > temp = new ArrayList<>( result.length );
 
-        try {
-            StatementOption[] result = getStatementOptions( transaction );
-
-            if (result.length != 0) {
-                final List< StatementOption > temp = new ArrayList<>( result.length );
-
-                for (final StatementOption option : result) {
-                    if (StandardOptions.valueOf( option.getName( transaction ) ) == null) {
-                        temp.add( option );
-                    }
+            for ( final StatementOption option : result ) {
+                if ( StandardOptions.valueOf( option.getName( transaction ) ) == null ) {
+                    temp.add( option );
                 }
-
-                result = temp.toArray( new StatementOption[temp.size()] );
             }
 
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
+            result = temp.toArray( new StatementOption[ temp.size() ] );
         }
+
+        return result;
     }
 
     /**
@@ -188,7 +176,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
         final String value = getObjectProperty( uow, PropertyValueType.STRING, "getDatatypeName", //$NON-NLS-1$
                                                 StandardDdlLexicon.DATATYPE_NAME );
 
-        if (StringUtils.isBlank( value )) {
+        if ( StringUtils.isBlank( value ) ) {
             return RelationalConstants.DEFAULT_DATATYPE_NAME;
         }
 
@@ -214,7 +202,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
     public String getDescription( final UnitOfWork transaction ) throws KException {
         final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ANNOTATION.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return null;
         }
 
@@ -230,7 +218,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
     public long getLength( final UnitOfWork uow ) throws KException {
         final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getLength", StandardDdlLexicon.DATATYPE_LENGTH ); //$NON-NLS-1$
 
-        if (value == null) {
+        if ( value == null ) {
             return RelationalConstants.DEFAULT_LENGTH;
         }
 
@@ -246,7 +234,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
     public String getNameInSource( final UnitOfWork transaction ) throws KException {
         final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NAMEINSOURCE.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return null;
         }
 
@@ -263,7 +251,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
         final String value = getObjectProperty( uow, PropertyValueType.STRING, "getNullable", //$NON-NLS-1$
                                                 StandardDdlLexicon.NULLABLE );
 
-        if (StringUtils.isBlank( value )) {
+        if ( StringUtils.isBlank( value ) ) {
             return Nullable.DEFAULT_VALUE;
         }
 
@@ -280,7 +268,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
         final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getPrecision", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_PRECISION );
 
-        if (value == null) {
+        if ( value == null ) {
             return RelationalConstants.DEFAULT_PRECISION;
         }
 
@@ -297,7 +285,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
         final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getScale", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_SCALE );
 
-        if (value == null) {
+        if ( value == null ) {
             return RelationalConstants.DEFAULT_SCALE;
         }
 
@@ -310,47 +298,23 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
      * @see org.komodo.relational.model.OptionContainer#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public StatementOption[] getStatementOptions( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public StatementOption[] getStatementOptions( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "resultsetcolumnimpl-getStatementOptions", true, null ); //$NON-NLS-1$
+        final KomodoObject same = new ObjectImpl( getRepository(), getAbsolutePath(), getIndex() );
+        final List< StatementOption > result = new ArrayList< StatementOption >();
+
+        for ( final KomodoObject kobject : same.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION ) ) {
+            final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+            result.add( option );
         }
 
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "getStatementOptions: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
+        if ( result.isEmpty() ) {
+            return StatementOption.NO_OPTIONS;
         }
 
-        try {
-            final KomodoObject same = new ObjectImpl(getRepository(), getAbsolutePath(), getIndex());
-            final List< StatementOption > result = new ArrayList< StatementOption >();
-
-            for (final KomodoObject kobject : same.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION )) {
-                final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug( "getStatementOptions: transaction = {0}, found statement option = {1}", //$NON-NLS-1$
-                                  transaction.getName(),
-                                  kobject.getAbsolutePath() );
-                }
-
-                result.add( option );
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            if (result.isEmpty()) {
-                return StatementOption.NO_OPTIONS;
-            }
-
-            return result.toArray( new StatementOption[result.size()] );
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        return result.toArray( new StatementOption[ result.size() ] );
     }
 
     /**
@@ -372,7 +336,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
     public String getUuid( final UnitOfWork transaction ) throws KException {
         final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return null;
         }
 
@@ -386,47 +350,27 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
      *      java.lang.String)
      */
     @Override
-    public void removeStatementOption( final UnitOfWork uow,
+    public void removeStatementOption( final UnitOfWork transaction,
                                        final String optionToRemove ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( optionToRemove, "optionToRemove" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "resultsetcolumnimpl-removeStatementOption", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "removeStatementOption: transaction = {0}, optionToRemove = {1}", //$NON-NLS-1$
-                          transaction.getName(),
-                          optionToRemove );
-        }
 
         boolean found = false;
+        final StatementOption[] options = getStatementOptions( transaction );
 
-        try {
-            final StatementOption[] options = getStatementOptions( transaction );
-
-            if (options.length != 0) {
-                for (final StatementOption option : options) {
-                    if (optionToRemove.equals( option.getName( transaction ) )) {
-                        option.remove( transaction );
-                        found = true;
-                        break;
-                    }
+        if ( options.length != 0 ) {
+            for ( final StatementOption option : options ) {
+                if ( optionToRemove.equals( option.getName( transaction ) ) ) {
+                    option.remove( transaction );
+                    found = true;
+                    break;
                 }
             }
+        }
 
-            if (!found) {
-                throw new KException( Messages.getString( Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove ) );
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
+        if ( !found ) {
+            throw new KException( Messages.getString( Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove ) );
         }
     }
 
@@ -532,51 +476,32 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
      *      java.lang.String, java.lang.String)
      */
     @Override
-    public StatementOption setStatementOption( final UnitOfWork uow,
+    public StatementOption setStatementOption( final UnitOfWork transaction,
                                                final String optionName,
                                                final String optionValue ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( optionName, "optionName" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "resultsetcolumnimpl-setStatementOption", false, null ); //$NON-NLS-1$
-        }
+        StatementOption result = null;
 
-        assert ( transaction != null );
+        if ( StringUtils.isBlank( optionValue ) ) {
+            removeStatementOption( transaction, optionName );
+        } else {
+            result = Utils.getOption( transaction, this, optionName );
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "setStatementOption: transaction = {0}, optionName = {1}", //$NON-NLS-1$
-                          transaction.getName(),
-                          optionName );
-        }
-
-        try {
-            StatementOption result = null;
-
-            if (StringUtils.isBlank( optionValue )) {
-                removeStatementOption( transaction, optionName );
+            if ( result == null ) {
+                result = RelationalModelFactory.createStatementOption( transaction,
+                                                                       getRepository(),
+                                                                       this,
+                                                                       optionName,
+                                                                       optionValue );
             } else {
-                result = Utils.getOption( transaction, this, optionName );
-
-                if (result == null) {
-                    result = RelationalModelFactory.createStatementOption( transaction,
-                                                                           getRepository(),
-                                                                           this,
-                                                                           optionName,
-                                                                           optionValue );
-                } else {
-                    result.setOption( transaction, optionValue );
-                }
+                result.setOption( transaction, optionValue );
             }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
         }
+
+        return result;
     }
 
     /**

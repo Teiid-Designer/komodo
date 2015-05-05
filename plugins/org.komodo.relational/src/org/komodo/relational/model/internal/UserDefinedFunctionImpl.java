@@ -22,6 +22,8 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 
@@ -121,7 +123,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -157,42 +159,29 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
      * @see org.komodo.relational.model.OptionContainer#getCustomOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public StatementOption[] getCustomOptions( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "userdefinedfunctionimpl-getCustomOptions", true, null ); //$NON-NLS-1$
-        }
+        // get super custom options then delete any subclass standard options
+        final StatementOption[] superOptions = super.getCustomOptions( transaction );
+        StatementOption[] result = StatementOption.NO_OPTIONS;
 
-        assert ( transaction != null );
+        if ( superOptions.length != 0 ) {
+            final List< StatementOption > temp = new ArrayList<>( superOptions.length );
 
-        try {
-            // get super custom options then delete any subclass standard options
-            final StatementOption[] superOptions = super.getCustomOptions( transaction );
-            StatementOption[] result = StatementOption.NO_OPTIONS;
-
-            if (superOptions.length != 0) {
-                final List< StatementOption > temp = new ArrayList<>( superOptions.length );
-
-                for (final StatementOption option : superOptions) {
-                    if (StandardOptions.valueOf( option.getName( transaction ) ) == null) {
-                        temp.add( option );
-                    }
-                }
-
-                if (!temp.isEmpty()) {
-                    result = temp.toArray( new StatementOption[temp.size()] );
+            for ( final StatementOption option : superOptions ) {
+                if ( StandardOptions.valueOf( option.getName( transaction ) ) == null ) {
+                    temp.add( option );
                 }
             }
 
-            if (uow == null) {
-                transaction.commit();
+            if ( !temp.isEmpty() ) {
+                result = temp.toArray( new StatementOption[ temp.size() ] );
             }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
         }
+
+        return result;
     }
 
     /**

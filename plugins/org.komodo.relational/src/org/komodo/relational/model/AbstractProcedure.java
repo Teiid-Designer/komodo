@@ -9,6 +9,7 @@ package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a relational model procedure or function.
@@ -22,7 +23,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param parameterName
      *        the name of the parameter being added (cannot be <code>null</code>)
      * @return the new parameter (never <code>null</code>)
@@ -34,7 +35,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>annotation</code> option (can be empty)
      * @throws KException
      *         if an error occurs
@@ -43,7 +44,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>name in source</code> option (can be empty)
      * @throws KException
      *         if an error occurs
@@ -52,7 +53,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the input parameters (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -69,7 +70,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>update count</code> option
      * @throws KException
      *         if an error occurs
@@ -78,7 +79,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>UUID</code> option (can be empty)
      * @throws KException
      *         if an error occurs
@@ -87,7 +88,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param parameterName
      *        the name of the parameter to remove (cannot be empty)
      * @throws KException
@@ -98,7 +99,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDescription
      *        the new value of the <code>annotation</code> option (can only be empty when removing)
      * @throws KException
@@ -109,7 +110,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newNameInSource
      *        the new name in source option (can only be empty when removing)
      * @throws KException
@@ -120,7 +121,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newUpdateCount
      *        the new value of the <code>update count</code> option
      * @throws KException
@@ -131,7 +132,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newUuid
      *        the new value of the <code>UUID</code> option (can only be empty when removing)
      * @throws KException

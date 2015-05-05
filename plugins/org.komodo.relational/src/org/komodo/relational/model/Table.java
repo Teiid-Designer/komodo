@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a relational model table.
@@ -129,7 +130,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param accessPatternName
      *        the name of the access pattern being added (cannot be empty)
      * @return the new access pattern (never <code>null</code>)
@@ -141,7 +142,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param columnName
      *        the name of the column being added (cannot be empty)
      * @return the new column (never <code>null</code>)
@@ -153,7 +154,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param foreignKeyName
      *        the name of the foreign key being added (cannot be empty)
      * @param referencedTable
@@ -168,7 +169,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param indexName
      *        the name of the index being added (cannot be empty)
      * @return the new index (never <code>null</code>)
@@ -180,7 +181,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param constraintName
      *        the name of the unique constraint being added (cannot be empty)
      * @return the new unique constraint (never <code>null</code>)
@@ -192,7 +193,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the access patterns (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -201,7 +202,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the cardinality
      * @throws KException
      *         if an error occurs
@@ -211,7 +212,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the columns (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -220,7 +221,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>description</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -229,7 +230,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the foreign keys (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -238,7 +239,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the indexes (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -247,7 +248,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the materialized table name (can be empty)
      * @throws KException
      *         if an error occurs
@@ -256,7 +257,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>name in source</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -265,7 +266,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the on commit value (can be <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -274,7 +275,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the primary key (can be <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -283,7 +284,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the query expression (can be empty)
      * @throws KException
      *         if an error occurs
@@ -292,7 +293,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the temporary table type or <code>null</code> if not a temporary table
      * @throws KException
      *         if an error occurs
@@ -301,7 +302,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the unique constraints (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -310,7 +311,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>UUID</code> option (can be empty)
      * @throws KException
      *         if an error occurs
@@ -319,7 +320,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this is a materialized table
      * @throws KException
      *         if an error occurs
@@ -329,7 +330,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this table is updatable
      * @throws KException
      *         if an error occurs
@@ -339,7 +340,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param accessPatternToRemove
      *        the name of the access pattern being removed (cannot be empty)
      * @throws KException
@@ -350,7 +351,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param columnToRemove
      *        the name of the column being removed (cannot be empty)
      * @throws KException
@@ -361,7 +362,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param foreignKeyToRemove
      *        the name of the foreign key being removed (cannot be empty)
      * @throws KException
@@ -372,7 +373,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param indexToRemove
      *        the name of the index being removed (cannot be empty)
      * @throws KException
@@ -383,7 +384,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @throws KException
      *         if an error occurs
      */
@@ -391,7 +392,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param constraintToRemove
      *        the name of the unique constraint being removed (cannot be empty)
      * @throws KException
@@ -402,7 +403,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newCardinality
      *        the new value for the <code>cardinality</code> property
      * @throws KException
@@ -414,7 +415,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDescription
      *        the new value of the <code>description</code> property (can only be empty when removing)
      * @throws KException
@@ -425,7 +426,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newMaterialized
      *        the new value for the <code>materialized</code> property
      * @throws KException
@@ -437,7 +438,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newMaterializedTable
      *        the new value for the <code>materialized table</code> property (can only be empty when removing)
      * @throws KException
@@ -448,7 +449,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newNameInSource
      *        the new name in source (can only be empty when removing)
      * @throws KException
@@ -459,7 +460,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newOnCommit
      *        the new value for the <code>on commit value</code> property (can be <code>null</code>)
      * @throws KException
@@ -470,7 +471,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newPrimaryKeyName
      *        the name of the new <code>primary key</code> child (cannot be empty)
      * @return the new primary key (never <code>null</code>)
@@ -482,7 +483,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newQueryExpression
      *        the new value for the <code>query expression</code> property (can be empty)
      * @throws KException
@@ -493,7 +494,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newTempType
      *        the new value for the <code>temporary table type</code> property (can be <code>null</code>)
      * @throws KException
@@ -504,7 +505,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newUpdatable
      *        the new value for the <code>updatable</code> property
      * @throws KException
@@ -516,7 +517,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newUuid
      *        the new value of the <code>UUID</code> option (can only be empty when removing)
      * @throws KException

@@ -12,6 +12,7 @@ import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a relational model column.
@@ -27,22 +28,6 @@ public interface Column extends OptionContainer, RelationalObject {
      * Identifier of this object
      */
     KomodoType IDENTIFIER = KomodoType.COLUMN;
-
-    /**
-      - teiidddl:autoIncrement (boolean) = 'false'
-      - ddl:nullable (string) = 'NULL' mandatory autocreated < 'NULL', 'NOT NULL'
-      - ddl:datatypeName (STRING)
-      - ddl:datatypeLength (LONG)
-      - ddl:datatypePrecision (LONG)
-      - ddl:datatypeScale (LONG)
-    TODO - ddl:defaultOption (STRING)
-        < 'LITERAL', 'DATETIME', 'USER', 'CURRENT_USER', 'SESSION_USER', 'SYSTEM_USER', 'NULL'
-      - ddl:defaultValue (STRING)
-    TODO - ddl:defaultPrecision (LONG)
-      - ddl:collationName (STRING)
-    TODO + ddl:dropBehavior (ddl:simpleProperty) = ddl:simpleProperty
-    TODO + ddl:columnAttribute (ddl:simpleProperty) = ddl:simpleProperty sns
-     */
 
     /**
      * The values for a column's searchable property.
@@ -138,7 +123,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>char octet length</code> property
      * @throws KException
      *         if an error occurs
@@ -147,7 +132,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>collation name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -156,7 +141,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>datatype name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -166,7 +151,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>default value</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -175,7 +160,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>description</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -184,7 +169,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the number of distinct values
      * @throws KException
      *         if an error occurs
@@ -194,7 +179,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>datatype length</code> property
      * @throws KException
      *         if an error occurs
@@ -204,7 +189,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>maximum value</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -213,7 +198,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>minimum value</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -222,7 +207,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>name in source</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -231,7 +216,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>native type</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -240,7 +225,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>nullable</code> property (never <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -250,7 +235,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>null value count</code> property
      * @throws KException
      *         if an error occurs
@@ -259,7 +244,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>datatype precision</code> property
      * @throws KException
      *         if an error occurs
@@ -269,7 +254,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>datatype radix</code> property
      * @throws KException
      *         if an error occurs
@@ -278,7 +263,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>datatype scale</code> property
      * @throws KException
      *         if an error occurs
@@ -288,7 +273,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>searchable</code> property (never <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -298,7 +283,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>UUID</code> option (can be empty)
      * @throws KException
      *         if an error occurs
@@ -307,7 +292,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if auto-incremented
      * @throws KException
      *         if an error occurs
@@ -317,7 +302,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if case-sensitive
      * @throws KException
      *         if an error occurs
@@ -327,7 +312,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this column holds a currency value
      * @throws KException
      *         if an error occurs
@@ -337,7 +322,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this column has a fixed length
      * @throws KException
      *         if an error occurs
@@ -347,7 +332,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this column is selectable
      * @throws KException
      *         if an error occurs
@@ -357,7 +342,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this column's value is signed
      * @throws KException
      *         if an error occurs
@@ -367,7 +352,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this column is updatable
      * @throws KException
      *         if an error occurs
@@ -377,7 +362,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAutoIncremented
      *        the new value for the <code>auto-incremented</code> property
      * @throws KException
@@ -389,7 +374,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newCaseSensitive
      *        the new value for the <code>case-sensitive</code> property
      * @throws KException
@@ -401,7 +386,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newCharOctetLength
      *        the new value of the <code>char octet length</code> property
      * @throws KException
@@ -412,7 +397,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newCollationName
      *        the new value of the <code>collation name</code> property (can be empty)
      * @throws KException
@@ -423,7 +408,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newCurrency
      *        the new value for the <code>currency</code> property
      * @throws KException
@@ -435,7 +420,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newTypeName
      *        the new value of the <code>datatype name</code> property
      * @throws KException
@@ -447,7 +432,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDefaultValue
      *        the new value of the <code>default value</code> property (can be empty)
      * @throws KException
@@ -458,7 +443,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDescription
      *        the new value of the <code>description</code> property (can only be empty when removing)
      * @throws KException
@@ -469,7 +454,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDistinctValues
      *        the new value for the <code>distinct values</code> property
      * @throws KException
@@ -481,7 +466,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newFixedLength
      *        the new value for the <code>fixed length</code> property
      * @throws KException
@@ -493,7 +478,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newLength
      *        the new value of the <code>datatype length</code> property
      * @throws KException
@@ -505,7 +490,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newMaxValue
      *        the new maximum value (can only be empty when removing)
      * @throws KException
@@ -516,7 +501,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newMinValue
      *        the new minimum value (can only be empty when removing)
      * @throws KException
@@ -527,7 +512,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newNameInSource
      *        the new name in source (can only be empty when removing)
      * @throws KException
@@ -538,7 +523,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newNativeType
      *        the new value of the <code>native type</code> property (can only be empty when removing)
      * @throws KException
@@ -549,7 +534,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newNullable
      *        the new value of the <code>nullable</code> property (can be <code>null</code>)
      * @throws KException
@@ -561,7 +546,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newNullValueCount
      *        the new value of the <code>null value count</code> property
      * @throws KException
@@ -572,7 +557,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newPrecision
      *        the new value of the <code>datatype precision</code> property
      * @throws KException
@@ -584,7 +569,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newRadix
      *        the new value of the <code>datatype radix</code> property
      * @throws KException
@@ -595,7 +580,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newScale
      *        the new value of the <code>datatype scale</code> property
      * @throws KException
@@ -607,7 +592,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newSearchable
      *        the new value of the <code>searchable</code> property (can be <code>null</code>)
      * @throws KException
@@ -619,7 +604,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newSelectable
      *        the new value for the <code>selectable</code> property
      * @throws KException
@@ -631,7 +616,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newSigned
      *        the new value for the <code>signed</code> property
      * @throws KException
@@ -643,7 +628,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newUpdatable
      *        the new value for the <code>updatable</code> property
      * @throws KException
@@ -655,7 +640,7 @@ public interface Column extends OptionContainer, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newUuid
      *        the new value of the <code>UUID</code> option (can only be empty when removing)
      * @throws KException

@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a DDL statement option from a relational model.
@@ -28,7 +29,7 @@ public interface StatementOption extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the statement option (can be empty)
      * @throws KException
      *         if an error occurs
@@ -37,7 +38,7 @@ public interface StatementOption extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newOption
      *        the new value for the <code>statement option</code> property (cannot be empty)
      * @throws KException

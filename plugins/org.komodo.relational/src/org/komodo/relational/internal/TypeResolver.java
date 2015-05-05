@@ -14,6 +14,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * A class that determines if a {@link KomodoObject} can be converted into a strong typed relational object.
@@ -25,7 +26,7 @@ public interface TypeResolver< T extends RelationalObject > {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parent
@@ -58,7 +59,7 @@ public interface TypeResolver< T extends RelationalObject > {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param kobject
      *        the {@link KomodoObject} being resolved (cannot be <code>null</code>)
      * @return <code>true</code> if object can be resolved to this resolver's type

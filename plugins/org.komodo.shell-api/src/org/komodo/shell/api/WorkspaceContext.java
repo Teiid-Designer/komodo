@@ -54,13 +54,13 @@ public interface WorkspaceContext {
 	 * @return the workspace status
 	 */
 	WorkspaceStatus getWorkspaceStatus();
-	
+
 	/**
 	 * Get the parent context
 	 * @return the parent
 	 */
 	WorkspaceContext getParent();
-	
+
 	/**
 	 * Get all children
 	 * @return the list of children
@@ -84,14 +84,14 @@ public interface WorkspaceContext {
 	 * @throws Exception if error occurs
 	 */
 	WorkspaceContext getChild(String name, String type) throws Exception;
-	
+
 	/**
 	 * Get the full name path for this context.  e.g. root.parentContext.thisContext
 	 * @return the full name
 	 * @throws Exception if errors occur
 	 */
 	String getFullName() throws Exception;
-	
+
 	/**
 	 * Determine if the context is within relational model
 	 * @return 'true' if relational
@@ -103,7 +103,7 @@ public interface WorkspaceContext {
 	 * @return the KomodoObject, null if not applicable
 	 */
 	KomodoObject getKomodoObj();
-	
+
 	/**
 	 * Get the property names at this context
 	 * @return the list of property names
@@ -127,12 +127,6 @@ public interface WorkspaceContext {
 	 */
 	void setPropertyValue(String propertyName, Object value) throws Exception;
 
-	/**
-	 * Add a child context
-	 * @param child the child
-	 */
-	void addChild(Object child);
-
     /**
      * @return the repository
      * @throws Exception if error occurs
@@ -145,5 +139,5 @@ public interface WorkspaceContext {
      * @throws Exception if error occurs
      */
     Object visit(WorkspaceContextVisitor visitor) throws Exception;
-	
+
 }

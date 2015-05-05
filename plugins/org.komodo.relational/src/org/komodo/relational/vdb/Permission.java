@@ -11,6 +11,7 @@ import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a VDB data policy permission.
@@ -69,7 +70,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param conditionName
      *        the name of the condition being added (cannot be empty)
      * @return the new condition (never <code>null</code>)
@@ -81,7 +82,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param maskName
      *        the name of the mask being added (cannot be empty)
      * @return the new mask (never <code>null</code>)
@@ -93,7 +94,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the conditions (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -102,7 +103,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the masks (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -111,7 +112,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the target resource name (never empty)
      * @throws KException
      *         if an error occurs
@@ -120,7 +121,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this permission allows alter
      * @throws KException
      *         if an error occurs
@@ -130,7 +131,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this permission allows create
      * @throws KException
      *         if an error occurs
@@ -140,7 +141,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this permission allows delete
      * @throws KException
      *         if an error occurs
@@ -150,7 +151,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this permission allows execute
      * @throws KException
      *         if an error occurs
@@ -160,7 +161,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this permission allows language
      * @throws KException
      *         if an error occurs
@@ -170,7 +171,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this permission allows read
      * @throws KException
      *         if an error occurs
@@ -180,7 +181,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if this permission allows update
      * @throws KException
      *         if an error occurs
@@ -190,7 +191,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param conditionToRemove
      *        the name of the condition being removed (cannot be empty)
      * @throws KException
@@ -201,7 +202,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param maskToRemove
      *        the name of the mask being removed (cannot be empty)
      * @throws KException
@@ -212,7 +213,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowAlter
      *        the new value for the <code>allow alter</code> property
      * @throws KException
@@ -224,7 +225,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowCreate
      *        the new value for the <code>allow create</code> property
      * @throws KException
@@ -236,7 +237,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowDelete
      *        the new value for the <code>allow delete</code> property
      * @throws KException
@@ -248,7 +249,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowExecute
      *        the new value for the <code>allow execute</code> property
      * @throws KException
@@ -260,7 +261,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowLanguage
      *        the new value for the <code>allow language</code> property
      * @throws KException
@@ -272,7 +273,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowRead
      *        the new value for the <code>allow read</code> property
      * @throws KException
@@ -284,7 +285,7 @@ public interface Permission extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowUpdate
      *        the new value for the <code>allow update</code> property
      * @throws KException

@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a user-defined function (CREATE VIRTUAL FUNCTION).
@@ -33,7 +34,7 @@ public interface UserDefinedFunction extends Function {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>category</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -42,7 +43,7 @@ public interface UserDefinedFunction extends Function {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>Java class name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -51,7 +52,7 @@ public interface UserDefinedFunction extends Function {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>Java method name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -60,7 +61,7 @@ public interface UserDefinedFunction extends Function {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newCategory
      *        the new value of the <code>category</code> property (can only be empty when removing)
      * @throws KException
@@ -71,7 +72,7 @@ public interface UserDefinedFunction extends Function {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newJavaClass
      *        the new value of the <code>Java class name</code> property (can only be empty when removing)
      * @throws KException
@@ -82,7 +83,7 @@ public interface UserDefinedFunction extends Function {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newJavaMethod
      *        the new value of the <code>Java method name</code> property (can only be empty when removing)
      * @throws KException

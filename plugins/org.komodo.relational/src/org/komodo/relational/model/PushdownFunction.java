@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a pushdown function (CREATE FOREIGN FUNCTION).
@@ -33,7 +34,7 @@ public interface PushdownFunction extends Function {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the result set (can be <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -42,7 +43,7 @@ public interface PushdownFunction extends Function {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @throws KException
      *         if a result set does not exist or an error occurs
      */
@@ -54,7 +55,7 @@ public interface PushdownFunction extends Function {
      * @param <T>
      *        the type of result set
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param resultSetType
      *        the type of result set being requested
      * @return the new result set (never <code>null</code>)

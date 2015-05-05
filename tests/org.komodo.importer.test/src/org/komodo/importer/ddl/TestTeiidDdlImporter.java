@@ -272,7 +272,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	assertNotNull("Failed - No Model Created ", modelNode);
 
     	// Test Model name
-    	String modelName = modelNode.getName(null);
+    	String modelName = modelNode.getName(this.uow);
     	assertEquals(importOptions.getOption(OptionKeys.NAME), modelName);
 
     	verifyMySQLAcctsDdl(modelNode);
@@ -298,7 +298,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         verifyPrimaryType(schemaNode, KomodoLexicon.Schema.NODE_TYPE);
 
         // Test Model name
-        String schemaName = schemaNode.getName(null);
+        String schemaName = schemaNode.getName(this.uow);
         assertEquals(importOptions.getOption(OptionKeys.NAME), schemaName);
 
         verifyMySQLAcctsDdl(schemaNode);
@@ -361,7 +361,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	verifyPrimaryType(modelNode, VdbLexicon.Vdb.DECLARATIVE_MODEL);
 
     	// Test Model name
-    	String modelName = modelNode.getName(null);
+    	String modelName = modelNode.getName(this.uow);
     	assertEquals(importOptions.getOption(OptionKeys.NAME), modelName);
 
         verifyFlatFileDdl(modelNode);
@@ -387,7 +387,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         verifyPrimaryType(schemaNode, KomodoLexicon.Schema.NODE_TYPE);
 
         // Test Schema name
-        String schemaName = schemaNode.getName(null);
+        String schemaName = schemaNode.getName(this.uow);
         assertEquals(importOptions.getOption(OptionKeys.NAME), schemaName);
 
         verifyFlatFileDdl(schemaNode);

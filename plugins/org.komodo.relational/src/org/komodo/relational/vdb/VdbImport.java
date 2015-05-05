@@ -11,6 +11,7 @@ import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a referenced VDB.
@@ -39,7 +40,7 @@ public interface VdbImport extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>version</code> property
      * @throws KException
      *         if an error occurs
@@ -49,7 +50,7 @@ public interface VdbImport extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if data policies should be imported
      * @throws KException
      *         if an error occurs
@@ -59,7 +60,7 @@ public interface VdbImport extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newImportDataPolicies
      *        the new value for the <code>import data policies</code> property
      * @throws KException
@@ -71,7 +72,7 @@ public interface VdbImport extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newVersion
      *        the new value of the <code>version</code> property
      * @throws KException

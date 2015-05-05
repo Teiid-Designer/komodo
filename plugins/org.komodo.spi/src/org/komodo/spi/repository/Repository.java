@@ -212,7 +212,8 @@ public interface Repository {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parentPath
      *        the parent path where the workspace object is created (can be empty if adding at the root of the workspace)
      * @param name
@@ -258,7 +259,8 @@ public interface Repository {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param query
      *        the SQL query
      *
@@ -269,7 +271,8 @@ public interface Repository {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param type
      *        the type of node to base the search on
      * @param property
@@ -290,7 +293,8 @@ public interface Repository {
     /**
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param types the primary or mixin types to search for
      *
      * @return the {@link KomodoObject}s resulting from the search
@@ -303,7 +307,8 @@ public interface Repository {
     /**
     *
     * @param transaction
-    *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
     * @param path the path to search for
     *
     * @return the {@link KomodoObject}s resulting from the search
@@ -319,7 +324,8 @@ public interface Repository {
      * The path can be workspace relative or absolute.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param path
      *        the path to the workspace object being requested (can be empty if the workspace root)
      * @return the requested workspace Komodo object (can be <code>null</code> if it does not exist)
@@ -333,7 +339,8 @@ public interface Repository {
      * Gets the {@link KomodoObject} with the specified identifier.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param jcrUuid
      *        the value of the <code>jcr:uuid</code> property (cannot be empty)
      * @return the requested workspace Komodo object or <code>null</code> if not found
@@ -365,7 +372,8 @@ public interface Repository {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param file
      *        the file being added to the workspace (cannot be <code>null</code>)
      * @param name
@@ -383,7 +391,8 @@ public interface Repository {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param url
      *        the resource being added to the workspace (cannot be <code>null</code>)
      * @param name
@@ -413,7 +422,8 @@ public interface Repository {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param overwrite
      *        <code>true</code> if existing artifacts should be updated
      * @param descriptor
@@ -430,7 +440,8 @@ public interface Repository {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param paths
      *        the paths of the workspace objects being removed (cannot be <code>null</code> or empty)
      * @throws KException
@@ -454,7 +465,8 @@ public interface Repository {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param artifactPaths
      *        the paths of the artifacts being requested (cannot be <code>null</code> or empty)
      * @return the requested artifacts (never <code>null</code>)
@@ -466,7 +478,8 @@ public interface Repository {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param artifactPaths
      *        the paths of the the artifacts being removed (cannot be <code>null</code> or empty)
      * @throws KException
@@ -479,7 +492,8 @@ public interface Repository {
      * The komodo library in the repository, ie. /tko:komodo/tko:library
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      *
      * @return the komodo library
      * @throws KException if an error occurs
@@ -490,7 +504,8 @@ public interface Repository {
      * The komodo workspace in the repository, ie. /tko:komodo/tko:workspace
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if operation should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      *
      * @return the komodo workspace
      * @throws KException if an error occurs

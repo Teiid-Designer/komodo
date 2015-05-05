@@ -9,6 +9,7 @@ package org.komodo.spi.repository;
 
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a Komodo object.
@@ -18,21 +19,13 @@ public interface KomodoObject extends KNode {
     /**
      * An empty Komodo object array.
      */
-    KomodoObject[] EMPTY_ARRAY = new KomodoObject[0];
-
-    /**
-     * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
-     * @return Type identifier of this komodo object
-     * @throws KException if error occurs
-     */
-    KomodoType getTypeIdentifier(UnitOfWork transaction) throws KException;
+    KomodoObject[] EMPTY_ARRAY = new KomodoObject[ 0 ];
 
     /**
      * Adds a child with the supplied name and primary type.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the name of the new child being added (cannot be empty)
      * @param primaryType
@@ -51,7 +44,7 @@ public interface KomodoObject extends KNode {
      * Adds the specified descriptor name(s).
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param descriptorNames
      *        the descriptor name(s) being added (cannot be empty)
      * @throws KException
@@ -64,7 +57,7 @@ public interface KomodoObject extends KNode {
      * Obtains the first child with the specified name regardless of the type.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param name
      *        the name of child being requested (cannot be empty)
      * @return the child object (never <code>null</code>)
@@ -75,11 +68,10 @@ public interface KomodoObject extends KNode {
                            final String name ) throws KException;
 
     /**
-     * Obtains the first child with the specified name having the specified primary type or mixin. If the type name is empty, the
-     * first child found regardless of type is returned.
+     * Obtains the first child with the specified name having the specified primary type or mixin.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param name
      *        the name of child being requested (cannot be empty)
      * @param typeName
@@ -97,7 +89,7 @@ public interface KomodoObject extends KNode {
      * Subclasses may choose to implement this so that it may not represent that actual, physical children.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @return the child objects (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -107,7 +99,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param name
      *        the name of child(ren) being requested (cannot be empty)
      * @return the child object(s) (never <code>null</code> but can be empty)
@@ -119,7 +111,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param type
      *        the primary type or mixin of the children being requested (cannot be empty)
      * @return the matching children (never <code>null</code> but can be empty)
@@ -131,7 +123,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param typeName
      *        the name of the primary type or mixin whose descriptor is being requested (cannot be empty)
      * @return the type descriptor (never <code>null</code>)
@@ -143,7 +135,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @return the object's mixin type descriptors (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -157,7 +149,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @return this object's primary type descriptor (never <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -166,7 +158,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param name
      *        the name of property being requested (cannot be empty)
      * @return the property or <code>null</code> if the property doesn't exist
@@ -177,11 +169,23 @@ public interface KomodoObject extends KNode {
                           final String name ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @param propName
+     *        the name of the property whose descriptor is being requested (cannot be empty)
+     * @return the property descriptor (can be <code>null</code> if not found)
+     * @throws KException
+     *         if an error occurs
+     */
+    PropertyDescriptor getPropertyDescriptor( final UnitOfWork transaction,
+                                              final String propName ) throws KException;
+
+    /**
      * Subclasses may choose to implement this so that it may not represent that actual, physical property names.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the property names for this object
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @return the property names for this object (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      * @see #getRawPropertyNames(UnitOfWork)
@@ -193,7 +197,7 @@ public interface KomodoObject extends KNode {
      * nodes. This method obtains the actual child nodes.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @return the unfiltered child objects (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -202,7 +206,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @return the unfiltered object's mixin type descriptors (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -213,7 +217,7 @@ public interface KomodoObject extends KNode {
      * Obtains a property even if it has been filtered out by the subclasses.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param name
      *        the name of property, filtered or unfiltered, being requested (cannot be empty)
      * @return the property or <code>null</code> if the property doesn't exist
@@ -228,8 +232,8 @@ public interface KomodoObject extends KNode {
      * properties. This method obtains the actual, physical set of property names.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the unfiltered property names for this object
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @return the unfiltered property names for this object (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      * @see #getPropertyNames(UnitOfWork)
@@ -242,10 +246,19 @@ public interface KomodoObject extends KNode {
     int getTypeId();
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @return the type identifier of this komodo object (never <code>null</code>)
+     * @throws KException
+     *         if error occurs
+     */
+    KomodoType getTypeIdentifier( final UnitOfWork transaction ) throws KException;
+
+    /**
      * Indicates if a child exists with the specified name, regardless of the type.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param name
      *        the name of the child whose existence is being checked (cannot be empty)
      * @return <code>true</code> if a child with the supplied name exists
@@ -259,7 +272,7 @@ public interface KomodoObject extends KNode {
      * Indicates if a child exists with the specified name and the specified primary type or mixin.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param name
      *        the name of the child whose existence is being checked (cannot be empty)
      * @param typeName
@@ -274,7 +287,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @return <code>true</code> if children exist
      * @throws KException
      *         if an error occurs
@@ -283,7 +296,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param descriptorName
      *        the name of the {@link Descriptor descriptor} being checked (cannot be empty)
      * @return <code>true</code> if this {@link KomodoObject} has this descriptor
@@ -295,7 +308,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @return <code>true</code> if properties exist
      * @throws KException
      *         if an error occurs
@@ -304,7 +317,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param name
      *        the name the property whose existence is being checked (cannot be empty)
      * @return <code>true</code> if a property with the supplied name exists
@@ -325,7 +338,7 @@ public interface KomodoObject extends KNode {
      * Prints this object's subtree to standard out
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @throws KException
      *         if an error occurs
      */
@@ -335,7 +348,7 @@ public interface KomodoObject extends KNode {
      * Removes this node.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @throws KException
      *         if an error occurs
      */
@@ -346,7 +359,7 @@ public interface KomodoObject extends KNode {
      * {@link #remove(UnitOfWork)} whenever the node being removed is available.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param names
      *        the name(s) of the child(ren) being removed from this object (cannot be empty)
      * @throws KException
@@ -358,7 +371,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param descriptorNames
      *        the mixin(s) being removed (cannot be empty)
      * @throws KException
@@ -369,7 +382,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param newName
      *        the new name (cannot be empty or contain any slashes)
      * @throws KException
@@ -380,7 +393,7 @@ public interface KomodoObject extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param typeName
      *        the new primary type name or <code>null</code> or empty if setting to <code>nt:unstructured</code>
      * @throws KException
@@ -394,7 +407,7 @@ public interface KomodoObject extends KNode {
      * values should only be used for creating and setting multi-valued properties.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param propertyName
      *        the name of one of this model object's properties (cannot be <code>null</code> or empty)
      * @param values
@@ -410,10 +423,16 @@ public interface KomodoObject extends KNode {
                       final Object... values ) throws KException;
 
     /**
-     * Visit this object with the given visitor
+     * Visit this object with the given visitor.
      *
-     * @param visitor the visitor
-     * @throws Exception if error occurs
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @param visitor
+     *        the visitor
+     * @throws Exception
+     *         if error occurs
      */
-    void visit(KomodoObjectVisitor visitor) throws Exception;
+    void visit( final UnitOfWork transaction,
+                final KomodoObjectVisitor visitor ) throws Exception;
+
 }

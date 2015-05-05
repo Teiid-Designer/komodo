@@ -34,112 +34,113 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
 
     @Before
     public void init() throws Exception {
-        this.kobject = _repo.add( null, null, NAME, null );
+        this.kobject = _repo.add( this.uow, null, NAME, null );
+        commit();
     }
 
     @Test
     public void shouldAddChild() throws Exception {
         final String name = "kid";
         final String type = "nt:folder";
-        final KomodoObject child = this.kobject.addChild( null, name, type );
-        assertThat( _repo.getFromWorkspace( null, child.getAbsolutePath() ), is( notNullValue() ) );
-        assertThat( child.getPrimaryType( null ).getName(), is( type ) );
+        final KomodoObject child = this.kobject.addChild( this.uow, name, type );
+        assertThat( _repo.getFromWorkspace( this.uow, child.getAbsolutePath() ), is( notNullValue() ) );
+        assertThat( child.getPrimaryType( this.uow ).getName(), is( type ) );
     }
 
     @Test
     public void shouldAddDescriptor() throws Exception {
         final String descriptorName = "mix:referenceable";
-        this.kobject.addDescriptor( null, descriptorName );
-        assertThat( this.kobject.hasDescriptor( null, descriptorName ), is( true ) );
-        assertThat( this.kobject.getDescriptors( null ).length, is( 1 ) );
-        assertThat( this.kobject.getDescriptors( null )[0].getName(), is( descriptorName ) );
+        this.kobject.addDescriptor( this.uow, descriptorName );
+        assertThat( this.kobject.hasDescriptor( this.uow, descriptorName ), is( true ) );
+        assertThat( this.kobject.getDescriptors( this.uow ).length, is( 1 ) );
+        assertThat( this.kobject.getDescriptors( this.uow )[0].getName(), is( descriptorName ) );
     }
 
     @Test
     public void shouldAddMultipleDescriptors() throws Exception {
         final String descriptor1 = "mix:referenceable";
         final String descriptor2 = "mix:lockable";
-        this.kobject.addDescriptor( null, descriptor1, descriptor2 );
-        assertThat( this.kobject.hasDescriptor( null, descriptor1 ), is( true ) );
-        assertThat( this.kobject.hasDescriptor( null, descriptor2 ), is( true ) );
-        assertThat( this.kobject.getDescriptors( null ).length, is( 2 ) );
+        this.kobject.addDescriptor( this.uow, descriptor1, descriptor2 );
+        assertThat( this.kobject.hasDescriptor( this.uow, descriptor1 ), is( true ) );
+        assertThat( this.kobject.hasDescriptor( this.uow, descriptor2 ), is( true ) );
+        assertThat( this.kobject.getDescriptors( this.uow ).length, is( 2 ) );
     }
 
     @Test
     public void shouldExist() throws Exception {
-        final KomodoObject obj = _repo.getFromWorkspace( null, NAME );
+        final KomodoObject obj = _repo.getFromWorkspace( this.uow, NAME );
         assertThat( obj, is( notNullValue() ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingChildWithEmptyName() throws Exception {
-        this.kobject.addChild( null, EMPTY_STRING, null );
+        this.kobject.addChild( this.uow, EMPTY_STRING, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingChildWithNullName() throws Exception {
-        this.kobject.addChild( null, null, null );
+        this.kobject.addChild( this.uow, null, null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailAddingEmptyDescriptorName() throws Exception {
-        this.kobject.addDescriptor( null, EMPTY_STRING );
+        this.kobject.addDescriptor( this.uow, EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailAddingNullDescriptorName() throws Exception {
-        this.kobject.addDescriptor( null, ( String )null );
+        this.kobject.addDescriptor( this.uow, ( String )null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailToGetChildIfItDoesNotExist() throws Exception {
-        this.kobject.getChild( null, "blah" );
+        this.kobject.getChild( this.uow, "blah" );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailToGetChildWithEmptyName() throws Exception {
-        this.kobject.getChild( null, EMPTY_STRING );
+        this.kobject.getChild( this.uow, EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailToGetChildWithNullName() throws Exception {
-        this.kobject.getChild( null, null );
+        this.kobject.getChild( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailToGetChildWithEmptyType() throws Exception {
         final String name = "kid";
-        this.kobject.addChild( null, name, null );
-        this.kobject.getChild( null, name, StringConstants.EMPTY_STRING );
+        this.kobject.addChild( this.uow, name, null );
+        this.kobject.getChild( this.uow, name, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailToGetChildWithNullType() throws Exception {
         final String name = "kid";
-        this.kobject.addChild( null, name, null );
-        this.kobject.getChild( null, name, null );
+        this.kobject.addChild( this.uow, name, null );
+        this.kobject.getChild( this.uow, name, null );
     }
 
     @Test
     public void shouldGetChild() throws Exception {
         final String name = "kid";
-        this.kobject.addChild( null, name, null );
-        assertThat( this.kobject.getChild( null, name ), is( notNullValue() ) );
+        this.kobject.addChild( this.uow, name, null );
+        assertThat( this.kobject.getChild( this.uow, name ), is( notNullValue() ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailToGetChildIfIncorrectType() throws Exception {
         final String name = "kid";
-        this.kobject.addChild( null, name, null );
-        this.kobject.getChild( null, name, JcrNtLexicon.FOLDER.getString() );
+        this.kobject.addChild( this.uow, name, null );
+        this.kobject.getChild( this.uow, name, JcrNtLexicon.FOLDER.getString() );
     }
 
     @Test
     public void shouldGetChildWithCorrectType() throws Exception {
         final String name = "kid";
-        KomodoObject expected = this.kobject.addChild( null, name, null );
-        this.kobject.addChild( null, name, JcrNtLexicon.FOLDER.getString() );
-        assertThat( this.kobject.getChild( null, name, JcrNtLexicon.UNSTRUCTURED.getString() ), is( expected ) );
+        KomodoObject expected = this.kobject.addChild( this.uow, name, null );
+        this.kobject.addChild( this.uow, name, JcrNtLexicon.FOLDER.getString() );
+        assertThat( this.kobject.getChild( this.uow, name, JcrNtLexicon.UNSTRUCTURED.getString() ), is( expected ) );
     }
 
     @Test
@@ -150,33 +151,33 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     @Test
     public void shouldGetNamedDescriptor() throws Exception {
         final String descriptorName = "mix:referenceable";
-        this.kobject.addDescriptor( null, descriptorName );
-        this.kobject.addDescriptor( null, "mix:lockable" );
-        assertThat( this.kobject.getDescriptors( null ).length, is( 2 ) );
-        assertThat( this.kobject.getDescriptor( null, descriptorName ).getName(), is( descriptorName ) );
+        this.kobject.addDescriptor( this.uow, descriptorName );
+        this.kobject.addDescriptor( this.uow, "mix:lockable" );
+        assertThat( this.kobject.getDescriptors( this.uow ).length, is( 2 ) );
+        assertThat( this.kobject.getDescriptor( this.uow, descriptorName ).getName(), is( descriptorName ) );
     }
 
     @Test
     public void shouldHaveSameNumberRawDescriptorsAsDescriptors() throws Exception {
-        assertThat( this.kobject.getDescriptors( null ).length, is( this.kobject.getRawDescriptors( null ).length ) );
+        assertThat( this.kobject.getDescriptors( this.uow ).length, is( this.kobject.getRawDescriptors( this.uow ).length ) );
     }
 
     @Test
     public void shouldHaveSameNumberRawPropertiesAsProperties() throws Exception {
-        assertThat( this.kobject.getPropertyNames( null ).length, is( this.kobject.getRawPropertyNames( null ).length ) );
+        assertThat( this.kobject.getPropertyNames( this.uow ).length, is( this.kobject.getRawPropertyNames( this.uow ).length ) );
     }
 
     @Test
     public void shouldHaveUnknownTypeIdentifier() throws Exception {
-        assertThat( this.kobject.getTypeIdentifier( null ), is( KomodoType.UNKNOWN ) );
+        assertThat( this.kobject.getTypeIdentifier( this.uow ), is( KomodoType.UNKNOWN ) );
     }
 
     @Test
     public void shouldRemove() throws Exception {
-        final KomodoObject obj = _repo.getFromWorkspace( null, NAME );
-        obj.remove( null );
-        assertThat( _repo.getFromWorkspace( null, NAME ), is( nullValue() ) );
-        assertThat( _repo.komodoWorkspace( null ).getChildren( null ).length, is( 0 ) );
+        final KomodoObject obj = _repo.getFromWorkspace( this.uow, NAME );
+        obj.remove( this.uow );
+        assertThat( _repo.getFromWorkspace( this.uow, NAME ), is( nullValue() ) );
+        assertThat( _repo.komodoWorkspace( this.uow ).getChildren( this.uow ).length, is( 0 ) );
     }
 
     @Test
@@ -242,28 +243,28 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     @Test
     public void shouldRemoveDescriptor() throws Exception {
         final String descriptorName = "mix:referenceable";
-        this.kobject.addDescriptor( null, descriptorName );
-        this.kobject.removeDescriptor( null, descriptorName );
-        assertThat( this.kobject.hasDescriptor( null, descriptorName ), is( false ) );
-        assertThat( this.kobject.getDescriptors( null ).length, is( 0 ) );
+        this.kobject.addDescriptor( this.uow, descriptorName );
+        this.kobject.removeDescriptor( this.uow, descriptorName );
+        assertThat( this.kobject.hasDescriptor( this.uow, descriptorName ), is( false ) );
+        assertThat( this.kobject.getDescriptors( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveMultipleDescriptors() throws Exception {
         final String descriptor1 = "mix:referenceable";
         final String descriptor2 = "mix:lockable";
-        this.kobject.addDescriptor( null, descriptor1, descriptor2 );
-        this.kobject.removeDescriptor( null, descriptor1, descriptor2 );
-        assertThat( this.kobject.hasDescriptor( null, descriptor1 ), is( false ) );
-        assertThat( this.kobject.hasDescriptor( null, descriptor2 ), is( false ) );
-        assertThat( this.kobject.getDescriptors( null ).length, is( 0 ) );
+        this.kobject.addDescriptor( this.uow, descriptor1, descriptor2 );
+        this.kobject.removeDescriptor( this.uow, descriptor1, descriptor2 );
+        assertThat( this.kobject.hasDescriptor( this.uow, descriptor1 ), is( false ) );
+        assertThat( this.kobject.hasDescriptor( this.uow, descriptor2 ), is( false ) );
+        assertThat( this.kobject.getDescriptors( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetPrimaryType() throws Exception {
         final String newType = "nt:folder";
-        this.kobject.setPrimaryType( null, newType );
-        assertThat( this.kobject.getPrimaryType( null ).getName(), is( newType ) );
+        this.kobject.setPrimaryType( this.uow, newType );
+        assertThat( this.kobject.getPrimaryType( this.uow ).getName(), is( newType ) );
     }
 
 }

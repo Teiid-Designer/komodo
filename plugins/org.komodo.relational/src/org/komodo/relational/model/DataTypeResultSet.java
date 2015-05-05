@@ -11,6 +11,7 @@ import org.komodo.relational.RelationalConstants;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a data type result set.
@@ -66,7 +67,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the data type display string
      * @throws KException
      *         if an error occurs
@@ -76,7 +77,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>data type length</code> property
      * @throws KException
      *         if an error occurs
@@ -86,7 +87,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>data type</code> property (never empty)
      * @throws KException
      *         if an error occurs
@@ -96,7 +97,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if an array type
      * @throws KException
      *         if an error occurs
@@ -105,7 +106,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newArray
      *        <code>true</code> if an array type
      * @throws KException
@@ -116,7 +117,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newLength
      *        the new value of the <code>data type length</code> property
      * @throws KException
@@ -128,7 +129,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newType
      *        the new value for the <code>data type</code> property (can be <code>null</code> when setting to default)
      * @throws KException

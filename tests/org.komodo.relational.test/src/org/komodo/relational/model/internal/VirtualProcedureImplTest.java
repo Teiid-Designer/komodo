@@ -25,7 +25,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class VirtualProcedureImplTest extends RelationalModelTest {
 
     private static final String AS_ClAUSE = "BEGIN SELECT a,b FROM x; END";
@@ -34,32 +34,33 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( null, _repo, null, "vdb", "externalFilePath" );
-        final Model model = RelationalModelFactory.createModel( null, _repo, vdb, "model" );
-        this.procedure = RelationalModelFactory.createVirtualProcedure( null, _repo, model, "myProcedure" );
+        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "externalFilePath" );
+        final Model model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
+        this.procedure = RelationalModelFactory.createVirtualProcedure( this.uow, _repo, model, "myProcedure" );
+        commit();
     }
 
     @Test
     public void shouldClearAsClauseWithEmptyString() throws Exception {
-        this.procedure.setAsClauseStatement( null, AS_ClAUSE );
-        this.procedure.setAsClauseStatement( null, StringConstants.EMPTY_STRING );
-        assertThat( this.procedure.getAsClauseStatement( null ), is( nullValue() ) );
+        this.procedure.setAsClauseStatement( this.uow, AS_ClAUSE );
+        this.procedure.setAsClauseStatement( this.uow, StringConstants.EMPTY_STRING );
+        assertThat( this.procedure.getAsClauseStatement( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldClearAsClauseWithNullString() throws Exception {
-        this.procedure.setAsClauseStatement( null, AS_ClAUSE );
-        this.procedure.setAsClauseStatement( null, null );
-        assertThat( this.procedure.getAsClauseStatement( null ), is( nullValue() ) );
+        this.procedure.setAsClauseStatement( this.uow, AS_ClAUSE );
+        this.procedure.setAsClauseStatement( this.uow, null );
+        assertThat( this.procedure.getAsClauseStatement( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotVirtualProcedure() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new VirtualProcedureImpl(null, _repo, _repo.komodoLibrary(null).getAbsolutePath());
+                new VirtualProcedureImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -67,19 +68,19 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
-        assertThat( this.procedure.getSchemaElementType( null ), is( SchemaElementType.VIRTUAL ) );
+        assertThat( this.procedure.getSchemaElementType( this.uow ), is( SchemaElementType.VIRTUAL ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.procedure.getPropertyNames( null );
-        final String[] rawProps = this.procedure.getRawPropertyNames( null );
+        final String[] filteredProps = this.procedure.getPropertyNames( this.uow );
+        final String[] rawProps = this.procedure.getRawPropertyNames( this.uow );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.procedure.getPropertyNames( null );
+        final String[] filteredProps = this.procedure.getPropertyNames( this.uow );
         final Filter[] filters = this.procedure.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -91,22 +92,22 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotCountStatementOptionsAsChildren() throws Exception {
-        this.procedure.setStatementOption( null, "sledge", "hammer" );
-        assertThat( this.procedure.getChildren( null ).length, is( 0 ) );
+        this.procedure.setStatementOption( this.uow, "sledge", "hammer" );
+        assertThat( this.procedure.getChildren( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveAsClauseStatementPropertyAfterConstruction() throws Exception {
-        assertThat( this.procedure.getAsClauseStatement( null ), is( nullValue() ) );
-        assertThat( this.procedure.hasProperty( null, TeiidDdlLexicon.CreateProcedure.STATEMENT ), is( false ) );
+        assertThat( this.procedure.getAsClauseStatement( this.uow ), is( nullValue() ) );
+        assertThat( this.procedure.hasProperty( this.uow, TeiidDdlLexicon.CreateProcedure.STATEMENT ), is( false ) );
     }
 
     @Test
     public void shouldSetAsClauseProperty() throws Exception {
         final String value = AS_ClAUSE;
-        this.procedure.setAsClauseStatement( null, value );
-        assertThat( this.procedure.getAsClauseStatement( null ), is( value ) );
-        assertThat( this.procedure.getProperty( null, TeiidDdlLexicon.CreateProcedure.STATEMENT ).getStringValue( null ),
+        this.procedure.setAsClauseStatement( this.uow, value );
+        assertThat( this.procedure.getAsClauseStatement( this.uow ), is( value ) );
+        assertThat( this.procedure.getProperty( this.uow, TeiidDdlLexicon.CreateProcedure.STATEMENT ).getStringValue( this.uow ),
                     is( value ) );
     }
 

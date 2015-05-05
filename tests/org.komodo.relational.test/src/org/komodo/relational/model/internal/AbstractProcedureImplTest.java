@@ -23,7 +23,6 @@ import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
@@ -34,228 +33,253 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final UnitOfWork uow = createWriteTransaction();
-
-        final Vdb vdb = RelationalModelFactory.createVdb( uow, _repo, null, "vdb", "externalFilePath" );
-        final Model model = RelationalModelFactory.createModel( uow, _repo, vdb, "model" );
-        this.procedure = RelationalModelFactory.createVirtualProcedure( uow, _repo, model, "procedure" );
-
-        commit( uow );
+        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "externalFilePath" );
+        final Model model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
+        this.procedure = RelationalModelFactory.createVirtualProcedure( this.uow, _repo, model, "procedure" );
+        commit();
     }
 
     @Test
     public void shouldAddParameter() throws Exception {
         final String name = "param";
 
-        { // setup
-            final UnitOfWork uow = createWriteTransaction();
-            this.procedure.addParameter( uow, name );
-            commit( uow );
-        }
+        // setup
+        this.procedure.addParameter( this.uow, name );
 
         // tests
-        assertThat( this.procedure.getChildren( null ).length, is( 1 ) );
-        assertThat( this.procedure.getChildren( null )[0].getName( null ), is( name ) );
-        assertThat( this.procedure.getChildren( null )[0], is( instanceOf( Parameter.class ) ) );
+        assertThat( this.procedure.getChildren( this.uow ).length, is( 1 ) );
+        assertThat( this.procedure.getChildren( this.uow )[0].getName( this.uow ), is( name ) );
+        assertThat( this.procedure.getChildren( this.uow )[0], is( instanceOf( Parameter.class ) ) );
     }
 
     @Test
     public void shouldAddStatementOption() throws Exception {
+        // setup
         final String name = "statementoption";
         final String value = "statementvalue";
-        final StatementOption statementOption = this.procedure.setStatementOption( null, name, value );
+        final StatementOption statementOption = this.procedure.setStatementOption( this.uow, name, value );
+
+        // tests
         assertThat( statementOption, is( notNullValue() ) );
-        assertThat( statementOption.getName( null ), is( name ) );
-        assertThat( statementOption.getOption( null ), is( value ) );
-        assertThat( this.procedure.getChildren( null ).length, is( 0 ) );
+        assertThat( statementOption.getName( this.uow ), is( name ) );
+        assertThat( statementOption.getOption( this.uow ), is( value ) );
+        assertThat( this.procedure.getChildren( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldAllowNullSchemaElementType() throws Exception {
-        this.procedure.setSchemaElementType( null, null );
+        this.procedure.setSchemaElementType( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyParameterName() throws Exception {
-        this.procedure.addParameter( null, StringConstants.EMPTY_STRING );
+        this.procedure.addParameter( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionName() throws Exception {
-        this.procedure.setStatementOption( null, StringConstants.EMPTY_STRING, "blah" );
+        this.procedure.setStatementOption( this.uow, StringConstants.EMPTY_STRING, "blah" );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullParameterName() throws Exception {
-        this.procedure.addParameter( null, null );
+        this.procedure.addParameter( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionName() throws Exception {
-        this.procedure.setStatementOption( null, null, "blah" );
+        this.procedure.setStatementOption( this.uow, null, "blah" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailAddingNullStatementOptionValue() throws Exception {
-        this.procedure.setStatementOption( null, "blah", null );
+        this.procedure.setStatementOption( this.uow, "blah", null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailASettingEmptyStatementOptionValueWhenNeverAdded() throws Exception {
-        this.procedure.setStatementOption( null, "blah", StringConstants.EMPTY_STRING );
+        this.procedure.setStatementOption( this.uow, "blah", StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyDescriptionWhenNeverAdded() throws Exception {
-        this.procedure.setDescription( null, StringConstants.EMPTY_STRING );
+        this.procedure.setDescription( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyNameInSourceWhenNeverAdded() throws Exception {
-        this.procedure.setNameInSource( null, StringConstants.EMPTY_STRING );
+        this.procedure.setNameInSource( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyUuidWhenNeverAdded() throws Exception {
-        this.procedure.setUuid( null, StringConstants.EMPTY_STRING );
+        this.procedure.setUuid( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullDescriptionWhenNeverAdded() throws Exception {
-        this.procedure.setDescription( null, null );
+        this.procedure.setDescription( this.uow, null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullNameInSourceWhenNeverAdded() throws Exception {
-        this.procedure.setNameInSource( null, null );
+        this.procedure.setNameInSource( this.uow, null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullUuidWhenNeverAdded() throws Exception {
-        this.procedure.setUuid( null, null );
+        this.procedure.setUuid( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyParameterName() throws Exception {
-        this.procedure.removeParameter( null, StringConstants.EMPTY_STRING );
+        this.procedure.removeParameter( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyStatementOptionName() throws Exception {
-        this.procedure.removeStatementOption( null, StringConstants.EMPTY_STRING );
+        this.procedure.removeStatementOption( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullParameterName() throws Exception {
-        this.procedure.removeParameter( null, null );
+        this.procedure.removeParameter( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullStatementOptionName() throws Exception {
-        this.procedure.removeStatementOption( null, null );
+        this.procedure.removeStatementOption( this.uow, null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownParameter() throws Exception {
-        this.procedure.removeParameter( null, "unknown" );
+        this.procedure.removeParameter( this.uow, "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownStatementOption() throws Exception {
-        this.procedure.removeStatementOption( null, "unknown" );
+        this.procedure.removeStatementOption( this.uow, "unknown" );
     }
 
     @Test
     public void shouldGetParameters() throws Exception {
+        // setup
         final int numParams = 5;
 
         for ( int i = 0; i < numParams; ++i ) {
-            this.procedure.addParameter( null, "param" + i );
+            this.procedure.addParameter( this.uow, "param" + i );
         }
 
-        assertThat( this.procedure.getParameters( null ).length, is( numParams ) );
-        assertThat( this.procedure.getChildrenOfType( null, CreateProcedure.PARAMETER ).length, is( numParams ) );
+        // tests
+        assertThat( this.procedure.getParameters( this.uow ).length, is( numParams ) );
+        assertThat( this.procedure.getChildrenOfType( this.uow, CreateProcedure.PARAMETER ).length, is( numParams ) );
     }
 
     @Test
     public void shouldGetStatementOptions() throws Exception {
+        // setup
         final int numStatementOptions = 5;
 
         for ( int i = 0; i < numStatementOptions; ++i ) {
-            this.procedure.setStatementOption( null, "statementoption" + i, "statementvalue" + i );
+            this.procedure.setStatementOption( this.uow, "statementoption" + i, "statementvalue" + i );
         }
 
-        assertThat( this.procedure.getStatementOptions( null ).length, is( numStatementOptions ) );
+        // tests
+        assertThat( this.procedure.getStatementOptions( this.uow ).length, is( numStatementOptions ) );
     }
 
     @Test
     public void shouldHaveDefaultUpdateCountAfterConstruction() throws Exception {
-        assertThat( this.procedure.getUpdateCount( null ), is( AbstractProcedure.DEFAULT_UPDATE_COUNT ) );
+        assertThat( this.procedure.getUpdateCount( this.uow ), is( AbstractProcedure.DEFAULT_UPDATE_COUNT ) );
     }
 
     @Test
     public void shouldNotCountStatementOptionsAsChildren() throws Exception {
-        this.procedure.setNameInSource( null, "elvis" );
-        this.procedure.setStatementOption( null, "sledge", "hammer" );
-        assertThat( this.procedure.getChildren( null ).length, is( 0 ) );
+        // setup
+        this.procedure.setNameInSource( this.uow, "elvis" );
+        this.procedure.setStatementOption( this.uow, "sledge", "hammer" );
+
+        // tests
+        assertThat( this.procedure.getChildren( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveParametersAfterConstruction() throws Exception {
-        assertThat( this.procedure.getParameters( null ).length, is( 0 ) );
+        assertThat( this.procedure.getParameters( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveParameter() throws Exception {
+        // setup
         final String name = "param";
-        this.procedure.addParameter( null, name );
-        this.procedure.removeParameter( null, name );
-        assertThat( this.procedure.getParameters( null ).length, is( 0 ) );
+        this.procedure.addParameter( this.uow, name );
+        this.procedure.removeParameter( this.uow, name );
+
+        // tests
+        assertThat( this.procedure.getParameters( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveStatementOption() throws Exception {
+        // setup
         final String name = "statementoption";
-        this.procedure.setStatementOption( null, name, "blah" );
-        this.procedure.removeStatementOption( null, name );
-        assertThat( this.procedure.getStatementOptions( null ).length, is( 0 ) );
+        this.procedure.setStatementOption( this.uow, name, "blah" );
+        this.procedure.removeStatementOption( this.uow, name );
+
+        // tests
+        assertThat( this.procedure.getStatementOptions( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
+        // setup
         final String value = "description";
-        this.procedure.setDescription( null, value );
-        assertThat( this.procedure.getDescription( null ), is( value ) );
+        this.procedure.setDescription( this.uow, value );
+
+        // tests
+        assertThat( this.procedure.getDescription( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetNameInSource() throws Exception {
+        // setup
         final String value = "nameInSource";
-        this.procedure.setNameInSource( null, value );
-        assertThat( this.procedure.getNameInSource( null ), is( value ) );
+        this.procedure.setNameInSource( this.uow, value );
+
+        // tests
+        assertThat( this.procedure.getNameInSource( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetSchemaElementTypeProperty() throws Exception {
+        // setup
         final SchemaElementType value = SchemaElementType.VIRTUAL;
-        this.procedure.setSchemaElementType( null, value );
-        assertThat( this.procedure.getSchemaElementType( null ), is( value ) );
-        assertThat( this.procedure.getProperty( null, TeiidDdlLexicon.SchemaElement.TYPE ).getStringValue( null ),
+        this.procedure.setSchemaElementType( this.uow, value );
+
+        // tests
+        assertThat( this.procedure.getSchemaElementType( this.uow ), is( value ) );
+        assertThat( this.procedure.getProperty( this.uow, TeiidDdlLexicon.SchemaElement.TYPE ).getStringValue( this.uow ),
                     is( value.name() ) );
     }
 
     @Test
     public void shouldSetUpdateCount() throws Exception {
+        // setup
         final int value = 10;
-        this.procedure.setUpdateCount( null, value );
-        assertThat( this.procedure.getUpdateCount( null ), is( value ) );
+        this.procedure.setUpdateCount( this.uow, value );
+
+        // tests
+        assertThat( this.procedure.getUpdateCount( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetUuid() throws Exception {
+        // setup
         final String value = "uuid";
-        this.procedure.setUuid( null, value );
-        assertThat( this.procedure.getUuid( null ), is( value ) );
+        this.procedure.setUuid( this.uow, value );
+
+        // tests
+        assertThat( this.procedure.getUuid( this.uow ), is( value ) );
     }
 
 }

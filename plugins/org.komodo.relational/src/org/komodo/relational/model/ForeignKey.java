@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a relational model foreign key.
@@ -38,7 +39,7 @@ public interface ForeignKey extends TableConstraint {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newReferencesColumn
      *        the references table columns being added (cannot be <code>null</code>)
      * @throws KException
@@ -49,7 +50,7 @@ public interface ForeignKey extends TableConstraint {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the columns referenced from the references table (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -58,7 +59,7 @@ public interface ForeignKey extends TableConstraint {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the references table (can be <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -67,7 +68,7 @@ public interface ForeignKey extends TableConstraint {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param referencesColumnToRemove
      *        the references table column being removed (cannot be <code>null</code>)
      * @throws KException
@@ -78,7 +79,7 @@ public interface ForeignKey extends TableConstraint {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newReferencesTable
      *        the new value for the references table (cannot be <code>null</code>)
      * @throws KException

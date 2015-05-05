@@ -28,6 +28,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -37,22 +38,6 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
  * An implementation of a relational model procedure parameter.
  */
 public final class ParameterImpl extends RelationalChildRestrictedObject implements Parameter {
-
-    /*
-
-    - teiidddl:parameterType (string) = 'IN' mandatory autocreated < 'IN', 'OUT', 'INOUT', 'VARIADIC'
-    - teiidddl:result (boolean) = 'false' autocreated
-    - ddl:nullable (string) = 'NULL' mandatory autocreated < 'NULL', 'NOT NULL'
-    - ddl:datatypeName (STRING)
-    - ddl:datatypeLength (LONG)
-    - ddl:datatypePrecision (LONG)
-    - ddl:datatypeScale (LONG)
-    TODO - ddl:defaultOption (STRING) < 'LITERAL', 'DATETIME', 'USER', 'CURRENT_USER', 'SESSION_USER', 'SYSTEM_USER', 'NULL'
-    - ddl:defaultValue (STRING)
-    TODO - ddl:defaultPrecision (LONG)
-    + * (ddl:statementOption) = ddl:statementOption
-
-     */
 
     /**
      * The resolver of a {@link Parameter}.
@@ -133,7 +118,7 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -281,47 +266,23 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
      * @see org.komodo.relational.model.OptionContainer#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public StatementOption[] getStatementOptions( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public StatementOption[] getStatementOptions( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "parameterimpl-getStatementOptions", true, null ); //$NON-NLS-1$
+        final KomodoObject same = new ObjectImpl( getRepository(), getAbsolutePath(), getIndex() );
+        final List< StatementOption > result = new ArrayList< StatementOption >();
+
+        for ( final KomodoObject kobject : same.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION ) ) {
+            final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+            result.add( option );
         }
 
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "getStatementOptions: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
+        if ( result.isEmpty() ) {
+            return StatementOption.NO_OPTIONS;
         }
 
-        try {
-            final KomodoObject same = new ObjectImpl(getRepository(), getAbsolutePath(), getIndex());
-            final List< StatementOption > result = new ArrayList< StatementOption >();
-
-            for (final KomodoObject kobject : same.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION )) {
-                final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug( "getStatementOptions: transaction = {0}, found statement option = {1}", //$NON-NLS-1$
-                                  transaction.getName(),
-                                  kobject.getAbsolutePath() );
-                }
-
-                result.add( option );
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            if (result.isEmpty()) {
-                return StatementOption.NO_OPTIONS;
-            }
-
-            return result.toArray( new StatementOption[result.size()] );
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        return result.toArray( new StatementOption[ result.size() ] );
     }
 
     /**
@@ -358,47 +319,27 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
      *      java.lang.String)
      */
     @Override
-    public void removeStatementOption( final UnitOfWork uow,
+    public void removeStatementOption( final UnitOfWork transaction,
                                        final String optionToRemove ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( optionToRemove, "optionToRemove" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "parameterimpl-removeStatementOption", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "removeStatementOption: transaction = {0}, optionToRemove = {1}", //$NON-NLS-1$
-                          transaction.getName(),
-                          optionToRemove );
-        }
 
         boolean found = false;
+        final StatementOption[] options = getStatementOptions( transaction );
 
-        try {
-            final StatementOption[] options = getStatementOptions( transaction );
-
-            if (options.length != 0) {
-                for (final StatementOption option : options) {
-                    if (optionToRemove.equals( option.getName( transaction ) )) {
-                        option.remove( transaction );
-                        found = true;
-                        break;
-                    }
+        if ( options.length != 0 ) {
+            for ( final StatementOption option : options ) {
+                if ( optionToRemove.equals( option.getName( transaction ) ) ) {
+                    option.remove( transaction );
+                    found = true;
+                    break;
                 }
             }
+        }
 
-            if (!found) {
-                throw new KException( Messages.getString( Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove ) );
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
+        if ( !found ) {
+            throw new KException( Messages.getString( Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove ) );
         }
     }
 
@@ -505,51 +446,32 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
      *      java.lang.String, java.lang.String)
      */
     @Override
-    public StatementOption setStatementOption( final UnitOfWork uow,
+    public StatementOption setStatementOption( final UnitOfWork transaction,
                                                final String optionName,
                                                final String optionValue ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( optionName, "optionName" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "parameterimpl-setStatementOption", false, null ); //$NON-NLS-1$
-        }
+        StatementOption result = null;
 
-        assert ( transaction != null );
+        if ( StringUtils.isBlank( optionValue ) ) {
+            removeStatementOption( transaction, optionName );
+        } else {
+            result = Utils.getOption( transaction, this, optionName );
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "setStatementOption: transaction = {0}, optionName = {1}", //$NON-NLS-1$
-                          transaction.getName(),
-                          optionName );
-        }
-
-        try {
-            StatementOption result = null;
-
-            if (StringUtils.isBlank( optionValue )) {
-                removeStatementOption( transaction, optionName );
+            if ( result == null ) {
+                result = RelationalModelFactory.createStatementOption( transaction,
+                                                                       getRepository(),
+                                                                       this,
+                                                                       optionName,
+                                                                       optionValue );
             } else {
-                result = Utils.getOption( transaction, this, optionName );
-
-                if (result == null) {
-                    result = RelationalModelFactory.createStatementOption( transaction,
-                                                                           getRepository(),
-                                                                           this,
-                                                                           optionName,
-                                                                           optionValue );
-                } else {
-                    result.setOption( transaction, optionValue );
-                }
+                result.setOption( transaction, optionValue );
             }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
         }
+
+        return result;
     }
 
 }

@@ -9,6 +9,7 @@ package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a user-defined scalar function.
@@ -104,7 +105,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if the query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>determinism</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -113,7 +114,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if the function is an aggregate
      * @throws KException
      *         if an error occurs
@@ -123,7 +124,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if the function allows the DISTINCT keyword
      * @throws KException
      *         if an error occurs
@@ -133,7 +134,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if the function supports the ORDER BY clause
      * @throws KException
      *         if an error occurs
@@ -143,7 +144,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if the function is analytic
      * @throws KException
      *         if an error occurs
@@ -153,7 +154,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if the function is decomposable
      * @throws KException
      *         if an error occurs
@@ -163,7 +164,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if the function is called when any of its parameters is <code>null</code>
      * @throws KException
      *         if an error occurs
@@ -173,7 +174,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if the function uses distinct rows
      * @throws KException
      *         if an error occurs
@@ -183,7 +184,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if the function has variable arguments
      * @throws KException
      *         if an error occurs
@@ -193,7 +194,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAggregate
      *        the new value for the <code>aggregate</code> property
      * @throws KException
@@ -205,7 +206,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowsDistinct
      *        the new value for the <code>allows distinct</code> property
      * @throws KException
@@ -217,7 +218,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowsOrderBy
      *        the new value for the <code>allows order by</code> property
      * @throws KException
@@ -229,7 +230,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newIsAnalytic
      *        the new value for the <code>analytic</code> property
      * @throws KException
@@ -241,7 +242,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDecomposable
      *        the new value for the <code>decomposable</code> property
      * @throws KException
@@ -253,7 +254,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDeterminism
      *        the new value for the <code>determinism</code> property
      * @throws KException
@@ -264,7 +265,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newNullOnNull
      *        the new value for the <code>null on null</code> property
      * @throws KException
@@ -276,7 +277,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newUsesDistinctRows
      *        the new value for the <code>uses distinct rows</code> property
      * @throws KException
@@ -288,7 +289,7 @@ public interface Function extends AbstractProcedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newVarArgs
      *        the new value for the <code>variable arguments</code> property
      * @throws KException

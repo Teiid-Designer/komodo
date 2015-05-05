@@ -26,7 +26,7 @@ import org.komodo.spi.KException;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
-public class PrimaryKeyImplTest extends RelationalModelTest {
+public final class PrimaryKeyImplTest extends RelationalModelTest {
 
     private static final String NAME = "primaryKey";
 
@@ -35,8 +35,9 @@ public class PrimaryKeyImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable( null, _repo, mock( Model.class ), "table" );
-        this.primaryKey = RelationalModelFactory.createPrimaryKey( null, _repo, this.table, NAME );
+        this.table = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "table" );
+        this.primaryKey = RelationalModelFactory.createPrimaryKey( this.uow, _repo, this.table, NAME );
+        commit();
     }
 
     @Test
@@ -46,11 +47,11 @@ public class PrimaryKeyImplTest extends RelationalModelTest {
 
     @Test
     public void shouldFailConstructionIfNotPrimaryKey() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new PrimaryKeyImpl( null, _repo, this.table.getAbsolutePath() );
+                new PrimaryKeyImpl( this.uow, _repo, this.table.getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -59,41 +60,41 @@ public class PrimaryKeyImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.primaryKey.getConstraintType(), is( TableConstraint.ConstraintType.PRIMARY_KEY ) );
-        assertThat( this.primaryKey.getProperty( null, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( null ),
+        assertThat( this.primaryKey.getProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
                     is( TableConstraint.ConstraintType.PRIMARY_KEY.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat( this.primaryKey.hasDescriptor( null, TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
+        assertThat( this.primaryKey.hasDescriptor( this.uow, TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat( this.primaryKey.getName( null ), is( NAME ) );
+        assertThat( this.primaryKey.getName( this.uow ), is( NAME ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.primaryKey.getPropertyNames( null );
-        final String[] rawProps = this.primaryKey.getRawPropertyNames( null );
+        final String[] filteredProps = this.primaryKey.getPropertyNames( this.uow );
+        final String[] rawProps = this.primaryKey.getRawPropertyNames( this.uow );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat( this.primaryKey.getParent( null ), is( instanceOf( Table.class ) ) );
-        assertThat( this.primaryKey.getTable( null ), is( this.table ) );
+        assertThat( this.primaryKey.getParent( this.uow ), is( instanceOf( Table.class ) ) );
+        assertThat( this.primaryKey.getTable( this.uow ), is( this.table ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.primaryKey.addChild( null, "blah", null );
+        this.primaryKey.addChild( this.uow, "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.primaryKey.getPropertyNames( null );
+        final String[] filteredProps = this.primaryKey.getPropertyNames( this.uow );
         final Filter[] filters = this.primaryKey.getFilters();
 
         for ( final String name : filteredProps ) {

@@ -9,6 +9,7 @@ package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.modeshape.sequencer.ddl.DdlConstants;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants;
 
@@ -45,7 +46,7 @@ public interface TableConstraint extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param columnToAdd
      *        the column being added (cannot be <code>null</code>)
      * @throws KException
@@ -56,7 +57,7 @@ public interface TableConstraint extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the columns contained in this key (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -70,7 +71,7 @@ public interface TableConstraint extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the parent <code>table</code> (never <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -79,7 +80,7 @@ public interface TableConstraint extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param columnToRemove
      *        the column being removed (cannot be <code>null</code>)
      * @throws KException

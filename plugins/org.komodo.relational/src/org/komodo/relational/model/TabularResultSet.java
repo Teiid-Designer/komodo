@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a tabular result set.
@@ -28,7 +29,7 @@ public interface TabularResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param columnName
      *        the name of the column being added (cannot be empty)
      * @return the new column (never <code>null</code>)
@@ -40,7 +41,7 @@ public interface TabularResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the columns (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -49,7 +50,7 @@ public interface TabularResultSet extends ProcedureResultSet {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param columnToRemove
      *        the name of the column being removed (cannot be empty)
      * @throws KException

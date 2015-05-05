@@ -53,8 +53,6 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -70,69 +68,36 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @After
-    public void cleanup() {
+    public void uncacheWorkspaceManager() {
         WorkspaceManager.uncacheInstance(_repo);
         wsMgr = null;
     }
 
-    private Model createModel(final UnitOfWork uow, final KomodoObject parent, final String modelName) throws Exception {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = _repo.createTransaction(this.name.getMethodName(), false, null);
-        }
-
-        final Model model = this.wsMgr.createModel(transaction, parent, modelName);
-
-        assertThat(model.getPrimaryType(transaction).getName(), is(VdbLexicon.Vdb.DECLARATIVE_MODEL));
-        assertThat(model.getName(transaction), is(modelName));
-
-        if (uow == null) {
-            transaction.commit();
-        }
+    private Model createModel(final KomodoObject parent, final String modelName) throws Exception {
+        final Model model = this.wsMgr.createModel(this.uow, parent, modelName);
+        assertThat(model.getPrimaryType(this.uow).getName(), is(VdbLexicon.Vdb.DECLARATIVE_MODEL));
+        assertThat(model.getName(this.uow), is(modelName));
 
         return model;
     }
 
-    private Table createTable( final UnitOfWork uow,
-                               final String tableName ) throws Exception {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = _repo.createTransaction(this.name.getMethodName(), false, null);
-        }
-
-        final Vdb vdb = createVdb(transaction, null, "vdb");
-        final Model model = createModel(transaction, vdb, "model");
-        final Table table = model.addTable(transaction, tableName);
-
-        if (uow == null) {
-            transaction.commit();
-        }
+    private Table createTable( final String tableName ) throws Exception {
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
+        final Table table = model.addTable(this.uow, tableName);
 
         return table;
     }
 
-    private Vdb createVdb( final UnitOfWork uow,
-                           final KomodoObject parent,
+    private Vdb createVdb( final KomodoObject parent,
                            final String vdbName ) throws Exception {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = _repo.createTransaction(this.name.getMethodName(), false, null);
-        }
-
         final String externalFilePath = "extPath";
-        final Vdb vdb = this.wsMgr.createVdb(transaction, parent, vdbName, externalFilePath);
+        final Vdb vdb = this.wsMgr.createVdb(this.uow, parent, vdbName, externalFilePath);
         assertNotNull(vdb);
 
-        assertThat(vdb.getPrimaryType(transaction).getName(), is(VdbLexicon.Vdb.VIRTUAL_DATABASE));
-        assertThat(vdb.getName(transaction), is(vdbName));
-        assertThat(vdb.getOriginalFilePath(transaction), is(externalFilePath));
-
-        if (uow == null) {
-            transaction.commit();
-        }
+        assertThat(vdb.getPrimaryType(this.uow).getName(), is(VdbLexicon.Vdb.VIRTUAL_DATABASE));
+        assertThat(vdb.getName(this.uow), is(vdbName));
+        assertThat(vdb.getOriginalFilePath(this.uow), is(externalFilePath));
 
         return vdb;
     }
@@ -140,64 +105,69 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     @Test
     public void shouldCreateModelAtWorkspaceRoot() throws Exception {
         final String modelName = "model";
-        final Model model = this.wsMgr.createModel( null, null, modelName );
+        final Model model = this.wsMgr.createModel( this.uow, null, modelName );
         assertThat(model, is(notNullValue()));
-        assertThat(this.wsMgr.findModels( null ).length, is(1));
-        assertThat(this.wsMgr.findModels( null )[0].getName( null ), is(modelName));
+
+        commit(); // must save before running a query
+
+        assertThat(this.wsMgr.findModels( this.uow ).length, is(1));
+        assertThat(this.wsMgr.findModels( this.uow )[0].getName( this.uow ), is(modelName));
     }
 
     @Test
     public void shouldCreateVdb() throws Exception {
-        final KomodoObject parent = _repo.add(null, _repo.komodoWorkspace(null).getAbsolutePath(), "parent", null);
-        final Vdb vdb = createVdb(null, parent, this.name.getMethodName());
+        final KomodoObject parent = _repo.add(this.uow, _repo.komodoWorkspace(this.uow).getAbsolutePath(), "parent", null);
+        final Vdb vdb = createVdb(parent, this.name.getMethodName());
         assertThat(vdb, is(notNullValue()));
-        assertThat(_repo.getFromWorkspace(null, vdb.getAbsolutePath()), is((KomodoObject)vdb));
+        assertThat(_repo.getFromWorkspace(this.uow, vdb.getAbsolutePath()), is((KomodoObject)vdb));
     }
 
     @Test
     public void shouldCreateVdbWithNullParent() throws Exception {
-        final Vdb vdb = createVdb(null, null, this.name.getMethodName());
+        final Vdb vdb = createVdb(null, this.name.getMethodName());
         assertThat(vdb, is(notNullValue()));
-        assertThat(vdb.getParent(null), is(_repo.komodoWorkspace(null)));
+        assertThat(vdb.getParent(this.uow), is(_repo.komodoWorkspace(this.uow)));
     }
 
     @Test
     public void shouldDeleteModel() throws Exception {
-        final Vdb parent = createVdb(null, null, this.name.getMethodName() + "Vdb");
-        final Model model = createModel(null, parent, this.name.getMethodName() + "Model");
-        this.wsMgr.delete(null, model);
-        assertThat(this.wsMgr.findModels(null).length, is(0));
+        final Vdb parent = createVdb(null, this.name.getMethodName() + "Vdb");
+        final Model model = createModel(parent, this.name.getMethodName() + "Model");
+        this.wsMgr.delete(this.uow, model);
+        assertThat(this.wsMgr.findModels(this.uow).length, is(0));
     }
 
     @Test
     public void shouldDeleteVdb() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        this.wsMgr.delete(null, vdb);
-        assertThat(this.wsMgr.findVdbs(null).length, is(0));
+        final Vdb vdb = createVdb(null, "vdb");
+        this.wsMgr.delete(this.uow, vdb);
+        assertThat(this.wsMgr.findVdbs(this.uow).length, is(0));
     }
 
     @Test
     public void shouldFindModels() throws Exception {
-        Vdb parent = createVdb(null, null, "vdb");
+        Vdb parent = createVdb(null, "vdb");
         final String prefix = this.name.getMethodName();
         int suffix = 0;
 
         // create at root
         for (int i = 0; i < 5; ++i) {
-            createModel(null, parent, (prefix + ++suffix));
+            createModel(parent, (prefix + ++suffix));
         }
 
         // create under a folder
-        final KomodoObject folder = _repo.add(null, parent.getAbsolutePath(), "folder", null);
-        assertNotNull(_repo.getFromWorkspace(null, folder.getAbsolutePath()));
+        final KomodoObject folder = _repo.add(this.uow, parent.getAbsolutePath(), "folder", null);
+        assertNotNull(_repo.getFromWorkspace(this.uow, folder.getAbsolutePath()));
 
         for (int i = 0; i < 7; ++i) {
             suffix++;
-            parent = createVdb(null, folder, "vdb" + suffix);
-            createModel(null, parent, (prefix + suffix));
+            parent = createVdb(folder, "vdb" + suffix);
+            createModel(parent, (prefix + suffix));
         }
 
-        assertThat(this.wsMgr.findModels(null).length, is(suffix));
+        commit(); // must save before running a query
+
+        assertThat(this.wsMgr.findModels(this.uow).length, is(suffix));
     }
 
     @Test
@@ -207,441 +177,437 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         // create at root
         for (int i = 0; i < 5; ++i) {
-            createVdb(null, null, (prefix + ++suffix));
+            createVdb(null, (prefix + ++suffix));
         }
 
         // create under a folder
-        final KomodoObject parent = _repo.add(null, null, "blah", null);
+        final KomodoObject parent = _repo.add(this.uow, null, "blah", null);
 
         for (int i = 0; i < 7; ++i) {
-            createVdb(null, parent, (prefix + ++suffix));
+            createVdb(parent, (prefix + ++suffix));
         }
 
-        assertThat(this.wsMgr.findVdbs(null).length, is(suffix));
+        commit(); // must save before running a query
+
+        assertThat(this.wsMgr.findVdbs(this.uow).length, is(suffix));
     }
 
     @Test( expected = Exception.class )
     public void shouldNotAllowEmptyExternalFilePath() throws Exception {
-        this.wsMgr.createVdb(null, null, "vdbName", StringConstants.EMPTY_STRING);
+        this.wsMgr.createVdb(this.uow, null, "vdbName", StringConstants.EMPTY_STRING);
     }
 
     @Test( expected = Exception.class )
     public void shouldNotAllowEmptyVdbName() throws Exception {
-        this.wsMgr.createVdb(null, null, StringConstants.EMPTY_STRING, "externalFilePath");
+        this.wsMgr.createVdb(this.uow, null, StringConstants.EMPTY_STRING, "externalFilePath");
     }
 
     @Test( expected = Exception.class )
     public void shouldNotAllowNullExternalFilePath() throws Exception {
-        this.wsMgr.createVdb(null, null, "vdbName", null);
+        this.wsMgr.createVdb(this.uow, null, "vdbName", null);
     }
 
     @Test( expected = Exception.class )
     public void shouldNotAllowNullVdbName() throws Exception {
-        this.wsMgr.createVdb(null, null, null, "externalFilePath");
+        this.wsMgr.createVdb(this.uow, null, null, "externalFilePath");
     }
 
     @Test
     public void shouldNotFindModelsWhenWorkspaceIsEmpty() throws Exception {
-        assertThat(this.wsMgr.findModels(null).length, is(0));
+        assertThat(this.wsMgr.findModels(this.uow).length, is(0));
     }
 
     @Test
     public void shouldNotFindSchemasWhenWorkspaceIsEmpty() throws Exception {
-        assertThat(this.wsMgr.findSchemas(null).length, is(0));
+        assertThat(this.wsMgr.findSchemas(this.uow).length, is(0));
     }
 
     @Test
     public void shouldNotFindTeiidsWhenWorkspaceIsEmpty() throws Exception {
-        assertThat(this.wsMgr.findTeiids(null).isEmpty(), is(true));
+        assertThat(this.wsMgr.findTeiids(this.uow).isEmpty(), is(true));
     }
 
     @Test
     public void shouldNotFindVdbsWhenWorkspaceIsEmpty() throws Exception {
-        assertThat(this.wsMgr.findVdbs(null).length, is(0));
+        assertThat(this.wsMgr.findVdbs(this.uow).length, is(0));
     }
 
     @Test
     public void shouldNotResolveAsVdb() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
         final KomodoObject kobject = new ObjectImpl(_repo, model.getAbsolutePath(), model.getIndex());
-        assertNull(this.wsMgr.resolve(null, kobject, Vdb.class));
+        assertNull(this.wsMgr.resolve(this.uow, kobject, Vdb.class));
     }
 
     @Test
     public void shouldResolveAccessPattern() throws Exception {
-        final Table table = createTable(null, "table");
-        final AccessPattern accessPattern = table.addAccessPattern(null, "accessPattern");
+        final Table table = createTable("table");
+        final AccessPattern accessPattern = table.addAccessPattern(this.uow, "accessPattern");
         final KomodoObject kobject = new ObjectImpl(_repo, accessPattern.getAbsolutePath(), accessPattern.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, AccessPattern.class), is(instanceOf(AccessPattern.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, AccessPattern.class), is(instanceOf(AccessPattern.class)));
     }
 
     @Test
     public void shouldResolveCondition() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final DataRole dataRole = vdb.addDataRole(null, "dataRole");
-        final Permission permission = dataRole.addPermission(null, "permission");
-        final Condition condition = permission.addCondition(null, "condition");
+        final Vdb vdb = createVdb(null, "vdb");
+        final DataRole dataRole = vdb.addDataRole(this.uow, "dataRole");
+        final Permission permission = dataRole.addPermission(this.uow, "permission");
+        final Condition condition = permission.addCondition(this.uow, "condition");
         final KomodoObject kobject = new ObjectImpl(_repo, condition.getAbsolutePath(), condition.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Condition.class), is(instanceOf(Condition.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Condition.class), is(instanceOf(Condition.class)));
     }
 
     @Test
     public void shouldResolveDataRole() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final DataRole dataRole = vdb.addDataRole(null, "dataRole");
+        final Vdb vdb = createVdb(null, "vdb");
+        final DataRole dataRole = vdb.addDataRole(this.uow, "dataRole");
         final KomodoObject kobject = new ObjectImpl(_repo, dataRole.getAbsolutePath(), dataRole.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, DataRole.class), is(instanceOf(DataRole.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, DataRole.class), is(instanceOf(DataRole.class)));
     }
 
     @Test
     public void shouldResolveDataTypeResultSet() throws Exception {
-        final Repository.UnitOfWork uow = _repo.createTransaction(this.name.getMethodName(), false, null);
-        final Vdb vdb = createVdb(uow, null, "vdb");
-        final Model model = createModel(uow, vdb, "model");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
         final StoredProcedure procedure = model.addStoredProcedure(uow, "procedure");
         final ProcedureResultSet resultSet = procedure.setResultSet(uow, DataTypeResultSet.class);
         final KomodoObject kobject = new ObjectImpl(_repo, resultSet.getAbsolutePath(), resultSet.getIndex());
         assertThat(this.wsMgr.resolve(uow, kobject, DataTypeResultSet.class), is(instanceOf(DataTypeResultSet.class)));
-        uow.commit();
     }
 
     @Test
     public void shouldResolveEntry() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Entry entry = vdb.addEntry(null, "entry", "path");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Entry entry = vdb.addEntry(this.uow, "entry", "path");
         final KomodoObject kobject = new ObjectImpl(_repo, entry.getAbsolutePath(), entry.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Entry.class), is(instanceOf(Entry.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Entry.class), is(instanceOf(Entry.class)));
     }
 
     @Test
     public void shouldResolveForeignKey() throws Exception {
-        final Repository.UnitOfWork uow = _repo.createTransaction(this.name.getMethodName(), false, null);
-        final Table refTable = createTable(uow, "refTable");
-        final Table table = createTable(uow, "table");
+        final Table refTable = createTable("refTable");
+        final Table table = createTable("table");
         final ForeignKey foreignKey = table.addForeignKey(uow, "foreignKey", refTable);
         final KomodoObject kobject = new ObjectImpl(_repo, foreignKey.getAbsolutePath(), foreignKey.getIndex());
         assertThat(this.wsMgr.resolve(uow, kobject, ForeignKey.class), is(instanceOf(ForeignKey.class)));
-        uow.commit();
     }
 
     @Test
     public void shouldResolveIndex() throws Exception {
-        final Table table = createTable(null, "table");
-        final Index index = table.addIndex(null, "index");
+        final Table table = createTable("table");
+        final Index index = table.addIndex(this.uow, "index");
         final KomodoObject kobject = new ObjectImpl(_repo, index.getAbsolutePath(), index.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Index.class), is(instanceOf(Index.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Index.class), is(instanceOf(Index.class)));
     }
 
     @Test
     public void shouldResolveMask() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final DataRole dataRole = vdb.addDataRole(null, "dataRole");
-        final Permission permission = dataRole.addPermission(null, "permission");
-        final Mask mask = permission.addMask(null, "mask");
+        final Vdb vdb = createVdb(null, "vdb");
+        final DataRole dataRole = vdb.addDataRole(this.uow, "dataRole");
+        final Permission permission = dataRole.addPermission(this.uow, "permission");
+        final Mask mask = permission.addMask(this.uow, "mask");
         final KomodoObject kobject = new ObjectImpl(_repo, mask.getAbsolutePath(), mask.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Mask.class), is(instanceOf(Mask.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Mask.class), is(instanceOf(Mask.class)));
     }
 
     @Test
     public void shouldResolveModel() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
         final KomodoObject kobject = new ObjectImpl(_repo, model.getAbsolutePath(), model.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Model.class), is(instanceOf(Model.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Model.class), is(instanceOf(Model.class)));
     }
 
     @Test
     public void shouldResolveModelSource() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
-        final ModelSource source = model.addSource(null, "source");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
+        final ModelSource source = model.addSource(this.uow, "source");
         final KomodoObject kobject = new ObjectImpl(_repo, source.getAbsolutePath(), source.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, ModelSource.class), is(instanceOf(ModelSource.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, ModelSource.class), is(instanceOf(ModelSource.class)));
     }
 
     @Test
     public void shouldResolveParameter() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
-        final Procedure procedure = model.addVirtualProcedure(null, "procedure");
-        final Parameter param = procedure.addParameter(null, "param");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
+        final Procedure procedure = model.addVirtualProcedure(this.uow, "procedure");
+        final Parameter param = procedure.addParameter(this.uow, "param");
         final KomodoObject kobject = new ObjectImpl(_repo, param.getAbsolutePath(), param.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Parameter.class), is(instanceOf(Parameter.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Parameter.class), is(instanceOf(Parameter.class)));
     }
 
     @Test
     public void shouldResolvePermission() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final DataRole dataRole = vdb.addDataRole(null, "dataRole");
-        final Permission permission = dataRole.addPermission(null, "permission");
+        final Vdb vdb = createVdb(null, "vdb");
+        final DataRole dataRole = vdb.addDataRole(this.uow, "dataRole");
+        final Permission permission = dataRole.addPermission(this.uow, "permission");
         final KomodoObject kobject = new ObjectImpl(_repo, permission.getAbsolutePath(), permission.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Permission.class), is(instanceOf(Permission.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Permission.class), is(instanceOf(Permission.class)));
     }
 
     @Test
     public void shouldResolvePrimaryKey() throws Exception {
-        final Table table = createTable(null, "table");
-        final PrimaryKey pk = table.setPrimaryKey(null, "pk");
+        final Table table = createTable("table");
+        final PrimaryKey pk = table.setPrimaryKey(this.uow, "pk");
         final KomodoObject kobject = new ObjectImpl(_repo, pk.getAbsolutePath(), pk.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, PrimaryKey.class), is(instanceOf(PrimaryKey.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, PrimaryKey.class), is(instanceOf(PrimaryKey.class)));
     }
 
     @Test
     public void shouldResolvePushdownFunction() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
-        final Function function = model.addPushdownFunction(null, "function");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
+        final Function function = model.addPushdownFunction(this.uow, "function");
         final KomodoObject kobject = new ObjectImpl(_repo, function.getAbsolutePath(), function.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, PushdownFunction.class), is(instanceOf(PushdownFunction.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, PushdownFunction.class), is(instanceOf(PushdownFunction.class)));
     }
 
     @Test
     public void shouldResolveStoredProcedure() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
-        final Procedure procedure = model.addStoredProcedure(null, "procedure");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
+        final Procedure procedure = model.addStoredProcedure(this.uow, "procedure");
         final KomodoObject kobject = new ObjectImpl(_repo, procedure.getAbsolutePath(), procedure.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, StoredProcedure.class), is(instanceOf(StoredProcedure.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, StoredProcedure.class), is(instanceOf(StoredProcedure.class)));
     }
 
     @Test
     public void shouldResolveTabularResultSet() throws Exception {
-        final Repository.UnitOfWork uow = _repo.createTransaction(this.name.getMethodName(), false, null);
-        final Vdb vdb = createVdb(uow, null, "vdb");
-        final Model model = createModel(uow, vdb, "model");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
         final StoredProcedure procedure = model.addStoredProcedure(uow, "procedure");
         final ProcedureResultSet resultSet = procedure.setResultSet(uow, TabularResultSet.class);
         final KomodoObject kobject = new ObjectImpl(_repo, resultSet.getAbsolutePath(), resultSet.getIndex());
         assertThat(this.wsMgr.resolve(uow, kobject, TabularResultSet.class), is(instanceOf(TabularResultSet.class)));
-        uow.commit();
     }
 
     @Test
     public void shouldResolveTable() throws Exception {
-        final Table table = createTable(null, "table");
+        final Table table = createTable("table");
         final KomodoObject kobject = new ObjectImpl(_repo, table.getAbsolutePath(), table.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Table.class), is(instanceOf(Table.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Table.class), is(instanceOf(Table.class)));
     }
 
     @Test
     public void shouldResolveTeiid() throws Exception {
-        final Teiid teiid = this.wsMgr.createTeiid(null, null, "teiid");
+        final Teiid teiid = this.wsMgr.createTeiid(this.uow, null, "teiid");
         final KomodoObject kobject = new ObjectImpl(_repo, teiid.getAbsolutePath(), teiid.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Teiid.class), is(instanceOf(Teiid.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Teiid.class), is(instanceOf(Teiid.class)));
     }
 
     @Test
     public void shouldResolveTranslator() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Translator translator = vdb.addTranslator(null, "translator", "oracle");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Translator translator = vdb.addTranslator(this.uow, "translator", "oracle");
         final KomodoObject kobject = new ObjectImpl(_repo, translator.getAbsolutePath(), translator.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Translator.class), is(instanceOf(Translator.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Translator.class), is(instanceOf(Translator.class)));
     }
 
     @Test
     public void shouldResolveUniqueConstraint() throws Exception {
-        final Table table = createTable(null, "table");
-        final UniqueConstraint uniqueConstraint = table.addUniqueConstraint(null, "uniqueConstraint");
+        final Table table = createTable("table");
+        final UniqueConstraint uniqueConstraint = table.addUniqueConstraint(this.uow, "uniqueConstraint");
         final KomodoObject kobject = new ObjectImpl(_repo, uniqueConstraint.getAbsolutePath(), uniqueConstraint.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, UniqueConstraint.class), is(instanceOf(UniqueConstraint.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, UniqueConstraint.class), is(instanceOf(UniqueConstraint.class)));
     }
 
     @Test
     public void shouldResolveUserDefinedFunction() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
-        final Function function = model.addUserDefinedFunction(null, "function");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
+        final Function function = model.addUserDefinedFunction(this.uow, "function");
         final KomodoObject kobject = new ObjectImpl(_repo, function.getAbsolutePath(), function.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, UserDefinedFunction.class), is(instanceOf(UserDefinedFunction.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, UserDefinedFunction.class), is(instanceOf(UserDefinedFunction.class)));
     }
 
     @Test
     public void shouldResolveVdb() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
+        final Vdb vdb = createVdb(null, "vdb");
         final KomodoObject kobject = new ObjectImpl(_repo, vdb.getAbsolutePath(), vdb.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, Vdb.class), is(instanceOf(Vdb.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, Vdb.class), is(instanceOf(Vdb.class)));
     }
 
     @Test
     public void shouldResolveVdbImport() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final VdbImport vdbImport = vdb.addImport(null, "vdbImport");
+        final Vdb vdb = createVdb(null, "vdb");
+        final VdbImport vdbImport = vdb.addImport(this.uow, "vdbImport");
         final KomodoObject kobject = new ObjectImpl(_repo, vdbImport.getAbsolutePath(), vdbImport.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, VdbImport.class), is(instanceOf(VdbImport.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, VdbImport.class), is(instanceOf(VdbImport.class)));
     }
 
     @Test
     public void shouldResolveView() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
-        final View view = model.addView(null, "view");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
+        final View view = model.addView(this.uow, "view");
         final KomodoObject kobject = new ObjectImpl(_repo, view.getAbsolutePath(), view.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, View.class), is(instanceOf(View.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, View.class), is(instanceOf(View.class)));
     }
 
     @Test
     public void shouldResolveVirtualProcedure() throws Exception {
-        final Vdb vdb = createVdb(null, null, "vdb");
-        final Model model = createModel(null, vdb, "model");
-        final Procedure procedure = model.addVirtualProcedure(null, "procedure");
+        final Vdb vdb = createVdb(null, "vdb");
+        final Model model = createModel(vdb, "model");
+        final Procedure procedure = model.addVirtualProcedure(this.uow, "procedure");
         final KomodoObject kobject = new ObjectImpl(_repo, procedure.getAbsolutePath(), procedure.getIndex());
-        assertThat(this.wsMgr.resolve(null, kobject, VirtualProcedure.class), is(instanceOf(VirtualProcedure.class)));
+        assertThat(this.wsMgr.resolve(this.uow, kobject, VirtualProcedure.class), is(instanceOf(VirtualProcedure.class)));
     }
 
     @Test
     public void shouldAdaptAllRelationalObjects() throws Exception {
-        KomodoObject workspace = _repo.komodoWorkspace(null);
-        Vdb vdb = RelationalModelFactory.createVdb(null, _repo, workspace.getAbsolutePath(), "testControlVdb", "/test1");
-        Model model = RelationalModelFactory.createModel(null, _repo, vdb, "testControlModel");
-        Table table = RelationalModelFactory.createTable(null, _repo, model, "testControlTable");
+        KomodoObject workspace = _repo.komodoWorkspace(this.uow);
+        Vdb vdb = RelationalModelFactory.createVdb(this.uow, _repo, workspace.getAbsolutePath(), "testControlVdb", "/test1");
+        Model model = RelationalModelFactory.createModel(this.uow, _repo, vdb, "testControlModel");
+        Table table = RelationalModelFactory.createTable(this.uow, _repo, model, "testControlTable");
         KomodoObject o = null;
 
         // Null object should safely return null
-        assertNull(wsMgr.resolve(null, o, Vdb.class));
+        assertNull(wsMgr.resolve(this.uow, o, Vdb.class));
 
         // Vdb should always equal vdb
         o = vdb;
-        Vdb vdb1 = wsMgr.resolve(null, o, Vdb.class);
+        Vdb vdb1 = wsMgr.resolve(this.uow, o, Vdb.class);
         assertNotNull(vdb1);
 
         // ObjectImpl referencing a vdb should be able to be adapted to a Vdb
         ObjectImpl vdbObj = new ObjectImpl(_repo, vdb.getAbsolutePath(), 0);
-        Vdb vdb2 = wsMgr.resolve(null, vdbObj, Vdb.class);
+        Vdb vdb2 = wsMgr.resolve(this.uow, vdbObj, Vdb.class);
         assertNotNull(vdb2);
 
         // Model should always equal model
         o = model;
-        Model model1 = wsMgr.resolve(null, o, Model.class);
+        Model model1 = wsMgr.resolve(this.uow, o, Model.class);
         assertNotNull(model1);
 
         // ObjectImpl referencing a model should be able to be adapted to a Model
         ObjectImpl modelObj = new ObjectImpl(_repo, model.getAbsolutePath(), 0);
-        Model model2 = wsMgr.resolve(null, modelObj, Model.class);
+        Model model2 = wsMgr.resolve(this.uow, modelObj, Model.class);
         assertNotNull(model2);
 
         // Table should always equal table
         o = table;
-        Table table1 = wsMgr.resolve(null, o, Table.class);
+        Table table1 = wsMgr.resolve(this.uow, o, Table.class);
         assertNotNull(table1);
 
         // ObjectImpl referencing a table should be able to be adapted to a Table
         ObjectImpl tableObj = new ObjectImpl(_repo, table.getAbsolutePath(), 0);
-        Table table2 = wsMgr.resolve(null, tableObj, Table.class);
+        Table table2 = wsMgr.resolve(this.uow, tableObj, Table.class);
         assertNotNull(table2);
     }
 
     @Test
     public void shouldCreateDataTypeResultSet() throws Exception {
-        final Vdb parent = createVdb(null, null, this.name.getMethodName() + "Vdb");
-        final Model model = createModel(null, parent, this.name.getMethodName() + "Model");
-        final AbstractProcedure procedure = RelationalModelFactory.createVirtualProcedure(null, _repo, model, "procedure");
-        final KomodoObject result = wsMgr.create(null, procedure, "resultSet", KomodoType.DATA_TYPE_RESULT_SET);
+        final Vdb parent = createVdb(null, this.name.getMethodName() + "Vdb");
+        final Model model = createModel(parent, this.name.getMethodName() + "Model");
+        final AbstractProcedure procedure = RelationalModelFactory.createVirtualProcedure(this.uow, _repo, model, "procedure");
+        final KomodoObject result = wsMgr.create(this.uow, procedure, "resultSet", KomodoType.DATA_TYPE_RESULT_SET);
         assertNotNull(result);
         assertThat(result, is(instanceOf(DataTypeResultSet.class)));
     }
 
     @Test
     public void shouldCreateResultSetColumn() throws Exception {
-        final Vdb parent = createVdb(null, null, this.name.getMethodName() + "Vdb");
-        final Model model = createModel(null, parent, this.name.getMethodName() + "Model");
-        final AbstractProcedure procedure = RelationalModelFactory.createVirtualProcedure(null, _repo, model, "procedure");
-        final TabularResultSet resultSet = RelationalModelFactory.createTabularResultSet( null, _repo, procedure );
-        final KomodoObject result = wsMgr.create(null, resultSet, "resultSetColumn", KomodoType.RESULT_SET_COLUMN);
+        final Vdb parent = createVdb(null, this.name.getMethodName() + "Vdb");
+        final Model model = createModel(parent, this.name.getMethodName() + "Model");
+        final AbstractProcedure procedure = RelationalModelFactory.createVirtualProcedure(this.uow, _repo, model, "procedure");
+        final TabularResultSet resultSet = RelationalModelFactory.createTabularResultSet( this.uow, _repo, procedure );
+        final KomodoObject result = wsMgr.create(this.uow, resultSet, "resultSetColumn", KomodoType.RESULT_SET_COLUMN);
         assertThat(result, is(instanceOf(ResultSetColumn.class)));
     }
 
     @Test
     public void shouldCreateAllRelationalObjects() throws Exception {
-        KomodoObject workspace = _repo.komodoWorkspace(null);
-        Vdb vdb = RelationalModelFactory.createVdb(null, _repo, workspace.getAbsolutePath(), "testControlVdb", "/test1");
-        Model model = RelationalModelFactory.createModel(null, _repo, vdb, "testControlModel");
-        Table table = RelationalModelFactory.createTable(null, _repo, model, "testControlTable");
-        AbstractProcedure procedure = RelationalModelFactory.createVirtualProcedure(null, _repo, model, "testControlProcedure");
-        DataRole dataRole = RelationalModelFactory.createDataRole(null, _repo, vdb, "testControlDataRole");
-        Permission permission = RelationalModelFactory.createPermission(null, _repo, dataRole, "testControlPermission");
+        KomodoObject workspace = _repo.komodoWorkspace(this.uow);
+        Vdb vdb = RelationalModelFactory.createVdb(this.uow, _repo, workspace.getAbsolutePath(), "testControlVdb", "/test1");
+        Model model = RelationalModelFactory.createModel(this.uow, _repo, vdb, "testControlModel");
+        Table table = RelationalModelFactory.createTable(this.uow, _repo, model, "testControlTable");
+        AbstractProcedure procedure = RelationalModelFactory.createVirtualProcedure(this.uow, _repo, model, "testControlProcedure");
+        DataRole dataRole = RelationalModelFactory.createDataRole(this.uow, _repo, vdb, "testControlDataRole");
+        Permission permission = RelationalModelFactory.createPermission(this.uow, _repo, dataRole, "testControlPermission");
 
         for (KomodoType type : KomodoType.values()) {
             String id = "test" + type.getType();
             switch (type) {
                 case FOREIGN_KEY: {
-                    Table refTable = RelationalModelFactory.createTable(null, _repo, model, "testRefTable");
-                    KomodoObject result = wsMgr.create(null, table, id, type, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, refTable));
+                    Table refTable = RelationalModelFactory.createTable(this.uow, _repo, model, "testRefTable");
+                    KomodoObject result = wsMgr.create(this.uow, table, id, type, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, refTable));
                     assertNotNull(result);
                     break;
                 }
                 case STATEMENT_OPTION: {
                     String optionValue = "testOptionValue";
-                    KomodoObject result = wsMgr.create(null, table, id, type, new RelationalProperty(StandardDdlLexicon.VALUE, optionValue));
+                    KomodoObject result = wsMgr.create(this.uow, table, id, type, new RelationalProperty(StandardDdlLexicon.VALUE, optionValue));
                     assertNotNull(result);
                     break;
                 }
                 case VDB_ENTRY: {
                     String entryPath = "testEntryPath";
-                    KomodoObject result = wsMgr.create(null, vdb, id, type, new RelationalProperty(VdbLexicon.Entry.PATH, entryPath));
+                    KomodoObject result = wsMgr.create(this.uow, vdb, id, type, new RelationalProperty(VdbLexicon.Entry.PATH, entryPath));
                     assertNotNull(result);
                     break;
                 }
                 case VDB_TRANSLATOR: {
                     String transType = "testTranslatorType";
-                    KomodoObject result = wsMgr.create(null, vdb, id, type, new RelationalProperty(VdbLexicon.Translator.TYPE, transType));
+                    KomodoObject result = wsMgr.create(this.uow, vdb, id, type, new RelationalProperty(VdbLexicon.Translator.TYPE, transType));
                     assertNotNull(result);
                     break;
                 }
                 case VDB: {
                     String filePath = "/test2";
-                    KomodoObject result = wsMgr.create(null, workspace, "test" + id, type, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, filePath));
+                    KomodoObject result = wsMgr.create(this.uow, workspace, "test" + id, type, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, filePath));
                     assertNotNull(result);
                     break;
                 }
                 case ACCESS_PATTERN: {
-                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, table, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case COLUMN: {
-                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, table, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case PUSHDOWN_FUNCTION: {
-                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, model, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case USER_DEFINED_FUNCTION: {
-                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, model, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case INDEX: {
-                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, table, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case MODEL: {
-                    KomodoObject result = wsMgr.create(null, vdb, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, vdb, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case PARAMETER: {
-                    KomodoObject result = wsMgr.create(null, procedure, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, procedure, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case PRIMARY_KEY: {
-                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, table, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case STORED_PROCEDURE: {
-                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, model, "test" + id, type);
                     assertNotNull(result);
                     assertThat(result, is(instanceOf(StoredProcedure.class)));
                     break;
                 }
                 case VIRTUAL_PROCEDURE: {
-                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, model, "test" + id, type);
                     assertNotNull(result);
                     assertThat(result, is(instanceOf(VirtualProcedure.class)));
                     break;
@@ -651,7 +617,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
                     break;
                 }
                 case TABULAR_RESULT_SET: {
-                    KomodoObject result = wsMgr.create(null, procedure, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, procedure, "test" + id, type);
                     assertNotNull(result);
                     assertThat(result, is(instanceOf(TabularResultSet.class)));
                     break;
@@ -661,63 +627,63 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
                     break;
                 }
                 case SCHEMA: {
-                    KomodoObject result = wsMgr.create(null, workspace, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, workspace, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case TABLE: {
-                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, model, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case TEIID: {
-                    KomodoObject result = wsMgr.create(null, workspace, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, workspace, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case UNIQUE_CONSTRAINT: {
-                    KomodoObject result = wsMgr.create(null, table, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, table, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case VDB_CONDITION: {
-                    KomodoObject result = wsMgr.create(null, permission, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, permission, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case VDB_DATA_ROLE: {
-                    KomodoObject result = wsMgr.create(null, vdb, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, vdb, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case VDB_IMPORT: {
-                    KomodoObject result = wsMgr.create(null, vdb, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, vdb, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case VDB_MASK: {
-                    KomodoObject result = wsMgr.create(null, permission, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, permission, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case VDB_MODEL_SOURCE: {
-                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, model, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case VDB_PERMISSION: {
-                    KomodoObject result = wsMgr.create(null, dataRole, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, dataRole, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case VIEW: {
-                    KomodoObject result = wsMgr.create(null, model, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, model, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }
                 case UNKNOWN:
                 default: {
-                    KomodoObject result = wsMgr.create(null, workspace, "test" + id, type);
+                    KomodoObject result = wsMgr.create(this.uow, workspace, "test" + id, type);
                     assertNotNull(result);
                     break;
                 }

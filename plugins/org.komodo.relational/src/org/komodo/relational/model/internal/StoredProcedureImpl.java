@@ -27,6 +27,8 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 
@@ -135,7 +137,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -155,42 +157,29 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
      * @see org.komodo.relational.model.OptionContainer#getCustomOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public StatementOption[] getCustomOptions( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "procedureimpl-getCustomOptions", true, null ); //$NON-NLS-1$
-        }
+        // get super custom options then delete any subclass standard options
+        final StatementOption[] superOptions = super.getCustomOptions( transaction );
+        StatementOption[] result = StatementOption.NO_OPTIONS;
 
-        assert ( transaction != null );
+        if ( superOptions.length != 0 ) {
+            final List< StatementOption > temp = new ArrayList<>( superOptions.length );
 
-        try {
-            // get super custom options then delete any subclass standard options
-            final StatementOption[] superOptions = super.getCustomOptions( transaction );
-            StatementOption[] result = StatementOption.NO_OPTIONS;
-
-            if (superOptions.length != 0) {
-                final List< StatementOption > temp = new ArrayList<>( superOptions.length );
-
-                for (final StatementOption option : superOptions) {
-                    if (StandardOptions.valueOf( option.getName( transaction ) ) == null) {
-                        temp.add( option );
-                    }
-                }
-
-                if (!temp.isEmpty()) {
-                    result = temp.toArray( new StatementOption[temp.size()] );
+            for ( final StatementOption option : superOptions ) {
+                if ( StandardOptions.valueOf( option.getName( transaction ) ) == null ) {
+                    temp.add( option );
                 }
             }
 
-            if (uow == null) {
-                transaction.commit();
+            if ( !temp.isEmpty() ) {
+                result = temp.toArray( new StatementOption[ temp.size() ] );
             }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
         }
+
+        return result;
     }
 
     /**
@@ -215,38 +204,25 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
      * @see org.komodo.relational.model.StoredProcedure#getResultSet(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public ProcedureResultSet getResultSet( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public ProcedureResultSet getResultSet( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "storedprocedureimpl-getResultSet", true, null ); //$NON-NLS-1$
+        ProcedureResultSet result = null;
+
+        if ( hasChild( transaction, CreateProcedure.RESULT_SET ) ) {
+            final KomodoObject kobject = getChild( transaction, CreateProcedure.RESULT_SET );
+
+            if ( DataTypeResultSetImpl.RESOLVER.resolvable( transaction, kobject ) ) {
+                result = DataTypeResultSetImpl.RESOLVER.resolve( transaction, kobject );
+            } else if ( TabularResultSetImpl.RESOLVER.resolvable( transaction, kobject ) ) {
+                result = TabularResultSetImpl.RESOLVER.resolve( transaction, kobject );
+            } else {
+                LOGGER.error( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, kobject.getAbsolutePath() ) );
+            }
         }
 
-        assert ( transaction != null );
-
-        try {
-            ProcedureResultSet result = null;
-
-            if (hasChild( transaction, CreateProcedure.RESULT_SET )) {
-                final KomodoObject kobject = getChild( transaction, CreateProcedure.RESULT_SET );
-
-                if (DataTypeResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
-                    result = DataTypeResultSetImpl.RESOLVER.resolve( transaction, kobject );
-                } else if (TabularResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
-                    result = TabularResultSetImpl.RESOLVER.resolve( transaction, kobject );
-                } else {
-                    LOGGER.error( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, kobject.getAbsolutePath() ) );
-                }
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        return result;
     }
 
     /**
@@ -271,35 +247,18 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
      * @see org.komodo.relational.model.StoredProcedure#removeResultSet(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public void removeResultSet( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public void removeResultSet( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "storedprocedureimpl-removeResultSet", false, null ); //$NON-NLS-1$
+        // delete existing result set
+        final ProcedureResultSet resultSet = getResultSet( transaction );
+
+        if ( resultSet == null ) {
+            throw new KException( Messages.getString( Relational.RESULT_SET_NOT_FOUND_TO_REMOVE, getAbsolutePath() ) );
         }
 
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "removeResultSet: transaction = {0}, stored procedure = {1}", transaction.getName(), getAbsolutePath() ); //$NON-NLS-1$
-        }
-
-        try {
-            // delete existing result set
-            final ProcedureResultSet resultSet = getResultSet( transaction );
-
-            if (resultSet == null) {
-                throw new KException( Messages.getString( Relational.RESULT_SET_NOT_FOUND_TO_REMOVE, getAbsolutePath() ) );
-            }
-
-            resultSet.remove( transaction );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        resultSet.remove( transaction );
     }
 
     /**
@@ -333,46 +292,31 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
      */
     @SuppressWarnings( "unchecked" )
     @Override
-    public < T extends ProcedureResultSet > T setResultSet( final UnitOfWork uow,
+    public < T extends ProcedureResultSet > T setResultSet( final UnitOfWork transaction,
                                                             final Class< T > resultSetType ) throws KException {
-        UnitOfWork transaction = uow;
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( resultSetType, "resultSetType" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "storedprocedureimpl-setResultSet", false, null ); //$NON-NLS-1$
+        // delete existing result set (don't call removeResultSet here as it will throw exception if one does not exist)
+        final ProcedureResultSet resultSet = getResultSet( transaction );
+
+        if ( resultSet != null ) {
+            resultSet.remove( transaction );
         }
 
-        assert ( transaction != null );
+        T result = null;
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "setResultSet: transaction = {0}, resultSetType = {1}", //$NON-NLS-1$
-                          transaction.getName(),
-                          resultSetType.getName() );
+        if ( resultSetType == TabularResultSet.class ) {
+            result = ( T )RelationalModelFactory.createTabularResultSet( transaction, getRepository(), this );
+        } else if ( resultSetType == DataTypeResultSet.class ) {
+            result = ( T )RelationalModelFactory.createDataTypeResultSet( transaction, getRepository(), this );
+        } else {
+            throw new UnsupportedOperationException( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE,
+                                                                         resultSetType.getName() ) );
         }
 
-        try {
-            // delete existing result set (don't call removeResultSet)
-            final ProcedureResultSet resultSet = getResultSet( transaction );
-
-            if (resultSet != null) {
-                resultSet.remove( transaction );
-            }
-
-            T result = null;
-
-            if (resultSetType == TabularResultSet.class) {
-                result = ( T )RelationalModelFactory.createTabularResultSet( transaction, getRepository(), this );
-            } else if (resultSetType == DataTypeResultSet.class) {
-                result = ( T )RelationalModelFactory.createDataTypeResultSet( transaction, getRepository(), this );
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        return result;
     }
 
 }

@@ -8,11 +8,11 @@
 package org.komodo.shell.commands.core;
 
 import java.util.List;
-
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.FindWorkspaceNodeVisitor;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -21,6 +21,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
@@ -47,51 +48,51 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public boolean execute() throws Exception {
-    	
-    	// TODO: DataTypeResultSet - doesnt use the name - autonames 'resultSet'
-    	
-    	// --------------------------------------------------
-    	// Make sure the correct number of args are present
-    	// --------------------------------------------------
-    	// Obj type and name are required for all types
+        
+        // TODO: DataTypeResultSet - doesnt use the name - autonames 'resultSet'
+        
+        // --------------------------------------------------
+        // Make sure the correct number of args are present
+        // --------------------------------------------------
+        // Obj type and name are required for all types
         String typeArg = requiredArgument(0, Messages.getString("CreateCommand.InvalidArgMsg_ObjectType")); //$NON-NLS-1$
         String objNameArg = requiredArgument(1, Messages.getString("CreateCommand.InvalidArgMsg_ObjectName")); //$NON-NLS-1$
 
         // Context path only required for some types
         String pathArg = null;
         if(requiresContextPath(typeArg)) {
-        	pathArg = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_ContextPath")); //$NON-NLS-1$
+            pathArg = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_ContextPath")); //$NON-NLS-1$
         } else {
-        	pathArg = optionalArgument(2);
+            pathArg = optionalArgument(2);
         }
         
         // Some types require a fourth arg
         String fourthArg = null;
         if(requiresFourthArg(typeArg)) {
-        	KomodoType type = KomodoType.getKomodoType(typeArg);
-        	if(type == KomodoType.FOREIGN_KEY) {
-        		fourthArg = requiredArgument(3, Messages.getString("CreateCommand.InvalidArgMsg_FKTableRefPath")); //$NON-NLS-1$
-        	} else {
-        		fourthArg = requiredArgument(3, Messages.getString("CreateCommand.InvalidArgMsg_FourthArg")); //$NON-NLS-1$
-        	}
+            KomodoType type = KomodoType.getKomodoType(typeArg);
+            if(type == KomodoType.FOREIGN_KEY) {
+                fourthArg = requiredArgument(3, Messages.getString("CreateCommand.InvalidArgMsg_FKTableRefPath")); //$NON-NLS-1$
+            } else {
+                fourthArg = requiredArgument(3, Messages.getString("CreateCommand.InvalidArgMsg_FourthArg")); //$NON-NLS-1$
+            }
         }
 
-    	// ----------------------------------------------
-    	// Validate the arg values
-    	// ----------------------------------------------
+        // ----------------------------------------------
+        // Validate the arg values
+        // ----------------------------------------------
         if (!validate(typeArg,objNameArg,pathArg,fourthArg)) {
-			return false;
-		}
+            return false;
+        }
         
         // ---------------------------
-		// Create the object
+        // Create the object
         // ---------------------------
         try {
-        	WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
-        	// If path was supplied, create the object at path context
-        	if(!StringUtils.isEmpty(pathArg)) {
-        		context = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
-        	}
+            WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
+            // If path was supplied, create the object at path context
+            if(!StringUtils.isEmpty(pathArg)) {
+                context = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
+            }
             create(typeArg, objNameArg, context, fourthArg);
             
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("CreateCommand.ObjectCreated", typeArg, objNameArg)); //$NON-NLS-1$
@@ -114,81 +115,82 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      * @return 'true' if valid, 'false' if not.
      * @throws Exception
      */
-	protected boolean validate(String typeArg, String objNameArg, String pathArg, String fourthArg) throws Exception {
-		// Get the context for object create.  otherwise use current context
-		WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
-		if (!StringUtils.isEmpty(pathArg)) {
-			context = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
-		}
-		// Validate the type is valid for the context
-		if (!validateChildType(typeArg,context)) {
-			return false;
-		}
-		
-		// Validate the name
-		if (!validateName(objNameArg)) {
-			return false;
-		}
-		
-		// Validate the path if supplied
-		if(!StringUtils.isEmpty(pathArg)) {
-			if (!validatePath(pathArg)) {
-				return false;
-			}
-		}
-		
-		// Validate fourth arg if it's required
-		if(requiresFourthArg(typeArg)) {
-			if (!validateFourthArg(typeArg,context,fourthArg)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * Validate the supplied name
-	 * @param name the name
-	 * @return 'true' if valid, 'false' if not.
-	 */
-	private boolean validateName(String name) {
-		return true;
-	}
-	
-	/**
-	 * Validate the fourth arg.  Not all creates require this arg.  Validiation is specific to the type.
-	 * @param objType the object type
-	 * @param context the context where created
-	 * @param fourthArg the fourth arg
-	 * @return 'true' if valid, 'false' if not.
-	 */
-	private boolean validateFourthArg(String objType, WorkspaceContext context, String fourthArg) {
-    	KomodoType kType = KomodoType.getKomodoType(objType);
-    	
-    	// For foreign keys, the fourth arg is a table reference
-        if(kType == KomodoType.FOREIGN_KEY) {
-        	String tableRefPath = fourthArg;
-        	WorkspaceContext tableContext = ContextUtils.getContextForPath(getWorkspaceStatus(), tableRefPath);
-        	// No context found for path
-        	if(tableContext==null) {
-                print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.locationArg_noContextWithThisName", tableRefPath)); //$NON-NLS-1$
-    			return false;
-        	} else {
-            	KomodoType refType = null;
-				try {
-					refType = KomodoType.getKomodoType(tableContext.getType());
-				} catch (Exception ex) {
-				}
-            	if(refType ==null || refType!=KomodoType.TABLE) {
-                    print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CreateCommand.FKTableRefPath_NotATable", tableRefPath)); //$NON-NLS-1$
-        			return false;
-            	}
-        	}
+    protected boolean validate(String typeArg, String objNameArg, String pathArg, String fourthArg) throws Exception {
+        // Get the context for object create.  otherwise use current context
+        WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
+        if (!StringUtils.isEmpty(pathArg)) {
+            context = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
         }
-    	
-    	return true;
-	}
-	
+        // Validate the type is valid for the context
+        if (!validateChildType(typeArg,context)) {
+            return false;
+        }
+        
+        // Validate the name
+        if (!validateName(objNameArg)) {
+            return false;
+        }
+        
+        // Validate the path if supplied
+        if(!StringUtils.isEmpty(pathArg)) {
+            if (!validatePath(pathArg)) {
+                return false;
+            }
+        }
+        
+        // Validate fourth arg if it's required
+        if(requiresFourthArg(typeArg)) {
+            if (!validateFourthArg(typeArg,context,fourthArg)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Validate the supplied name
+     * @param name the name
+     * @return 'true' if valid, 'false' if not.
+     */
+    private boolean validateName(String name) {
+        return true;
+    }
+    
+    /**
+     * Validate the fourth arg.  Not all creates require this arg.  Validiation is specific to the type.
+     * @param objType the object type
+     * @param context the context where created
+     * @param fourthArg the fourth arg
+     * @return 'true' if valid, 'false' if not.
+     */
+    private boolean validateFourthArg(String objType, WorkspaceContext context, String fourthArg) {
+        KomodoType kType = KomodoType.getKomodoType(objType);
+        
+        // For foreign keys, the fourth arg is a table reference
+        if(kType == KomodoType.FOREIGN_KEY) {
+            String tableRefPath = fourthArg;
+            WorkspaceContext tableContext = ContextUtils.getContextForPath(getWorkspaceStatus(), tableRefPath);
+            // No context found for path
+            if(tableContext==null) {
+                print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.locationArg_noContextWithThisName", tableRefPath)); //$NON-NLS-1$
+                return false;
+            } else {
+                KomodoType refType = null;
+                try {
+                    refType = KomodoType.getKomodoType(tableContext.getType());
+                } catch (Exception ex) {
+                    // TODO??
+                }
+                if(refType ==null || refType!=KomodoType.TABLE) {
+                    print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CreateCommand.FKTableRefPath_NotATable", tableRefPath)); //$NON-NLS-1$
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
     /**
      * Create an object of the supplied type and name, at the specified context
      * @param objType the object type
@@ -204,58 +206,67 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         WorkspaceManager wkspManager = WorkspaceManager.getInstance(repository);
         KomodoObject parent = context.getKomodoObj();
 
+        final UnitOfWork uow = wsStatus.getTransaction();
         KomodoType kType = KomodoType.getKomodoType(objType);
         switch (kType) {
             case STATEMENT_OPTION: {
-//                String optionValue = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_StatementOptionValue")); //$NON-NLS-1$
-//                wkspManager.create(null, parent, objName, kType, new RelationalProperty(StandardDdlLexicon.VALUE, optionValue));
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(StandardDdlLexicon.VALUE, UNKNOWN));
+                String optionValue = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_StatementOptionValue")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(StandardDdlLexicon.VALUE, optionValue));
             } break;
             case VDB_ENTRY: {
-//                String entryPath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_EntryPath")); //$NON-NLS-1$
-//                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Entry.PATH, entryPath));
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Entry.PATH, UNKNOWN));
-        	} break;
+                String entryPath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_EntryPath")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(VdbLexicon.Entry.PATH, entryPath));
+            } break;
             case VDB_TRANSLATOR: {
-//                String transType = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_TranslatorType")); //$NON-NLS-1$
-//                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Translator.TYPE, transType));
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Translator.TYPE, UNKNOWN));
+                String transType = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_TranslatorType")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(VdbLexicon.Translator.TYPE, transType));
             } break;
             case VDB: {
-//                String filePath = optionalArgument(2, Messages.getString("CreateCommand.DefaultVdb_VdbFilePath")); //$NON-NLS-1$
-//                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, filePath));
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, UNKNOWN));
+                String filePath = optionalArgument(2, Messages.getString("CreateCommand.DefaultVdb_VdbFilePath")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, filePath));
+            } break;
+            case MODEL: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.modelNameRequired")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(VdbLexicon.Model.MODEL, name));
+            } break;
+            case TABLE: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.tableNameRequired")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT, name));
+            } break;
+            case VIEW: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.viewNameRequired")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateTable.VIEW_STATEMENT, name));
+            } break;
+            case COLUMN: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.columnNameRequired")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT, name));
             } break;
             case FOREIGN_KEY: {
-            	// For FK, the fourth arg is the tableRefPath
-            	String tableRefPath = fourthArg;
-                WorkspaceContext refTableContext = ContextUtils.getContextForPath(wsStatus, tableRefPath);
+                String tableRefPath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_FKTableRefPath")); //$NON-NLS-1$
 
-                if (refTableContext == null)
-                    throw new Exception(Messages.getString("CreateCommand.invalidForeignKeyRefPath", tableRefPath)); //$NON-NLS-1$
-            	
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, refTableContext.getKomodoObj()));
+                FindWorkspaceNodeVisitor visitor = new FindWorkspaceNodeVisitor(tableRefPath);
+                visitor.visit(wsStatus.getRootContext());
+                WorkspaceContext otherTableContext = visitor.getNodeContext();
+
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, otherTableContext.getKomodoObj()));
             } break;
-            case VDB_MASK: {
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, UNKNOWN));
+            case PRIMARY_KEY: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.primaryKeyNameRequired")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.Constraint.TABLE_ELEMENT, name));
             } break;
-            case VDB_PERMISSION: {
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, UNKNOWN));
+            case STORED_PROCEDURE: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.procedureNameRequired")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT, name));
             } break;
-            case VDB_MODEL_SOURCE: {
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, UNKNOWN));
-            } break;
-            case VDB_CONDITION: {
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, UNKNOWN));
-            } break;
-            case RESULT_SET_COLUMN: {
-                wkspManager.create(null, parent, objName, kType, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, UNKNOWN));
+            case PARAMETER: {
+                String name = requiredArgument(1, Messages.getString("CreateCommand.parameterNameRequired")); //$NON-NLS-1$
+                wkspManager.create(uow, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateProcedure.PARAMETER, name));
             } break;
             
             case UNKNOWN:
                 throw new Exception(Messages.getString("CreateCommand.notValidType", objType)); //$NON-NLS-1$
             default:
-                wkspManager.create(null, parent, objName, kType);
+                wkspManager.create(uow, parent, objName, kType);
         }
     }
 
@@ -264,37 +275,37 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
-    	if (getArguments().isEmpty()) {
+        if (getArguments().isEmpty()) {
             List<String> validTypes = KomodoType.getTypes();
-    		// --------------------------------------------------------------
-    		// No arg - offer subcommands
-    		// --------------------------------------------------------------
-    		if(lastArgument==null) {
-    			candidates.addAll(validTypes);
-    			// --------------------------------------------------------------
-    			// One arg - determine the completion options for it.
-    			// --------------------------------------------------------------
-    		} else {
-    			for (String item : validTypes) {
-    				if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
-    					candidates.add(item);
-    				}
-    			}
-    		}
-    		return 0;
-    	} else if (getArguments().size()==1) {
-    		if(lastArgument==null) {
-    			candidates.add("objName"); //$NON-NLS-1$
-    		}
-    		return 0;
-    	} else if (getArguments().size()==2) {
-    		// The arg is expected to be a path
-    		updateTabCompleteCandidatesForPath(candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument);
+            // --------------------------------------------------------------
+            // No arg - offer subcommands
+            // --------------------------------------------------------------
+            if(lastArgument==null) {
+                candidates.addAll(validTypes);
+                // --------------------------------------------------------------
+                // One arg - determine the completion options for it.
+                // --------------------------------------------------------------
+            } else {
+                for (String item : validTypes) {
+                    if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
+                        candidates.add(item);
+                    }
+                }
+            }
+            return 0;
+        } else if (getArguments().size()==1) {
+            if(lastArgument==null) {
+                candidates.add("objName"); //$NON-NLS-1$
+            }
+            return 0;
+        } else if (getArguments().size()==2) {
+            // The arg is expected to be a path
+            updateTabCompleteCandidatesForPath(candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument);
 
-    		// Do not put space after it - may want to append more to the path
-    		return CompletionConstants.NO_APPEND_SEPARATOR;
-    	}
-    	return -1;
+            // Do not put space after it - may want to append more to the path
+            return CompletionConstants.NO_APPEND_SEPARATOR;
+        }
+        return -1;
     }
     
     /**
@@ -303,12 +314,12 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      * @return 'true' if the path is required, 'false' if not.
      */
     private boolean requiresContextPath(String objType) {
-    	KomodoType kType = KomodoType.getKomodoType(objType);
+        KomodoType kType = KomodoType.getKomodoType(objType);
         if(kType == KomodoType.FOREIGN_KEY) {
-        	return true;
+            return true;
         }
-    	
-    	return false;
+        
+        return false;
     }
 
     /**
@@ -317,35 +328,35 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      * @return 'true' if the fourth arg is required, 'false' if not.
      */
     private boolean requiresFourthArg(String objType) {
-    	KomodoType kType = KomodoType.getKomodoType(objType);
+        KomodoType kType = KomodoType.getKomodoType(objType);
         if(kType == KomodoType.FOREIGN_KEY) {
-        	return true;
+            return true;
         }
-    	
-    	return false;
+        
+        return false;
     }
     
-	/**
+    /**
      * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
      */
     @Override
     public void printUsage(int indent) {
-    	// Print out the objType-specific usage (if possible)
-    	if(getArguments().size()>=1) {
-    		String objType = getArguments().get(0);
-    		if(requiresFourthArg(objType)) {
-    			KomodoType kType = KomodoType.getKomodoType(objType);
-    			if(kType==KomodoType.FOREIGN_KEY) {
-            		print(indent,Messages.getString(getClass().getSimpleName() + ".fkUsage")); //$NON-NLS-1$
-    			} else {
-            		print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
-    			}
-    		} else {
-        		print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
-    		}
-    	} else {
-    		print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
-    	}
+        // Print out the objType-specific usage (if possible)
+        if(getArguments().size()>=1) {
+            String objType = getArguments().get(0);
+            if(requiresFourthArg(objType)) {
+                KomodoType kType = KomodoType.getKomodoType(objType);
+                if(kType==KomodoType.FOREIGN_KEY) {
+                    print(indent,Messages.getString(getClass().getSimpleName() + ".fkUsage")); //$NON-NLS-1$
+                } else {
+                    print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
+                }
+            } else {
+                print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
+            }
+        } else {
+            print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
+        }
     }
 
 }

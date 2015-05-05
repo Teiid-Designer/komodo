@@ -26,9 +26,10 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.PropertyValueType;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -234,24 +235,486 @@ public class PropertyImpl implements Property {
         this.path = propertyPath;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getAbsolutePath()
+     */
     @Override
-    public PropertyValueType getValueType(UnitOfWork uow) throws KException {
-        UnitOfWork transaction = uow;
+    public String getAbsolutePath() {
+        return this.path;
+    }
 
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getValueType", true, null); //$NON-NLS-1$
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getBooleanValue(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean getBooleanValue( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final boolean result = getSession(transaction).getProperty(this.path).getBoolean();
+            return result;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
         }
+    }
 
-        assert (transaction != null);
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getBooleanValues(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean[] getBooleanValues( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
+            final Value[] values = property.getValues();
+            final boolean[] booleanValues = new boolean[values.length];
+            int i = 0;
+
+            for (final Value value : values) {
+                booleanValues[i++] = value.getBoolean();
+            }
+
+            return booleanValues;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getDateValue(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Calendar getDateValue( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final Calendar result = getSession(transaction).getProperty(this.path).getDate();
+            return result;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getDateValues(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Calendar[] getDateValues( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
+            final Value[] values = property.getValues();
+            final Calendar[] dateValues = new Calendar[values.length];
+            int i = 0;
+
+            for (final Value value : values) {
+                dateValues[i++] = value.getDate();
+            }
+
+            return dateValues;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getDecimalValue(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public BigDecimal getDecimalValue( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final BigDecimal result = getSession(transaction).getProperty(this.path).getDecimal();
+            return result;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getDecimalValues(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public BigDecimal[] getDecimalValues( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
+            final Value[] values = property.getValues();
+            final BigDecimal[] decimalValues = new BigDecimal[values.length];
+            int i = 0;
+
+            for (final Value value : values) {
+                decimalValues[i++] = value.getDecimal();
+            }
+
+            return decimalValues;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getDescriptor(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public PropertyDescriptor getDescriptor( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
+            final PropertyDescriptor result = new PropertyDescriptorImpl(property.getDefinition());
+            return result;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getDoubleValue(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public double getDoubleValue( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final double result = getSession(transaction).getProperty(this.path).getDouble();
+            return result;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getDoubleValues(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public double[] getDoubleValues( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
+            final Value[] values = property.getValues();
+            final double[] doubleValues = new double[values.length];
+            int i = 0;
+
+            for (final Value value : values) {
+                doubleValues[i++] = value.getDouble();
+            }
+
+            return doubleValues;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getLongValue(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public long getLongValue( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final long result = getSession(transaction).getProperty(this.path).getLong();
+            return result;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getLongValues(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public long[] getLongValues( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
+            final Value[] values = property.getValues();
+            final long[] longValues = new long[values.length];
+            int i = 0;
+
+            for (final Value value : values) {
+                longValues[i++] = value.getLong();
+            }
+
+            return longValues;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getName(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getName( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final String result = getSession(transaction).getProperty(getAbsolutePath()).getName();
+            return result;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final Node parent = getSession(transaction).getProperty(getAbsolutePath()).getParent();
+            String parentPath = parent.getPath();
+
+            if (!parentPath.endsWith("/")) { //$NON-NLS-1$
+                parentPath += "/"; //$NON-NLS-1$
+            }
+
+            return new ObjectImpl(this.repository, parent.getPath(), 0);
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getRepository()
+     */
+    @Override
+    public Repository getRepository() {
+        return this.repository;
+    }
+
+    private Session getSession( final UnitOfWork transaction ) {
+        return ((UnitOfWorkImpl)transaction).getSession();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getStringValue(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getStringValue( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final String result = getSession(transaction).getProperty(this.path).getString();
+            return result;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getStringValues(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String[] getStringValues( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
+            final Value[] values = property.getValues();
+            final String[] stringValues = new String[values.length];
+            int i = 0;
+
+            for (final Value value : values) {
+                stringValues[i++] = value.getString();
+            }
+
+            return stringValues;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getValue(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Object getValue( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
+            final Value value = property.getValue();
+            final int propType = property.getType();
+            final Object result = convert(value, propType);
+
+            return result;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getValues(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Object[] getValues( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
+            final int propType = property.getType();
+            final Value[] values = property.getValues();
+            final Object[] objectValues = new Object[values.length];
+            int i = 0;
+
+            for (final Value value : values) {
+                objectValues[i++] = convert(value, propType);
+            }
+
+            return objectValues;
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getValueType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public PropertyValueType getValueType( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         PropertyValueType propertyValueType = PropertyValueType.UNDEFINED;
 
         try {
             final javax.jcr.Property result = getSession(transaction).getProperty(this.path);
-
-            if (uow == null) {
-                transaction.commit();
-            }
 
             int requiredType = result.getDefinition().getRequiredType();
             switch (requiredType) {
@@ -284,673 +747,6 @@ public class PropertyImpl implements Property {
 
             return propertyValueType;
         } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getAbsolutePath()
-     */
-    @Override
-    public String getAbsolutePath() {
-        return this.path;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getBooleanValue(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public boolean getBooleanValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getBooleanValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final boolean result = getSession(transaction).getProperty(this.path).getBoolean();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getBooleanValues(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public boolean[] getBooleanValues( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getBooleanValues", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            final Value[] values = property.getValues();
-            final boolean[] booleanValues = new boolean[values.length];
-            int i = 0;
-
-            for (final Value value : values) {
-                booleanValues[i++] = value.getBoolean();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return booleanValues;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getDateValue(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public Calendar getDateValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getDateValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final Calendar result = getSession(transaction).getProperty(this.path).getDate();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getDateValues(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public Calendar[] getDateValues( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getDateValues", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            final Value[] values = property.getValues();
-            final Calendar[] dateValues = new Calendar[values.length];
-            int i = 0;
-
-            for (final Value value : values) {
-                dateValues[i++] = value.getDate();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return dateValues;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getDecimalValue(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public BigDecimal getDecimalValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getDecimalValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final BigDecimal result = getSession(transaction).getProperty(this.path).getDecimal();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getDecimalValues(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public BigDecimal[] getDecimalValues( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getDecimalValues", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            final Value[] values = property.getValues();
-            final BigDecimal[] decimalValues = new BigDecimal[values.length];
-            int i = 0;
-
-            for (final Value value : values) {
-                decimalValues[i++] = value.getDecimal();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return decimalValues;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getDescriptor(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public PropertyDescriptor getDescriptor( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getDescriptor", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            final PropertyDescriptor result = new PropertyDescriptorImpl(property.getDefinition());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getDoubleValue(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public double getDoubleValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getDoubleValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final double result = getSession(transaction).getProperty(this.path).getDouble();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getDoubleValues(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public double[] getDoubleValues( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getDoubleValues", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            final Value[] values = property.getValues();
-            final double[] doubleValues = new double[values.length];
-            int i = 0;
-
-            for (final Value value : values) {
-                doubleValues[i++] = value.getDouble();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return doubleValues;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getLongValue(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public long getLongValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getLongValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final long result = getSession(transaction).getProperty(this.path).getLong();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getLongValues(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public long[] getLongValues( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getLongValues", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            final Value[] values = property.getValues();
-            final long[] longValues = new long[values.length];
-            int i = 0;
-
-            for (final Value value : values) {
-                longValues[i++] = value.getLong();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return longValues;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.KNode#getName(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public String getName( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("propertyimpl-getName", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final String result = getSession(transaction).getProperty(getAbsolutePath()).getName();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            if (uow == null) {
-                transaction.rollback();
-            }
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public KomodoObject getParent( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("propertyimpl-getParent", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final Node parent = getSession(transaction).getProperty(getAbsolutePath()).getParent();
-            String parentPath = parent.getPath();
-
-            if (!parentPath.endsWith("/")) { //$NON-NLS-1$
-                parentPath += "/"; //$NON-NLS-1$
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return new ObjectImpl(this.repository, parent.getPath(), 0);
-        } catch (final Exception e) {
-            if (uow == null) {
-                transaction.rollback();
-            }
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.KNode#getRepository()
-     */
-    @Override
-    public Repository getRepository() {
-        return this.repository;
-    }
-
-    private Session getSession( final UnitOfWork transaction ) {
-        return ((UnitOfWorkImpl)transaction).getSession();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getStringValue(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public String getStringValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getStringValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final String result = getSession(transaction).getProperty(this.path).getString();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getStringValues(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public String[] getStringValues( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getStringValues", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            final Value[] values = property.getValues();
-            final String[] stringValues = new String[values.length];
-            int i = 0;
-
-            for (final Value value : values) {
-                stringValues[i++] = value.getString();
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return stringValues;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getValue(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public Object getValue( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getValue", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            final Value value = property.getValue();
-            final int propType = property.getType();
-            final Object result = convert(value, propType);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            transaction.rollback();
-
-            if (e instanceof KException) {
-                throw (KException)e;
-            }
-
-            throw new KException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Property#getValues(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public Object[] getValues( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-getValues", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final javax.jcr.Property property = getSession(transaction).getProperty(this.path);
-            final int propType = property.getType();
-            final Value[] values = property.getValues();
-            final Object[] objectValues = new Object[values.length];
-            int i = 0;
-
-            for (final Value value : values) {
-                objectValues[i++] = convert(value, propType);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return objectValues;
-        } catch (final Exception e) {
-            transaction.rollback();
-
             if (e instanceof KException) {
                 throw (KException)e;
             }
@@ -965,27 +761,15 @@ public class PropertyImpl implements Property {
      * @see org.komodo.spi.repository.Property#isMultiple(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public boolean isMultiple( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-isMultiple", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public boolean isMultiple( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
             final Session session = getSession(transaction);
             final boolean result = session.getProperty(this.path).isMultiple();
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            transaction.rollback();
-
             if (e instanceof KException) {
                 throw (KException)e;
             }
@@ -1000,15 +784,10 @@ public class PropertyImpl implements Property {
      * @see org.komodo.spi.repository.Property#set(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.Object[])
      */
     @Override
-    public void set( final UnitOfWork uow,
+    public void set( final UnitOfWork transaction,
                      final Object... values ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("propertyImpl-set", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
             final Session session = getSession(transaction);
@@ -1048,13 +827,7 @@ public class PropertyImpl implements Property {
                     }
                 }
             }
-
-            if (uow == null) {
-                transaction.commit();
-            }
         } catch (final Exception e) {
-            transaction.rollback();
-
             if (e instanceof KException) {
                 throw (KException)e;
             }

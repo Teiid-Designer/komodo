@@ -11,6 +11,7 @@ import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a VDB permission mask.
@@ -36,7 +37,7 @@ public interface Mask extends RelationalObject {
      * A name used by Teiid to reference this VDB.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>order</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -47,7 +48,7 @@ public interface Mask extends RelationalObject {
      * Sets the name used by Teiid to reference this VDB.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newOrder
      *        the new value of the <code>order</code> property
      * @throws KException

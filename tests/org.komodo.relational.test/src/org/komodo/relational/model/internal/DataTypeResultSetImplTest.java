@@ -27,15 +27,16 @@ import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 @SuppressWarnings( { "javadoc", "nls" } )
-public class DataTypeResultSetImplTest extends RelationalModelTest {
+public final class DataTypeResultSetImplTest extends RelationalModelTest {
 
     private StoredProcedure procedure;
     private DataTypeResultSet resultSet;
 
     @Before
     public void init() throws Exception {
-        this.procedure = RelationalModelFactory.createStoredProcedure( null, _repo, mock( Model.class ), "procedure" );
-        this.resultSet = RelationalModelFactory.createDataTypeResultSet( null, _repo, this.procedure );
+        this.procedure = RelationalModelFactory.createStoredProcedure( this.uow, _repo, mock( Model.class ), "procedure" );
+        this.resultSet = RelationalModelFactory.createDataTypeResultSet( this.uow, _repo, this.procedure );
+        commit();
     }
 
     @Test
@@ -45,11 +46,11 @@ public class DataTypeResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldFailConstructionIfNotDataTypeResultSet() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new DataTypeResultSetImpl( null, _repo, this.procedure.getAbsolutePath() );
+                new DataTypeResultSetImpl( this.uow, _repo, this.procedure.getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -58,53 +59,53 @@ public class DataTypeResultSetImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectDisplayString() throws Exception {
         // STRING
-        assertThat( this.resultSet.getDisplayString( null ), is( "STRING" ) );
+        assertThat( this.resultSet.getDisplayString( this.uow ), is( "STRING" ) );
 
         // STRING(50)
-        this.resultSet.setLength( null, 50 );
-        assertThat( this.resultSet.getDisplayString( null ), is( "STRING(50)" ) );
+        this.resultSet.setLength( this.uow, 50 );
+        assertThat( this.resultSet.getDisplayString( this.uow ), is( "STRING(50)" ) );
 
         // STRING(50)[]
-        this.resultSet.setArray( null, true );
-        assertThat( this.resultSet.getDisplayString( null ), is( "STRING(50)[]" ) );
+        this.resultSet.setArray( this.uow, true );
+        assertThat( this.resultSet.getDisplayString( this.uow ), is( "STRING(50)[]" ) );
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat( this.resultSet.getName( null ), is( CreateProcedure.RESULT_SET ) );
+        assertThat( this.resultSet.getName( this.uow ), is( CreateProcedure.RESULT_SET ) );
     }
 
     @Test
     public void shouldHaveDatatypeLengthPropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.resultSet.getLength( null ), is( RelationalConstants.DEFAULT_LENGTH ) );
-        assertThat( this.resultSet.hasProperty( null, StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
+        assertThat( this.resultSet.getLength( this.uow ), is( RelationalConstants.DEFAULT_LENGTH ) );
+        assertThat( this.resultSet.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
     }
 
     @Test
     public void shouldHaveDefaultTypeAfterConstruction() throws Exception {
-        assertThat( this.resultSet.getType( null ), is( Type.DEFAULT_VALUE ) );
+        assertThat( this.resultSet.getType( this.uow ), is( Type.DEFAULT_VALUE ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.resultSet.getPropertyNames( null );
-        final String[] rawProps = this.resultSet.getRawPropertyNames( null );
+        final String[] filteredProps = this.resultSet.getPropertyNames( this.uow );
+        final String[] rawProps = this.resultSet.getRawPropertyNames( this.uow );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.resultSet.addChild( null, "blah", null );
+        this.resultSet.addChild( this.uow, "blah", null );
     }
 
     @Test
     public void shouldNotBeAnArrayAfterConstruction() throws Exception {
-        assertThat( this.resultSet.isArray( null ), is( false ) );
+        assertThat( this.resultSet.isArray( this.uow ), is( false ) );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.resultSet.getPropertyNames( null );
+        final String[] filteredProps = this.resultSet.getPropertyNames( this.uow );
         final Filter[] filters = this.resultSet.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -116,30 +117,31 @@ public class DataTypeResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetArray() throws Exception {
-        this.resultSet.setArray( null, true );
-        assertThat( this.resultSet.isArray( null ), is( true ) );
+        this.resultSet.setArray( this.uow, true );
+        assertThat( this.resultSet.isArray( this.uow ), is( true ) );
     }
 
     @Test
     public void shouldSetDatatypeLengthProperty() throws Exception {
         final long value = ( RelationalConstants.DEFAULT_LENGTH + 10 );
-        this.resultSet.setLength( null, value );
-        assertThat( this.resultSet.getLength( null ), is( value ) );
-        assertThat( this.resultSet.getProperty( null, StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( null ), is( value ) );
+        this.resultSet.setLength( this.uow, value );
+        assertThat( this.resultSet.getLength( this.uow ), is( value ) );
+        assertThat( this.resultSet.getProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( this.uow ),
+                    is( value ) );
     }
 
     @Test
     public void shouldSetType() throws Exception {
         final Type value = Type.BIGDECIMAL;
-        this.resultSet.setType( null, value );
-        assertThat( this.resultSet.getType( null ), is( value ) );
+        this.resultSet.setType( this.uow, value );
+        assertThat( this.resultSet.getType( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetTypeToDefaultWhenNull() throws Exception {
-        this.resultSet.setType( null, Type.BIGDECIMAL );
-        this.resultSet.setType( null, null );
-        assertThat( this.resultSet.getType( null ), is( Type.DEFAULT_VALUE ) );
+        this.resultSet.setType( this.uow, Type.BIGDECIMAL );
+        this.resultSet.setType( this.uow, null );
+        assertThat( this.resultSet.getType( this.uow ), is( Type.DEFAULT_VALUE ) );
     }
 
 }
