@@ -34,6 +34,7 @@ import org.komodo.core.KEngine;
 import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
 import org.komodo.repository.Messages;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
@@ -45,7 +46,7 @@ import org.modeshape.jcr.RepositoryConfiguration;
 /**
  * The thread the ModeShape engine uses for local repositories.
  */
-public class ModeshapeEngineThread extends Thread {
+public class ModeshapeEngineThread extends Thread implements StringConstants {
 
     /**
      * Request types to send to this engine thread
@@ -122,8 +123,6 @@ public class ModeshapeEngineThread extends Thread {
 
         private RequestCallback callback;
 
-        private boolean awaitSequencers = false;
-
         /**
          * @param requestType
          *        type of request (cannot be <code>null</code>)
@@ -135,20 +134,6 @@ public class ModeshapeEngineThread extends Thread {
             ArgCheck.isNotNull(requestType, "requestType"); //$NON-NLS-1$
             this.requestType = requestType;
             this.callback = callback;
-        }
-
-        /**
-         * @return wait for sequencers flag
-         */
-        public boolean awaitSequencers() {
-            return this.awaitSequencers;
-        }
-
-        /**
-         * @param waitForSequencers the waitForSequencers to set
-         */
-        public void setAwaitSequencers(boolean waitForSequencers) {
-            this.awaitSequencers = waitForSequencers;
         }
 
         /**
@@ -239,8 +224,10 @@ public class ModeshapeEngineThread extends Thread {
 
     private void respondCallback(final Request request, Object result) {
         if (request.getCallback() != null) {
+            LOGGER.debug("ModeshapeEngineThread: Responding to callback: " + request.getCallback().getClass().getName()); //$NON-NLS-1$
             request.getCallback().respond(result);
-        }
+        } else
+            LOGGER.debug("ModeshapeEngineThread: No callback assigned"); //$NON-NLS-1$
     }
 
     private void errorCallback(final Request request, Exception e) {
@@ -261,6 +248,8 @@ public class ModeshapeEngineThread extends Thread {
                         "commitSession called when request is not a commit session"); //$NON-NLS-1$
         final SessionRequest commitRequest = (SessionRequest)request;
         final Session session = commitRequest.getSession();
+        final String commitRequestId = commitRequest.getName() + HYPHEN + session.hashCode();
+
         LOGGER.debug("commit session for request {0}", commitRequest.getName()); //$NON-NLS-1$
 
         try {
@@ -281,32 +270,40 @@ public class ModeshapeEngineThread extends Thread {
             // then attach a listener to the sequencers controller class, which will be responsible
             // for responding to the callback and finalising the session.
             //
-            if (request.awaitSequencers()) {
-                KSequencerListener sequencerListener = new KSequencerListener() {
+            KSequencerListener sequencerListener = new KSequencerListener() {
 
-                    @Override
-                    public void sequencingCompleted() {
-                        LOGGER.debug("Sequencers completed. Calling request callback"); //$NON-NLS-1$
-                        try {
-                            respondCallback(request, null);
-                        } finally {
-                            logoutSession(session);
-                        }
+                @Override
+                public String id() {
+                    return commitRequestId;
+                }
+
+                @Override
+                public Session session() {
+                    return session;
+                }
+
+                @Override
+                public void sequencingCompleted() {
+                    LOGGER.debug("Sequencers completed. Calling request callback"); //$NON-NLS-1$
+                    try {
+                        respondCallback(request, null);
+                    } finally {
+                        logoutSession(session);
                     }
+                }
 
-                    @Override
-                    public void sequencingError(Exception exception) {
-                        try {
-                            LOGGER.error(Messages.getString(Messages.Komodo.SEQUENCING_ERROR_TRYING_TO_COMMIT, exception, commitRequest.getName()));
-                            errorCallback(request, exception);
-                        } finally {
-                            logoutSession(session);
-                        }
+                @Override
+                public void sequencingError(Exception exception) {
+                    try {
+                        LOGGER.error(Messages.getString(Messages.Komodo.SEQUENCING_ERROR_TRYING_TO_COMMIT, exception, commitRequest.getName()));
+                        errorCallback(request, exception);
+                    } finally {
+                        logoutSession(session);
                     }
-                };
+                }
+            };
 
-                sequencers.addSequencerListener(sequencerListener);
-            }
+            sequencers.addSequencerListener(sequencerListener);
 
             //
             // Save the session
@@ -314,19 +311,6 @@ public class ModeshapeEngineThread extends Thread {
             session.save();
 
             LOGGER.debug("commit session request {0} has been saved", commitRequest.getName()); //$NON-NLS-1$
-
-            //
-            // Respond with the callback immmediately if not to await the
-            // completion of the sequencers
-            //
-            if (! request.awaitSequencers() && request.getCallback() != null) {
-                try {
-                    LOGGER.debug("Not waiting on sequencers. Calling callback immediately"); //$NON-NLS-1$
-                    respondCallback(request, null);
-                } finally {
-                    logoutSession(session);
-                }
-            }
 
         } catch (final Exception e) {
             request.requestType = RequestType.ROLLBACK_SESSION;

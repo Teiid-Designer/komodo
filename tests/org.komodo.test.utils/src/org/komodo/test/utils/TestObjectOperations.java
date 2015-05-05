@@ -24,31 +24,47 @@ package org.komodo.test.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Iterator;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
+import javax.jcr.Property;
+import javax.jcr.PropertyIterator;
+import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.jcr.query.Query;
+import javax.jcr.query.QueryManager;
+import javax.jcr.query.QueryResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
 import org.modeshape.common.collection.Problems;
+import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrRepository;
 import org.modeshape.jcr.ModeShapeEngine;
 import org.modeshape.jcr.RepositoryConfiguration;
+import org.modeshape.jcr.api.JcrConstants;
 
 /**
  * Mapping of MODE-2463 issue where both a remove and re-add of the same node
  * cannot be conducted in the same session
  */
 @SuppressWarnings( {"nls", "javadoc"} )
-public class TestObjectOperations {
+public class TestObjectOperations implements StringConstants {
+
+    private static final String BOOKS_EXAMPLE_FULL = "books.xml";
+
+    private static final String TWEET_EXAMPLE = "tweet-example-vdb.xml";
 
     /**
      * Default location of the configuration of the test repository
@@ -132,6 +148,68 @@ public class TestObjectOperations {
         clearRepository();
     }
 
+    private void traverse(String tabs, Node node, StringBuffer buffer) throws Exception {
+        buffer.append(tabs + node.getName() + NEW_LINE);
+
+        PropertyIterator propertyIterator = node.getProperties();
+        while (propertyIterator.hasNext()) {
+            javax.jcr.Property property = propertyIterator.nextProperty();
+            buffer.append(tabs + TAB + "@" + property.toString() + NEW_LINE);
+        }
+
+        javax.jcr.NodeIterator children = node.getNodes();
+        while (children.hasNext()) {
+            traverse(tabs + TAB, children.nextNode(), buffer);
+        }
+    }
+
+    protected void traverse(Node node) throws Exception {
+        StringBuffer buffer = new StringBuffer(NEW_LINE);
+        traverse(TAB, node, buffer);
+        KLog.getLogger().info(buffer.toString());
+    }
+
+    @Test
+    @Ignore("Demonstrates the failure of querying on a session not yet committed.")
+    public void testAddChild() throws Exception {
+        String name = "testNode";
+        String childName = "description";
+
+        Session session1 = newSession();
+        Node rootNode = session1.getRootNode();
+        Node testNode = rootNode.addNode(name);
+        assertNotNull(testNode);
+
+        Node descNode = testNode.addNode(childName);
+        assertNotNull(descNode);
+
+        descNode = testNode.getNode(childName);
+        assertNotNull(descNode);
+
+        testNode = session1.getNode(testNode.getPath());
+        assertNotNull(testNode.getNode(childName));
+
+        traverse(testNode);
+
+//        session1.save();
+//        Session session2 = newSession();
+
+        String queryStmt = "SELECT [jcr:path] FROM [" + JcrConstants.NT_UNSTRUCTURED + "]";
+
+        QueryManager queryMgr = session1.getWorkspace().getQueryManager();
+//        QueryManager queryMgr = session2.getWorkspace().getQueryManager();
+        Query query = queryMgr.createQuery(queryStmt, Query.JCR_SQL2);
+        QueryResult result = query.execute();
+        NodeIterator itr = result.getNodes();
+
+        int i = 0;
+        while (itr.hasNext()) {
+            i++;
+        }
+
+        assertTrue(i > 0);
+    }
+
     @Test
     @Ignore("Mapping issue MODE-2463 - a remove then a re-add cannot be conducted in the same transaction")
     public void testRemoveThenAdd() throws Exception {
@@ -203,5 +281,100 @@ public class TestObjectOperations {
         } catch (PathNotFoundException ex) {
             // No node found at testNodePath which should be correct
         }
+    }
+
+    private String toString(InputStream inputStream) throws Exception {
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        int result = bis.read();
+        while (result != -1) {
+            byte b = (byte)result;
+            buf.write(b);
+            result = bis.read();
+        }
+
+        return buf.toString();
+    }
+
+    /**
+     * Demonstrates that the when a string property value is saved, an algorithm is run
+     * which converts it to a binary value if the number of bytes > minimumBinarySizeInBytes.
+     * The default in modeshape of this option is 4096KB.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testDemonstratingPropertyValueConversion()  throws Exception {
+        InputStream bookStream = getClass().getResourceAsStream(BOOKS_EXAMPLE_FULL);
+        assertNotNull(bookStream);
+
+        String bigContent = toString(bookStream);
+        assertNotNull(bigContent);
+        assertTrue(bigContent.length() > 0);
+
+        //
+        // Number of bytes is greater than minimumBinarySizeInBytes option
+        // threshold in modeshape implying that this string value will be converted
+        // into a binary stream upon saving of the session
+        //
+        assertTrue(bigContent.getBytes().length > 4096);
+
+        InputStream tweetStream = getClass().getResourceAsStream(TWEET_EXAMPLE);
+        assertNotNull(tweetStream);
+
+        String littleContent = toString(tweetStream);
+        assertNotNull(littleContent);
+        assertTrue(littleContent.length() > 0);
+
+        //
+        // Number of bytes is smaller than minimumBinarySizeInBytes option
+        // threshold in modeshape implying that this string value will NOT be
+        // converted into a binary stream upon saving of the session
+        //
+        assertTrue(littleContent.getBytes().length < 4096);
+
+
+        String bigDataName = "BigData";
+        String littleDataName = "LittleData";
+
+        Session session1 = newSession();
+        Node rootNode = session1.getRootNode();
+
+        Node bigDataNode = rootNode.addNode(bigDataName);
+        Node contentNode = bigDataNode.addNode(JcrLexicon.CONTENT.getString(), null);
+        contentNode.setProperty(JcrLexicon.DATA.getString(), bigContent);
+        Property bigDataProperty = contentNode.getProperty(JcrLexicon.DATA.getString());
+
+        Node littleDataNode = rootNode.addNode(littleDataName);
+        contentNode = littleDataNode.addNode(JcrLexicon.CONTENT.getString(), null);
+        contentNode.setProperty(JcrLexicon.DATA.getString(), littleContent);
+        Property littleDataProperty = contentNode.getProperty(JcrLexicon.DATA.getString());
+
+        //
+        // So up until this point both littleDataNode's and bigDataNode's data property
+        // contains a property value of type STRING
+        //
+        assertEquals(PropertyType.STRING, bigDataProperty.getType());
+        assertEquals(PropertyType.STRING, littleDataProperty.getType());
+
+        session1.save();
+        session1.logout();
+
+        //
+        // Demonstrates that once the session is saved and the byte size
+        // of the string was larger than 4096KB the property value is changed
+        // to a binary value
+        //
+        Session session2 = newSession();
+        bigDataProperty = session2.getProperty(bigDataProperty.getPath());
+        littleDataProperty = session2.getProperty(littleDataProperty.getPath());
+        assertNotNull(bigDataProperty);
+        assertNotNull(littleDataProperty);
+
+        assertEquals(PropertyType.BINARY, bigDataProperty.getType());
+        assertEquals(PropertyType.STRING, littleDataProperty.getType());
+
+        traverse(session2.getNode(bigDataNode.getPath()));
+        traverse(session2.getNode(littleDataNode.getPath()));
     }
 }

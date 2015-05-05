@@ -22,34 +22,62 @@
 package org.komodo.test.utils;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import javax.jcr.Session;
 import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
 import org.komodo.utils.KLog;
 
 /**
- * Listener that checks new nodes to see if they equals given paths
+ * Listener that will wait for the sequencers to complete prior to letting
+ * the thread calling {@link #wait()} to continue.
  */
-public class SequencerLatchListener implements KSequencerListener {
+public class SynchronousSequencerListener implements KSequencerListener {
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
     private final KSequencerController sequencers;
 
+    private final String listenerId;
+
+    private final Session session;
+
     private Exception sequencerException = null;
 
     /**
+     * @param listenerId the id of this listener 
+     * @param session the session
      * @param sequencers the sequencers
+     * @throws Exception if error occurs
      */
-    public SequencerLatchListener(KSequencerController sequencers) {
+    public SynchronousSequencerListener(String listenerId, Session session, KSequencerController sequencers) throws Exception {
+        this.listenerId = listenerId;
+        this.session = session;
         this.sequencers = sequencers;
         this.sequencers.addSequencerListener(this);
     }
 
     /**
-     * @return latch
+     * Wait for the completion of the sequencers
+     *
+     * @param timeout the maximum time to wait
+     * @param unit the time unit of the {@code timeout} argument
+     * @return {@code true} if the count reached zero and {@code false}
+     *         if the waiting time elapsed before the count reached zero
+     * @throws Exception if error occurs
      */
-    public CountDownLatch getLatch() {
-        return latch;
+    public boolean await(long timeout, TimeUnit unit) throws Exception {
+        return latch.await(timeout, unit);
+    }
+
+    @Override
+    public String id() {
+        return listenerId;
+    }
+
+    @Override
+    public Session session() {
+        return session;
     }
 
     @Override

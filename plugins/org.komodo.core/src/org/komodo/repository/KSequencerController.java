@@ -67,12 +67,9 @@ public interface KSequencerController {
 
     /**
      * @param listener the listener to add
+     *
+     * @throws Exception if error occurs
      */
-    void addSequencerListener(KSequencerListener listener);
-
-    /**
-     * @param listener the listener to remove
-     */
-    void removeSequencerListener(KSequencerListener listener);
+    void addSequencerListener(KSequencerListener listener) throws Exception;
 
 }

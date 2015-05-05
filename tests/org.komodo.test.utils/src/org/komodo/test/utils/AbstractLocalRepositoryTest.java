@@ -37,7 +37,6 @@ import org.komodo.repository.LocalRepository;
 import org.komodo.repository.LocalRepository.LocalRepositoryId;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -114,13 +113,14 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
             _repo.notify(event);
         }
 
-        if (! _repoObserver.getLatch().await(1, TimeUnit.MINUTES))
-            throw new RuntimeException("Local repository was not stopped");
-
-        _repo.removeObserver(_repoObserver);
-
-        _repoObserver = null;
-        _repo = null;
+        try {
+            if (! _repoObserver.getLatch().await(3, TimeUnit.MINUTES))
+                throw new RuntimeException("Local repository was not stopped");
+        } finally {
+            _repo.removeObserver(_repoObserver);
+            _repoObserver = null;
+            _repo = null;
+        }
     }
 
     @After
@@ -136,7 +136,7 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         RepositoryClientEvent event = RepositoryClientEvent.createClearEvent(client);
         _repo.notify(event);
 
-        if (! _repoObserver.getLatch().await(1, TimeUnit.MINUTES))
+        if (! _repoObserver.getLatch().await(3, TimeUnit.MINUTES))
             throw new RuntimeException("Local repository was not cleared");
     }
 
@@ -208,26 +208,5 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
 
         return sb.toString();
-    }
-
-    private void traverse(String tabs, KomodoObject kObject, StringBuffer buffer) throws Exception {
-        buffer.append(tabs + kObject.getName(null) + NEW_LINE);
-
-        String[] propertyNames = kObject.getPropertyNames(null);
-
-        for (String propertyName : propertyNames) {
-            Property property = kObject.getProperty(null, propertyName);
-            buffer.append(tabs + TAB + "@" + toString(property) + NEW_LINE);
-        }
-
-        KomodoObject[] children = kObject.getChildren(null);
-        for (int i = 0; i < children.length; ++i)
-            traverse(tabs + TAB, children[i], buffer);
-    }
-
-    protected void traverse(KomodoObject kObject) throws Exception {
-        StringBuffer buffer = new StringBuffer(NEW_LINE);
-        traverse(TAB, kObject, buffer);
-        KLog.getLogger().info(buffer.toString());
     }
 }

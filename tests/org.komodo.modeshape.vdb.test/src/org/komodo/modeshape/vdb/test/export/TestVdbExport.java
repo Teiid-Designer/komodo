@@ -44,7 +44,7 @@ import org.junit.Test;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
 import org.komodo.test.utils.AbstractSequencerTest;
-import org.komodo.test.utils.SequencerLatchListener;
+import org.komodo.test.utils.SynchronousSequencerListener;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -103,11 +103,12 @@ public class TestVdbExport extends AbstractSequencerTest {
     }
 
     private void saveSession() throws Exception {
-        SequencerLatchListener listener = addSequencingListenerLatch();
+        String requestId = getClass().getName() + session().hashCode();
+        SynchronousSequencerListener listener = addSequencingListenerLatch(requestId, session());
 
         session().save();
 
-        assertTrue(listener.getLatch().await(3, TimeUnit.MINUTES));
+        assertTrue(listener.await(3, TimeUnit.MINUTES));
         assertFalse(listener.exceptionOccurred());
     }
 

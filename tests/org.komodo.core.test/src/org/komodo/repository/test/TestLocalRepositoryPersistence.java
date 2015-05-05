@@ -32,7 +32,6 @@ import static org.mockito.Mockito.mock;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
@@ -41,13 +40,13 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.LocalRepository.LocalRepositoryId;
 import org.komodo.repository.RepositoryImpl;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.test.utils.AbstractLoggingTest;
@@ -176,24 +175,8 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
         initLocalRepository(config);
         assertNotNull(_repo);
 
-        final CountDownLatch latch = new CountDownLatch(1);
-        UnitOfWork uow = _repo.createTransaction("test-persistence-workspace", false, new UnitOfWorkListener() {
-
-            @Override
-            public boolean awaitSequencerCompletion() {
-                return false;
-            }
-
-            @Override
-            public void respond(Object results) {
-                latch.countDown();
-            }
-
-            @Override
-            public void errorOccurred(Throwable error) {
-                latch.countDown();
-            }
-        });
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = _repo.createTransaction("test-persistence-workspace", false, callback);
 
         // Create the komodo workspace
         KomodoObject workspace = _repo.komodoWorkspace(uow);
@@ -207,7 +190,8 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
         //
         // Wait for the latch to countdown
         //
-        assertTrue(latch.await(3, TimeUnit.MINUTES));
+        assertTrue(callback.await(3, TimeUnit.MINUTES));
+        assertFalse(callback.hasError());
 
         // Find the workspace to confirm what we expect to happen
         List<KomodoObject> results = _repo.searchByType(null, KomodoLexicon.Workspace.NODE_TYPE);
@@ -251,24 +235,8 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
         initLocalRepository(config);
         assertNotNull(_repo);
 
-        final CountDownLatch latch = new CountDownLatch(1);
-        UnitOfWork uow = _repo.createTransaction("test-persistence-objects", false, new UnitOfWorkListener() {
-
-            @Override
-            public boolean awaitSequencerCompletion() {
-                return false;
-            }
-
-            @Override
-            public void respond(Object results) {
-                latch.countDown();
-            }
-
-            @Override
-            public void errorOccurred(Throwable error) {
-                latch.countDown();
-            }
-        });
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = _repo.createTransaction("test-persistence-objects", false, callback);
 
         // Create the komodo workspace
         KomodoObject workspace = _repo.komodoWorkspace(uow);
@@ -287,7 +255,8 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest
         //
         // Wait for the latch to countdown
         //
-        assertTrue(latch.await(3, TimeUnit.MINUTES));
+        assertTrue(callback.await(3, TimeUnit.MINUTES));
+        assertFalse(callback.hasError());
 
         // Find the objects to confirm what we expect to happen
         List<KomodoObject> results = _repo.searchByType(null, KomodoLexicon.VdbModel.NODE_TYPE);

@@ -10,13 +10,12 @@ package org.komodo.relational.model.internal;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,10 +23,10 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class SchemaImplTest extends RelationalModelTest {
@@ -38,10 +37,6 @@ public class SchemaImplTest extends RelationalModelTest {
                                                                         ") OPTIONS (CARDINALITY '1234567954432')" + NEW_LINE +
                                                                         "AS" + NEW_LINE +
                                                                         "SELECT e1, e2 FROM foo.bar;\n";
-
-    private static final String SEQUENCE_DDL_PROBLEM = ".*\\/ddl.+problem";
-
-    private static final String SEQUENCE_TEIID_SQL_PATH = ".*\\/G1\\/tsql:query";
 
     private static final String NAME = "schema";
 
@@ -57,27 +52,8 @@ public class SchemaImplTest extends RelationalModelTest {
     }
 
     private void setRenditionValueAwaitSequencing(String value) throws Exception {
-        final CountDownLatch updateLatch = new CountDownLatch(1);
-        final Throwable[] errorHolder = new Throwable[1];
-
-        UnitOfWork transaction = _repo.createTransaction("schematests-setrendition-value", false, new UnitOfWorkListener() {
-
-            @Override
-            public boolean awaitSequencerCompletion() {
-                return true;
-            }
-
-            @Override
-            public void respond(Object results) {
-                updateLatch.countDown();
-            }
-
-            @Override
-            public void errorOccurred(Throwable error) {
-                updateLatch.countDown();
-                errorHolder[0] = error;
-            }
-        });
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork transaction = _repo.createTransaction("schematests-setrendition-value", false, callback);
 
         assertNotNull(transaction);
 
@@ -89,10 +65,10 @@ public class SchemaImplTest extends RelationalModelTest {
         transaction.commit();
 
         // Wait for the sequencing of the repository or timeout of 3 minutes
-        assertTrue(updateLatch.await(3, TimeUnit.MINUTES));
-        assertNull(errorHolder[0]);
+        assertTrue(callback.await(3, TimeUnit.MINUTES));
+        assertFalse(callback.hasError());
 
-        traverse(schema);
+        traverse(_repo.createTransaction("traverse-schema", true, null), schema.getAbsolutePath());
     }
 
     @Test

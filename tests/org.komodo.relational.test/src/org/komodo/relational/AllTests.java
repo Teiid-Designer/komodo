@@ -14,6 +14,7 @@ import org.komodo.relational.model.internal.ParameterImplTest;
 import org.komodo.relational.model.internal.PrimaryKeyImplTest;
 import org.komodo.relational.model.internal.PushdownFunctionImplTest;
 import org.komodo.relational.model.internal.ResultSetColumnImplTest;
+import org.komodo.relational.model.internal.SchemaImplTest;
 import org.komodo.relational.model.internal.StatementOptionImplTest;
 import org.komodo.relational.model.internal.StoredProcedureImplTest;
 import org.komodo.relational.model.internal.TableConstraintTest;
@@ -73,6 +74,9 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
     TranslatorImplTest.class,
     VdbImplTest.class,
     VdbImportImplTest.class,
+
+    // DDL
+    SchemaImplTest.class,
 
     // Workspace
     WorkspaceManagerTest.class,
