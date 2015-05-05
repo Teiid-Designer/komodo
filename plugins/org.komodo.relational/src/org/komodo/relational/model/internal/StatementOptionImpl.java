@@ -9,8 +9,8 @@ package org.komodo.relational.model.internal;
 
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
@@ -21,13 +21,14 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 /**
  * An implementation of a relational model DDL statement option.
  */
-public final class StatementOptionImpl extends RelationalObjectImpl implements StatementOption {
+public final class StatementOptionImpl extends RelationalChildRestrictedObject implements StatementOption {
 
     /**
      * The resolver of a {@link StatementOption}.
@@ -109,7 +110,7 @@ public final class StatementOptionImpl extends RelationalObjectImpl implements S
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath

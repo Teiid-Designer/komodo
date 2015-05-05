@@ -24,6 +24,8 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 
@@ -115,7 +117,7 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -132,79 +134,29 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public KomodoObject[] getChildren( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "pushdownfunctionimpl-getChildren", true, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            final KomodoObject[] superKids = super.getChildren( transaction );
-            final ProcedureResultSet resultSet = getResultSet( transaction );
-            KomodoObject[] result = null;
-
-            if (resultSet == null) {
-                result = superKids;
-            } else {
-                result = new KomodoObject[superKids.length + 1];
-                System.arraycopy( superKids, 0, result, 0, superKids.length );
-                result[superKids.length] = resultSet;
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.relational.model.PushdownFunction#getResultSet(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public ProcedureResultSet getResultSet( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public ProcedureResultSet getResultSet( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "pushdownfunctionimpl-getResultSet", true, null ); //$NON-NLS-1$
+        ProcedureResultSet result = null;
+
+        if ( hasChild( transaction, CreateProcedure.RESULT_SET ) ) {
+            final KomodoObject kobject = getChild( transaction, CreateProcedure.RESULT_SET );
+
+            if ( DataTypeResultSetImpl.RESOLVER.resolvable( transaction, kobject ) ) {
+                result = DataTypeResultSetImpl.RESOLVER.resolve( transaction, kobject );
+            } else if ( TabularResultSetImpl.RESOLVER.resolvable( transaction, kobject ) ) {
+                result = TabularResultSetImpl.RESOLVER.resolve( transaction, kobject );
+            } else {
+                throw new UnsupportedOperationException( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE,
+                                                                             kobject.getAbsolutePath() ) );
+            }
         }
 
-        assert ( transaction != null );
-
-        try {
-            ProcedureResultSet result = null;
-
-            if (hasChild( transaction, CreateProcedure.RESULT_SET )) {
-                final KomodoObject kobject = getChild( transaction, CreateProcedure.RESULT_SET );
-
-                if (DataTypeResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
-                    result = DataTypeResultSetImpl.RESOLVER.resolve( transaction, kobject );
-                } else if (TabularResultSetImpl.RESOLVER.resolvable( transaction, kobject )) {
-                    result = TabularResultSetImpl.RESOLVER.resolve( transaction, kobject );
-                } else {
-                    LOGGER.error( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, kobject.getAbsolutePath() ) );
-                }
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        return result;
     }
 
     /**
@@ -233,35 +185,18 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
      * @see org.komodo.relational.model.PushdownFunction#removeResultSet(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public void removeResultSet( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public void removeResultSet( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "pushdownfunctionimpl-removeResultSet", false, null ); //$NON-NLS-1$
+        // delete existing result set
+        final ProcedureResultSet resultSet = getResultSet( transaction );
+
+        if ( resultSet == null ) {
+            throw new KException( Messages.getString( Relational.RESULT_SET_NOT_FOUND_TO_REMOVE, getAbsolutePath() ) );
         }
 
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "removeResultSet: transaction = {0}, pushdown function = {1}", transaction.getName(), getAbsolutePath() ); //$NON-NLS-1$
-        }
-
-        try {
-            // delete existing result set
-            final ProcedureResultSet resultSet = getResultSet( transaction );
-
-            if (resultSet == null) {
-                throw new KException( Messages.getString( Relational.RESULT_SET_NOT_FOUND_TO_REMOVE, getAbsolutePath() ) );
-            }
-
-            resultSet.remove( transaction );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        resultSet.remove( transaction );
     }
 
     /**
@@ -271,46 +206,27 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
      */
     @SuppressWarnings( "unchecked" )
     @Override
-    public < T extends ProcedureResultSet > T setResultSet( final UnitOfWork uow,
+    public < T extends ProcedureResultSet > T setResultSet( final UnitOfWork transaction,
                                                             final Class< T > resultSetType ) throws KException {
-        UnitOfWork transaction = uow;
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction( "pushdownfunctionimpl-setResultSet", false, null ); //$NON-NLS-1$
+        // delete existing result set (don't call removeResultSet as it throws exception if one does not exist)
+        final ProcedureResultSet resultSet = getResultSet( transaction );
+
+        if ( resultSet != null ) {
+            resultSet.remove( transaction );
         }
 
-        assert ( transaction != null );
+        T result = null;
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "setResultSet: transaction = {0}, resultSetType = {1}", //$NON-NLS-1$
-                          transaction.getName(),
-                          resultSetType.getName() );
+        if ( resultSetType == TabularResultSet.class ) {
+            result = ( T )RelationalModelFactory.createTabularResultSet( transaction, getRepository(), this );
+        } else if ( resultSetType == DataTypeResultSet.class ) {
+            result = ( T )RelationalModelFactory.createDataTypeResultSet( transaction, getRepository(), this );
         }
 
-        try {
-            // delete existing result set (don't call removeResultSet)
-            final ProcedureResultSet resultSet = getResultSet( transaction );
-
-            if (resultSet != null) {
-                resultSet.remove( transaction );
-            }
-
-            T result = null;
-
-            if (resultSetType == TabularResultSet.class) {
-                result = ( T )RelationalModelFactory.createTabularResultSet( transaction, getRepository(), this );
-            } else if (resultSetType == DataTypeResultSet.class) {
-                result = ( T )RelationalModelFactory.createDataTypeResultSet( transaction, getRepository(), this );
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        return result;
     }
 
 }

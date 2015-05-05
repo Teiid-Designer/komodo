@@ -7,10 +7,10 @@
  */
 package org.komodo.relational.model;
 
-import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KNode;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -24,8 +24,8 @@ public interface OptionContainer extends KNode {
     class Utils {
 
         /**
-         * @param uow
-         *        the transaction (can be <code>null</code> if query should be automatically committed)
+         * @param transaction
+         *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
          * @param container
          *        the option container whose statement option is being requested (cannot be <code>null</code>)
          * @param name
@@ -34,49 +34,34 @@ public interface OptionContainer extends KNode {
          * @throws KException
          *         if an error occurs
          */
-        public static StatementOption getOption( final UnitOfWork uow,
+        public static StatementOption getOption( final UnitOfWork transaction,
                                                  final OptionContainer container,
                                                  final String name ) throws KException {
-            ArgCheck.isNotNull(container, "container"); //$NON-NLS-1$
-            ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
+            ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+            ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+            ArgCheck.isNotNull( container, "container" ); //$NON-NLS-1$
+            ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
 
-            UnitOfWork transaction = uow;
+            StatementOption result = null;
+            final StatementOption[] options = container.getStatementOptions( transaction );
 
-            if (transaction == null) {
-                final String transactionName = (container.getClass().getSimpleName() + "-get" + name); //$NON-NLS-1$
-                transaction = container.getRepository().createTransaction(transactionName, true, null);
-            }
-
-            assert (transaction != null);
-
-            try {
-                StatementOption result = null;
-                final StatementOption[] options = container.getStatementOptions(transaction);
-
-                if (options.length != 0) {
-                    for (final StatementOption option : options) {
-                        if (name.equals(option.getName(transaction))) {
-                            result = option;
-                            break;
-                        }
+            if ( options.length != 0 ) {
+                for ( final StatementOption option : options ) {
+                    if ( name.equals( option.getName( transaction ) ) ) {
+                        result = option;
+                        break;
                     }
                 }
-
-                if (uow == null) {
-                    transaction.commit();
-                }
-
-                return result;
-            } catch (final Exception e) {
-                throw ObjectImpl.handleError(uow, transaction, e);
             }
+
+            return result;
         }
 
     }
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the user-defined, built-in, and any other non-standard statement options (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -85,7 +70,7 @@ public interface OptionContainer extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the statement options (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -94,7 +79,7 @@ public interface OptionContainer extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param optionToRemove
      *        the name of the statement option being removed (cannot be empty)
      * @throws KException
@@ -105,7 +90,7 @@ public interface OptionContainer extends KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param optionName
      *        the name of the statement option being added (cannot be empty)
      * @param optionValue

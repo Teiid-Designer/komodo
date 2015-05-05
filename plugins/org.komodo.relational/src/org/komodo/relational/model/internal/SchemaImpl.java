@@ -37,7 +37,9 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.utils.ArgCheck;
 
 /**
  * A named schema fragment
@@ -98,7 +100,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
             try {
                 ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.Schema.NODE_TYPE );
                 return true;
-            } catch (final Exception e) {
+            } catch ( final Exception e ) {
                 // not resolvable
             }
 
@@ -121,7 +123,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -132,18 +134,44 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
     public SchemaImpl( final UnitOfWork uow,
                        final Repository repository,
                        final String workspacePath ) throws KException {
-        super(uow, repository, workspacePath);
+        super( uow, repository, workspacePath );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
+     */
     @Override
-    public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return RESOLVER.identifier();
+    public String export( final UnitOfWork transaction,
+                          final Properties properties ) throws KException {
+        // Is there a situation where this schema fragment is just Teiid SQL?
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final StringBuffer result = new StringBuffer();
+            final Node schemaNode = node( transaction );
+
+            final DdlNodeVisitor visitor = new DdlNodeVisitor( TeiidVersionProvider.getInstance().getTeiidVersion(), false );
+            visitor.visit( schemaNode );
+            result.append( visitor.getDdl() );
+
+            return result.toString();
+        } catch ( final Exception e ) {
+            throw handleError( e );
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Schema#getRendition(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
     @Override
-    public String getRendition( UnitOfWork uow ) throws KException {
-        String rendition = getObjectProperty(uow, PropertyValueType.STRING, "getRendition", //$NON-NLS-1$
-                                             KomodoLexicon.Schema.RENDITION);
+    public String getRendition( final UnitOfWork uow ) throws KException {
+        final String rendition = getObjectProperty( uow, PropertyValueType.STRING, "getRendition", //$NON-NLS-1$
+                                                    KomodoLexicon.Schema.RENDITION );
 
         return rendition == null ? EMPTY_STRING : rendition;
     }
@@ -158,43 +186,25 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
         return TYPE_ID;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getTypeIdentifier(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
     @Override
-    public void setRendition( UnitOfWork uow,
-                              String rendition ) throws KException {
-        setObjectProperty(uow, "setRendition", KomodoLexicon.Schema.RENDITION, rendition); //$NON-NLS-1$
+    public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
+        return RESOLVER.identifier();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Schema#setRendition(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
     @Override
-    public String export(UnitOfWork uow, Properties properties) throws KException {
-        // Is there a situation where this schema fragment is just Teiid SQL?
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("schemaimpl-export", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("schemaimpl-export: transaction = {0}", transaction.getName()); //$NON-NLS-1$
-        }
-
-        try {
-            StringBuffer result = new StringBuffer();
-            Node schemaNode = node(transaction);
-
-            DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion(), false);
-            visitor.visit(schemaNode);
-            result.append(visitor.getDdl());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result.toString();
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+    public void setRendition( final UnitOfWork uow,
+                              final String rendition ) throws KException {
+        setObjectProperty( uow, "setRendition", KomodoLexicon.Schema.RENDITION, rendition ); //$NON-NLS-1$
     }
 
 }

@@ -11,6 +11,7 @@ import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a VDB model source.
@@ -34,7 +35,7 @@ public interface ModelSource extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>JNDI name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -43,7 +44,7 @@ public interface ModelSource extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>translator name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -52,7 +53,7 @@ public interface ModelSource extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newJndiName
      *        the new value of the <code>JNDI name</code> property (can only be empty when removing)
      * @throws KException
@@ -63,7 +64,7 @@ public interface ModelSource extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newTranslatorName
      *        the new value of the <code>translator name</code> property (can only be empty when removing)
      * @throws KException

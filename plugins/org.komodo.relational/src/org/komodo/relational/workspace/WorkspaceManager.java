@@ -129,29 +129,8 @@ public class WorkspaceManager implements StringConstants {
         return this.repository;
     }
 
-    /**
-     * Only one of the {@link UnitOfWork transactions} passed in should be non-<code>null</code>. Ensures that a transaction
-     * rollback occurs if the transaction was constructed within the method.
-     *
-     * @param transactionParameter
-     *        the transaction passed into the method (can be <code>null</code>)
-     * @param transactionVariable
-     *        the transaction constructed within the method (can be <code>null</code>)
-     * @param e
-     *        the error being handled (cannot be <code>null</code>)
-     * @return the error passed in if already a {@link KException} or the error passed in wrapped in a {@link KException}
-     */
-    private static KException handleError( final UnitOfWork transactionParameter,
-                                           final UnitOfWork transactionVariable,
-                                           final Exception e ) {
+    private static KException handleError( final Exception e ) {
         assert (e != null);
-        assert ((transactionParameter == null) && (transactionVariable != null))
-               || ((transactionParameter != null) && (transactionVariable == null))
-               || ((transactionParameter == transactionVariable));
-
-        if (transactionParameter == null) {
-            transactionVariable.rollback();
-        }
 
         if (e instanceof KException) {
             return (KException)e;
@@ -162,7 +141,8 @@ public class WorkspaceManager implements StringConstants {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
      *        the parent of the model object being created (can be <code>null</code> if creating at workspace root)
      * @param modelName
@@ -171,8 +151,9 @@ public class WorkspaceManager implements StringConstants {
      * @throws KException
      *         if an error occurs
      */
-    public Model createModel( UnitOfWork uow, KomodoObject parent, String modelName ) throws KException {
-
+    public Model createModel( UnitOfWork uow,
+                              KomodoObject parent,
+                              String modelName ) throws KException {
         KomodoObject kobject = create(uow, parent, modelName, KomodoType.MODEL);
         if (! (kobject instanceof Model))
            return null;
@@ -182,7 +163,8 @@ public class WorkspaceManager implements StringConstants {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
      *        the parent of the schema object being created (cannot be <code>null</code>)
      * @param schemaName
@@ -191,8 +173,9 @@ public class WorkspaceManager implements StringConstants {
      * @throws KException
      *         if an error occurs
      */
-    public Schema createSchema( UnitOfWork uow, KomodoObject parent, String schemaName ) throws KException {
-
+    public Schema createSchema( UnitOfWork uow,
+                                KomodoObject parent,
+                                String schemaName ) throws KException {
         if (parent == null)
             parent = getRepository().komodoWorkspace(uow);
 
@@ -205,7 +188,8 @@ public class WorkspaceManager implements StringConstants {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
      *        the parent of the teiid object being created (cannot be <code>null</code>)
      * @param id
@@ -214,8 +198,9 @@ public class WorkspaceManager implements StringConstants {
      * @throws KException
      *         if an error occurs
      */
-    public Teiid createTeiid( UnitOfWork uow, KomodoObject parent, String id ) throws KException {
-
+    public Teiid createTeiid( UnitOfWork uow,
+                              KomodoObject parent,
+                              String id ) throws KException {
         if (parent == null)
             parent = getRepository().komodoWorkspace(uow);
 
@@ -228,7 +213,8 @@ public class WorkspaceManager implements StringConstants {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
      *        the parent of the model object being created (can be <code>null</code> if VDB should be created at the workspace
      *        root)
@@ -241,13 +227,12 @@ public class WorkspaceManager implements StringConstants {
      *         if an error occurs
      */
     public Vdb createVdb( final UnitOfWork uow,
-                                         KomodoObject parent,
-                                         final String vdbName,
-                                         final String externalFilePath ) throws KException {
+                          KomodoObject parent,
+                          final String vdbName,
+                          final String externalFilePath ) throws KException {
         ArgCheck.isNotNull(externalFilePath, "externalFilePath"); //$NON-NLS-1$
 
-        RelationalProperty filePathProperty = new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE,
-                                                                                                         externalFilePath);
+        RelationalProperty filePathProperty = new RelationalProperty( VdbLexicon.Vdb.ORIGINAL_FILE, externalFilePath );
 
         if (parent == null)
             parent = getRepository().komodoWorkspace(uow);
@@ -260,8 +245,9 @@ public class WorkspaceManager implements StringConstants {
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
      *        the parent of the new object (cannot be <code>null</code>)
      * @param id
@@ -274,99 +260,63 @@ public class WorkspaceManager implements StringConstants {
      * @return new object
      * @throws KException if an error occurs
      */
-    public KomodoObject create(UnitOfWork uow,
-                                                  KomodoObject parent,
-                                                  String id,
-                                                  KomodoType type,
-                                                  RelationalProperty... properties) throws KException {
+    public KomodoObject create( UnitOfWork transaction,
+                                KomodoObject parent,
+                                String id,
+                                KomodoType type,
+                                RelationalProperty... properties ) throws KException {
 
-        ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
-        ArgCheck.isNotNull(type);
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( id, "id" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( type );
 
         RelationalProperties relProperties = new RelationalProperties();
-        if (properties != null) {
-            for (RelationalProperty property : properties) {
-                relProperties.add(property);
+        if ( ( properties != null ) && ( properties.length != 0 ) ) {
+            for ( RelationalProperty property : properties ) {
+                relProperties.add( property );
             }
         }
 
-        UnitOfWork transaction = uow;
-        if (uow == null) {
-            String logType = KomodoType.UNKNOWN.equals(type) ? "object" : type.toString(); //$NON-NLS-1$
-            transaction = getRepository().createTransaction("workspacemanager-create" + logType, false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        KomodoObject result = null;
-        try {
-            TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
-            TypeResolver< ? > resolver = registry.getResolver(type);
-            if (resolver == null) {
-                if (parent == null) {
-                    return getRepository().komodoWorkspace( transaction ).addChild(transaction, id, JcrConstants.NT_UNSTRUCTURED);
-                }
-
-                return parent.addChild(transaction, id, JcrConstants.NT_UNSTRUCTURED);
+        TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
+        TypeResolver< ? > resolver = registry.getResolver( type );
+        if ( resolver == null ) {
+            if ( parent == null ) {
+                return getRepository().komodoWorkspace( transaction ).addChild( transaction, id, JcrConstants.NT_UNSTRUCTURED );
             }
 
-            result = resolver.create(transaction, getRepository(), parent, id, relProperties);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-        } catch (Exception ex) {
-            throw handleError(uow, transaction, ex);
+            return parent.addChild( transaction, id, JcrConstants.NT_UNSTRUCTURED );
         }
 
-        return result;
+        return resolver.create( transaction, getRepository(), parent, id, relProperties );
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param kobjects
      *        the object(s) being deleted (cannot be <code>null</code>, empty, or have a <code>null</code> element)
      * @throws KException
      *         if an error occurs or if an object does not exist
      */
-    public void delete( final UnitOfWork uow,
+    public void delete( final UnitOfWork transaction,
                         final KomodoObject... kobjects ) throws KException {
-        ArgCheck.isNotEmpty(kobjects, "kobjects"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( kobjects, "kobjects" ); //$NON-NLS-1$
 
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-delete", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            for (final KomodoObject kobject : kobjects) {
-                ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
-                validateWorkspaceMember(uow, kobject);
-                kobject.remove(transaction);
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+        for ( final KomodoObject kobject : kobjects ) {
+            ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
+            validateWorkspaceMember( transaction, kobject );
+            kobject.remove( transaction );
         }
     }
 
-    private String[] findByType( final UnitOfWork uow,
+    private String[] findByType( final UnitOfWork transaction,
                                  final String type ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-findByType", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
         String[] result = null;
 
         try {
@@ -385,31 +335,24 @@ public class WorkspaceManager implements StringConstants {
                 }
             }
 
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @return all {@link Model}s in the workspace (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    public Model[] findModels( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-findModels", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public Model[] findModels( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final String[] paths = findByType(transaction, VdbLexicon.Vdb.DECLARATIVE_MODEL);
         Model[] result = null;
@@ -425,28 +368,21 @@ public class WorkspaceManager implements StringConstants {
             }
         }
 
-        if (uow == null) {
-            transaction.commit();
-        }
-
         return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @return all {@link Model}s in the workspace (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    public Schema[] findSchemas( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-findSchemas", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public Schema[] findSchemas( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final String[] paths = findByType(transaction, KomodoLexicon.Schema.NODE_TYPE);
         Schema[] result = null;
@@ -462,28 +398,21 @@ public class WorkspaceManager implements StringConstants {
             }
         }
 
-        if (uow == null) {
-            transaction.commit();
-        }
-
         return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @return all {@link Teiid}s in the workspace
      * @throws KException
      *         if an error occurs
      */
-    public List< Teiid > findTeiids( UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-findTeiids", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public List< Teiid > findTeiids( UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final String[] paths = findByType(transaction, KomodoLexicon.Teiid.NODE_TYPE);
         List< Teiid > result = null;
@@ -498,28 +427,21 @@ public class WorkspaceManager implements StringConstants {
             }
         }
 
-        if (uow == null) {
-            transaction.commit();
-        }
-
         return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @return all {@link Vdb}s in the workspace (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    public Vdb[] findVdbs( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-findVdbs", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public Vdb[] findVdbs( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final String[] paths = findByType(transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         Vdb[] result = null;
@@ -535,10 +457,6 @@ public class WorkspaceManager implements StringConstants {
             }
         }
 
-        if (uow == null) {
-            transaction.commit();
-        }
-
         return result;
     }
 
@@ -550,12 +468,13 @@ public class WorkspaceManager implements StringConstants {
      * The type id of the {@link KomodoObject} is extracted and the correct
      * relational model object created. If the latter is not assignable from the
      * given adapted class then it is concluded the adaption should fail and
-     * null is returned, otherwise the new object is retured.
+     * null is returned, otherwise the new object is returned.
      *
      * @param <T>
      *        the desired outcome class
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param object
      *        the object being resolved
      * @param resolvedClass
@@ -564,24 +483,15 @@ public class WorkspaceManager implements StringConstants {
      * @throws KException
      *         if a resolver could not be found, if the object was not resolvable, or if an error occurred
      */
-    public <T extends KomodoObject> T resolve(final UnitOfWork uow,
-                                                                              final Object object,
-                                                                              final Class<T> resolvedClass) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction("workspacemanager-resolve", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public < T extends KomodoObject > T resolve( final UnitOfWork transaction,
+                                                 final Object object,
+                                                 final Class< T > resolvedClass ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         AdapterFactory adapter = new AdapterFactory(getRepository());
         T kobject = adapter.adapt(transaction, object, resolvedClass);
-
-        if (uow == null) {
-            transaction.commit();
-        }
-
         return kobject;
     }
 

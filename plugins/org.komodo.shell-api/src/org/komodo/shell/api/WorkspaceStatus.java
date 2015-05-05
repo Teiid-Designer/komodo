@@ -27,10 +27,10 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * WorkspaceStatus interface.
@@ -76,14 +76,14 @@ public interface WorkspaceStatus extends StringConstants {
 	 * @return the home context
 	 */
 	WorkspaceContext getRootContext();
-	
+
 	/**
 	 * Set the current workspace context
 	 * @param context the current workspace context
 	 * @throws Exception if error occurs
 	 */
 	void setCurrentContext(WorkspaceContext context) throws Exception;
-	
+
 	/**
 	 * Get the current workspace context
 	 * @return the current workspace context
@@ -95,7 +95,7 @@ public interface WorkspaceStatus extends StringConstants {
 	 * @param recordState 'true' to enable recording, 'false' to disable
 	 */
 	void setRecordingStatus(boolean recordState);
-	
+
 	/**
 	 * Get the recording status
 	 * @return 'true' if recording is enabled, 'false' if not.
@@ -107,7 +107,7 @@ public interface WorkspaceStatus extends StringConstants {
 	 * @return the output file
 	 */
 	File getRecordingOutputFile();
-	
+
 	/**
      * @return current teiid model
      */
@@ -146,6 +146,18 @@ public interface WorkspaceStatus extends StringConstants {
      * @return the komodo engine
      */
     KEngine getEngine();
+
+    /**
+     * @return the current transaction (never <code>null</code>)
+     */
+    UnitOfWork getTransaction();
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     */
+    void setTransaction( final UnitOfWork transaction );
 
     /**
      * @param contextId

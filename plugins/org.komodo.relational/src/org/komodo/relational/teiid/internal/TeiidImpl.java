@@ -24,17 +24,19 @@ package org.komodo.relational.teiid.internal;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
@@ -44,13 +46,14 @@ import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
 import org.teiid.runtime.client.instance.TCTeiidInstance;
 
 /**
  * Implementation of teiid instance model
  */
-public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManager {
+public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid, EventManager {
 
     /**
      * The resolver of a {@link Teiid}.
@@ -443,7 +446,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository
      * @param path
@@ -471,20 +474,25 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
     }
 
     /**
-     * @param uow
-     *        the transaction
-     * @return value of teiid id property
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return value of teiid id property (never empty)
      * @throws KException
      *         if error occurs
      */
     @Override
-    public String getId( UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, PropertyValueType.STRING, "getId", JcrLexicon.UUID.getString()); //$NON-NLS-1$
+    public String getId( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final Property prop = getRawProperty( transaction, JcrLexicon.UUID.getString() );
+        final String result = prop.getStringValue( transaction );
+        return result;
     }
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid host property
      * @throws KException
      *         if error occurs
@@ -496,7 +504,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid admin port property
      * @throws KException
      *         if error occurs
@@ -509,7 +517,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param port
      *        new value of admin port property
      * @throws KException
@@ -523,7 +531,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid admin user property
      * @throws KException
      *         if error occurs
@@ -536,7 +544,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param userName
      *        new value of admin username property
      * @throws KException
@@ -550,7 +558,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid admin password property
      * @throws KException
      *         if error occurs
@@ -563,7 +571,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param password
      *        new value of admin password property
      * @throws KException
@@ -587,7 +595,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid secure property
      * @throws KException
      *         if error occurs
@@ -600,7 +608,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param secure
      *        new value of admin secure property
      * @throws KException
@@ -614,7 +622,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid jdbc port property
      * @throws KException
      *         if error occurs
@@ -626,7 +634,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param port
      *        new value of jdbc port property
      * @throws KException
@@ -640,7 +648,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid jdbc user property
      * @throws KException
      *         if error occurs
@@ -652,7 +660,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param userName
      *        new value of jdbc username property
      * @throws KException
@@ -666,8 +674,8 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
-     * @return value of teiid jdbc password property
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return value of teiid JDBC password property
      * @throws KException
      *         if error occurs
      */
@@ -679,7 +687,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param password
      *        new value of jdbc password property
      * @throws KException
@@ -693,7 +701,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid secure property
      * @throws KException
      *         if error occurs
@@ -706,7 +714,7 @@ public class TeiidImpl extends RelationalObjectImpl implements Teiid, EventManag
 
     /**
      * @param uow
-     *        the transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param secure
      *        new value of jdbc secure property
      * @throws KException

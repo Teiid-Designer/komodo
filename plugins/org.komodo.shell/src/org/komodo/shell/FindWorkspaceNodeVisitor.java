@@ -31,13 +31,17 @@ public class FindWorkspaceNodeVisitor implements WorkspaceContextVisitor, String
     public String visit(WorkspaceContext workspaceContext) throws Exception {
 		String startpath = workspaceContext.getFullName();
 		
-		if( node != null ) return startpath;
-		
+		if( node != null )
+		    return startpath;
+
 		if( startpath.equals(nodePath) ) {
 			node = workspaceContext.getKomodoObj();
 			context = workspaceContext;
 			return startpath;
 		}
+
+		if (! nodePath.startsWith(startpath))
+            return null;
 
         for (WorkspaceContext child : workspaceContext.getChildren()) {
             String childPath = (String)child.visit(this);

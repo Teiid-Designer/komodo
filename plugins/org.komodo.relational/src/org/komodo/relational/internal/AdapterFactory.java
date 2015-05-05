@@ -25,6 +25,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -54,14 +55,17 @@ public class AdapterFactory {
      * null is returned, otherwise the new object is returned.
      * @param <T> the result's type
      *
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param object object to adapt
      * @param adaptedClass the expected class that the object should be adapted to
      * @return the adapted instance or null
      */
     @SuppressWarnings( "unchecked" )
-    public <T extends KomodoObject> T adapt(UnitOfWork uow, Object object, Class<T> adaptedClass) {
+    public <T extends KomodoObject> T adapt(UnitOfWork transaction, Object object, Class<T> adaptedClass) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
         if (! (object instanceof KomodoObject))
             return null;
 
@@ -71,14 +75,6 @@ public class AdapterFactory {
         KomodoObject result = null;
 
         try {
-            UnitOfWork transaction = uow;
-
-            if (uow == null) {
-                transaction = repository.createTransaction(object.getClass().getSimpleName() + "-adapt", true, null); //$NON-NLS-1$
-            }
-
-            assert (transaction != null);
-
             KomodoObject kObject = (KomodoObject) object;
             KomodoType type = kObject.getTypeIdentifier(transaction);
             TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
@@ -97,10 +93,6 @@ public class AdapterFactory {
                         break;
                     }
                 }
-            }
-
-            if (uow == null) {
-                transaction.commit();
             }
 
             if (result == null)

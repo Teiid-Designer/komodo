@@ -41,13 +41,13 @@ public class SynchronousNestedCallback extends SynchronousCallback {
 
     @Override
     public void respond(Object results) {
-        super.respond(results);
         delegate.respond(results);
+        super.respond(results);
     }
 
     @Override
     public void errorOccurred(Throwable error) {
-        super.errorOccurred(error);
         delegate.errorOccurred(error);
+        super.errorOccurred(error);
     }
 }

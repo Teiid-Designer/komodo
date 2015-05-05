@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a stored procedure (CREATE FOREIGN PROCEDURE).
@@ -38,7 +39,7 @@ public interface StoredProcedure extends Procedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>native query</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -47,7 +48,7 @@ public interface StoredProcedure extends Procedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the result set (can be <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -56,7 +57,7 @@ public interface StoredProcedure extends Procedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if non-prepared
      * @throws KException
      *         if an error occurs
@@ -66,7 +67,7 @@ public interface StoredProcedure extends Procedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @throws KException
      *         if a result set does not exist or an error occurs
      */
@@ -74,7 +75,7 @@ public interface StoredProcedure extends Procedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newNativeQuery
      *        the new value of the <code>native query</code> property (can only be empty when removing)
      * @throws KException
@@ -85,7 +86,7 @@ public interface StoredProcedure extends Procedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newNonPrepared
      *        the new value for the <code>non-prepared</code> property
      * @throws KException
@@ -101,9 +102,9 @@ public interface StoredProcedure extends Procedure {
      * @param <T>
      *        the type of result set
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param resultSetType
-     *        the type of result set being requested
+     *        the type of result set being requested (cannot be <code>null</code>)
      * @return the new result set (never <code>null</code>)
      * @throws KException
      *         if an error occurs

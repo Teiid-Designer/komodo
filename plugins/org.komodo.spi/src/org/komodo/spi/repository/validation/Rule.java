@@ -11,6 +11,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.outcome.Outcome.Level;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * A rule used in validation of {@link KomodoObject}'s.
@@ -196,7 +197,7 @@ public interface Rule {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param kobject
      *        the object being evaluated (cannot be <code>null</code>)
      * @return the result (never <code>null</code>)
@@ -207,20 +208,26 @@ public interface Rule {
                      final KomodoObject kobject ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the localized rule description (never empty)
      * @throws KException
      *         if an error occurs
      */
-    String getDescription() throws KException;
+    String getDescription( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the fully qualified JCR name of the property or child node type being validated (can be empty)
      * @throws KException
      *         if an error occurs
      */
-    String getJcrName() throws KException;
+    String getJcrName( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param key
      *        the message key (cannot be empty)
      * @param args
@@ -229,65 +236,84 @@ public interface Rule {
      * @throws KException
      *         if an error occurs
      */
-    String getMessage( final String key,
+    String getMessage( final UnitOfWork transaction,
+                       final String key,
                        final String... args ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the unique identifier (never empty)
      * @throws KException
      *         if an error occurs
      */
-    String getName() throws KException;
+    String getName( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the fully qualified JCR node type validated by this rule (never empty)
      * @throws KException
      *         if an error occurs
      */
-    String getNodeType() throws KException;
+    String getNodeType( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the rule type (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    RuleType getRuleType() throws KException;
+    RuleType getRuleType( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the rule severity (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    Level getSeverity() throws KException;
+    Level getSeverity( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the validation type (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    ValidationType getValidationType() throws KException;
+    ValidationType getValidationType( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if rule is enabled and should be run
      * @throws KException
      *         if an error occurs
      */
-    boolean isEnabled() throws KException;
+    boolean isEnabled( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newEnabled
      *        the new enabled indicator
      * @throws KException
      *         if an error occurs
      */
-    void setEnabled( final boolean newEnabled ) throws KException;
+    void setEnabled( final UnitOfWork transaction,
+                     final boolean newEnabled ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newLevel
      *        the new severity (cannot be <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    void setSeverity( final Level newLevel ) throws KException;
+    void setSeverity( final UnitOfWork transaction,
+                      final Level newLevel ) throws KException;
 
 }

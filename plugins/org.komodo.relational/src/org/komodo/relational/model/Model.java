@@ -11,6 +11,7 @@ import org.komodo.relational.vdb.ModelSource;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a relational model.
@@ -49,7 +50,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param functionName
      *        the name of the function to create (cannot be empty)
      * @return the new function (never <code>null</code>)
@@ -61,7 +62,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param procedureName
      *        the name of the procedure to create (cannot be empty)
      * @return the new procedure (never <code>null</code>)
@@ -73,7 +74,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param functionName
      *        the name of the function to create (cannot be empty)
      * @return the new function (never <code>null</code>)
@@ -85,7 +86,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param procedureName
      *        the name of the procedure to create (cannot be empty)
      * @return the new procedure (never <code>null</code>)
@@ -97,7 +98,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param sourceName
      *        the name of the model source to create (cannot be empty)
      * @return the new model source (never <code>null</code>)
@@ -109,7 +110,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param tableName
      *        the name of the table to create (cannot be empty)
      * @return the new table (never <code>null</code>)
@@ -121,7 +122,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param viewName
      *        the name of the view to create (cannot be empty)
      * @return the new view (never <code>null</code>)
@@ -133,7 +134,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>description</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -144,7 +145,7 @@ public interface Model extends RelationalObject {
      * No functions are returned.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the functions found in this model (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -153,7 +154,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return model definition of this model
      * @throws KException
      *         if error occurs
@@ -162,7 +163,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return model type of this model (never <code>null</code>)
      * @throws KException
      *         if error occurs
@@ -174,7 +175,7 @@ public interface Model extends RelationalObject {
      * No functions are returned.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the procedures found in this model (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -183,7 +184,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the model sources found in this model (can be empty)
      * @throws KException
      *         if an error occurs
@@ -192,7 +193,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the tables found in this model (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -201,7 +202,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the views found in this model (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -210,7 +211,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param functionName
      *        the name of the function being deleted (cannot be empty)
      * @throws KException
@@ -221,7 +222,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param procedureName
      *        the name of the procedure being deleted (cannot be empty)
      * @throws KException
@@ -232,7 +233,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param sourceName
      *        the name of the model source being deleted (cannot be empty)
      * @throws KException
@@ -243,7 +244,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param tableName
      *        the name of the table being deleted (cannot be empty)
      * @throws KException
@@ -254,7 +255,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param viewName
      *        the name of the view being deleted (cannot be empty)
      * @throws KException
@@ -265,7 +266,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDescription
      *        the new value of the <code>description</code> property (can only be empty when removing)
      * @throws KException
@@ -276,7 +277,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param modelDefinition
      *        the model definition, eg. a string of ddl
      * @throws KException
@@ -287,7 +288,7 @@ public interface Model extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newModelType
      *        the new model type (can be <code>null</code>)
      * @throws KException

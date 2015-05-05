@@ -39,6 +39,8 @@ public class Messages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum SHELL {
+        TRANSACTION_COMMIT_ERROR,
+        TRANSACTION_TIMEOUT,
         COMPONENT_STARTED,
         COMPONENT_FAILED,
         ENGINE_STARTING,
@@ -93,7 +95,7 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum ShowCommand {
         Separator,
@@ -163,7 +165,7 @@ public class Messages implements StringConstants {
 
         return MessageFormat.format(text, parameters);
     }
-    
+
     /**
      * Look up a message in the i18n resource message bundle by key, then format the
      * message with the given params and return the result.
@@ -184,7 +186,7 @@ public class Messages implements StringConstants {
             	text = err.getLocalizedMessage();
             }
         }
-        
+
         // Check the trivial cases ...
         if (text == null) {
             return OPEN_ANGLE_BRACKET + key + CLOSE_ANGLE_BRACKET;

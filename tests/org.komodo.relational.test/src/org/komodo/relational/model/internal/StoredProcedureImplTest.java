@@ -20,6 +20,7 @@ import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
@@ -27,27 +28,27 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Repository;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class StoredProcedureImplTest extends RelationalModelTest {
 
     private StoredProcedure procedure;
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( null, _repo, null, "vdb", "externalFilePath" );
-        final Model model = RelationalModelFactory.createModel( null, _repo, vdb, "model" );
-        this.procedure = RelationalModelFactory.createStoredProcedure( null, _repo, model, "procedure" );
+        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "externalFilePath" );
+        final Model model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
+        this.procedure = RelationalModelFactory.createStoredProcedure( this.uow, _repo, model, "procedure" );
+        commit();
     }
 
     @Test
     public void shouldFailConstructionIfNotStoredProcedure() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new StoredProcedureImpl(null, _repo, _repo.komodoLibrary(null).getAbsolutePath());
+                new StoredProcedureImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -55,86 +56,105 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
 
     @Test( expected = KException.class )
     public void shouldFailRemovingResultSetIfOneDoesNotExist() throws Exception {
-        this.procedure.removeResultSet( null );
+        this.procedure.removeResultSet( this.uow );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNativeQueryWithEmptyValueWhenItWasNeverAdded() throws Exception {
-        this.procedure.setNativeQuery( null, StringConstants.EMPTY_STRING );
+        this.procedure.setNativeQuery( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullNativeQueryWhenNeverAdded() throws Exception {
-        this.procedure.setNativeQuery( null, null );
+        this.procedure.setNativeQuery( this.uow, null );
     }
 
     @Test
     public void shouldGetOnlyResultSetWhenGettingChildren() throws Exception {
-        final TabularResultSet resultSet = this.procedure.setResultSet( null, TabularResultSet.class );
-        assertThat(this.procedure.getChildren( null ).length, is(1));
-        assertThat(this.procedure.getChildren( null )[0], is((KomodoObject)resultSet));
+        final TabularResultSet resultSet = this.procedure.setResultSet( this.uow, TabularResultSet.class );
+        assertThat( this.procedure.getChildren( this.uow ).length, is( 1 ) );
+        assertThat( this.procedure.getChildren( this.uow )[0], is( ( KomodoObject )resultSet ) );
     }
 
     @Test
     public void shouldGetChildren() throws Exception {
-        this.procedure.addParameter( null, "param" );
-        this.procedure.setResultSet( null, DataTypeResultSet.class );
-        assertThat(this.procedure.getChildren( null ).length, is(2));
+        this.procedure.addParameter( this.uow, "param" );
+        this.procedure.setResultSet( this.uow, DataTypeResultSet.class );
+        assertThat( this.procedure.getChildren( this.uow ).length, is( 2 ) );
     }
 
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
-        assertThat( this.procedure.getSchemaElementType( null ), is( SchemaElementType.FOREIGN ) );
+        assertThat( this.procedure.getSchemaElementType( this.uow ), is( SchemaElementType.FOREIGN ) );
     }
 
     @Test
     public void shouldHaveDefaultNonPreparedAfterConstruction() throws Exception {
-        assertThat( this.procedure.isNonPrepared( null ), is( StoredProcedure.DEFAULT_NON_PREPARED ) );
+        assertThat( this.procedure.isNonPrepared( this.uow ), is( StoredProcedure.DEFAULT_NON_PREPARED ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.procedure.getPropertyNames( this.uow );
+        final String[] rawProps = this.procedure.getRawPropertyNames( this.uow );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.procedure.getPropertyNames( this.uow );
+        final Filter[] filters = this.procedure.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
+    }
+
+    @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.procedure.setNativeQuery( this.uow, "blah" );
+        this.procedure.setStatementOption( this.uow, "sledge", "hammer" );
+        assertThat( this.procedure.getChildren( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveResultSetAfterConstruction() throws Exception {
-        assertThat( this.procedure.getResultSet( null ), is( nullValue() ) );
+        assertThat( this.procedure.getResultSet( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldRemoveResultSet() throws Exception {
-        final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-        this.procedure.setResultSet( uow, TabularResultSet.class );
-        this.procedure.removeResultSet( uow );
-        uow.commit();
-
-        assertThat( this.procedure.getResultSet( null ), is( nullValue() ) );
+        this.procedure.setResultSet( this.uow, TabularResultSet.class );
+        this.procedure.removeResultSet( this.uow );
+        assertThat( this.procedure.getResultSet( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetDataTypeResultSet() throws Exception {
-        final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-        assertThat( this.procedure.setResultSet( uow, DataTypeResultSet.class ), is( notNullValue() ) );
-        assertThat( this.procedure.getResultSet( uow ), is( instanceOf( DataTypeResultSet.class ) ) );
-        uow.commit();
+        assertThat( this.procedure.setResultSet( this.uow, DataTypeResultSet.class ), is( notNullValue() ) );
+        assertThat( this.procedure.getResultSet( this.uow ), is( instanceOf( DataTypeResultSet.class ) ) );
     }
 
     @Test
     public void shouldSetNativeQuery() throws Exception {
         final String value = "nativeQuery";
-        this.procedure.setNativeQuery( null, value );
-        assertThat( this.procedure.getNativeQuery( null ), is( value ) );
+        this.procedure.setNativeQuery( this.uow, value );
+        assertThat( this.procedure.getNativeQuery( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetNonPrepared() throws Exception {
         final boolean value = !StoredProcedure.DEFAULT_NON_PREPARED;
-        this.procedure.setNonPrepared( null, value );
-        assertThat( this.procedure.isNonPrepared( null ), is( value ) );
+        this.procedure.setNonPrepared( this.uow, value );
+        assertThat( this.procedure.isNonPrepared( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetTabularResultSet() throws Exception {
-        final Repository.UnitOfWork uow = _repo.createTransaction( this.name.getMethodName(), false, null );
-        assertThat( this.procedure.setResultSet( uow, TabularResultSet.class ), is( notNullValue() ) );
-        assertThat( this.procedure.getResultSet( uow ), is( instanceOf( TabularResultSet.class ) ) );
-        uow.commit();
+        assertThat( this.procedure.setResultSet( this.uow, TabularResultSet.class ), is( notNullValue() ) );
+        assertThat( this.procedure.getResultSet( this.uow ), is( instanceOf( TabularResultSet.class ) ) );
     }
 
 }

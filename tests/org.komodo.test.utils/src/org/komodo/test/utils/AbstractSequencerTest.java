@@ -75,6 +75,8 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractSequencerTest extends MultiUseAbstractTest implements Sequencing, StringConstants {
 
+    protected static final long TIME_TO_WAIT = 3; // in minutes
+
     private static final int DEFAULT_WAIT_TIME_SECONDS = 15;
 
     protected Node rootNode;
@@ -178,7 +180,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         SynchronousSequencerListener listener = addSequencingListenerLatch(requestId, session);
         session.save();
 
-        assertTrue(listener.await(3, TimeUnit.MINUTES));
+        assertTrue(listener.await(TIME_TO_WAIT, TimeUnit.MINUTES));
         assertFalse(listener.exceptionOccurred());
 
         traverse(node);

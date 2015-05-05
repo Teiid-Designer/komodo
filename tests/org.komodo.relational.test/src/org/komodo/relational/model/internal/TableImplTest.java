@@ -25,6 +25,7 @@ import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.PrimaryKey;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
@@ -38,168 +39,189 @@ import org.komodo.spi.repository.KomodoObject;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class TableImplTest extends RelationalModelTest {
 
-    private static final String NAME = "table";
+    private static final String NAME = "myTable";
 
     private Model model;
     private Table table;
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb(null, _repo, null, "vdb", "path");
-        this.model = RelationalModelFactory.createModel(null, _repo, vdb, "model");
-        this.table = RelationalModelFactory.createTable(null, _repo, this.model, NAME);
+        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "path" );
+        this.model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
+        this.table = RelationalModelFactory.createTable( this.uow, _repo, this.model, NAME );
+        commit();
     }
 
     @Test
     public void shouldAddAccessPattern() throws Exception {
         final String name = "accesspattern";
-        final AccessPattern accessPattern = this.table.addAccessPattern(null, name);
-        assertThat(accessPattern, is(notNullValue()));
-        assertThat(accessPattern.getName(null), is(name));
+        final AccessPattern accessPattern = this.table.addAccessPattern( this.uow, name );
+        assertThat( accessPattern, is( notNullValue() ) );
+        assertThat( accessPattern.getName( this.uow ), is( name ) );
+        assertThat( this.table.getChildren( this.uow ).length, is( 1 ) );
+        assertThat( this.table.getChildren( this.uow )[0], is( instanceOf( AccessPattern.class ) ) );
     }
 
     @Test
     public void shouldAddColumn() throws Exception {
         final String name = "column";
-        final Column column = this.table.addColumn( null, name );
+        final Column column = this.table.addColumn( this.uow, name );
         assertThat( column, is( notNullValue() ) );
-        assertThat( this.table.getColumns( null ).length, is( 1 ) );
-        assertThat( column.getName( null ), is( name ) );
+        assertThat( this.table.getColumns( this.uow ).length, is( 1 ) );
+        assertThat( column.getName( this.uow ), is( name ) );
+        assertThat( this.table.getChildren( this.uow ).length, is( 1 ) );
+        assertThat( this.table.getChildren( this.uow )[0], is( instanceOf( Column.class ) ) );
     }
 
     @Test
     public void shouldAddForeignKey() throws Exception {
-        final Table refTable = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "refTable");
+        final Table refTable = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "refTable" );
         final String name = "foreignKey";
-        final ForeignKey foreignKey = this.table.addForeignKey(null, name, refTable);
+        final ForeignKey foreignKey = this.table.addForeignKey( this.uow, name, refTable );
 
-        assertThat(foreignKey, is(notNullValue()));
-        assertThat(foreignKey.getName(null), is(name));
+        assertThat( foreignKey, is( notNullValue() ) );
+        assertThat( foreignKey.getName( this.uow ), is( name ) );
+        assertThat( this.table.getChildren( this.uow ).length, is( 1 ) );
+        assertThat( this.table.getChildren( this.uow )[0], is( instanceOf( ForeignKey.class ) ) );
     }
 
     @Test
     public void shouldAddIndex() throws Exception {
         final String name = "index";
-        final Index index = this.table.addIndex(null, name);
+        final Index index = this.table.addIndex( this.uow, name );
 
-        assertThat(index, is(notNullValue()));
-        assertThat(index.getName(null), is(name));
+        assertThat( index, is( notNullValue() ) );
+        assertThat( index.getName( this.uow ), is( name ) );
+        assertThat( this.table.getChildren( this.uow ).length, is( 1 ) );
+        assertThat( this.table.getChildren( this.uow )[0], is( instanceOf( Index.class ) ) );
     }
 
     @Test
     public void shouldAddStatementOption() throws Exception {
         final String name = "statementoption";
         final String value = "statementvalue";
-        final StatementOption statementOption = this.table.setStatementOption(null, name, value);
-        assertThat(statementOption, is(notNullValue()));
-        assertThat(statementOption.getName(null), is(name));
-        assertThat(statementOption.getOption(null), is(value));
+        final StatementOption statementOption = this.table.setStatementOption( this.uow, name, value );
+        assertThat( statementOption, is( notNullValue() ) );
+        assertThat( statementOption.getName( this.uow ), is( name ) );
+        assertThat( statementOption.getOption( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldAddUniqueConstraint() throws Exception {
         final String name = "uniqueConstraint";
-        final UniqueConstraint uniqueConstraint = this.table.addUniqueConstraint(null, name);
+        final UniqueConstraint uniqueConstraint = this.table.addUniqueConstraint( this.uow, name );
 
-        assertThat(uniqueConstraint, is(notNullValue()));
-        assertThat(uniqueConstraint.getName(null), is(name));
+        assertThat( uniqueConstraint, is( notNullValue() ) );
+        assertThat( uniqueConstraint.getName( this.uow ), is( name ) );
+        assertThat( this.table.getChildren( this.uow ).length, is( 1 ) );
+        assertThat( this.table.getChildren( this.uow )[0], is( instanceOf( UniqueConstraint.class ) ) );
     }
 
     @Test
     public void shouldAllowEmptyQueryExpression() throws Exception {
-        this.table.setQueryExpression(null, StringConstants.EMPTY_STRING);
+        this.table.setQueryExpression( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test
     public void shouldAllowNullOnCommitValue() throws Exception {
-        this.table.setOnCommitValue(null, null);
+        this.table.setOnCommitValue( this.uow, null );
     }
 
     @Test
     public void shouldAllowNullQueryExpression() throws Exception {
-        this.table.setQueryExpression(null, null);
+        this.table.setQueryExpression( this.uow, null );
     }
 
     @Test
     public void shouldAllowNullSchemaElementType() throws Exception {
-        this.table.setSchemaElementType(null, null);
+        this.table.setSchemaElementType( this.uow, null );
     }
 
     @Test
     public void shouldAllowNullTemporaryTypeValue() throws Exception {
-        this.table.setTemporaryTableType(null, null);
+        this.table.setTemporaryTableType( this.uow, null );
+    }
+
+    @Test
+    public void shouldCountChildren() throws Exception {
+        this.table.addAccessPattern( this.uow, "accessPattern" );
+        this.table.addColumn( this.uow, "column" );
+        this.table.addIndex( this.uow, "index" );
+        this.table.addUniqueConstraint( this.uow, "uniqueConstraint" );
+        this.table.setPrimaryKey( this.uow, "primaryKey" );
+        assertThat( this.table.getChildren( this.uow ).length, is( 5 ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyAccessPatternName() throws Exception {
-        this.table.addAccessPattern(null, StringConstants.EMPTY_STRING);
+        this.table.addAccessPattern( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyColumnName() throws Exception {
-        this.table.addColumn(null, StringConstants.EMPTY_STRING);
+        this.table.addColumn( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyForeignKeyName() throws Exception {
-        this.table.addForeignKey(null, StringConstants.EMPTY_STRING, mock(Table.class));
+        this.table.addForeignKey( this.uow, StringConstants.EMPTY_STRING, mock( Table.class ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyIndexName() throws Exception {
-        this.table.addIndex(null, StringConstants.EMPTY_STRING);
+        this.table.addIndex( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionName() throws Exception {
-        this.table.setStatementOption(null, StringConstants.EMPTY_STRING, "blah");
+        this.table.setStatementOption( this.uow, StringConstants.EMPTY_STRING, "blah" );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyUniqueConstraintName() throws Exception {
-        this.table.addUniqueConstraint(null, StringConstants.EMPTY_STRING);
+        this.table.addUniqueConstraint( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullAccessPatternName() throws Exception {
-        this.table.addAccessPattern(null, null);
+        this.table.addAccessPattern( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullColumnName() throws Exception {
-        this.table.addColumn(null, null);
+        this.table.addColumn( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullForeignKeyName() throws Exception {
-        this.table.addForeignKey(null, null, mock(Table.class));
+        this.table.addForeignKey( this.uow, null, mock( Table.class ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullIndexName() throws Exception {
-        this.table.addIndex(null, null);
+        this.table.addIndex( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionName() throws Exception {
-        this.table.setStatementOption(null, null, "blah");
+        this.table.setStatementOption( this.uow, null, "blah" );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullUniqueConstraintName() throws Exception {
-        this.table.addUniqueConstraint(null, null);
+        this.table.addUniqueConstraint( this.uow, null );
     }
 
     @Test
     public void shouldFailConstructionIfNotTable() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new TableImpl(null, _repo, _repo.komodoLibrary(null).getAbsolutePath());
+                new TableImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -207,430 +229,445 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Test( expected = KException.class )
     public void shouldFailRemovingMissingPrimaryKey() throws Exception {
-        this.table.removePrimaryKey(null);
+        this.table.removePrimaryKey( this.uow );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyDescriptionWhenNeverAdded() throws Exception {
-        this.table.setDescription(null, StringConstants.EMPTY_STRING);
+        this.table.setDescription( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyMaterializedTableWhenNeverAdded() throws Exception {
-        this.table.setMaterializedTable(null, StringConstants.EMPTY_STRING);
+        this.table.setMaterializedTable( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyNameInSourceWhenNeverAdded() throws Exception {
-        this.table.setNameInSource(null, StringConstants.EMPTY_STRING);
+        this.table.setNameInSource( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyStatementOptionValueWhenNeverAdded() throws Exception {
-        this.table.setStatementOption(null, "blah", StringConstants.EMPTY_STRING);
+        this.table.setStatementOption( this.uow, "blah", StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyUuidWhenNeverAdded() throws Exception {
-        this.table.setUuid( null, StringConstants.EMPTY_STRING );
+        this.table.setUuid( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullDescriptionWhenNeverAdded() throws Exception {
-        this.table.setDescription(null, null);
+        this.table.setDescription( this.uow, null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullMaterializedTableWhenNeverAdded() throws Exception {
-        this.table.setMaterializedTable(null, null);
+        this.table.setMaterializedTable( this.uow, null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullNameInSourceWhenNeverAdded() throws Exception {
-        this.table.setNameInSource(null, null);
+        this.table.setNameInSource( this.uow, null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullStatementOptionValueWhenNeverAdded() throws Exception {
-        this.table.setStatementOption(null, "blah", null);
+        this.table.setStatementOption( this.uow, "blah", null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullUuidWhenNeverAdded() throws Exception {
-        this.table.setUuid( null, null );
+        this.table.setUuid( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyAccessPatternName() throws Exception {
-        this.table.removeAccessPattern(null, StringConstants.EMPTY_STRING);
+        this.table.removeAccessPattern( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyColumnName() throws Exception {
-        this.table.removeColumn(null, StringConstants.EMPTY_STRING);
+        this.table.removeColumn( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyForeignKeyName() throws Exception {
-        this.table.removeForeignKey(null, StringConstants.EMPTY_STRING);
+        this.table.removeForeignKey( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyIndexName() throws Exception {
-        this.table.removeIndex(null, StringConstants.EMPTY_STRING);
+        this.table.removeIndex( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyStatementOptionName() throws Exception {
-        this.table.removeStatementOption(null, StringConstants.EMPTY_STRING);
+        this.table.removeStatementOption( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyUniqueConstraintName() throws Exception {
-        this.table.removeUniqueConstraint(null, StringConstants.EMPTY_STRING);
+        this.table.removeUniqueConstraint( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveMissingPrimaryKey() throws Exception {
-        this.table.removePrimaryKey(null);
+        this.table.removePrimaryKey( this.uow );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullAccessPatternName() throws Exception {
-        this.table.removeAccessPattern(null, null);
+        this.table.removeAccessPattern( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullColumnName() throws Exception {
-        this.table.removeColumn(null, null);
+        this.table.removeColumn( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullForeignKeyName() throws Exception {
-        this.table.removeForeignKey(null, null);
+        this.table.removeForeignKey( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullIndexName() throws Exception {
-        this.table.removeIndex(null, null);
+        this.table.removeIndex( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullStatementOptionName() throws Exception {
-        this.table.removeStatementOption(null, null);
+        this.table.removeStatementOption( this.uow, null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullUniqueConstraintName() throws Exception {
-        this.table.removeUniqueConstraint(null, null);
+        this.table.removeUniqueConstraint( this.uow, null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownAccessPattern() throws Exception {
-        this.table.removeAccessPattern(null, "unknown");
+        this.table.removeAccessPattern( this.uow, "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownColumn() throws Exception {
-        this.table.removeColumn(null, "unknown");
+        this.table.removeColumn( this.uow, "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownForeignKey() throws Exception {
-        this.table.removeForeignKey(null, "unknown");
+        this.table.removeForeignKey( this.uow, "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownIndex() throws Exception {
-        this.table.removeIndex(null, "unknown");
+        this.table.removeIndex( this.uow, "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownStatementOption() throws Exception {
-        this.table.removeStatementOption(null, "unknown");
+        this.table.removeStatementOption( this.uow, "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownUniqueConstraint() throws Exception {
-        this.table.removeUniqueConstraint(null, "unknown");
+        this.table.removeUniqueConstraint( this.uow, "unknown" );
     }
 
     @Test
     public void shouldGetAccessPatterns() throws Exception {
         final int numAccessPatterns = 5;
 
-        for (int i = 0; i < numAccessPatterns; ++i) {
-            this.table.addAccessPattern(null, "accesspattern" + i);
+        for ( int i = 0; i < numAccessPatterns; ++i ) {
+            this.table.addAccessPattern( this.uow, "accesspattern" + i );
         }
 
-        assertThat(this.table.getAccessPatterns(null).length, is(numAccessPatterns));
+        assertThat( this.table.getAccessPatterns( this.uow ).length, is( numAccessPatterns ) );
     }
 
     @Test
     public void shouldGetColumns() throws Exception {
         final int numColumns = 5;
 
-        for (int i = 0; i < numColumns; ++i) {
-            this.table.addColumn(null, "column" + i);
+        for ( int i = 0; i < numColumns; ++i ) {
+            this.table.addColumn( this.uow, "column" + i );
         }
 
-        assertThat(this.table.getColumns(null).length, is(numColumns));
+        assertThat( this.table.getColumns( this.uow ).length, is( numColumns ) );
     }
 
     @Test
     public void shouldGetForeignKeys() throws Exception {
-        final Table refTable = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "refTable");
+        final Table refTable = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "refTable" );
         final int numForeignKeys = 5;
 
-        for (int i = 0; i < numForeignKeys; ++i) {
-            this.table.addForeignKey(null, "foreignKey" + i, refTable);
+        for ( int i = 0; i < numForeignKeys; ++i ) {
+            this.table.addForeignKey( this.uow, "foreignKey" + i, refTable );
         }
 
-        assertThat(this.table.getForeignKeys(null).length, is(numForeignKeys));
+        assertThat( this.table.getForeignKeys( this.uow ).length, is( numForeignKeys ) );
     }
 
     @Test
     public void shouldGetIndexes() throws Exception {
         final int numIndexes = 5;
 
-        for (int i = 0; i < numIndexes; ++i) {
-            this.table.addIndex(null, "index" + i);
+        for ( int i = 0; i < numIndexes; ++i ) {
+            this.table.addIndex( this.uow, "index" + i );
         }
 
-        assertThat(this.table.getIndexes(null).length, is(numIndexes));
+        assertThat( this.table.getIndexes( this.uow ).length, is( numIndexes ) );
     }
 
     @Test
     public void shouldGetStatementOptions() throws Exception {
         final int numStatementOptions = 5;
 
-        for (int i = 0; i < numStatementOptions; ++i) {
-            this.table.setStatementOption(null, "statementoption" + i, "statementvalue" + i);
+        for ( int i = 0; i < numStatementOptions; ++i ) {
+            this.table.setStatementOption( this.uow, "statementoption" + i, "statementvalue" + i );
         }
 
-        assertThat(this.table.getStatementOptions(null).length, is(numStatementOptions));
+        assertThat( this.table.getStatementOptions( this.uow ).length, is( numStatementOptions ) );
     }
 
     @Test
     public void shouldGetUniqueConstraints() throws Exception {
         final int numUniqueConstraints = 5;
 
-        for (int i = 0; i < numUniqueConstraints; ++i) {
-            this.table.addUniqueConstraint(null, "foreignKey" + i);
+        for ( int i = 0; i < numUniqueConstraints; ++i ) {
+            this.table.addUniqueConstraint( this.uow, "foreignKey" + i );
         }
 
-        assertThat(this.table.getUniqueConstraints(null).length, is(numUniqueConstraints));
+        assertThat( this.table.getUniqueConstraints( this.uow ).length, is( numUniqueConstraints ) );
     }
 
     @Test
     public void shouldHaveDefaultCardinalityAfterConstruction() throws Exception {
-        assertThat(this.table.getCardinality(null), is(Table.DEFAULT_CARDINALITY));
+        assertThat( this.table.getCardinality( this.uow ), is( Table.DEFAULT_CARDINALITY ) );
     }
 
     @Test
     public void shouldHaveDefaultMaterializedAfterConstruction() throws Exception {
-        assertThat(this.table.isMaterialized(null), is(Table.DEFAULT_MATERIALIZED));
+        assertThat( this.table.isMaterialized( this.uow ), is( Table.DEFAULT_MATERIALIZED ) );
     }
 
     @Test
     public void shouldHaveDefaultUpdatableAfterConstruction() throws Exception {
-        assertThat(this.table.isUpdatable(null), is(Table.DEFAULT_UPDATABLE));
+        assertThat( this.table.isUpdatable( this.uow ), is( Table.DEFAULT_UPDATABLE ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.table.getPropertyNames( this.uow );
+        final String[] rawProps = this.table.getRawPropertyNames( this.uow );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentModel() throws Exception {
-        assertThat(this.table.getParent(null), is(instanceOf(Model.class)));
-        assertThat(this.table.getParent(null), is((KomodoObject)this.model));
+        assertThat( this.table.getParent( this.uow ), is( instanceOf( Model.class ) ) );
+        assertThat( this.table.getParent( this.uow ), is( ( KomodoObject )this.model ) );
     }
 
     @Test
     public void shouldHaveSchemaElementTypePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat(this.table.getSchemaElementType(null), is(SchemaElementType.DEFAULT_VALUE));
-        assertThat(this.table.hasProperty(null, StandardDdlLexicon.DEFAULT_VALUE), is(false));
+        assertThat( this.table.getSchemaElementType( this.uow ), is( SchemaElementType.DEFAULT_VALUE ) );
+        assertThat( this.table.hasProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
     }
 
     @Test
-    public void shouldHaveStrongTypeChildren() throws Exception {
-        this.table.addAccessPattern(null, "accessPattern");
-        this.table.addColumn(null, "column");
-        this.table.addIndex(null, "index");
-        this.table.addUniqueConstraint(null, "uniqueConstraint");
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.table.getPropertyNames( this.uow );
+        final Filter[] filters = this.table.getFilters();
 
-        assertThat(this.table.getChildren(null).length, is(4));
-        assertThat(this.table.getChildren(null)[0], is(instanceOf(AccessPattern.class)));
-        assertThat(this.table.getChildren(null)[1], is(instanceOf(Column.class)));
-        assertThat(this.table.getChildren(null)[2], is(instanceOf(Index.class)));
-        assertThat(this.table.getChildren(null)[3], is(instanceOf(UniqueConstraint.class)));
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
+    }
+
+    @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.table.setCardinality( this.uow, 5 );
+        this.table.setStatementOption( this.uow, "sledge", "hammer" );
+        assertThat( this.table.getChildren( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveOnCommitValueAfterConstruction() throws Exception {
-        assertThat(this.table.hasProperty(null, StandardDdlLexicon.ON_COMMIT_VALUE), is(false));
-        assertThat(this.table.getOnCommitValue(null), is(nullValue()));
+        assertThat( this.table.hasProperty( this.uow, StandardDdlLexicon.ON_COMMIT_VALUE ), is( false ) );
+        assertThat( this.table.getOnCommitValue( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldNotHavePrimaryKeyAfterConstruction() throws Exception {
-        assertThat(this.table.getPrimaryKey(null), is(nullValue()));
+        assertThat( this.table.getPrimaryKey( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldNotHaveQueryExpressionAfterConstruction() throws Exception {
-        assertThat(this.table.getQueryExpression(null), is(nullValue()));
+        assertThat( this.table.getQueryExpression( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldNotHaveTemporaryTypeValueAfterConstruction() throws Exception {
-        assertThat(this.table.hasProperty(null, StandardDdlLexicon.TEMPORARY), is(false));
-        assertThat(this.table.getTemporaryTableType(null), is(nullValue()));
+        assertThat( this.table.hasProperty( this.uow, StandardDdlLexicon.TEMPORARY ), is( false ) );
+        assertThat( this.table.getTemporaryTableType( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldRemoveAccessPattern() throws Exception {
         final String name = "accesspattern";
-        this.table.addAccessPattern(null, name);
-        this.table.removeAccessPattern(null, name);
-        assertThat(this.table.getAccessPatterns(null).length, is(0));
+        this.table.addAccessPattern( this.uow, name );
+        this.table.removeAccessPattern( this.uow, name );
+        assertThat( this.table.getAccessPatterns( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveColumn() throws Exception {
         final String name = "column";
-        this.table.addColumn(null, name);
-        this.table.removeColumn(null, name);
-        assertThat(this.table.getColumns(null).length, is(0));
+        this.table.addColumn( this.uow, name );
+        this.table.removeColumn( this.uow, name );
+        assertThat( this.table.getColumns( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveForeignKey() throws Exception {
-        final Table refTable = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "refTable");
+        final Table refTable = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "refTable" );
         final String name = "foreignKey";
-        this.table.addForeignKey(null, name, refTable);
-        this.table.removeForeignKey(null, name);
+        this.table.addForeignKey( this.uow, name, refTable );
+        this.table.removeForeignKey( this.uow, name );
 
-        assertThat(this.table.getForeignKeys(null).length, is(0));
+        assertThat( this.table.getForeignKeys( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveIndex() throws Exception {
         final String name = "index";
-        this.table.addIndex(null, name);
-        this.table.removeIndex(null, name);
+        this.table.addIndex( this.uow, name );
+        this.table.removeIndex( this.uow, name );
 
-        assertThat(this.table.getIndexes(null).length, is(0));
+        assertThat( this.table.getIndexes( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemovePrimaryKey() throws Exception {
-        this.table.setPrimaryKey(null, "primaryKey");
-        this.table.removePrimaryKey(null);
-        assertThat(this.table.getPrimaryKey(null), is(nullValue()));
+        this.table.setPrimaryKey( this.uow, "primaryKey" );
+        this.table.removePrimaryKey( this.uow );
+        assertThat( this.table.getPrimaryKey( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldRemoveStatementOption() throws Exception {
         final String name = "statementoption";
-        this.table.setStatementOption(null, name, "blah");
-        this.table.removeStatementOption(null, name);
-        assertThat(this.table.getStatementOptions(null).length, is(0));
+        this.table.setStatementOption( this.uow, name, "blah" );
+        this.table.removeStatementOption( this.uow, name );
+        assertThat( this.table.getStatementOptions( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveUniqueConstraint() throws Exception {
         final String name = "uniqueConstraint";
-        this.table.addUniqueConstraint(null, name);
-        this.table.removeUniqueConstraint(null, name);
+        this.table.addUniqueConstraint( this.uow, name );
+        this.table.removeUniqueConstraint( this.uow, name );
 
-        assertThat(this.table.getUniqueConstraints(null).length, is(0));
+        assertThat( this.table.getUniqueConstraints( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetCardinality() throws Exception {
         final int value = 10;
-        this.table.setCardinality(null, value);
-        assertThat(this.table.getCardinality(null), is(value));
+        this.table.setCardinality( this.uow, value );
+        assertThat( this.table.getCardinality( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String value = "description";
-        this.table.setDescription(null, value);
-        assertThat(this.table.getDescription(null), is(value));
+        this.table.setDescription( this.uow, value );
+        assertThat( this.table.getDescription( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetMaterialized() throws Exception {
         final boolean value = !Table.DEFAULT_MATERIALIZED;
-        this.table.setMaterialized(null, value);
-        assertThat(this.table.isMaterialized(null), is(value));
+        this.table.setMaterialized( this.uow, value );
+        assertThat( this.table.isMaterialized( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetMaterializedTable() throws Exception {
         final String value = "materializedTable";
-        this.table.setMaterializedTable(null, value);
-        assertThat(this.table.getMaterializedTable(null), is(value));
+        this.table.setMaterializedTable( this.uow, value );
+        assertThat( this.table.getMaterializedTable( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetNameInSource() throws Exception {
         final String value = "nameInSource";
-        this.table.setNameInSource(null, value);
-        assertThat(this.table.getNameInSource(null), is(value));
+        this.table.setNameInSource( this.uow, value );
+        assertThat( this.table.getNameInSource( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetOnCommitProperty() throws Exception {
         final OnCommit value = OnCommit.DELETE_ROWS;
-        this.table.setOnCommitValue(null, value);
-        assertThat(this.table.getOnCommitValue(null), is(value));
-        assertThat(this.table.getProperty(null, StandardDdlLexicon.ON_COMMIT_VALUE).getStringValue(null), is(value.toValue()));
+        this.table.setOnCommitValue( this.uow, value );
+        assertThat( this.table.getOnCommitValue( this.uow ), is( value ) );
+        assertThat( this.table.getProperty( this.uow, StandardDdlLexicon.ON_COMMIT_VALUE ).getStringValue( this.uow ),
+                    is( value.toValue() ) );
     }
 
     @Test
     public void shouldSetPrimaryKey() throws Exception {
         final String name = "primaryKey";
-        final PrimaryKey pk = this.table.setPrimaryKey(null, name);
-        assertThat(pk, is(notNullValue()));
-        assertThat(pk.getName(null), is(name));
-        assertThat(this.table.hasChild(null, name), is(true));
+        final PrimaryKey pk = this.table.setPrimaryKey( this.uow, name );
+        assertThat( pk, is( notNullValue() ) );
+        assertThat( pk.getName( this.uow ), is( name ) );
+        assertThat( this.table.hasChild( this.uow, name ), is( true ) );
     }
 
     @Test
     public void shouldSetQueryExpression() throws Exception {
-        final String value = "queryexpression";
-        this.table.setQueryExpression(null, value);
-        assertThat(this.table.getQueryExpression(null), is(value));
+        final String value = ( "select * from " + NAME );
+        this.table.setQueryExpression( this.uow, value );
+        assertThat( this.table.getQueryExpression( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetSchemaElementTypeProperty() throws Exception {
         final SchemaElementType value = SchemaElementType.VIRTUAL;
-        this.table.setSchemaElementType(null, value);
-        assertThat(this.table.getSchemaElementType(null), is(value));
-        assertThat(this.table.getProperty(null, TeiidDdlLexicon.SchemaElement.TYPE).getStringValue(null), is(value.name()));
+        this.table.setSchemaElementType( this.uow, value );
+        assertThat( this.table.getSchemaElementType( this.uow ), is( value ) );
+        assertThat( this.table.getProperty( this.uow, TeiidDdlLexicon.SchemaElement.TYPE ).getStringValue( this.uow ),
+                    is( value.name() ) );
     }
 
     @Test
     public void shouldSetTemporaryTableTypeProperty() throws Exception {
         final TemporaryType value = TemporaryType.GLOBAL;
-        this.table.setTemporaryTableType(null, value);
-        assertThat(this.table.getTemporaryTableType(null), is(value));
-        assertThat(this.table.getProperty(null, StandardDdlLexicon.TEMPORARY).getStringValue(null), is(value.name()));
+        this.table.setTemporaryTableType( this.uow, value );
+        assertThat( this.table.getTemporaryTableType( this.uow ), is( value ) );
+        assertThat( this.table.getProperty( this.uow, StandardDdlLexicon.TEMPORARY ).getStringValue( this.uow ),
+                    is( value.name() ) );
     }
 
     @Test
     public void shouldSetUpdatable() throws Exception {
         final boolean value = !Table.DEFAULT_UPDATABLE;
-        this.table.setUpdatable(null, value);
-        assertThat(this.table.isUpdatable(null), is(value));
+        this.table.setUpdatable( this.uow, value );
+        assertThat( this.table.isUpdatable( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetUuid() throws Exception {
         final String value = "uuid";
-        this.table.setUuid( null, value );
-        assertThat( this.table.getUuid( null ), is( value ) );
+        this.table.setUuid( this.uow, value );
+        assertThat( this.table.getUuid( this.uow ), is( value ) );
     }
 
 }

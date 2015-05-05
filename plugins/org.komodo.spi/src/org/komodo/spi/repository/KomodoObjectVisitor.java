@@ -21,6 +21,8 @@
  */
 package org.komodo.spi.repository;
 
+import org.komodo.spi.repository.Repository.UnitOfWork;
+
 /**
  *
  */
@@ -29,10 +31,14 @@ public interface KomodoObjectVisitor {
     /**
      * Visit the given object
      *
-     * @param object the ojbect to be visited
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param object the object to be visited
      * @return an object according to implementation
      * @throws Exception if error in visiting occurs
      */
-    Object visit(KomodoObject object) throws Exception;
+    Object visit(UnitOfWork transaction,
+                 KomodoObject object) throws Exception;
 
 }

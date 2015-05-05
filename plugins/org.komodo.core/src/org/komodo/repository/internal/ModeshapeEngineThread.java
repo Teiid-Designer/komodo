@@ -21,7 +21,6 @@
  */
 package org.komodo.repository.internal;
 
-import java.net.URL;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
@@ -35,6 +34,7 @@ import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
 import org.komodo.repository.Messages;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Repository;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
@@ -200,25 +200,22 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
 
     private volatile boolean stop = false;
 
-    private final URL configPath;
-
     private final WorkspaceIdentifier identifier;
+
+    private final Repository.Id repoId;
 
     private KSequencerController sequencers;
 
     /**
      * Create this thread and give it a name
      *
-     * @param configPath
-     *        path to configuration file
-     * @param workspaceName
-     *        the repository workspace name (cannot be empty)
+     * @param repoId
+     *        information identifying the repository (cannot be <code>null</code>)
      */
-    public ModeshapeEngineThread( URL configPath,
-                                  final String workspaceName ) {
+    public ModeshapeEngineThread( final Repository.Id repoId ) {
         super("Modeshape Engine Thread"); //$NON-NLS-1$
-        this.configPath = configPath;
-        identifier = new WorkspaceIdentifier(workspaceName);
+        this.repoId = repoId;
+        this.identifier = new WorkspaceIdentifier(repoId.getWorkspaceName());
         setDaemon(true);
     }
 
@@ -330,7 +327,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
      * @return is modeshape engine and repository are running
      */
     public boolean isRunning() {
-        return ModeshapeUtils.isEngineRunning(msEngine) && 
+        return ModeshapeUtils.isEngineRunning(msEngine) &&
                     ModeshapeUtils.isRepositoryRunning(identifier.getRepository());
     }
 
@@ -364,7 +361,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             msEngine.start();
 
             // start the local repository
-            final RepositoryConfiguration config = RepositoryConfiguration.read(configPath);
+            final RepositoryConfiguration config = RepositoryConfiguration.read(this.repoId.getConfiguration());
 
             //
             // Validate the configuration for any errors
@@ -415,7 +412,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             startRepository.get(5, TimeUnit.MINUTES);
 
             // Add the sequencing listener
-            sequencers = new KSequencers(identifier);
+            sequencers = new KSequencers( identifier );
 
             respondCallback(request, null);
         } catch (Exception ex) {

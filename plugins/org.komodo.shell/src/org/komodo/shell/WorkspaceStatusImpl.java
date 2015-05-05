@@ -29,15 +29,22 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
+import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
+import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -53,10 +60,14 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     /* Cache of context to avoid creating needless duplicate contexts */
     private Map<String, WorkspaceContext> contextCache = new HashMap<String, WorkspaceContext>();
 
+    private UnitOfWork uow; // the current transaction
+    private int count = 0; // commit count
+
     private WorkspaceContext currentContext;
     private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
-    
+
     private Properties wsProperties = new Properties();
+
     private boolean recordingStatus = false;
 
     private Teiid teiid;
@@ -67,23 +78,40 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      * @throws Exception error on initialisation failure
      */
     public WorkspaceStatusImpl(KomodoShell shell) throws Exception {
-        this.shell = shell;
-        init();
+        this( null, shell );
     }
 
-    private void init() throws Exception {
+    /**
+     * @param transaction
+     *        the transaction to use initially in the shell (can be <code>null</code> if one should be created)
+     * @param shell
+     *        parent shell
+     * @throws Exception
+     *         error on initialisation failure
+     */
+    public WorkspaceStatusImpl( final UnitOfWork transaction,
+                                final KomodoShell shell ) throws Exception {
+        this.shell = shell;
+        init(transaction);
+    }
+
+    private void init( final UnitOfWork transaction ) throws Exception {
         Repository repo = getEngine().getDefaultRepository();
-        KomodoObject komodoWksp = repo.komodoWorkspace(null);
 
-        KomodoObject komodoRoot = komodoWksp.getParent(null);
+        if ( transaction == null ) {
+            this.uow = repo.createTransaction( getClass().getSimpleName() + ".init()", false, null ); //$NON-NLS-1$
+        } else {
+            this.uow = transaction;
+        }
 
-        rootContext = new WorkspaceContextImpl(this, null, komodoRoot);
-        contextCache.put(komodoRoot.getAbsolutePath(), rootContext);
-        
-        
-        WorkspaceContext wsContext = rootContext.getChild(komodoWksp.getName(null));
-        contextCache.put(komodoWksp.getAbsolutePath(), wsContext);
+        KomodoObject komodoWksp = repo.komodoWorkspace( this.uow );
+        KomodoObject komodoRoot = komodoWksp.getParent( this.uow );
 
+        rootContext = new WorkspaceContextImpl( this, null, komodoRoot );
+        contextCache.put( komodoRoot.getAbsolutePath(), rootContext );
+
+        WorkspaceContext wsContext = rootContext.getChild( komodoWksp.getName( this.uow ) );
+        contextCache.put( komodoWksp.getAbsolutePath(), wsContext );
 
         currentContext = wsContext;
     }
@@ -106,6 +134,52 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     @Override
     public PrintStream getOutputStream() {
         return shell.getOutputStream();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getTransaction()
+     */
+    @Override
+    public UnitOfWork getTransaction() {
+        return this.uow;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#setTransaction(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public void setTransaction( final UnitOfWork transaction ) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        this.uow = transaction;
+    }
+
+    protected void commit( final String source ) throws Exception {
+        final String txName = this.uow.getName();
+        this.uow.commit();
+
+        final CountDownLatch latch = new CountDownLatch( 1 );
+        final boolean success = latch.await( 3, TimeUnit.MINUTES );
+
+        if ( success ) {
+            final KException error = uow.getError();
+            final State txState = this.uow.getState();
+
+            if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
+                throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+            }
+        } else {
+            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
+        }
+
+        // create new transaction
+        final String name = ( source + '.' + this.count );
+        KLog.getLogger().debug( "WorkspaceStatusImpl new transaction: " + name ); //$NON-NLS-1$
+        this.uow = getEngine().getDefaultRepository().createTransaction( name, false, null );
     }
 
     @Override
@@ -256,7 +330,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     		}
     	}
     }
-    
+
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceStatus#getProperties()
      */

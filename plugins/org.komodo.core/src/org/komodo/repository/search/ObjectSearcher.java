@@ -35,6 +35,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.ModeShapeLexicon;
@@ -111,6 +112,7 @@ public class ObjectSearcher implements SQLConstants {
         return fromTypes;
     }
 
+    @SuppressWarnings( "unchecked" )
     private <T extends PropertyClause> T findWhereAliasClause(Class<T> clauseType, String alias, String property) {
         for (Clause clause : whereClauses) {
             if (! (clauseType.isInstance(clause)))
@@ -243,7 +245,7 @@ public class ObjectSearcher implements SQLConstants {
     /**
      * Set a custom where clause for this searcher. Such a clause may be created
      * using {@link #toString()} or be completely custom.
-     * 
+     *
      * Note:
      * * no parsing of this clause will be conducted prior to appending this clause.
      * * do not prefix this clause with the WHERE keyword
@@ -357,19 +359,15 @@ public class ObjectSearcher implements SQLConstants {
     /**
      * Performs the search using the parameters of this object seacher
      *
-     * @param uow a transaction. Can be null
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param statement an sql2-like query statement
      * @return a list of {@link KomodoObject}s resulting from this search. Empty list if no results are found
      * @throws KException if error occurs
      */
-    public List<KomodoObject> searchObjects(final UnitOfWork uow, String statement) throws KException {
-        UnitOfWork transaction = uow;
-
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("objectsearcher-search", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+    public List<KomodoObject> searchObjects(final UnitOfWork transaction, String statement) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         List<KomodoObject> results = Collections.emptyList();
 

@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
@@ -47,8 +48,9 @@ public class SchemaImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
-        workspace = _repo.komodoWorkspace(null);
-        this.schema = manager.createSchema(null, workspace, NAME);
+        workspace = _repo.komodoWorkspace(this.uow);
+        this.schema = manager.createSchema(this.uow, workspace, NAME);
+        commit();
     }
 
     private void setRenditionValueAwaitSequencing(String value) throws Exception {
@@ -65,7 +67,7 @@ public class SchemaImplTest extends RelationalModelTest {
         transaction.commit();
 
         // Wait for the sequencing of the repository or timeout of 3 minutes
-        assertTrue(callback.await(3, TimeUnit.MINUTES));
+        assertTrue(callback.await(TIME_TO_WAIT, TimeUnit.MINUTES));
         assertFalse(callback.hasError());
 
         traverse(_repo.createTransaction("traverse-schema", true, null), schema.getAbsolutePath());
@@ -75,7 +77,7 @@ public class SchemaImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotSchema() {
         if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
             try {
-                new SchemaImpl(null, _repo, workspace.getAbsolutePath());
+                new SchemaImpl(this.uow, _repo, workspace.getAbsolutePath());
                 fail();
             } catch (final KException e) {
                 // expected
@@ -85,16 +87,16 @@ public class SchemaImplTest extends RelationalModelTest {
 
     @Test
     public void shouldAllowEmptyRendition() throws Exception {
-        this.schema.setRendition(null, EMPTY_STRING);
-        String rendition = this.schema.getRendition(null);
+        this.schema.setRendition(this.uow, EMPTY_STRING);
+        String rendition = this.schema.getRendition(this.uow);
         assertThat(rendition, is(notNullValue()));
         assertThat(rendition.isEmpty(), is(true));
     }
 
     @Test
     public void shouldAllowNullRendition() throws Exception {
-        this.schema.setRendition(null, null);
-        String rendition = this.schema.getRendition(null);
+        this.schema.setRendition(this.uow, null);
+        String rendition = this.schema.getRendition(this.uow);
         assertThat(rendition, is(notNullValue()));
         assertThat(rendition.isEmpty(), is(true));
     }
@@ -102,12 +104,12 @@ public class SchemaImplTest extends RelationalModelTest {
     @Test
     public void shouldsetRendition() throws Exception {
         setRenditionValueAwaitSequencing(DDL_VIEW);
-        assertThat(this.schema.getRendition(null), is(DDL_VIEW));
+        assertThat(this.schema.getRendition(this.uow), is(DDL_VIEW));
     }
 
     @Test
     public void shouldExportEmptyDdl() throws Exception {
-        final String fragment = this.schema.export(null, new Properties());
+        final String fragment = this.schema.export(this.uow, new Properties());
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(true));
     }
@@ -116,7 +118,7 @@ public class SchemaImplTest extends RelationalModelTest {
     public void shouldExportInvalidDdl() throws Exception {
         setRenditionValueAwaitSequencing("This is not ddl syntax");
 
-        final String fragment = this.schema.export(null, new Properties());
+        final String fragment = this.schema.export(this.uow, new Properties());
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(true));
     }
@@ -126,10 +128,29 @@ public class SchemaImplTest extends RelationalModelTest {
         setRenditionValueAwaitSequencing(DDL_VIEW);
 
         // test
-        final String fragment = this.schema.export(null, new Properties());
+        final String fragment = this.schema.export(this.uow, new Properties());
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(false));
         assertEquals(DDL_VIEW, fragment);
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.schema.getPropertyNames( this.uow );
+        final String[] rawProps = this.schema.getRawPropertyNames( this.uow );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.schema.getPropertyNames( this.uow );
+        final Filter[] filters = this.schema.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
 }

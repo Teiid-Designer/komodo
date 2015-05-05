@@ -11,6 +11,7 @@ import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a VDB data role.
@@ -49,7 +50,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param roleName
      *        the name of the mapped role being added (cannot be empty)
      * @return all the mapped roles (never empty)
@@ -61,7 +62,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param permissionName
      *        the name of the permission being added (cannot be empty)
      * @return the new permission (never <code>null</code>)
@@ -73,7 +74,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>description</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -82,7 +83,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the mapped role names (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -91,7 +92,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the permissions (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -100,7 +101,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if allows creating temporary tables
      * @throws KException
      *         if an error occurs
@@ -110,7 +111,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if any authenticated
      * @throws KException
      *         if an error occurs
@@ -120,7 +121,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if grant all
      * @throws KException
      *         if an error occurs
@@ -130,7 +131,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param roleNameToRemove
      *        the name of the role being removed (cannot be empty)
      * @return all the mapped roles (never <code>null</code> but can be empty)
@@ -142,7 +143,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param permissionToRemove
      *        the name of the permission being removed (cannot be empty)
      * @throws KException
@@ -153,7 +154,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAllowCreateTempTables
      *        the new value for the <code>allow creating temporary tables</code> property
      * @throws KException
@@ -165,7 +166,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newAnyAuthenticated
      *        the new value for the <code>any authenticated</code> property
      * @throws KException
@@ -177,7 +178,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDescription
      *        the new value of the <code>description</code> property
      * @throws KException
@@ -188,7 +189,7 @@ public interface DataRole extends RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newGrantAll
      *        the new value for the <code>grant all</code> property
      * @throws KException

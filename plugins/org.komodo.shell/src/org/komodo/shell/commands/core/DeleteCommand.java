@@ -1,7 +1,7 @@
 package org.komodo.shell.commands.core;
 
+import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
@@ -12,6 +12,7 @@ import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Deletes the referenced node from the repository
@@ -85,33 +86,50 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
     	WorkspaceStatus wsStatus = getWorkspaceStatus();
         Repository repository = wsStatus.getCurrentContext().getRepository();
         WorkspaceManager wkspManager = WorkspaceManager.getInstance(repository);
-        
+        KomodoObject parent = wsStatus.getCurrentContext().getKomodoObj();
+        UnitOfWork transaction = wsStatus.getTransaction();
+
         // Get the Komodo object to delete
         WorkspaceContext contextToDelete = ContextUtils.getContextForPath(wsStatus, objPath);
         KomodoObject objToDelete = contextToDelete.getKomodoObj();
-
+         
         if( objToDelete != null ) {
-        	wkspManager.delete(null, objToDelete);
+            wkspManager.delete(transaction, objToDelete);
         } else {
         	throw new Exception(Messages.getString("DeleteCommand.cannotDelete_objectDoesNotExist", objPath)); //$NON-NLS-1$
         }
     }
-    
-	/**
-	 * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
-	 */
-	@Override
-	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
-		if (getArguments().isEmpty()) {
-			WorkspaceContext currentContext = getWorkspaceStatus().getCurrentContext();
-			
-			// The arg is expected to be a path
-			updateTabCompleteCandidatesForPath(candidates, currentContext, false, lastArgument);
 
-			// Do not put space after it - may want to append more to the path
-			return CompletionConstants.NO_APPEND_SEPARATOR;
-		}
-		return -1;
-	}
-        
+    /**
+     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+        if (getArguments().isEmpty()) {
+			// List of potential completions
+			List<String> potentialsList = new ArrayList<String>();
+			List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
+			for(WorkspaceContext wsContext : children) {
+				potentialsList.add(wsContext.getName());
+			}
+    		// --------------------------------------------------------------
+    		// No arg - offer children relative to current context.
+    		// --------------------------------------------------------------
+    		if(lastArgument==null) {
+    			candidates.addAll(potentialsList);
+    		// --------------------------------------------------------------
+    		// One arg - determine the completion options for it.
+    		// --------------------------------------------------------------
+    		} else {
+    			for (String item : potentialsList) {
+    				if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
+    					candidates.add(item);
+    				}
+    			}
+    		}
+            return 0;
+        }
+        return -1;
+    }
+
 }

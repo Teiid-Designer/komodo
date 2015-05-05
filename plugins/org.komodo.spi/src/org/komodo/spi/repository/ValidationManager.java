@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.List;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.validation.Rule;
 import org.komodo.spi.utils.LocalizedMessage;
 
@@ -24,7 +25,7 @@ public interface ValidationManager {
      * second element being the translated text.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the unique rule name (cannot be empty)
      * @param nodeType
@@ -51,7 +52,7 @@ public interface ValidationManager {
      * second element being the translated text.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the unique rule name (cannot be empty)
      * @param nodeType
@@ -78,7 +79,7 @@ public interface ValidationManager {
      * second element being the translated text.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the unique rule name (cannot be empty)
      * @param nodeType
@@ -108,7 +109,7 @@ public interface ValidationManager {
      * second element being the translated text.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the unique rule name (cannot be empty)
      * @param nodeType
@@ -135,7 +136,7 @@ public interface ValidationManager {
      * second element being the translated text.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the unique rule name (cannot be empty)
      * @param nodeType
@@ -174,7 +175,7 @@ public interface ValidationManager {
      * second element being the translated text.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the unique rule name (cannot be empty)
      * @param nodeType
@@ -213,7 +214,7 @@ public interface ValidationManager {
      * second element being the translated text.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the unique rule name (cannot be empty)
      * @param nodeType
@@ -240,7 +241,7 @@ public interface ValidationManager {
      * second element being the translated text.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the unique rule name (cannot be empty)
      * @param nodeType
@@ -279,7 +280,7 @@ public interface ValidationManager {
      * second element being the translated text.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param name
      *        the unique rule name (cannot be empty)
      * @param nodeType
@@ -318,11 +319,11 @@ public interface ValidationManager {
 
     /**
      * @param rulesXmlFile
-     *        the file whose rule definitions are being added (cannot be <code>null</code>)
+     *        the file whose rule definitions are being validated (cannot be <code>null</code>)
      * @return a list of errors (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    List< String > importRules( final File rulesXmlFile ) throws KException;
+    List< String > validateRules( final File rulesXmlFile ) throws KException;
 
 }

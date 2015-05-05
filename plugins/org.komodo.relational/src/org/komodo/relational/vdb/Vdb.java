@@ -8,13 +8,13 @@
 package org.komodo.relational.vdb;
 
 import java.util.Properties;
-
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.w3c.dom.Document;
 
 /**
@@ -63,7 +63,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param dataRoleName
      *        the name of the data role being added (cannot be empty)
      * @return the new data role (never <code>null</code>)
@@ -75,7 +75,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param entryName
      *        the name of the entry being added (cannot be empty)
      * @param entryPath
@@ -90,7 +90,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param vdbName
      *        the name of the VDB being imported (cannot be empty)
      * @return the new VDB import (never <code>null</code>)
@@ -102,7 +102,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param modelName
      *        the name of the VDB being imported (cannot be empty)
      * @return the new VDB import (never <code>null</code>)
@@ -114,7 +114,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param translatorName
      *        the name of the translator being added (cannot be empty)
      * @param translatorType
@@ -129,7 +129,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param properties (can be <code>null</code> or empty)
      * @return the VDB XML manifest representing the current state of the VDB (never null)
      * @throws KException
@@ -139,7 +139,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>connection type</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -148,7 +148,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the data roles (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -157,7 +157,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>description</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -166,7 +166,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the entries (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -175,7 +175,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the VDB models (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -184,7 +184,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the VDB imports (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -193,7 +193,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>original file path</code> property (never empty)
      * @throws KException
      *         if an error occurs
@@ -202,7 +202,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the translators (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -213,7 +213,7 @@ public interface Vdb extends Exportable, RelationalObject {
      * A name used by Teiid to reference this VDB.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>Teiid VDB name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -222,7 +222,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>version</code> property
      * @throws KException
      *         if an error occurs
@@ -232,7 +232,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return <code>true</code> if a preview VDB
      * @throws KException
      *         if an error occurs
@@ -242,7 +242,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param dataRoleToRemove
      *        the name of the data role being removed (cannot be empty)
      * @throws KException
@@ -253,7 +253,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param entryToRemove
      *        the name of the entry being removed (cannot be empty)
      * @throws KException
@@ -264,7 +264,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param importToRemove
      *        the name of the VDB import being removed (cannot be empty)
      * @throws KException
@@ -275,7 +275,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param modelToRemove
      *        the name of the model being removed (cannot be empty)
      * @throws KException
@@ -286,7 +286,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param translatorToRemove
      *        the name of the translator being removed (cannot be empty)
      * @throws KException
@@ -297,7 +297,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newConnectionType
      *        the new value of the <code>connection type</code> property
      * @throws KException
@@ -308,7 +308,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDescription
      *        the new value of the <code>description</code> property
      * @throws KException
@@ -319,7 +319,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newOriginalFilePath
      *        the new value of the <code>original file path</code> property (cannot be empty)
      * @throws KException
@@ -330,7 +330,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newPreview
      *        the new value for the <code>preview</code> property
      * @throws KException
@@ -344,7 +344,7 @@ public interface Vdb extends Exportable, RelationalObject {
      * Sets the name used by Teiid to reference this VDB.
      *
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newVdbName
      *        the new value of the <code>Teiid VDB name</code> property
      * @throws KException
@@ -355,7 +355,7 @@ public interface Vdb extends Exportable, RelationalObject {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newVersion
      *        the new value of the <code>version</code> property
      * @throws KException

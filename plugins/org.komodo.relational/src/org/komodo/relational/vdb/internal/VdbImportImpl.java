@@ -9,8 +9,8 @@ package org.komodo.relational.vdb.internal;
 
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
@@ -21,12 +21,14 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * An implementation of a referenced VDB.
  */
-public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
+public class VdbImportImpl extends RelationalChildRestrictedObject implements VdbImport {
 
     /**
      * The resolver of a {@link VdbImport}.
@@ -106,7 +108,7 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -131,27 +133,13 @@ public class VdbImportImpl extends RelationalObjectImpl implements VdbImport {
      * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public KomodoObject getParent( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (transaction == null) {
-            transaction = getRepository().createTransaction("vdbimportimpl-getParent", true, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject grouping = super.getParent(transaction);
-            final KomodoObject result = resolveType(transaction, grouping.getParent(transaction));
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final KomodoObject grouping = super.getParent( transaction );
+        final KomodoObject result = resolveType( transaction, grouping.getParent( transaction ) );
+        return result;
     }
 
     /**

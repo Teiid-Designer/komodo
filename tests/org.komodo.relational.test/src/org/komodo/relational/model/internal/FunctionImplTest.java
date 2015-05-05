@@ -17,8 +17,9 @@ import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Function.Determinism;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class FunctionImplTest extends RelationalModelTest {
 
     private static final String NAME = "function";
@@ -27,7 +28,34 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.function = RelationalModelFactory.createPushdownFunction(null, _repo, mock(Model.class), NAME);
+        this.function = RelationalModelFactory.createPushdownFunction( this.uow, _repo, mock( Model.class ), NAME );
+        commit();
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.function.getPropertyNames( this.uow );
+        final String[] rawProps = this.function.getRawPropertyNames( this.uow );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.function.getPropertyNames( this.uow );
+        final Filter[] filters = this.function.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
+    }
+
+    @Test
+    public void shouldNotCountStatementOptionsAsChildren() throws Exception {
+        this.function.setAnalytic( this.uow, true );
+        this.function.setStatementOption( this.uow, "sledge", "hammer" );
+        assertThat( this.function.getChildren( this.uow ).length, is( 0 ) );
     }
 
     /////////////////////////////////////////////////
@@ -36,14 +64,14 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultAggregateAfterConstruction() throws Exception {
-        assertThat(this.function.isAggregate(null), is(Function.DEFAULT_AGGREGATE));
+        assertThat( this.function.isAggregate( this.uow ), is( Function.DEFAULT_AGGREGATE ) );
     }
 
     @Test
     public void shouldSetAggregate() throws Exception {
         final boolean value = !Function.DEFAULT_AGGREGATE;
-        this.function.setAggregate(null, value);
-        assertThat(this.function.isAggregate(null), is(value));
+        this.function.setAggregate( this.uow, value );
+        assertThat( this.function.isAggregate( this.uow ), is( value ) );
     }
 
     /////////////////////////////////////////////////
@@ -52,14 +80,14 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultAllowsDistinctAfterConstruction() throws Exception {
-        assertThat(this.function.isAllowsDistinct(null), is(Function.DEFAULT_ALLOWS_DISTINCT));
+        assertThat( this.function.isAllowsDistinct( this.uow ), is( Function.DEFAULT_ALLOWS_DISTINCT ) );
     }
 
     @Test
     public void shouldSetAllowsDistinct() throws Exception {
         final boolean value = !Function.DEFAULT_ALLOWS_DISTINCT;
-        this.function.setAllowsDistinct(null, value);
-        assertThat(this.function.isAllowsDistinct(null), is(value));
+        this.function.setAllowsDistinct( this.uow, value );
+        assertThat( this.function.isAllowsDistinct( this.uow ), is( value ) );
     }
 
     /////////////////////////////////////////////////
@@ -68,14 +96,14 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultAllowsOrderByAfterConstruction() throws Exception {
-        assertThat(this.function.isAllowsOrderBy(null), is(Function.DEFAULT_ALLOWS_ORDER_BY));
+        assertThat( this.function.isAllowsOrderBy( this.uow ), is( Function.DEFAULT_ALLOWS_ORDER_BY ) );
     }
 
     @Test
     public void shouldSetAllowsOrderBy() throws Exception {
         final boolean value = !Function.DEFAULT_ALLOWS_ORDER_BY;
-        this.function.setAllowsOrderBy(null, value);
-        assertThat(this.function.isAllowsOrderBy(null), is(value));
+        this.function.setAllowsOrderBy( this.uow, value );
+        assertThat( this.function.isAllowsOrderBy( this.uow ), is( value ) );
     }
 
     /////////////////////////////////////////////////
@@ -84,14 +112,14 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultAnalyticAfterConstruction() throws Exception {
-        assertThat(this.function.isAnalytic(null), is(Function.DEFAULT_ANALYTIC));
+        assertThat( this.function.isAnalytic( this.uow ), is( Function.DEFAULT_ANALYTIC ) );
     }
 
     @Test
     public void shouldSetAnalytic() throws Exception {
         final boolean value = !Function.DEFAULT_ANALYTIC;
-        this.function.setAnalytic(null, value);
-        assertThat(this.function.isAnalytic(null), is(value));
+        this.function.setAnalytic( this.uow, value );
+        assertThat( this.function.isAnalytic( this.uow ), is( value ) );
     }
 
     /////////////////////////////////////////////////
@@ -100,14 +128,14 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultDecomposableAfterConstruction() throws Exception {
-        assertThat(this.function.isDecomposable(null), is(Function.DEFAULT_DECOMPOSABLE));
+        assertThat( this.function.isDecomposable( this.uow ), is( Function.DEFAULT_DECOMPOSABLE ) );
     }
 
     @Test
     public void shouldSetDecomposable() throws Exception {
         final boolean value = !Function.DEFAULT_DECOMPOSABLE;
-        this.function.setDecomposable(null, value);
-        assertThat(this.function.isDecomposable(null), is(value));
+        this.function.setDecomposable( this.uow, value );
+        assertThat( this.function.isDecomposable( this.uow ), is( value ) );
     }
 
     /////////////////////////////////////////////////
@@ -116,21 +144,21 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultDeterminismAfterConstruction() throws Exception {
-        assertThat(this.function.getDeterminism(null), is(Determinism.DEFAULT_VALUE));
+        assertThat( this.function.getDeterminism( this.uow ), is( Determinism.DEFAULT_VALUE ) );
     }
 
     @Test
     public void shouldSetDeterminism() throws Exception {
         final Determinism value = Determinism.COMMAND_DETERMINISTIC;
-        this.function.setDeterminism(null, value);
-        assertThat(this.function.getDeterminism(null), is(value));
+        this.function.setDeterminism( this.uow, value );
+        assertThat( this.function.getDeterminism( this.uow ), is( value ) );
     }
 
     @Test
     public void shouldSetDeterminismToDefaultWhenNull() throws Exception {
-        this.function.setDeterminism(null, Determinism.COMMAND_DETERMINISTIC);
-        this.function.setDeterminism(null, null);
-        assertThat(this.function.getDeterminism(null), is(Determinism.DEFAULT_VALUE));
+        this.function.setDeterminism( this.uow, Determinism.COMMAND_DETERMINISTIC );
+        this.function.setDeterminism( this.uow, null );
+        assertThat( this.function.getDeterminism( this.uow ), is( Determinism.DEFAULT_VALUE ) );
     }
 
     /////////////////////////////////////////////////
@@ -139,14 +167,14 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultNullOnNullAfterConstruction() throws Exception {
-        assertThat(this.function.isNullOnNull(null), is(Function.DEFAULT_NULL_ON_NULL));
+        assertThat( this.function.isNullOnNull( this.uow ), is( Function.DEFAULT_NULL_ON_NULL ) );
     }
 
     @Test
     public void shouldSetNullOnNull() throws Exception {
         final boolean value = !Function.DEFAULT_NULL_ON_NULL;
-        this.function.setNullOnNull(null, value);
-        assertThat(this.function.isNullOnNull(null), is(value));
+        this.function.setNullOnNull( this.uow, value );
+        assertThat( this.function.isNullOnNull( this.uow ), is( value ) );
     }
 
     /////////////////////////////////////////////////
@@ -155,14 +183,14 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultUsesDistinctRowsAfterConstruction() throws Exception {
-        assertThat(this.function.isUsesDistinctRows(null), is(Function.DEFAULT_USES_DISTINCT_ROWS));
+        assertThat( this.function.isUsesDistinctRows( this.uow ), is( Function.DEFAULT_USES_DISTINCT_ROWS ) );
     }
 
     @Test
     public void shouldSetUsesDistinctRows() throws Exception {
         final boolean value = !Function.DEFAULT_USES_DISTINCT_ROWS;
-        this.function.setUsesDistinctRows(null, value);
-        assertThat(this.function.isUsesDistinctRows(null), is(value));
+        this.function.setUsesDistinctRows( this.uow, value );
+        assertThat( this.function.isUsesDistinctRows( this.uow ), is( value ) );
     }
 
     /////////////////////////////////////////////////
@@ -171,14 +199,14 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultVarArgsAfterConstruction() throws Exception {
-        assertThat(this.function.isVarArgs(null), is(Function.DEFAULT_VARARGS));
+        assertThat( this.function.isVarArgs( this.uow ), is( Function.DEFAULT_VARARGS ) );
     }
 
     @Test
     public void shouldSetVarArgsNull() throws Exception {
         final boolean value = !Function.DEFAULT_VARARGS;
-        this.function.setVarArgs(null, value);
-        assertThat(this.function.isVarArgs(null), is(value));
+        this.function.setVarArgs( this.uow, value );
+        assertThat( this.function.isVarArgs( this.uow ), is( value ) );
     }
 
 }

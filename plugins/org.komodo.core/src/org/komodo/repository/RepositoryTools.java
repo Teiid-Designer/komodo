@@ -123,15 +123,23 @@ public class RepositoryTools implements StringConstants {
     }
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param property
      *        the property whose display value is being requested (cannot be empty)
      * @return String representation including the property name and its values
      */
-    public static String getDisplayNameAndValue(Property property) {
+    public static String getDisplayNameAndValue(UnitOfWork transaction,
+                                                Property property) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
         StringBuilder sb = new StringBuilder();
         try {
-            sb.append(property.getName(null)).append('=');
-            sb.append(getDisplayValue(property));
+            sb.append(property.getName(transaction)).append('=');
+            sb.append(getDisplayValue(transaction, property));
         } catch (Exception e) {
             sb.append(" on deleted node ").append(property.getAbsolutePath()); //$NON-NLS-1$
         }
@@ -140,17 +148,21 @@ public class RepositoryTools implements StringConstants {
     }
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param property
      *        the property whose display value is being requested (cannot be empty)
      * @return String representation of property values
      * @throws Exception the exception
      */
-    public static String getDisplayValue(Property property) throws Exception {
+    public static String getDisplayValue(UnitOfWork transaction,
+                                         Property property) throws Exception {
     	StringBuilder sb = new StringBuilder();
 
     	if (property.isMultiple(null)) {
     		sb.append('[');
-    		Object[] values = property.getValues(null);
+    		Object[] values = property.getValues(transaction);
     		for (int i = 0; i < values.length; ++i) {
     			Object value = values[i];
     			sb.append(value);
@@ -159,24 +171,28 @@ public class RepositoryTools implements StringConstants {
     		}
     		sb.append(']');
     	} else {
-    		Object value = property.getValue(null);
+    		Object value = property.getValue(transaction);
     		sb.append(value);
     	}
 
     	return sb.toString();
     }
-    
+
     /**
      * Traverses the graph of the given {@link KomodoObject} and returns its
      * String representation.
      *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param kObject object to be traversed
      * @return string representation of object's graph
      * @throws Exception if error occurs
      */
-    public static String traverse(KomodoObject kObject) throws Exception {
+    public static String traverse(UnitOfWork transaction,
+                                  KomodoObject kObject) throws Exception {
         TraversalOutputVisitor visitor = new TraversalOutputVisitor();
-        return visitor.visit(kObject);
+        return visitor.visit(transaction, kObject);
     }
 
     /**
@@ -203,20 +219,21 @@ public class RepositoryTools implements StringConstants {
         }
 
         @Override
-        public String visit(KomodoObject object) throws Exception {
+        public String visit(UnitOfWork transaction,
+                            KomodoObject object) throws Exception {
             String indent = createIndent(object.getAbsolutePath());
-            buffer.append(indent + object.getName(null) + NEW_LINE);
+            buffer.append(indent + object.getName(transaction) + NEW_LINE);
 
-            String[] propertyNames = object.getPropertyNames(null);
+            String[] propertyNames = object.getPropertyNames(transaction);
 
             for (String propertyName : propertyNames) {
-                Property property = object.getProperty(null, propertyName);
-                buffer.append(indent + TAB + AT + getDisplayNameAndValue(property) + NEW_LINE);
+                Property property = object.getProperty(transaction, propertyName);
+                buffer.append(indent + TAB + AT + getDisplayNameAndValue(transaction, property) + NEW_LINE);
             }
 
-            KomodoObject[] children = object.getChildren(null);
+            KomodoObject[] children = object.getChildren(transaction);
             for (int i = 0; i < children.length; ++i)
-                children[i].visit(this);
+                children[i].visit(transaction, this);
 
             return buffer.toString();
         }

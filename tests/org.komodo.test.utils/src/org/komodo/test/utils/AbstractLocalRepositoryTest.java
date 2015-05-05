@@ -22,6 +22,7 @@
 package org.komodo.test.utils;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -32,10 +33,14 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.Session;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.LocalRepository.LocalRepositoryId;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.State;
@@ -60,21 +65,22 @@ import org.komodo.utils.KLog;
  * in an @AfterClass annotated method and use the _repoObserver to await
  * the shutdown of the repository. The destoryLocalRepository function will
  * still run but it should do nothing since _repo is shutdown via the KEngine.
+ *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
 public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest implements StringConstants {
 
     private static final String TEST_REPOSITORY_CONFIG = "test-local-repository-in-memory-config.json";
 
+    protected static final long TIME_TO_WAIT = 3; // in minutes
+
     protected static LocalRepository _repo = null;
 
     protected static LocalRepositoryObserver _repoObserver = null;
 
     @BeforeClass
-    public static void initLocalRepository() throws Exception {
-
+    public static void initRepository() throws Exception {
         URL configUrl = AbstractLocalRepositoryTest.class.getResource(TEST_REPOSITORY_CONFIG);
-
         LocalRepositoryId id = new LocalRepositoryId(configUrl, DEFAULT_LOCAL_WORKSPACE_NAME);
         _repo = new LocalRepository(id);
         assertThat(_repo.getState(), is(State.NOT_REACHABLE));
@@ -114,7 +120,7 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
 
         try {
-            if (! _repoObserver.getLatch().await(3, TimeUnit.MINUTES))
+            if (! _repoObserver.getLatch().await(TIME_TO_WAIT, TimeUnit.MINUTES))
                 throw new RuntimeException("Local repository was not stopped");
         } finally {
             _repo.removeObserver(_repoObserver);
@@ -123,8 +129,28 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
     }
 
+    @Rule
+    public TestName name = new TestName();
+    protected boolean rollbackOnly = false;
+    protected UnitOfWork uow;
+    protected SynchronousCallback callback;
+
+    @Before
+    public void createInitialTransaction() throws Exception {
+        this.callback = new SynchronousCallback();
+        this.uow = createTransaction(callback);
+    }
+
     @After
     public void clearLocalRepository() throws Exception {
+        // rollback current transaction if necessary
+        if ( this.uow != null ) {
+            if ( ( this.uow.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED )
+                 || ( this.uow.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.RUNNING ) ) {
+                this.uow.rollback();
+            }
+        }
+
         assertNotNull(_repo);
 
         if (! State.REACHABLE.equals(_repo.getState()))
@@ -136,8 +162,33 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         RepositoryClientEvent event = RepositoryClientEvent.createClearEvent(client);
         _repo.notify(event);
 
-        if (! _repoObserver.getLatch().await(3, TimeUnit.MINUTES))
+        if (! _repoObserver.getLatch().await(TIME_TO_WAIT, TimeUnit.MINUTES))
             throw new RuntimeException("Local repository was not cleared");
+    }
+
+    protected void commit(org.komodo.spi.repository.Repository.UnitOfWork.State expectedState) throws Exception {
+        this.uow.commit();
+        assertThat( this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
+        assertThat( this.uow.getError(), is( nullValue() ) );
+        assertThat( this.uow.getState(), is( expectedState ) );
+
+        // create new transaction
+        this.callback = new SynchronousCallback();
+        this.uow = createTransaction(callback);
+    }
+
+    protected void commit() throws Exception {
+        commit(org.komodo.spi.repository.Repository.UnitOfWork.State.COMMITTED);
+    }
+
+    protected UnitOfWork createTransaction(String name, SynchronousCallback callback) throws Exception {
+        return _repo.createTransaction( name,
+                                        this.rollbackOnly,
+                                        callback );
+    }
+
+    protected UnitOfWork createTransaction(SynchronousCallback callback) throws Exception {
+        return this.createTransaction( getClass().getSimpleName(), callback );
     }
 
     protected Session session(UnitOfWork uow) throws Exception {
@@ -148,7 +199,7 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         return session;
     }
 
-    private void traverse(String tabs, Node node, StringBuffer buffer) throws Exception {
+    protected void traverse(String tabs, Node node, StringBuffer buffer) throws Exception {
         buffer.append(tabs + node.getName() + NEW_LINE);
 
         PropertyIterator propertyIterator = node.getProperties();
@@ -180,18 +231,13 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         traverse(session.getRootNode());
     }
 
-    /**
-     * @param property
-     * @return String representation of property and its values
-     * @throws Exception
-     */
-    private String toString(Property property) throws Exception {
+    protected String toString(Property property) throws Exception {
         StringBuilder sb = new StringBuilder();
         try {
-            sb.append(property.getName(null)).append('=');
-            if (property.isMultiple(null)) {
+            sb.append(property.getName(this.uow)).append('=');
+            if (property.isMultiple(this.uow)) {
                 sb.append('[');
-                Object[] values = property.getValues(null);
+                Object[] values = property.getValues(this.uow);
                 for (int i = 0; i < values.length; ++i) {
                     Object value = values[i];
                     sb.append(value);
@@ -200,7 +246,7 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
                 }
                 sb.append(']');
             } else {
-                Object value = property.getValue(null);
+                Object value = property.getValue(this.uow);
                 sb.append(value);
             }
         } catch (Exception e) {

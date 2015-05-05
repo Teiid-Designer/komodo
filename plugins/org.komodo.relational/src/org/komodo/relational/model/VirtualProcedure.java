@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a virtual procedure (CREATE VIRTUAL PROCEDURE).
@@ -33,7 +34,7 @@ public interface VirtualProcedure extends Procedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the AS clause <code>statement</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -42,7 +43,7 @@ public interface VirtualProcedure extends Procedure {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newStatement
      *        the new AS clause statement (cannot be empty)
      * @throws KException

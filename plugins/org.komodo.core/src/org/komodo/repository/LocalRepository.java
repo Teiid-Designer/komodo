@@ -57,7 +57,6 @@ public class LocalRepository extends RepositoryImpl {
     public static class LocalRepositoryId implements Id {
 
         private final URL configPath;
-
         private final String workspaceName;
 
         /**
@@ -230,7 +229,7 @@ public class LocalRepository extends RepositoryImpl {
         boolean timeout = false;
 
         try {
-            timeout = !latch.await(5, TimeUnit.SECONDS);
+            timeout = !latch.await(1, TimeUnit.MINUTES);
         } catch (final Exception e) {
             throw new KException(e);
         }
@@ -420,7 +419,7 @@ public class LocalRepository extends RepositoryImpl {
         if (engineThread != null && !engineThread.isAlive()) throw new RuntimeException(
                                                                                         Messages.getString(Messages.LocalRepository.EngineThread_Died));
 
-        engineThread = new ModeshapeEngineThread(getId().getConfiguration(), getId().getWorkspaceName());
+        engineThread = new ModeshapeEngineThread(getId());
         engineThread.start();
     }
 

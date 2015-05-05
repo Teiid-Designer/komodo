@@ -17,12 +17,13 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.OptionContainer;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class StatementOptionImplTest extends RelationalModelTest {
 
     private static final String NAME = "statementoption";
@@ -31,16 +32,26 @@ public final class StatementOptionImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.option = RelationalModelFactory.createStatementOption(null, _repo, mock(OptionContainer.class), NAME, "initialValue");
+        this.option = RelationalModelFactory.createStatementOption( this.uow,
+                                                                    _repo,
+                                                                    mock( OptionContainer.class ),
+                                                                    NAME,
+                                                                    "initialValue" );
+        commit();
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.option.isChildRestricted(), is( true ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotStatementOption() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new StatementOptionImpl(null, _repo, _repo.komodoLibrary(null).getAbsolutePath());
+                new StatementOptionImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -48,30 +59,54 @@ public final class StatementOptionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat(this.option.hasDescriptor(null, StandardDdlLexicon.TYPE_STATEMENT_OPTION), is(true));
+        assertThat( this.option.hasDescriptor( this.uow, StandardDdlLexicon.TYPE_STATEMENT_OPTION ), is( true ) );
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat(this.option.getName(null), is(NAME));
+        assertThat( this.option.getName( this.uow ), is( NAME ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.option.getPropertyNames( this.uow );
+        final String[] rawProps = this.option.getRawPropertyNames( this.uow );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.option.addChild( this.uow, "blah", null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowEmptyOptionValueProperty() throws Exception {
-        this.option.setOption(null, StringConstants.EMPTY_STRING);
+        this.option.setOption( this.uow, StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowNullOptionValueProperty() throws Exception {
-        this.option.setOption(null, null);
+        this.option.setOption( this.uow, null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.option.getPropertyNames( this.uow );
+        final Filter[] filters = this.option.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test
     public void shouldSetOptionValueProperty() throws Exception {
         final String value = "optionvalue";
-        this.option.setOption(null, value);
-        assertThat(this.option.getOption(null), is(value));
-        assertThat(this.option.getProperty(null, StandardDdlLexicon.VALUE).getStringValue(null), is(value));
+        this.option.setOption( this.uow, value );
+        assertThat( this.option.getOption( this.uow ), is( value ) );
+        assertThat( this.option.getProperty( this.uow, StandardDdlLexicon.VALUE ).getStringValue( this.uow ), is( value ) );
     }
 
 }

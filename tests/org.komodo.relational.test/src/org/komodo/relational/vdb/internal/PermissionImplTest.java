@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
@@ -24,10 +25,9 @@ import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class PermissionImplTest extends RelationalModelTest {
 
     private DataRole dataRole;
@@ -36,59 +36,56 @@ public final class PermissionImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(PermissionImplTest.class.getSimpleName(), false, null);
-
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb");
-        this.dataRole = RelationalModelFactory.createDataRole(transaction, _repo, this.vdb, "dataRole");
-        this.permission = RelationalModelFactory.createPermission(transaction, _repo, this.dataRole, "permission");
-
-        transaction.commit();
+        this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
+        this.dataRole = RelationalModelFactory.createDataRole( this.uow, _repo, this.vdb, "dataRole" );
+        this.permission = RelationalModelFactory.createPermission( this.uow, _repo, this.dataRole, "permission" );
+        commit();
     }
 
     @Test
     public void shouldAddCondition() throws Exception {
         final String name = "condition";
-        final Condition condition = this.permission.addCondition(null, name);
-        assertThat(condition, is(notNullValue()));
-        assertThat(this.permission.getConditions(null).length, is(1));
+        final Condition condition = this.permission.addCondition( this.uow, name );
+        assertThat( condition, is( notNullValue() ) );
+        assertThat( this.permission.getConditions( this.uow ).length, is( 1 ) );
 
-        final Condition added = this.permission.getConditions(null)[0];
-        assertThat(added, is(condition));
-        assertThat(added.getName(null), is(name));
-        assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Condition.CONDITION));
-        assertThat(this.permission.getChildren(null)[0], is(instanceOf(Condition.class)));
+        final Condition added = this.permission.getConditions( this.uow )[0];
+        assertThat( added, is( condition ) );
+        assertThat( added.getName( this.uow ), is( name ) );
+        assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.Condition.CONDITION ) );
+        assertThat( this.permission.getChildren( this.uow )[0], is( instanceOf( Condition.class ) ) );
     }
 
     @Test
     public void shouldAddMask() throws Exception {
         final String name = "mask";
-        final Mask mask = this.permission.addMask(null, name);
-        assertThat(mask, is(notNullValue()));
-        assertThat(this.permission.getMasks(null).length, is(1));
+        final Mask mask = this.permission.addMask( this.uow, name );
+        assertThat( mask, is( notNullValue() ) );
+        assertThat( this.permission.getMasks( this.uow ).length, is( 1 ) );
 
-        final Mask added = this.permission.getMasks(null)[0];
-        assertThat(added, is(mask));
-        assertThat(added.getName(null), is(name));
-        assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.Mask.MASK));
-        assertThat(this.permission.getChildren(null)[0], is(instanceOf(Mask.class)));
+        final Mask added = this.permission.getMasks( this.uow )[0];
+        assertThat( added, is( mask ) );
+        assertThat( added.getName( this.uow ), is( name ) );
+        assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.Mask.MASK ) );
+        assertThat( this.permission.getChildren( this.uow )[0], is( instanceOf( Mask.class ) ) );
     }
 
     @Test
     public void shouldHaveStrongTypedChildren() throws Exception {
-        this.permission.addMask(null, "mask");
-        this.permission.addCondition(null, "condition");
-        assertThat(this.permission.getChildren(null).length, is(2));
-        assertThat(this.permission.getChildren(null)[0], is(instanceOf(Condition.class)));
-        assertThat(this.permission.getChildren(null)[1], is(instanceOf(Mask.class)));
+        this.permission.addMask( this.uow, "mask" );
+        this.permission.addCondition( this.uow, "condition" );
+        assertThat( this.permission.getChildren( this.uow ).length, is( 2 ) );
+        assertThat( this.permission.getChildren( this.uow )[0], is( instanceOf( Condition.class ) ) );
+        assertThat( this.permission.getChildren( this.uow )[1], is( instanceOf( Mask.class ) ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotPermission() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new PermissionImpl(null, _repo, this.vdb.getAbsolutePath());
+                new PermissionImpl( this.uow, _repo, this.vdb.getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -96,154 +93,173 @@ public final class PermissionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat(this.permission.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.PERMISSION));
+        assertThat( this.permission.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.PERMISSION ) );
     }
 
     @Test
     public void shouldHaveDefaultAllowAlterValueAfterConstruction() throws Exception {
-        assertThat(this.permission.isAllowAlter(null), is(Permission.DEFAULT_ALLOW_ALTER));
+        assertThat( this.permission.isAllowAlter( this.uow ), is( Permission.DEFAULT_ALLOW_ALTER ) );
     }
 
     @Test
     public void shouldHaveDefaultAllowCreateValueAfterConstruction() throws Exception {
-        assertThat(this.permission.isAllowCreate(null), is(Permission.DEFAULT_ALLOW_CREATE));
+        assertThat( this.permission.isAllowCreate( this.uow ), is( Permission.DEFAULT_ALLOW_CREATE ) );
     }
 
     @Test
     public void shouldHaveDefaultAllowDeleteValueAfterConstruction() throws Exception {
-        assertThat(this.permission.isAllowDelete(null), is(Permission.DEFAULT_ALLOW_DELETE));
+        assertThat( this.permission.isAllowDelete( this.uow ), is( Permission.DEFAULT_ALLOW_DELETE ) );
     }
 
     @Test
     public void shouldHaveDefaultAllowExecuteValueAfterConstruction() throws Exception {
-        assertThat(this.permission.isAllowExecute(null), is(Permission.DEFAULT_ALLOW_EXECUTE));
+        assertThat( this.permission.isAllowExecute( this.uow ), is( Permission.DEFAULT_ALLOW_EXECUTE ) );
     }
 
     @Test
     public void shouldHaveDefaultAllowLanguageValueAfterConstruction() throws Exception {
-        assertThat(this.permission.isAllowLanguage(null), is(Permission.DEFAULT_ALLOW_LANGUAGE));
+        assertThat( this.permission.isAllowLanguage( this.uow ), is( Permission.DEFAULT_ALLOW_LANGUAGE ) );
     }
 
     @Test
     public void shouldHaveDefaultAllowReadValueAfterConstruction() throws Exception {
-        assertThat(this.permission.isAllowRead(null), is(Permission.DEFAULT_ALLOW_READ));
+        assertThat( this.permission.isAllowRead( this.uow ), is( Permission.DEFAULT_ALLOW_READ ) );
     }
 
     @Test
     public void shouldHaveDefaultAllowUpdateValueAfterConstruction() throws Exception {
-        assertThat(this.permission.isAllowUpdate(null), is(Permission.DEFAULT_ALLOW_UPDATE));
+        assertThat( this.permission.isAllowUpdate( this.uow ), is( Permission.DEFAULT_ALLOW_UPDATE ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.permission.getPropertyNames( this.uow );
+        final String[] rawProps = this.permission.getRawPropertyNames( this.uow );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentDataRole() throws Exception {
-        assertThat(this.permission.getParent(null), is(instanceOf(DataRole.class)));
+        assertThat( this.permission.getParent( this.uow ), is( instanceOf( DataRole.class ) ) );
     }
 
     @Test
     public void shouldHaveResourceName() throws Exception {
-        assertThat(this.permission.getResourceName(null), is(notNullValue()));
-        assertThat(this.permission.getResourceName(null), is(this.permission.getName(null)));
+        assertThat( this.permission.getResourceName( this.uow ), is( notNullValue() ) );
+        assertThat( this.permission.getResourceName( this.uow ), is( this.permission.getName( this.uow ) ) );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyCondition() throws Exception {
-        this.permission.addCondition(null, StringConstants.EMPTY_STRING);
+        this.permission.addCondition( this.uow, StringConstants.EMPTY_STRING );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyMask() throws Exception {
-        this.permission.addMask(null, StringConstants.EMPTY_STRING);
+        this.permission.addMask( this.uow, StringConstants.EMPTY_STRING );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullCondition() throws Exception {
-        this.permission.addCondition(null, null);
+        this.permission.addCondition( this.uow, null );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullMask() throws Exception {
-        this.permission.addMask(null, null);
+        this.permission.addMask( this.uow, null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.permission.getPropertyNames( this.uow );
+        final Filter[] filters = this.permission.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test
     public void shouldNotHaveConditionsAfterConstruction() throws Exception {
-        assertThat(this.permission.getConditions(null), is(notNullValue()));
-        assertThat(this.permission.getConditions(null).length, is(0));
+        assertThat( this.permission.getConditions( this.uow ), is( notNullValue() ) );
+        assertThat( this.permission.getConditions( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveMakssAfterConstruction() throws Exception {
-        assertThat(this.permission.getMasks(null), is(notNullValue()));
-        assertThat(this.permission.getMasks(null).length, is(0));
+        assertThat( this.permission.getMasks( this.uow ), is( notNullValue() ) );
+        assertThat( this.permission.getMasks( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveCondition() throws Exception {
         final String name = "condition";
-        this.permission.addCondition(null, name);
-        assertThat(this.permission.getConditions(null).length, is(1));
+        this.permission.addCondition( this.uow, name );
+        assertThat( this.permission.getConditions( this.uow ).length, is( 1 ) );
 
-        this.permission.removeCondition(null, name);
-        assertThat(this.permission.getConditions(null).length, is(0));
+        this.permission.removeCondition( this.uow, name );
+        assertThat( this.permission.getConditions( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveMask() throws Exception {
         final String name = "mask";
-        this.permission.addMask(null, name);
-        assertThat(this.permission.getMasks(null).length, is(1));
+        this.permission.addMask( this.uow, name );
+        assertThat( this.permission.getMasks( this.uow ).length, is( 1 ) );
 
-        this.permission.removeMask(null, name);
-        assertThat(this.permission.getMasks(null).length, is(0));
+        this.permission.removeMask( this.uow, name );
+        assertThat( this.permission.getMasks( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetAllowAlterValue() throws Exception {
         final boolean newValue = !Permission.DEFAULT_ALLOW_ALTER;
-        this.permission.setAllowAlter(null, newValue);
-        assertThat(this.permission.isAllowAlter(null), is(newValue));
+        this.permission.setAllowAlter( this.uow, newValue );
+        assertThat( this.permission.isAllowAlter( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetAllowCreateValue() throws Exception {
         final boolean newValue = !Permission.DEFAULT_ALLOW_CREATE;
-        this.permission.setAllowCreate(null, newValue);
-        assertThat(this.permission.isAllowCreate(null), is(newValue));
+        this.permission.setAllowCreate( this.uow, newValue );
+        assertThat( this.permission.isAllowCreate( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetAllowDeleteValue() throws Exception {
         final boolean newValue = !Permission.DEFAULT_ALLOW_DELETE;
-        this.permission.setAllowDelete(null, newValue);
-        assertThat(this.permission.isAllowDelete(null), is(newValue));
+        this.permission.setAllowDelete( this.uow, newValue );
+        assertThat( this.permission.isAllowDelete( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetAllowExecuteValue() throws Exception {
         final boolean newValue = !Permission.DEFAULT_ALLOW_EXECUTE;
-        this.permission.setAllowExecute(null, newValue);
-        assertThat(this.permission.isAllowExecute(null), is(newValue));
+        this.permission.setAllowExecute( this.uow, newValue );
+        assertThat( this.permission.isAllowExecute( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetAllowLanguageValue() throws Exception {
         final boolean newValue = !Permission.DEFAULT_ALLOW_LANGUAGE;
-        this.permission.setAllowLanguage(null, newValue);
-        assertThat(this.permission.isAllowLanguage(null), is(newValue));
+        this.permission.setAllowLanguage( this.uow, newValue );
+        assertThat( this.permission.isAllowLanguage( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetAllowReadValue() throws Exception {
         final boolean newValue = !Permission.DEFAULT_ALLOW_READ;
-        this.permission.setAllowRead(null, newValue);
-        assertThat(this.permission.isAllowRead(null), is(newValue));
+        this.permission.setAllowRead( this.uow, newValue );
+        assertThat( this.permission.isAllowRead( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetAllowUpdateValue() throws Exception {
         final boolean newValue = !Permission.DEFAULT_ALLOW_UPDATE;
-        this.permission.setAllowUpdate(null, newValue);
-        assertThat(this.permission.isAllowUpdate(null), is(newValue));
+        this.permission.setAllowUpdate( this.uow, newValue );
+        assertThat( this.permission.isAllowUpdate( this.uow ), is( newValue ) );
     }
 
 }

@@ -75,6 +75,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -90,8 +91,8 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public final class RelationalModelFactory {
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentTable
@@ -102,42 +103,27 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static AccessPattern createAccessPattern( final UnitOfWork uow,
+    public static AccessPattern createAccessPattern( final UnitOfWork transaction,
                                                      final Repository repository,
                                                      final Table parentTable,
                                                      final String accessPatternName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentTable, "parentTable"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(accessPatternName, "accessPatternName"); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentTable, "parentTable" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( accessPatternName, "accessPatternName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentTable.getAbsolutePath(), accessPatternName, null );
+        kobject.addDescriptor( transaction, Constraint.TABLE_ELEMENT );
+        kobject.setProperty( transaction, Constraint.TYPE, AccessPattern.CONSTRAINT_TYPE.toValue() );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createAccessPattern", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), accessPatternName, null);
-            kobject.addDescriptor(transaction, Constraint.TABLE_ELEMENT);
-            kobject.setProperty(transaction, Constraint.TYPE, AccessPattern.CONSTRAINT_TYPE.toValue());
-
-            final AccessPattern result = new AccessPatternImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final AccessPattern result = new AccessPatternImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param table
@@ -148,41 +134,26 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Column createColumn( final UnitOfWork uow,
+    public static Column createColumn( final UnitOfWork transaction,
                                        final Repository repository,
                                        final Table table,
                                        final String columnName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(table, "table"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(columnName, "columnName"); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( table, "table" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( columnName, "columnName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, table.getAbsolutePath(), columnName, null );
+        kobject.addDescriptor( transaction, CreateTable.TABLE_ELEMENT );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createColumn", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject kobject = repository.add(transaction, table.getAbsolutePath(), columnName, null);
-            kobject.addDescriptor(transaction, CreateTable.TABLE_ELEMENT);
-
-            final Column result = new ColumnImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final Column result = new ColumnImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentPermission
@@ -193,45 +164,34 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Condition createCondition( final UnitOfWork uow,
+    public static Condition createCondition( final UnitOfWork transaction,
                                              final Repository repository,
                                              final Permission parentPermission,
                                              final String conditionName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentPermission, "parentPermission"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(conditionName, "conditionName"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createCondition", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentPermission, "parentPermission" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( conditionName, "conditionName" ); //$NON-NLS-1$
 
         try {
-            final KomodoObject grouping = RepositoryTools.findOrCreateChild(transaction,
-                                                                            parentPermission,
-                                                                            VdbLexicon.DataRole.Permission.CONDITIONS,
-                                                                            VdbLexicon.DataRole.Permission.CONDITIONS);
-            final KomodoObject kobject = grouping.addChild(transaction,
-                                                           conditionName,
-                                                           VdbLexicon.DataRole.Permission.Condition.CONDITION);
-            final Condition result = new ConditionImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
+            final KomodoObject grouping = RepositoryTools.findOrCreateChild( transaction,
+                                                                             parentPermission,
+                                                                             VdbLexicon.DataRole.Permission.CONDITIONS,
+                                                                             VdbLexicon.DataRole.Permission.CONDITIONS );
+            final KomodoObject kobject = grouping.addChild( transaction,
+                                                            conditionName,
+                                                            VdbLexicon.DataRole.Permission.Condition.CONDITION );
+            final Condition result = new ConditionImpl( transaction, repository, kobject.getAbsolutePath() );
             return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+        } catch ( final Exception e ) {
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentVdb
@@ -242,21 +202,15 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static DataRole createDataRole( final UnitOfWork uow,
+    public static DataRole createDataRole( final UnitOfWork transaction,
                                            final Repository repository,
                                            final Vdb parentVdb,
                                            final String dataRoleName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentVdb, "parentVdb"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(dataRoleName, "dataRoleName"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createDataRole", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final KomodoObject grouping = RepositoryTools.findOrCreateChild(transaction,
@@ -265,20 +219,15 @@ public final class RelationalModelFactory {
                                                                             VdbLexicon.Vdb.DATA_ROLES);
             final KomodoObject kobject = grouping.addChild(transaction, dataRoleName, VdbLexicon.DataRole.DATA_ROLE);
             final DataRole result = new DataRoleImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentProcedure
@@ -287,41 +236,26 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static DataTypeResultSet createDataTypeResultSet( final UnitOfWork uow,
+    public static DataTypeResultSet createDataTypeResultSet( final UnitOfWork transaction,
                                                              final Repository repository,
                                                              final AbstractProcedure parentProcedure ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotNull( parentProcedure, "parentProcedure" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction( "relationalmodelfactory-createDataTypeResultSet", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            final KomodoObject kobject = repository.add( transaction,
-                                                         parentProcedure.getAbsolutePath(),
-                                                         CreateProcedure.RESULT_SET,
-                                                         null );
-            kobject.addDescriptor( transaction, CreateProcedure.RESULT_DATA_TYPE );
-            final DataTypeResultSet result = new DataTypeResultSetImpl( transaction, repository, kobject.getAbsolutePath() );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        final KomodoObject kobject = repository.add( transaction,
+                                                     parentProcedure.getAbsolutePath(),
+                                                     CreateProcedure.RESULT_SET,
+                                                     null );
+        kobject.addDescriptor( transaction, CreateProcedure.RESULT_DATA_TYPE );
+        final DataTypeResultSet result = new DataTypeResultSetImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentVdb
@@ -334,23 +268,17 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Entry createEntry( final UnitOfWork uow,
+    public static Entry createEntry( final UnitOfWork transaction,
                                      final Repository repository,
                                      final Vdb parentVdb,
                                      final String entryName,
                                      final String entryPath ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentVdb, "parentVdb"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(entryName, "entryName"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(entryPath, "entryPath"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createEntry", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final KomodoObject grouping = RepositoryTools.findOrCreateChild(transaction,
@@ -360,20 +288,15 @@ public final class RelationalModelFactory {
             final KomodoObject kobject = grouping.addChild(transaction, entryName, VdbLexicon.Entry.ENTRY);
             final Entry result = new EntryImpl(transaction, repository, kobject.getAbsolutePath());
             result.setPath(transaction, entryPath);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentTable
@@ -386,45 +309,32 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static ForeignKey createForeignKey( final UnitOfWork uow,
+    public static ForeignKey createForeignKey( final UnitOfWork transaction,
                                                final Repository repository,
                                                final Table parentTable,
                                                final String foreignKeyName,
                                                final Table tableReference ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentTable, "parentTable"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(foreignKeyName, "foreignKeyName"); //$NON-NLS-1$
-        ArgCheck.isNotNull(tableReference, "tableReference"); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentTable, "parentTable" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( foreignKeyName, "foreignKeyName" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( tableReference, "tableReference" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentTable.getAbsolutePath(), foreignKeyName, null );
+        kobject.addDescriptor( transaction, Constraint.FOREIGN_KEY_CONSTRAINT );
+        kobject.setProperty( transaction, Constraint.TYPE, ForeignKey.CONSTRAINT_TYPE.toValue() );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createForeignKey", false, null); //$NON-NLS-1$
-        }
-
-        try {
-            final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), foreignKeyName, null);
-            kobject.addDescriptor(transaction, Constraint.FOREIGN_KEY_CONSTRAINT);
-            kobject.setProperty(transaction, Constraint.TYPE, ForeignKey.CONSTRAINT_TYPE.toValue());
-
-            final ForeignKey fk = new ForeignKeyImpl(transaction, repository, kobject.getAbsolutePath());
-            fk.setReferencesTable(transaction, tableReference);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return fk;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final ForeignKey fk = new ForeignKeyImpl( transaction, repository, kobject.getAbsolutePath() );
+        fk.setReferencesTable( transaction, tableReference );
+        return fk;
     }
 
     /**
      * This is Teiid's <code>Create Foreign Function</code> command.
      *
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentModel
@@ -435,43 +345,28 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static PushdownFunction createPushdownFunction( final UnitOfWork uow,
+    public static PushdownFunction createPushdownFunction( final UnitOfWork transaction,
                                                            final Repository repository,
                                                            final Model parentModel,
                                                            final String functionName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( functionName, "functionName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), functionName, null );
+        kobject.addDescriptor( transaction, CreateProcedure.FUNCTION_STATEMENT );
+        kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.name() );
+        setCreateStatementProperties( transaction, kobject );
 
-        if (uow == null) {
-            transaction = repository.createTransaction( "relationalmodelfactory-createPushdownFunction", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), functionName, null );
-            kobject.addDescriptor( transaction, CreateProcedure.FUNCTION_STATEMENT );
-            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.name() );
-            setCreateStatementProperties( transaction, kobject );
-
-            final PushdownFunction result = new PushdownFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        final PushdownFunction result = new PushdownFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentTable
@@ -482,40 +377,27 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Index createIndex( final UnitOfWork uow,
+    public static Index createIndex( final UnitOfWork transaction,
                                      final Repository repository,
                                      final Table parentTable,
                                      final String indexName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentTable, "parentTable"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(indexName, "indexName"); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentTable, "parentTable" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( indexName, "indexName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentTable.getAbsolutePath(), indexName, null );
+        kobject.addDescriptor( transaction, Constraint.INDEX_CONSTRAINT );
+        kobject.setProperty( transaction, Constraint.TYPE, Index.CONSTRAINT_TYPE.toValue() );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createIndex", false, null); //$NON-NLS-1$
-        }
-
-        try {
-            final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), indexName, null);
-            kobject.addDescriptor(transaction, Constraint.INDEX_CONSTRAINT);
-            kobject.setProperty(transaction, Constraint.TYPE, Index.CONSTRAINT_TYPE.toValue());
-
-            final Index index = new IndexImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return index;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final Index index = new IndexImpl( transaction, repository, kobject.getAbsolutePath() );
+        return index;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentPermission
@@ -526,21 +408,15 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Mask createMask( final UnitOfWork uow,
+    public static Mask createMask( final UnitOfWork transaction,
                                    final Repository repository,
                                    final Permission parentPermission,
                                    final String maskName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentPermission, "parentPermission"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(maskName, "maskName"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createMask", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final KomodoObject grouping = RepositoryTools.findOrCreateChild(transaction,
@@ -549,20 +425,15 @@ public final class RelationalModelFactory {
                                                                             VdbLexicon.DataRole.Permission.MASKS);
             final KomodoObject kobject = grouping.addChild(transaction, maskName, VdbLexicon.DataRole.Permission.Mask.MASK);
             final Mask result = new MaskImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param vdb
@@ -573,46 +444,31 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Model createModel( final UnitOfWork uow,
+    public static Model createModel( final UnitOfWork transaction,
                                      final Repository repository,
                                      final Vdb vdb,
                                      final String modelName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(modelName, "modelName"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createModel", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( modelName, "modelName" ); //$NON-NLS-1$
 
         KomodoObject kobject = null;
 
-        try {
-            if (vdb == null) {
-                final KomodoObject workspace = repository.komodoWorkspace( transaction );
-                kobject = workspace.addChild(transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
-            } else {
-                kobject = vdb.addChild(transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
-            }
-
-            final Model result = new ModelImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+        if ( vdb == null ) {
+            final KomodoObject workspace = repository.komodoWorkspace( transaction );
+            kobject = workspace.addChild( transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL );
+        } else {
+            kobject = vdb.addChild( transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL );
         }
+
+        final Model result = new ModelImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentModel
@@ -623,21 +479,15 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static ModelSource createModelSource( final UnitOfWork uow,
+    public static ModelSource createModelSource( final UnitOfWork transaction,
                                                  final Repository repository,
                                                  final Model parentModel,
                                                  final String sourceName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(sourceName, "sourceName"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createModelSource", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final KomodoObject grouping = RepositoryTools.findOrCreateChild(transaction,
@@ -646,20 +496,15 @@ public final class RelationalModelFactory {
                                                                             VdbLexicon.Vdb.SOURCES);
             final KomodoObject kobject = grouping.addChild(transaction, sourceName, VdbLexicon.Source.SOURCE);
             final ModelSource result = new ModelSourceImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentProcedure
@@ -670,41 +515,30 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Parameter createParameter( final UnitOfWork uow,
+    public static Parameter createParameter( final UnitOfWork transaction,
                                              final Repository repository,
                                              final AbstractProcedure parentProcedure,
                                              final String parameterName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentProcedure, "parentProcedure"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(parameterName, "parameterName"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createParameter", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final KomodoObject kobject = repository.add(transaction, parentProcedure.getAbsolutePath(), parameterName, null);
             kobject.addDescriptor(transaction, CreateProcedure.PARAMETER);
 
             final Parameter result = new ParameterImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentDataRole
@@ -715,21 +549,15 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Permission createPermission( final UnitOfWork uow,
+    public static Permission createPermission( final UnitOfWork transaction,
                                                final Repository repository,
                                                final DataRole parentDataRole,
                                                final String permissionName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentDataRole, "parentDataRole"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(permissionName, "permissionName"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createPermission", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final KomodoObject grouping = RepositoryTools.findOrCreateChild(transaction,
@@ -738,20 +566,15 @@ public final class RelationalModelFactory {
                                                                             VdbLexicon.DataRole.PERMISSIONS);
             final KomodoObject kobject = grouping.addChild(transaction, permissionName, VdbLexicon.DataRole.Permission.PERMISSION);
             final Permission result = new PermissionImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentTable
@@ -762,44 +585,29 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static PrimaryKey createPrimaryKey( final UnitOfWork uow,
+    public static PrimaryKey createPrimaryKey( final UnitOfWork transaction,
                                                final Repository repository,
                                                final Table parentTable,
                                                final String primaryKeyName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentTable, "parentTable"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(primaryKeyName, "primaryKeyName"); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentTable, "parentTable" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( primaryKeyName, "primaryKeyName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentTable.getAbsolutePath(), primaryKeyName, null );
+        kobject.addDescriptor( transaction, Constraint.TABLE_ELEMENT );
+        kobject.setProperty( transaction, Constraint.TYPE, PrimaryKey.CONSTRAINT_TYPE.toValue() );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createPrimaryKey", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), primaryKeyName, null);
-            kobject.addDescriptor(transaction, Constraint.TABLE_ELEMENT);
-            kobject.setProperty(transaction, Constraint.TYPE, PrimaryKey.CONSTRAINT_TYPE.toValue());
-
-            final PrimaryKey result = new PrimaryKeyImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final PrimaryKey result = new PrimaryKeyImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
      * This is Teiid's <code>Create Foreign Procedure</code> command.
      *
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentModel
@@ -810,43 +618,28 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static StoredProcedure createStoredProcedure( final UnitOfWork uow,
+    public static StoredProcedure createStoredProcedure( final UnitOfWork transaction,
                                                          final Repository repository,
                                                          final Model parentModel,
                                                          final String procedureName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( procedureName, "procedureName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), procedureName, null );
+        kobject.addDescriptor( transaction, CreateProcedure.PROCEDURE_STATEMENT );
+        kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.name() );
+        setCreateStatementProperties( transaction, kobject );
 
-        if (uow == null) {
-            transaction = repository.createTransaction( "relationalmodelfactory-createStoredProcedure", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), procedureName, null );
-            kobject.addDescriptor( transaction, CreateProcedure.PROCEDURE_STATEMENT );
-            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.FOREIGN.name() );
-            setCreateStatementProperties( transaction, kobject );
-
-            final StoredProcedure result = new StoredProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        final StoredProcedure result = new StoredProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param resultSet
@@ -857,41 +650,26 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static ResultSetColumn createResultSetColumn( final UnitOfWork uow,
+    public static ResultSetColumn createResultSetColumn( final UnitOfWork transaction,
                                                          final Repository repository,
                                                          final TabularResultSet resultSet,
                                                          final String columnName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotNull( resultSet, "resultSet" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( columnName, "columnName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, resultSet.getAbsolutePath(), columnName, null );
+        kobject.addDescriptor( transaction, CreateProcedure.RESULT_COLUMN );
 
-        if (uow == null) {
-            transaction = repository.createTransaction( "relationalmodelfactory-createResultSetColumn", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            final KomodoObject kobject = repository.add( transaction, resultSet.getAbsolutePath(), columnName, null );
-            kobject.addDescriptor( transaction, CreateProcedure.RESULT_COLUMN );
-
-            final ResultSetColumn result = new ResultSetColumnImpl( transaction, repository, kobject.getAbsolutePath() );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        final ResultSetColumn result = new ResultSetColumnImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentWorkspacePath
@@ -902,48 +680,33 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Schema createSchema( final UnitOfWork uow,
+    public static Schema createSchema( final UnitOfWork transaction,
                                  final Repository repository,
                                  final String parentWorkspacePath,
-                                 final String schemaName) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(schemaName, "schemaName"); //$NON-NLS-1$
+                                       final String schemaName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( schemaName, "schemaName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        // make sure path is in the library
+        String parentPath = parentWorkspacePath;
+        final String workspacePath = repository.komodoWorkspace( transaction ).getAbsolutePath();
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createSchema", false, null); //$NON-NLS-1$
+        if ( StringUtils.isBlank( parentWorkspacePath ) ) {
+            parentPath = workspacePath;
+        } else if ( !parentPath.startsWith( workspacePath ) ) {
+            parentPath = ( workspacePath + parentPath );
         }
 
-        assert (transaction != null);
-
-        try {
-            // make sure path is in the library
-            String parentPath = parentWorkspacePath;
-            final String workspacePath = repository.komodoWorkspace(transaction).getAbsolutePath();
-
-            if (StringUtils.isBlank(parentWorkspacePath)) {
-                parentPath = workspacePath;
-            } else if (!parentPath.startsWith(workspacePath)) {
-                parentPath = (workspacePath + parentPath);
-            }
-
-            final KomodoObject kobject = repository.add(transaction, parentPath, schemaName, KomodoLexicon.Schema.NODE_TYPE);
-            final Schema result = new SchemaImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final KomodoObject kobject = repository.add( transaction, parentPath, schemaName, KomodoLexicon.Schema.NODE_TYPE );
+        final Schema result = new SchemaImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param optionContainer
@@ -956,44 +719,29 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static StatementOption createStatementOption( final UnitOfWork uow,
+    public static StatementOption createStatementOption( final UnitOfWork transaction,
                                                          final Repository repository,
                                                          final OptionContainer optionContainer,
                                                          final String optionName,
                                                          final String optionValue ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(optionContainer, "optionContainer"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(optionName, "optionName"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(optionValue, "optionValue"); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( optionContainer, "optionContainer" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( optionName, "optionName" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( optionValue, "optionValue" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, optionContainer.getAbsolutePath(), optionName, null );
+        kobject.addDescriptor( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createStatementOption", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject kobject = repository.add(transaction, optionContainer.getAbsolutePath(), optionName, null);
-            kobject.addDescriptor(transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION);
-
-            final StatementOption result = new StatementOptionImpl(transaction, repository, kobject.getAbsolutePath());
-            result.setOption(transaction, optionValue);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final StatementOption result = new StatementOptionImpl( transaction, repository, kobject.getAbsolutePath() );
+        result.setOption( transaction, optionValue );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentModel
@@ -1004,40 +752,27 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Table createTable( final UnitOfWork uow,
+    public static Table createTable( final UnitOfWork transaction,
                                      final Repository repository,
                                      final Model parentModel,
                                      final String tableName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(tableName, "tableName"); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( tableName, "tableName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), tableName, null );
+        kobject.addDescriptor( transaction, CreateTable.TABLE_STATEMENT );
+        setCreateStatementProperties( transaction, kobject );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createTable", false, null); //$NON-NLS-1$
-        }
-
-        try {
-            final KomodoObject kobject = repository.add(transaction, parentModel.getAbsolutePath(), tableName, null);
-            kobject.addDescriptor(transaction, CreateTable.TABLE_STATEMENT);
-            setCreateStatementProperties(transaction, kobject);
-
-            final Table result = new TableImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final Table result = new TableImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentProcedure
@@ -1046,41 +781,26 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static TabularResultSet createTabularResultSet( final UnitOfWork uow,
+    public static TabularResultSet createTabularResultSet( final UnitOfWork transaction,
                                                            final Repository repository,
                                                            final AbstractProcedure parentProcedure ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotNull( parentProcedure, "parentProcedure" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction( "relationalmodelfactory-createTabularResultSet", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            final KomodoObject kobject = repository.add( transaction,
-                                                         parentProcedure.getAbsolutePath(),
-                                                         CreateProcedure.RESULT_SET,
-                                                         null );
-            kobject.addDescriptor( transaction, CreateProcedure.RESULT_COLUMNS );
-            final TabularResultSet result = new TabularResultSetImpl( transaction, repository, kobject.getAbsolutePath() );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        final KomodoObject kobject = repository.add( transaction,
+                                                     parentProcedure.getAbsolutePath(),
+                                                     CreateProcedure.RESULT_SET,
+                                                     null );
+        kobject.addDescriptor( transaction, CreateProcedure.RESULT_COLUMNS );
+        final TabularResultSet result = new TabularResultSetImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentWorkspacePath
@@ -1091,48 +811,33 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Teiid createTeiid( final UnitOfWork uow,
-                                 final Repository repository,
-                                 final String parentWorkspacePath,
-                                 final String id) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
+    public static Teiid createTeiid( final UnitOfWork transaction,
+                                     final Repository repository,
+                                     final String parentWorkspacePath,
+                                     final String id ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( id, "id" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        // make sure path is in the library
+        String parentPath = parentWorkspacePath;
+        final String workspacePath = repository.komodoWorkspace( transaction ).getAbsolutePath();
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createTeiid", false, null); //$NON-NLS-1$
+        if ( StringUtils.isBlank( parentWorkspacePath ) ) {
+            parentPath = workspacePath;
+        } else if ( !parentPath.startsWith( workspacePath ) ) {
+            parentPath = ( workspacePath + parentPath );
         }
 
-        assert (transaction != null);
-
-        try {
-            // make sure path is in the library
-            String parentPath = parentWorkspacePath;
-            final String workspacePath = repository.komodoWorkspace(transaction).getAbsolutePath();
-
-            if (StringUtils.isBlank(parentWorkspacePath)) {
-                parentPath = workspacePath;
-            } else if (!parentPath.startsWith(workspacePath)) {
-                parentPath = (workspacePath + parentPath);
-            }
-
-            final KomodoObject kobject = repository.add(transaction, parentPath, id, KomodoLexicon.Teiid.NODE_TYPE);
-            final Teiid result = new TeiidImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final KomodoObject kobject = repository.add( transaction, parentPath, id, KomodoLexicon.Teiid.NODE_TYPE );
+        final Teiid result = new TeiidImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentVdb
@@ -1145,23 +850,17 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Translator createTranslator( final UnitOfWork uow,
+    public static Translator createTranslator( final UnitOfWork transaction,
                                                final Repository repository,
                                                final Vdb parentVdb,
                                                final String translatorName,
                                                final String translatorType ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentVdb, "parentVdb"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(translatorName, "translatorName"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(translatorType, "translatorType"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createTranslator", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final KomodoObject grouping = RepositoryTools.findOrCreateChild(transaction,
@@ -1171,20 +870,15 @@ public final class RelationalModelFactory {
             final KomodoObject kobject = grouping.addChild(transaction, translatorName, VdbLexicon.Translator.TRANSLATOR);
             final Translator result = new TranslatorImpl(transaction, repository, kobject.getAbsolutePath());
             result.setType(transaction, translatorType);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentTable
@@ -1195,44 +889,29 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static UniqueConstraint createUniqueConstraint( final UnitOfWork uow,
+    public static UniqueConstraint createUniqueConstraint( final UnitOfWork transaction,
                                                            final Repository repository,
                                                            final Table parentTable,
                                                            final String uniqueConstraintName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentTable, "parentTable"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(uniqueConstraintName, "uniqueConstraintName"); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentTable, "parentTable" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( uniqueConstraintName, "uniqueConstraintName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentTable.getAbsolutePath(), uniqueConstraintName, null );
+        kobject.addDescriptor( transaction, Constraint.TABLE_ELEMENT );
+        kobject.setProperty( transaction, Constraint.TYPE, UniqueConstraint.CONSTRAINT_TYPE.toValue() );
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createUniqueConstraint", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
-
-        try {
-            final KomodoObject kobject = repository.add(transaction, parentTable.getAbsolutePath(), uniqueConstraintName, null);
-            kobject.addDescriptor(transaction, Constraint.TABLE_ELEMENT);
-            kobject.setProperty(transaction, Constraint.TYPE, UniqueConstraint.CONSTRAINT_TYPE.toValue());
-
-            final UniqueConstraint result = new UniqueConstraintImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final UniqueConstraint result = new UniqueConstraintImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
      * This is Teiid's <code>Create Virtual Function</code> command.
      *
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentModel
@@ -1243,43 +922,28 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static UserDefinedFunction createUserDefinedFunction( final UnitOfWork uow,
+    public static UserDefinedFunction createUserDefinedFunction( final UnitOfWork transaction,
                                                                  final Repository repository,
                                                                  final Model parentModel,
                                                                  final String functionName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( functionName, "functionName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), functionName, null );
+        kobject.addDescriptor( transaction, CreateProcedure.FUNCTION_STATEMENT );
+        kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.name() );
+        setCreateStatementProperties( transaction, kobject );
 
-        if (uow == null) {
-            transaction = repository.createTransaction( "relationalmodelfactory-createUserDefinedFunction", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), functionName, null );
-            kobject.addDescriptor( transaction, CreateProcedure.FUNCTION_STATEMENT );
-            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.name() );
-            setCreateStatementProperties( transaction, kobject );
-
-            final UserDefinedFunction result = new UserDefinedFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        final UserDefinedFunction result = new UserDefinedFunctionImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentWorkspacePath
@@ -1292,52 +956,37 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static Vdb createVdb( final UnitOfWork uow,
+    public static Vdb createVdb( final UnitOfWork transaction,
                                  final Repository repository,
                                  final String parentWorkspacePath,
                                  final String vdbName,
                                  final String externalFilePath ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(vdbName, "vdbName"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(externalFilePath, "externalFilePath"); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( vdbName, "vdbName" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( externalFilePath, "externalFilePath" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        // make sure path is in the library
+        String parentPath = parentWorkspacePath;
+        final String workspacePath = repository.komodoWorkspace( transaction ).getAbsolutePath();
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createVdb", false, null); //$NON-NLS-1$
+        if ( StringUtils.isBlank( parentWorkspacePath ) ) {
+            parentPath = workspacePath;
+        } else if ( !parentPath.startsWith( workspacePath ) ) {
+            parentPath = ( workspacePath + parentPath );
         }
 
-        assert (transaction != null);
-
-        try {
-            // make sure path is in the library
-            String parentPath = parentWorkspacePath;
-            final String workspacePath = repository.komodoWorkspace(transaction).getAbsolutePath();
-
-            if (StringUtils.isBlank(parentWorkspacePath)) {
-                parentPath = workspacePath;
-            } else if (!parentPath.startsWith(workspacePath)) {
-                parentPath = (workspacePath + parentPath);
-            }
-
-            final KomodoObject kobject = repository.add(transaction, parentPath, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-            final Vdb result = new VdbImpl(transaction, repository, kobject.getAbsolutePath());
-            result.setOriginalFilePath(transaction, externalFilePath);
-            result.setVdbName(transaction, vdbName);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final KomodoObject kobject = repository.add( transaction, parentPath, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+        final Vdb result = new VdbImpl( transaction, repository, kobject.getAbsolutePath() );
+        result.setOriginalFilePath( transaction, externalFilePath );
+        result.setVdbName( transaction, vdbName );
+        return result;
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentVdb
@@ -1348,21 +997,15 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static VdbImport createVdbImport( final UnitOfWork uow,
+    public static VdbImport createVdbImport( final UnitOfWork transaction,
                                              final Repository repository,
                                              final Vdb parentVdb,
                                              final String vdbName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
         ArgCheck.isNotNull(parentVdb, "parentVdb"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(vdbName, "vdbName"); //$NON-NLS-1$
-
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createVdbImport", false, null); //$NON-NLS-1$
-        }
-
-        assert (transaction != null);
 
         try {
             final KomodoObject grouping = RepositoryTools.findOrCreateChild(transaction,
@@ -1372,20 +1015,15 @@ public final class RelationalModelFactory {
             final KomodoObject kobject = grouping.addChild(transaction, vdbName, VdbLexicon.ImportVdb.IMPORT_VDB);
             final VdbImport result = new VdbImportImpl(transaction, repository, kobject.getAbsolutePath());
             result.setVersion(transaction, Vdb.DEFAULT_VERSION);
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
             return result;
         } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
+            throw handleError( e );
         }
     }
 
     /**
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentModel
@@ -1396,41 +1034,29 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static View createView( final UnitOfWork uow,
+    public static View createView( final UnitOfWork transaction,
                                    final Repository repository,
                                    final Model parentModel,
                                    final String viewName ) throws KException {
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(parentModel, "parentModel"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(viewName, "viewName"); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( viewName, "viewName" ); //$NON-NLS-1$
 
-        if (uow == null) {
-            transaction = repository.createTransaction("relationalmodelfactory-createView", false, null); //$NON-NLS-1$
-        }
+        final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), viewName, null );
+        kobject.addDescriptor( transaction, CreateTable.VIEW_STATEMENT );
+        setCreateStatementProperties( transaction, kobject );
 
-        try {
-            final KomodoObject kobject = repository.add(transaction, parentModel.getAbsolutePath(), viewName, null);
-            kobject.addDescriptor(transaction, CreateTable.VIEW_STATEMENT);
-            setCreateStatementProperties(transaction, kobject);
-
-            final View result = new ViewImpl(transaction, repository, kobject.getAbsolutePath());
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError(uow, transaction, e);
-        }
+        final View result = new ViewImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
      * This is Teiid's <code>Create Virtual Procedure</code> command.
      *
-     * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentModel
@@ -1441,72 +1067,39 @@ public final class RelationalModelFactory {
      * @throws KException
      *         if an error occurs
      */
-    public static VirtualProcedure createVirtualProcedure( final UnitOfWork uow,
+    public static VirtualProcedure createVirtualProcedure( final UnitOfWork transaction,
                                                            final Repository repository,
                                                            final Model parentModel,
                                                            final String procedureName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotNull( parentModel, "parentModel" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( procedureName, "procedureName" ); //$NON-NLS-1$
 
-        UnitOfWork transaction = uow;
+        final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), procedureName, null );
+        kobject.addDescriptor( transaction, CreateProcedure.PROCEDURE_STATEMENT );
+        kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.name() );
+        setCreateStatementProperties( transaction, kobject );
 
-        if (uow == null) {
-            transaction = repository.createTransaction( "relationalmodelfactory-createVirtualProcedure", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        try {
-            final KomodoObject kobject = repository.add( transaction, parentModel.getAbsolutePath(), procedureName, null );
-            kobject.addDescriptor( transaction, CreateProcedure.PROCEDURE_STATEMENT );
-            kobject.setProperty( transaction, SchemaElement.TYPE, SchemaElementType.VIRTUAL.name() );
-            setCreateStatementProperties( transaction, kobject );
-
-            final VirtualProcedure result = new VirtualProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        final VirtualProcedure result = new VirtualProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
-    /**
-     * Only one of the {@link UnitOfWork transactions} passed in should be non-<code>null</code>. Ensures that a transaction
-     * rollback occurs if the transaction was constructed within the method.
-     *
-     * @param transactionParameter
-     *        the transaction passed into the method (can be <code>null</code>)
-     * @param transactionVariable
-     *        the transaction constructed within the method (can be <code>null</code>)
-     * @param e
-     *        the error being handled (cannot be <code>null</code>)
-     * @return the error passed in if already a {@link KException} or the error passed in wrapped in a {@link KException}
-     */
-    private static KException handleError( final UnitOfWork transactionParameter,
-                                           final UnitOfWork transactionVariable,
-                                           final Exception e ) {
-        assert (e != null);
-        assert ((transactionParameter == null) && (transactionVariable != null))
-        || ((transactionParameter != null) && (transactionVariable == null));
+    private static KException handleError( final Exception e ) {
+        assert ( e != null );
 
-        if (transactionParameter == null) {
-            transactionVariable.rollback();
+        if ( e instanceof KException ) {
+            return ( KException )e;
         }
 
-        if (e instanceof KException) {
-            return (KException)e;
-        }
-
-        return new KException(e);
+        return new KException( e );
     }
 
     private static void setCreateStatementProperties( final UnitOfWork transaction,
                                                       final KomodoObject kobject ) throws KException {
+        assert ( transaction != null );
+
         /*
 
         - ddl:expression (string) mandatory             // The string fragment encompassing the statement expression.

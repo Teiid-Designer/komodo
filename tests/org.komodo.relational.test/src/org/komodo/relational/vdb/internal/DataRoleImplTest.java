@@ -18,15 +18,15 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( { "javadoc", "nls" } )
 public final class DataRoleImplTest extends RelationalModelTest {
 
     private DataRole dataRole;
@@ -34,21 +34,18 @@ public final class DataRoleImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final UnitOfWork transaction = _repo.createTransaction(DataRoleImplTest.class.getSimpleName(), false, null);
-
-        this.vdb = RelationalModelFactory.createVdb(transaction, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb");
-        this.dataRole = RelationalModelFactory.createDataRole(transaction, _repo, this.vdb, "dataRole");
-
-        transaction.commit();
+        this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
+        this.dataRole = RelationalModelFactory.createDataRole( this.uow, _repo, this.vdb, "dataRole" );
+        commit();
     }
 
     @Test
     public void shouldFailConstructionIfNotDataRole() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new DataRoleImpl(null, _repo, this.vdb.getAbsolutePath());
+                new DataRoleImpl( this.uow, _repo, this.vdb.getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -57,142 +54,169 @@ public final class DataRoleImplTest extends RelationalModelTest {
     @Test
     public void shouldAddMappedRole() throws Exception {
         final String name = "role";
-        final String[] mappedRoles = this.dataRole.addMappedRole(null, name);
+        final String[] mappedRoles = this.dataRole.addMappedRole( this.uow, name );
 
-        assertThat(mappedRoles, is(notNullValue()));
-        assertThat(this.dataRole.getMappedRoles(null).length, is(1));
-        assertThat(this.dataRole.getMappedRoles(null)[0], is(name));
+        assertThat( mappedRoles, is( notNullValue() ) );
+        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 1 ) );
+        assertThat( this.dataRole.getMappedRoles( this.uow )[0], is( name ) );
+    }
+
+    @Test
+    public void shouldAddMultipleMappedRoles() throws Exception {
+        this.dataRole.addMappedRole( this.uow, "roleA" );
+        this.dataRole.addMappedRole( this.uow, "roleB" );
+
+        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 2 ) );
     }
 
     @Test
     public void shouldAddPermission() throws Exception {
         final String name = "permission";
-        final Permission permission = this.dataRole.addPermission(null, name);
-        assertThat(permission, is(notNullValue()));
-        assertThat(this.dataRole.getPermissions(null).length, is(1));
+        final Permission permission = this.dataRole.addPermission( this.uow, name );
+        assertThat( permission, is( notNullValue() ) );
+        assertThat( this.dataRole.getPermissions( this.uow ).length, is( 1 ) );
 
-        final Permission added = this.dataRole.getPermissions(null)[0];
-        assertThat(added, is(permission));
-        assertThat(added.getName(null), is(name));
-        assertThat(added.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.Permission.PERMISSION));
-        assertThat(this.dataRole.getChildren(null)[0], is(instanceOf(Permission.class)));
+        final Permission added = this.dataRole.getPermissions( this.uow )[0];
+        assertThat( added, is( permission ) );
+        assertThat( added.getName( this.uow ), is( name ) );
+        assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.PERMISSION ) );
+        assertThat( this.dataRole.getChildren( this.uow )[0], is( instanceOf( Permission.class ) ) );
     }
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat(this.dataRole.getPrimaryType(null).getName(), is(VdbLexicon.DataRole.DATA_ROLE));
+        assertThat( this.dataRole.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.DATA_ROLE ) );
     }
 
     @Test
     public void shouldHaveDefaultAllowCreateTempTablesValueAfterConstruction() throws Exception {
-        assertThat(this.dataRole.isAllowCreateTempTables(null), is(DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES));
+        assertThat( this.dataRole.isAllowCreateTempTables( this.uow ), is( DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES ) );
     }
 
     @Test
     public void shouldHaveDefaultAnyAuthenticatedValueAfterConstruction() throws Exception {
-        assertThat(this.dataRole.isAnyAuthenticated(null), is(DataRole.DEFAULT_ANY_AUTHENTICATED));
+        assertThat( this.dataRole.isAnyAuthenticated( this.uow ), is( DataRole.DEFAULT_ANY_AUTHENTICATED ) );
     }
 
     @Test
     public void shouldHaveDefaultGrantAllValueAfterConstruction() throws Exception {
-        assertThat(this.dataRole.isGrantAll(null), is(DataRole.DEFAULT_GRANT_ALL));
+        assertThat( this.dataRole.isGrantAll( this.uow ), is( DataRole.DEFAULT_GRANT_ALL ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.dataRole.getPropertyNames( this.uow );
+        final String[] rawProps = this.dataRole.getRawPropertyNames( this.uow );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentVdb() throws Exception {
-        assertThat(this.dataRole.getParent(null), is(instanceOf(Vdb.class)));
+        assertThat( this.dataRole.getParent( this.uow ), is( instanceOf( Vdb.class ) ) );
     }
 
     @Test
     public void shouldHaveStrongTypedChildren() throws Exception {
-        this.dataRole.addPermission(null, "permission");
-        assertThat(this.dataRole.getChildren(null).length, is(1));
-        assertThat(this.dataRole.getChildren(null)[0], is(instanceOf(Permission.class)));
+        this.dataRole.addPermission( this.uow, "permission" );
+        assertThat( this.dataRole.getChildren( this.uow ).length, is( 1 ) );
+        assertThat( this.dataRole.getChildren( this.uow )[0], is( instanceOf( Permission.class ) ) );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyMappedRole() throws Exception {
-        this.dataRole.addMappedRole(null, StringConstants.EMPTY_STRING);
+        this.dataRole.addMappedRole( this.uow, StringConstants.EMPTY_STRING );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyPermission() throws Exception {
-        this.dataRole.addPermission(null, StringConstants.EMPTY_STRING);
+        this.dataRole.addPermission( this.uow, StringConstants.EMPTY_STRING );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullMappedRole() throws Exception {
-        this.dataRole.addMappedRole(null, null);
+        this.dataRole.addMappedRole( this.uow, null );
     }
 
-    @Test( expected = KException.class )
+    @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullPermission() throws Exception {
-        this.dataRole.addPermission(null, null);
+        this.dataRole.addPermission( this.uow, null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.dataRole.getPropertyNames( this.uow );
+        final Filter[] filters = this.dataRole.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
     @Test
     public void shouldNotHaveDescriptionAfterConstruction() throws Exception {
-        assertThat(this.dataRole.getDescription(null), is(nullValue()));
+        assertThat( this.dataRole.getDescription( this.uow ), is( nullValue() ) );
     }
 
     @Test
     public void shouldNotHaveMappedRolesAfterConstruction() throws Exception {
-        assertThat(this.dataRole.getMappedRoles(null), is(notNullValue()));
-        assertThat(this.dataRole.getMappedRoles(null).length, is(0));
+        assertThat( this.dataRole.getMappedRoles( this.uow ), is( notNullValue() ) );
+        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHavePermissionsAfterConstruction() throws Exception {
-        assertThat(this.dataRole.getPermissions(null), is(notNullValue()));
-        assertThat(this.dataRole.getPermissions(null).length, is(0));
+        assertThat( this.dataRole.getPermissions( this.uow ), is( notNullValue() ) );
+        assertThat( this.dataRole.getPermissions( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveMappedRole() throws Exception {
         final String name = "role";
-        this.dataRole.addMappedRole(null, name);
-        assertThat(this.dataRole.getMappedRoles(null).length, is(1));
+        this.dataRole.addMappedRole( this.uow, name );
+        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 1 ) );
 
-        this.dataRole.removeMappedRole(null, name);
-        assertThat(this.dataRole.getMappedRoles(null).length, is(0));
+        this.dataRole.removeMappedRole( this.uow, name );
+        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemovePermission() throws Exception {
         final String name = "permission";
-        this.dataRole.addPermission(null, name);
-        assertThat(this.dataRole.getPermissions(null).length, is(1));
+        this.dataRole.addPermission( this.uow, name );
+        assertThat( this.dataRole.getPermissions( this.uow ).length, is( 1 ) );
 
-        this.dataRole.removePermission(null, name);
-        assertThat(this.dataRole.getPermissions(null).length, is(0));
+        this.dataRole.removePermission( this.uow, name );
+        assertThat( this.dataRole.getPermissions( this.uow ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetAllowCreateTempTablesValue() throws Exception {
         final boolean newValue = !DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES;
-        this.dataRole.setAllowCreateTempTables(null, newValue);
-        assertThat(this.dataRole.isAllowCreateTempTables(null), is(newValue));
+        this.dataRole.setAllowCreateTempTables( this.uow, newValue );
+        assertThat( this.dataRole.isAllowCreateTempTables( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetAnyAuthenticatedValue() throws Exception {
         final boolean newValue = !DataRole.DEFAULT_ANY_AUTHENTICATED;
-        this.dataRole.setAnyAuthenticated(null, newValue);
-        assertThat(this.dataRole.isAnyAuthenticated(null), is(newValue));
+        this.dataRole.setAnyAuthenticated( this.uow, newValue );
+        assertThat( this.dataRole.isAnyAuthenticated( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String newValue = "newDescription";
-        this.dataRole.setDescription(null, newValue);
-        assertThat(this.dataRole.getDescription(null), is(newValue));
+        this.dataRole.setDescription( this.uow, newValue );
+        assertThat( this.dataRole.getDescription( this.uow ), is( newValue ) );
     }
 
     @Test
     public void shouldSetGrantAllValue() throws Exception {
         final boolean newValue = !DataRole.DEFAULT_GRANT_ALL;
-        this.dataRole.setGrantAll(null, newValue);
-        assertThat(this.dataRole.isGrantAll(null), is(newValue));
+        this.dataRole.setGrantAll( this.uow, newValue );
+        assertThat( this.dataRole.isGrantAll( this.uow ), is( newValue ) );
     }
 
 }

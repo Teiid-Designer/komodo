@@ -18,14 +18,15 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
-@SuppressWarnings( {"javadoc", "nls"} )
-public class UniqueConstraintImplTest extends RelationalModelTest {
+@SuppressWarnings( { "javadoc", "nls" } )
+public final class UniqueConstraintImplTest extends RelationalModelTest {
 
     private static final String NAME = "uniqueconstraint";
 
@@ -34,17 +35,23 @@ public class UniqueConstraintImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable(null, _repo, mock(Model.class), "table");
-        this.uniqueConstraint = RelationalModelFactory.createUniqueConstraint(null, _repo, this.table, NAME);
+        this.table = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "table" );
+        this.uniqueConstraint = RelationalModelFactory.createUniqueConstraint( this.uow, _repo, this.table, NAME );
+        commit();
+    }
+
+    @Test
+    public void shouldBeChildRestricted() {
+        assertThat( this.uniqueConstraint.isChildRestricted(), is( true ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotUniqueConstraint() {
-        if (RelationalObjectImpl.VALIDATE_INITIAL_STATE) {
+        if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new UniqueConstraintImpl(null, _repo, this.table.getAbsolutePath());
+                new UniqueConstraintImpl( this.uow, _repo, this.table.getAbsolutePath() );
                 fail();
-            } catch (final KException e) {
+            } catch ( final KException e ) {
                 // expected
             }
         }
@@ -52,20 +59,44 @@ public class UniqueConstraintImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
-        assertThat(this.uniqueConstraint.getConstraintType(), is(TableConstraint.ConstraintType.UNIQUE));
-        assertThat(this.uniqueConstraint.getProperty(null, TeiidDdlLexicon.Constraint.TYPE).getStringValue(null),
-                   is(TableConstraint.ConstraintType.UNIQUE.toValue()));
+        assertThat( this.uniqueConstraint.getConstraintType(), is( TableConstraint.ConstraintType.UNIQUE ) );
+        assertThat( this.uniqueConstraint.getProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
+                    is( TableConstraint.ConstraintType.UNIQUE.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat(this.uniqueConstraint.hasDescriptor(null, TeiidDdlLexicon.Constraint.TABLE_ELEMENT), is(true));
+        assertThat( this.uniqueConstraint.hasDescriptor( this.uow, TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
+    }
+
+    @Test
+    public void shouldHaveMoreRawProperties() throws Exception {
+        final String[] filteredProps = this.uniqueConstraint.getPropertyNames( this.uow );
+        final String[] rawProps = this.uniqueConstraint.getRawPropertyNames( this.uow );
+        assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat(this.uniqueConstraint.getParent(null), is(instanceOf(Table.class)));
-        assertThat(this.uniqueConstraint.getTable(null), is(this.table));
+        assertThat( this.uniqueConstraint.getParent( this.uow ), is( instanceOf( Table.class ) ) );
+        assertThat( this.uniqueConstraint.getTable( this.uow ), is( this.table ) );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowChildren() throws Exception {
+        this.uniqueConstraint.addChild( this.uow, "blah", null );
+    }
+
+    @Test
+    public void shouldNotContainFilteredProperties() throws Exception {
+        final String[] filteredProps = this.uniqueConstraint.getPropertyNames( this.uow );
+        final Filter[] filters = this.uniqueConstraint.getFilters();
+
+        for ( final String name : filteredProps ) {
+            for ( final Filter filter : filters ) {
+                assertThat( filter.rejectProperty( name ), is( false ) );
+            }
+        }
     }
 
 }

@@ -25,6 +25,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
@@ -115,7 +116,7 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
 
     /**
      * @param uow
-     *        the transaction (can be <code>null</code> if update should be automatically committed)
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository where the relational object exists (cannot be <code>null</code>)
      * @param workspacePath
@@ -136,37 +137,17 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
      *      java.lang.String)
      */
     @Override
-    public ResultSetColumn addColumn( final UnitOfWork uow,
+    public ResultSetColumn addColumn( final UnitOfWork transaction,
                                       final String columnName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( columnName, "columnName" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
 
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "tabularresultsetimpl-addColumn", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addColumn: transaction = {0}, columnName = {1}", //$NON-NLS-1$
-                          transaction.getName(),
-                          columnName );
-        }
-
-        try {
-            final ResultSetColumn result = RelationalModelFactory.createResultSetColumn( transaction,
-                                                                                         getRepository(),
-                                                                                         this,
-                                                                                         columnName );
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        final ResultSetColumn result = RelationalModelFactory.createResultSetColumn( transaction,
+                                                                                     getRepository(),
+                                                                                     this,
+                                                                                     columnName );
+        return result;
     }
 
     /**
@@ -175,46 +156,22 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
      * @see org.komodo.relational.model.TabularResultSet#getColumns(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public ResultSetColumn[] getColumns( final UnitOfWork uow ) throws KException {
-        UnitOfWork transaction = uow;
+    public ResultSetColumn[] getColumns( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "tabularresultsetimpl-getColumns", true, null ); //$NON-NLS-1$
+        final List< ResultSetColumn > result = new ArrayList<>();
+
+        for ( final KomodoObject kobject : getChildrenOfType( transaction, CreateProcedure.RESULT_COLUMN ) ) {
+            final ResultSetColumn column = new ResultSetColumnImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+            result.add( column );
         }
 
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "getColumns: transaction = {0}", transaction.getName() ); //$NON-NLS-1$
+        if ( result.isEmpty() ) {
+            return ResultSetColumn.NO_COLUMNS;
         }
 
-        try {
-            final List< ResultSetColumn > result = new ArrayList<>();
-
-            for (final KomodoObject kobject : getChildrenOfType( transaction, CreateProcedure.RESULT_COLUMN )) {
-                final ResultSetColumn column = new ResultSetColumnImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug( "getColumns: transaction = {0}, found column = {1}", //$NON-NLS-1$
-                                  transaction.getName(),
-                                  kobject.getAbsolutePath() );
-                }
-
-                result.add( column );
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-
-            if (result.isEmpty()) {
-                return ResultSetColumn.NO_COLUMNS;
-            }
-
-            return result.toArray( new ResultSetColumn[result.size()] );
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
-        }
+        return result.toArray( new ResultSetColumn[ result.size() ] );
     }
 
     /**
@@ -234,47 +191,27 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
      *      java.lang.String)
      */
     @Override
-    public void removeColumn( final UnitOfWork uow,
+    public void removeColumn( final UnitOfWork transaction,
                               final String columnToRemove ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( columnToRemove, "columnToRemove" ); //$NON-NLS-1$
-        UnitOfWork transaction = uow;
-
-        if (uow == null) {
-            transaction = getRepository().createTransaction( "tabularresultsetimpl-removeColumn", false, null ); //$NON-NLS-1$
-        }
-
-        assert ( transaction != null );
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "removeColumn: transaction = {0}, columnToRemove = {1}", //$NON-NLS-1$
-                          transaction.getName(),
-                          columnToRemove );
-        }
 
         boolean found = false;
+        final ResultSetColumn[] columns = getColumns( transaction );
 
-        try {
-            final ResultSetColumn[] columns = getColumns( transaction );
-
-            if (columns.length != 0) {
-                for (final ResultSetColumn column : columns) {
-                    if (columnToRemove.equals( column.getName( transaction ) )) {
-                        column.remove( transaction );
-                        found = true;
-                        break;
-                    }
+        if ( columns.length != 0 ) {
+            for ( final ResultSetColumn column : columns ) {
+                if ( columnToRemove.equals( column.getName( transaction ) ) ) {
+                    column.remove( transaction );
+                    found = true;
+                    break;
                 }
             }
+        }
 
-            if (!found) {
-                throw new KException( Messages.getString( Relational.COLUMN_NOT_FOUND_TO_REMOVE, columnToRemove ) );
-            }
-
-            if (uow == null) {
-                transaction.commit();
-            }
-        } catch (final Exception e) {
-            throw handleError( uow, transaction, e );
+        if ( !found ) {
+            throw new KException( Messages.getString( Relational.COLUMN_NOT_FOUND_TO_REMOVE, columnToRemove ) );
         }
     }
 
