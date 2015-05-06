@@ -160,7 +160,7 @@ public class RepositoryTools implements StringConstants {
                                          Property property) throws Exception {
     	StringBuilder sb = new StringBuilder();
 
-    	if (property.isMultiple(null)) {
+    	if (property.isMultiple(transaction)) {
     		sb.append('[');
     		Object[] values = property.getValues(transaction);
     		for (int i = 0; i < values.length; ++i) {

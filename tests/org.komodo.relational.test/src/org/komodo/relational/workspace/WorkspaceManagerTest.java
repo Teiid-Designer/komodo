@@ -8,11 +8,15 @@
 package org.komodo.relational.workspace;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+
+import java.util.Arrays;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +67,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     private WorkspaceManager wsMgr;
 
     @Before
-    public void obtainWorkspaceManager() {
+    public void obtainWorkspaceManager() throws Exception {
         wsMgr = WorkspaceManager.getInstance(_repo);
     }
 
@@ -690,4 +694,16 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
             }
         }
     }
+    
+    @Test
+    public void shouldFilterChildren() throws Exception {
+    	final WorkspaceManager workspaceMgr = WorkspaceManager.getInstance( _repo );
+    	final Vdb vdb = createVdb( workspaceMgr, this.name.getMethodName() );
+    	final KomodoObject kobject = _repo.add( this.uow, workspaceMgr.getAbsolutePath(), "kobject", null );
+    	assertThat( workspaceMgr.getChildren( this.uow ).length, is( 1 ) );
+    	assertThat( workspaceMgr.getChildren( this.uow )[0], is( instanceOf( Vdb.class ) ) );
+    	assertThat( workspaceMgr.getRawChildren( this.uow ).length, is( 2 ) );
+    	assertThat( Arrays.asList( workspaceMgr.getRawChildren( this.uow ) ), hasItems( vdb, kobject ) );
+    }   
+    
 }

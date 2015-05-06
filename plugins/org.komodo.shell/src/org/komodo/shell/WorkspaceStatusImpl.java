@@ -31,15 +31,16 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -104,14 +105,13 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             this.uow = transaction;
         }
 
-        KomodoObject komodoWksp = repo.komodoWorkspace( this.uow );
-        KomodoObject komodoRoot = komodoWksp.getParent( this.uow );
-
-        rootContext = new WorkspaceContextImpl( this, null, komodoRoot );
-        contextCache.put( komodoRoot.getAbsolutePath(), rootContext );
-
-        WorkspaceContext wsContext = rootContext.getChild( komodoWksp.getName( this.uow ) );
-        contextCache.put( komodoWksp.getAbsolutePath(), wsContext );
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(repo);
+        
+        WorkspaceContextImpl wsContext = new WorkspaceContextImpl(this,null,wkspMgr);
+        contextCache.put( wkspMgr.getAbsolutePath(), wsContext );
+        
+        rootContext = wsContext;
+        contextCache.put( wkspMgr.getAbsolutePath(), rootContext );
 
         currentContext = wsContext;
     }

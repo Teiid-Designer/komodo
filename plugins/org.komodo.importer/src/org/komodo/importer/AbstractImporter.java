@@ -71,7 +71,7 @@ public abstract class AbstractImporter implements StringConstants {
         return getRepository().komodoWorkspace(transaction);
     }
 
-    protected WorkspaceManager getWorkspaceManager() {
+    protected WorkspaceManager getWorkspaceManager() throws KException {
         return WorkspaceManager.getInstance(getRepository());
     }
 
