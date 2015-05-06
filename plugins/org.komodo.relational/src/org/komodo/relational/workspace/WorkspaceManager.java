@@ -30,6 +30,7 @@ import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.relational.model.Model;
@@ -60,7 +61,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 /**
  *
  */
-public class WorkspaceManager implements StringConstants {
+public class WorkspaceManager extends RelationalObjectImpl {
 
     private static final String FIND_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s] WHERE ISDESCENDANTNODE('" //$NON-NLS-1$
                                                      + RepositoryImpl.WORKSPACE_ROOT + "') ORDER BY [jcr:name] ASC"; //$NON-NLS-1$
@@ -78,20 +79,21 @@ public class WorkspaceManager implements StringConstants {
 
     private static KeyInValueHashMap< Repository.Id, WorkspaceManager > instances = new KeyInValueHashMap< Repository.Id, WorkspaceManager >(
                                                                                                                                              adapter);
-    private final Repository repository;
 
     /**
      * @param repository
      *        the repository
      * @return singleton instance for the given repository
+     * @throws KException if there is an error obtaining the workspace manager
      */
-    public static WorkspaceManager getInstance( Repository repository ) {
+    public static WorkspaceManager getInstance( Repository repository ) throws KException {
         WorkspaceManager instance = instances.get(repository.getId());
-        if (instance == null) {
-            instance = new WorkspaceManager(repository);
-            instances.add(instance);
-        }
-
+        
+        UnitOfWork uow = repository.createTransaction( "createWorkspaceManager", true, null ); //$NON-NLS-1$
+        instance = new WorkspaceManager(uow, repository);
+        uow.commit();
+        instances.add(instance);
+        
         return instance;
     }
 
@@ -108,9 +110,9 @@ public class WorkspaceManager implements StringConstants {
         instances.remove(repository.getId());
     }
 
-    private WorkspaceManager( Repository repository ) {
-        this.repository = repository;
-        this.repository.addObserver(new RepositoryObserver() {
+    private WorkspaceManager(UnitOfWork uow, Repository repository ) throws KException {
+        super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);        
+        repository.addObserver(new RepositoryObserver() {
 
             @Override
             public void eventOccurred() {
@@ -120,23 +122,6 @@ public class WorkspaceManager implements StringConstants {
                 }
             }
         });
-    }
-
-    /**
-     * @return the repository
-     */
-    public Repository getRepository() {
-        return this.repository;
-    }
-
-    private static KException handleError( final Exception e ) {
-        assert (e != null);
-
-        if (e instanceof KException) {
-            return (KException)e;
-        }
-
-        return new KException(e);
     }
 
     /**
@@ -497,14 +482,14 @@ public class WorkspaceManager implements StringConstants {
 
     private void validateWorkspaceMember( final UnitOfWork uow,
                                           final KomodoObject kobject ) throws KException {
-        if (!this.repository.equals(kobject.getRepository())) {
+        if (!getRepository().equals(kobject.getRepository())) {
             throw new KException(Messages.getString(Relational.OBJECT_BEING_DELETED_HAS_WRONG_REPOSITORY,
                                                     kobject.getAbsolutePath(),
                                                     kobject.getRepository().getId().getUrl(),
-                                                    this.repository.getId().getUrl()));
+                                                    getRepository().getId().getUrl()));
         }
 
-        if (!kobject.getAbsolutePath().startsWith(this.repository.komodoWorkspace(uow).getAbsolutePath())) {
+        if (!kobject.getAbsolutePath().startsWith(getRepository().komodoWorkspace(uow).getAbsolutePath())) {
             throw new KException(Messages.getString(Relational.OBJECT_BEING_DELETED_HAS_NULL_PARENT, kobject.getAbsolutePath()));
         }
     }
