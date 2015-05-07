@@ -7,8 +7,8 @@
  */
 package org.komodo.relational.internal;
 
+import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;

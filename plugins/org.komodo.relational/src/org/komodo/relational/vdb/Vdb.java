@@ -8,8 +8,8 @@
 package org.komodo.relational.vdb;
 
 import java.util.Properties;
+import org.komodo.relational.RelationalObject;
 import org.komodo.relational.model.Model;
-import org.komodo.relational.model.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoType;

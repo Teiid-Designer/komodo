@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.relational.RelationalObject;
+
 /**
  * Represents a relational model result set.
  */

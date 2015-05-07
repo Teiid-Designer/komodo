@@ -23,6 +23,7 @@ import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -37,6 +38,11 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
  * A base implementation of a relational model procedure or function.
  */
 abstract class AbstractProcedureImpl extends RelationalObjectImpl implements AbstractProcedure {
+
+    /**
+     * The allowed child types.
+     */
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Parameter.IDENTIFIER };
 
     static Class< ? extends AbstractProcedure > getProcedureType( final UnitOfWork transaction,
                                                                   final KomodoObject kobject ) throws KException {
@@ -130,6 +136,16 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         }
 
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return CHILD_TYPES;
     }
 
     /**

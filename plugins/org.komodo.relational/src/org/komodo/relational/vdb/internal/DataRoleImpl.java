@@ -38,6 +38,11 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public final class DataRoleImpl extends RelationalObjectImpl implements DataRole {
 
     /**
+     * The allowed child types.
+     */
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Permission.IDENTIFIER };
+
+    /**
      * The resolver of a {@link DataRole}.
      */
     public static final TypeResolver< DataRole > RESOLVER = new TypeResolver< DataRole >() {
@@ -223,6 +228,16 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
         }
 
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return CHILD_TYPES;
     }
 
     /**

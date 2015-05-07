@@ -5,9 +5,8 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.model;
+package org.komodo.relational;
 
-import org.komodo.relational.ExcludeNamespaceFilter;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.PropertyDescriptor;

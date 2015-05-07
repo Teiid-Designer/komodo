@@ -216,6 +216,11 @@ public enum KomodoType {
     }
 
     /**
+     * An empty array of types.
+     */
+    public static final KomodoType[] NO_TYPES = new KomodoType[0];
+
+    /**
      * @param kType the string definition of a type
      * @return the {@link KomodoType} of the given string definition
      */

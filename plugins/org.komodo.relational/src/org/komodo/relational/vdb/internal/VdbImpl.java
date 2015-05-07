@@ -50,6 +50,12 @@ import org.xml.sax.InputSource;
  */
 public final class VdbImpl extends RelationalObjectImpl implements Vdb {
 
+    /**
+     * The allowed child types.
+     */
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { DataRole.IDENTIFIER, Entry.IDENTIFIER, Model.IDENTIFIER,
+                                                                      Translator.IDENTIFIER, VdbImport.IDENTIFIER };
+
     private class VdbManifestImpl implements VdbManifest {
 
         private final String xml;
@@ -395,6 +401,16 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         }
 
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return CHILD_TYPES;
     }
 
     /**

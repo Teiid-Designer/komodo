@@ -122,6 +122,12 @@ public interface KomodoObject extends KNode {
                                       final String type ) throws KException;
 
     /**
+     * @return the types of children that can be created (never <code>null</code> but can be empty if any type is allowed)
+     * @see #isChildRestricted()
+     */
+    KomodoType[] getChildTypes();
+
+    /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param typeName

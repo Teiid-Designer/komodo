@@ -8,20 +8,22 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.model.PushdownFunction;
-import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UserDefinedFunction;
@@ -355,6 +357,19 @@ public final class ModelImplTest extends RelationalModelTest {
         }
 
         assertThat( this.model.getViews( this.uow ).length, is( numViews ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectChildTypes() {
+        assertThat( Arrays.asList( this.model.getChildTypes() ),
+                    hasItems( PushdownFunction.IDENTIFIER,
+                              ModelSource.IDENTIFIER,
+                              StoredProcedure.IDENTIFIER,
+                              Table.IDENTIFIER,
+                              UserDefinedFunction.IDENTIFIER,
+                              View.IDENTIFIER,
+                              VirtualProcedure.IDENTIFIER ) );
+        assertThat( this.model.getChildTypes().length, is( 7 ) );
     }
 
     @Test

@@ -8,9 +8,11 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -186,6 +188,12 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
 
         // tests
         assertThat( this.procedure.getStatementOptions( this.uow ).length, is( numStatementOptions ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectChildTypes() {
+        assertThat( Arrays.asList( this.procedure.getChildTypes() ), hasItem( Parameter.IDENTIFIER ) );
+        assertThat( this.procedure.getChildTypes().length, is( 1 ) );
     }
 
     @Test
