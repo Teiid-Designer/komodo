@@ -195,7 +195,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	                                                                   final KomodoObject ko,
 	                                                                   final Class< T > resolvedClass) {
 		try {
-			return WorkspaceManager.getInstance(_repo).resolve(transaction, ko, resolvedClass);
+			return WorkspaceManager.getInstance(transaction,_repo).resolve(transaction, ko, resolvedClass);
 		} catch ( KException ke) {
 			Assert.fail("Failed : "+ ke.getMessage()); //$NON-NLS-1$
 		}

@@ -43,7 +43,7 @@ public final class ModelImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final WorkspaceManager wsMgr = WorkspaceManager.getInstance( _repo );
+        final WorkspaceManager wsMgr = WorkspaceManager.getInstance( this.uow, _repo );
         final KomodoObject workspace = _repo.komodoWorkspace( this.uow );
         final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, workspace.getAbsolutePath(), "parentVdb", "/test1" );
         this.model = wsMgr.createModel( this.uow, vdb, NAME );

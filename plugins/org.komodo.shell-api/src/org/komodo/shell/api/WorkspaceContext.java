@@ -22,6 +22,8 @@
 package org.komodo.shell.api;
 
 import java.util.List;
+
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 
@@ -55,6 +57,13 @@ public interface WorkspaceContext {
 	 */
 	WorkspaceStatus getWorkspaceStatus();
 
+	/**
+	 * Get the workspace manager
+	 * @return the workspace manager
+	 * @throws Exception if error occurs
+	 */
+	WorkspaceManager getWorkspaceManager() throws Exception;
+	
 	/**
 	 * Get the parent context
 	 * @return the parent

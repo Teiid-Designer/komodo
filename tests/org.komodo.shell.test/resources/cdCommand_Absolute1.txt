@@ -1,2 +1,4 @@
 #cd into workspace with absolute path
-cd /tko:komodo/tko:workspace
+#cd /tko:workspace
+#create Vdb myVdb
+

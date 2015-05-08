@@ -191,6 +191,11 @@ public enum KomodoType {
     VDB_SCHEMA,
 
     /**
+     * Workspace type
+     */
+    WORKSPACE,
+
+    /**
      * Unknown Type
      */
     UNKNOWN;

@@ -40,7 +40,8 @@ public interface WorkspaceStatus extends StringConstants {
     /**
      * The type id of the root object
      */
-    String ROOT_TYPE = FORWARD_SLASH;
+    String WORKSPACE_TYPE = "WORKSPACE";
+//    String WORKSPACE_TYPE = FORWARD_SLASH;
 
     @SuppressWarnings("javadoc")
 	public static final String RECORDING_FILE_KEY = "RECORDING_FILE"; //$NON-NLS-1$
@@ -72,10 +73,10 @@ public interface WorkspaceStatus extends StringConstants {
 	Properties getProperties();
 
 	/**
-	 * Get the home context
-	 * @return the home context
+	 * Get the workspace context
+	 * @return the workspace context
 	 */
-	WorkspaceContext getRootContext();
+	WorkspaceContext getWorkspaceContext();
 
 	/**
 	 * Set the current workspace context

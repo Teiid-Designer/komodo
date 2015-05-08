@@ -47,11 +47,11 @@ public class ShowCommandTest extends AbstractCommandTest {
     	
     	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
                                         INDENT+"Current Teiid Instance  : None set\n"+ //$NON-NLS-1$
-                                        INDENT+"Current Context : [/tko:komodo/tko:workspace]\n"; //$NON-NLS-1$
+                                        INDENT+"Current Context : [/tko:workspace]\n"; //$NON-NLS-1$
 
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -62,10 +62,10 @@ public class ShowCommandTest extends AbstractCommandTest {
     	
     	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
                                 INDENT+"Current Teiid Instance  : None set\n"+ //$NON-NLS-1$
-    	                        INDENT+"Current Context : [/tko:komodo/tko:workspace/MyVdb/MyModel]\n"; //$NON-NLS-1$
+    	                        INDENT+"Current Context : [/tko:workspace/MyVdb/MyModel]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:komodo/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
     
     @Test
@@ -74,13 +74,13 @@ public class ShowCommandTest extends AbstractCommandTest {
     	
     	execute();
     	
-    	String expectedOutput = INDENT+"Children for UNKNOWN \"/tko:komodo\"\n"+ //$NON-NLS-1$
+    	String expectedOutput = INDENT+"Children for UNKNOWN \"\"\n"+ //$NON-NLS-1$
                                 INDENT+"---------------          \n"+ //$NON-NLS-1$
                                 INDENT+"tko:workspace [UNKNOWN]\n"; //$NON-NLS-1$
 
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:komodo", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -89,7 +89,7 @@ public class ShowCommandTest extends AbstractCommandTest {
     	
     	execute();
     	
-    	String expectedOutput = INDENT+"Children for VDB \"/tko:komodo/tko:workspace/MyVdb\"\n"+ //$NON-NLS-1$
+    	String expectedOutput = INDENT+"Children for VDB \"/tko:workspace/MyVdb\"\n"+ //$NON-NLS-1$
                                 INDENT+"---------------          \n"+ //$NON-NLS-1$
     	                        INDENT+"Model1 [MODEL]\n"+ //$NON-NLS-1$
     	                        INDENT+"Model2 [MODEL]\n"+ //$NON-NLS-1$
@@ -97,7 +97,7 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:komodo/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
 }

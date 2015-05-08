@@ -61,7 +61,7 @@ public class VdbImporter extends AbstractImporter {
         String vdbFilePath = importOptions.getOption(OptionKeys.VDB_FILE_PATH).toString();
         KomodoObject workspace = getWorkspace(transaction);
 
-        Vdb vdb = getWorkspaceManager().createVdb(transaction, workspace, vdbName, vdbFilePath);
+        Vdb vdb = getWorkspaceManager(transaction).createVdb(transaction, workspace, vdbName, vdbFilePath);
         KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
         fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
         return vdb;

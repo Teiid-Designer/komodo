@@ -68,7 +68,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Before
     public void obtainWorkspaceManager() throws Exception {
-        wsMgr = WorkspaceManager.getInstance(_repo);
+        wsMgr = WorkspaceManager.getInstance(this.uow, _repo);
     }
 
     @After
@@ -697,7 +697,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     
     @Test
     public void shouldFilterChildren() throws Exception {
-    	final WorkspaceManager workspaceMgr = WorkspaceManager.getInstance( _repo );
+    	final WorkspaceManager workspaceMgr = WorkspaceManager.getInstance(this.uow, _repo );
     	final Vdb vdb = createVdb( workspaceMgr, this.name.getMethodName() );
     	final KomodoObject kobject = _repo.add( this.uow, workspaceMgr.getAbsolutePath(), "kobject", null );
     	assertThat( workspaceMgr.getChildren( this.uow ).length, is( 1 ) );
