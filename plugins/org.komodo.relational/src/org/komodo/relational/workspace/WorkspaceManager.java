@@ -82,6 +82,7 @@ public class WorkspaceManager extends RelationalObjectImpl {
                                                                                                                                              adapter);
 
     /**
+     * @param uow the transaction
      * @param repository
      *        the repository
      * @return singleton instance for the given repository
@@ -117,7 +118,8 @@ public class WorkspaceManager extends RelationalObjectImpl {
     }
 
     private WorkspaceManager(UnitOfWork uow, Repository repository ) throws KException {
-        super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);        
+        super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);  
+        repository.komodoWorkspace(uow);
         repository.addObserver(new RepositoryObserver() {
 
             @Override

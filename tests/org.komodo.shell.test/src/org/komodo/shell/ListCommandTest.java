@@ -46,10 +46,10 @@ public class ListCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"tko:workspace [UNKNOWN]\n"; //$NON-NLS-1$
+    	String expectedOutput = INDENT+"No children for WORKSPACE[tko:workspace].\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test

@@ -24,10 +24,10 @@ create VdbEntry MyEntry1 /tko:workspace/MyVdb1
 create VdbDataRole MyDataRole1 /tko:workspace/MyVdb1
 #
 # VdbPermission needs DataRole parent
-create VdbPermission MyPermission1 /tko:workspace/MyVdb1/vdb:dataRoles/MyDataRole1
+create VdbPermission MyPermission1 /tko:workspace/MyVdb1/MyDataRole1
 #
 # VdbCondition - requires VdbPermission parent
-create VdbCondition MyCondition1 /tko:workspace/MyVdb1/vdb:dataRoles/MyDataRole1/vdb:permissions/MyPermission1
+create VdbCondition MyCondition1 /tko:workspace/MyVdb1/MyDataRole1/MyPermission1
 #
 # VdbMask - requires VdbPermission parent
-create VdbMask MyMask1 /tko:workspace/MyVdb1/vdb:dataRoles/MyDataRole1/vdb:permissions/MyPermission1
+create VdbMask MyMask1 /tko:workspace/MyVdb1/MyDataRole1/MyPermission1
