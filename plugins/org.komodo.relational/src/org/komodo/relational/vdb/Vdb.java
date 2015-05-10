@@ -140,6 +140,23 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return the allowed languages (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getAllowedLanguages( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return the authentication type (can be empty)
+     * @throws KException
+     */
+    String getAuthenticationType( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the value of the <code>connection type</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -176,6 +193,15 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return the GSS pattern (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getGssPattern( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the VDB models (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
@@ -199,6 +225,33 @@ public interface Vdb extends Exportable, RelationalObject {
      *         if an error occurs
      */
     String getOriginalFilePath( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return the password pattern (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getPasswordPattern( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return the query timeout or -1 if not set
+     * @throws KException
+     *         if an error occurs
+     */
+    int getQueryTimeout( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return the security domain (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getSecurityDomain( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -298,6 +351,28 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param newAllowedLanguages
+     *        the new allowed languages (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    void setAllowedLanguages( final UnitOfWork transaction,
+                              final String newAllowedLanguages ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param newAuthenticationType
+     *        the new authentication type (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    void setAuthenticationType( final UnitOfWork transaction,
+                                final String newAuthenticationType ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newConnectionType
      *        the new value of the <code>connection type</code> property
      * @throws KException
@@ -320,6 +395,17 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param newGssPattern
+     *        the new GSS pattern (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    void setGssPattern( final UnitOfWork transaction,
+                        final String newGssPattern ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newOriginalFilePath
      *        the new value of the <code>original file path</code> property (cannot be empty)
      * @throws KException
@@ -327,6 +413,17 @@ public interface Vdb extends Exportable, RelationalObject {
      */
     void setOriginalFilePath( final UnitOfWork transaction,
                               final String newOriginalFilePath ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param newPasswordPattern
+     *        the new password pattern (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    void setPasswordPattern( final UnitOfWork transaction,
+                             final String newPasswordPattern ) throws KException;
 
     /**
      * @param transaction
@@ -339,6 +436,28 @@ public interface Vdb extends Exportable, RelationalObject {
      */
     void setPreview( final UnitOfWork transaction,
                      final boolean newPreview ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param newQueryTimeout
+     *        the new query timeout or a negative number to delete the current value
+     * @throws KException
+     *         if an error occurs
+     */
+    void setQueryTimeout( final UnitOfWork transaction,
+                          final int newQueryTimeout ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param newSecurityDomain
+     *        the new security domain (can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    void setSecurityDomain( final UnitOfWork transaction,
+                            final String newSecurityDomain ) throws KException;
 
     /**
      * Sets the name used by Teiid to reference this VDB.
