@@ -112,15 +112,8 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.TABLE_ELEMENT );
-                return true;
-            } catch (final Exception e) {
-                // not resolvable
-            }
-
-            return false;
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.TABLE_ELEMENT );
         }
 
         /**

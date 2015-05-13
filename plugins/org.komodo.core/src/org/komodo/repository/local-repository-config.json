@@ -15,7 +15,10 @@
     ],
     "workspaces" : {
         "default" : "komodoLocalWorkspace",
-        "allowCreation" : true
+        "allowCreation" : true,
+        "initialContent" : {
+            "*" : "initialContent.xml"
+        }
     },
     "storage" : {
         "cacheConfiguration" : "org/komodo/repository/local-repository-infinispan-config.xml",

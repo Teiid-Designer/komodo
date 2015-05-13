@@ -95,11 +95,6 @@ public class Messages implements StringConstants {
          */
         INCORRECT_TYPE,
 
-        /**
-         * An error message indicating the object has an incorrect property value.
-         */
-        INVALID_PROPERTY_VALUE,
-
         NO_ARTIFACT_DESCRIPTION,
         REMOVE_WORKSPACE_OBJECT_ERROR,
         UNABLE_TO_CONSTRUCT_PROPERTY,

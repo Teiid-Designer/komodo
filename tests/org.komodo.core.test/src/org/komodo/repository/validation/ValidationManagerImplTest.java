@@ -14,8 +14,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.rules.TestName;
 import org.komodo.spi.KException;
 import org.komodo.spi.outcome.Outcome.Level;
 import org.komodo.spi.repository.KomodoObject;
@@ -26,6 +26,7 @@ import org.komodo.spi.repository.validation.Rule.MessageKey;
 import org.komodo.spi.utils.LocalizedMessage;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 
+@Ignore
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest {
 
@@ -41,9 +42,6 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
                                                                         "This is a rule description" ) );
         _message = Collections.singletonList( new LocalizedMessage( "myrule.msg", "en", "This is a rule error message" ) );
     }
-
-    @org.junit.Rule
-    public TestName name = new TestName();
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailWhenNullRulesFile() throws Exception {

@@ -31,6 +31,7 @@ import javax.jcr.nodetype.NodeType;
 import org.komodo.repository.Messages;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrRepository;
 import org.modeshape.jcr.ModeShapeEngine;
 import org.modeshape.jcr.api.Session;
@@ -78,7 +79,9 @@ public class ModeshapeUtils implements StringConstants {
         }
 
         // the workspace name must agree with the config file
-        return identifier.getRepository().login(null, identifier.getWorkspace());
+        final Session session = identifier.getRepository().login(null, identifier.getWorkspace());
+        KLog.getLogger().debug("ModeShapeUtils.createSession: {0}", session.hashCode()); //$NON-NLS-1$
+        return session;
     }
 
     /**

@@ -31,7 +31,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -105,11 +104,11 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             this.uow = transaction;
         }
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(this.uow,repo);
-        
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(repo);
+
         wsContext = new WorkspaceContextImpl(this,null,wkspMgr);
         contextCache.put( wkspMgr.getAbsolutePath(), wsContext );
-        
+
         currentContext = wsContext;
     }
 
@@ -314,7 +313,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     		}
     	}
     }
-    
+
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceStatus#setProperties(java.util.Properties)
      */

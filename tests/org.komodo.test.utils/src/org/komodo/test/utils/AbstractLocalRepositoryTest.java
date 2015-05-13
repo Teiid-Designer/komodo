@@ -132,6 +132,7 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
     @Rule
     public TestName name = new TestName();
     protected boolean rollbackOnly = false;
+    protected int txCount;
     protected UnitOfWork uow;
     protected SynchronousCallback callback;
 
@@ -139,46 +140,57 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
     public void createInitialTransaction() throws Exception {
         this.callback = new SynchronousCallback();
         this.uow = createTransaction(callback);
+        KLog.getLogger().debug( "\n\n ----- Test {0}: createInitialTransaction() finished", this.name.getMethodName() );
     }
 
     @After
-    public void clearLocalRepository() throws Exception {
-        // rollback current transaction if necessary
-        if ( this.uow != null ) {
-            if ( ( this.uow.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED )
-                 || ( this.uow.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.RUNNING ) ) {
-                this.uow.rollback();
+    public void cleanup() throws Exception {
+        { // process current transaction if necessary
+            if ( this.uow != null ) {
+                switch ( this.uow.getState() ) {
+                    case NOT_STARTED:
+                    case RUNNING:
+                        rollback();
+                        break;
+                    case COMMITTED:
+                    case ERROR:
+                    case ROLLED_BACK:
+                    default:
+                        break;
+                }
+
+                this.uow = null;
+                this.callback = null;
+                this.txCount = 0;
             }
         }
 
-        assertNotNull(_repo);
+        { // clean repository
+            assertNotNull( _repo );
 
-        if (! State.REACHABLE.equals(_repo.getState()))
-            return;
+            if ( !State.REACHABLE.equals( _repo.getState() ) ) return;
 
-        _repoObserver.resetLatch();
+            _repoObserver.resetLatch();
 
-        RepositoryClient client = mock(RepositoryClient.class);
-        RepositoryClientEvent event = RepositoryClientEvent.createClearEvent(client);
-        _repo.notify(event);
+            RepositoryClient client = mock( RepositoryClient.class );
+            RepositoryClientEvent event = RepositoryClientEvent.createClearEvent( client );
+            _repo.notify( event );
 
-        if (! _repoObserver.getLatch().await(TIME_TO_WAIT, TimeUnit.MINUTES))
-            throw new RuntimeException("Local repository was not cleared");
+            if ( !_repoObserver.getLatch().await( TIME_TO_WAIT, TimeUnit.MINUTES ) ) throw new RuntimeException( "Local repository was not cleared" );
+
+            KLog.getLogger().debug( "Test {0}: clearLocalRepository() finished\n\n=====\n\n", this.name.getMethodName() );
+        }
     }
 
-    protected void commit(org.komodo.spi.repository.Repository.UnitOfWork.State expectedState) throws Exception {
+    protected void commit() throws Exception {
         this.uow.commit();
         assertThat( this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
         assertThat( this.uow.getError(), is( nullValue() ) );
-        assertThat( this.uow.getState(), is( expectedState ) );
+        assertThat( this.uow.getState(), is( UnitOfWork.State.COMMITTED ) );
 
         // create new transaction
         this.callback = new SynchronousCallback();
         this.uow = createTransaction(callback);
-    }
-
-    protected void commit() throws Exception {
-        commit(org.komodo.spi.repository.Repository.UnitOfWork.State.COMMITTED);
     }
 
     protected UnitOfWork createTransaction(String name, SynchronousCallback callback) throws Exception {
@@ -188,7 +200,18 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
     }
 
     protected UnitOfWork createTransaction(SynchronousCallback callback) throws Exception {
-        return this.createTransaction( getClass().getSimpleName(), callback );
+        return this.createTransaction( this.name.getMethodName() + '-' + this.txCount++, callback );
+    }
+
+    protected void rollback() throws Exception {
+        this.uow.rollback();
+        assertThat( this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
+        assertThat( this.uow.getError(), is( nullValue() ) );
+        assertThat( this.uow.getState(), is( UnitOfWork.State.ROLLED_BACK ) );
+
+        // create new transaction
+        this.callback = new SynchronousCallback();
+        this.uow = createTransaction(callback);
     }
 
     protected Session session(UnitOfWork uow) throws Exception {

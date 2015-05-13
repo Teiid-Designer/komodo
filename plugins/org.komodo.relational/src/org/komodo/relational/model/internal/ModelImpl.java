@@ -102,15 +102,8 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Vdb.DECLARATIVE_MODEL );
-                return true;
-            } catch (final Exception e) {
-                // not resolvable
-            }
-
-            return false;
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Vdb.DECLARATIVE_MODEL );
         }
 
         /**

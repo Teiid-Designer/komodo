@@ -45,7 +45,7 @@ public class SynchronousSequencerListener implements KSequencerListener {
     private Exception sequencerException = null;
 
     /**
-     * @param listenerId the id of this listener 
+     * @param listenerId the id of this listener
      * @param session the session
      * @param sequencers the sequencers
      * @throws Exception if error occurs

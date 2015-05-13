@@ -73,6 +73,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
     public KSequencers(WorkspaceIdentifier identifier) throws Exception {
         this.identifier = identifier;
         this.session = ModeshapeUtils.createSession(identifier);
+        KLog.getLogger().debug("KSequencers.init: session = {0}", session.hashCode()); //$NON-NLS-1$
 
         ObservationManager manager = session.getWorkspace().getObservationManager();
         manager.addEventListener(this,
@@ -95,6 +96,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
     @Override
     public synchronized void dispose() {
         if (session != null) {
+            KLog.getLogger().debug("KSequencers.dispose: logout session: {0}", session.hashCode()); //$NON-NLS-1$
             session.logout();
             session = null;
         }
@@ -165,7 +167,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         } catch (RepositoryException ex) {
             // Not required to be logged since false is returned anyway
         }
-        
+
         return false;
     }
 
@@ -230,6 +232,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
                         return;
 
                     session = ModeshapeUtils.createSession(getIdentifier());
+                    KLog.getLogger().debug("KSequencers.preSequenceClean: session = {0}", session.hashCode()); //$NON-NLS-1$
                     Iterator<Node> childIter = outputNode.getNodes();
                     while(childIter.hasNext()) {
                         Node child = childIter.next();
@@ -285,6 +288,8 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         preSequenceClean(sequencerType, outputNode);
 
         Session seqSession = ModeshapeUtils.createSession(getIdentifier());
+        KLog.getLogger().debug("KSequencers.sequenceClean: session = {0}", session.hashCode()); //$NON-NLS-1$
+
         try {
             KLog.getLogger().debug("Executing " + sequencerType.name() + " Sequencer on property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
 

@@ -24,7 +24,6 @@ package org.komodo.relational.workspace;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
@@ -82,20 +81,25 @@ public class WorkspaceManager extends RelationalObjectImpl {
                                                                                                                                              adapter);
 
     /**
-     * @param uow the transaction
      * @param repository
-     *        the repository
-     * @return singleton instance for the given repository
-     * @throws KException if there is an error obtaining the workspace manager
+     *        the repository whose workspace manager is being requested (cannot be <code>null</code>)
+     * @return the singleton instance for the given repository (never <code>null</code>)
+     * @throws KException
+     *         if there is an error obtaining the workspace manager
      */
-    public static WorkspaceManager getInstance( UnitOfWork uow, Repository repository ) throws KException {
+    public static WorkspaceManager getInstance( Repository repository ) throws KException {
         WorkspaceManager instance = instances.get(repository.getId());
-        
-        //UnitOfWork uow = repository.createTransaction( "createWorkspaceManager", true, null ); //$NON-NLS-1$
-        instance = new WorkspaceManager(uow, repository);
-        //uow.commit();
-        instances.add(instance);
-        
+
+        if ( instance == null ) {
+            // We must create a transaction here so that it can be passed on to the constructor. Since the
+            // node associated with the WorkspaceManager always exists we don't have to create it.
+            final UnitOfWork uow = repository.createTransaction( "createWorkspaceManager", true, null ); //$NON-NLS-1$
+            instance = new WorkspaceManager( uow, repository );
+            uow.commit();
+
+            instances.add( instance );
+        }
+
         return instance;
     }
 
@@ -118,8 +122,7 @@ public class WorkspaceManager extends RelationalObjectImpl {
     }
 
     private WorkspaceManager(UnitOfWork uow, Repository repository ) throws KException {
-        super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);  
-        repository.komodoWorkspace(uow);
+        super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);
         repository.addObserver(new RepositoryObserver() {
 
             @Override

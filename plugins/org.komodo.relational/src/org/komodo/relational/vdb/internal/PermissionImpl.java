@@ -87,15 +87,11 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.DataRole.Permission.PERMISSION );
-                return true;
-            } catch (final Exception e) {
-                // not resolvable
-            }
-
-            return false;
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction,
+                                            kobject.getRepository(),
+                                            kobject,
+                                            VdbLexicon.DataRole.Permission.PERMISSION );
         }
 
         /**

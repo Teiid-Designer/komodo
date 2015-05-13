@@ -16,7 +16,7 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
-
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.spi.repository.KomodoType;
@@ -40,6 +40,7 @@ public class ListCommandTest extends AbstractCommandTest {
 		super();
 	}
 
+	@Ignore
     @Test
     public void testList1() throws Exception {
     	setup(LIST_COMMAND1, ListCommand.class);
@@ -65,15 +66,15 @@ public class ListCommandTest extends AbstractCommandTest {
     	assertEquals(expectedOutput,writerOutput);
     	assertEquals("/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
-    
+
     @Test
     public void testList3() throws Exception {
     	setup(LIST_COMMAND3, ListCommand.class);
 
     	execute();
-    	
+
     	assertEquals("/tko:workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
+
     	String expectedOutput = INDENT+"Table1 ["+KomodoType.TABLE.name()+"]\n"; //$NON-NLS-1$ //$NON-NLS-2$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
