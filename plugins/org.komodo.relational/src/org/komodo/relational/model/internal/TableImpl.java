@@ -47,6 +47,13 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
  */
 public class TableImpl extends RelationalObjectImpl implements Table {
 
+    /**
+     * The allowed child types.
+     */
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { AccessPattern.IDENTIFIER, Column.IDENTIFIER,
+                                                                      ForeignKey.IDENTIFIER, Index.IDENTIFIER,
+                                                                      UniqueConstraint.IDENTIFIER };
+
     private enum StandardOptions {
 
         ANNOTATION,
@@ -58,19 +65,6 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         UUID
 
     }
-
-    /*
-
-      - ddl:temporary (STRING) < 'GLOBAL', 'LOCAL'
-      - ddl:onCommitValue (STRING) < 'DELETE ROWS', 'PRESERVE ROWS'
-      - teiidddl:schemaElementType (string) = 'FOREIGN' mandatory autocreated < 'FOREIGN', 'VIRTUAL'
-      - teiidddl:queryExpression (string)
-    + * (ddl:columnDefinition) = ddl:columnDefinition sns
-    // TODO + * (ddl:tableConstraint) = ddl:tableConstraint sns
-    + * (ddl:statementOption) = ddl:statementOption sns
-    + * (teiidddl:constraint) = teiidddl:constraint sns
-
-     */
 
     /**
      * The resolver of a {@link Table}.
@@ -325,6 +319,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         System.arraycopy( indexes, 0, result, constraints.length + columns.length + foreignKeys.length, indexes.length );
 
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return CHILD_TYPES;
     }
 
     /**
