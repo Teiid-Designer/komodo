@@ -1,5 +1,4 @@
 #show children at the root
-cd ..
 show children
 
 

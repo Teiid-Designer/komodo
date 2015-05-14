@@ -181,15 +181,8 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-                return true;
-            } catch (final Exception e) {
-                // not resolvable
-            }
-
-            return false;
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Vdb.VIRTUAL_DATABASE );
         }
 
         /**

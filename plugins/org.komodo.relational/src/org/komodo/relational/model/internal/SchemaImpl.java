@@ -96,15 +96,8 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.Schema.NODE_TYPE );
-                return true;
-            } catch ( final Exception e ) {
-                // not resolvable
-            }
-
-            return false;
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.Schema.NODE_TYPE );
         }
 
         /**

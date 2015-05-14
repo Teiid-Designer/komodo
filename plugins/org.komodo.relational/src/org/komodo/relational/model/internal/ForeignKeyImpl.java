@@ -86,20 +86,13 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, Constraint.FOREIGN_KEY_CONSTRAINT );
-                ObjectImpl.validatePropertyValue( transaction,
-                                                  kobject.getRepository(),
-                                                  kobject,
-                                                  Constraint.TYPE,
-                                                  ForeignKey.CONSTRAINT_TYPE.toValue() );
-                return true;
-            } catch (final Exception e) {
-                // not resolvable
-            }
-
-            return false;
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, Constraint.FOREIGN_KEY_CONSTRAINT )
+                   && ObjectImpl.validatePropertyValue( transaction,
+                                                        kobject.getRepository(),
+                                                        kobject,
+                                                        Constraint.TYPE,
+                                                        ForeignKey.CONSTRAINT_TYPE.toValue() );
         }
 
         /**

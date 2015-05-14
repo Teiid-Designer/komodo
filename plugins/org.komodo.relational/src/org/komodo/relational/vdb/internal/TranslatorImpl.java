@@ -83,15 +83,8 @@ public final class TranslatorImpl extends RelationalChildRestrictedObject implem
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Translator.TRANSLATOR );
-                return true;
-            } catch (final Exception e) {
-                // not resolvable
-            }
-
-            return false;
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Translator.TRANSLATOR );
         }
 
         /**

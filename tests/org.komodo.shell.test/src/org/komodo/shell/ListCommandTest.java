@@ -16,7 +16,6 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.spi.repository.KomodoType;
@@ -46,10 +45,10 @@ public class ListCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"tko:workspace [UNKNOWN]\n"; //$NON-NLS-1$
+    	String expectedOutput = INDENT+"No children for WORKSPACE[tko:workspace].\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:komodo", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -63,17 +62,17 @@ public class ListCommandTest extends AbstractCommandTest {
     			                INDENT+"Model3 ["+KomodoType.MODEL.name()+"]\n"; //$NON-NLS-1$ //$NON-NLS-2$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:komodo/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
-    
+
     @Test
     public void testList3() throws Exception {
     	setup(LIST_COMMAND3, ListCommand.class);
 
     	execute();
-    	
-    	assertEquals("/tko:komodo/tko:workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
+
+    	assertEquals("/tko:workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+
     	String expectedOutput = INDENT+"Table1 ["+KomodoType.TABLE.name()+"]\n"; //$NON-NLS-1$ //$NON-NLS-2$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);

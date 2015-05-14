@@ -30,9 +30,11 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 import org.komodo.core.KEngine;
+import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
 import org.komodo.repository.Messages;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.ArgCheck;
@@ -237,6 +239,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
         if (session == null || ! session.isLive())
             return;
 
+        LOGGER.debug("ModeShapeEngineThread.logoutSession: {0}", session.hashCode()); //$NON-NLS-1$
         session.logout();
     }
 
@@ -446,15 +449,60 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
         if (session == null || !session.isLive())
             return;
 
+        LOGGER.debug("ModeShapeEngineThread.clear: session = {0}", session.hashCode()); //$NON-NLS-1$
+
         Node rootNode = session.getRootNode();
         NodeIterator children = rootNode.getNodes();
         while(children.hasNext()) {
             Node child = children.nextNode();
             try {
-                // Cannot legally remove system nodes and they are not created
-                // by the tests anyway so leave them alone
-                if (!child.isNodeType("mode:system")) //$NON-NLS-1$
+                // since /tko:komodo, /tko:komodo/tko:workspace, /tko:komodo/tko:library, and /tko:komodo/tko:environment
+                // nodes are created by the repository configuration file we don't want to delete them. We do want to
+                // delete their children though.
+                if ( RepositoryImpl.KOMODO_ROOT.equals( child.getPath() ) ) {
+                    { // remove all children of workspace
+                        assert child.hasNode( Komodo.WORKSPACE );
+
+                        final Node workspace = child.getNode( Komodo.WORKSPACE );
+                        final NodeIterator itr = workspace.getNodes();
+
+                        while ( itr.hasNext() ) {
+                            final Node kid = itr.nextNode();
+                            LOGGER.debug( "ModeShapeEngineThread.clear: deleting node = {0}", kid.getPath() ); //$NON-NLS-1$
+                            kid.remove();
+                        }
+                    }
+
+                    { // remove all children of library
+                        assert child.hasNode( Komodo.LIBRARY );
+
+                        final Node library = child.getNode( Komodo.LIBRARY );
+                        final NodeIterator itr = library.getNodes();
+
+                        while ( itr.hasNext() ) {
+                            final Node kid = itr.nextNode();
+                            LOGGER.debug( "ModeShapeEngineThread.clear: deleting node = {0}", kid.getPath() ); //$NON-NLS-1$
+                            kid.remove();
+                        }
+                    }
+
+                    { // remove all children of environment
+                        assert child.hasNode( Komodo.ENVIRONMENT );
+
+                        final Node env = child.getNode( Komodo.ENVIRONMENT );
+                        final NodeIterator itr = env.getNodes();
+
+                        while ( itr.hasNext() ) {
+                            final Node kid = itr.nextNode();
+                            LOGGER.debug( "ModeShapeEngineThread.clear: deleting node = {0}", kid.getPath() ); //$NON-NLS-1$
+                            kid.remove();
+                        }
+                    }
+                } else if (!child.isNodeType("mode:system")) { //$NON-NLS-1$
+                    // Cannot legally remove system nodes and they are not created
+                    // by the tests anyway so leave them alone
                     child.remove();
+                }
             } catch (Exception ex) {
                 // No need to display these exceptions
             }
@@ -471,6 +519,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
         Object results = null;
         try {
             results = ModeshapeUtils.createSession(identifier);
+            LOGGER.debug("ModeShapeEngineThread.createSession: {0}", results.hashCode()); //$NON-NLS-1$
             respondCallback(request, results);
         } catch (Exception ex) {
             errorCallback(request, ex);

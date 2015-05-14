@@ -22,10 +22,12 @@
 package org.komodo.repository;
 
 import java.net.URL;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import org.komodo.core.KEngine;
 import org.komodo.repository.internal.ModeshapeEngineThread;
@@ -333,6 +335,8 @@ public class LocalRepository extends RepositoryImpl {
                                                                                                         callback,
                                                                                                         getSession(),
                                                                                                         getName() );
+                    KLog.getLogger().debug("LocalRepository.LocalRepositoryTransaction.commit() post commit request for session: {0}",  //$NON-NLS-1$
+                                           getSession().hashCode());
                     LocalRepository.this.engineThread.accept( request );
                 }
             }
@@ -391,10 +395,17 @@ public class LocalRepository extends RepositoryImpl {
 
             // send rollback request
             final RollbackCallback callback = new RollbackCallback();
-            LocalRepository.this.engineThread.accept(new ModeshapeEngineThread.SessionRequest(RequestType.ROLLBACK_SESSION,
-                                                                                              callback,
-                                                                                              getSession(),
-                                                                                              getName()));
+
+            if ( this.state == State.ERROR ) {
+                callback.errorOccurred( getError() );
+            } else {
+                KLog.getLogger().debug( "LocalRepository.LocalRepositoryTransaction.rollback post rollback request for session: {0}", //$NON-NLS-1$
+                                        getSession().hashCode() );
+                LocalRepository.this.engineThread.accept( new ModeshapeEngineThread.SessionRequest( RequestType.ROLLBACK_SESSION,
+                                                                                                    callback,
+                                                                                                    getSession(),
+                                                                                                    getName() ) );
+            }
         }
 
         protected void setError( final Throwable e ) {
@@ -444,6 +455,7 @@ public class LocalRepository extends RepositoryImpl {
             }
         };
 
+        KLog.getLogger().debug("LocalRepository.startRepository() post start repository request"); //$NON-NLS-1$
         engineThread.accept(new Request(RequestType.START, callback));
     }
 
@@ -474,25 +486,43 @@ public class LocalRepository extends RepositoryImpl {
             }
         };
 
-        // check session cache
-        if (!this.sessions.isEmpty()) {
-            for (final Entry< Session, UnitOfWork > entry : this.sessions.entrySet()) {
-                final Session session = entry.getKey();
-
-                // rollback and close all leftover sessions (there should not be any)
-                if (session.isLive()) {
-                    final UnitOfWork uow = entry.getValue();
-                    LOGGER.debug("LocalRepository.stopRepository: closing session for transaction {0}", uow.getName()); //$NON-NLS-1$
-                    uow.rollback();
-                    session.logout();
-                }
-            }
-        }
-
+        KLog.getLogger().debug("LocalRepository.stopRepository() post stop request"); //$NON-NLS-1$
         this.engineThread.accept(new Request(RequestType.STOP, callback));
     }
 
     private void clearRepository() {
+        // cleanup session cache
+        if (!this.sessions.isEmpty()) {
+            final Iterator< Entry< Session, UnitOfWork > > itr = this.sessions.entrySet().iterator();
+
+            while (itr.hasNext()) {
+                final Entry< Session, UnitOfWork > entry = itr.next();
+                final Session session = entry.getKey();
+
+                // rollback and close all leftover sessions
+                if ( session.isLive() ) {
+                    final UnitOfWork uow = entry.getValue();
+                    LOGGER.debug( "LocalRepository.stopRepository: closing session for transaction {0}", uow.getName() ); //$NON-NLS-1$
+
+                    // rollback any session that is in an incomplete state
+                    if ( !uow.getState().isFinal() ) {
+                        try {
+                            session.refresh( false );
+                        } catch ( final RepositoryException e ) {
+                            LOGGER.error( "LocalRepository.stopRepository(): Exception rolling back transaction \"{0}\"", //$NON-NLS-1$
+                                          e,
+                                          uow.getName() );
+                        }
+                    }
+
+                    // does not hurt to call logout if already called
+                    session.logout();
+                }
+
+                itr.remove();
+            }
+        }
+
         RequestCallback callback = new RequestCallback() {
 
             /**
@@ -516,6 +546,7 @@ public class LocalRepository extends RepositoryImpl {
             }
         };
 
+        KLog.getLogger().debug("LocalRepository.clearRepository() post clear request"); //$NON-NLS-1$
         this.engineThread.accept(new Request(RequestType.CLEAR, callback));
     }
 

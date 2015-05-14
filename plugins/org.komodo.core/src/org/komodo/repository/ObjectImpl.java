@@ -21,7 +21,6 @@ import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import javax.jcr.nodetype.NodeType;
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
-import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -92,19 +91,20 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      *        the name of the property being validated (cannot be empty)
      * @param expectedValue
      *        the expected value or <code>null</code> if the property should not exist
+     * @return <code>true</code> if the property value is the expected value
      * @throws KException
-     *         if an error occurs or if the property value is not the expected value
+     *         if an error occurs
      */
-    public static void validatePropertyValue( final UnitOfWork transaction,
-                                              final Repository repository,
-                                              final KomodoObject kobject,
-                                              final String name,
-                                              final Object expectedValue ) throws KException {
+    public static boolean validatePropertyValue( final UnitOfWork transaction,
+                                                 final Repository repository,
+                                                 final KomodoObject kobject,
+                                                 final String name,
+                                                 final Object expectedValue ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
 
         boolean valid = true;
         final Property property = kobject.getProperty( transaction, name );
@@ -117,9 +117,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             valid = property.getValue( transaction ).equals( expectedValue );
         }
 
-        if ( !valid ) {
-            throw new KException( Messages.getString( Komodo.INVALID_PROPERTY_VALUE, kobject.getAbsolutePath(), name ) );
-        }
+        return valid;
     }
 
     /**
@@ -132,28 +130,32 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @param types
      *        the primary type or descriptor names that the object must have (cannot be <code>null</code> or empty or have a
      *        <code>null</code> element)
+     * @return <code>true</code> if object is resolvable to the specified type(s)
      * @throws KException
      *         if an error occurs or if object does not have all the specified types
      */
-    public static void validateType( final UnitOfWork transaction,
-                                     final Repository repository,
-                                     final KomodoObject kobject,
-                                     final String... types ) throws KException {
+    public static boolean validateType( final UnitOfWork transaction,
+                                        final Repository repository,
+                                        final KomodoObject kobject,
+                                        final String... types ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
-        ArgCheck.isNotNull(kobject, "kobject"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(types, "types"); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( types, "types" ); //$NON-NLS-1$
+
+        boolean result = true;
 
         for ( final String type : types ) {
             ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
 
             if ( !kobject.hasDescriptor( transaction, type ) && !type.equals( kobject.getPrimaryType( transaction ).getName() ) ) {
-                throw new KException( Messages.getString( Komodo.INCORRECT_TYPE,
-                                                          kobject.getAbsolutePath(),
-                                                          kobject.getClass().getSimpleName() ) );
+                result = false;
+                break;
             }
         }
+
+        return result;
     }
 
     protected int index;
@@ -295,7 +297,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("objectimpl-node: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+            LOGGER.debug("objectimpl-node: transaction = {0}, path = {1}", transaction.getName(), getAbsolutePath()); //$NON-NLS-1$
         }
 
         Node node = null;
@@ -379,6 +381,10 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         try {
             final Node node = node(transaction).addNode(name, type);
             final KomodoObject result = new ObjectImpl(getRepository(), node.getPath(), node.getIndex());
+
+            if ( LOGGER.isDebugEnabled() ) {
+                LOGGER.debug( "objectimpl-addChild: transaction = {0}, path = {1}", transaction.getName(), node.getPath() ); //$NON-NLS-1$
+            }
 
             return result;
         } catch (final Exception e) {

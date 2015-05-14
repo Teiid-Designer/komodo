@@ -338,6 +338,8 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         _repo.add(this.uow, null, item1, null);
         final String item2 = "shouldRemoveMultipleWorkspaceRootItems-2";
         _repo.add(this.uow, null, item2, null);
+        commit();
+
         _repo.remove(this.uow, item1, item2);
         commit();
 

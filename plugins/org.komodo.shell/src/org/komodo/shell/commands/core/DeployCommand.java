@@ -85,8 +85,7 @@ public class DeployCommand extends BuiltInShellCommand implements StringConstant
             }
         }
 
-        Repository repository = wsStatus.getCurrentContext().getRepository();
-        WorkspaceManager wkspManager = WorkspaceManager.getInstance(repository);
+        WorkspaceManager wkspManager = wsStatus.getCurrentContext().getWorkspaceManager();
 
         Vdb vdb = wkspManager.resolve(null, vdbToDeploy, Vdb.class);
         if (vdb == null)

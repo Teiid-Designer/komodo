@@ -375,6 +375,11 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     /**
      * The root path of the Komodo repository library.
      */
+    public static String ENV_ROOT = ( KOMODO_ROOT + FORWARD_SLASH + Komodo.ENVIRONMENT );
+
+    /**
+     * The root path of the Komodo repository library.
+     */
     public static String LIBRARY_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.LIBRARY);
 
     /**
@@ -438,6 +443,13 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
             final Node parent = session.getNode(workspacePath);
             final Node newNode = parent.addNode(name, primaryType);
             final KomodoObject result = new ObjectImpl(this, newNode.getPath(), 0);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug( "RepositoryImpl.add: transaction = {0}, node name = {1}, index = {2}", //$NON-NLS-1$
+                              transaction.getName(),
+                              newNode.getName(),
+                              newNode.getIndex() );
+            }
 
             return result;
         } catch (final Exception e) {
@@ -1185,6 +1197,20 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
      */
     protected KomodoObject komodoRoot(final UnitOfWork uow) throws KException {
         return create(uow, KOMODO_ROOT, KomodoLexicon.Komodo.NODE_TYPE);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Repository#komodoEnvironment(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoObject komodoEnvironment( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        komodoRoot( transaction );
+        return create( transaction, ENV_ROOT, KomodoLexicon.Environment.NODE_TYPE );
     }
 
     @Override

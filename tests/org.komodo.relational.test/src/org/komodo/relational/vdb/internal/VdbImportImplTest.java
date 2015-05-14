@@ -31,7 +31,7 @@ public final class VdbImportImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
-        this.vdbImport = RelationalModelFactory.createVdbImport( this.uow, _repo, this.vdb, "entry" );
+        this.vdbImport = RelationalModelFactory.createVdbImport( this.uow, _repo, this.vdb, "vdbToImport" );
         commit();
     }
 

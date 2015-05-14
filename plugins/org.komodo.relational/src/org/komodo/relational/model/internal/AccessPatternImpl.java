@@ -78,21 +78,15 @@ public final class AccessPatternImpl extends TableConstraintImpl implements Acce
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                final Repository repository = kobject.getRepository();
-                ObjectImpl.validateType( transaction, repository, kobject, Constraint.TABLE_ELEMENT );
-                ObjectImpl.validatePropertyValue( transaction,
-                                                  repository,
-                                                  kobject,
-                                                  Constraint.TYPE,
-                                                  AccessPattern.CONSTRAINT_TYPE.toValue() );
-                return true;
-            } catch (final Exception e) {
-                // not resolvable
-            }
+                                   final KomodoObject kobject ) throws KException {
+            final Repository repository = kobject.getRepository();
 
-            return false;
+            return ObjectImpl.validateType( transaction, repository, kobject, Constraint.TABLE_ELEMENT )
+                   && ObjectImpl.validatePropertyValue( transaction,
+                                                        repository,
+                                                        kobject,
+                                                        Constraint.TYPE,
+                                                        AccessPattern.CONSTRAINT_TYPE.toValue() );
         }
 
         /**

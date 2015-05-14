@@ -63,9 +63,11 @@ public interface TypeResolver< T extends RelationalObject > {
      * @param kobject
      *        the {@link KomodoObject} being resolved (cannot be <code>null</code>)
      * @return <code>true</code> if object can be resolved to this resolver's type
+     * @throws KException
+     *         if an error occurs
      */
     boolean resolvable( final UnitOfWork transaction,
-                        final KomodoObject kobject );
+                        final KomodoObject kobject ) throws KException;
 
     /**
      * Converts the specified {@link KomodoObject} to this resolver's strong typed relational object. It is assumed that the

@@ -15,7 +15,6 @@ import javax.jcr.Session;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
@@ -86,17 +85,12 @@ public class ValidationManagerImpl implements ValidationManager {
 
     private static SAXParser _parser;
 
-    /**
-     * The root path of the Komodo repository library.
-     */
-    public static String ENV_ROOT = ( RepositoryImpl.KOMODO_ROOT + StringConstants.FORWARD_SLASH + Komodo.ENVIRONMENT );
-
     private static final KLog LOGGER = KLog.getLogger();
 
     /**
      * The root path of the Komodo environment validation area.
      */
-    public static String VALIDATION_ROOT = ( ENV_ROOT + StringConstants.FORWARD_SLASH + KomodoLexicon.Environment.VALIDATION );
+    public static String VALIDATION_ROOT = ( RepositoryImpl.ENV_ROOT + StringConstants.FORWARD_SLASH + KomodoLexicon.Environment.VALIDATION );
 
     private static void setupValidationParser() throws Exception {
         // load validation XSD for validation using parser
@@ -597,11 +591,8 @@ public class ValidationManagerImpl implements ValidationManager {
 
         final Session session = getSession( transaction );
         final JcrTools jcrTools = new JcrTools();
-
-        jcrTools.findOrCreateNode( session, RepositoryImpl.KOMODO_ROOT );
-        jcrTools.findOrCreateNode( session, ENV_ROOT );
-
         final Node node = jcrTools.findOrCreateNode( session, VALIDATION_ROOT );
+
         return new ObjectImpl( this.repo, node.getPath(), node.getIndex() );
     }
 

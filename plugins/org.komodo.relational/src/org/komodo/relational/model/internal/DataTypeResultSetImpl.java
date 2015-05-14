@@ -87,15 +87,10 @@ public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                // must have the right name
-                if (CreateProcedure.RESULT_SET.equals( kobject.getName( transaction ) )) {
-                    ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_DATA_TYPE );
-                    return true;
-                }
-            } catch (final KException e) {
-                // not resolvable
+                                   final KomodoObject kobject ) throws KException {
+            // must have the right name
+            if ( CreateProcedure.RESULT_SET.equals( kobject.getName( transaction ) ) ) {
+                return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_DATA_TYPE );
             }
 
             return false;

@@ -82,15 +82,8 @@ public final class ViewImpl extends TableImpl implements View {
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.VIEW_STATEMENT );
-                return true;
-            } catch (final Exception e) {
-                // not resolvable
-            }
-
-            return false;
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.VIEW_STATEMENT );
         }
 
         /**

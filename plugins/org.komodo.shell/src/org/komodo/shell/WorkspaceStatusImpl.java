@@ -31,7 +31,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -55,8 +54,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     private final KomodoShell shell;
 
-    /* The library context is where all artifacts are stored */
-    private WorkspaceContextImpl rootContext;
+    /* Workspace Context */
+    private WorkspaceContextImpl wsContext;
 
     /* Cache of context to avoid creating needless duplicate contexts */
     private Map<String, WorkspaceContext> contextCache = new HashMap<String, WorkspaceContext>();
@@ -106,12 +105,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(repo);
-        
-        WorkspaceContextImpl wsContext = new WorkspaceContextImpl(this,null,wkspMgr);
+
+        wsContext = new WorkspaceContextImpl(this,null,wkspMgr);
         contextCache.put( wkspMgr.getAbsolutePath(), wsContext );
-        
-        rootContext = wsContext;
-        contextCache.put( wkspMgr.getAbsolutePath(), rootContext );
 
         currentContext = wsContext;
     }
@@ -192,14 +188,14 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             return context;
 
         if (FORWARD_SLASH.equals(contextPath))
-            return getRootContext();
+            return getWorkspaceContext();
 
         //
         // Need to hunt for the path
         // contextPath should be of the form /tko:komodo/tko:workspace/vdb/.../...
         //
         String[] contexts = contextPath.split("\\/"); //$NON-NLS-1$
-        context = getRootContext();
+        context = getWorkspaceContext();
         for (int i = 0; i < contexts.length; ++i) {
             try {
                 context = context.getChild(contexts[i]);
@@ -245,11 +241,11 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#getRootContext()
+     * @see org.komodo.shell.api.WorkspaceStatus#getWorkspaceContext()
      */
     @Override
-    public WorkspaceContext getRootContext() {
-        return rootContext;
+    public WorkspaceContext getWorkspaceContext() {
+        return wsContext;
     }
 
     /**
@@ -317,7 +313,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     		}
     	}
     }
-    
+
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceStatus#setProperties(java.util.Properties)
      */

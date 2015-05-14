@@ -45,7 +45,7 @@ public class VdbImporter extends AbstractImporter {
      * constructor
      *
      * @param repository repository into which ddl should be imported
-     * 
+     *
      */
     public VdbImporter(Repository repository) {
         super(repository, ImportType.VDB);
@@ -94,7 +94,7 @@ public class VdbImporter extends AbstractImporter {
      * @param vdbXmlFile the vdb xml file
      * @param importOptions the options for the import
      * @param importMessages the messages recorded during the import
-     * @return newly created root vdb node 
+     * @return newly created root vdb node
      */
     public KomodoObject importVdb(File vdbXmlFile, ImportOptions importOptions, ImportMessages importMessages) {
         KomodoObject ko = null;

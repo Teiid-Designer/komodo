@@ -16,78 +16,9 @@
     ],
     "workspaces" : {
         "default" : "komodoLocalWorkspace",
-        "allowCreation" : true
-    },
-    "indexProviders" : {
-        "local" : {
-            "classname" : "org.modeshape.jcr.index.local.LocalIndexProvider",
-            "directory" : "${user.home}/.komodo/indexes"
-        }
-    },
-    "indexes" : {
-        "nodesByLocalName" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "nt:unstructured",
-            "columns" : "mode:localName(STRING)",
-            "workspaces" : "*"
-        },
-        "nodesByPath" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "nt:unstructured",
-            "columns" : "jcr:path(PATH)",
-            "workspaces" : "*"
-        },
-        "nodesByType" : {
-            "kind" : "Nodetype",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "nt:unstructured",
-            "workspaces" : "*",
-            "columns" : "mode:localName(STRING)"
-        },
-        "vdbsByVersion" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "vdb:virtualDatabase",
-            "workspaces" : "*",
-            "columns" : "vdb:version(LONG)"
-        },
-        "kSchemaByRendition" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "tko:schema",
-            "workspaces" : "*",
-            "columns" : "tko:rendition(STRING)"
-        },
-        "ddlTableStmtByQuery" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "teiidddl:createTable",
-            "workspaces" : "*",
-            "columns" : "teiidddl:queryExpression(STRING)"
-        },
-        "ddlViewStmtByQuery" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "teiidddl:createView",
-            "workspaces" : "*",
-            "columns" : "teiidddl:queryExpression(STRING)"
-        },
-        "ddlProcStmtByQuery" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "teiidddl:createProcedure",
-            "workspaces" : "*",
-            "columns" : "teiidddl:statement(STRING)"
+        "allowCreation" : true,
+        "initialContent" : {
+            "*" : "initialContent.xml"
         }
     },
     "sequencing" : {

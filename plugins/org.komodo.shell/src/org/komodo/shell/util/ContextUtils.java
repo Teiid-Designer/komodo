@@ -18,12 +18,12 @@ import org.komodo.utils.StringUtils;
 public class ContextUtils {
 	
 	@SuppressWarnings("javadoc")
-	public static final String ROOT_CONTEXT_NAME = "tko:komodo"; //$NON-NLS-1$
+	public static final String WORKSPACE_CONTEXT_NAME = "tko:workspace"; //$NON-NLS-1$
 	@SuppressWarnings("javadoc")
 	public static final String PATH_SEPARATOR = "/"; //$NON-NLS-1$
 
 	private static final String ROOT_OPT1 = PATH_SEPARATOR;
-	private static final String ROOT_OPT2 = ROOT_OPT1 + ContextUtils.ROOT_CONTEXT_NAME;
+	private static final String ROOT_OPT2 = ROOT_OPT1 + ContextUtils.WORKSPACE_CONTEXT_NAME;
 	private static final String ROOT_OPT3 = ROOT_OPT2 + PATH_SEPARATOR;
 
 	/**
@@ -39,12 +39,12 @@ public class ContextUtils {
 		
 		// check path for cd into root options
 		if( path.equalsIgnoreCase(ROOT_OPT1) || path.equalsIgnoreCase(ROOT_OPT2) || path.equalsIgnoreCase(ROOT_OPT3)) { 
-			return workspaceStatus.getRootContext();
+			return workspaceStatus.getWorkspaceContext();
 		}
 		
 		// Location supplied as absolute path
 		if(ContextUtils.isAbsolutePath(path)) {
-			return ContextUtils.getContextForAbsolutePath(workspaceStatus.getRootContext(), path);
+			return ContextUtils.getContextForAbsolutePath(workspaceStatus.getWorkspaceContext(), path);
 		// Location supplied as relative path
 		} else {
 			return ContextUtils.getRelativeContext(workspaceStatus.getCurrentContext(), path);
@@ -204,25 +204,25 @@ public class ContextUtils {
 	}
 
 	/**
-	 * Determines if the supplied path is absolute (starts with /ROOT_CONTEXT_NAME/ )
+	 * Determines if the supplied path is absolute (starts with /WORKSPACE_CONTEXT_NAME/ )
 	 * @param path the supplied path
 	 * @return true if path is absolute, false if not
 	 */
 	public static boolean isAbsolutePath(String path) {
-		if(path.startsWith(PATH_SEPARATOR + ROOT_CONTEXT_NAME + PATH_SEPARATOR)) {
+		if(path.startsWith(PATH_SEPARATOR + WORKSPACE_CONTEXT_NAME + PATH_SEPARATOR)) {
 			return true;
 		}
 		return false;
 	}
 	
 	/**
-	 * convert the supplied absolute path to a path relative to the root context
+	 * convert the supplied absolute path to a path relative to the workspace context
 	 * @param absolutePath the supplied absolute path
 	 * @return the path relative to the root context
 	 */
 	public static String convertAbsolutePathToRootRelative(String absolutePath) {
-		if(absolutePath.startsWith(PATH_SEPARATOR + ROOT_CONTEXT_NAME + PATH_SEPARATOR)) {
-			return absolutePath.substring( (PATH_SEPARATOR+ROOT_CONTEXT_NAME+PATH_SEPARATOR).length() );
+		if(absolutePath.startsWith(PATH_SEPARATOR + WORKSPACE_CONTEXT_NAME + PATH_SEPARATOR)) {
+			return absolutePath.substring( (PATH_SEPARATOR+WORKSPACE_CONTEXT_NAME+PATH_SEPARATOR).length() );
 		}
 		return null;
 	}
@@ -236,7 +236,7 @@ public class ContextUtils {
 	public static String convertAbsolutePathToRelative(WorkspaceContext context, String absolutePath) {
 		String absContextPath = null;
 		try {
-			absContextPath = ContextUtils.PATH_SEPARATOR + context.getFullName();
+			absContextPath = context.getFullName();
 		} catch (Exception ex) {
 			return null;
 		}

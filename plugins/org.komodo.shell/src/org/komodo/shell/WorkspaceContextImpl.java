@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceContextVisitor;
@@ -284,4 +285,12 @@ public class WorkspaceContextImpl implements WorkspaceContext {
     public Object visit(WorkspaceContextVisitor visitor) throws Exception {
         return visitor.visit(this);
     }
+
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceContext#getWorkspaceManager()
+	 */
+	@Override
+	public WorkspaceManager getWorkspaceManager() throws Exception {
+        return WorkspaceManager.getInstance(getRepository());
+	}
 }

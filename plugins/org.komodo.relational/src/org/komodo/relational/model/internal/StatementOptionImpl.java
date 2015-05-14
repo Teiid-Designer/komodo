@@ -83,15 +83,11 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
          */
         @Override
         public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) {
-            try {
-                ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, StandardDdlLexicon.TYPE_STATEMENT_OPTION );
-                return true;
-            } catch (final Exception e) {
-                // not resolvable
-            }
-
-            return false;
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction,
+                                            kobject.getRepository(),
+                                            kobject,
+                                            StandardDdlLexicon.TYPE_STATEMENT_OPTION );
         }
 
         /**
