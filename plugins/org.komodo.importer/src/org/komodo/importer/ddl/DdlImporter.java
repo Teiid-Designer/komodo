@@ -66,8 +66,8 @@ public class DdlImporter extends AbstractImporter {
             case MODEL:
             {
                 ModelType.Type modelType = (ModelType.Type) importOptions.getOption(OptionKeys.MODEL_TYPE);
-                Vdb vdb = getWorkspaceManager().createVdb(transaction, getWorkspace(transaction), "vdb-for-" + name, name); //$NON-NLS-1$
-                Model model = getWorkspaceManager().createModel(transaction, vdb, name);
+                Vdb vdb = getWorkspaceManager(transaction).createVdb(transaction, getWorkspace(transaction), "vdb-for-" + name, name); //$NON-NLS-1$
+                Model model = getWorkspaceManager(transaction).createModel(transaction, vdb, name);
                 model.setModelType(transaction, Model.Type.valueOf(modelType.toString()));
                 model.setModelDefinition(transaction, content);
                 model.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
@@ -75,7 +75,7 @@ public class DdlImporter extends AbstractImporter {
             }
             case SCHEMA:
             {
-                Schema schema = getWorkspaceManager().createSchema(transaction, getWorkspace(transaction), name);
+                Schema schema = getWorkspaceManager(transaction).createSchema(transaction, getWorkspace(transaction), name);
                 schema.setRendition(transaction, content);
                 schema.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
                 return schema;

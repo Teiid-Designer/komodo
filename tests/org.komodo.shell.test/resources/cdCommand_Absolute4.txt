@@ -1,5 +1,5 @@
 #create a vdb, model, tables.  cd using absolute with a .. notation mixed in
-cd /tko:komodo/tko:workspace
+cd /tko:workspace
 create vdb MyVdb
 cd MyVdb
 create model MyModel
@@ -7,4 +7,4 @@ cd MyModel
 create table Table1
 create table Table2
 cd Table2
-cd /tko:komodo/tko:workspace/MyVdb/MyModel/Table2/../Table1
+cd /tko:workspace/MyVdb/MyModel/Table2/../Table1

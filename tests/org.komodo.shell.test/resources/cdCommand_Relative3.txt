@@ -1,5 +1,5 @@
 #uses one double dot notation
-cd /tko:komodo/tko:workspace
+cd /tko:workspace
 create vdb MyVdb
 cd MyVdb
 create model MyModel

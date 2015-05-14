@@ -373,7 +373,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KomodoObject vdbNode = _repo.getFromWorkspace(uow, TWEET_EXAMPLE);
         assertNotNull(vdbNode);
-        WorkspaceManager wkspManager = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspManager = WorkspaceManager.getInstance(uow,_repo);
 
         KomodoObject twitterView = vdbNode.getChild(uow, TWITTER_VIEW_MODEL);
         Model model = wkspManager.resolve(uow, twitterView, Model.class);
@@ -772,7 +772,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow, vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(this.uow);
@@ -790,7 +790,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(2, vdb.getModels(this.uow).length);
 
         assertEquals(1, vdb.getDataRoles(this.uow).length);
-        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(this.uow,  vdb.getDataRoles(this.uow)[0], DataRole.class);
+        DataRole dataRole = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow,  vdb.getDataRoles(this.uow)[0], DataRole.class);
     	assertEquals("publishers-only", dataRole.getName(this.uow));
     	assertNotNull(dataRole.getProperty(this.uow, "vdb:grantAll"));
         assertEquals("true", dataRole.getProperty(this.uow, "vdb:grantAll").getValue(this.uow).toString());
@@ -798,7 +798,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(2, dataRole.getMappedRoles(this.uow).length);
 
         assertEquals(1, vdb.getTranslators(this.uow).length);
-        Translator translator = WorkspaceManager.getInstance(_repo).resolve(this.uow,  vdb.getTranslators(this.uow)[0], Translator.class);
+        Translator translator = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow,  vdb.getTranslators(this.uow)[0], Translator.class);
     	assertEquals("books_db2", translator.getName(this.uow));
     	assertEquals("db2", translator.getType(this.uow));
     	assertNotNull(translator.getProperty(this.uow, "requiresCriteria"));
@@ -833,7 +833,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow, vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(this.uow);
@@ -887,7 +887,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow, vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(this.uow);
@@ -923,7 +923,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow, vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(this.uow);
@@ -964,7 +964,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 		    </data-role>
         */
 
-        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(this.uow,  vdb.getDataRoles(this.uow)[0], DataRole.class);
+        DataRole dataRole = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow,  vdb.getDataRoles(this.uow)[0], DataRole.class);
     	assertEquals("publishers-only", dataRole.getName(this.uow));
     	assertNotNull(dataRole.getProperty(this.uow, "vdb:grantAll"));
         assertEquals("true", dataRole.getProperty(this.uow, "vdb:grantAll").getValue(this.uow).toString());
@@ -995,7 +995,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow, vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         assertEquals("BooksVirtualModelOnly", vdb.getVdbName(this.uow));
@@ -1033,7 +1033,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow, vdbNode, Vdb.class);
 
         /*
 		    <description>Sample vdb containing only a tranlator override element</description>
@@ -1050,7 +1050,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertEquals(0, vdb.getModels(this.uow).length);
         assertEquals(1, vdb.getTranslators(this.uow).length);
-        Translator translator = WorkspaceManager.getInstance(_repo).resolve(this.uow,  vdb.getTranslators(this.uow)[0], Translator.class);
+        Translator translator = WorkspaceManager.getInstance(this.uow, _repo).resolve(this.uow,  vdb.getTranslators(this.uow)[0], Translator.class);
     	assertEquals("books_db2", translator.getName(this.uow));
     	assertEquals("db2", translator.getType(this.uow));
 

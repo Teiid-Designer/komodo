@@ -63,8 +63,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         WorkspaceStatus wsStatus = getWorkspaceStatus();
 
         WorkspaceContext currentContext = wsStatus.getCurrentContext();
-        Repository repository = wsStatus.getCurrentContext().getRepository();
-        WorkspaceManager wkspManager = WorkspaceManager.getInstance(repository);
+        WorkspaceManager wkspManager = wsStatus.getCurrentContext().getWorkspaceManager();
         KomodoObject parent = currentContext.getKomodoObj();
         
         KomodoObject child = parent.getChild(null, objName);

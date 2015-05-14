@@ -202,11 +202,10 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
     private void create(String objType, String objName, WorkspaceContext context, String fourthArg) throws Exception {
         WorkspaceStatus wsStatus = getWorkspaceStatus();
 
-        Repository repository = wsStatus.getCurrentContext().getRepository();
-        WorkspaceManager wkspManager = WorkspaceManager.getInstance(repository);
+        WorkspaceManager wkspManager = wsStatus.getCurrentContext().getWorkspaceManager();
+        final UnitOfWork uow = wsStatus.getTransaction();
         KomodoObject parent = context.getKomodoObj();
 
-        final UnitOfWork uow = wsStatus.getTransaction();
         KomodoType kType = KomodoType.getKomodoType(objType);
         switch (kType) {
             case STATEMENT_OPTION: {
@@ -245,7 +244,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 String tableRefPath = requiredArgument(2, Messages.getString("CreateCommand.InvalidArgMsg_FKTableRefPath")); //$NON-NLS-1$
 
                 FindWorkspaceNodeVisitor visitor = new FindWorkspaceNodeVisitor(tableRefPath);
-                visitor.visit(wsStatus.getRootContext());
+                visitor.visit(wsStatus.getWorkspaceContext());
                 WorkspaceContext otherTableContext = visitor.getNodeContext();
 
                 wkspManager.create(uow, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, otherTableContext.getKomodoObj()));

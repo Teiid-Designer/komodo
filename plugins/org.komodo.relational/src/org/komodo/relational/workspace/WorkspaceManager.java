@@ -24,6 +24,7 @@ package org.komodo.relational.workspace;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
@@ -81,20 +82,26 @@ public class WorkspaceManager extends RelationalObjectImpl {
                                                                                                                                              adapter);
 
     /**
+     * @param uow the transaction
      * @param repository
      *        the repository
      * @return singleton instance for the given repository
      * @throws KException if there is an error obtaining the workspace manager
      */
-    public static WorkspaceManager getInstance( Repository repository ) throws KException {
+    public static WorkspaceManager getInstance( UnitOfWork uow, Repository repository ) throws KException {
         WorkspaceManager instance = instances.get(repository.getId());
         
-        UnitOfWork uow = repository.createTransaction( "createWorkspaceManager", true, null ); //$NON-NLS-1$
+        //UnitOfWork uow = repository.createTransaction( "createWorkspaceManager", true, null ); //$NON-NLS-1$
         instance = new WorkspaceManager(uow, repository);
-        uow.commit();
+        //uow.commit();
         instances.add(instance);
         
         return instance;
+    }
+
+    @Override
+    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+        return KomodoType.WORKSPACE;
     }
 
     /**
@@ -111,7 +118,8 @@ public class WorkspaceManager extends RelationalObjectImpl {
     }
 
     private WorkspaceManager(UnitOfWork uow, Repository repository ) throws KException {
-        super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);        
+        super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);  
+        repository.komodoWorkspace(uow);
         repository.addObserver(new RepositoryObserver() {
 
             @Override

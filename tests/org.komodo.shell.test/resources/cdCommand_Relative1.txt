@@ -1,5 +1,4 @@
 #cd into workspace
-cd /tko:komodo/
-cd tko:workspace
+cd /tko:workspace/
 
 

@@ -41,7 +41,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:komodo/tko:workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -50,7 +50,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:komodo/tko:workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -59,7 +59,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:komodo/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -68,7 +68,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:komodo/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
 
     	KomodoObject ko = wsStatus.getCurrentContext().getKomodoObj();
     	// Verify the komodo class is a Table and is TABLE type
@@ -93,9 +93,9 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	assertEquals("/tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/tko:komodo/tko:workspace/vdb_test_1/model_1/table_1"); //$NON-NLS-1$
+    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/vdb_test_1/model_1/table_1"); //$NON-NLS-1$
 
     	KomodoObject ko = tableContext.getKomodoObj();
     	// Verify the komodo class is a Table and is TABLE type
@@ -128,9 +128,9 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	assertEquals("/tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/tko:komodo/tko:workspace/vdb_test_1/model_1/table_1"); //$NON-NLS-1$
+    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/vdb_test_1/model_1/table_1"); //$NON-NLS-1$
 
     	KomodoObject ko = tableContext.getKomodoObj();
     	// Verify the komodo class is a Table and is TABLE type
@@ -163,14 +163,14 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	assertEquals("/tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext modelContext = ContextUtils.getContextForPath(wsStatus, "/tko:komodo/tko:workspace/MyModel"); //$NON-NLS-1$
+    	WorkspaceContext modelContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/MyModel"); //$NON-NLS-1$
     	KomodoObject ko = modelContext.getKomodoObj();
     	// Verify the komodo class is a Model and is MODEL type
     	assertEquals(KomodoType.MODEL.name(), ko.getTypeIdentifier(this.uow).name());
 
-    	WorkspaceContext table1Context = ContextUtils.getContextForPath(wsStatus, "/tko:komodo/tko:workspace/MyModel/MyTable1"); //$NON-NLS-1$
+    	WorkspaceContext table1Context = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/MyModel/MyTable1"); //$NON-NLS-1$
     	ko = table1Context.getKomodoObj();
     	// Verify the komodo class is a Model and is MODEL type
     	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(this.uow).name());
@@ -205,9 +205,9 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	assertEquals("/tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext vdbContext = ContextUtils.getContextForPath(wsStatus, "/tko:komodo/tko:workspace/MyVdb1"); //$NON-NLS-1$
+    	WorkspaceContext vdbContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/MyVdb1"); //$NON-NLS-1$
     	KomodoObject ko = vdbContext.getKomodoObj();
     	// Verify the komodo class is a Vdb and is VDB type
     	assertEquals(KomodoType.VDB.name(), ko.getTypeIdentifier(this.uow).name());

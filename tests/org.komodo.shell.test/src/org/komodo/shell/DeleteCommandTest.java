@@ -21,7 +21,7 @@ public class DeleteCommandTest  extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	assertEquals(0, wsStatus.getCurrentContext().getKomodoObj().getChildren(this.uow).length);
     }
 
@@ -31,7 +31,7 @@ public class DeleteCommandTest  extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:komodo/tko:workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	assertEquals(0, wsStatus.getCurrentContext().getKomodoObj().getChildren(this.uow).length);
     }
 
@@ -42,7 +42,7 @@ public class DeleteCommandTest  extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:komodo/tko:workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	assertEquals(0, wsStatus.getCurrentContext().getKomodoObj().getChildren(this.uow).length);
     }
     
@@ -52,10 +52,10 @@ public class DeleteCommandTest  extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	// Model child table was deleted
-    	WorkspaceContext context = ContextUtils.getContextForPath(wsStatus, "/tko:komodo/tko:workspace/vdb_test_1/model_1"); //$NON-NLS-1$
+    	WorkspaceContext context = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/vdb_test_1/model_1"); //$NON-NLS-1$
     	assertEquals(0, context.getKomodoObj().getChildren(uow).length);
     }
     
@@ -65,10 +65,10 @@ public class DeleteCommandTest  extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:komodo/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	// VDB child model was deleted
-    	WorkspaceContext context = ContextUtils.getContextForPath(wsStatus, "/tko:komodo/tko:workspace/vdb_test_1"); //$NON-NLS-1$
+    	WorkspaceContext context = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/vdb_test_1"); //$NON-NLS-1$
     	assertEquals(0, context.getKomodoObj().getChildren(uow).length);
     }
 

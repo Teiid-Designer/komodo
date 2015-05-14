@@ -4,5 +4,5 @@ cd vdb_test_1
 create model model_1
 cd model_1
 create table table_1
-cd /tko:komodo/tko:workspace
-delete /tko:komodo/tko:workspace/vdb_test_1/model_1
+cd /tko:workspace
+delete /tko:workspace/vdb_test_1/model_1

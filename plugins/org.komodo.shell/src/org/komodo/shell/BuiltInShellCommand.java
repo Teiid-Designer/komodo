@@ -238,7 +238,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     	// List of potentials completions
     	List<String> potentialsList = new ArrayList<String>();
     	// Only offer '..' if below the root
-    	if( (currentContext.getType()!=WorkspaceStatus.ROOT_TYPE) && includeGoUp ) {
+    	if( (currentContext.getType()!=WorkspaceStatus.WORKSPACE_TYPE) && includeGoUp ) {
     		potentialsList.add(StringConstants.DOT_DOT);
     	}
 
@@ -261,23 +261,23 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     		if( lastArgument.startsWith(ContextUtils.PATH_SEPARATOR) ) {
     			// If not the full absolute root, then provide it
     			if(!ContextUtils.isAbsolutePath(lastArgument)) {
-    				potentialsList.add(ContextUtils.PATH_SEPARATOR+ContextUtils.ROOT_CONTEXT_NAME+ContextUtils.PATH_SEPARATOR);
+    				potentialsList.add(ContextUtils.PATH_SEPARATOR+ContextUtils.WORKSPACE_CONTEXT_NAME+ContextUtils.PATH_SEPARATOR);
     				updateCandidates(candidates,potentialsList,lastArgument);
     				// Starts with correct root - provide next option
     			} else {
     				String relativePath = ContextUtils.convertAbsolutePathToRootRelative(lastArgument);
-    				WorkspaceContext deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus().getRootContext(), relativePath);
+    				WorkspaceContext deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus().getWorkspaceContext(), relativePath);
 
     				// Get children of deepest context match to form potentialsList
     				List<WorkspaceContext> children = deepestMatchingContext.getChildren();
     				if(!children.isEmpty()) {
     					// Get all children as potentials
     					for(WorkspaceContext childContext : children) {
-    						String absolutePath = ContextUtils.PATH_SEPARATOR + childContext.getFullName();
+    						String absolutePath = childContext.getFullName();
     						potentialsList.add(absolutePath+ContextUtils.PATH_SEPARATOR);
     					}
     				} else {
-    					String absolutePath = ContextUtils.PATH_SEPARATOR + deepestMatchingContext.getFullName();
+    					String absolutePath = deepestMatchingContext.getFullName();
     					potentialsList.add(absolutePath+ContextUtils.PATH_SEPARATOR);
     				}
     				updateCandidates(candidates, potentialsList, lastArgument);
@@ -294,12 +294,12 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     			if(!children.isEmpty()) {
     				// Get all children as potentials
     				for(WorkspaceContext childContext : children) {
-    					String absolutePath = ContextUtils.PATH_SEPARATOR + childContext.getFullName();
+    					String absolutePath = childContext.getFullName();
     					String relativePath = ContextUtils.convertAbsolutePathToRelative(currentContext, absolutePath);
     					potentialsList.add(relativePath+ContextUtils.PATH_SEPARATOR);
     				}
     			} else {
-    				String absolutePath = ContextUtils.PATH_SEPARATOR + deepestMatchingContext.getFullName();
+    				String absolutePath = deepestMatchingContext.getFullName();
     				String relativePath = ContextUtils.convertAbsolutePathToRelative(currentContext, absolutePath);
     				potentialsList.add(relativePath+ContextUtils.PATH_SEPARATOR);
     			}

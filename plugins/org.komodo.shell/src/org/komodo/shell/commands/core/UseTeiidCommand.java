@@ -22,6 +22,7 @@
 package org.komodo.shell.commands.core;
 
 import java.util.List;
+
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
@@ -30,7 +31,6 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.runtime.TeiidInstance;
 
 /**
@@ -61,8 +61,7 @@ public class UseTeiidCommand extends BuiltInShellCommand implements StringConsta
         String noConnect = optionalArgument(1);
         WorkspaceStatus wStatus = getWorkspaceStatus();
 
-        Repository repository = wStatus.getCurrentContext().getRepository();
-        WorkspaceManager wkspManager = WorkspaceManager.getInstance(repository);
+        WorkspaceManager wkspManager = wStatus.getCurrentContext().getWorkspaceManager();
 
         List<Teiid> teiids = wkspManager.findTeiids(null);
 

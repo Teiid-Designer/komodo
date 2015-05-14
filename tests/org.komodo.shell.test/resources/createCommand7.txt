@@ -1,41 +1,41 @@
 # -----------------------------------------------
 # Create all relational objects 
 # -----------------------------------------------
-create Schema MySchema /tko:komodo/tko:workspace
+create Schema MySchema /tko:workspace
 #
-create Model MyModel /tko:komodo/tko:workspace
+create Model MyModel /tko:workspace
 #
-create Table MyTable1 /tko:komodo/tko:workspace/MyModel
-create Table MyTable2 /tko:komodo/tko:workspace/MyModel
+create Table MyTable1 /tko:workspace/MyModel
+create Table MyTable2 /tko:workspace/MyModel
 #
-create View MyView /tko:komodo/tko:workspace/MyModel
+create View MyView /tko:workspace/MyModel
 #
-create UserDefinedFunction MyUdf /tko:komodo/tko:workspace/MyModel
+create UserDefinedFunction MyUdf /tko:workspace/MyModel
 #
-create PushdownFunction MyPushdownFunc /tko:komodo/tko:workspace/MyModel
+create PushdownFunction MyPushdownFunc /tko:workspace/MyModel
 #
-create StoredProcedure MyStoredProc /tko:komodo/tko:workspace/MyModel
+create StoredProcedure MyStoredProc /tko:workspace/MyModel
 #
-create VirtualProcedure MyVirtualProc /tko:komodo/tko:workspace/MyModel
+create VirtualProcedure MyVirtualProc /tko:workspace/MyModel
 #
-create Column MyCol1 /tko:komodo/tko:workspace/MyModel/MyTable1
-create Column MyCol2 /tko:komodo/tko:workspace/MyModel/MyTable1
-create Column MyCol3 /tko:komodo/tko:workspace/MyModel/MyTable1
+create Column MyCol1 /tko:workspace/MyModel/MyTable1
+create Column MyCol2 /tko:workspace/MyModel/MyTable1
+create Column MyCol3 /tko:workspace/MyModel/MyTable1
 #
-create PrimaryKey MyPk /tko:komodo/tko:workspace/MyModel/MyTable1
+create PrimaryKey MyPk /tko:workspace/MyModel/MyTable1
 #
-create AccessPattern MyAp /tko:komodo/tko:workspace/MyModel/MyTable1
+create AccessPattern MyAp /tko:workspace/MyModel/MyTable1
 #
-create UniqueConstraint MyUc /tko:komodo/tko:workspace/MyModel/MyTable1
+create UniqueConstraint MyUc /tko:workspace/MyModel/MyTable1
 #
-create ForeignKey MyFk /tko:komodo/tko:workspace/MyModel/MyTable1 /tko:komodo/tko:workspace/MyModel/MyTable2
+create ForeignKey MyFk /tko:workspace/MyModel/MyTable1 /tko:workspace/MyModel/MyTable2
 #
-create DataTypeResultSet MyDataTypeResultSet /tko:komodo/tko:workspace/MyModel/MyStoredProc
+create DataTypeResultSet MyDataTypeResultSet /tko:workspace/MyModel/MyStoredProc
 #
-create TabularResultSet MyTabResultSet /tko:komodo/tko:workspace/MyModel/MyVirtualProc
+create TabularResultSet MyTabResultSet /tko:workspace/MyModel/MyVirtualProc
 #
-create ResultSetColumn MyResultSetCol /tko:komodo/tko:workspace/MyModel/MyVirtualProc/resultSet
+create ResultSetColumn MyResultSetCol /tko:workspace/MyModel/MyVirtualProc/resultSet
 #
-create Parameter MyParam /tko:komodo/tko:workspace/MyModel/MyVirtualProc
+create Parameter MyParam /tko:workspace/MyModel/MyVirtualProc
 #
-create Index MyIndx /tko:komodo/tko:workspace/MyModel/MyTable2
+create Index MyIndx /tko:workspace/MyModel/MyTable2
