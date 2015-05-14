@@ -382,6 +382,10 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             final Node node = node(transaction).addNode(name, type);
             final KomodoObject result = new ObjectImpl(getRepository(), node.getPath(), node.getIndex());
 
+            if ( LOGGER.isDebugEnabled() ) {
+                LOGGER.debug( "objectimpl-addChild: transaction = {0}, path = {1}", transaction.getName(), node.getPath() ); //$NON-NLS-1$
+            }
+
             return result;
         } catch (final Exception e) {
             throw handleError( e );

@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.spi.KException;
 import org.komodo.spi.outcome.Outcome.Level;
@@ -26,7 +25,6 @@ import org.komodo.spi.repository.validation.Rule.MessageKey;
 import org.komodo.spi.utils.LocalizedMessage;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 
-@Ignore
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest {
 

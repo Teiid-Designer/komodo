@@ -16,7 +16,6 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.shell.commands.core.CdCommand;
 
@@ -46,7 +45,6 @@ public class CdCommandTest extends AbstractCommandTest {
 		super();
 	}
 
-	@Ignore
     @Test
     public void testCdRelative1() throws Exception {
     	setup(CD_COMMAND_REL1, CdCommand.class);
@@ -107,7 +105,6 @@ public class CdCommandTest extends AbstractCommandTest {
     	assertEquals("/tko:workspace/MyVdb/MyModel/MyTable1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
-    @Ignore
     @Test
     public void testCdAbsolute1() throws Exception {
     	setup(CD_COMMAND_ABS1, CdCommand.class);

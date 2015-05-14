@@ -16,7 +16,6 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.shell.commands.core.ShowCommand;
 
@@ -40,7 +39,6 @@ public class ShowCommandTest extends AbstractCommandTest {
 		super();
 	}
 
-	@Ignore
     @Test
     public void testShowStatus1() throws Exception {
     	setup(SHOW_STATUS1, ShowCommand.class);
@@ -70,7 +68,6 @@ public class ShowCommandTest extends AbstractCommandTest {
     	assertEquals("/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
-    @Ignore
     @Test
     public void testShowChildren1() throws Exception {
     	setup(SHOW_CHILDREN1, ShowCommand.class);

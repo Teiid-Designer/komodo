@@ -14,3 +14,5 @@ Require-Bundle: org.junit;bundle-version="[4.11.0,5.0.0)",
  org.komodo.core;bundle-version="0.0.1";visibility:=reexport
 Eclipse-RegisterBuddy: org.komodo.modeshape.lib
 Export-Package: org.komodo.test.utils
+Bundle-ClassPath: resources/,
+ .

@@ -16,7 +16,6 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.spi.repository.KomodoType;
@@ -40,7 +39,6 @@ public class ListCommandTest extends AbstractCommandTest {
 		super();
 	}
 
-	@Ignore
     @Test
     public void testList1() throws Exception {
     	setup(LIST_COMMAND1, ListCommand.class);
