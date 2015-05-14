@@ -187,6 +187,16 @@ public interface KomodoObject extends KNode {
                                               final String propName ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @return the property descriptors from the primary type descriptor and the mixin descriptors (can be <code>null</code> if
+     *         not found)
+     * @throws KException
+     *         if an error occurs
+     */
+    PropertyDescriptor[] getPropertyDescriptors( final UnitOfWork transaction ) throws KException;
+
+    /**
      * Subclasses may choose to implement this so that it may not represent that actual, physical property names.
      *
      * @param transaction

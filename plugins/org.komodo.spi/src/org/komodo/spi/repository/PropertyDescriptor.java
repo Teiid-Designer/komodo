@@ -7,12 +7,30 @@
 */
 package org.komodo.spi.repository;
 
-import org.komodo.spi.KException;
+import java.util.Comparator;
 
 /**
  * A {@link KomodoObject Komodo object's} {@link Property property} descriptor.
  */
 public interface PropertyDescriptor {
+
+    /**
+     * Sorts {@link PropertyDescriptor}s by name.
+     */
+    Comparator< PropertyDescriptor > NAME_SORTER = new Comparator< PropertyDescriptor >() {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public int compare( final PropertyDescriptor thisDescriptor,
+                            final PropertyDescriptor thatDescriptor ) {
+            return thisDescriptor.getName().compareTo( thatDescriptor.getName() );
+        }
+
+    };
 
     /**
      * The property type.
@@ -101,44 +119,32 @@ public interface PropertyDescriptor {
      * most one default value.
      *
      * @return the default values or an empty array if no default values exist.
-     * @throws KException
-     *         if an error occurs
      */
-    Object[] getDefaultValues() throws KException;
+    Object[] getDefaultValues();
 
     /**
      * @return the property name (never <code>null</code> or empty)
-     * @throws KException
-     *         if an error occurs
      */
-    String getName() throws KException;
+    String getName();
 
     /**
      * @return the type of the property (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
      */
-    Type getType() throws KException;
+    Type getType();
 
     /**
      * @return <code>true</code> if property is required
-     * @throws KException
-     *         if an error occurs
      */
-    boolean isMandatory() throws KException;
+    boolean isMandatory();
 
     /**
      * @return <code>true</code> if the property value is modifiable
-     * @throws KException
-     *         if an error occurs
      */
-    boolean isModifiable() throws KException;
+    boolean isModifiable();
 
     /**
      * @return <code>true</code> if this property is multi-valued
-     * @throws KException
-     *         if an error occurs
      */
-    boolean isMultiple() throws KException;
+    boolean isMultiple();
 
 }

@@ -107,6 +107,49 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
     }
 
     /**
+     * @param mandatory
+     *        <code>true</code> if the property is mandatory
+     * @param modifiable
+     *        <code>true</code> if the property is modifiable
+     * @param multiple
+     *        <code>true</code> if the property is multi-valued
+     * @param name
+     *        the property name (cannot be empty)
+     * @param type
+     *        the property type (cannot be <code>null</code>)
+     * @param values
+     *        the default values (can be <code>null</code> or empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    public PropertyDescriptorImpl( final boolean mandatory,
+                                   final boolean modifiable,
+                                   final boolean multiple,
+                                   final String name,
+                                   final Type type,
+                                   final Object[] values ) throws KException {
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( type, "type" ); //$NON-NLS-1$
+
+        this.mandatory = mandatory;
+        this.modifiable = modifiable;
+        this.multiple = multiple;
+        this.name = name;
+        this.type = type;
+
+        if ( ( values == null ) || ( values.length == 0 ) ) {
+            this.defaultValues = NO_VALUES;
+        } else {
+            this.defaultValues = new Object[ values.length ];
+            int i = 0;
+
+            for ( final Object value : values ) {
+                this.defaultValues[i++] = PropertyImpl.convert( value, convert( this.type ) );
+            }
+        }
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @see org.komodo.spi.repository.PropertyDescriptor#getDefaultValues()
