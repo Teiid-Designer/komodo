@@ -52,6 +52,14 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public final class ModelImpl extends RelationalObjectImpl implements Model {
 
     /**
+     * The allowed child types.
+     */
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { PushdownFunction.IDENTIFIER, ModelSource.IDENTIFIER,
+                                                                      StoredProcedure.IDENTIFIER, Table.IDENTIFIER,
+                                                                      UserDefinedFunction.IDENTIFIER, View.IDENTIFIER,
+                                                                      VirtualProcedure.IDENTIFIER };
+
+    /**
      * The resolver of a {@link Model}.
      */
     public static final TypeResolver< Model > RESOLVER = new TypeResolver< Model >() {
@@ -317,6 +325,16 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
 
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return CHILD_TYPES;
     }
 
     /**

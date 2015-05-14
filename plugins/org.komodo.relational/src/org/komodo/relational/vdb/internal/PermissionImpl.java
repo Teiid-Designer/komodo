@@ -37,6 +37,11 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public final class PermissionImpl extends RelationalObjectImpl implements Permission {
 
     /**
+     * The allowed child types.
+     */
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Condition.IDENTIFIER, Mask.IDENTIFIER };
+
+    /**
      * The resolver of a {@link Permission}.
      */
     public static final TypeResolver< Permission > RESOLVER = new TypeResolver< Permission >() {
@@ -163,6 +168,16 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
 
         final Mask result = RelationalModelFactory.createMask( transaction, getRepository(), this, maskName );
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return CHILD_TYPES;
     }
 
     /**

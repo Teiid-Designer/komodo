@@ -35,6 +35,11 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
 public final class TabularResultSetImpl extends RelationalObjectImpl implements TabularResultSet {
 
     /**
+     * The allowed child types.
+     */
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { ResultSetColumn.IDENTIFIER };
+
+    /**
      * The resolver of a {@link TabularResultSet}.
      */
     public static final TypeResolver< TabularResultSet > RESOLVER = new TypeResolver< TabularResultSet >() {
@@ -148,6 +153,16 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
                                                                                      this,
                                                                                      columnName );
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return CHILD_TYPES;
     }
 
     /**

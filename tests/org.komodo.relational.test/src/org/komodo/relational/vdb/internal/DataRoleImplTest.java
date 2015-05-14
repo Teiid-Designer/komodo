@@ -8,17 +8,19 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
@@ -81,6 +83,12 @@ public final class DataRoleImplTest extends RelationalModelTest {
         assertThat( added.getName( this.uow ), is( name ) );
         assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.PERMISSION ) );
         assertThat( this.dataRole.getChildren( this.uow )[0], is( instanceOf( Permission.class ) ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectChildTypes() {
+        assertThat( Arrays.asList( this.dataRole.getChildTypes() ), hasItem( Permission.IDENTIFIER ) );
+        assertThat( this.dataRole.getChildTypes().length, is( 1 ) );
     }
 
     @Test

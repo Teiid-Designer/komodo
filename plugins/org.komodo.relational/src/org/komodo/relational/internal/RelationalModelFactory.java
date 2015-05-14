@@ -8,6 +8,7 @@
 package org.komodo.relational.internal;
 
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.RelationalObject;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
@@ -19,7 +20,6 @@ import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.PushdownFunction;
-import org.komodo.relational.model.RelationalObject;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;

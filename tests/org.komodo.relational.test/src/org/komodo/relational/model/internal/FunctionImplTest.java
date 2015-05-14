@@ -13,11 +13,11 @@ import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Function.Determinism;
 import org.komodo.relational.model.Model;
-import org.komodo.relational.model.RelationalObject.Filter;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class FunctionImplTest extends RelationalModelTest {

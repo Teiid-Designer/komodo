@@ -914,7 +914,9 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     }
 
     protected void notifyObservers() {
-        for (final RepositoryObserver observer : this.observers) {
+        final Set<RepositoryObserver> copy = new HashSet<>(this.observers);
+
+        for (final RepositoryObserver observer : copy) {
             try {
                 // Ensure all observers are informed even if one throws an exception
                 observer.eventOccurred();

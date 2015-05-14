@@ -10,7 +10,7 @@ package org.komodo.relational.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.komodo.relational.model.RelationalObject;
+import org.komodo.relational.RelationalObject;
 import org.komodo.repository.Messages;
 import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.ObjectImpl;
@@ -258,7 +258,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.RelationalObject#getFilters()
+     * @see org.komodo.relational.RelationalObject#getFilters()
      */
     @Override
     public Filter[] getFilters() {
@@ -485,7 +485,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.RelationalObject#isChildRestricted()
+     * @see org.komodo.relational.RelationalObject#isChildRestricted()
      */
     @Override
     public boolean isChildRestricted() {
@@ -570,7 +570,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.RelationalObject#setFilters(org.komodo.relational.model.RelationalObject.Filter[])
+     * @see org.komodo.relational.RelationalObject#setFilters(org.komodo.relational.RelationalObject.Filter[])
      */
     @Override
     public void setFilters( final Filter[] newFilters ) {

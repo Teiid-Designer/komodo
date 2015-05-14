@@ -8,19 +8,21 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import java.util.Arrays;
 import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
-import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Translator;
@@ -205,6 +207,17 @@ public final class VdbImplTest extends RelationalModelTest {
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailRenameWhenNewNameIsNull() throws Exception {
         this.vdb.rename( this.uow, null );
+    }
+
+    @Test
+    public void shouldHaveCorrectChildTypes() {
+        assertThat( Arrays.asList( this.vdb.getChildTypes() ),
+                    hasItems( DataRole.IDENTIFIER,
+                              Entry.IDENTIFIER,
+                              Model.IDENTIFIER,
+                              Translator.IDENTIFIER,
+                              VdbImport.IDENTIFIER ) );
+        assertThat(this.vdb.getChildTypes().length, is(5));
     }
 
     @Test

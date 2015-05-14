@@ -8,16 +8,18 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
-import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
@@ -58,6 +60,12 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
                 // expected
             }
         }
+    }
+
+    @Test
+    public void shouldHaveCorrectChildTypes() {
+        assertThat( Arrays.asList( this.resultSet.getChildTypes() ), hasItem( ResultSetColumn.IDENTIFIER ) );
+        assertThat( this.resultSet.getChildTypes().length, is( 1 ) );
     }
 
     @Test

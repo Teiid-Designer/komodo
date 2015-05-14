@@ -9,6 +9,7 @@ package org.komodo.relational.internal;
 
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -28,6 +29,16 @@ public abstract class RelationalChildRestrictedObject extends RelationalObjectIm
                                                final String path,
                                                final int index ) throws KException {
         super( uow, repository, path, index );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public final KomodoType[] getChildTypes() {
+        return KomodoType.NO_TYPES;
     }
 
     /**

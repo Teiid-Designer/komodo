@@ -7,7 +7,7 @@
  */
 package org.komodo.relational;
 
-import org.komodo.relational.model.RelationalObject.Filter;
+import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
@@ -38,7 +38,7 @@ public class ExcludeNamespaceFilter implements Filter {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.RelationalObject.Filter#rejectDescriptor(java.lang.String)
+     * @see org.komodo.relational.RelationalObject.Filter#rejectDescriptor(java.lang.String)
      */
     @Override
     public boolean rejectDescriptor( final String descriptorName ) {
@@ -49,7 +49,7 @@ public class ExcludeNamespaceFilter implements Filter {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.RelationalObject.Filter#rejectProperty(java.lang.String)
+     * @see org.komodo.relational.RelationalObject.Filter#rejectProperty(java.lang.String)
      */
     @Override
     public boolean rejectProperty( final String propName ) {

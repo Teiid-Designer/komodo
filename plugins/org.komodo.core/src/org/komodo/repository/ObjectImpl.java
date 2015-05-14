@@ -583,6 +583,16 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return KomodoType.NO_TYPES;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.spi.repository.KomodoObject#getDescriptor(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */

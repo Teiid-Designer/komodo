@@ -8,6 +8,7 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.RelationalConstants;
+import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;

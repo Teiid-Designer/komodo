@@ -8,16 +8,18 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.model.RelationalObject.Filter;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
@@ -89,6 +91,12 @@ public final class PermissionImplTest extends RelationalModelTest {
                 // expected
             }
         }
+    }
+
+    @Test
+    public void shouldHaveCorrectChildTypes() {
+        assertThat( Arrays.asList( this.permission.getChildTypes() ), hasItems( Condition.IDENTIFIER, Mask.IDENTIFIER ) );
+        assertThat( this.permission.getChildTypes().length, is( 2 ) );
     }
 
     @Test
