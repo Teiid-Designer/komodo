@@ -14,7 +14,9 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +33,7 @@ import org.komodo.relational.vdb.Vdb.VdbManifest;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -265,6 +268,24 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( this.vdb.getChildren( this.uow )[3], is( instanceOf( Model.class ) ) );
     }
 
+    @Test
+    public void shouldIncludeSpecialPropertiesInPrimaryTypePropertyDescriptors() throws Exception {
+        final PropertyDescriptor[] descriptors = this.vdb.getPrimaryType( this.uow ).getPropertyDescriptors( this.uow );
+        final List< String > specialProps = new ArrayList<>( Arrays.asList( VdbImpl.SpecialProperty.valuesAsTeiidNames() ) );
+
+        // make sure we are returning more than just the special props
+        assertThat( descriptors.length > specialProps.size(), is( true ) );
+
+        for ( final PropertyDescriptor descriptor : descriptors ) {
+            if ( specialProps.contains( descriptor.getName() ) ) {
+                specialProps.remove( descriptor.getName() );
+            }
+        }
+
+        // make sure we found all the special props
+        assertThat( specialProps.isEmpty(), is( true ) );
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyDataRole() throws Exception {
         this.vdb.addDataRole( this.uow, StringConstants.EMPTY_STRING );
@@ -373,6 +394,22 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRemoveAllowedLanguages() throws Exception {
+        final String newValue = "newAllowedLanguages";
+        this.vdb.setAllowedLanguages( this.uow, newValue );
+        this.vdb.setAllowedLanguages( this.uow, null );
+        assertThat( this.vdb.getAllowedLanguages( this.uow ), is( nullValue() ) );
+    }
+
+    @Test
+    public void shouldRemoveAuthenticationType() throws Exception {
+        final String newValue = "newAuthenticationType";
+        this.vdb.setAuthenticationType( this.uow, newValue );
+        this.vdb.setAuthenticationType( this.uow, null );
+        assertThat( this.vdb.getAuthenticationType( this.uow ), is( nullValue() ) );
+    }
+
+    @Test
     public void shouldRemoveDataRole() throws Exception {
         final String name = "dataRole";
         this.vdb.addDataRole( this.uow, name );
@@ -393,6 +430,14 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRemoveGssPattern() throws Exception {
+        final String newValue = "newGssPattern";
+        this.vdb.setGssPattern( this.uow, newValue );
+        this.vdb.setGssPattern( this.uow, null );
+        assertThat( this.vdb.getGssPattern( this.uow ), is( nullValue() ) );
+    }
+
+    @Test
     public void shouldRemoveModel() throws Exception {
         final String name = "model";
         this.vdb.addModel( this.uow, name );
@@ -400,6 +445,30 @@ public final class VdbImplTest extends RelationalModelTest {
 
         this.vdb.removeModel( this.uow, name );
         assertThat( this.vdb.getModels( this.uow ).length, is( 0 ) );
+    }
+
+    @Test
+    public void shouldRemovePasswordPattern() throws Exception {
+        final String newValue = "newPasswordPattern";
+        this.vdb.setPasswordPattern( this.uow, newValue );
+        this.vdb.setPasswordPattern( this.uow, null );
+        assertThat( this.vdb.getPasswordPattern( this.uow ), is( nullValue() ) );
+    }
+
+    @Test
+    public void shouldRemoveQueryTimeout() throws Exception {
+        final int newValue = 10;
+        this.vdb.setQueryTimeout( this.uow, newValue );
+        this.vdb.setQueryTimeout( this.uow, -100 );
+        assertThat( this.vdb.getQueryTimeout( this.uow ), is( -1 ) );
+    }
+
+    @Test
+    public void shouldRemoveSecurityDomain() throws Exception {
+        final String newValue = "newSecurityDomain";
+        this.vdb.setSecurityDomain( this.uow, newValue );
+        this.vdb.setSecurityDomain( this.uow, null );
+        assertThat( this.vdb.getSecurityDomain( this.uow ), is( nullValue() ) );
     }
 
     @Test
@@ -431,6 +500,20 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldSetAllowedLanguages() throws Exception {
+        final String newValue = "newAllowedLanguages";
+        this.vdb.setAllowedLanguages( this.uow, newValue );
+        assertThat( this.vdb.getAllowedLanguages( this.uow ), is( newValue ) );
+    }
+
+    @Test
+    public void shouldSetAuthenticationType() throws Exception {
+        final String newValue = "newAuthenticationType";
+        this.vdb.setAuthenticationType( this.uow, newValue );
+        assertThat( this.vdb.getAuthenticationType( this.uow ), is( newValue ) );
+    }
+
+    @Test
     public void shouldSetConnectionType() throws Exception {
         final String newValue = "newConnectionType";
         this.vdb.setConnectionType( this.uow, newValue );
@@ -445,6 +528,13 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldSetGssPattern() throws Exception {
+        final String newValue = "newGssPattern";
+        this.vdb.setGssPattern( this.uow, newValue );
+        assertThat( this.vdb.getGssPattern( this.uow ), is( newValue ) );
+    }
+
+    @Test
     public void shouldSetOriginalFilePath() throws Exception {
         final String newValue = "newOriginalFilePath";
         this.vdb.setOriginalFilePath( this.uow, newValue );
@@ -452,10 +542,31 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldSetPasswordPattern() throws Exception {
+        final String newValue = "newPasswordPattern";
+        this.vdb.setPasswordPattern( this.uow, newValue );
+        assertThat( this.vdb.getPasswordPattern( this.uow ), is( newValue ) );
+    }
+
+    @Test
     public void shouldSetPreviewValue() throws Exception {
         final boolean newValue = !Vdb.DEFAULT_PREVIEW;
         this.vdb.setPreview( this.uow, newValue );
         assertThat( this.vdb.isPreview( this.uow ), is( newValue ) );
+    }
+
+    @Test
+    public void shouldSetQueryTimeout() throws Exception {
+        final int newValue = 10;
+        this.vdb.setQueryTimeout( this.uow, newValue );
+        assertThat( this.vdb.getQueryTimeout( this.uow ), is( newValue ) );
+    }
+
+    @Test
+    public void shouldSetSecurityDomain() throws Exception {
+        final String newValue = "newSecurityDomain";
+        this.vdb.setSecurityDomain( this.uow, newValue );
+        assertThat( this.vdb.getSecurityDomain( this.uow ), is( newValue ) );
     }
 
     @Test

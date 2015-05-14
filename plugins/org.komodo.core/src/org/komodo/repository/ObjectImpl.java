@@ -807,13 +807,32 @@ public class ObjectImpl implements KomodoObject, StringConstants {
 
         for ( final Descriptor typeDescriptor : getAllDescriptors( transaction, this ) ) {
             for ( final PropertyDescriptor propDescriptor : typeDescriptor.getPropertyDescriptors( transaction ) ) {
-                if ( propName.equals( propDescriptor.getName() ) ) {
+                if ( ( propDescriptor != null ) && propName.equals( propDescriptor.getName() ) ) {
                     return propDescriptor;
                 }
             }
         }
 
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getPropertyDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public PropertyDescriptor[] getPropertyDescriptors( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final List< PropertyDescriptor > result = new ArrayList<>();
+
+        for ( final Descriptor descriptor : getAllDescriptors( transaction, this ) ) {
+            result.addAll( Arrays.asList( descriptor.getPropertyDescriptors( transaction ) ) );
+        }
+
+        return result.toArray( new PropertyDescriptor[ result.size() ] );
     }
 
     /**

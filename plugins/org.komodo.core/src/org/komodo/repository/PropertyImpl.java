@@ -74,6 +74,41 @@ public class PropertyImpl implements Property {
     }
 
     /**
+     * Values will be converted to a string if a conversion cannot be done. Only boolean, long, decimal, double, and string are
+     * supported. A string conversion is done for all unsupported types.
+     *
+     * @param value
+     *        the value (cannot be <code>null</code>)
+     * @param propertyType
+     *        the required type of the property
+     * @return the value converted to the required type (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static Object convert( final Object value,
+                                  final int propertyType ) throws KException {
+        if ( value instanceof Value ) {
+            return convert( ( Value )value, propertyType );
+        }
+
+        try {
+            switch ( propertyType ) {
+                case PropertyType.BOOLEAN:
+                    return Boolean.parseBoolean( value.toString() );
+                case PropertyType.LONG:
+                    return Long.parseLong( value.toString() );
+                case PropertyType.DOUBLE:
+                case PropertyType.DECIMAL:
+                    return Double.parseDouble( value.toString() );
+                default:
+                    return value.toString();
+            }
+        } catch ( final Exception e ) {
+            throw new KException( Messages.getString( Komodo.UNABLE_TO_CONVERT_VALUE, propertyType ), e );
+        }
+    }
+
+    /**
      * @param factory
      *        the factory used to perform the conversion (cannot be <code>null</code>)
      * @param value
