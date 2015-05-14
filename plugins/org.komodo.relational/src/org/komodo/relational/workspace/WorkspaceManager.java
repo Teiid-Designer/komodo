@@ -63,6 +63,11 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  */
 public class WorkspaceManager extends RelationalObjectImpl {
 
+    /**
+     * The allowed child types.
+     */
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Vdb.IDENTIFIER, Model.IDENTIFIER };
+
     private static final String FIND_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s] WHERE ISDESCENDANTNODE('" //$NON-NLS-1$
                                                      + RepositoryImpl.WORKSPACE_ROOT + "') ORDER BY [jcr:name] ASC"; //$NON-NLS-1$
 
@@ -101,6 +106,16 @@ public class WorkspaceManager extends RelationalObjectImpl {
         }
 
         return instance;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return CHILD_TYPES;
     }
 
     @Override

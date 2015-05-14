@@ -194,6 +194,12 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         assertThat(this.wsMgr.findVdbs(this.uow).length, is(suffix));
     }
 
+    @Test
+    public void shouldHaveCorrectChildTypes() {
+        assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Vdb.IDENTIFIER, Model.IDENTIFIER ) );
+        assertThat( this.wsMgr.getChildTypes().length, is( 2 ) );
+    }
+
     @Test( expected = Exception.class )
     public void shouldNotAllowEmptyExternalFilePath() throws Exception {
         this.wsMgr.createVdb(this.uow, null, "vdbName", StringConstants.EMPTY_STRING);
