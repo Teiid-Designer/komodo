@@ -32,6 +32,9 @@ import org.komodo.spi.repository.Repository;
  */
 public interface WorkspaceContext {
 
+	@SuppressWarnings("javadoc")
+	public static final String WORKSPACE_ROOT_DISPLAY_NAME = "workspace"; //$NON-NLS-1$
+	
     /**
      * Represents all komodo object types
      */
@@ -50,6 +53,12 @@ public interface WorkspaceContext {
 	 * @throws Exception if error occurs
 	 */
 	String getType() throws Exception;
+
+	/**
+	 * Get the allowable child types
+	 * @return the list of allowable types
+	 */
+	List<String> getAllowableChildTypes();
 
 	/**
 	 * Get the workspace status

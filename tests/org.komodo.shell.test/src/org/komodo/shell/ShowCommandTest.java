@@ -47,11 +47,11 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
                                         INDENT+"Current Teiid Instance  : None set\n"+ //$NON-NLS-1$
-                                        INDENT+"Current Context : [/tko:workspace]\n"; //$NON-NLS-1$
+                                        INDENT+"Current Context : [/workspace]\n"; //$NON-NLS-1$
 
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -62,10 +62,10 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
                                 INDENT+"Current Teiid Instance  : None set\n"+ //$NON-NLS-1$
-    	                        INDENT+"Current Context : [/tko:workspace/MyVdb/MyModel]\n"; //$NON-NLS-1$
+    	                        INDENT+"Current Context : [/workspace/MyVdb/MyModel]\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -74,11 +74,11 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"No children for WORKSPACE \"/tko:workspace\".\n"; //$NON-NLS-1$
+    	String expectedOutput = INDENT+"No children for WORKSPACE \"/workspace\".\n"; //$NON-NLS-1$
 
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -87,7 +87,7 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"Children for VDB \"/tko:workspace/MyVdb\"\n"+ //$NON-NLS-1$
+    	String expectedOutput = INDENT+"Children for VDB \"/workspace/MyVdb\"\n"+ //$NON-NLS-1$
                                 INDENT+"---------------          \n"+ //$NON-NLS-1$
     	                        INDENT+"Model1 [MODEL]\n"+ //$NON-NLS-1$
     	                        INDENT+"Model2 [MODEL]\n"+ //$NON-NLS-1$
@@ -95,7 +95,7 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
 }

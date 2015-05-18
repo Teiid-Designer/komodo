@@ -7,7 +7,9 @@
 */
 package org.komodo.shell.commands.core;
 
+import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
@@ -20,7 +22,6 @@ import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -33,7 +34,6 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public class CreateCommand extends BuiltInShellCommand implements StringConstants {
 
     private static final String CREATE = "create"; //$NON-NLS-1$
-    private static final String UNKNOWN = "Unknown";  //$NON-NLS-1$
     
     /**
      * Constructor.
@@ -85,16 +85,19 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         }
         
         // ---------------------------
+        // Get context for the create
+        // ---------------------------
+        WorkspaceContext context = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
+
+        // ---------------------------
         // Create the object
         // ---------------------------
         try {
-            WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
-            // If path was supplied, create the object at path context
-            if(!StringUtils.isEmpty(pathArg)) {
-                context = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
-            }
+        	// Create
             create(typeArg, objNameArg, context, fourthArg);
-            
+            // Commit transaction
+            getWorkspaceStatus().commit("CreateCommand"); //$NON-NLS-1$
+            // Print message
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("CreateCommand.ObjectCreated", typeArg, objNameArg)); //$NON-NLS-1$
             if (getWorkspaceStatus().getRecordingStatus())
                 recordCommand(getArguments());
@@ -116,26 +119,28 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      * @throws Exception
      */
     protected boolean validate(String typeArg, String objNameArg, String pathArg, String fourthArg) throws Exception {
+        // Validate the path if supplied
+        if(!StringUtils.isEmpty(pathArg)) {
+            if (!validatePath(pathArg)) {
+                return false;
+            }
+        }
+        
         // Get the context for object create.  otherwise use current context
         WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
         if (!StringUtils.isEmpty(pathArg)) {
             context = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
         }
+        
         // Validate the type is valid for the context
         if (!validateChildType(typeArg,context)) {
             return false;
         }
         
         // Validate the name
-        if (!validateName(objNameArg)) {
+        KomodoType kType = KomodoType.getKomodoType(typeArg);
+        if (!validateObjectName(objNameArg,kType)) {
             return false;
-        }
-        
-        // Validate the path if supplied
-        if(!StringUtils.isEmpty(pathArg)) {
-            if (!validatePath(pathArg)) {
-                return false;
-            }
         }
         
         // Validate fourth arg if it's required
@@ -144,15 +149,14 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 return false;
             }
         }
-        return true;
-    }
-    
-    /**
-     * Validate the supplied name
-     * @param name the name
-     * @return 'true' if valid, 'false' if not.
-     */
-    private boolean validateName(String name) {
+        
+        // Check for existing object type with requested name.  dont allow a duplicate
+        WorkspaceContext childContext = context.getChild(objNameArg, typeArg);
+        if(childContext!=null) {
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CreateCommand.noDuplicateAllowed", objNameArg, typeArg)); //$NON-NLS-1$
+            return false;
+        }
+        
         return true;
     }
     
@@ -275,17 +279,24 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
         if (getArguments().isEmpty()) {
-            List<String> validTypes = KomodoType.getTypes();
+        	// Get list of valid child types for current context
+        	KomodoObject kObj = getWorkspaceStatus().getCurrentContext().getKomodoObj();
+        	KomodoType[] validTypes = kObj.getChildTypes();
+        	List<String> validChildren = new ArrayList<String>(validTypes.length);
+        	for(KomodoType kType : validTypes) {
+        		validChildren.add(kType.getType());
+        	}
+        	
             // --------------------------------------------------------------
             // No arg - offer subcommands
             // --------------------------------------------------------------
             if(lastArgument==null) {
-                candidates.addAll(validTypes);
+                candidates.addAll(validChildren);
                 // --------------------------------------------------------------
                 // One arg - determine the completion options for it.
                 // --------------------------------------------------------------
             } else {
-                for (String item : validTypes) {
+                for (String item : validChildren) {
                     if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
                         candidates.add(item);
                     }
@@ -341,7 +352,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
     @Override
     public void printUsage(int indent) {
         // Print out the objType-specific usage (if possible)
-        if(getArguments().size()>=1) {
+        if(getArguments()!=null && getArguments().size()>=1) {
             String objType = getArguments().get(0);
             if(requiresFourthArg(objType)) {
                 KomodoType kType = KomodoType.getKomodoType(objType);

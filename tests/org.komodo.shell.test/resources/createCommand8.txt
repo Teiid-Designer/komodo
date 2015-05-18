@@ -2,32 +2,32 @@
 # Create all Vdb objects 
 # -----------------------------------------------
 #
-create Vdb MyVdb1 /tko:workspace
-create Vdb MyVdb2 /tko:workspace
+create Vdb MyVdb1 /workspace
+create Vdb MyVdb2 /workspace
 #
 # VdbTranslator
-create VdbTranslator MyTranslator1 /tko:workspace/MyVdb1
+create VdbTranslator MyTranslator1 /workspace/MyVdb1
 #
 # VdbImport
-create VdbImport MyImport1 /tko:workspace/MyVdb1
+create VdbImport MyImport1 /workspace/MyVdb1
 #
 # VdbModel
-create Model MyModel /tko:workspace/MyVdb1
+create Model MyModel /workspace/MyVdb1
 #
 # VdbModelSource must be created under VdbModel
-create VdbModelSource MyModelSource1 /tko:workspace/MyVdb1/MyModel
+create VdbModelSource MyModelSource1 /workspace/MyVdb1/MyModel
 #
 # VdbEntry
-create VdbEntry MyEntry1 /tko:workspace/MyVdb1
+create VdbEntry MyEntry1 /workspace/MyVdb1
 #
 # VdbDataRole
-create VdbDataRole MyDataRole1 /tko:workspace/MyVdb1
+create VdbDataRole MyDataRole1 /workspace/MyVdb1
 #
 # VdbPermission needs DataRole parent
-create VdbPermission MyPermission1 /tko:workspace/MyVdb1/MyDataRole1
+create VdbPermission MyPermission1 /workspace/MyVdb1/MyDataRole1
 #
 # VdbCondition - requires VdbPermission parent
-create VdbCondition MyCondition1 /tko:workspace/MyVdb1/MyDataRole1/MyPermission1
+create VdbCondition MyCondition1 /workspace/MyVdb1/MyDataRole1/MyPermission1
 #
 # VdbMask - requires VdbPermission parent
-create VdbMask MyMask1 /tko:workspace/MyVdb1/MyDataRole1/MyPermission1
+create VdbMask MyMask1 /workspace/MyVdb1/MyDataRole1/MyPermission1

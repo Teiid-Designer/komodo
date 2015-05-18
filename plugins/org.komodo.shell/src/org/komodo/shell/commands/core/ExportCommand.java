@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,11 +14,12 @@ import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * Exports the referenced node to the specified file name and location
@@ -27,15 +27,15 @@ import org.komodo.spi.repository.Repository;
  *
  */
 public class ExportCommand extends BuiltInShellCommand implements StringConstants {
+    private static final String EXPORT = "export"; //$NON-NLS-1$
 	private static final String XML_EXT = "xml"; //$NON-NLS-1$
 	
     /**
      * Constructor.
-     * @param name the command name
      * @param wsStatus the workspace status
      */
-    public ExportCommand(String name, WorkspaceStatus wsStatus) {
-        super(name, wsStatus);
+    public ExportCommand(WorkspaceStatus wsStatus) {
+        super(EXPORT, wsStatus);
     }
 
     /**
@@ -43,32 +43,59 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public boolean execute() throws Exception {
-        String objNameArg = requiredArgument(0, Messages.getString("ExportCommand.InvalidArgMsg_ObjectName")); //$NON-NLS-1$
-        String fileNameAndLocation = requiredArgument(1, Messages.getString("ExportCommand.InvalidArgMsg_OutputFileName")); //$NON-NLS-1$
+        String objPathArg = requiredArgument(0, Messages.getString("ExportCommand.InvalidArgMsg_ObjectName")); //$NON-NLS-1$
+        String filePathArg = requiredArgument(1, Messages.getString("ExportCommand.InvalidArgMsg_OutputFileName")); //$NON-NLS-1$
 
+        if(!validateObjectPath(objPathArg)) {
+        	return false;
+        }
+        if(!validateFileName(filePathArg)) {
+        	return false;
+        }
+        
         try {
-        	export(objNameArg, fileNameAndLocation);
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ExportCommand.ObjectExported", objNameArg, fileNameAndLocation)); //$NON-NLS-1$
+        	export(objPathArg, filePathArg);
+        	
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ExportCommand.ObjectExported", objPathArg, filePathArg)); //$NON-NLS-1$
             if (getWorkspaceStatus().getRecordingStatus())
                 recordCommand(getArguments());
         } catch (Exception e) {
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ExportCommand.Failure", objNameArg)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ExportCommand.Failure", objPathArg)); //$NON-NLS-1$
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
             return false;
         }
         return true;
     }
-
-    private void export(String objName, String fileNameAndLocation) throws Exception {
-        WorkspaceStatus wsStatus = getWorkspaceStatus();
-
-        WorkspaceContext currentContext = wsStatus.getCurrentContext();
+    
+    /**
+     * Validate the supplied context path
+     * @param objPath the objPath
+     * @return 'true' if valid, 'false' if not.
+     */
+    private boolean validateObjectPath(String objPath) {
+        return true;
+    }
+    
+    /**
+     * Validate the supplied fileName
+     * @param fileName the file name
+     * @return 'true' if valid, 'false' if not.
+     */
+    private boolean validateFileName(String fileName) {
+        return true;
+    }
+    
+    private void export(String objPath, String fileNameAndLocation) throws Exception {
+    	WorkspaceStatus wsStatus = getWorkspaceStatus();
         WorkspaceManager wkspManager = wsStatus.getCurrentContext().getWorkspaceManager();
-        KomodoObject parent = currentContext.getKomodoObj();
-        
-        KomodoObject child = parent.getChild(null, objName);
-        if( child == null ) {
-        	throw new Exception(Messages.getString("ExportCommand.cannotExport_objectDoesNotExist", objName)); //$NON-NLS-1$
+        UnitOfWork transaction = wsStatus.getTransaction();
+
+        // Get the context for export
+        WorkspaceContext contextToExport = ContextUtils.getContextForPath(wsStatus, objPath);
+        KomodoObject objToExport = contextToExport.getKomodoObj();
+         
+        if( objToExport == null ) {
+        	throw new Exception(Messages.getString("ExportCommand.cannotExport_objectDoesNotExist", objPath)); //$NON-NLS-1$
         }
         
         // Check for file location and name
@@ -76,26 +103,24 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         if( theFile.exists()) {
         	throw new Exception(Messages.getString("ExportCommand.cannotExport_fileAlreadyExists", fileNameAndLocation)); //$NON-NLS-1$
         }
-        // Check object type
-       
         
-        if( child.getTypeIdentifier(null).equals(KomodoType.VDB)) {
-        	Vdb vdb = wkspManager.resolve(null, child, Vdb.class);
+        // Check object type
+        if( objToExport.getTypeIdentifier(transaction).equals(KomodoType.VDB)) {
+        	Vdb vdb = wkspManager.resolve(transaction, objToExport, Vdb.class);
         	if( vdb == null ) {
-        		throw new Exception(" EXPORT VDB not yet implemented"); //$NON-NLS-1$
+        		throw new Exception(" Could not resolve the VDB"); //$NON-NLS-1$
         	}
 			Properties props = new Properties();
 			props.put( ExportConstants.USE_TABS_PROP_KEY, true);
 
-			String ddlXmlString = vdb.export(null, props);
+			String ddlXmlString = vdb.export(transaction, props);
 			if (ddlXmlString == null || ddlXmlString .isEmpty()) {
 				throw new Exception(Messages.getString("ExportCommand.cannotExport_problemWithVdb")); //$NON-NLS-1$
 			}
 			
 			handleExport(ddlXmlString, fileNameAndLocation);
-			
         	
-        } else if( child.getTypeIdentifier(null).equals(KomodoType.MODEL)) {
+        } else if( objToExport.getTypeIdentifier(transaction).equals(KomodoType.MODEL)) {
         	 // IF Model, then export as xyz.ddl file
         	throw new Exception(" EXPORT MODEL not yet implemented"); //$NON-NLS-1$
         }
@@ -158,30 +183,19 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
-        if (getArguments().isEmpty()) {
-			// List of potential completions
-			List<String> potentialsList = new ArrayList<String>();
-			List<WorkspaceContext> children = getWorkspaceStatus().getCurrentContext().getChildren();
-			for(WorkspaceContext wsContext : children) {
-				potentialsList.add(wsContext.getName());
-			}
-    		// --------------------------------------------------------------
-    		// No arg - offer children relative to current context.
-    		// --------------------------------------------------------------
+    	if (getArguments().isEmpty()) {
+    		// The arg is expected to be a path
+    		updateTabCompleteCandidatesForPath(candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument);
+
+    		// Do not put space after it - may want to append more to the path
+    		return CompletionConstants.NO_APPEND_SEPARATOR;
+    	} else if (getArguments().size()==1) {
+    		// This arg is required filePath
     		if(lastArgument==null) {
-    			candidates.addAll(potentialsList);
-    		// --------------------------------------------------------------
-    		// One arg - determine the completion options for it.
-    		// --------------------------------------------------------------
-    		} else {
-    			for (String item : potentialsList) {
-    				if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
-    					candidates.add(item);
-    				}
-    			}
+    			candidates.add("<filePath>"); //$NON-NLS-1$
     		}
-            return 0;
-        }
-        return -1;
+    		return 0;
+    	}
+    	return -1;
     }
 }

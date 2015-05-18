@@ -2,6 +2,7 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.vdb.Vdb;
@@ -10,6 +11,7 @@ import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  *
@@ -41,7 +43,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/vdb_test_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -50,7 +52,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -59,7 +61,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -68,23 +70,24 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/vdb_test_1/model_1/table_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
 
     	KomodoObject ko = wsStatus.getCurrentContext().getKomodoObj();
+    	UnitOfWork trans = wsStatus.getTransaction();
     	// Verify the komodo class is a Table and is TABLE type
-    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(this.uow).name());
+    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
 
-    	Table table = (Table)resolveType(this.uow, ko, Table.class);
+    	Table table = (Table)resolveType(trans, ko, Table.class);
 
     	// verify 3 columns
-    	assertEquals(3, table.getColumns(this.uow).length);
+    	assertEquals(3, table.getColumns(trans).length);
 
     	// verify PK
-    	assertNotNull(table.getPrimaryKey(this.uow));
-    	assertEquals("pk_1", table.getPrimaryKey(this.uow).getName(this.uow)); //$NON-NLS-1$
+    	assertNotNull(table.getPrimaryKey(trans));
+    	assertEquals("pk_1", table.getPrimaryKey(trans).getName(trans)); //$NON-NLS-1$
 
     	// verify 2 access patterns
-    	assertEquals(2, table.getAccessPatterns(this.uow).length);
+    	assertEquals(2, table.getAccessPatterns(trans).length);
     }
     
     @Test
@@ -93,25 +96,26 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/vdb_test_1/model_1/table_1"); //$NON-NLS-1$
+    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/vdb_test_1/model_1/table_1"); //$NON-NLS-1$
 
     	KomodoObject ko = tableContext.getKomodoObj();
+    	UnitOfWork trans = wsStatus.getTransaction();
     	// Verify the komodo class is a Table and is TABLE type
-    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(this.uow).name());
+    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
     	
-    	Table table = (Table)resolveType(this.uow, ko, Table.class);
+    	Table table = (Table)resolveType(trans, ko, Table.class);
     	
     	// verify 3 columns
-    	assertEquals(3, table.getColumns(this.uow).length);
+    	assertEquals(3, table.getColumns(trans).length);
     	
     	// verify PK
-    	assertNotNull(table.getPrimaryKey(this.uow));
-    	assertEquals("pk_1", table.getPrimaryKey(this.uow).getName(this.uow)); //$NON-NLS-1$
+    	assertNotNull(table.getPrimaryKey(trans));
+    	assertEquals("pk_1", table.getPrimaryKey(trans).getName(trans)); //$NON-NLS-1$
     	
     	// verify 2 access patterns
-    	assertEquals(2, table.getAccessPatterns(this.uow).length);
+    	assertEquals(2, table.getAccessPatterns(trans).length);
 
     	// verify 1 foreign key
     	//assertEquals(1, table.getForeignKeys(null).length);
@@ -128,25 +132,26 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/vdb_test_1/model_1/table_1"); //$NON-NLS-1$
+    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/vdb_test_1/model_1/table_1"); //$NON-NLS-1$
 
     	KomodoObject ko = tableContext.getKomodoObj();
+    	UnitOfWork trans = wsStatus.getTransaction();
     	// Verify the komodo class is a Table and is TABLE type
-    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(this.uow).name());
+    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
     	
-    	Table table = (Table)resolveType(this.uow, ko, Table.class);
+    	Table table = (Table)resolveType(trans, ko, Table.class);
     	
     	// verify 3 columns
-    	assertEquals(3, table.getColumns(this.uow).length);
+    	assertEquals(3, table.getColumns(trans).length);
     	
     	// verify PK
-    	assertNotNull(table.getPrimaryKey(this.uow));
-    	assertEquals("pk_1", table.getPrimaryKey(this.uow).getName(this.uow)); //$NON-NLS-1$
+    	assertNotNull(table.getPrimaryKey(trans));
+    	assertEquals("pk_1", table.getPrimaryKey(trans).getName(trans)); //$NON-NLS-1$
     	
     	// verify 2 access patterns
-    	assertEquals(2, table.getAccessPatterns(this.uow).length);
+    	assertEquals(2, table.getAccessPatterns(trans).length);
 
     	// verify 1 foreign key
     	//assertEquals(1, table.getForeignKeys(null).length);
@@ -163,35 +168,36 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext modelContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/MyModel"); //$NON-NLS-1$
+    	WorkspaceContext modelContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyModel"); //$NON-NLS-1$
     	KomodoObject ko = modelContext.getKomodoObj();
+    	UnitOfWork trans = wsStatus.getTransaction();
     	// Verify the komodo class is a Model and is MODEL type
-    	assertEquals(KomodoType.MODEL.name(), ko.getTypeIdentifier(this.uow).name());
+    	assertEquals(KomodoType.MODEL.name(), ko.getTypeIdentifier(trans).name());
 
-    	WorkspaceContext table1Context = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/MyModel/MyTable1"); //$NON-NLS-1$
+    	WorkspaceContext table1Context = ContextUtils.getContextForPath(wsStatus, "/workspace/MyModel/MyTable1"); //$NON-NLS-1$
     	ko = table1Context.getKomodoObj();
     	// Verify the komodo class is a Model and is MODEL type
-    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(this.uow).name());
+    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
     	
-    	Table table1 = (Table)resolveType(this.uow, ko, Table.class);
+    	Table table1 = (Table)resolveType(trans, ko, Table.class);
     	
     	// verify 3 columns
-    	assertEquals(3, table1.getColumns(this.uow).length);
+    	assertEquals(3, table1.getColumns(trans).length);
     	
     	// verify PK
-    	assertNotNull(table1.getPrimaryKey(this.uow));
-    	assertEquals("MyPk", table1.getPrimaryKey(this.uow).getName(this.uow)); //$NON-NLS-1$
+    	assertNotNull(table1.getPrimaryKey(trans));
+    	assertEquals("MyPk", table1.getPrimaryKey(trans).getName(trans)); //$NON-NLS-1$
 
     	// verify 1 FK
-    	assertEquals(1, table1.getForeignKeys(this.uow).length);
+    	assertEquals(1, table1.getForeignKeys(trans).length);
     	
     	// verify 2 access patterns
-    	assertEquals(1, table1.getAccessPatterns(this.uow).length);
+    	assertEquals(1, table1.getAccessPatterns(trans).length);
 
     	// verify 1 unique constrain
-    	assertEquals(1, table1.getUniqueConstraints(this.uow).length);
+    	assertEquals(1, table1.getUniqueConstraints(trans).length);
 
     }
     
@@ -205,26 +211,27 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     	execute();
     	
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext vdbContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/MyVdb1"); //$NON-NLS-1$
+    	WorkspaceContext vdbContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyVdb1"); //$NON-NLS-1$
     	KomodoObject ko = vdbContext.getKomodoObj();
+    	UnitOfWork trans = wsStatus.getTransaction();
     	// Verify the komodo class is a Vdb and is VDB type
-    	assertEquals(KomodoType.VDB.name(), ko.getTypeIdentifier(this.uow).name());
+    	assertEquals(KomodoType.VDB.name(), ko.getTypeIdentifier(trans).name());
     	
-    	Vdb vdb = (Vdb)resolveType(this.uow, ko, Vdb.class);
+    	Vdb vdb = (Vdb)resolveType(trans, ko, Vdb.class);
     	
     	// Verify one translator
-    	assertEquals(1, vdb.getTranslators(this.uow).length);
+    	assertEquals(1, vdb.getTranslators(trans).length);
     	
     	// Verify one DataRole
-    	assertEquals(1, vdb.getDataRoles(this.uow).length);
+    	assertEquals(1, vdb.getDataRoles(trans).length);
     	
     	// Verify one Import
-    	assertEquals(1, vdb.getImports(this.uow).length);
+    	assertEquals(1, vdb.getImports(trans).length);
     	
     	// Verify one Entry
-    	assertEquals(1, vdb.getEntries(this.uow).length);
+    	assertEquals(1, vdb.getEntries(trans).length);
     	
     }
 

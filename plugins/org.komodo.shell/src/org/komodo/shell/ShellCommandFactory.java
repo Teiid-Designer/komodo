@@ -45,12 +45,10 @@ import org.komodo.shell.commands.core.DeleteCommand;
 import org.komodo.shell.commands.core.ExportCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
-import org.komodo.shell.commands.core.NavigateCommand;
 import org.komodo.shell.commands.core.PlayCommand;
 import org.komodo.shell.commands.core.RenameCommand;
 import org.komodo.shell.commands.core.SetCommand;
 import org.komodo.shell.commands.core.ShowCommand;
-import org.komodo.shell.commands.core.UseTeiidCommand;
 import org.komodo.utils.FileUtils;
 
 /**
@@ -68,13 +66,6 @@ public class ShellCommandFactory {
 	private static String EXIT_CMD_NAME = "exit"; //$NON-NLS-1$ 
 	private static String QUIT_CMD_NAME = "quit"; //$NON-NLS-1$ 
 	
-	private static String CD_CMD_NAME = "cd"; //$NON-NLS-1$ 
-	private static String LIST_CMD_NAME = "list"; //$NON-NLS-1$
-	private static String RENAME_CMD_NAME = "rename"; //$NON-NLS-1$ 
-	private static String IMPORT_CMD_NAME = "import"; //$NON-NLS-1$
-	private static String EXPORT_CMD_NAME = "export"; //$NON-NLS-1$
-	private static String PLAY_CMD_NAME = "play"; //$NON-NLS-1$
-
 	private WorkspaceStatus wsStatus;
 	private Map<String, ShellCommand> commandMap;
 
@@ -97,10 +88,10 @@ public class ShellCommandFactory {
 		List<String> allList = new ArrayList<String>(1);
 		allList.add(WorkspaceContext.ALL_TYPES);
 		
-		ListCommand listCommand = new ListCommand(LIST_CMD_NAME,this.wsStatus);
+		ListCommand listCommand = new ListCommand(this.wsStatus);
 		commandMap.put(listCommand.getName().toLowerCase(), listCommand);  
 
-		CdCommand cdCommand = new CdCommand(CD_CMD_NAME,this.wsStatus);
+		CdCommand cdCommand = new CdCommand(this.wsStatus);
 		commandMap.put(cdCommand.getName().toLowerCase(), cdCommand); 
 
 		SetCommand setCommand = new SetCommand(this.wsStatus);
@@ -112,25 +103,25 @@ public class ShellCommandFactory {
 		DeleteCommand deleteCommand = new DeleteCommand(this.wsStatus);
 		commandMap.put(deleteCommand.getName().toLowerCase(), deleteCommand);
 
-		ImportCommand importCommand = new ImportCommand(IMPORT_CMD_NAME,this.wsStatus);
+		ImportCommand importCommand = new ImportCommand(this.wsStatus);
 		commandMap.put(importCommand.getName().toLowerCase(), importCommand);
 
-		ExportCommand exportCommand = new ExportCommand(EXPORT_CMD_NAME,this.wsStatus);
+		ExportCommand exportCommand = new ExportCommand(this.wsStatus);
 		commandMap.put(exportCommand.getName().toLowerCase(), exportCommand);
 
-		UseTeiidCommand connCommand = new UseTeiidCommand(this.wsStatus);
-        commandMap.put(connCommand.getName().toLowerCase(), connCommand);
+//		UseTeiidCommand connCommand = new UseTeiidCommand(this.wsStatus);
+//        commandMap.put(connCommand.getName().toLowerCase(), connCommand);
 
-        NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
-        commandMap.put(traverseCommand.getName().toLowerCase(), traverseCommand);
+//        NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
+//        commandMap.put(traverseCommand.getName().toLowerCase(), traverseCommand);
         
         ShowCommand showCommand = new ShowCommand(this.wsStatus);
         commandMap.put(showCommand.getName().toLowerCase(), showCommand);
 
-        RenameCommand renameCommand = new RenameCommand(RENAME_CMD_NAME, this.wsStatus);
+        RenameCommand renameCommand = new RenameCommand(this.wsStatus);
         commandMap.put(renameCommand.getName().toLowerCase(), renameCommand);
 
-        PlayCommand playCommand = new PlayCommand(PLAY_CMD_NAME, this.wsStatus);
+        PlayCommand playCommand = new PlayCommand(this.wsStatus);
         commandMap.put(playCommand.getName().toLowerCase(), playCommand);
 
 		discoverContributedCommands();

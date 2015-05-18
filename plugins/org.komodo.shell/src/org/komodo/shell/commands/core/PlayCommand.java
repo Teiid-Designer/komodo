@@ -19,13 +19,14 @@ import org.komodo.spi.constants.StringConstants;
  */
 public class PlayCommand  extends BuiltInShellCommand implements StringConstants {
 
-	/**
+    private static final String PLAY = "play"; //$NON-NLS-1$
+
+    /**
 	 * Constructor.
-	 * @param name the name of the command
 	 * @param wsStatus the workspace status
 	 */
-	public PlayCommand(String name, WorkspaceStatus wsStatus) {
-		super(name,wsStatus);
+	public PlayCommand(WorkspaceStatus wsStatus) {
+		super(PLAY,wsStatus);
 	}
 
 	/**

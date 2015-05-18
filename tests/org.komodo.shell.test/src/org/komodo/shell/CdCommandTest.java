@@ -52,7 +52,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -62,7 +62,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -72,7 +72,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/tko:workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -82,7 +82,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -92,7 +92,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/tko:workspace/MyVdb/MyModel/MyTable1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel/MyTable1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -102,7 +102,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/tko:workspace/MyVdb/MyModel/MyTable1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel/MyTable1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -113,7 +113,7 @@ public class CdCommandTest extends AbstractCommandTest {
 
     	// Check WorkspaceContext
     	String contextName = wsStatus.getCurrentContext().getFullName();
-    	assertEquals("/tko:workspace", contextName); //$NON-NLS-1$
+    	assertEquals("/workspace", contextName); //$NON-NLS-1$
     }
 
     @Test
@@ -123,7 +123,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -133,7 +133,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/tko:workspace/MyVdb/MyModel/MyTable2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel/MyTable2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -143,7 +143,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/tko:workspace/MyVdb/MyModel/Table1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel/Table1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
 }

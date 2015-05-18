@@ -63,7 +63,7 @@ public class UseTeiidCommand extends BuiltInShellCommand implements StringConsta
 
         WorkspaceManager wkspManager = wStatus.getCurrentContext().getWorkspaceManager();
 
-        List<Teiid> teiids = wkspManager.findTeiids(null);
+        List<Teiid> teiids = wkspManager.findTeiids(wStatus.getTransaction());
 
         if (teiids == null || teiids.size() == 0) {
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("UseTeiidCommand.noInstancesDefined")); //$NON-NLS-1$
@@ -71,8 +71,8 @@ public class UseTeiidCommand extends BuiltInShellCommand implements StringConsta
         }
 
         for (Teiid teiid : teiids) {
-            String teiidName = teiid.getName(null);
-            if (nameOrId.equals(teiid.getId(null)) || nameOrId.equals(teiidName)) {
+            String teiidName = teiid.getName(wStatus.getTransaction());
+            if (nameOrId.equals(teiid.getId(wStatus.getTransaction())) || nameOrId.equals(teiidName)) {
                 wStatus.setTeiid(teiid);
                 TeiidInstance teiidInstance = teiid.getTeiidInstance();
 

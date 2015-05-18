@@ -40,8 +40,7 @@ public interface WorkspaceStatus extends StringConstants {
     /**
      * The type id of the root object
      */
-    String WORKSPACE_TYPE = "WORKSPACE";
-//    String WORKSPACE_TYPE = FORWARD_SLASH;
+    String WORKSPACE_TYPE = "WORKSPACE"; //$NON-NLS-1$
 
     @SuppressWarnings("javadoc")
 	public static final String RECORDING_FILE_KEY = "RECORDING_FILE"; //$NON-NLS-1$
@@ -148,6 +147,13 @@ public interface WorkspaceStatus extends StringConstants {
      */
     KEngine getEngine();
 
+    /**
+     * Commit 
+     * @param source identifier for commit
+     * @throws Exception 
+     */
+    void commit(String source) throws Exception;
+    
     /**
      * @return the current transaction (never <code>null</code>)
      */

@@ -2,7 +2,9 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
+
 import org.junit.Test;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.api.WorkspaceContext;
@@ -12,6 +14,7 @@ import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * SetCommand - allows setting of properties, global properties, recording state, etc.
@@ -39,16 +42,17 @@ public class SetCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:workspace/MyModel/MyTable", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyModel/MyTable", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
     	KomodoObject ko = wsStatus.getCurrentContext().getKomodoObj();
-    	// Verify the komodo class is a Table and is TABLE type
-    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(this.uow).name());
+    	UnitOfWork trans = wsStatus.getTransaction();
+     	// Verify the komodo class is a Table and is TABLE type
+    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
     	
-    	Table table = (Table)resolveType(this.uow, ko, Table.class);
-    	Property prop = table.getProperty(this.uow, "ddl:length"); //$NON-NLS-1$
+    	Table table = (Table)resolveType(trans, ko, Table.class);
+    	Property prop = table.getProperty(trans, "ddl:length"); //$NON-NLS-1$
     	
-    	assertEquals(99L, prop.getValue(this.uow));
+    	assertEquals(99L, prop.getValue(trans));
     }
     
     @Test
@@ -57,19 +61,20 @@ public class SetCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/MyModel/MyTable"); //$NON-NLS-1$
+    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyModel/MyTable"); //$NON-NLS-1$
     	assertNotNull(tableContext);
 
     	KomodoObject ko = tableContext.getKomodoObj();
+    	UnitOfWork trans = wsStatus.getTransaction();
     	// Verify the komodo class is a Table and is TABLE type
-    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(this.uow).name());
+    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
     	
-    	Table table = (Table)resolveType(this.uow, ko, Table.class);
-    	Property prop = table.getProperty(this.uow, "ddl:length"); //$NON-NLS-1$
+    	Table table = (Table)resolveType(trans, ko, Table.class);
+    	Property prop = table.getProperty(trans, "ddl:length"); //$NON-NLS-1$
     	
-    	assertEquals(99L, prop.getValue(this.uow));
+    	assertEquals(99L, prop.getValue(trans));
     }
     
     @Test
@@ -78,19 +83,20 @@ public class SetCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	
-    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/tko:workspace/MyModel/MyTable"); //$NON-NLS-1$
+    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyModel/MyTable"); //$NON-NLS-1$
         assertNotNull(tableContext);
 
     	KomodoObject ko = tableContext.getKomodoObj();
+    	UnitOfWork trans = wsStatus.getTransaction();
     	// Verify the komodo class is a Table and is TABLE type
-    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(this.uow).name());
+    	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
     	
-    	Table table = (Table)resolveType(this.uow, ko, Table.class);
-    	Property prop = table.getProperty(this.uow, "ddl:length"); //$NON-NLS-1$
+    	Table table = (Table)resolveType(trans, ko, Table.class);
+    	Property prop = table.getProperty(trans, "ddl:length"); //$NON-NLS-1$
     	
-    	assertEquals(99L, prop.getValue(this.uow));
+    	assertEquals(99L, prop.getValue(trans));
     }
     
     @Test

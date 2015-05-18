@@ -29,11 +29,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.WorkspaceContext;
@@ -61,6 +61,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private Map<String, WorkspaceContext> contextCache = new HashMap<String, WorkspaceContext>();
 
     private UnitOfWork uow; // the current transaction
+    private SynchronousCallback callback;
+    
     private int count = 0; // commit count
 
     private WorkspaceContext currentContext;
@@ -99,9 +101,13 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         Repository repo = getEngine().getDefaultRepository();
 
         if ( transaction == null ) {
-            this.uow = repo.createTransaction( getClass().getSimpleName() + ".init()", false, null ); //$NON-NLS-1$
+        	createTransaction(repo);
         } else {
             this.uow = transaction;
+            Repository.UnitOfWorkListener uowListener = transaction.getCallback();
+            if(uowListener!=null && uowListener instanceof SynchronousCallback) {
+                this.callback = (SynchronousCallback)uowListener;
+            }
         }
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(repo);
@@ -110,6 +116,16 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         contextCache.put( wkspMgr.getAbsolutePath(), wsContext );
 
         currentContext = wsContext;
+    }
+    
+    /**
+     * Creates the callback and transaction
+     * @param repo the repository 
+     * @throws Exception exception if fail
+     */
+    private void createTransaction(Repository repo) throws Exception {
+        this.callback = new SynchronousCallback();
+        this.uow = repo.createTransaction( getClass().getSimpleName() + ".createTransaction()", false, callback ); //$NON-NLS-1$
     }
 
     @Override
@@ -154,13 +170,12 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         this.uow = transaction;
     }
 
-    protected void commit( final String source ) throws Exception {
+    @Override
+	public void commit( final String source ) throws Exception {
         final String txName = this.uow.getName();
         this.uow.commit();
 
-        final CountDownLatch latch = new CountDownLatch( 1 );
-        final boolean success = latch.await( 3, TimeUnit.MINUTES );
-
+        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
         if ( success ) {
             final KException error = uow.getError();
             final State txState = this.uow.getState();
@@ -175,7 +190,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         // create new transaction
         final String name = ( source + '.' + this.count );
         KLog.getLogger().debug( "WorkspaceStatusImpl new transaction: " + name ); //$NON-NLS-1$
-        this.uow = getEngine().getDefaultRepository().createTransaction( name, false, null );
+        createTransaction(getEngine().getDefaultRepository());
     }
 
     @Override

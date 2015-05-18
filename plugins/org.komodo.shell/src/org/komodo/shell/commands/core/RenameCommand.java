@@ -10,6 +10,7 @@ import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 
 /**
  * renames the referenced node
@@ -19,13 +20,14 @@ import org.komodo.spi.repository.KomodoObject;
  */
 public class RenameCommand extends BuiltInShellCommand implements StringConstants {
 
+    private static final String RENAME = "rename"; //$NON-NLS-1$
+    
     /**
      * Constructor.
-     * @param name the command name
      * @param wsStatus the workspace status
      */
-    public RenameCommand(String name, WorkspaceStatus wsStatus) {
-        super(name, wsStatus);
+    public RenameCommand(WorkspaceStatus wsStatus) {
+        super(RENAME, wsStatus);
     }
 
     /**
@@ -36,8 +38,28 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         String objNameArg = requiredArgument(0, Messages.getString("RenameCommand.InvalidArgMsg_ObjectName")); //$NON-NLS-1$
         String newName = requiredArgument(1, Messages.getString("RenameCommand.InvalidArgMsg_NewName")); //$NON-NLS-1$
 
+        // Validate that specified object exists
+        if (!validateChildExists(objNameArg,getWorkspaceStatus().getCurrentContext())) {
+            return false;
+        }
+        // Validate the new name
+        String childType = getWorkspaceStatus().getCurrentContext().getChild(objNameArg).getType();
+        KomodoType kType = KomodoType.getKomodoType(childType);
+        if (!validateObjectName(newName,kType)) {
+            return false;
+        }
+        
+        // Validate that the rename would not create a duplicate of same type
+        if (!validateNotDuplicateType(objNameArg,newName,getWorkspaceStatus().getCurrentContext())) {
+            return false;
+        }
+        
         try {
+        	// Rename
             rename(objNameArg, newName);
+            // Commit transaction
+            getWorkspaceStatus().commit("RenameCommand"); //$NON-NLS-1$
+            // Print message
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("RenameCommand.ObjectRenamed", objNameArg, newName)); //$NON-NLS-1$
             if (getWorkspaceStatus().getRecordingStatus())
                 recordCommand(getArguments());
@@ -49,14 +71,51 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         return true;
     }
 
+    /**
+     * Validate a child with the specified name exists
+     * @param name the child name
+     * @param context the parent context
+     * @return 'true' if exists, 'false' if not.
+     */
+    private boolean validateChildExists(String name, WorkspaceContext context) throws Exception {
+    	WorkspaceContext childContext = context.getChild(name);
+    	if(childContext==null) {
+        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", name)); //$NON-NLS-1$
+    		return false;
+    	}
+        return true;
+    }
+    
+    /**
+     * Validates whether another child of the same name and type already exists
+     * @param oldName the name of the object being renamed
+     * @param newName the new child name
+     * @param context the parent context
+     * @return 'true' if exists, 'false' if not.
+     */
+    private boolean validateNotDuplicateType(String oldName, String newName, WorkspaceContext context) throws Exception {
+    	// The child being renamed.
+    	WorkspaceContext childToRename = context.getChild(oldName);
+    	// Determine if child with specifed name already exists
+    	WorkspaceContext existingChild = context.getChild(newName);
+    	// If child exists, check the type
+    	if(existingChild!=null) {
+    		if(existingChild.getType().equals(childToRename.getType())) {
+    			print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_wouldCreateDuplicate", newName)); //$NON-NLS-1$
+    			return false;
+    		}
+    	}
+        return true;
+    }
+    
     private void rename(String objName, String newName) throws Exception {
         WorkspaceStatus wsStatus = getWorkspaceStatus();
 
         KomodoObject parent = wsStatus.getCurrentContext().getKomodoObj();
         
-        KomodoObject child = parent.getChild(null, objName);
+        KomodoObject child = parent.getChild(wsStatus.getTransaction(), objName);
         if( child != null ) {
-        	child.rename(null, newName);
+        	child.rename(wsStatus.getTransaction(), newName);
         } else {
         	throw new Exception(Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", objName)); //$NON-NLS-1$
         }

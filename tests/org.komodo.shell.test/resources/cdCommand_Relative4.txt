@@ -1,5 +1,5 @@
 #Uses multiple double dot notations together
-cd /tko:workspace
+cd /workspace
 create vdb MyVdb
 cd MyVdb
 create model MyModel

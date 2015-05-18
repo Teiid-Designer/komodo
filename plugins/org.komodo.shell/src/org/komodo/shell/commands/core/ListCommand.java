@@ -35,13 +35,14 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 public class ListCommand extends BuiltInShellCommand {
 
+    private static final String LIST = "list"; //$NON-NLS-1$
+    
 	/**
 	 * Constructor.
-	 * @param name the command name
 	 * @param wsStatus the workspace status
 	 */
-	public ListCommand(String name, WorkspaceStatus wsStatus) {
-		super(name,wsStatus);
+	public ListCommand(WorkspaceStatus wsStatus) {
+		super(LIST,wsStatus);
 	}
 
 	/**
